@@ -1,0 +1,33 @@
+{
+  "name": "adv-default-theme",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <img src=\"https://upload.wikimedia.org/wikipedia/commons/b/b1/Adempiere-logo.png\" /> </p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erpcya/adv-default-theme.git"
+  },
+  "keywords": [],
+  "author": "Elsio Sanchez<https://github.com/elsiosanchez>",
+  "contributors": [
+    {
+      "name": "Elsio Sanchez",
+      "url": "https://github.com/elsiosanchez"
+    },
+    {
+      "name": "Yamel Senih",
+      "url": "https://github.com/YamelSenih/"
+    }
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/erpcya/adv-default-theme/issues"
+  },
+  "dependencies": {
+    "tasksfile": "^5.1.1"
+  },
+  "homepage": "https://github.com/erpcya/adv-default-theme#readme"
+}
