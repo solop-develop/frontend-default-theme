@@ -40,7 +40,7 @@ In order to use the new ADVue Theme Pos theme in your [ADempiere Vue](https://gi
 1. Download all dependencies and start development server:
 
    ```
-   lerna bootstrap && yarn dev
+   yarn && lerna bootstrap && yarn dev
    ```
 
 1. That's it! Now, after opening your development server (http://localhost:9527 by adv-default-theme), you should see [ADempiere Vue](https://github.com/adempiere/adempiere-vue) with the adv-default-theme. 🎉
