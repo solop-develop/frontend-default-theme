@@ -12,13 +12,13 @@ In order to use the new ADVue Theme Pos theme in your [ADempiere Vue](https://gi
 1. Install `lerna` globally:
 
    ```
-   npm install -g lerna
+   yarn global add lerna
    ```
 
    or
 
    ```
-   yarn global add lerna
+   npm install -g lerna
    ```
 
 1. Configure `adv-default-theme` repository as a git submodule in theme path of your [ADempiere Vue](https://github.com/adempiere/adempiere-vue) workspace, and then track `develop` branch:
