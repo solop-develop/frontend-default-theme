@@ -47,4 +47,4 @@ In order to use the new ADVue Theme Pos theme in your [ADempiere Vue](https://gi
 
 ## Design customization
 
-Si quieres personalizar los diseños de adv-default-theme puedes empezar con este increíble archivo by Aditya Patel from HotWax Commerce.
+You can use this template project to create your own project.
