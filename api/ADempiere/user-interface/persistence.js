@@ -22,24 +22,23 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
  * Object List from window
  * @param {string} windowUuid
  * @param {string} tabUuid
- * @param {array}  conditionsList
  * @param {array}  columnsList // TODO: Add support on adempiere-vue
+ * @param {array}  filters used as where clause
  * @param {string} orderByClause
  * @param {string} pageToken
  */
 export function getEntities({
   windowUuid,
   tabUuid,
-  conditions = [],
   columns = [],
   attributes = [],
   sorting = [],
-  filters,
+  filters = [],
   pageToken,
   pageSize
 }) {
-  if (isEmptyValue(filters)) {
-    filters = conditions.map(condition => {
+  if (!isEmptyValue(filters)) {
+    filters = filters.map(condition => {
       const { value, operator, columnName, valueTo, values } = condition
       return {
         column_name: columnName,
@@ -53,12 +52,12 @@ export function getEntities({
 
   // context attributes
   if (!isEmptyValue(attributes)) {
-    attributes.forEach(attributeValue => {
-      filters.push({
+    attributes = attributes.map(attributeValue => {
+      return {
         column_name: attributeValue.columnName,
         operator: attributeValue.operator,
         value: attributeValue.value
-      })
+      }
     })
   }
 
