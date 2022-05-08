@@ -238,15 +238,21 @@ export default {
         })
       }
     },
-    actionKeyPerformed(value) {
+    /**
+     * Keyup enter event on DOM element, call this method
+     * @param {object} event html
+     */
+    actionKeyPerformed(event) {
       if (this.metadata.handleActionKeyPerformed) {
         this.$store.dispatch('notifyActionKeyPerformed', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
-          value: value.target.value,
-          keyCode: value.keyCode
+          value: event.target.value,
+          keyCode: event.keyCode
         })
       }
+      // enter key sends the values
+      this.preHandleChange(event.target.value)
     },
     keyReleased(value) {
       if (this.metadata.handleKeyReleased) {
