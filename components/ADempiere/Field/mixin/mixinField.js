@@ -240,7 +240,7 @@ export default {
     },
     /**
      * Keyup enter event on DOM element, call this method
-     * @param {objet} event html
+     * @param {object} event html
      */
     actionKeyPerformed(event) {
       if (this.metadata.handleActionKeyPerformed) {
