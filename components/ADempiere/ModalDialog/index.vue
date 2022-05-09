@@ -130,7 +130,7 @@ export default defineComponent({
       storedModalDialog.value.cancelMethod()
     }
     const EmptyMandatory = computed(() => {
-      const fieldsList = store.getters.getStoredFieldsFromBrowser(props.parentUuid)
+      const fieldsList = store.getters.getStoredFieldsFromProcess(props.containerUuid)
       return store.getters.getFieldsListEmptyMandatory({
         containerUuid: props.containerUuid,
         fieldsList: fieldsList
