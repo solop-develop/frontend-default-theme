@@ -28,10 +28,15 @@
 
     <span class="content-modal-dialog">
       <component
+        v-if="isLoading"
         :is="componentRender"
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :container-manager="containerManager"
+      />
+      <loading-view
+        v-else
+        key="form-loading"
       />
     </span>
 
@@ -51,18 +56,21 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
 
 // components and mixins
-import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+// import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 
 export default defineComponent({
   name: 'ModalDialog',
 
   components: {
-    PanelDefinition
+    LoadingView
+    // PanelDefinition
   },
 
   props: {
@@ -92,6 +100,7 @@ export default defineComponent({
   },
 
   setup(props) {
+    const isLoading = ref(false)
     const storedModalDialog = computed(() => {
       return store.getters.getModalDialogManager({
         containerUuid: props.containerUuid
@@ -104,6 +113,10 @@ export default defineComponent({
       })
     })
 
+    const findProcess = computed(() => {
+      return store.getters.getStoredProcess(props.containerUuid)
+    })
+
     const title = computed(() => {
       return storedModalDialog.value.title
     })
@@ -113,6 +126,26 @@ export default defineComponent({
       return storedModalDialog.value.componentPath
     })
 
+    watch(isShowed, (newValue, oldValue) => {
+      if (newValue !== oldValue && newValue) {
+        dataProcess()
+      }
+    })
+
+    const dataProcess = () => {
+      if (isEmptyValue(findProcess)) {
+        isLoading.value = true
+        return
+      }
+      storedModalDialog.value.loadData()
+        .then(respose => {
+          isLoading.value = true
+        })
+        .catch(error => {
+          console.warn(error)
+          isLoading.value = true
+        })
+    }
     const closeDialog = () => {
       // close modal dialog
       store.commit('setShowedModalDialog', {
@@ -132,6 +165,9 @@ export default defineComponent({
       // call custom function to done
       storedModalDialog.value.doneMethod()
     }
+    if (isShowed.effect && isShowed.value && !isEmptyValue(findProcess.value) && !isEmptyValue(findProcess.value.isActive)) {
+      dataProcess()
+    }
 
     return {
       // computeds
@@ -139,9 +175,12 @@ export default defineComponent({
       componentRender,
       isShowed,
       title,
+      isLoading,
+      findProcess,
       // methods
       cancelButton,
       closeDialog,
+      dataProcess,
       doneButton
     }
   }
