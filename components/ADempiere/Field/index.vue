@@ -43,11 +43,6 @@
     >
       <el-form-item :class="classFrom">
         <template slot="label">
-          {{ fieldAttributes.contextColumnNames }}
-          {{ fieldAttributes.reference.contextColumnNames }}
-
-          {{ fieldAttributes.defaultValue }}
-          {{ fieldAttributes.defaultValueTo }}
           <field-options
             :metadata="fieldAttributes"
             :container-manager="containerManager"
@@ -208,6 +203,9 @@ export default {
           break
         case 'FieldTime':
           field = () => import('@theme/components/ADempiere/Field/FieldTime')
+          break
+        case 'FieldUrl':
+          field = () => import('@theme/components/ADempiere/Field/FieldUrl')
           break
         case 'FieldYesNo':
           field = () => import('@theme/components/ADempiere/Field/FieldYesNo')
