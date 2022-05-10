@@ -24,6 +24,7 @@ export default {
   data() {
     return {
       isLoading: false,
+      timeOut: null,
       optionsList: [],
       blankValues: [null, undefined, -1, '-1']
     }
@@ -42,7 +43,7 @@ export default {
 
       return {
         // label with '' value is assumed to be undefined non-existent
-        label: ' ',
+        displayedValue: ' ',
         id: undefined,
         uuid: undefined,
         value
@@ -56,7 +57,6 @@ export default {
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,
-        contextColumnNamesByDefaultValue: this.metadata.contextColumnNames,
         uuid: this.metadata.uuid,
         id: this.metadata.id,
         //
@@ -69,6 +69,7 @@ export default {
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,
+        contextColumnNamesByDefaultValue: this.metadata.contextColumnNames,
         uuid: this.metadata.uuid,
         id: this.metadata.id,
         //
