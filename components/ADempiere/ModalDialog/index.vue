@@ -63,14 +63,14 @@ import store from '@/store'
 // components and mixins
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
-// import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+import { showMessage } from '@/utils/ADempiere/notification'
+import language from '@/lang'
 
 export default defineComponent({
   name: 'ModalDialog',
 
   components: {
     LoadingView
-    // PanelDefinition
   },
 
   props: {
@@ -101,6 +101,15 @@ export default defineComponent({
 
   setup(props) {
     const isLoading = ref(false)
+
+    const emptyMandatory = computed(() => {
+      const fieldsList = store.getters.getStoredFieldsFromProcess(props.containerUuid)
+      return store.getters.getFieldsListEmptyMandatory({
+        containerUuid: props.containerUuid,
+        fieldsList: fieldsList
+      })
+    })
+
     const storedModalDialog = computed(() => {
       return store.getters.getModalDialogManager({
         containerUuid: props.containerUuid
@@ -161,6 +170,13 @@ export default defineComponent({
     }
 
     const doneButton = () => {
+      if (!isEmptyValue(emptyMandatory.value)) {
+        showMessage({
+          message: language.t('notifications.mandatoryFieldMissing') + emptyMandatory.value,
+          type: 'info'
+        })
+        return
+      }
       closeDialog()
       // call custom function to done
       storedModalDialog.value.doneMethod()
@@ -177,6 +193,7 @@ export default defineComponent({
       title,
       isLoading,
       findProcess,
+      emptyMandatory,
       // methods
       cancelButton,
       closeDialog,
