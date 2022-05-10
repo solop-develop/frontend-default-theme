@@ -129,7 +129,8 @@ export default defineComponent({
       // call custom function to cancel
       storedModalDialog.value.cancelMethod()
     }
-    const EmptyMandatory = computed(() => {
+
+    const emptyMandatory = computed(() => {
       const fieldsList = store.getters.getStoredFieldsFromProcess(props.containerUuid)
       return store.getters.getFieldsListEmptyMandatory({
         containerUuid: props.containerUuid,
@@ -137,7 +138,7 @@ export default defineComponent({
       })
     })
     const doneButton = () => {
-      if (!isEmptyValue(EmptyMandatory.value)) {
+      if (!isEmptyValue(emptyMandatory.value)) {
         showMessage({
           message: language.t('notifications.mandatoryFieldMissing') + EmptyMandatory.value,
           type: 'info'
@@ -155,7 +156,7 @@ export default defineComponent({
       componentRender,
       isShowed,
       title,
-      EmptyMandatory,
+      emptyMandatory,
       // methods
       cancelButton,
       closeDialog,
