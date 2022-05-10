@@ -43,6 +43,11 @@
     >
       <el-form-item :class="classFrom">
         <template slot="label">
+          {{ fieldAttributes.contextColumnNames }}
+          {{ fieldAttributes.reference.contextColumnNames }}
+
+          {{ fieldAttributes.defaultValue }}
+          {{ fieldAttributes.defaultValueTo }}
           <field-options
             :metadata="fieldAttributes"
             :container-manager="containerManager"
