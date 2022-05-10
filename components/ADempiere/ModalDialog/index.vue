@@ -27,13 +27,14 @@
     </span>
 
     <span class="content-modal-dialog">
-      <component
-        v-if="isLoading"
-        :is="componentRender"
-        :parent-uuid="parentUuid"
-        :container-uuid="containerUuid"
-        :container-manager="containerManager"
-      />
+      <span v-if="isLoading">
+        <component
+          :is="componentRender"
+          :parent-uuid="parentUuid"
+          :container-uuid="containerUuid"
+          :container-manager="containerManager"
+        />
+      </span>
       <loading-view
         v-else
         key="form-loading"
@@ -142,7 +143,7 @@ export default defineComponent({
     })
 
     const dataProcess = () => {
-      if (isEmptyValue(findProcess)) {
+      if (!isEmptyValue(findProcess.value)) {
         isLoading.value = true
         return
       }
@@ -181,7 +182,7 @@ export default defineComponent({
       // call custom function to done
       storedModalDialog.value.doneMethod()
     }
-    if (isShowed.effect && isShowed.value && !isEmptyValue(findProcess.value) && !isEmptyValue(findProcess.value.isActive)) {
+    if (isShowed.effect && isShowed.value) {
       dataProcess()
     }
 
