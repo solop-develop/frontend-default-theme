@@ -17,18 +17,14 @@
 -->
 <template>
   <el-time-picker
-    :ref="metadata.columnName"
     v-model="value"
+    v-bind="commonsProperties"
     :picker-options="{
       minTime: minValue,
       maxTime: maxValue
     }"
     :is-range="isPickerRange"
     range-separator="-"
-    :placeholder="$t('components.timePlaceholder')"
-    :class="cssClassStyle"
-    :readonly="Boolean(metadata.readonly)"
-    :disabled="isDisabled"
     @change="preHandleChange"
     @blur="focusLost"
     @focus="focusGained"
@@ -39,13 +35,13 @@
 
 <script>
 // components and mixins
-import FieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
 
 export default {
   name: 'FieldTime',
 
   mixins: [
-    FieldMixin
+    fieldMixin
   ],
 
   computed: {

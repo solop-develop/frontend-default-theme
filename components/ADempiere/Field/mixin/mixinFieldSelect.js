@@ -56,6 +56,7 @@ export default {
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,
+        contextColumnNamesByDefaultValue: this.metadata.contextColumnNames,
         uuid: this.metadata.uuid,
         id: this.metadata.id,
         //
