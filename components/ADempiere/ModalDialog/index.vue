@@ -6,16 +6,13 @@
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
-
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
-
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
-
 <template>
   <el-dialog
     title="modal-dialog"
@@ -25,7 +22,6 @@
     <span slot="title">
       {{ title }}
     </span>
-
     <span class="content-modal-dialog">
       <component
         :is="componentRender"
@@ -34,7 +30,6 @@
         :container-manager="containerManager"
       />
     </span>
-
     <span slot="footer" class="dialog-footer">
       <el-button
         type="danger"
@@ -49,22 +44,16 @@
     </span>
   </el-dialog>
 </template>
-
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
-
 import store from '@/store'
-
 // components and mixins
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-
 export default defineComponent({
   name: 'ModalDialog',
-
   components: {
     PanelDefinition
   },
-
   props: {
     parentUuid: {
       type: String,
@@ -90,29 +79,24 @@ export default defineComponent({
       }
     }
   },
-
   setup(props) {
     const storedModalDialog = computed(() => {
       return store.getters.getModalDialogManager({
         containerUuid: props.containerUuid
       })
     })
-
     const isShowed = computed(() => {
       return store.getters.getShowedModalDialog({
         containerUuid: props.containerUuid
       })
     })
-
     const title = computed(() => {
       return storedModalDialog.value.title
     })
-
     const componentRender = computed(() => {
       // return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
       return storedModalDialog.value.componentPath
     })
-
     const closeDialog = () => {
       // close modal dialog
       store.commit('setShowedModalDialog', {
@@ -120,7 +104,6 @@ export default defineComponent({
         isShowed: false
       })
     }
-
     const cancelButton = () => {
       closeDialog()
       // call custom function to cancel
@@ -138,7 +121,6 @@ export default defineComponent({
       // call custom function to done
       storedModalDialog.value.doneMethod()
     }
-
     return {
       // computeds
       storedModalDialog,
