@@ -57,6 +57,9 @@ import store from '@/store'
 
 // components and mixins
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { showMessage } from '@/utils/ADempiere/notification'
+import language from '@/lang'
 
 export default defineComponent({
   name: 'ModalDialog',
@@ -127,7 +130,21 @@ export default defineComponent({
       storedModalDialog.value.cancelMethod()
     }
 
+    const emptyMandatory = computed(() => {
+      const fieldsList = store.getters.getStoredFieldsFromProcess(props.containerUuid)
+      return store.getters.getFieldsListEmptyMandatory({
+        containerUuid: props.containerUuid,
+        fieldsList: fieldsList
+      })
+    })
     const doneButton = () => {
+      if (!isEmptyValue(emptyMandatory.value)) {
+        showMessage({
+          message: language.t('notifications.mandatoryFieldMissing') + EmptyMandatory.value,
+          type: 'info'
+        })
+        return
+      }
       closeDialog()
       // call custom function to done
       storedModalDialog.value.doneMethod()
@@ -139,6 +156,7 @@ export default defineComponent({
       componentRender,
       isShowed,
       title,
+      emptyMandatory,
       // methods
       cancelButton,
       closeDialog,
