@@ -31,8 +31,8 @@ import 'codemirror/lib/codemirror.css' // codemirror
 import Editor from 'tui-editor'
 
 // components and mixins
-import FieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
-import FieldMixinText from '@theme/components/ADempiere/Field/mixin/mixinFieldText.js'
+import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixinText from '@theme/components/ADempiere/Field/mixin/mixinFieldText.js'
 
 // utils and helper methods
 import { getLanguage } from '@/lang'
@@ -41,8 +41,8 @@ export default {
   name: 'FieldTextLong',
 
   mixins: [
-    FieldMixin,
-    FieldMixinText
+    fieldMixin,
+    fieldMixinText
   ],
 
   props: {
