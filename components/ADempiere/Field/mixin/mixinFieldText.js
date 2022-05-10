@@ -23,6 +23,12 @@ export default {
         value = ''
       }
       return String(value)
+    },
+    maxLength() {
+      if (!this.isEmptyValue(this.metadata.fieldLength) && this.metadata.fieldLength > 0) {
+        return Number(this.metadata.fieldLength)
+      }
+      return undefined
     }
   }
 
