@@ -205,7 +205,7 @@ export default {
           field = () => import('@theme/components/ADempiere/Field/FieldTime')
           break
         case 'FieldUrl':
-          field = () => import('@/components/ADempiere/Field/FieldUrl')
+          field = () => import('@theme/components/ADempiere/Field/FieldUrl')
           break
         case 'FieldYesNo':
           field = () => import('@theme/components/ADempiere/Field/FieldYesNo')
