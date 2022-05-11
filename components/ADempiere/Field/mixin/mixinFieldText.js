@@ -17,18 +17,21 @@
 export default {
   name: 'MixinFieldText',
 
+  computed: {
+    maxLength() {
+      if (!this.isEmptyValue(this.metadata.fieldLength) && this.metadata.fieldLength > 0) {
+        return Number(this.metadata.fieldLength)
+      }
+      return undefined
+    }
+  },
+
   methods: {
     parseValue(value) {
       if (this.isEmptyValue(value)) {
         value = ''
       }
       return String(value)
-    },
-    maxLength() {
-      if (!this.isEmptyValue(this.metadata.fieldLength) && this.metadata.fieldLength > 0) {
-        return Number(this.metadata.fieldLength)
-      }
-      return undefined
     }
   }
 
