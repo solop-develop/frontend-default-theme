@@ -301,6 +301,13 @@ export default defineComponent({
         columnName: UUID
       })
     })
+    
+    const currentTabTableName = computed(() => {
+      return store.getters.getTableName(
+        props.parentUuid,
+        currentTabMetadata.value.firstTabUuid
+      )
+    })
 
     const getData = () => {
       const containerUuid = tabUuid.value
@@ -392,13 +399,12 @@ export default defineComponent({
         getData()
       }
       watch(currentRecordLogs, (newValue, oldValue) => {
-        const recordId = newValue[props.allTabsList[parseInt(currentTab.value)].tableName + '_ID']
-        const recordUuid = newValue.UUID
+        const recordId = newValue[currentTabTableName.value + '_ID']
         router.push({
           name: root.$route.name,
           query: {
             ...root.$route.query,
-            action: recordUuid,
+            action: newValue.UUID,
             recordId
           },
           params: {
@@ -467,6 +473,7 @@ export default defineComponent({
       // computed
       isShowedTabs,
       isShowedTableRecords,
+      currentTabTableName,
       tabStyle,
       // methods
       handleClick,
