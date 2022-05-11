@@ -55,7 +55,6 @@
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
           />
-
           <div v-if="isShowedTabs">
             <!-- records in table to multi records -->
             <default-table
@@ -392,6 +391,22 @@ export default defineComponent({
       if (isReadyFromGetData.value) {
         getData()
       }
+      watch(currentRecordLogs, (newValue, oldValue) => {
+        const recordId = newValue[props.allTabsList[parseInt(currentTab.value)].tableName + '_ID']
+        const recordUuid = newValue.UUID
+        router.push({
+          name: root.$route.name,
+          query: {
+            ...root.$route.query,
+            action: recordUuid,
+            recordId
+          },
+          params: {
+            ...root.$route.params,
+            recordId
+          }
+        }, () => {})
+      })
       // if changed tab and not records in stored, get records from server
       watch(tabUuid, (newValue, oldValue) => {
         if (newValue !== oldValue && !isEmptyValue(recordUuidTabParent.value) && !tabData.value.isLoaded) {
