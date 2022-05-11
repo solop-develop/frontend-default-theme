@@ -390,7 +390,7 @@ export default {
       this.containerManager.getLookupList({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
-        contextColumnNames: this.metadata.contextColumnNames,
+        contextColumnNames: this.metadata.reference.contextColumnNames,
         uuid: this.metadata.uuid,
         //
         tableName: this.metadata.reference.tableName,
