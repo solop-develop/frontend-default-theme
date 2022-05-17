@@ -10,12 +10,19 @@
   "author": "Elsio Sanchez<https://github.com/elsiosanchez>",
   "contributors": [
     {
+      "name": "Edwin Betancourt",
+      "url": "https://github.com/EdwinBetanc0urt/",
+      "email": "EdwinBetanc0urt@outlook.com"
+    },
+    {
       "name": "Elsio Sanchez",
-      "url": "https://github.com/elsiosanchez"
+      "url": "https://github.com/elsiosanchez",
+      "email": "elsiosanches@gmail.com"
     },
     {
       "name": "Yamel Senih",
-      "url": "https://github.com/YamelSenih/"
+      "url": "https://github.com/YamelSenih/",
+      "email": "ySenih@erpya.com"
     }
   ],
   "license": "ISC",
@@ -27,6 +34,9 @@
   },
   "devDependencies": {
     "@vue/cli-service": "4.5.13"
+  },
+  "scripts": {
+    "ci": "yarn install --frozen-lockfile"
   },
   "homepage": "https://github.com/erpcya/adv-default-theme#readme"
 }

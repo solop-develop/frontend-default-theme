@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -21,10 +21,7 @@
     v-model="value"
     v-bind="commonsProperties"
     :pattern="pattern"
-    :rows="rows"
-    :type="typeTextBox"
     :maxlength="maxLength"
-    :show-password="Boolean(metadata.isEncrypted)"
     :autofocus="metadata.inTable"
     :size="inputSize"
     show-word-limit
@@ -35,7 +32,12 @@
     @keyup.native="keyReleased"
     @keyup.native.enter="actionKeyPerformed"
     @submit="false"
-  />
+  >
+    <i
+      slot="prefix"
+      class="el-icon-link el-input__icon"
+    />
+  </el-input>
 </template>
 
 <script>
@@ -43,11 +45,8 @@
 import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
 import fieldMixinText from '@theme/components/ADempiere/Field/mixin/mixinFieldText.js'
 
-// constants
-import { TEXT } from '@/utils/ADempiere/references'
-
 export default {
-  name: 'FieldText',
+  name: 'FieldUrl',
 
   mixins: [
     fieldMixin,
@@ -67,23 +66,17 @@ export default {
 
   data() {
     return {
-      patternFileName: '[A-Za-zñÑ0-9-_]{1,}',
-      patternFilePath: '[A-Za-zñÑ0-9-_/.]{1,}'
+      // url pattern
+      patternValidate: '((ht|f)tp(s?)\:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)'
     }
   },
 
   computed: {
     cssClassStyle() {
-      const { cssClassName, displayType, inTable } = this.metadata
-      let styleClass = ''
+      const { cssClassName, inTable } = this.metadata
+      let styleClass = ' custom-field-text '
       if (!this.isEmptyValue(cssClassName)) {
         styleClass += cssClassName
-      }
-
-      if (displayType === TEXT.id) {
-        styleClass += ' custom-field-textarea '
-      } else {
-        styleClass += ' custom-field-text '
       }
 
       if (inTable) {
@@ -95,30 +88,28 @@ export default {
       }
       return styleClass
     },
-    // Only used when input type='TextArea'
-    rows() {
-      if (this.metadata.inTable) {
-        return 1
+
+    validText() {
+      if (this.isEmptyValue(this.value)) {
+        return true
       }
-      return 4
+      if (this.isEmptyValue(this.patternValidate)) {
+        return true
+      }
+      return (new RegExp(this.patternValidate)).test(this.value)
     },
-    typeTextBox() {
-      // String, Url, FileName...
-      let typeInput = 'text'
-      // Display Type 'Text' (14)
-      if (this.metadata.displayType === TEXT.id) {
-        typeInput = 'textarea'
-      }
-      if (this.metadata.isEncrypted) {
-        typeInput = 'password'
-      }
-      return typeInput
-    },
+
     inputSize() {
       if (this.isEmptyValue(this.metadata.inputSize)) {
         return 'medium'
       }
       return this.metadata.inputSize
+    },
+    maxLength() {
+      if (!this.isEmptyValue(this.metadata.fieldLength) && this.metadata.fieldLength > 0) {
+        return Number(this.metadata.fieldLength)
+      }
+      return undefined
     }
   }
 }
@@ -127,12 +118,5 @@ export default {
 <style lang="scss">
   .custom-field-text {
     max-height: 36px;
-  }
-
-  // indicates if the textarea is adjustable
-  .el-textarea__inner {
-    &.field-in-table {
-      resize: none !important;
-    }
   }
 </style>

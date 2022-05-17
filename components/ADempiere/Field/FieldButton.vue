@@ -17,19 +17,21 @@
 -->
 <template>
   <el-input
-    :ref="metadata.columnName"
     v-model="value"
+    v-bind="commonsProperties"
     type="hidden"
     @change="preHandleChange"
   />
 </template>
 
 <script>
+// components and mixins
 import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
 import fieldMixinText from '@theme/components/ADempiere/Field/mixin/mixinFieldText.js'
 
 export default {
   name: 'FieldButton',
+
   mixins: [
     fieldMixin,
     fieldMixinText

@@ -1,18 +1,21 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com, Elsio Sanchez elsiosanche@gmail.com www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-dialog
     title="modal-dialog"
@@ -22,20 +25,16 @@
     <span slot="title">
       {{ title }}
     </span>
+
     <span class="content-modal-dialog">
-      <span v-if="isLoading">
-        <component
-          :is="componentRender"
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
-          :container-manager="containerManager"
-        />
-      </span>
-      <loading-view
-        v-else
-        key="form-loading"
+      <component
+        :is="componentRender"
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :container-manager="containerManager"
       />
     </span>
+
     <span slot="footer" class="dialog-footer">
       <el-button
         type="danger"
@@ -50,21 +49,25 @@
     </span>
   </el-dialog>
 </template>
+
 <script>
-import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
+
 // components and mixins
-import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { showMessage } from '@/utils/ADempiere/notification'
 import language from '@/lang'
 
 export default defineComponent({
   name: 'ModalDialog',
+
   components: {
-    LoadingView
+    PanelDefinition
   },
+
   props: {
     parentUuid: {
       type: String,
@@ -90,8 +93,42 @@ export default defineComponent({
       }
     }
   },
+
   setup(props) {
-    const isLoading = ref(false)
+    const storedModalDialog = computed(() => {
+      return store.getters.getModalDialogManager({
+        containerUuid: props.containerUuid
+      })
+    })
+
+    const isShowed = computed(() => {
+      return store.getters.getShowedModalDialog({
+        containerUuid: props.containerUuid
+      })
+    })
+
+    const title = computed(() => {
+      return storedModalDialog.value.title
+    })
+
+    const componentRender = computed(() => {
+      // return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
+      return storedModalDialog.value.componentPath
+    })
+
+    const closeDialog = () => {
+      // close modal dialog
+      store.commit('setShowedModalDialog', {
+        containerUuid: props.containerUuid,
+        isShowed: false
+      })
+    }
+
+    const cancelButton = () => {
+      closeDialog()
+      // call custom function to cancel
+      storedModalDialog.value.cancelMethod()
+    }
 
     const emptyMandatory = computed(() => {
       const fieldsList = store.getters.getStoredFieldsFromProcess(props.containerUuid)
@@ -100,66 +137,10 @@ export default defineComponent({
         fieldsList: fieldsList
       })
     })
-
-    const storedModalDialog = computed(() => {
-      return store.getters.getModalDialogManager({
-        containerUuid: props.containerUuid
-      })
-    })
-    const isShowed = computed(() => {
-      return store.getters.getShowedModalDialog({
-        containerUuid: props.containerUuid
-      })
-    })
-
-    const findProcess = computed(() => {
-      return store.getters.getStoredProcess(props.containerUuid)
-    })
-
-    const title = computed(() => {
-      return storedModalDialog.value.title
-    })
-    const componentRender = computed(() => {
-      // return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
-      return storedModalDialog.value.componentPath
-    })
-
-    watch(isShowed, (newValue, oldValue) => {
-      if (newValue !== oldValue && newValue) {
-        dataProcess()
-      }
-    })
-
-    const dataProcess = () => {
-      if (!isEmptyValue(findProcess.value)) {
-        isLoading.value = true
-        return
-      }
-      storedModalDialog.value.loadData()
-        .then(respose => {
-          isLoading.value = true
-        })
-        .catch(error => {
-          console.warn(error)
-          isLoading.value = true
-        })
-    }
-    const closeDialog = () => {
-      // close modal dialog
-      store.commit('setShowedModalDialog', {
-        containerUuid: props.containerUuid,
-        isShowed: false
-      })
-    }
-    const cancelButton = () => {
-      closeDialog()
-      // call custom function to cancel
-      storedModalDialog.value.cancelMethod()
-    }
     const doneButton = () => {
       if (!isEmptyValue(emptyMandatory.value)) {
         showMessage({
-          message: language.t('notifications.mandatoryFieldMissing') + emptyMandatory.value,
+          message: language.t('notifications.mandatoryFieldMissing') + EmptyMandatory.value,
           type: 'info'
         })
         return
@@ -168,9 +149,6 @@ export default defineComponent({
       // call custom function to done
       storedModalDialog.value.doneMethod()
     }
-    if (isShowed.effect && isShowed.value) {
-      dataProcess()
-    }
 
     return {
       // computeds
@@ -178,13 +156,10 @@ export default defineComponent({
       componentRender,
       isShowed,
       title,
-      isLoading,
-      findProcess,
       emptyMandatory,
       // methods
       cancelButton,
       closeDialog,
-      dataProcess,
       doneButton
     }
   }
