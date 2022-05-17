@@ -301,7 +301,7 @@ export default defineComponent({
         columnName: UUID
       })
     })
-    
+
     const currentTabTableName = computed(() => {
       return store.getters.getTableName(
         props.parentUuid,

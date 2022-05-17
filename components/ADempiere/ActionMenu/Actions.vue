@@ -156,6 +156,10 @@ export default defineComponent({
       default: () => {},
       required: true
     },
+    reportFormat: {
+      type: String,
+      default: ''
+    },
     size: {
       type: String,
       default: ''
@@ -231,6 +235,7 @@ export default defineComponent({
         tableName,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
+        reportFormat: props.reportFormat,
         uuid: action.uuid
       })
     }
