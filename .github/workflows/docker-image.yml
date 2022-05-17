@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      
+
       - name: Compress files for application dist
         uses: TheDoctor0/zip-release@0.6.2
         with:
