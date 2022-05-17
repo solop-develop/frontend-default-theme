@@ -15,19 +15,33 @@
 -->
 
 <template>
-  <embed
-    class="pdf-content"
-    :src="src"
-    :type="typeFormat"
-    style="height:1000px;width:100%; position:relative;"
-  >
+  <div>
+    <download-file
+      :format="format"
+      :name="name"
+      :mime-type="mimeType"
+      :stream="stream"
+    />
+    <embed
+      class="pdf-content"
+      :src="src"
+      :type="typeFormat"
+      style="height:1000px;width:100%; position:relative;"
+    >
+  </div>
 </template>
 
 <script>
 import { defineComponent } from '@vue/composition-api'
+// components and mixins
+import DownloadFile from '@theme/components/ADempiere/FileRender/downloadFile.vue'
 
 export default defineComponent({
   name: 'PDF-File',
+
+  components: {
+    DownloadFile
+  },
 
   props: {
     src: {

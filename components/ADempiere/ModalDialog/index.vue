@@ -1,21 +1,18 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com, Elsio Sanchez elsiosanche@gmail.com www.erpya.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
-
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
-
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
-
 <template>
   <el-dialog
     title="modal-dialog"
@@ -25,7 +22,6 @@
     <span slot="title">
       {{ title }}
     </span>
-
     <span class="content-modal-dialog">
       <span v-if="isLoading">
         <component
@@ -40,7 +36,6 @@
         key="form-loading"
       />
     </span>
-
     <span slot="footer" class="dialog-footer">
       <el-button
         type="danger"
@@ -55,12 +50,10 @@
     </span>
   </el-dialog>
 </template>
-
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
-
 // components and mixins
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -69,11 +62,9 @@ import language from '@/lang'
 
 export default defineComponent({
   name: 'ModalDialog',
-
   components: {
     LoadingView
   },
-
   props: {
     parentUuid: {
       type: String,
@@ -99,7 +90,6 @@ export default defineComponent({
       }
     }
   },
-
   setup(props) {
     const isLoading = ref(false)
 
@@ -116,7 +106,6 @@ export default defineComponent({
         containerUuid: props.containerUuid
       })
     })
-
     const isShowed = computed(() => {
       return store.getters.getShowedModalDialog({
         containerUuid: props.containerUuid
@@ -130,7 +119,6 @@ export default defineComponent({
     const title = computed(() => {
       return storedModalDialog.value.title
     })
-
     const componentRender = computed(() => {
       // return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
       return storedModalDialog.value.componentPath
@@ -163,13 +151,11 @@ export default defineComponent({
         isShowed: false
       })
     }
-
     const cancelButton = () => {
       closeDialog()
       // call custom function to cancel
       storedModalDialog.value.cancelMethod()
     }
-
     const doneButton = () => {
       if (!isEmptyValue(emptyMandatory.value)) {
         showMessage({
