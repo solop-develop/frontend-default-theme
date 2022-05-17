@@ -169,6 +169,7 @@ export default defineComponent({
       tableName
     } = props.actionsManager
 
+    const instanceUuid = root.$route.params.instanceUuid
     // set initial value
     const actionsList = ref([])
     if (props.actionsManager && props.actionsManager.getActionList) {
@@ -229,6 +230,7 @@ export default defineComponent({
         parentUuid,
         containerUuid,
         tableName,
+        instanceUuid,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
         uuid: action.uuid
