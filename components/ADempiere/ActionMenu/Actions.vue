@@ -237,7 +237,8 @@ export default defineComponent({
         instanceUuid,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
-        reportFormat: props.reportFormat,
+        reportViewUuid: action.reportViewUuid,
+        reportFormat: action.reportFormat,
         uuid: action.uuid
       })
     }
