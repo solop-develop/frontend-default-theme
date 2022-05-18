@@ -62,7 +62,7 @@ const staticRoutes = [
         name: 'Report Viewer',
         meta: {
           title: language.t('route.reportViewer'),
-          reportFormat: ''
+          reportType: ''
         }
       }
     ]

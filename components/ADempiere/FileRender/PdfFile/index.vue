@@ -25,7 +25,7 @@
     <embed
       class="pdf-content"
       :src="src"
-      :type="typeFormat"
+      :type="mimeType"
       style="height:1000px;width:100%; position:relative;"
     >
   </div>
@@ -33,6 +33,7 @@
 
 <script>
 import { defineComponent } from '@vue/composition-api'
+
 // components and mixins
 import DownloadFile from '@theme/components/ADempiere/FileRender/downloadFile.vue'
 
@@ -48,9 +49,21 @@ export default defineComponent({
       type: String,
       required: true
     },
-    typeFormat: {
+    mimeType: {
       type: String,
       default: 'application/pdf'
+    },
+    format: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      default: undefined
+    },
+    stream: {
+      type: [Object, Array],
+      default: undefined
     }
   }
 
