@@ -47,6 +47,10 @@
       <el-scrollbar v-else key="withActions" wrap-class="scroll-child">
         <el-dropdown-item
           v-for="(action, index) in actionsList"
+          v-show="!action.displayed || (action.displayed && action.displayed({
+            parentUuid,
+            containerUuid
+          }))"
           :key="index"
           :command="action"
           :disabled="!action.enabled({
@@ -135,7 +139,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from '@vue/composition-api'
+import { computed, defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'MenuActions',
@@ -173,10 +177,12 @@ export default defineComponent({
 
     const instanceUuid = root.$route.params.instanceUuid
     // set initial value
-    const actionsList = ref([])
-    if (props.actionsManager && props.actionsManager.getActionList) {
-      actionsList.value = props.actionsManager.getActionList()
-    }
+    const actionsList = computed(() => {
+      if (props.actionsManager && props.actionsManager.getActionList) {
+        return props.actionsManager.getActionList()
+      }
+      return []
+    })
 
     const recordUuid = computed(() => {
       // TODO: Change query name 'action'
