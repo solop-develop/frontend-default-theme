@@ -15,20 +15,12 @@
 -->
 
 <template>
-  <div>
-    <download-file
-      :format="format"
-      :name="name"
-      :mime-type="mimeType"
-      :stream="stream"
-    />
-    <embed
-      class="pdf-content"
-      :src="src"
-      :type="mimeType"
-      style="height:1000px;width:100%; position:relative;"
-    >
-  </div>
+  <embed
+    class="pdf-content"
+    :src="src"
+    :type="mimeType"
+    style="height:1000px;width:100%; position:relative;"
+  >
 </template>
 
 <script>
