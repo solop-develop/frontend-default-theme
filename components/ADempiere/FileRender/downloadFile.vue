@@ -56,6 +56,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { buildLinkHref } from '@/utils/ADempiere/resource'
+import { DEFAULT_REPORT_TYPE } from '@/utils/ADempiere/dictionary/report'
 
 export default defineComponent({
   name: 'DownloadFile',
@@ -67,7 +68,7 @@ export default defineComponent({
     },
     format: {
       type: String,
-      default: 'xlsx'
+      default: DEFAULT_REPORT_TYPE
     },
     name: {
       type: String,
@@ -113,7 +114,7 @@ export default defineComponent({
     function downloadOtherFile(format) {
       root.$store.dispatch('downloadReport', {
         containerUuid: root.$route.params.reportUuid,
-        reportFormat: format
+        reportType: format
       })
     }
 

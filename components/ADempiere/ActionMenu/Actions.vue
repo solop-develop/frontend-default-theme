@@ -90,20 +90,22 @@
                     :command="actionChild"
                     :divided="true"
                   >
-                    <span class="contents">
-                      <b class="label" @click="runAction(actionChild)">
-                        {{ actionChild.name }}
-                      </b>
-                    </span>
+                    <div @click="runAction(actionChild)">
+                      <span class="contents">
+                        <b class="label">
+                          {{ actionChild.name }}
+                        </b>
+                      </span>
 
-                    <p class="description" @click="runAction(actionChild)">
-                      <template v-if="isEmptyValue(actionChild.description)">
-                        {{ $t('data.noDescription') }}
-                      </template>
-                      <template v-else>
-                        {{ actionChild.description }}
-                      </template>
-                    </p>
+                      <p class="description">
+                        <template v-if="isEmptyValue(actionChild.description)">
+                          {{ $t('data.noDescription') }}
+                        </template>
+                        <template v-else>
+                          {{ actionChild.description }}
+                        </template>
+                      </p>
+                    </div>
                   </el-dropdown-item>
                 </el-scrollbar>
               </el-dropdown-menu>
@@ -155,10 +157,6 @@ export default defineComponent({
       type: Object,
       default: () => {},
       required: true
-    },
-    reportFormat: {
-      type: String,
-      default: ''
     },
     size: {
       type: String,
@@ -237,7 +235,6 @@ export default defineComponent({
         instanceUuid,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
-        reportFormat: props.reportFormat,
         uuid: action.uuid
       })
     }

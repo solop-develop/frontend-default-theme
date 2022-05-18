@@ -24,7 +24,6 @@
       :container-uuid="containerUuid"
       :size="size"
       :actions-manager="actionsManager"
-      :report-format="reportFormat"
     />
 
     <menu-relations
@@ -80,10 +79,6 @@ export default defineComponent({
     relationsManager: {
       type: Object,
       default: () => {}
-    },
-    reportFormat: {
-      type: String,
-      default: ''
     }
   },
 
