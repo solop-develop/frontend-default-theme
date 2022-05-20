@@ -37,7 +37,7 @@
 
     <el-table
       ref="multipleTable"
-      v-loading="isLoadingDataTale"
+      v-loading="isLoadingDataTable"
       style="width: 100%; height: 88% !important;"
       border
       height="90% !important"
@@ -141,6 +141,10 @@ export default defineComponent({
     panelMetadata: {
       type: Object,
       required: true
+    },
+    isLoadingDataTable: {
+      type: Boolean,
+      default: false
     },
     // get the table header
     header: {
