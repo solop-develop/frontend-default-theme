@@ -63,7 +63,16 @@
         >
           <div class="contents">
             <div class="auxiliary-menu-icon">
-              <i :class="action.icon" style="font-size: 18" />
+              <svg-icon
+                v-if="action.isSvgIcon"
+                :icon-class="action.icon"
+                style="font-size: 18"
+              />
+              <i
+                v-else
+                :class="action.icon"
+                style="font-size: 18"
+              />
             </div>
 
             <!-- for print format -->
