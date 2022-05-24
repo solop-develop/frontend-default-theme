@@ -98,7 +98,7 @@
     <!-- pagination table, set custom or use default change page method -->
     <custom-pagination
       :total="recordsLength"
-      :current-page="1"
+      :current-page="currentPage"
       :selection="selectionsLength"
       :handle-change-page="handleChangePage"
     />
@@ -171,12 +171,12 @@ export default defineComponent({
     const valueToSearch = ref('')
 
     const isLoadingDataTale = computed(() => {
-      if (props.containerManager && props.containerManager.getStoredData) {
-        return !props.containerManager.getStoredData({
+      if (props.containerManager && props.containerManager.isLoadedRecords) {
+        return !props.containerManager.isLoadedRecords({
           containerUuid: props.containerUuid
-        }).isLoaded
+        })
       }
-      return isEmptyValue(props.dataTable)
+      return !isEmptyValue(props.dataTable)
     })
 
     const currentOption = computed(() => {
@@ -216,6 +216,15 @@ export default defineComponent({
       return props.containerManager.getSelection({
         containerUuid: props.containerUuid
       }).length
+    })
+    
+    const currentPage = computed(() => {
+      if (props.containerManager.getRecordCount) {
+        return props.containerManager.getPageNumber({
+          containerUuid: props.containerUuid
+        })
+      }
+      return 1
     })
 
     const recordsLength = computed(() => {
@@ -368,6 +377,7 @@ export default defineComponent({
       currentOption,
       keyColumn,
       recordsLength,
+      currentPage,
       selectionsLength,
       // methods
       filterRecord,
