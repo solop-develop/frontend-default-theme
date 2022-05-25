@@ -153,7 +153,7 @@ import {
   formatDate,
   formatPrice
 } from '@/utils/ADempiere/valueFormat.js'
-import { extractPagingToken } from '@/utils/ADempiere/valueUtils.js'
+import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'SearchCompleteOrders',

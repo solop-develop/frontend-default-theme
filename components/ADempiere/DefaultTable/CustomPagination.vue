@@ -40,6 +40,10 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+// constants
+import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/constants/table'
+
+// utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
@@ -48,7 +52,7 @@ export default defineComponent({
   props: {
     currentPage: {
       type: Number,
-      default: undefined
+      default: 1
     },
     selection: {
       type: Number,
@@ -56,7 +60,7 @@ export default defineComponent({
     },
     pageSize: {
       type: Number,
-      default: 15
+      default: ROWS_OF_RECORDS_BY_PAGE
     },
     total: {
       type: Number,

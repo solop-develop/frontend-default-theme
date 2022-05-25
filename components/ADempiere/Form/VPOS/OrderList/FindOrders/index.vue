@@ -202,7 +202,7 @@ import {
   formatDate,
   formatPrice
 } from '@/utils/ADempiere/valueFormat.js'
-import { extractPagingToken } from '@/utils/ADempiere/valueUtils.js'
+import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import { holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
 

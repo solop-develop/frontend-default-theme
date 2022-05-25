@@ -217,7 +217,7 @@ export default defineComponent({
         containerUuid: props.containerUuid
       }).length
     })
-    
+
     const currentPage = computed(() => {
       if (props.containerManager.getRecordCount) {
         return props.containerManager.getPageNumber({
