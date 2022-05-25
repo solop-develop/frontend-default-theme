@@ -122,6 +122,7 @@ import LabelPopoverOption from './LabelPopoverOption.vue'
 
 // utils and helper methods
 import {
+  infoOptionItem,
   optionsListStandad, optionsListAdvancedQuery,
   documentStatusOptionItem, translateOptionItem,
   zoomInOptionItem, calculatorOptionItem,
@@ -304,6 +305,13 @@ export default defineComponent({
         !root.isEmptyValue(field.reference.zoomWindows) &&
         isLookup(field.displayType)) {
         menuOptions.push(zoomInOptionItem)
+      }
+
+      if (field.componentPath === 'FieldButton') {
+        const optionsButton = [
+          infoOptionItem
+        ]
+        return optionsButton.concat(menuOptions)
       }
 
       return optionsListStandad.concat(menuOptions)

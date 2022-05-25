@@ -24,7 +24,7 @@
 
     <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
       <el-dropdown-item
-        :disabled="!isHiddenFields"
+        :disabled="!isHiddenFieldsList"
         command="hiddenOptionals"
       >
         <svg-icon icon-class="eye" />
@@ -96,7 +96,7 @@ export default defineComponent({
     })
 
     // enabled hidden optionals fields (only mandatory))
-    const isHiddenFields = computed(() => {
+    const isHiddenFieldsList = computed(() => {
       return props.showedFields.length > 0 &&
         props.availableFields.length > 0
     })
@@ -134,7 +134,7 @@ export default defineComponent({
       // computeds
       isShowFields,
       isShowFieldsWithValue,
-      isHiddenFields,
+      isHiddenFieldsList,
       // methods
       handleCommand
     }
