@@ -150,7 +150,7 @@ import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
 import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat.js'
-import { extractPagingToken } from '@/utils/ADempiere/valueUtils.js'
+import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'AisleVendorList',
