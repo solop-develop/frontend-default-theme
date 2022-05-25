@@ -16,25 +16,102 @@
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <el-input
-    v-model="value"
+  <el-button
     v-bind="commonsProperties"
-    type="hidden"
-    @change="preHandleChange"
-  />
+    type="primary"
+    plain
+    @click="startProcess"
+  >
+    <!-- eslint-disable-next-line -->
+    <component v-bind="iconProps" />
+    {{ metadata.name }}
+  </el-button>
 </template>
 
 <script>
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
-import fieldMixinText from '@theme/components/ADempiere/Field/mixin/mixinFieldText.js'
+
+// utils and helpers methods
+import {
+  runProcessOfWindow,
+  generateReportOfWindow,
+  openBrowserAssociated
+} from '@/utils/ADempiere/dictionary/window.js'
 
 export default {
   name: 'FieldButton',
 
   mixins: [
-    fieldMixin,
-    fieldMixinText
-  ]
+    fieldMixin
+  ],
+
+  computed: {
+    iconProps() {
+      if (this.metadata.process) {
+        if (this.metadata.process.isReport || this.metadata.process.jasperReport) {
+          return {
+            is: 'i',
+            class: 'el-icon-data-analysis'
+          }
+        }
+
+        if (this.metadata.process.browserUuid) {
+          return {
+            is: 'svg-icon',
+            'icon-class': 'search'
+          }
+        }
+
+        if (this.metadata.process.workflowUuid) {
+          return {
+            is: 'svg-icon',
+            'icon-class': 'example'
+          }
+        }
+
+        return {
+          is: 'svg-icon',
+          'icon-class': 'search'
+        }
+      }
+
+      return {
+        is: 'span'
+      }
+    }
+  },
+  methods: {
+    startProcess() {
+      if (this.isEmptyValue(this.metadata.process)) {
+        return
+      }
+
+      if (this.metadata.process.isReport || this.metadata.process.jasperReport) {
+        generateReportOfWindow.generateReportOfWindow({
+          parentUuid: this.parentUuid,
+          containerUuid: this.containerUuid,
+          uuid: this.metadata.process.uuid
+        })
+        return
+      }
+
+      if (this.metadata.process.browserUuid) {
+        openBrowserAssociated.openBrowserAssociated({
+          parentUuid: this.parentUuid,
+          containerUuid: this.containerUuid,
+          uuid: this.metadata.process.uuid,
+          browserUuid: this.metadata.process.browserUuid
+        })
+        return
+      }
+
+      runProcessOfWindow.runProcessOfWindow({
+        parentUuid: this.parentUuid,
+        containerUuid: this.containerUuid,
+        uuid: this.metadata.process.uuid
+      })
+    }
+  }
 }
 </script>

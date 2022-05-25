@@ -44,6 +44,7 @@
       <el-form-item :class="classFrom">
         <template slot="label">
           <field-options
+            v-if="!isOnlyField"
             :metadata="fieldAttributes"
             :container-manager="containerManager"
             :record-uuid="recordUuid"
@@ -276,6 +277,11 @@ export default {
         return 'in-table'
       }
       return ''
+    },
+
+    isOnlyField() {
+      return this.field.isFieldOnly ||
+        this.field.componentPath === 'FieldButton'
     }
   },
 
