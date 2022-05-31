@@ -146,6 +146,15 @@ export default {
           columnName,
           value
         })
+        // update element column name
+        if (columnName !== this.metadata.elementName) {
+          this.$store.commit('updateValueOfField', {
+            parentUuid: this.metadata.parentUuid,
+            containerUuid,
+            columnName: this.metadata.elementName,
+            value
+          })
+        }
       }
     },
     uuidValue: {
@@ -246,7 +255,7 @@ export default {
     'metadata.displayed'(value) {
       if (value) {
         // if is field showed, search into store all options to list
-        this.optionsList = this.getLookupAll
+        this.optionsList = this.getStoredLookupAll
       }
     },
     value(newValue) {
@@ -275,7 +284,7 @@ export default {
 
   beforeMount() {
     if (this.metadata.displayed) {
-      this.optionsList = this.getLookupAll
+      this.optionsList = this.getStoredLookupAll
       const value = this.value
       if (!this.isEmptyValue(value) && !this.metadata.isAdvancedQuery) {
         const option = this.findOption(value)
@@ -341,7 +350,7 @@ export default {
             this.displayedValue = responseLookupItem.displayedValue
             this.uuidValue = responseLookupItem.uuid
             this.$nextTick(() => {
-              this.optionsList = this.getLookupAll
+              this.optionsList = this.getStoredLookupAll
             })
           }
         })
@@ -354,7 +363,7 @@ export default {
      */
     getDataLookupList(isShowList) {
       // get stored list values
-      const list = this.getLookupList
+      const list = this.getStoredLookupList
       // refresh local list component
       this.optionsList = list
       if (isShowList) {
@@ -404,7 +413,7 @@ export default {
           if (!this.isEmptyValue(responseLookupList)) {
             this.optionsList = responseLookupList
           } else {
-            this.optionsList = this.getLookupAll
+            this.optionsList = this.getStoredLookupAll
           }
         })
         .finally(() => {

@@ -293,6 +293,13 @@ export default {
           columnName: this.metadata.columnName,
           value
         })
+        if (this.metadata.columnName !== this.metadata.elementName) {
+          this.$store.dispatch('notifyActionPerformed', {
+            containerUuid: this.metadata.containerUuid,
+            columnName: this.metadata.elementName,
+            value
+          })
+        }
       }
 
       // if is custom field, set custom handle change value
