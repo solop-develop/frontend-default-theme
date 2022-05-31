@@ -49,10 +49,12 @@ export default {
         value
       }
     },
-    getLookupList() {
+    getStoredLookupList() {
       if (!this.metadata.displayed) {
         return [this.blankOption]
       }
+
+      // add blanck option in firts element on list
       return this.$store.getters.getStoredLookupList({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
@@ -64,7 +66,7 @@ export default {
         columnName: this.metadata.columnName
       })
     },
-    getLookupAll() {
+    getStoredLookupAll() {
       const allOptions = this.$store.getters.getStoredLookupAll({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
