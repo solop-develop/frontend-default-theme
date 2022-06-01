@@ -35,10 +35,12 @@
         v-if="isActiveTab"
         type="text"
         style="margin-left: 0px;"
-        :disabled="isDisbaledTable"
         @click="changeShowedRecords "
       >
-        <i class="el-icon-s-fold" style="font-size: 15px; color: black;" />
+        <i
+          class="el-icon-s-fold"
+          style="font-size: 15px; color: black;"
+        />
       </el-button>
     </el-tooltip>
 
@@ -52,7 +54,10 @@
         style="margin-left: 0px;"
         @click="changeShowedTab"
       >
-        <svg-icon icon-class="eye-open" style="font-size: 15px; color: black;" />
+        <svg-icon
+          icon-class="eye-open"
+          style="font-size: 15px; color: black;"
+        />
       </el-button>
     </el-tooltip>
   </span>
@@ -100,13 +105,6 @@ export default defineComponent({
       )
     })
 
-    const isDisbaledTable = computed(() => {
-      if (props.isParentTabs) {
-        return false
-      }
-      return !root.$store.getters.getStoredWindow(props.parentUuid).isShowedTabsChildren
-    })
-
     function changeShowedRecords() {
       if (tabMetadata.value.isParentTab) {
         root.$store.dispatch('changeTabAttribute', {
@@ -147,9 +145,9 @@ export default defineComponent({
     }
 
     return {
+      // Data
       tabMetadata,
-      isDisbaledTable,
-      // methods
+      // Methods
       changeShowedTab,
       changeShowedRecords
     }
