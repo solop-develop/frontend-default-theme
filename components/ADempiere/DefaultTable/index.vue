@@ -34,7 +34,6 @@
         </el-input>
       </el-col>
     </el-row>
-
     <el-table
       ref="multipleTable"
       v-loading="isLoadingDataTable"
@@ -73,13 +72,9 @@
         >
           <template slot-scope="scope">
             <!-- formatted displayed value -->
-            <cell-info
-              :container-uuid="containerUuid"
-              :field-attributes="fieldAttributes"
-              :container-manager="containerManager"
-              :scope="scope"
-              :data-row="scope.row"
-            />
+            <p style="max-height: 40px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">
+              {{ displayValue(scope.row, scope.row[fieldAttributes.columnName], fieldAttributes) }}
+            </p>
           </template>
         </el-table-column>
       </template>
@@ -109,18 +104,17 @@
 import { defineComponent, computed, onMounted, ref } from '@vue/composition-api'
 
 // components and mixins
-import CellInfo from './CellInfo.vue'
 import ColumnsDisplayOption from './ColumnsDisplayOption'
 import CustomPagination from './CustomPagination.vue'
 
 // utils and helper methods
+import language from '@/lang'
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'DefaultTable',
 
   components: {
-    CellInfo,
     ColumnsDisplayOption,
     CustomPagination
   },
@@ -242,15 +236,6 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         row
       })
-
-      /*
-      if (!row.isEditRow) {
-        row.isEditRow = true
-      }
-      if (!row.isSelectedRow) {
-        row.isEditRow = false
-      }
-      */
     }
 
     /**
@@ -363,6 +348,17 @@ export default defineComponent({
         toggleSelection(selectionsList)
       }
     })
+    /**
+     * formatted displayed value
+     */
+    function displayValue(row, fieldValue, fieldAttributes) {
+      if (typeof fieldValue === 'boolean') {
+        return fieldValue ? language.t('components.switchActiveText') : language.t('components.switchInactiveText')
+      } else if (fieldAttributes.columnName.includes('_ID')) {
+        return row['DisplayColumn_' + fieldAttributes.columnName]
+      }
+      return fieldValue
+    }
 
     return {
       // data
@@ -388,6 +384,7 @@ export default defineComponent({
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
+      displayValue,
       isDisplayed
     }
   }
