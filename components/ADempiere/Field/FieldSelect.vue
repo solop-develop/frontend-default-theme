@@ -334,15 +334,7 @@ export default {
       }
       this.isLoading = true
 
-      this.getDefaultValueFromServer({
-        parentUuid: this.metadata.parentUuid,
-        containerUuid: this.metadata.containerUuid,
-        contextColumnNames: this.metadata.contextColumnNames,
-        uuid: this.metadata.uuid,
-        id: this.metadata.id,
-        //
-        columnName: this.metadata.columnName
-      })
+      this.getDefaultValueFromServer()
         .then(responseLookupItem => {
           // with value response update local component list
           if (!this.isEmptyValue(responseLookupItem)) {
