@@ -186,16 +186,15 @@ export default {
           //
           uuid: this.metadata.uuid,
           id: this.metadata.id,
-          columnName: this.metadata.columnName
+          columnName: this.metadata.columnName,
+          value: this.value
         })
       }
 
-      return this.$store.dispatch('getDefaultValueFromServer', {
-        parentUuid: this.metadata.parentUuid,
-        containerUuid: this.metadata.containerUuid,
-        columnName: this.metadata.columnName,
-        query: this.metadata.defaultValue
-      })
+      // return default parsed value
+      return Promise.resolve(
+        this.parseValue(this.value)
+      )
     },
 
     /**
