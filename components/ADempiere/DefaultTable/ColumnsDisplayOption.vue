@@ -24,19 +24,50 @@
 
     <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
       <el-dropdown-item
-        :command="$t('table.dataTable.showAllColumns')"
+        :disabled="isEmptyValue(selectionsRecords)"
+        :command="{
+          dispatch: 'deleteSelectedRecordsFromWindow',
+          value: {
+            parentUuid,
+            containerUuid
+          }
+        }"
+      >
+        <i class="el-icon-delete" />
+        {{ $t('table.dataTable.deleteSelection') }}
+      </el-dropdown-item>
+      <el-dropdown-item
+        :command="{
+          dispatch: 'selectOption',
+          value: $t('table.dataTable.showMinimalistView')
+        }"
+      >
+        <svg-icon :icon-class="optionIcon($t('table.dataTable.showMinimalistView'))" />
+        {{ $t('table.dataTable.showMinimalistView') }}
+      </el-dropdown-item>
+      <el-dropdown-item
+        :command="{
+          dispatch: 'selectOption',
+          value: $t('table.dataTable.showAllColumns')
+        }"
       >
         <svg-icon :icon-class="optionIcon($t('table.dataTable.showAllColumns'))" />
         {{ $t('table.dataTable.showAllColumns') }}
       </el-dropdown-item>
       <el-dropdown-item
-        :command="$t('table.dataTable.showOnlyMandatoryColumns')"
+        :command="{
+          dispatch: 'selectOption',
+          value: $t('table.dataTable.showOnlyMandatoryColumns')
+        }"
       >
         <svg-icon :icon-class="optionIcon($t('table.dataTable.showOnlyMandatoryColumns'))" />
         {{ $t('table.dataTable.showOnlyMandatoryColumns') }}
       </el-dropdown-item>
       <el-dropdown-item
-        :command="$t('table.dataTable.showTableColumnsOnly')"
+        :command="{
+          dispatch: 'selectOption',
+          value: $t('table.dataTable.showTableColumnsOnly')
+        }"
       >
         <svg-icon :icon-class="optionIcon($t('table.dataTable.showTableColumnsOnly'))" />
         {{ $t('table.dataTable.showTableColumnsOnly') }}
@@ -46,8 +77,7 @@
 </template>
 
 <script>
-import { defineComponent } from '@vue/composition-api'
-
+import { defineComponent, computed } from '@vue/composition-api'
 export default defineComponent({
   name: 'ColumnsDisplayOption',
 
@@ -56,10 +86,27 @@ export default defineComponent({
       type: String,
       required: true,
       default: () => ''
+    },
+    parentUuid: {
+      type: String,
+      default: undefined
+    },
+    containerManager: {
+      type: Object,
+      required: false
+    },
+    containerUuid: {
+      type: String,
+      required: false
     }
   },
 
   setup(props, { root }) {
+    const selectionsRecords = computed(() => {
+      return props.containerManager.getSelection({
+        containerUuid: props.containerUuid
+      })
+    })
     const optionIcon = (icon) => {
       if (icon === props.option) {
         return 'eye-open'
@@ -68,11 +115,13 @@ export default defineComponent({
     }
 
     const handleCommand = (command) => {
-      root.$store.dispatch('selectOption', command)
+      root.$store.dispatch(command.dispatch, command.value)
     }
 
     return {
-      // methods
+      // Computed
+      selectionsRecords,
+      // Methods
       handleCommand,
       optionIcon
     }

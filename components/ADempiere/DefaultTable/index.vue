@@ -18,8 +18,8 @@
 
 <template>
   <el-main class="default-table">
-    <el-row>
-      <el-col v-if="isShowSearch" :span="24">
+    <el-row v-if="isShowSearch">
+      <el-col :span="23">
         <el-input
           v-model="valueToSearch"
           clearable
@@ -32,6 +32,14 @@
             class="el-icon-search el-input__icon"
           />
         </el-input>
+      </el-col>
+      <el-col :span="1">
+        <columns-display-option
+          :option="currentOption"
+          :container-manager="containerManager"
+          :parent-uuid="parentUuid"
+          :container-uuid="containerUuid"
+        />
       </el-col>
     </el-row>
     <el-table
@@ -78,16 +86,6 @@
           </template>
         </el-table-column>
       </template>
-      <el-table-column
-        fixed="right"
-        width="50"
-      >
-        <template slot="header">
-          <columns-display-option
-            :option="currentOption"
-          />
-        </template>
-      </el-table-column>
     </el-table>
 
     <!-- pagination table, set custom or use default change page method -->
