@@ -81,7 +81,7 @@ import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/Docu
 import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
 
 // utils and helpers methods
-import { typeValue } from '@/utils/ADempiere/valueUtils.js'
+import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
 import {
   formatField, formatPrice, formatQuantity
 } from '@/utils/ADempiere/valueFormat.js'
@@ -121,7 +121,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const { columnName } = props.fieldAttributes
 
     const fieldValue = computed(() => {
@@ -155,7 +155,7 @@ export default defineComponent({
     })
 
     const formatNumber = ({ displayType, value }) => {
-      if (root.isEmptyValue(value)) {
+      if (isEmptyValue(value)) {
         value = 0
       }
       // Amount, Costs+Prices
@@ -186,7 +186,7 @@ export default defineComponent({
         }
 
         case 'FieldNumber':
-          if (root.isEmptyValue(fieldValue.value)) {
+          if (isEmptyValue(fieldValue.value)) {
             valueToShow = undefined
             break
           }
@@ -198,7 +198,7 @@ export default defineComponent({
 
         case 'FieldSelect':
           valueToShow = row[displayColumnName]
-          if (root.isEmptyValue(valueToShow) && fieldValue.value === 0) {
+          if (isEmptyValue(valueToShow) && fieldValue.value === 0) {
             valueToShow = field.defaultValue
             break
           }
@@ -221,7 +221,7 @@ export default defineComponent({
       if (!record.isSelectedRow) {
         return false
       }
-      if (!isReadOnly.value && record.isEditRow) {
+      if (record.isEditRow && !isReadOnly.value) {
         return true
       }
       return false
