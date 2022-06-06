@@ -37,7 +37,6 @@
 import { defineComponent, computed } from '@vue/composition-api'
 
 import MenuActions from './Actions.vue'
-import MenuRelations from './Relations.vue'
 import MenuReferences from './References.vue'
 
 export default defineComponent({
@@ -45,7 +44,6 @@ export default defineComponent({
 
   components: {
     MenuActions,
-    MenuRelations,
     MenuReferences
   },
 
