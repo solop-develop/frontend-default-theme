@@ -26,11 +26,11 @@
   >
     <div class="contents">
       <div class="auxiliary-menu-icon">
-        <svg-icon icon-class="tree-table" style="font-size: 18" />
+        <i class="el-icon-zoom-in" style="font-size: 18px;" />
       </div>
 
       <!-- for print format -->
-      <el-dropdown>
+      <el-dropdown @command="openReference">
         <span>
           <b class="label">
             {{ $t('actionMenu.references') }}
@@ -171,7 +171,6 @@ export default defineComponent({
 
     const getReferences = () => {
       const references = getterReferences.value
-      console.log({ references, parentUuid })
       if (!root.isEmptyValue(references)) {
         referencesList.value = references.referencesList
       } else {
@@ -183,7 +182,6 @@ export default defineComponent({
           recordUuid: recordUuid.value
         })
           .then(responseReferences => {
-            console.log(responseReferences.referencesList, 123)
             referencesList.value = responseReferences.referencesList
           })
           // handle error in store
