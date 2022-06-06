@@ -26,11 +26,6 @@
       :actions-manager="actionsManager"
     />
 
-    <menu-relations
-      :size="size"
-      :relations-manager="relationsManager"
-    />
-
     <menu-references
       :size="size"
       :references-manager="referencesManager"
@@ -42,7 +37,6 @@
 import { defineComponent, computed } from '@vue/composition-api'
 
 import MenuActions from './Actions.vue'
-import MenuRelations from './Relations.vue'
 import MenuReferences from './References.vue'
 
 export default defineComponent({
@@ -50,7 +44,6 @@ export default defineComponent({
 
   components: {
     MenuActions,
-    MenuRelations,
     MenuReferences
   },
 
@@ -75,10 +68,6 @@ export default defineComponent({
     referencesManager: {
       type: Object,
       default: () => ({})
-    },
-    relationsManager: {
-      type: Object,
-      default: () => {}
     }
   },
 
