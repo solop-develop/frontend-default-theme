@@ -18,62 +18,61 @@
 
 <template>
   <!-- records references only window -->
-  <el-dropdown
-    :size="size"
-    trigger="click"
-    class="menu-references"
-    @command="openReference"
+  <el-dropdown-item
+    v-if="!isDisabledMenu"
+    key="withoutActions"
+    style="min-height: 26px"
+    :divided="true"
   >
-    <el-button
-      :size="size"
-      plain
-      type="warning"
-      :disabled="isDisabledMenu"
-    >
-      {{ $t('actionMenu.references') }}
+    <div class="contents">
+      <div class="auxiliary-menu-icon">
+        <i class="el-icon-zoom-in" style="font-size: 18px;" />
+      </div>
 
-      <i
-        v-if="isLoadingReferences"
-        key="loading"
-        class="el-icon-loading el-icon--right"
-      />
-      <i
-        v-else
-        key="loaded"
-        class="el-icon-arrow-down el-icon--right"
-      />
-    </el-button>
-
-    <el-dropdown-menu slot="dropdown">
-      <el-dropdown-item
-        v-if="isEmptyValue(referencesList) && isReferecesContent"
-        key="withoutReference"
-        style="min-height: 45px"
-      >
-        <span class="contents">
+      <!-- for print format -->
+      <el-dropdown @command="openReference">
+        <span>
           <b class="label">
-            {{ $t('actionMenu.withoutReferences') }}
+            {{ $t('actionMenu.references') }}
           </b>
+          <p class="description">
+            <b> {{ '(' + referencesList.length +')' }} Disponibles </b>
+          </p>
         </span>
-      </el-dropdown-item>
 
-      <el-scrollbar v-else key="withReferences" wrap-class="scroll-child">
-        <el-dropdown-item
-          v-for="(reference, index) in referencesList"
-          :key="index"
-          :command="reference"
-          :divided="true"
-        >
-          <span class="contents">
-            <b class="label">
-              {{ reference.displayName }}
-            </b>
-          </span>
-        </el-dropdown-item>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item
+            v-if="isEmptyValue(referencesList) && isReferecesContent"
+            key="withoutReference"
+            style="min-height: 45px"
+            :divided="true"
+          >
+            <span class="contents">
+              <b class="label">
+                {{ $t('actionMenu.withoutReferences') }}
+              </b>
+            </span>
+          </el-dropdown-item>
 
-      </el-scrollbar>
-    </el-dropdown-menu>
-  </el-dropdown>
+          <el-scrollbar v-else key="withReferences" wrap-class="scroll-child">
+            <el-dropdown-item
+              v-for="(reference, index) in referencesList"
+              :key="index"
+              :command="reference"
+              :divided="true"
+            >
+              <span class="contents">
+                <b class="label">
+                  {{ reference.displayName }}
+                </b>
+              </span>
+            </el-dropdown-item>
+
+          </el-scrollbar>
+        </el-dropdown-menu>
+      </el-dropdown>
+    </div>
+  </el-dropdown-item>
 </template>
 
 <script>
@@ -93,13 +92,18 @@ export default defineComponent({
     referencesManager: {
       type: Object,
       required: true
+    },
+    actionsManager: {
+      type: Object,
+      default: () => {},
+      required: true
     }
   },
 
   setup(props, { root, parent }) {
     const {
-      parentUuid
-    } = parent._props
+      parentUuid,
+    } = props.actionsManager
     const {
       getTableName
     } = props.referencesManager

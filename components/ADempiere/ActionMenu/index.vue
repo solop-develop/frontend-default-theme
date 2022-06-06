@@ -24,10 +24,6 @@
       :container-uuid="containerUuid"
       :size="size"
       :actions-manager="actionsManager"
-    />
-
-    <menu-references
-      :size="size"
       :references-manager="referencesManager"
     />
   </div>
