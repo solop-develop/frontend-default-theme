@@ -26,11 +26,6 @@
       :actions-manager="actionsManager"
     />
 
-    <menu-relations
-      :size="size"
-      :relations-manager="relationsManager"
-    />
-
     <menu-references
       :size="size"
       :references-manager="referencesManager"
@@ -75,10 +70,6 @@ export default defineComponent({
     referencesManager: {
       type: Object,
       default: () => ({})
-    },
-    relationsManager: {
-      type: Object,
-      default: () => {}
     }
   },
 
