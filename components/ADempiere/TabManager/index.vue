@@ -70,19 +70,8 @@
             />
             <!-- Close table when clicking on group of fields -->
             <div @click="closeRecordNavigation()">
-              <!-- fields in panel to single record -->
-              <tab-parent
-                v-show="isParentTabs"
-                :parent-uuid="parentUuid"
-                :container-manager="containerManager"
-                :tabs-list="tabsList"
-                :all-tabs-list="allTabsList"
-                :current-tab-uuid="tabUuid"
-                :actions-manager="actionsManager"
-                :tab-attributes="tabAttributes"
-              />
-              <tab-children
-                v-show="!isParentTabs && !isShowedTableRecords"
+              <tab-panel
+                v-show="isParentTabs || (!isParentTabs && !isShowedTableRecords)"
                 :parent-uuid="parentUuid"
                 :container-manager="containerManager"
                 :tabs-list="tabsList"
@@ -129,8 +118,7 @@ import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.v
 import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
-import TabChildren from './TabChildren.vue'
-import TabParent from './TabParent.vue'
+import TabPanel from './TabPanel.vue'
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 // constants
@@ -147,8 +135,7 @@ export default defineComponent({
     DefaultTable,
     PanelDefinition,
     ActionMenu,
-    TabChildren,
-    TabParent,
+    TabPanel,
     RecordNavigation,
     PanelInfo,
     TabLabel
