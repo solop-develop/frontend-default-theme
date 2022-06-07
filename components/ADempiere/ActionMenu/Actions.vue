@@ -143,11 +143,11 @@
           </div>
         </el-dropdown-item>
         <!-- References Menu -->
-        <menu-references
+        <!-- <menu-references
           :size="size"
           :actions-manager="actionsManager"
           :references-manager="referencesManager"
-        />
+        /> -->
       </el-scrollbar>
     </el-dropdown-menu>
   </el-dropdown>
@@ -155,13 +155,13 @@
 
 <script>
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
-import MenuReferences from './References.vue'
+// import MenuReferences from './References.vue'
 
 export default defineComponent({
   name: 'MenuActions',
-  components: {
-    MenuReferences
-  },
+  // components: {
+  //   MenuReferences
+  // },
 
   props: {
     parentUuid: {
@@ -184,10 +184,6 @@ export default defineComponent({
     size: {
       type: String,
       default: ''
-    },
-    referencesManager: {
-      type: Object,
-      required: true
     }
   },
 

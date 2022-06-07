@@ -18,101 +18,21 @@
 
 <template>
   <div style="height: 100% !important;">
-    <auxiliary-panel
-      v-if="isParentTabs && isShowedTableRecords"
-      :parent-uuid="parentUuid"
-      :container-uuid="tabUuid"
-      :label="tabsList[currentTab].name"
-    >
-      <record-navigation
+    <div style="float: right;padding-left: 1%;">
+      <action-menu
         :parent-uuid="parentUuid"
-        :container-uuid="tabUuid"
+        :container-uuid="currentTabUuid"
         :container-manager="containerManager"
-        :current-tab="tabsList[currentTab]"
+        :actions-manager="listAction"
       />
-    </auxiliary-panel>
-    <div style="display: flex;">
-      <el-tabs
-        v-model="currentTab"
-        type="border-card"
-        style="width: 99%"
-        @tab-click="handleClick"
-      >
-        <el-tab-pane
-          v-for="(tabAttributes, key) in tabsList"
-          :key="key"
-          :label="tabAttributes.name"
-          :name="String(key)"
-          :tabuuid="tabAttributes.uuid"
-          :tabindex="String(key)"
-          lazy
-          :disabled="isDisabledTab(key)"
-          :style="tabStyle"
-        >
-          <tab-label
-            slot="label"
-            :is-active-tab="tabAttributes.uuid === tabUuid"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-          />
-          <div v-if="isShowedTabs">
-            <!-- records in table to multi records -->
-            <default-table
-              v-if="!isParentTabs"
-              v-show="!isParentTabs && isShowedTableRecords"
-              key="default-table"
-              :parent-uuid="parentUuid"
-              :container-uuid="tabAttributes.uuid"
-              :container-manager="containerManager"
-              :header="tableHeaders"
-              :data-table="recordsList"
-              :panel-metadata="tabAttributes"
-            />
-            <!-- Close table when clicking on group of fields -->
-            <div @click="closeRecordNavigation()">
-              <!-- fields in panel to single record -->
-              <tab-parent
-                v-show="isParentTabs"
-                :parent-uuid="parentUuid"
-                :container-manager="containerManager"
-                :tabs-list="tabsList"
-                :all-tabs-list="allTabsList"
-                :current-tab-uuid="tabUuid"
-                :actions-manager="actionsManager"
-                :tab-attributes="tabAttributes"
-              />
-              <tab-children
-                v-show="!isParentTabs && !isShowedTableRecords"
-                :parent-uuid="parentUuid"
-                :container-manager="containerManager"
-                :tabs-list="tabsList"
-                :all-tabs-list="allTabsList"
-                :current-tab-uuid="tabUuid"
-                :actions-manager="actionsManager"
-                :tab-attributes="tabAttributes"
-              />
-            </div>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-      <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 50%;">
-        <el-button type="primary" size="mini" circle @click="openRecordLogs">
-          <svg-icon icon-class="tree-table" />
-        </el-button>
-      </div>
     </div>
-    <el-drawer
-      :visible.sync="drawer"
-      :with-header="false"
-      :before-close="openRecordLogs"
-      :size="'50%'"
-    >
-      <panel-info
-        :all-tabs-list="allTabsList"
-        :container-manager="containerManager"
-        :current-record="currentRecordLogs"
-      />
-    </el-drawer>
+    <panel-definition
+      key="panel-definition"
+      :parent-uuid="parentUuid"
+      :container-uuid="tabAttributes.uuid"
+      :container-manager="containerManager"
+      :group-tab="tabAttributes.tabGroup"
+    />
   </div>
 </template>
 
@@ -120,6 +40,7 @@
 import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import router from '@/router'
+import language from '@/lang'
 import store from '@/store'
 
 // components and mixins
@@ -129,8 +50,6 @@ import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.v
 import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
-import TabChildren from './TabChildren.vue'
-import TabParent from './TabParent.vue'
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 // constants
@@ -140,15 +59,13 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
-  name: 'TabManager',
+  name: 'TabChildren',
 
   components: {
     AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
     ActionMenu,
-    TabChildren,
-    TabParent,
     RecordNavigation,
     PanelInfo,
     TabLabel
@@ -157,7 +74,7 @@ export default defineComponent({
   props: {
     parentUuid: {
       type: String,
-      required: true
+      required: false
     },
     containerManager: {
       type: Object,
@@ -175,12 +92,20 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
+    currentTabUuid: {
+      type: String,
+      default: ''
+    },
     actionsManager: {
       type: Object,
       default: () => ({})
     },
     // used only window
     referencesManager: {
+      type: Object,
+      default: () => ({})
+    },
+    tabAttributes: {
       type: Object,
       default: () => ({})
     }
@@ -214,6 +139,23 @@ export default defineComponent({
     // use getter to reactive properties
     const currentTabMetadata = computed(() => {
       return store.getters.getStoredTab(props.parentUuid, tabUuid.value)
+    })
+
+    const listAction = computed(() => {
+      const alo =   store.getters.getStoredActionsMenu({
+        containerUuid: props.tabAttributes.uuid
+      })
+      return {
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabAttributes.uuid,
+        defaultActionName: language.t('actionMenu.createNewRecord'),
+        tableName: props.tabAttributes.tableName,
+        getActionList: () => {
+          return store.getters.getStoredActionsMenu({
+            containerUuid: props.tabAttributes.uuid
+          })
+        }
+      }
     })
 
     const isShowedTabs = computed(() => {
@@ -501,6 +443,7 @@ export default defineComponent({
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
+      listAction,   
       tabStyle,
       // methods
       handleClick,
