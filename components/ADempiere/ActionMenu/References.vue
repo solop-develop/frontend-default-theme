@@ -102,7 +102,7 @@ export default defineComponent({
 
   setup(props, { root, parent }) {
     const {
-      parentUuid,
+      parentUuid
     } = props.actionsManager
     const {
       getTableName
