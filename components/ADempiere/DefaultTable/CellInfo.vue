@@ -67,9 +67,15 @@
       </el-popover>
     </p>
 
-    <p v-else key="only-value" :class="cellCssClass">
-      {{ displayedValue }}
-    </p>
+    <span v-else>
+      <div
+        v-if="(!isEmptyValue(displayedValue) && fieldAttributes.componentPath === OPERATORS_FIELD_TEXT_LONG.componentPath)"
+        v-markdown="displayedValue"
+      />
+      <p v-else key="only-value" :class="cellCssClass">
+        {{ displayedValue }}
+      </p>
+    </span>
   </span>
 </template>
 
@@ -79,7 +85,6 @@ import { defineComponent, computed } from '@vue/composition-api'
 // components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
-
 // utils and helpers methods
 import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
 import {
@@ -88,6 +93,9 @@ import {
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 // constants
+import {
+  OPERATORS_FIELD_TEXT_LONG
+} from '@/utils/ADempiere/dataUtils'
 import { FIELDS_CURRENCY } from '@/utils/ADempiere/references.js'
 
 export default defineComponent({
@@ -228,6 +236,8 @@ export default defineComponent({
     }
 
     return {
+      // data
+      OPERATORS_FIELD_TEXT_LONG,
       // computeds
       cellCssClass,
       fieldValue,
