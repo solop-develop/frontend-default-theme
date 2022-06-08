@@ -70,14 +70,15 @@
             />
             <!-- Close table when clicking on group of fields -->
             <div @click="closeRecordNavigation()">
-              <!-- fields in panel to single record -->
-              <panel-definition
+              <tab-panel
                 v-show="isParentTabs || (!isParentTabs && !isShowedTableRecords)"
-                key="panel-definition"
                 :parent-uuid="parentUuid"
-                :container-uuid="tabAttributes.uuid"
                 :container-manager="containerManager"
-                :group-tab="tabAttributes.tabGroup"
+                :tabs-list="tabsList"
+                :all-tabs-list="allTabsList"
+                :current-tab-uuid="tabUuid"
+                :actions-manager="actionsManager"
+                :tab-attributes="tabAttributes"
               />
             </div>
           </div>
@@ -117,6 +118,8 @@ import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.v
 import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
+import TabPanel from './TabPanel.vue'
+import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -131,6 +134,8 @@ export default defineComponent({
     AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
+    ActionMenu,
+    TabPanel,
     RecordNavigation,
     PanelInfo,
     TabLabel
@@ -156,6 +161,15 @@ export default defineComponent({
     isParentTabs: {
       type: Boolean,
       default: true
+    },
+    actionsManager: {
+      type: Object,
+      default: () => ({})
+    },
+    // used only window
+    referencesManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 

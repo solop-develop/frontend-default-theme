@@ -103,7 +103,6 @@ export default defineComponent({
 }
 
 .auxiliary-menu-mobile {
-  position: absolute;
   height: 39px !important;
   right: 0%;
   top: 0;
