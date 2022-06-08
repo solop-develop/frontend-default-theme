@@ -32,6 +32,7 @@
         value-key="key"
         :size="size"
         :popper-append-to-body="true"
+        style="width: 250px;"
       >
         <el-option
           v-for="(item, key) in fieldsListAvailable"
