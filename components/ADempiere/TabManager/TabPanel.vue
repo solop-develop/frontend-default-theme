@@ -63,30 +63,9 @@ export default defineComponent({
       type: Object,
       required: true
     },
-    allTabsList: {
-      type: Array,
-      required: false
-    },
-    tabsList: {
-      type: Array,
-      default: () => []
-    },
-    isParentTabs: {
-      type: Boolean,
-      default: true
-    },
     currentTabUuid: {
       type: String,
       default: ''
-    },
-    actionsManager: {
-      type: Object,
-      default: () => ({})
-    },
-    // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
     },
     tabAttributes: {
       type: Object,

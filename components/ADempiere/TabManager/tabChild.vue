@@ -18,19 +18,6 @@
 
 <template>
   <div style="height: 100% !important;">
-    <auxiliary-panel
-      v-if="isShowedTableRecords"
-      :parent-uuid="parentUuid"
-      :container-uuid="tabUuid"
-      :label="tabsList[currentTab].name"
-    >
-      <record-navigation
-        :parent-uuid="parentUuid"
-        :container-uuid="tabUuid"
-        :container-manager="containerManager"
-        :current-tab="tabsList[currentTab]"
-      />
-    </auxiliary-panel>
     <div style="display: flex;">
       <el-tabs
         v-model="currentTab"
@@ -56,9 +43,21 @@
             :container-uuid="tabAttributes.uuid"
           />
 
-          <!-- Close table when clicking on group of fields -->
-          <div v-if="isShowedTabs" @click="closeRecordNavigation()">
+          <div v-if="isShowedTabs">
+            <!-- records in table to multi records -->
+            <default-table
+              v-if="isShowedTableRecords"
+              key="default-table"
+              :parent-uuid="parentUuid"
+              :container-uuid="tabAttributes.uuid"
+              :container-manager="containerManager"
+              :header="tableHeaders"
+              :data-table="recordsList"
+              :panel-metadata="tabAttributes"
+            />
             <tab-panel
+              v-else
+              key="tab-panel"
               :parent-uuid="parentUuid"
               :container-manager="containerManager"
               :tabs-list="tabsList"
@@ -69,31 +68,12 @@
           </div>
         </el-tab-pane>
       </el-tabs>
-
-      <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 50%;">
-        <el-button type="primary" size="mini" circle @click="openRecordLogs">
-          <svg-icon icon-class="tree-table" />
-        </el-button>
-      </div>
     </div>
-
-    <el-drawer
-      :visible.sync="drawer"
-      :with-header="false"
-      :before-close="openRecordLogs"
-      :size="'50%'"
-    >
-      <panel-info
-        :all-tabs-list="allTabsList"
-        :container-manager="containerManager"
-        :current-record="currentRecordLogs"
-      />
-    </el-drawer>
   </div>
 </template>
 
 <script>
-import { defineComponent, computed, watch, ref } from '@vue/composition-api'
+import { defineComponent, computed, watch, ref, onUnmounted } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
@@ -101,10 +81,7 @@ import store from '@/store'
 // components and mixins
 import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
-import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
-import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
@@ -120,11 +97,8 @@ export default defineComponent({
   components: {
     AuxiliaryPanel,
     DefaultTable,
-    PanelDefinition,
     ActionMenu,
     TabPanel,
-    RecordNavigation,
-    PanelInfo,
     TabLabel
   },
 
@@ -148,7 +122,8 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
-    const queryProperty = 'tab'
+    const queryProperty = 'tabChild'
+
     // if tabParent is present in path set this
     const tabNo = root.$route.query[queryProperty] || '0'
     const currentTab = ref(tabNo)
@@ -164,11 +139,6 @@ export default defineComponent({
       }
     })
 
-    // Panel Info
-
-    const currentRecordLogs = ref({})
-    const drawer = ref(false)
-
     // use getter to reactive properties
     const currentTabMetadata = computed(() => {
       return store.getters.getStoredTab(props.parentUuid, tabUuid.value)
@@ -176,7 +146,8 @@ export default defineComponent({
 
     const isShowedTabs = computed(() => {
       const storedWindow = store.getters.getStoredWindow(props.parentUuid)
-      return storedWindow.isShowedTabsParent
+
+      return storedWindow.isShowedTabsChildren
     })
 
     const isShowedTableRecords = computed(() => {
@@ -188,12 +159,11 @@ export default defineComponent({
     })
 
     function isDisabledTab(key) {
-      return (key > 0) &&
-        (isCreateNew.value || isEmptyValue(recordUuidTabParent.value))
+      return key > 0 && (isCreateNew.value || isEmptyValue(recordUuidTabParent.value))
     }
 
     function setCurrentTab() {
-      store.commit('setCurrentTab', {
+      store.commit('setCurrentTabChild', {
         parentUuid: props.parentUuid,
         tab: props.tabsList[currentTab.value]
       })
@@ -213,7 +183,7 @@ export default defineComponent({
      */
     const handleClick = (tabHTML) => {
       const { tabuuid, tabindex } = tabHTML.$attrs
-      findRecordLogs(props.allTabsList[0])
+
       setTabNumber(tabindex)
 
       // set metadata tab
@@ -255,8 +225,15 @@ export default defineComponent({
       return tabData.value.recordsList
     })
 
+    const isLoadedParentRecords = computed(() => {
+      return store.getters.getTabData({
+        containerUuid: currentTabMetadata.value.firstTabUuid
+      }).isLoaded
+    })
+
     const isReadyFromGetData = computed(() => {
-      return !tabData.value.isLoaded
+      // TODO: add is loaded context columns
+      return isLoadedParentRecords.value && !tabData.value.isLoaded
     })
 
     const recordUuidTabParent = computed(() => {
@@ -265,13 +242,6 @@ export default defineComponent({
         containerUuid: currentTabMetadata.value.firstTabUuid,
         columnName: UUID
       })
-    })
-
-    const currentTabTableName = computed(() => {
-      return store.getters.getTableName(
-        props.parentUuid,
-        currentTabMetadata.value.firstTabUuid
-      )
     })
 
     const getData = () => {
@@ -304,16 +274,19 @@ export default defineComponent({
         const { action } = root.$route.query
         // uuid into action query
         if (!isEmptyValue(action) && action !== 'create-new') {
-          if (action === 'zoomIn') {
-            const { columnName, value } = root.$route.query
+          /*
+          // search link value
+          const { linkColumnName } = tab
+          const value = store.getters.getValueOfField({
+            parentUuid: props.parentUuid,
+            columnName: linkColumnName
+          })
+          if (linkColumnName && !isEmptyValue(value)) {
             row = responseData.find(rowData => {
-              return rowData[columnName] === value
-            })
-          } else {
-            row = responseData.find(rowData => {
-              return rowData.UUID === action
-            })
+            return rowData[linkColumnName] === value
+          })
           }
+          */
         }
 
         // set first record
@@ -331,89 +304,61 @@ export default defineComponent({
     }
 
     /**
-     * Close table when clicking on group of fields
+     * Vuex suscription when record parent change
      */
-    const closeRecordNavigation = () => {
-      store.dispatch('changeTabAttribute', {
-        parentUuid: props.parentUuid,
-        containerUuid: tabUuid.value,
-        attributeName: 'isShowedTableRecords',
-        attributeValue: false
-      })
-    }
+    let unsuscribeChangeParentRecord = () => {}
 
-    if (isReadyFromGetData.value) {
-      getData()
-    }
-    watch(currentRecordLogs, (newValue, oldValue) => {
-      const recordId = newValue[currentTabTableName.value + '_ID']
-      router.push({
-        name: root.$route.name,
-        query: {
-          ...root.$route.query,
-          action: newValue.UUID,
-          recordId
-        },
-        params: {
-          ...root.$route.params,
-          recordId
-        }
-      }, () => {})
-    })
-    // if changed tab and not records in stored, get records from server
-    watch(tabUuid, (newValue, oldValue) => {
-      if (newValue !== oldValue && !isEmptyValue(recordUuidTabParent.value) && !tabData.value.isLoaded) {
+    // if changed record in parent tab, reload tab child
+    watch(isReadyFromGetData, (newValue, oldValue) => {
+      if (newValue) {
         getData()
       }
     })
 
-    /**
-     * Listar Historico de cambios
-     */
-    const openRecordLogs = (a) => {
-      findRecordLogs(props.allTabsList[0])
-      drawer.value = !drawer.value
-      if (drawer.value) {
-        props.containerManager.getRecordLogs({
-          tableName: props.allTabsList[0].tableName,
-          recordId: currentRecordLogs.value[props.allTabsList[parseInt(currentTab.value)].tableName + '_ID'],
-          recordUuid: currentRecordLogs.value.UUID
-        })
+    // if changed record in parent tab, reload tab child
+    watch(recordUuidTabParent, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+        getData()
       }
-      // store.commit('setShowRecordLogs', newValue)
-    }
+    })
 
-    /**
-     * Current Record
-     */
-    const findRecordLogs = (tab) => {
-      currentRecordLogs.value = store.getters.getValuesView({
-        parentUuid: tab.parentUuid,
-        containerUuid: tab.containerUuid,
-        format: 'object'
-      })
-    }
-    findRecordLogs(props.allTabsList[0])
+    unsuscribeChangeParentRecord = store.subscribeAction({
+      after: (action, state) => {
+        if (action.type === 'setTabDefaultValues' && action.payload) {
+          const currentChildTab = currentTabMetadata.value
+          if (action.payload.parentUuid === currentChildTab.parentUuid) {
+            const isChangeParentTab = currentChildTab.parentTabs.some(tabItem => {
+              return tabItem.uuid === action.payload.containerUuid
+            })
+            if (isChangeParentTab) {
+              store.dispatch('setTabDefaultValues', {
+                parentUuid: action.payload.parentUuid,
+                containerUuid: currentChildTab.containerUuid
+              })
+            }
+          }
+        }
+      }
+    })
 
     setTabNumber(currentTab.value)
+
+    // remove susbscriptions
+    onUnmounted(() => {
+      unsuscribeChangeParentRecord()
+    })
 
     return {
       tabUuid,
       currentTab,
       tableHeaders,
       recordsList,
-      drawer,
-      currentRecordLogs,
       // computed
       isShowedTabs,
       isShowedTableRecords,
-      currentTabTableName,
       tabStyle,
       // methods
       handleClick,
-      findRecordLogs,
-      openRecordLogs,
-      closeRecordNavigation,
       isDisabledTab
     }
   }

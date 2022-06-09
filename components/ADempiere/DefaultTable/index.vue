@@ -105,6 +105,8 @@
 <script>
 import { defineComponent, computed, onMounted, ref } from '@vue/composition-api'
 
+import store from '@/store'
+
 // components and mixins
 import CellInfo from './CellInfo.vue'
 import ColumnsDisplayOption from './ColumnsDisplayOption'
@@ -177,7 +179,7 @@ export default defineComponent({
     })
 
     const currentOption = computed(() => {
-      return root.$store.getters.getTableOption
+      return store.getters.getTableOption
     })
 
     const keyColumn = computed(() => {
@@ -322,10 +324,10 @@ export default defineComponent({
     function filterRecord(searchText) {
       isLoadFilter.value = true
 
-      root.$store.dispatch('getEntities', {
+      store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
-        searhValue: searchText
+        searchValue: searchText
       })
         .finally(() => {
           clearTimeout(timeOut.value)

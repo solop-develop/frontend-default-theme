@@ -152,8 +152,9 @@ export default {
       // set value into component and fieldValue store
       this.value = this.parseValue(value)
 
-      // set value and change into store
-      this.preHandleChange(value)
+      // change depends fields
+      // this.preHandleChange(value)
+      this.activeLogics()
     }
   },
 
@@ -192,9 +193,10 @@ export default {
       }
 
       // return default parsed value
-      return Promise.resolve(
-        this.parseValue(this.value)
-      )
+      return Promise.resolve({
+        value: this.parseValue(this.value),
+        displayedValue: undefined
+      })
     },
 
     /**
@@ -275,6 +277,27 @@ export default {
         })
       }
     },
+
+    /**
+     * Active or calling change logics on depends fields
+     */
+    activeLogics() {
+      let fieldsList = []
+      if (this.containerManager.getFieldsList) {
+        fieldsList = this.containerManager.getFieldsList({
+          parentUuid: this.metadata.parentUuid,
+          containerUuid: this.metadata.containerUuid,
+          root: this
+        })
+      }
+
+      this.$store.dispatch('changeDependentFieldsList', {
+        field: this.metadata,
+        fieldsList,
+        containerManager: this.containerManager
+      })
+    },
+
     /**
      * @param {mixed} value, main value in component
      * @param {mixed} valueTo, used in end value in range
@@ -304,18 +327,7 @@ export default {
       // if is custom field, set custom handle change value
       if (this.metadata.isCustomField) {
         if (this.metadata.isActiveLogics) {
-          let fieldsList = []
-          if (this.containerManager.getFieldsList) {
-            fieldsList = this.containerManager.getFieldsList({
-              parentUuid: this.metadata.parentUuid,
-              containerUuid: this.metadata.containerUuid,
-              root: this
-            })
-          }
-          this.$store.dispatch('changeDependentFieldsList', {
-            field: this.metadata,
-            fieldsList
-          })
+          this.activeLogics()
         }
         return
       }
