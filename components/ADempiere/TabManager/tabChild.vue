@@ -64,6 +64,8 @@
               :all-tabs-list="allTabsList"
               :current-tab-uuid="tabUuid"
               :tab-attributes="tabAttributes"
+              :actions-manager="actionsManager"
+              :references-manager="referencesManager"
             />
           </div>
         </el-tab-pane>
@@ -118,6 +120,15 @@ export default defineComponent({
     tabsList: {
       type: Array,
       default: () => []
+    },
+    actionsManager: {
+      type: Object,
+      default: () => ({})
+    },
+    // used only window
+    referencesManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 
