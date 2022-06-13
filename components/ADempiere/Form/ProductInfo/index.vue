@@ -36,7 +36,7 @@
  * This component is made to be the prototype of the Product Info search field
  */
 import ProductInfoList from './productList'
-import staticReportRoutes from '@/utils/ADempiere/constants/zoomReport'
+import staticReportRoutes from '@/utils/ADempiere/constants/report'
 import {
   formatPrice,
   formatQuantity

@@ -276,15 +276,7 @@ export default defineComponent({
 
     const getData = () => {
       const containerUuid = tabUuid.value
-      const filters = []
-      if (!isEmptyValue(root.$route.query) &&
-        !isEmptyValue(root.$route.query.columnName) &&
-        !isEmptyValue(root.$route.query.value)) {
-        filters.push({
-          columnName: root.$route.query.columnName,
-          value: root.$route.query.value
-        })
-      }
+      const filters = root.$route.query.filters
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,
