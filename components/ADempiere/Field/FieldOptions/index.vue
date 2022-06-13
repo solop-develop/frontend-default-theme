@@ -246,13 +246,16 @@ export default defineComponent({
           .toString()
         value = Number(valueQuery.replace(/[^\d]/g, ''))
       }
+      const filters = [{
+        columnName: columnName,
+        value: value
+      }]
 
       zoomIn({
         uuid: window.uuid,
-        selection: [{
-          columnName: columnName,
-          value: value
-        }]
+        query: {
+          filters
+        }
       })
     }
 
