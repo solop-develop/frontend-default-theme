@@ -249,12 +249,10 @@ export default defineComponent({
 
       zoomIn({
         uuid: window.uuid,
-        query: {
-          tabParent: 0,
-          action: 'zoomIn',
-          columnName,
-          value
-        }
+        selection: [{
+          columnName: columnName,
+          value: value
+        }]
       })
     }
 
