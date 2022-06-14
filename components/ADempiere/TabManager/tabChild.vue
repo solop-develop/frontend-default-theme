@@ -320,6 +320,13 @@ export default defineComponent({
     let unsuscribeChangeParentRecord = () => {}
 
     // if changed record in parent tab, reload tab child
+    watch(currentTab, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+        getData()
+      }
+    })
+
+    // if changed record in parent tab, reload tab child
     watch(recordUuidTabParent, (newValue, oldValue) => {
       if (newValue !== oldValue && !isEmptyValue(newValue)) {
         getData()
