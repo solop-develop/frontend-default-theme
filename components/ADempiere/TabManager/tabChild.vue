@@ -320,13 +320,6 @@ export default defineComponent({
     let unsuscribeChangeParentRecord = () => {}
 
     // if changed record in parent tab, reload tab child
-    watch(isReadyFromGetData, (newValue, oldValue) => {
-      if (newValue) {
-        getData()
-      }
-    })
-
-    // if changed record in parent tab, reload tab child
     watch(recordUuidTabParent, (newValue, oldValue) => {
       if (newValue !== oldValue && !isEmptyValue(newValue)) {
         getData()
@@ -366,6 +359,7 @@ export default defineComponent({
       recordsList,
       // computed
       isShowedTabs,
+      recordUuidTabParent,
       isShowedTableRecords,
       tabStyle,
       // methods

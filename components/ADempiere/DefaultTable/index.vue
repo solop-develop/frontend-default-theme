@@ -106,6 +106,7 @@
 import { defineComponent, computed, onMounted, ref } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 
 // components and mixins
 import CellInfo from './CellInfo.vue'
@@ -219,9 +220,9 @@ export default defineComponent({
 
     const currentPage = computed(() => {
       if (props.containerManager.getRecordCount) {
-        return props.containerManager.getPageNumber({
+        return parseInt(props.containerManager.getPageNumber({
           containerUuid: props.containerUuid
-        })
+        }), 10)
       }
       return 1
     })
@@ -297,6 +298,15 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         pageNumber
       })
+      const isParentTab = store.getters.getStoredTab(props.parentUuid, props.containerUuid).isParentTab
+      router.push({
+        name: root.$route.name,
+        query: {
+          ...root.$route.query,
+          page: isParentTab ? pageNumber : root.$route.query.page,
+          pageChild: !isParentTab ? pageNumber : root.$route.query.pageChild
+        }
+      }, () => {})
     }
 
     const timeOut = ref(() => {})
