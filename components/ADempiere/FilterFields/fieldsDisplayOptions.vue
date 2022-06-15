@@ -46,15 +46,15 @@
         <svg-icon icon-class="eye-open" />
         {{ $t('fieldDisplayOptions.showOptionalFieldsWithValue') }}
       </el-dropdown-item>
-      <el-dropdown-item :command="2">
+      <el-dropdown-item v-if="!isMobile" :command="2">
         <svg-icon :icon-class="iconColumn(2)" />
         Mostrar 2 Columnas
       </el-dropdown-item>
-      <el-dropdown-item :command="3">
+      <el-dropdown-item v-if="!isMobile" :command="3">
         <svg-icon :icon-class="iconColumn(3)" />
         Mostrar 3 Columnas
       </el-dropdown-item>
-      <el-dropdown-item :command="4">
+      <el-dropdown-item v-if="!isMobile" :command="4">
         <svg-icon :icon-class="iconColumn(4)" />
         Mostrar 4 Columnas
       </el-dropdown-item>
@@ -128,6 +128,9 @@ export default defineComponent({
     const currentColumnSize = computed(() => {
       return store.getters.getSizeColumn({ containerUuid: props.containerUuid })
     })
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
 
     function iconColumn(column) {
       if (column === currentColumnSize.value) {
@@ -167,6 +170,7 @@ export default defineComponent({
       isShowFieldsWithValue,
       isHiddenFieldsList,
       currentColumnSize,
+      isMobile,
       // methods
       handleCommand,
       iconColumn
