@@ -57,6 +57,8 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+import store from '@/store'
+
 // components and mixins
 import FieldsDisplayOption from './fieldsDisplayOptions.vue'
 
@@ -86,16 +88,12 @@ export default defineComponent({
     },
     filterManager: {
       type: Function,
-      default: ({ filterList }) => {}
+      default: ({ filterList }) => { return true }
     },
     // isDisplayedField or isDisplayedColumn
     showedManager: {
       type: Function,
       default: (field) => {}
-    },
-    panelType: {
-      type: String,
-      default: 'window'
     },
     /**
      * If is used in table, by default false
@@ -106,7 +104,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const size = props.inTable
       ? 'mini'
       : 'small'
@@ -120,14 +118,14 @@ export default defineComponent({
       : 'isShowedFromUser'
 
     const isMobile = computed(() => {
-      root.$store.state.app.device === 'mobile'
+      store.state.app.device === 'mobile'
     })
 
     const fieldsListAvailable = computed(() => {
       /*
       if (!props.inTable && props.panelType === 'window' && !root.isEmptyValue(props.groupField)) {
         // compare group fields to window
-        return root.$store.getters.getFieldsListNotMandatory({
+        return store.getters.getFieldsListNotMandatory({
           containerUuid: props.containerUuid,
           fieldsList: props.fieldsList
         })
@@ -137,7 +135,7 @@ export default defineComponent({
       }
       */
       // get fields not mandatory
-      return root.$store.getters.getFieldsListNotMandatory({
+      return store.getters.getFieldsListNotMandatory({
         containerUuid: props.containerUuid,
         fieldsList: props.fieldsList,
         showedMethod: props.showedManager,
@@ -147,7 +145,7 @@ export default defineComponent({
 
     const fieldsListAvailableWithValue = computed(() => {
       // get fields not mandatory with default value
-      return root.$store.getters.getFieldsListNotMandatory({
+      return store.getters.getFieldsListNotMandatory({
         containerUuid: props.containerUuid,
         fieldsList: fieldsListAvailable.value,
         isEvaluateDefaultValue: true,
@@ -198,7 +196,7 @@ export default defineComponent({
      * @param {array} selectedValues
      */
     const changeShowedTable = (selectedValues) => {
-      root.$store.dispatch('changeFieldAttributesBoolean', {
+      store.dispatch('changeFieldAttributesBoolean', {
         containerUuid: props.containerUuid,
         fieldsIncludes: selectedValues,
         attribute: 'isShowedTableFromUser',

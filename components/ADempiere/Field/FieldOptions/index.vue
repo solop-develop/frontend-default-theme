@@ -116,6 +116,9 @@
 <script>
 import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
+import language from '@/lang'
+import store from '@/store'
+
 // components and mixins
 import LabelField from './LabelField.vue'
 import LabelPopoverOption from './LabelPopoverOption.vue'
@@ -130,7 +133,7 @@ import {
 } from '@theme/components/ADempiere/Field/FieldOptions/fieldOptionsList.js'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { isLookup, LIST } from '@/utils/ADempiere/references.js'
-import { typeValue } from '@/utils/ADempiere/valueUtils.js'
+import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
   name: 'FieldOptions',
@@ -160,17 +163,17 @@ export default defineComponent({
     const optionColumnName = ref(root.$route.query.fieldColumnName)
 
     const isMobile = computed(() => {
-      return root.$store.state.app.device === 'mobile'
+      return store.state.app.device === 'mobile'
     })
 
     // current option field selected
     const currentFieldOption = computed(() => {
-      return root.$store.getters.getFieldContextMenu
+      return store.getters.getFieldContextMenu
     })
 
     const valueField = computed(() => {
       const { parentUuid, containerUuid, columnName } = props.metadata
-      return root.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid,
         containerUuid,
         columnName
@@ -179,8 +182,8 @@ export default defineComponent({
 
     setTimeout(() => {
       if (isMobile.value && optionColumnName.value === props.metadata.columnName) {
-        root.$store.commit('changeShowRigthPanel', true)
-        root.$store.dispatch('setOptionField', {
+        store.commit('changeShowRigthPanel', true)
+        store.dispatch('setOptionField', {
           fieldAttributes: props.metadata,
           name: root.$route.query.typeAction,
           valueField: valueField.value
@@ -192,12 +195,12 @@ export default defineComponent({
 
     // TODO: Manage with panel
     const panelContextMenu = computed(() => {
-      return root.$store.state.contextMenu.isShowRightPanel
+      return store.state.contextMenu.isShowRightPanel
     })
 
     // TODO: Manage with field
     const showPanelFieldOption = computed(() => {
-      return root.$store.state.contextMenu.isShowOptionField
+      return store.state.contextMenu.isShowOptionField
     })
 
     const labelStyle = computed(() => {
@@ -216,7 +219,7 @@ export default defineComponent({
         containerUuid
       })
 
-      return root.$store.getters.getFieldsListNotMandatory({
+      return store.getters.getFieldsListNotMandatory({
         containerUuid: props.containerUuid,
         fieldsList,
         showedMethod: props.containerManager.isDisplayedField,
@@ -264,17 +267,17 @@ export default defineComponent({
         return false
       }
 
-      // if (!root.isEmptyValue(root.$store.getters.getOrders)) {
+      // if (!isEmptyValue(store.getters.getOrders)) {
       //   reutrn false
       // }
 
       const { parentUuid, containerUuid, columnName } = props.metadata
-      const statusValue = root.$store.getters.getValueOfField({
+      const statusValue = store.getters.getValueOfField({
         parentUuid,
         containerUuid,
         columnName
       })
-      if (!root.isEmptyValue(statusValue)) {
+      if (!isEmptyValue(statusValue)) {
         return true
       }
 
@@ -287,7 +290,9 @@ export default defineComponent({
       if (field.isNumericField) {
         menuOptions.push(calculatorOptionItem)
       }
-      if (!field.required) {
+
+      // add hide this field with isShowdFromUser
+      if (field.isParent || !field.required || !isEmptyValue(field.defaultValue)) {
         menuOptions.push(hideThisField)
       }
       // infoOption, operatorOption
@@ -303,7 +308,7 @@ export default defineComponent({
       }
 
       if (field.reference &&
-        !root.isEmptyValue(field.reference.zoomWindows) &&
+        !isEmptyValue(field.reference.zoomWindows) &&
         isLookup(field.displayType)) {
         menuOptions.push(zoomInOptionItem)
       }
@@ -323,7 +328,7 @@ export default defineComponent({
         const option = optionsList.value.find(option => {
           return root.$route.query.typeAction === option.name
         })
-        if (!root.isEmptyValue(root.$route.query) && option) {
+        if (!isEmptyValue(root.$route.query) && option) {
           return true
         }
         return false
@@ -332,7 +337,7 @@ export default defineComponent({
         if (!value) {
           showPopoverPath.value = false
           /*
-          root.$router.push({
+          router.push({
             name: root.$route.name,
             query: {
               ...root.$route.query,
@@ -347,10 +352,10 @@ export default defineComponent({
 
     const closePopover = () => {
       visibleForDesktop.value = false
-      // root.$store.commit('changeShowRigthPanel', false)
-      // root.$store.commit('changeShowPopoverField', true)
+      // store.commit('changeShowRigthPanel', false)
+      // store.commit('changeShowPopoverField', true)
       /*
-      root.$router.push({
+      router.push({
         name: root.$route.name,
         query: {
           ...root.$route.query,
@@ -372,7 +377,7 @@ export default defineComponent({
      * Used by mobile menu
      */
     const handleCommand = (command) => {
-      root.$store.commit('setRecordAccess', false)
+      store.commit('setRecordAccess', false)
 
       handleOptionSelected(command.name)
     }
@@ -387,21 +392,21 @@ export default defineComponent({
     }
 
     const handleOptionSelected = (optionName) => {
-      if (optionName === root.$t('table.ProcessActivity.zoomIn')) {
+      if (optionName === language.t('table.ProcessActivity.zoomIn')) {
         redirect()
         return
       }
-      if (optionName === root.$t('fieldOptions.hideThisField')) {
+      if (optionName === language.t('fieldOptions.hideThisField')) {
         hideOnlyThisfield()
         return
       }
 
       if (isMobile.value) {
-        root.$store.commit('changeShowRigthPanel', true)
+        store.commit('changeShowRigthPanel', true)
       } else {
-        root.$store.commit('changeShowOptionField', true)
+        store.commit('changeShowOptionField', true)
         visibleForDesktop.value = true
-        // root.$router.push({
+        // router.push({
         //   name: root.$route.name,
         //   query: {
         //     ...root.$route.query,
@@ -415,8 +420,8 @@ export default defineComponent({
         return option.name === optionName
       })
 
-      root.$store.commit('changeShowPopoverField', true)
-      root.$store.dispatch('setOptionField', {
+      store.commit('changeShowPopoverField', true)
+      store.dispatch('setOptionField', {
         ...option,
         valueField: valueField.value,
         fieldAttributes: props.metadata
