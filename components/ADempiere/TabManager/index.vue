@@ -261,6 +261,8 @@ export default defineComponent({
       })
     })
 
+    const query = root.$route.query
+
     // get records list
     const recordsList = computed(() => {
       return tabData.value.recordsList
@@ -287,11 +289,14 @@ export default defineComponent({
 
     const getData = () => {
       const containerUuid = tabUuid.value
-      const filters = root.$route.query.filters
+      const filters = query.filters
+      const pageNumber = query.page
+      
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,
-        filters
+        filters,
+        pageNumber
       }).then(responseData => {
         if (isCreateNew.value || isEmptyValue(responseData)) {
           // set values in panel
@@ -304,7 +309,7 @@ export default defineComponent({
         }
 
         let row = {}
-        const { action } = root.$route.query
+        const { action } = query
         // uuid into action query
         if (!isEmptyValue(action) && action !== 'create-new') {
           if (action === 'zoomIn') {
