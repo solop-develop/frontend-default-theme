@@ -87,16 +87,14 @@ import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/Docu
 import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
 // utils and helpers methods
 import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
-import {
-  formatField, formatPrice, formatQuantity
-} from '@/utils/ADempiere/valueFormat.js'
+import { formatField } from '@/utils/ADempiere/valueFormat.js'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
+import { formatNumber } from '@/utils/ADempiere/formatValue/numberFormat'
 
 // constants
 import {
   OPERATORS_FIELD_TEXT_LONG
 } from '@/utils/ADempiere/dataUtils'
-import { FIELDS_CURRENCY } from '@/utils/ADempiere/references.js'
 
 export default defineComponent({
   name: 'CellInfo',
@@ -162,17 +160,6 @@ export default defineComponent({
       return classCss
     })
 
-    const formatNumber = ({ displayType, value }) => {
-      if (isEmptyValue(value)) {
-        value = 0
-      }
-      // Amount, Costs+Prices
-      if (FIELDS_CURRENCY.includes(displayType)) {
-        return formatPrice(value)
-      }
-      return formatQuantity(value)
-    }
-
     /**
      * @param {object} row, row data
      * @param {object} field, field with attributes
@@ -198,6 +185,7 @@ export default defineComponent({
             valueToShow = undefined
             break
           }
+          // TODO: Add currency of row
           valueToShow = formatNumber({
             displayType,
             value: fieldValue.value
