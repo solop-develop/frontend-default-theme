@@ -242,11 +242,6 @@ export default defineComponent({
       }).isLoaded
     })
 
-    const isReadyFromGetData = computed(() => {
-      // TODO: add is loaded context columns
-      return isLoadedParentRecords.value && !tabData.value.isLoaded
-    })
-
     const recordUuidTabParent = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
