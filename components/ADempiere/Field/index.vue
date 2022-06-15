@@ -72,7 +72,7 @@ import FieldOptions from '@theme/components/ADempiere/Field/FieldOptions/index.v
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT } from '@/utils/ADempiere/references'
-
+import { LAYOUT_SIZE_COLUMN, DEFAULT_SIZE_COLUMN } from '@/utils/ADempiere/componentUtils'
 // utils and helper methods
 import { evalutateTypeField } from '@/utils/ADempiere/dictionaryUtils'
 
@@ -138,6 +138,9 @@ export default {
       }
       return 'field-standard'
     },
+    currentColumnSize() {
+      return this.$store.getters.getSizeColumn({ containerUuid: this.containerUuid })
+    },
     sizeField() {
       if (this.isEmptyValue(this.field.size)) {
         return {
@@ -146,6 +149,15 @@ export default {
           md: 24,
           lg: 24,
           xl: 24
+        }
+      }
+      if (this.currentColumnSize !== DEFAULT_SIZE_COLUMN) {
+        return {
+          xs: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
+          sm: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
+          md: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
+          lg: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
+          xl: LAYOUT_SIZE_COLUMN / this.currentColumnSize
         }
       }
       return {

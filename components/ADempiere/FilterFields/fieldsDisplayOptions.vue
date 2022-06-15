@@ -46,12 +46,25 @@
         <svg-icon icon-class="eye-open" />
         {{ $t('fieldDisplayOptions.showOptionalFieldsWithValue') }}
       </el-dropdown-item>
+      <el-dropdown-item :command="2">
+        <svg-icon :icon-class="iconColumn(2)" />
+        Mostrar 2 Columnas
+      </el-dropdown-item>
+      <el-dropdown-item :command="3">
+        <svg-icon :icon-class="iconColumn(3)" />
+        Mostrar 3 Columnas
+      </el-dropdown-item>
+      <el-dropdown-item :command="4">
+        <svg-icon :icon-class="iconColumn(4)" />
+        Mostrar 4 Columnas
+      </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
 </template>
 
 <script>
 import { computed, defineComponent } from '@vue/composition-api'
+import store from '@/store'
 
 export default defineComponent({
   name: 'FieldsDisplayOption',
@@ -112,9 +125,27 @@ export default defineComponent({
         return field.columnName
       })
     })
+    const currentColumnSize = computed(() => {
+      return store.getters.getSizeColumn({ containerUuid: props.containerUuid })
+    })
+
+    function iconColumn(column) {
+      if (column === currentColumnSize.value) {
+        return 'eye-open' 
+      }
+      return 'eye' 
+    }
 
     const handleCommand = (command) => {
       let fieldsShowed = []
+      if (typeof command === 'number') {
+        store.dispatch('changeSizeField', {
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          sizeField: command
+        })
+        return
+      }
       if (command === 'showOptionals') {
         fieldsShowed = fieldsListAvailable.value
       }
@@ -135,8 +166,10 @@ export default defineComponent({
       isShowFields,
       isShowFieldsWithValue,
       isHiddenFieldsList,
+      currentColumnSize,
       // methods
-      handleCommand
+      handleCommand,
+      iconColumn
     }
   }
 })
