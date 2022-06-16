@@ -48,15 +48,15 @@
       </el-dropdown-item>
       <el-dropdown-item v-if="!isMobile" :command="2">
         <svg-icon :icon-class="iconColumn(2)" />
-        Mostrar 2 Columnas
+        {{ $t('fieldDisplayOptions.Show2Columns') }}
       </el-dropdown-item>
       <el-dropdown-item v-if="!isMobile" :command="3">
         <svg-icon :icon-class="iconColumn(3)" />
-        Mostrar 3 Columnas
+        {{ $t('fieldDisplayOptions.Show3Columns') }}
       </el-dropdown-item>
       <el-dropdown-item v-if="!isMobile" :command="4">
         <svg-icon :icon-class="iconColumn(4)" />
-        Mostrar 4 Columnas
+        {{ $t('fieldDisplayOptions.Show4Columns') }}
       </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
@@ -134,9 +134,9 @@ export default defineComponent({
 
     function iconColumn(column) {
       if (column === currentColumnSize.value) {
-        return 'eye-open' 
+        return 'eye-open'
       }
-      return 'eye' 
+      return 'eye'
     }
 
     const handleCommand = (command) => {
