@@ -46,12 +46,25 @@
         <svg-icon icon-class="eye-open" />
         {{ $t('fieldDisplayOptions.showOptionalFieldsWithValue') }}
       </el-dropdown-item>
+      <el-dropdown-item v-if="!isMobile" :command="2">
+        <svg-icon :icon-class="iconColumn(2)" />
+        {{ $t('fieldDisplayOptions.Show2Columns') }}
+      </el-dropdown-item>
+      <el-dropdown-item v-if="!isMobile" :command="3">
+        <svg-icon :icon-class="iconColumn(3)" />
+        {{ $t('fieldDisplayOptions.Show3Columns') }}
+      </el-dropdown-item>
+      <el-dropdown-item v-if="!isMobile" :command="4">
+        <svg-icon :icon-class="iconColumn(4)" />
+        {{ $t('fieldDisplayOptions.Show4Columns') }}
+      </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
 </template>
 
 <script>
 import { computed, defineComponent } from '@vue/composition-api'
+import store from '@/store'
 
 export default defineComponent({
   name: 'FieldsDisplayOption',
@@ -112,9 +125,30 @@ export default defineComponent({
         return field.columnName
       })
     })
+    const currentColumnSize = computed(() => {
+      return store.getters.getSizeColumn({ containerUuid: props.containerUuid })
+    })
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
+    function iconColumn(column) {
+      if (column === currentColumnSize.value) {
+        return 'eye-open'
+      }
+      return 'eye'
+    }
 
     const handleCommand = (command) => {
       let fieldsShowed = []
+      if (typeof command === 'number') {
+        store.dispatch('changeSizeField', {
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          sizeField: command
+        })
+        return
+      }
       if (command === 'showOptionals') {
         fieldsShowed = fieldsListAvailable.value
       }
@@ -135,8 +169,11 @@ export default defineComponent({
       isShowFields,
       isShowFieldsWithValue,
       isHiddenFieldsList,
+      currentColumnSize,
+      isMobile,
       // methods
-      handleCommand
+      handleCommand,
+      iconColumn
     }
   }
 })
