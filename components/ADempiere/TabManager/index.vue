@@ -291,7 +291,7 @@ export default defineComponent({
       const containerUuid = tabUuid.value
       const filters = query.filters
       const pageNumber = query.page
-      
+
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,

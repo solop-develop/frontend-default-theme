@@ -236,17 +236,6 @@ export default defineComponent({
       return tabData.value.recordsList
     })
 
-    const isLoadedParentRecords = computed(() => {
-      return store.getters.getTabData({
-        containerUuid: currentTabMetadata.value.firstTabUuid
-      }).isLoaded
-    })
-
-    const isReadyFromGetData = computed(() => {
-      // TODO: add is loaded context columns
-      return isLoadedParentRecords.value && !tabData.value.isLoaded
-    })
-
     const recordUuidTabParent = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
