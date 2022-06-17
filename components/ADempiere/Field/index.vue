@@ -41,9 +41,10 @@
       :xl="sizeField.xl"
       :class="classField"
     >
-      <el-form-item :class="classFrom" :style="isAlignButton">
+      <el-form-item :class="classFrom">
         <template slot="label">
           <field-options
+            v-if="!isOnlyField"
             :metadata="fieldAttributes"
             :container-manager="containerManager"
             :record-uuid="recordUuid"

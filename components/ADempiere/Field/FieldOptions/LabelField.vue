@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isFieldOnly && !isButton" :style="labelStyle" class="label-field">
+  <div v-if="!isFieldOnly" :style="labelStyle" class="label-field">
     <span>
       {{ label }}
     </span>
@@ -24,10 +24,6 @@ export default defineComponent({
     label: {
       type: String,
       default: ''
-    },
-    isButton: {
-      type: Boolean,
-      default: false
     },
     isFieldOnly: {
       type: Boolean,

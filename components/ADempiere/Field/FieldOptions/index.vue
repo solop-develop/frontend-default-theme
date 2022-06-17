@@ -67,7 +67,6 @@
           <label-field
             :is-mandatory="metadata.required"
             :label="metadata.name"
-            :is-button="displayTitleButton"
             :is-field-only="metadata.isFieldOnly"
           />
         </template>
@@ -170,10 +169,6 @@ export default defineComponent({
     // current option field selected
     const currentFieldOption = computed(() => {
       return store.getters.getFieldContextMenu
-    })
-
-    const displayTitleButton = computed(() => {
-      return props.metadata.componentPath === 'FieldButton'
     })
 
     const valueField = computed(() => {
@@ -466,7 +461,6 @@ export default defineComponent({
       visibleForDesktop,
       valueField,
       triggerMenu,
-      displayTitleButton,
       showPanelFieldOption,
       // methods
       closePopover,
