@@ -44,31 +44,15 @@
           />
 
           <div v-if="isShowedTableRecords">
-            <el-button
-              plain
-              size="small"
-              type="text"
-              style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;z-index: 99999"
-              @click="changeShowedRecords"
-            >
-              <span
-                style="padding: 10px;"
-              >
-                <svg-icon icon-class="table" />
-                <b>
-                  {{ $t('window.gridToggle') }}
-                </b>
-              </span>
-            </el-button>
-            <div style="float: right;padding-left: 1%;">
-              <action-menu
-                :parent-uuid="parentUuid"
-                :container-uuid="tabUuid"
-                :container-manager="containerManager"
-                :actions-manager="listAction"
-                :references-manager="referencesManager"
-              />
-            </div>
+            <tab-options
+              :parent-uuid="parentUuid"
+              :container-manager="containerManager"
+              :current-tab-uuid="tabUuid"
+              :tabs-list="tabsList"
+              :all-tabs-list="allTabsList"
+              :tab-attributes="tabAttributes"
+              :references-manager="referencesManager"
+            />
             <br>
           </div>
           <div v-if="isShowedTabs">
@@ -114,7 +98,7 @@ import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import TabPanel from './TabPanel.vue'
-import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import TabOptions from './TabOptions.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -128,9 +112,9 @@ export default defineComponent({
   components: {
     AuxiliaryPanel,
     DefaultTable,
-    ActionMenu,
     TabPanel,
-    TabLabel
+    TabLabel,
+    TabOptions
   },
 
   props: {

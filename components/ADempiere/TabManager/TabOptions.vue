@@ -17,39 +17,34 @@
 -->
 
 <template>
-  <div style="height: 100% !important;">
-    <span v-if="!isShowedTableRecords">
-      <tab-options
+  <span>
+    <el-button
+      plain
+      size="small"
+      type="text"
+      style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;"
+      class="alo"
+      @click="changeShowedRecords"
+    >
+      <span
+        style="padding: 10px;"
+      >
+        <svg-icon icon-class="table" />
+        <b>
+          {{ $t('window.gridToggle') }}
+        </b>
+      </span>
+    </el-button>
+    <div style="float: right;padding-left: 1%;">
+      <action-menu
         :parent-uuid="parentUuid"
+        :container-uuid="currentTabUuid"
         :container-manager="containerManager"
-        :current-tab-uuid="currentTabUuid"
-        :tabs-list="tabsList"
-        :tab-attributes="tabAttributes"
+        :actions-manager="listAction"
         :references-manager="referencesManager"
       />
-    </span>
-    <div>
-      <!-- {{ tabsList }} -->
-      <default-table
-        v-if="isShowedTableRecords"
-        key="default-table"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :header="tableHeaders"
-        :data-table="recordsList"
-        :panel-metadata="tabAttributes"
-      />
-      <panel-definition
-        v-else
-        key="panel-definition"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :group-tab="tabAttributes.tabGroup"
-      />
     </div>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -59,17 +54,13 @@ import language from '@/lang'
 import store from '@/store'
 
 // components and mixins
-import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
-import TabOptions from './TabOptions.vue'
+import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 export default defineComponent({
-  name: 'TabPanel',
+  name: 'TabOptions',
 
   components: {
-    PanelDefinition,
-    DefaultTable,
-    TabOptions
+    ActionMenu
   },
 
   props: {

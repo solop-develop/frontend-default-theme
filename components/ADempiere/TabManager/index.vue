@@ -56,32 +56,15 @@
             :container-uuid="tabAttributes.uuid"
           />
           <span v-if="currentTabMetadata.isShowedTableRecords">
-            <el-button
-              plain
-              size="small"
-              type="text"
-              style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;"
-              class="alo"
-              @click="changeShowedRecords"
-            >
-              <span
-                style="padding: 10px;"
-              >
-                <svg-icon icon-class="table" />
-                <b>
-                  {{ $t('window.gridToggle') }}
-                </b>
-              </span>
-            </el-button>
-            <div style="float: right;padding-left: 1%;">
-              <action-menu
-                :parent-uuid="parentUuid"
-                :container-uuid="tabUuid"
-                :container-manager="containerManager"
-                :actions-manager="listAction"
-                :references-manager="referencesManager"
-              />
-            </div>
+            <tab-options
+              :parent-uuid="parentUuid"
+              :container-manager="containerManager"
+              :current-tab-uuid="tabUuid"
+              :tabs-list="tabsList"
+              :all-tabs-list="allTabsList"
+              :tab-attributes="tabAttributes"
+              :references-manager="referencesManager"
+            />
             <br>
           </span>
           <!-- Close table when clicking on group of fields -->
@@ -137,7 +120,7 @@ import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
-import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import TabOptions from './TabOptions.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -152,11 +135,11 @@ export default defineComponent({
     AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
-    ActionMenu,
     TabPanel,
     RecordNavigation,
     PanelInfo,
-    TabLabel
+    TabLabel,
+    TabOptions
   },
 
   props: {
