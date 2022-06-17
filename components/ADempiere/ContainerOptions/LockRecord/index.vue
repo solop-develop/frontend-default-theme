@@ -22,7 +22,7 @@
       {{ tabName }}
     </span>
 
-    <el-tooltip
+    <!-- <el-tooltip
       :content="tooltipText"
       placement="top"
     >
@@ -33,7 +33,7 @@
       <el-button v-else type="text" @click="lockRecord()">
         <i class="el-icon-lock icon-font" />
       </el-button>
-    </el-tooltip>
+    </el-tooltip> -->
   </span>
 
   <span v-else key="onlyName" :class="{ 'locked-record': isLocked }">

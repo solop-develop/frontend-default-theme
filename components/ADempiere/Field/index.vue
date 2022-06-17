@@ -41,10 +41,9 @@
       :xl="sizeField.xl"
       :class="classField"
     >
-      <el-form-item :class="classFrom">
+      <el-form-item :class="classFrom" :style="isAlignButton">
         <template slot="label">
           <field-options
-            v-if="!isOnlyField"
             :metadata="fieldAttributes"
             :container-manager="containerManager"
             :record-uuid="recordUuid"
@@ -143,6 +142,9 @@ export default {
     },
     currentColumnSize() {
       return this.$store.getters.getSizeColumn({ containerUuid: this.containerUuid })
+    },
+    isAlignButton() {
+      return this.isOnlyField ? 'display: contents;text-align: center;' : ''
     },
     sizeField() {
       if (isEmptyValue(this.field.size)) {

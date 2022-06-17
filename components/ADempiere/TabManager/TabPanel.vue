@@ -18,22 +18,55 @@
 
 <template>
   <div style="height: 100% !important;">
-    <div style="float: right;padding-left: 1%;">
-      <action-menu
+    <span v-if="!isShowedTableRecords">
+      <el-button
+        plain
+        size="small"
+        type="text"
+        style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;"
+        class="alo"
+        @click="changeShowedRecords"
+      >
+        <span
+          style="padding: 10px;"
+        >
+          <svg-icon icon-class="table" />
+          <b>
+            {{ $t('window.gridToggle') }}
+          </b>
+        </span>
+      </el-button>
+      <div style="float: right;padding-left: 1%;">
+        <action-menu
+          :parent-uuid="parentUuid"
+          :container-uuid="currentTabUuid"
+          :container-manager="containerManager"
+          :actions-manager="listAction"
+          :references-manager="referencesManager"
+        />
+      </div>
+    </span>
+    <div>
+      <!-- {{ tabsList }} -->
+      <default-table
+        v-if="isShowedTableRecords"
+        key="default-table"
         :parent-uuid="parentUuid"
-        :container-uuid="currentTabUuid"
+        :container-uuid="tabAttributes.uuid"
         :container-manager="containerManager"
-        :actions-manager="listAction"
-        :references-manager="referencesManager"
+        :header="tableHeaders"
+        :data-table="recordsList"
+        :panel-metadata="tabAttributes"
+      />
+      <panel-definition
+        v-else
+        key="panel-definition"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :container-manager="containerManager"
+        :group-tab="tabAttributes.tabGroup"
       />
     </div>
-    <panel-definition
-      key="panel-definition"
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-      :container-manager="containerManager"
-      :group-tab="tabAttributes.tabGroup"
-    />
   </div>
 </template>
 
@@ -45,13 +78,15 @@ import store from '@/store'
 
 // components and mixins
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 export default defineComponent({
-  name: 'TabChildren',
+  name: 'TabPanel',
 
   components: {
     PanelDefinition,
+    DefaultTable,
     ActionMenu
   },
 
@@ -67,6 +102,10 @@ export default defineComponent({
     currentTabUuid: {
       type: String,
       default: ''
+    },
+    tabsList: {
+      type: Array,
+      default: () => []
     },
     tabAttributes: {
       type: Object,
@@ -97,10 +136,48 @@ export default defineComponent({
         }
       }
     })
+    const isShowedTableRecords = computed(() => {
+      return tabData.value.isShowedTableRecords
+    })
+
+    const tabData = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.tabAttributes.uuid
+      )
+    })
+
+    const tableHeaders = computed(() => {
+      const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
+      if (panel && panel.fieldsList) {
+        return panel.fieldsList
+      }
+      return []
+    })
+
+    // get records list
+    const recordsList = computed(() => {
+      return tabData.value.recordsList
+    })
+
+    function changeShowedRecords() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isShowedTableRecords,
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabAttributes.uuid
+      })
+    }
 
     return {
       // computed
-      listAction
+      listAction,
+      recordsList,
+      isShowedTableRecords,
+      tableHeaders,
+      // methodo
+      changeShowedRecords
     }
   }
 

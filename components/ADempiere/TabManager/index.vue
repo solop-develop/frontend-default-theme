@@ -18,7 +18,7 @@
 
 <template>
   <div style="height: 100% !important;">
-    <auxiliary-panel
+    <!-- <auxiliary-panel
       v-if="isShowedTableRecords"
       :parent-uuid="parentUuid"
       :container-uuid="tabUuid"
@@ -30,7 +30,7 @@
         :container-manager="containerManager"
         :current-tab="tabsList[currentTab]"
       />
-    </auxiliary-panel>
+    </auxiliary-panel> -->
     <div style="display: flex;">
       <el-tabs
         v-model="currentTab"
@@ -55,9 +55,37 @@
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
           />
-
+          <span v-if="currentTabMetadata.isShowedTableRecords">
+            <el-button
+              plain
+              size="small"
+              type="text"
+              style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;"
+              class="alo"
+              @click="changeShowedRecords"
+            >
+              <span
+                style="padding: 10px;"
+              >
+                <svg-icon icon-class="table" />
+                <b>
+                  {{ $t('window.gridToggle') }}
+                </b>
+              </span>
+            </el-button>
+            <div style="float: right;padding-left: 1%;">
+              <action-menu
+                :parent-uuid="parentUuid"
+                :container-uuid="tabUuid"
+                :container-manager="containerManager"
+                :actions-manager="listAction"
+                :references-manager="referencesManager"
+              />
+            </div>
+            <br>
+          </span>
           <!-- Close table when clicking on group of fields -->
-          <div v-if="isShowedTabs" @click="closeRecordNavigation()">
+          <div v-if="isShowedTabs">
             <tab-panel
               :parent-uuid="parentUuid"
               :container-manager="containerManager"
@@ -99,6 +127,7 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
+import language from '@/lang'
 
 // components and mixins
 import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
@@ -338,17 +367,19 @@ export default defineComponent({
       })
     }
 
-    /**
-     * Close table when clicking on group of fields
-     */
-    const closeRecordNavigation = () => {
-      store.dispatch('changeTabAttribute', {
+    const listAction = computed(() => {
+      return {
         parentUuid: props.parentUuid,
         containerUuid: tabUuid.value,
-        attributeName: 'isShowedTableRecords',
-        attributeValue: false
-      })
-    }
+        defaultActionName: language.t('actionMenu.createNewRecord'),
+        tableName: props.tabsList[currentTab.value].tableName,
+        getActionList: () => {
+          return store.getters.getStoredActionsMenu({
+            containerUuid: tabUuid.value
+          })
+        }
+      }
+    })
 
     if (isReadyFromGetData.value) {
       getData()
@@ -401,6 +432,23 @@ export default defineComponent({
         format: 'object'
       })
     }
+
+    const tabMetadata = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+    })
+
+    function changeShowedRecords() {
+      store.dispatch('changeTabAttribute', {
+        parentUuid: props.parentUuid,
+        containerUuid: currentTabMetadata.value.uuid,
+        attributeName: 'isShowedTableRecords',
+        attributeValue: !currentTabMetadata.value.isShowedTableRecords
+      })
+    }
+
     findRecordLogs(props.allTabsList[0])
 
     setTabNumber(currentTab.value)
@@ -416,12 +464,15 @@ export default defineComponent({
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
+      currentTabMetadata,
       tabStyle,
+      listAction,
+      tabMetadata,
       // methods
       handleClick,
+      changeShowedRecords,
       findRecordLogs,
       openRecordLogs,
-      closeRecordNavigation,
       isDisabledTab
     }
   }

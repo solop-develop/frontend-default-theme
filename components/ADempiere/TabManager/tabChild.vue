@@ -43,6 +43,34 @@
             :container-uuid="tabAttributes.uuid"
           />
 
+          <div v-if="isShowedTableRecords">
+            <el-button
+              plain
+              size="small"
+              type="text"
+              style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;z-index: 99999"
+              @click="changeShowedRecords"
+            >
+              <span
+                style="padding: 10px;"
+              >
+                <svg-icon icon-class="table" />
+                <b>
+                  {{ $t('window.gridToggle') }}
+                </b>
+              </span>
+            </el-button>
+            <div style="float: right;padding-left: 1%;">
+              <action-menu
+                :parent-uuid="parentUuid"
+                :container-uuid="tabUuid"
+                :container-manager="containerManager"
+                :actions-manager="listAction"
+                :references-manager="referencesManager"
+              />
+            </div>
+            <br>
+          </div>
           <div v-if="isShowedTabs">
             <!-- records in table to multi records -->
             <default-table
@@ -79,6 +107,7 @@ import { defineComponent, computed, watch, ref, onUnmounted } from '@vue/composi
 
 import router from '@/router'
 import store from '@/store'
+import language from '@/lang'
 
 // components and mixins
 import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
@@ -173,6 +202,29 @@ export default defineComponent({
       return key > 0 && (isCreateNew.value || isEmptyValue(recordUuidTabParent.value))
     }
 
+    const listAction = computed(() => {
+      return {
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabsList[currentTab.value].uuid,
+        defaultActionName: language.t('actionMenu.createNewRecord'),
+        tableName: props.tabsList[currentTab.value].tableName,
+        getActionList: () => {
+          return store.getters.getStoredActionsMenu({
+            containerUuid: props.tabsList[currentTab.value].uuid
+          })
+        }
+      }
+    })
+
+    function changeShowedRecords() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: !currentTabMetadata.value.isShowedTableRecords,
+        parentUuid: props.parentUuid,
+        containerUuid: tabUuid.value
+      })
+    }
     function setCurrentTab() {
       store.commit('setCurrentTabChild', {
         parentUuid: props.parentUuid,
@@ -355,12 +407,15 @@ export default defineComponent({
       recordsList,
       // computed
       isShowedTabs,
+      listAction,
+      currentTabMetadata,
       recordUuidTabParent,
       isShowedTableRecords,
       tabStyle,
       // methods
       handleClick,
-      isDisabledTab
+      isDisabledTab,
+      changeShowedRecords
     }
   }
 
