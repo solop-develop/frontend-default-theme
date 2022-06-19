@@ -21,7 +21,7 @@
     :is="componentRender"
     :parent-uuid="parentUuid"
     :container-uuid="containerUuid"
-    :container-manager="containerManager"
+    :container-manager="containerManagerPanel"
     :panel-metadata="panelMetadata"
     :is-show-filter="isShowFilter"
   />
@@ -52,13 +52,17 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
-    if (root.$route.query.action === 'create-new') {
-      props.containerManager.setDefaultValues({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-    }
+  setup(props) {
+    const containerManagerPanel = computed(() => {
+      return props.containerManager
+    })
+
+    // if (root.$route.query.action === 'create-new') {
+    //   containerManagerPanel.value.setDefaultValues({
+    //     parentUuid: props.parentUuid,
+    //     containerUuid: props.containerUuid
+    //   })
+    // }
 
     const componentRender = computed(() => {
       const panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
@@ -70,14 +74,15 @@ export default defineComponent({
      * the fields it contains
      */
     const panelMetadata = computed(() => {
-      return props.containerManager.getPanel({
+      return containerManagerPanel.value.getPanel({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
-      })
+      }) || {}
     })
 
     return {
       // computeds
+      containerManagerPanel,
       panelMetadata,
       componentRender
     }

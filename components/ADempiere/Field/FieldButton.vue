@@ -38,7 +38,9 @@ import {
   generateReportOfWindow,
   openBrowserAssociated
 } from '@/utils/ADempiere/dictionary/window.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
+// TODO: Add displayed value
 export default {
   name: 'FieldButton',
 
@@ -48,7 +50,7 @@ export default {
 
   computed: {
     iconProps() {
-      if (this.metadata.process) {
+      if (!isEmptyValue(this.metadata.process)) {
         if (this.metadata.process.isReport || this.metadata.process.jasperReport) {
           return {
             is: 'i',
@@ -70,12 +72,14 @@ export default {
           }
         }
 
+        // is process
         return {
-          is: 'svg-icon',
-          'icon-class': 'search'
+          is: 'i',
+          'class': 'el-icon-setting'
         }
       }
 
+      // button without process associated
       return {
         is: 'span'
       }
