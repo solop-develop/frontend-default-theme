@@ -64,6 +64,9 @@ import store from '@/store'
 import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere'
+
 export default defineComponent({
   name: 'StandardPanel',
 
@@ -97,14 +100,24 @@ export default defineComponent({
   },
 
   setup(props) {
-    let fieldsList = []
-
-    const generatePanel = () => {
+    const fieldsList = computed(() => {
       // order and assign groups
-      if (props.panelMetadata) {
-        fieldsList = props.panelMetadata.fieldsList
+      if (!isEmptyValue(props.panelMetadata) && !isEmptyValue(props.panelMetadata.fieldsList)) {
+        return props.panelMetadata.fieldsList
       }
-    }
+
+      if (!isEmptyValue(props.containerManager) && props.containerManager.getFieldsList) {
+        const fields = props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        if (!isEmptyValue(fields)) {
+          return fields
+        }
+      }
+
+      return []
+    })
 
     const shadowGroup = computed(() => {
       if (store.state.app.device === 'mobile') {
@@ -112,8 +125,6 @@ export default defineComponent({
       }
       return 'hover'
     })
-
-    generatePanel()
 
     return {
       fieldsList,

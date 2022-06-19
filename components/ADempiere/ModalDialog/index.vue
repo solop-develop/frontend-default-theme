@@ -23,12 +23,12 @@
       {{ title }}
     </span>
     <span class="content-modal-dialog">
-      <span v-if="isLoading">
+      <span v-if="isLoaded">
         <component
           :is="componentRender"
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
-          :container-manager="containerManager"
+          :container-manager="containerManagerModalDialog"
         />
       </span>
       <loading-view
@@ -54,11 +54,12 @@
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
+
 // components and mixins
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
+// utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
-import { showMessage } from '@/utils/ADempiere/notification'
-import language from '@/lang'
 
 export default defineComponent({
   name: 'ModalDialog',
@@ -91,29 +92,31 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const isLoading = ref(false)
-
-    const emptyMandatory = computed(() => {
-      const fieldsList = store.getters.getStoredFieldsFromProcess(props.containerUuid)
-      return store.getters.getFieldsListEmptyMandatory({
-        containerUuid: props.containerUuid,
-        fieldsList: fieldsList
-      })
-    })
+    const isLoaded = ref(false)
 
     const storedModalDialog = computed(() => {
       return store.getters.getModalDialogManager({
         containerUuid: props.containerUuid
       })
     })
+
+    const containerManagerModalDialog = computed(() => {
+      const modalDialogStored = storedModalDialog.value
+      if (!isEmptyValue(modalDialogStored) && !isEmptyValue(modalDialogStored.containerManager)) {
+        return {
+          ...props.containerManager,
+          ...modalDialogStored.containerManager
+        }
+      }
+      return {
+        ...props.containerManager
+      }
+    })
+
     const isShowed = computed(() => {
       return store.getters.getShowedModalDialog({
         containerUuid: props.containerUuid
-      })
-    })
-
-    const findProcess = computed(() => {
-      return store.getters.getStoredProcess(props.containerUuid)
+      }) || false
     })
 
     const title = computed(() => {
@@ -126,24 +129,21 @@ export default defineComponent({
 
     watch(isShowed, (newValue, oldValue) => {
       if (newValue !== oldValue && newValue) {
-        dataProcess()
+        loadModal()
       }
     })
 
-    const dataProcess = () => {
-      if (!isEmptyValue(findProcess.value)) {
-        isLoading.value = true
-        return
+    const loadModal = () => {
+      if (!isEmptyValue(storedModalDialog.value.beforeOpen)) {
+        storedModalDialog.value.beforeOpen()
       }
+
       storedModalDialog.value.loadData()
-        .then(respose => {
-          isLoading.value = true
-        })
-        .catch(error => {
-          console.warn(error)
-          isLoading.value = true
+        .finally(() => {
+          isLoaded.value = true
         })
     }
+
     const closeDialog = () => {
       // close modal dialog
       store.commit('setShowedModalDialog', {
@@ -156,35 +156,27 @@ export default defineComponent({
       // call custom function to cancel
       storedModalDialog.value.cancelMethod()
     }
+
     const doneButton = () => {
-      if (!isEmptyValue(emptyMandatory.value)) {
-        showMessage({
-          message: language.t('notifications.mandatoryFieldMissing') + emptyMandatory.value,
-          type: 'info'
-        })
-        return
-      }
       closeDialog()
       // call custom function to done
       storedModalDialog.value.doneMethod()
     }
     if (isShowed.effect && isShowed.value) {
-      dataProcess()
+      loadModal()
     }
 
     return {
       // computeds
+      containerManagerModalDialog,
       storedModalDialog,
       componentRender,
+      isLoaded,
       isShowed,
       title,
-      isLoading,
-      findProcess,
-      emptyMandatory,
       // methods
       cancelButton,
       closeDialog,
-      dataProcess,
       doneButton
     }
   }
