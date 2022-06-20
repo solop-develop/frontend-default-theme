@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <span v-if="isActiveTab" key="withTooltip" class="lock-record">
+  <span v-if="isActiveTab && !isEmptyValue(keyColumn)" key="withTooltip" class="lock-record">
     <span :class="{ 'locked-record': isLocked }">
       {{ tabName }}
     </span>
@@ -168,6 +168,7 @@ export default defineComponent({
     return {
       tabName,
       isLocked,
+      keyColumn,
       // computed
       tooltipText,
       // methods
