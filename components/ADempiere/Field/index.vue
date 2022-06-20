@@ -74,7 +74,7 @@ import store from '@/store'
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
-import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
+import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW , FOCUSABLE_FIELDS_LIST } from '@/utils/ADempiere/componentUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -346,10 +346,12 @@ export default {
   },
 
   methods: {
-    focusField() {
-      if (this.field.handleRequestFocus || (this.field.displayed && !this.field.readonly)) {
-        this.$refs[this.field.columnName].requestFocus()
-      }
+    focusField(columnName) {
+      setTimeout(() => {
+        if (this.field.columnName === columnName) {
+          this.$refs[columnName].$refs[columnName].focus()
+        }
+      }, 1000)
     }
   }
 }
