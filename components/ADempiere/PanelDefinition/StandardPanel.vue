@@ -60,7 +60,6 @@
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 import store from '@/store'
-import router from '@/router'
 
 // components and mixins
 import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
@@ -125,7 +124,6 @@ export default defineComponent({
       return []
     })
 
-
     const recordUuid = computed(() => {
       // TODO: Change query name 'action'
       const { action } = root.$route.query
@@ -138,7 +136,7 @@ export default defineComponent({
       }
       return 'hover'
     })
-    
+
     const fieldDefinitionRef = ref(null)
     const query = root._route.query
 
@@ -166,12 +164,12 @@ export default defineComponent({
       }
     })
 
-    function setFocus () {
+    function setFocus() {
       const fields = props.containerManager.getFieldsList({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
       })
-      fieldIndex.value = fields.findIndex(field => 
+      fieldIndex.value = fields.findIndex(field =>
         FOCUSABLE_FIELDS_LIST.includes(field.componentPath) &&
         props.containerManager.isDisplayedField(field) &&
         !props.containerManager.isReadOnlyField(field)
