@@ -25,27 +25,28 @@
     <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
       <el-dropdown-item
         :disabled="!isHiddenFieldsList"
-        command="hiddenOptionals"
+        command="minimalistView"
       >
-        <svg-icon icon-class="eye" />
-        {{ $t('fieldDisplayOptions.hideOptionalFields') }}
-      </el-dropdown-item>
-
-      <el-dropdown-item
-        :disabled="!isShowFields"
-        command="showOptionals"
-      >
-        <svg-icon icon-class="eye-open" />
-        {{ $t('fieldDisplayOptions.showOptionalFields') }}
+        <i class="el-icon-menu" />
+        {{ $t('fieldDisplayOptions.minimalistView') }}
       </el-dropdown-item>
 
       <el-dropdown-item
         :disabled="!isShowFieldsWithValue"
-        command="showOptionalsValue"
+        command="showWithValue"
       >
-        <svg-icon icon-class="eye-open" />
-        {{ $t('fieldDisplayOptions.showOptionalFieldsWithValue') }}
+        <svg-icon icon-class="component" />
+        {{ $t('fieldDisplayOptions.showFieldsWithValue') }}
       </el-dropdown-item>
+
+      <el-dropdown-item
+        :disabled="!isShowFields"
+        command="showAll"
+      >
+        <i class="el-icon-s-grid" />
+        {{ $t('fieldDisplayOptions.showAllFields') }}
+      </el-dropdown-item>
+
       <el-dropdown-item v-if="!isMobile" :command="2">
         <svg-icon :icon-class="iconColumn(2)" />
         {{ $t('fieldDisplayOptions.Show2Columns') }}
@@ -64,6 +65,7 @@
 
 <script>
 import { computed, defineComponent } from '@vue/composition-api'
+
 import store from '@/store'
 
 export default defineComponent({
@@ -149,10 +151,10 @@ export default defineComponent({
         })
         return
       }
-      if (command === 'showOptionals') {
+      if (command === 'showAll') {
         fieldsShowed = fieldsListAvailable.value
       }
-      if (command === 'showOptionalsValue') {
+      if (command === 'showWithValue') {
         fieldsShowed = fieldsListAvailableWithValue.value
       }
 
