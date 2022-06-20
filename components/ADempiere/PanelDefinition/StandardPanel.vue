@@ -160,7 +160,9 @@ export default defineComponent({
 
     watch(recordUuid, (newValue, oldValue) => {
       if (newValue !== oldValue) {
-        fieldDefinitionRef.value[fieldIndex.value].focusField(fieldDefinitionRef.value[fieldIndex.value].field.columnName)
+        if (!isEmptyValue(fieldDefinitionRef.value) && !isEmptyValue(fieldIndex.value)) {
+          fieldDefinitionRef.value[fieldIndex.value].focusField(fieldDefinitionRef.value[fieldIndex.value].field.columnName)
+        }
       }
     })
 
