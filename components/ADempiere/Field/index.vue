@@ -144,6 +144,9 @@ export default {
     currentColumnSize() {
       return this.$store.getters.getSizeColumn({ containerUuid: this.containerUuid })
     },
+    isAlignButton() {
+      return this.isOnlyField ? 'display: contents;text-align: center;' : ''
+    },
     sizeField() {
       if (isEmptyValue(this.field.size)) {
         return {

@@ -18,7 +18,7 @@
 
 <template>
   <div style="height: 100% !important;">
-    <auxiliary-panel
+    <!-- <auxiliary-panel
       v-if="isShowedTableRecords"
       :parent-uuid="parentUuid"
       :container-uuid="tabUuid"
@@ -30,7 +30,7 @@
         :container-manager="containerManager"
         :current-tab="tabsList[currentTab]"
       />
-    </auxiliary-panel>
+    </auxiliary-panel> -->
     <div style="display: flex;">
       <el-tabs
         v-model="currentTab"
@@ -55,9 +55,20 @@
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
           />
-
+          <span v-if="currentTabMetadata.isShowedTableRecords">
+            <tab-options
+              :parent-uuid="parentUuid"
+              :container-manager="containerManager"
+              :current-tab-uuid="tabUuid"
+              :tabs-list="tabsList"
+              :all-tabs-list="allTabsList"
+              :tab-attributes="tabAttributes"
+              :references-manager="referencesManager"
+            />
+            <br>
+          </span>
           <!-- Close table when clicking on group of fields -->
-          <div v-if="isShowedTabs" @click="closeRecordNavigation()">
+          <div v-if="isShowedTabs">
             <tab-panel
               :parent-uuid="parentUuid"
               :container-manager="containerManager"
@@ -99,6 +110,7 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
+import language from '@/lang'
 
 // components and mixins
 import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
@@ -108,7 +120,7 @@ import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
-import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import TabOptions from './TabOptions.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -123,11 +135,11 @@ export default defineComponent({
     AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
-    ActionMenu,
     TabPanel,
     RecordNavigation,
     PanelInfo,
-    TabLabel
+    TabLabel,
+    TabOptions
   },
 
   props: {
@@ -338,17 +350,19 @@ export default defineComponent({
       })
     }
 
-    /**
-     * Close table when clicking on group of fields
-     */
-    const closeRecordNavigation = () => {
-      store.dispatch('changeTabAttribute', {
+    const listAction = computed(() => {
+      return {
         parentUuid: props.parentUuid,
         containerUuid: tabUuid.value,
-        attributeName: 'isShowedTableRecords',
-        attributeValue: false
-      })
-    }
+        defaultActionName: language.t('actionMenu.createNewRecord'),
+        tableName: props.tabsList[currentTab.value].tableName,
+        getActionList: () => {
+          return store.getters.getStoredActionsMenu({
+            containerUuid: tabUuid.value
+          })
+        }
+      }
+    })
 
     if (isReadyFromGetData.value) {
       getData()
@@ -401,6 +415,23 @@ export default defineComponent({
         format: 'object'
       })
     }
+
+    const tabMetadata = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+    })
+
+    function changeShowedRecords() {
+      store.dispatch('changeTabAttribute', {
+        parentUuid: props.parentUuid,
+        containerUuid: currentTabMetadata.value.uuid,
+        attributeName: 'isShowedTableRecords',
+        attributeValue: !currentTabMetadata.value.isShowedTableRecords
+      })
+    }
+
     findRecordLogs(props.allTabsList[0])
 
     setTabNumber(currentTab.value)
@@ -416,12 +447,15 @@ export default defineComponent({
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
+      currentTabMetadata,
       tabStyle,
+      listAction,
+      tabMetadata,
       // methods
       handleClick,
+      changeShowedRecords,
       findRecordLogs,
       openRecordLogs,
-      closeRecordNavigation,
       isDisabledTab
     }
   }

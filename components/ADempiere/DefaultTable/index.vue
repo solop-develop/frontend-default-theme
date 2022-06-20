@@ -54,6 +54,7 @@
       :data="recordsWithFilter"
       :element-loading-text="$t('notifications.loading')"
       element-loading-background="rgba(255, 255, 255, 0.8)"
+      :row-class-name="tableRowClassName"
       @row-click="handleRowClick"
       @row-dblclick="handleRowDblClick"
       @select="handleSelection"
@@ -169,7 +170,6 @@ export default defineComponent({
 
   setup(props, { root, refs }) {
     const valueToSearch = ref('')
-
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -375,6 +375,12 @@ export default defineComponent({
         refs.multipleTable.clearSelection()
       }
     }
+    function tableRowClassName(params) {
+      if (params.row.UUID === root.$route.query.action) {
+        return 'success-row'
+      }
+      return ''
+    }
 
     onMounted(() => {
       if (props.isTableSelection) {
@@ -403,6 +409,7 @@ export default defineComponent({
       selectionsLength,
       // methods
       filterRecord,
+      tableRowClassName,
       handleChangeSearch,
       headerLabel,
       handleChangePage,
@@ -445,6 +452,10 @@ export default defineComponent({
   .el-table--scrollable-y .el-table__body-wrapper {
     overflow-y: auto;
     height: 90% !important;
+  }
+
+  .el-table .success-row {
+    background: #d0f4f5e5;
   }
 }
 </style>
