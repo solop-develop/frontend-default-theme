@@ -73,8 +73,9 @@ import store from '@/store'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
-import { TEXT } from '@/utils/ADempiere/references'
-import { LAYOUT_SIZE_COLUMN, DEFAULT_SIZE_COLUMN } from '@/utils/ADempiere/componentUtils'
+import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
+import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
+
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { evalutateTypeField } from '@/utils/ADempiere/dictionaryUtils'
@@ -149,24 +150,28 @@ export default {
     },
     sizeField() {
       if (isEmptyValue(this.field.size)) {
+        const size = 24
         return {
-          xs: 24,
-          sm: 24,
-          md: 24,
-          lg: 24,
-          xl: 24
+          xs: size,
+          sm: size,
+          md: size,
+          lg: size,
+          xl: size,
+          ...DEFAULT_SIZE
         }
       }
-      if (DEFAULT_SIZE_COLUMN >= 0) {
+      if (DEFAULT_COLUMNS_PER_ROW >= 0) {
+        const size = parseInt(LAYOUT_MAX_COLUMNS_PER_ROW / this.currentColumnSize, 10)
         return {
-          xs: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
-          sm: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
-          md: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
-          lg: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
-          xl: LAYOUT_SIZE_COLUMN / this.currentColumnSize
+          xs: size,
+          sm: size,
+          md: size,
+          lg: size,
+          xl: size
         }
       }
       return {
+        // ...this.field.size,
         xs: this.field.size.xs,
         sm: this.field.size.sm,
         md: this.field.size.md,

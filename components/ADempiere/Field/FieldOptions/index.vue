@@ -125,10 +125,11 @@ import LabelPopoverOption from './LabelPopoverOption.vue'
 
 // utils and helper methods
 import {
+  // calculatorOptionItem,
   infoOptionItem,
   optionsListStandad, optionsListAdvancedQuery,
   documentStatusOptionItem, translateOptionItem,
-  zoomInOptionItem, calculatorOptionItem,
+  zoomInOptionItem,
   hideThisField
 } from '@theme/components/ADempiere/Field/FieldOptions/fieldOptionsList.js'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
