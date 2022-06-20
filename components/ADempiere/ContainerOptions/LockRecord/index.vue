@@ -71,7 +71,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { name: tabName, tableName } = store.getters.getStoredTab(props.parentUuid, props.containerUuid)
+    const { name: tabName, tableName, keyColumn } = store.getters.getStoredTab(props.parentUuid, props.containerUuid)
 
     const isLocked = ref(false)
 
@@ -148,16 +148,22 @@ export default defineComponent({
     // timer to execute the request between times
     const timeOut = ref(() => {})
 
-    watch(() => recordUuid, (newValue, oldValue) => {
-      if (props.isActiveTab && isValidUuid(newValue) && !isGettingRecordAccess.value) {
-        clearTimeout(timeOut.value)
+    if (!isEmptyValue(keyColumn)) {
+      watch(() => recordUuid, (newValue, oldValue) => {
+        if (props.isActiveTab && isValidUuid(newValue) && !isGettingRecordAccess.value) {
+          clearTimeout(timeOut.value)
 
-        timeOut.value = setTimeout(() => {
-          // get records
-          getPrivateAccess()
-        }, 1000)
+          timeOut.value = setTimeout(() => {
+            // get records
+            getPrivateAccess()
+          }, 1000)
+        }
+      })
+
+      if (props.isActiveTab && isValidUuid(recordUuid.value) && !isGettingRecordAccess.value) {
+        getPrivateAccess()
       }
-    })
+    }
 
     return {
       tabName,
