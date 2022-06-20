@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <span v-if="isActiveTab" key="withTooltip" class="lock-record">
+  <span v-if="isActiveTab && !isEmptyValue(keyColumn)" key="withTooltip" class="lock-record">
     <span :class="{ 'locked-record': isLocked }">
       {{ tabName }}
     </span>
@@ -46,6 +46,12 @@
 <script>
 import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
+import language from '@/lang'
+import store from '@/store'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+
 export default defineComponent({
   name: 'LockRecord',
 
@@ -58,52 +64,43 @@ export default defineComponent({
       type: String,
       required: true
     },
-    tabName: {
-      type: String,
-      required: true
-    },
-    tableName: {
-      type: String,
-      required: true
-    },
     isActiveTab: {
       type: Boolean,
       required: true
     }
   },
 
-  setup(props, { root }) {
-    const tableName = props.tableName
+  setup(props) {
+    const { name: tabName, tableName, keyColumn } = store.getters.getStoredTab(props.parentUuid, props.containerUuid)
 
     const isLocked = ref(false)
 
-    const isValidUuid = (recordUuid) => {
-      return !root.isEmptyValue(recordUuid) && recordUuid !== 'create-new'
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.containerUuid)
+    })
+
+    const isValidUuid = (uuidByRecord) => {
+      return !isEmptyValue(uuidByRecord) && uuidByRecord !== 'create-new'
     }
 
     const tooltipText = computed(() => {
       if (isLocked.value) {
-        return root.$t('recordManager.unlockRecord')
+        return language.t('recordManager.unlockRecord')
       }
-      return root.$t('recordManager.lockRecord')
+      return language.t('recordManager.lockRecord')
     })
 
     const storedPrivateAccess = computed(() => {
-      const { recordUuid } = getRecordKeys()
-
-      return root.$store.getters.getStoredPrivateAccess({
+      return store.getters.getStoredPrivateAccess({
         tableName,
-        recordUuid
+        recordUuid: recordUuid.value
       })
     })
 
     const lockRecord = () => {
-      const { recordId, recordUuid } = getRecordKeys()
-
-      root.$store.dispatch('lockRecordFromServer', {
+      store.dispatch('lockRecordFromServer', {
         tableName,
-        recordId,
-        recordUuid
+        recordUuid: recordUuid.value
       })
         .then(isLockedResponse => {
           isLocked.value = isLockedResponse
@@ -111,56 +108,24 @@ export default defineComponent({
     }
 
     const unLockRecord = () => {
-      const { recordId, recordUuid } = getRecordKeys()
-
-      root.$store.dispatch('unlockRecordFromServer', {
+      store.dispatch('unlockRecordFromServer', {
         tableName,
-        recordId,
-        recordUuid
+        recordUuid: recordUuid.value
       })
         .then(isUnLockedResponse => {
           isLocked.value = isUnLockedResponse
         })
     }
 
-    const record = computed(() => {
-      return root.$store.getters.getValuesView({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        format: 'object'
-      })
-    })
-
-    const getRecordKeys = () => {
-      let recordId
-      let recordUuid
-      const recordRow = record.value
-      if (!root.isEmptyValue(recordRow)) {
-        recordId = recordRow[tableName + '_ID']
-        recordUuid = recordRow.UUID
-      } else {
-        if (isValidUuid(root.$route.query.action)) {
-          recordUuid = root.$route.query.action
-        }
-      }
-
-      return {
-        recordId,
-        recordUuid
-      }
-    }
-
     const isGettingRecordAccess = ref(false)
 
     const getPrivateAccess = () => {
-      const { recordId, recordUuid } = getRecordKeys()
-
-      if (root.isEmptyValue(recordId) && root.isEmptyValue(recordUuid)) {
+      if (isEmptyValue(recordUuid.value)) {
         return
       }
 
       // get from vuex stored
-      if (!root.isEmptyValue(storedPrivateAccess.value)) {
+      if (!isEmptyValue(storedPrivateAccess.value)) {
         isLocked.value = storedPrivateAccess.value.isLocked
         return
       }
@@ -168,10 +133,9 @@ export default defineComponent({
       isGettingRecordAccess.value = true
 
       // get from server
-      root.$store.dispatch('getPrivateAccessFromServer', {
+      store.dispatch('getPrivateAccessFromServer', {
         tableName,
-        recordId,
-        recordUuid
+        recordUuid: recordUuid.value
       })
         .then(privateAccessResponse => {
           isLocked.value = privateAccessResponse
@@ -184,19 +148,27 @@ export default defineComponent({
     // timer to execute the request between times
     const timeOut = ref(() => {})
 
-    watch(() => root.$route.query.action, (newValue, oldValue) => {
-      if (props.isActiveTab && isValidUuid(newValue) && !isGettingRecordAccess.value) {
-        clearTimeout(timeOut.value)
+    if (!isEmptyValue(keyColumn)) {
+      watch(() => recordUuid, (newValue, oldValue) => {
+        if (props.isActiveTab && isValidUuid(newValue) && !isGettingRecordAccess.value) {
+          clearTimeout(timeOut.value)
 
-        timeOut.value = setTimeout(() => {
-          // get records
-          getPrivateAccess()
-        }, 1000)
+          timeOut.value = setTimeout(() => {
+            // get records
+            getPrivateAccess()
+          }, 1000)
+        }
+      })
+
+      if (props.isActiveTab && isValidUuid(recordUuid.value) && !isGettingRecordAccess.value) {
+        getPrivateAccess()
       }
-    })
+    }
 
     return {
+      tabName,
       isLocked,
+      keyColumn,
       // computed
       tooltipText,
       // methods
