@@ -19,8 +19,9 @@
 <template>
   <div class="field-options">
     <el-dropdown
-      v-if="isMobile"
+      v-if="!isMobile"
       key="options-mobile"
+      :tabindex="-1"
       size="mini"
       hide-on-click
       trigger="click"

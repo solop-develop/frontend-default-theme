@@ -346,10 +346,12 @@ export default {
   },
 
   methods: {
-    focusField() {
-      if (this.field.handleRequestFocus || (this.field.displayed && !this.field.readonly)) {
-        this.$refs[this.field.columnName].requestFocus()
-      }
+    focusField(columnName) {
+      setTimeout(() => {
+        if (this.field.columnName === columnName) {
+          this.$refs[columnName].$refs[columnName].focus()
+        }
+      }, 1000)
     }
   }
 }

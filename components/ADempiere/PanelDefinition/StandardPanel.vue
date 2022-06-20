@@ -40,6 +40,7 @@
             <el-row>
               <template v-for="(fieldAttributes, subKey) in fieldsList">
                 <field-definition
+                  ref="fieldDefinitionRef"
                   :key="subKey"
                   :parent-uuid="parentUuid"
                   :container-uuid="containerUuid"
@@ -57,7 +58,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 import store from '@/store'
 
 // components and mixins
@@ -66,6 +67,7 @@ import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere'
+import { FOCUSABLE_FIELDS_LIST } from '@/utils/ADempiere/componentUtils'
 
 export default defineComponent({
   name: 'StandardPanel',
@@ -99,10 +101,12 @@ export default defineComponent({
     }
   },
 
-  setup(props) {
+  setup(props, { root }) {
+    const fieldIndex = ref()
     const fieldsList = computed(() => {
       // order and assign groups
       if (!isEmptyValue(props.panelMetadata) && !isEmptyValue(props.panelMetadata.fieldsList)) {
+        setFocus(props.panelMetadata.fieldsList)
         return props.panelMetadata.fieldsList
       }
 
@@ -112,11 +116,18 @@ export default defineComponent({
           containerUuid: props.containerUuid
         })
         if (!isEmptyValue(fields)) {
+          setFocus(fields)
           return fields
         }
       }
 
       return []
+    })
+
+    const recordUuid = computed(() => {
+      // TODO: Change query name 'action'
+      const { action } = root.$route.query
+      return action
     })
 
     const shadowGroup = computed(() => {
@@ -126,9 +137,53 @@ export default defineComponent({
       return 'hover'
     })
 
+    const fieldDefinitionRef = ref(null)
+    const query = root._route.query
+
+    watch(fieldDefinitionRef, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (newValue[fieldIndex]) {
+          newValue[fieldIndex].focusField(newValue[fieldIndex].field.columnName)
+        }
+      }
+    })
+
+    watch(fieldIndex, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (fieldDefinitionRef.value[newValue]) {
+          fieldDefinitionRef.value[newValue].focusField(fieldDefinitionRef.value[newValue].field.columnName)
+        }
+      }
+    })
+
+    watch(recordUuid, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (!isEmptyValue(fieldDefinitionRef.value) && !isEmptyValue(fieldIndex.value)) {
+          fieldDefinitionRef.value[fieldIndex.value].focusField(fieldDefinitionRef.value[fieldIndex.value].field.columnName)
+        }
+      }
+    })
+
+    function setFocus() {
+      const fields = props.containerManager.getFieldsList({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      fieldIndex.value = fields.findIndex(field =>
+        FOCUSABLE_FIELDS_LIST.includes(field.componentPath) &&
+        props.containerManager.isDisplayedField(field) &&
+        !props.containerManager.isReadOnlyField(field)
+      )
+    }
+
     return {
       fieldsList,
-      shadowGroup
+      shadowGroup,
+      query,
+      fieldDefinitionRef,
+      recordUuid,
+      // methodos
+      setFocus
     }
   }
 })
