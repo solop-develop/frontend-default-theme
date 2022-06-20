@@ -154,7 +154,7 @@ export default {
           xl: 24
         }
       }
-      if (this.currentColumnSize !== DEFAULT_SIZE_COLUMN) {
+      if (DEFAULT_SIZE_COLUMN >= 0) {
         return {
           xs: LAYOUT_SIZE_COLUMN / this.currentColumnSize,
           sm: LAYOUT_SIZE_COLUMN / this.currentColumnSize,

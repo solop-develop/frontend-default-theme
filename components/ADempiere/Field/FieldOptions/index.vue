@@ -287,9 +287,9 @@ export default defineComponent({
     const optionsList = computed(() => {
       const field = props.metadata
       const menuOptions = []
-      if (field.isNumericField) {
-        menuOptions.push(calculatorOptionItem)
-      }
+      // if (field.isNumericField) {
+      //   menuOptions.push(calculatorOptionItem)
+      // }
 
       // add hide this field with isShowdFromUser
       if (field.isParent || !field.required || !isEmptyValue(field.defaultValue)) {
@@ -319,7 +319,6 @@ export default defineComponent({
         ]
         return optionsButton.concat(menuOptions)
       }
-
       return optionsListStandad.concat(menuOptions)
     })
 
