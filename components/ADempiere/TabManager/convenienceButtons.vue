@@ -138,9 +138,23 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Vuex subscription when record parent change
+     * TODO: Add support to restart or delete timer by flushPersistenceQueue
+     */
+    const unsubscribeChangeParentRecord = () => {}
+
+    // unsubscribeChangeParentRecord = store.subscribeAction({
+    //   before: (action, state) => {
+    //     if (action.type === 'addKeyPressed' && action.payload && action.payload.containerUuid === containerUuid) {
+    //       // restart timer
+    //     }
+    //   }
+    // })
+
     // remove susbscriptions
     onUnmounted(() => {
-      unsuscribeChangeParentRecord()
+      unsubscribeChangeParentRecord()
     })
 
     return {
