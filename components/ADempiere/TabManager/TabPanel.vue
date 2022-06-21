@@ -40,17 +40,6 @@
         :data-table="recordsList"
         :panel-metadata="tabAttributes"
       />
-      <!-- <el-table
-        v-if="isShowedTableRecords"
-        :data="tableData"
-      >
-        <el-table-column prop="date" label="Date" width="140">
-        </el-table-column>
-        <el-table-column prop="name" label="Name" width="120">
-        </el-table-column>
-        <el-table-column prop="address" label="Address">
-        </el-table-column>
-      </el-table> -->
       <panel-definition
         v-else
         key="panel-definition"
@@ -130,12 +119,6 @@ export default defineComponent({
       }
     })
 
-    const item = {
-      date: '2016-05-02',
-      name: 'Tom',
-      address: 'No. 189, Grove St, Los Angeles'
-    }
-    const tableData = Array(25).fill(item)
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -176,7 +159,6 @@ export default defineComponent({
       recordsList,
       isShowedTableRecords,
       tableHeaders,
-      tableData,
       // methodo
       changeShowedRecords
     }

@@ -31,7 +31,7 @@
       >
         <svg-icon icon-class="table" />
         <b>
-          {{ $t('window.gridToggle') }}
+          {{ label }}
         </b>
       </span>
     </el-button>
@@ -133,6 +133,14 @@ export default defineComponent({
       return tabData.value.recordsList
     })
 
+
+    const label = computed(() => {
+      if (isShowedTableRecords.value) {
+        return language.t('window.toggleSingle')
+      }
+      return language.t('window.multiRecord')
+    })
+
     function changeShowedRecords() {
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
@@ -149,6 +157,7 @@ export default defineComponent({
       recordsList,
       isShowedTableRecords,
       tableHeaders,
+      label,
       // methodo
       changeShowedRecords
     }
