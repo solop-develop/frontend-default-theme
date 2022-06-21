@@ -17,25 +17,32 @@
 -->
 
 <template>
-  <span>
-    <el-button
-      plain
-      size="small"
-      type="text"
-      style="height: 93%;margin-right: 0%;padding-right: 10px; float: left;"
-      class="alo"
-      @click="changeShowedRecords"
-    >
-      <span
-        style="padding: 10px;"
+  <span class="tab-options-main">
+    <div style="height: 93%;margin-right: 0%;padding-right: 10px; float: left; display: inline-flex;">
+      <el-button
+        plain
+        size="small"
+        type="text"
+        @click="changeShowedRecords"
       >
-        <svg-icon icon-class="table" />
-        <b>
-          {{ label }}
-        </b>
-      </span>
-    </el-button>
-    <div style="float: right;padding-left: 1%;">
+        <span style="padding: 10px;">
+          <svg-icon icon-class="table" />
+          <b>
+            {{ label }}
+          </b>
+        </span>
+      </el-button>
+
+      <convenience-buttons
+        :parent-uuid="parentUuid"
+        :container-uuid="currentTabUuid"
+        :container-manager="containerManager"
+        :tab-attributes="tabAttributes"
+      />
+    </div>
+
+    <div style="float: right; padding-left: 1%; display: inline-flex;">
+
       <action-menu
         :parent-uuid="parentUuid"
         :container-uuid="currentTabUuid"
@@ -55,12 +62,14 @@ import store from '@/store'
 
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons.vue'
 
 export default defineComponent({
   name: 'TabOptions',
 
   components: {
-    ActionMenu
+    ActionMenu,
+    ConvenienceButtons
   },
 
   props: {
@@ -102,6 +111,7 @@ export default defineComponent({
         containerUuid: props.tabAttributes.uuid,
         defaultActionName: language.t('actionMenu.createNewRecord'),
         tableName: props.tabAttributes.tableName,
+        withoutDefaulAction: true,
         getActionList: () => {
           return store.getters.getStoredActionsMenu({
             containerUuid: props.tabAttributes.uuid
@@ -109,6 +119,7 @@ export default defineComponent({
         }
       }
     })
+
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -132,7 +143,6 @@ export default defineComponent({
     const recordsList = computed(() => {
       return tabData.value.recordsList
     })
-
 
     const label = computed(() => {
       if (isShowedTableRecords.value) {
@@ -158,7 +168,7 @@ export default defineComponent({
       isShowedTableRecords,
       tableHeaders,
       label,
-      // methodo
+      // methods
       changeShowedRecords
     }
   }

@@ -1,0 +1,171 @@
+<!--
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
+-->
+
+<template>
+  <div class="convenience-buttons-main">
+    <el-button
+      v-if="isCreateRecord"
+      plain
+      size="small"
+      type="success"
+      class="new-record-button"
+      @click="newRecord"
+    >
+      {{ $t('actionMenu.new') }}
+    </el-button>
+
+    <el-button
+      v-if="isDeleteRecord"
+      plain
+      size="small"
+      type="danger"
+      class="delete-record-button"
+      @click="deleteCurrentRecord"
+    >
+      {{ $t('actionMenu.delete') }}
+    </el-button>
+
+    <el-button
+      v-if="isUndoChanges"
+      plain
+      size="small"
+      type="info"
+      class="undo-changes-button"
+      @click="undoChanges"
+    >
+      {{ $t('actionMenu.undo') }}
+    </el-button>
+  </div>
+</template>
+
+<script>
+import { defineComponent, computed, onUnmounted } from '@vue/composition-api'
+
+import store from '@/store'
+
+// components and mixins
+import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { createNewRecord, deleteRecord, undoChange } from '@/utils/ADempiere/dictionary/window'
+
+export default defineComponent({
+  name: 'ConvenienceButtons',
+
+  components: {
+    ActionMenu
+  },
+
+  props: {
+    parentUuid: {
+      type: String,
+      required: false
+    },
+    containerManager: {
+      type: Object,
+      required: true
+    },
+    currentTabUuid: {
+      type: String,
+      default: ''
+    },
+    tabAttributes: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+
+  setup(props) {
+    const containerUuid = props.tabAttributes.uuid
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(containerUuid)
+    })
+
+    const isCreateRecord = computed(() => {
+      if (props.tabAttributes.isInsertRecord && !props.tabAttributes.isReadOnly) {
+        return !isEmptyValue(recordUuid.value) // && recordUuid.value !== 'create-new'
+      }
+
+      return false
+    })
+
+    const isDeleteRecord = computed(() => {
+      if (props.tabAttributes.isDeleteable) {
+        return !isEmptyValue(recordUuid.value) && recordUuid.value !== 'create-new'
+      }
+      return false
+    })
+
+    const isUndoChanges = computed(() => {
+      return isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new'
+    })
+
+    function newRecord() {
+      createNewRecord.createNewRecord({
+        parentUuid: props.parentUuid,
+        containerUuid
+      })
+    }
+
+    function deleteCurrentRecord() {
+      deleteRecord.deleteRecord({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        recordUuid: recordUuid.value
+      })
+    }
+
+    function undoChanges() {
+      undoChange.undoChange({
+        parentUuid: props.parentUuid,
+        containerUuid
+      })
+    }
+
+    // remove susbscriptions
+    onUnmounted(() => {
+      unsuscribeChangeParentRecord()
+    })
+
+    return {
+      containerUuid,
+      store,
+      // computed
+      recordUuid,
+      isCreateRecord,
+      isDeleteRecord,
+      isUndoChanges,
+      // methods
+      newRecord,
+      deleteCurrentRecord,
+      undoChanges
+    }
+  }
+
+})
+</script>
+
+<style lang="scss" scoped>
+.convenience-buttons-main {
+  .el-button {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+}
+</style>

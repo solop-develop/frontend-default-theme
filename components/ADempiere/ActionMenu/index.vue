@@ -32,6 +32,9 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+import store from '@/store'
+
+// components and mixins
 import MenuActions from './Actions.vue'
 import MenuReferences from './References.vue'
 
@@ -67,16 +70,16 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup() {
     const isMobile = computed(() => {
-      return root.$store.getters.device === 'mobile'
+      return store.getters.device === 'mobile'
     })
 
     const size = computed(() => {
       if (isMobile.value) {
         return 'mini'
       }
-      return 'medium'
+      return 'small'
     })
 
     return {
