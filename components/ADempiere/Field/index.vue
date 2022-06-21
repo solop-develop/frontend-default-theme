@@ -348,7 +348,7 @@ export default {
   methods: {
     focusField(columnName) {
       setTimeout(() => {
-        if (this.field.columnName === columnName) {
+        if (this.field.columnName === columnName && !isEmptyValue(this.$refs)) {
           this.$refs[columnName].$refs[columnName].focus()
         }
       }, 1000)
