@@ -22,14 +22,19 @@
     v-if="!isEmptyValue(actionsManager)"
     :hide-on-click="true"
     :size="size"
-    split-button
+    :split-button="isWithDefaultAction"
     type="primary"
     trigger="click"
-    class="action-container"
+    :class="{ 'action-container': true, 'without-defualt-action': !isWithDefaultAction }"
     @command="runAction"
     @click="runDefaultAction"
   >
-    {{ defaultActionName }}
+    <template v-if="isWithDefaultAction">
+      {{ defaultActionName }}
+    </template>
+    <el-button v-else type="primary" plain :size="size">
+      <i class="el-icon-arrow-down el-icon--right" />
+    </el-button>
 
     <el-dropdown-menu slot="dropdown" class="action-dropdown-menu">
       <el-dropdown-item
@@ -156,10 +161,19 @@
 <script>
 
 import { computed, defineComponent } from '@vue/composition-api'
+
+import language from '@/lang'
+import store from '@/store'
+
+// components and mixins
 import MenuReferences from './References.vue'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'MenuActions',
+
   components: {
     MenuReferences
   },
@@ -208,18 +222,20 @@ export default defineComponent({
       return []
     })
 
+    const isWithDefaultAction = computed(() => {
+      return !props.actionsManager.withoutDefaulAction
+    })
+
     const recordUuid = computed(() => {
-      // TODO: Change query name 'action'
-      const { action } = root.$route.query
-      return action
+      return store.getters.getUuidOfContainer(containerUuid)
     })
 
     const isWithRecord = computed(() => {
-      return !root.isEmptyValue(recordUuid.value) && recordUuid.value !== 'create-new'
+      return !isEmptyValue(recordUuid.value) && recordUuid.value !== 'create-new'
     })
 
     const isUndoAction = computed(() => {
-      if (!root.isEmptyValue(tableName)) {
+      if (!isEmptyValue(tableName)) {
         if (!isWithRecord.value) {
           return true
         }
@@ -229,26 +245,28 @@ export default defineComponent({
 
     const defaultActionToRun = computed(() => {
       if (isUndoAction.value) {
-        return actionsList.value[2]
+        return actionsList.value[1]
       }
       return actionsList.value[0]
     })
 
     const defaultActionName = computed(() => {
-      if (!root.isEmptyValue(props.actionsManager.defaultActionName)) {
+      if (!isEmptyValue(props.actionsManager.defaultActionName)) {
         return props.actionsManager.defaultActionName
       }
-      if (!root.isEmptyValue(actionsList.value)) {
+      if (!isEmptyValue(actionsList.value)) {
         return actionsList.value[0].name
       }
-      return root.$t('actionMenu.runProcess')
+      return language.t('actionMenu.runProcess')
     })
 
     /**
      * Run default action with last parameters
      */
     function runDefaultAction() {
-      runAction(defaultActionToRun.value)
+      if (isWithDefaultAction.value) {
+        runAction(defaultActionToRun.value)
+      }
     } // end runAction
 
     /**
@@ -272,6 +290,7 @@ export default defineComponent({
     return {
       actionsList,
       defaultActionName,
+      isWithDefaultAction,
       // methods
       runAction,
       runDefaultAction
@@ -319,11 +338,20 @@ export default defineComponent({
 </style>
 <style lang="scss">
 .action-container {
+  &.without-defualt-action {
+    .el-button {
+      padding-left: 5px;
+      padding-right: 8px;
+    }
+  }
+
   .el-button-group {
     // light blue style of the first section of the menu button
     // >.el-button::first-child {
     >.el-button:not(:last-child) {
-      min-width: 105px;
+      :not(.without-defualt-action) {
+        min-width: 105px;
+      }
       font-weight: bold;
       // margin-right: -1px;
       color: #0080ff;
