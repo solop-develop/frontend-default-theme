@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-main class="default-table">
+  <div :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
         <el-input
@@ -45,9 +45,8 @@
     <el-table
       ref="multipleTable"
       v-loading="isLoadingDataTable"
-      style="width: 100%; height: 88% !important;"
       border
-      height="90% !important"
+      :height="heightTable"
       :row-key="keyColumn"
       reserve-selection
       highlight-current-row
@@ -100,7 +99,7 @@
       :selection="selectionsLength"
       :handle-change-page="handleChangePage"
     />
-  </el-main>
+  </div>
 </template>
 
 <script>
@@ -170,6 +169,7 @@ export default defineComponent({
 
   setup(props, { root, refs }) {
     const valueToSearch = ref('')
+    const heightTable = ref()
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -382,7 +382,26 @@ export default defineComponent({
       return ''
     }
 
+    function adjustSize() {
+      const panelMain = document.getElementById('mainWindow')
+
+      if (!isEmptyValue(panelMain) && !isEmptyValue(panelMain.clientHeight)) {
+        const size = parseInt(panelMain.clientHeight) / 2
+        if (recordsWithFilter.value.length < 5) {
+          heightTable.value = 'auto'
+          return
+        }
+        heightTable.value = size
+      }
+    }
+    window.addEventListener('resize', setTableHeight)
+    function setTableHeight() {
+      adjustSize()
+    }
+
     onMounted(() => {
+      // adjustSize()
+      // setTableHeight()
       if (props.isTableSelection) {
         const selectionsList = props.containerManager.getSelection({
           containerUuid: props.containerUuid
@@ -396,6 +415,7 @@ export default defineComponent({
       // data
       valueToSearch,
       isLoadFilter,
+      heightTable,
       // computeds
       headerList,
       isLoadingDataTale,
@@ -409,6 +429,8 @@ export default defineComponent({
       selectionsLength,
       // methods
       filterRecord,
+      setTableHeight,
+      adjustSize,
       tableRowClassName,
       handleChangeSearch,
       headerLabel,
@@ -424,38 +446,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.default-table {
-  padding: 0px !important;
-  display: contents;
-  height: 50% !important;
-  overflow: hidden;
-
-  .el-form-item {
-    >.el-form-item__content {
-      display: contents !important;
-    }
-  }
-
-  .input-search {
+ div#mainWindow{
     width: 100%;
-    padding-right: 20px;
-    margin-right: 20px;
-    margin-left: 10px;
-    margin-bottom: 10px;
-  }
-
-  .el-table__cell {
-    // height table row
-    padding: 0px !important;
-  }
-
-  .el-table--scrollable-y .el-table__body-wrapper {
-    overflow-y: auto;
-    height: 90% !important;
-  }
-
-  .el-table .success-row {
-    background: #d0f4f5e5;
-  }
 }
 </style>

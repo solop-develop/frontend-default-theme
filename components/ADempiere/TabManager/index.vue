@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div style="height: 100% !important;">
+  <div>
     <!-- <auxiliary-panel
       v-if="isShowedTableRecords"
       :parent-uuid="parentUuid"
@@ -35,7 +35,7 @@
       <el-tabs
         v-model="currentTab"
         type="border-card"
-        style="width: 99%"
+        style="width:100%"
         @tab-click="handleClick"
       >
         <el-tab-pane
