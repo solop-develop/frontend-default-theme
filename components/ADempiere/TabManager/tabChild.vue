@@ -17,73 +17,71 @@
 -->
 
 <template>
-  <div style="height: 100% !important;">
-    <div style="display: flex;">
-      <el-tabs
-        v-model="currentTab"
-        type="border-card"
-        style="width: 99%"
-        @tab-click="handleClick"
-      >
-        <el-tab-pane
-          v-for="(tabAttributes, key) in tabsList"
-          :key="key"
-          :label="tabAttributes.name"
-          :name="String(key)"
-          :tabuuid="tabAttributes.uuid"
-          :tabindex="String(key)"
-          lazy
-          :disabled="isDisabledTab(key)"
-          :style="tabStyle"
-        >
-          <tab-label
-            slot="label"
-            :is-active-tab="tabAttributes.uuid === tabUuid"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-          />
+  <!-- <div style="height: 100% !important;">
+    <div style="display: flex;"> -->
+  <el-tabs
+    v-model="currentTab"
+    type="border-card"
+    style="width: 100%"
+    @tab-click="handleClick"
+  >
+    <el-tab-pane
+      v-for="(tabAttributes, key) in tabsList"
+      :key="key"
+      :label="tabAttributes.name"
+      :name="String(key)"
+      :tabuuid="tabAttributes.uuid"
+      :tabindex="String(key)"
+      lazy
+      :disabled="isDisabledTab(key)"
+      :style="tabStyle"
+    >
+      <tab-label
+        slot="label"
+        :is-active-tab="tabAttributes.uuid === tabUuid"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
 
-          <div v-if="isShowedTableRecords">
-            <tab-options
-              :parent-uuid="parentUuid"
-              :container-manager="containerManager"
-              :current-tab-uuid="tabUuid"
-              :tabs-list="tabsList"
-              :all-tabs-list="allTabsList"
-              :tab-attributes="tabAttributes"
-              :references-manager="referencesManager"
-            />
-            <br>
-          </div>
-          <div v-if="isShowedTabs">
-            <!-- records in table to multi records -->
-            <default-table
-              v-if="isShowedTableRecords"
-              key="default-table"
-              :parent-uuid="parentUuid"
-              :container-uuid="tabAttributes.uuid"
-              :container-manager="containerManager"
-              :header="tableHeaders"
-              :data-table="recordsList"
-              :panel-metadata="tabAttributes"
-            />
-            <tab-panel
-              v-else
-              key="tab-panel"
-              :parent-uuid="parentUuid"
-              :container-manager="containerManager"
-              :tabs-list="tabsList"
-              :all-tabs-list="allTabsList"
-              :current-tab-uuid="tabUuid"
-              :tab-attributes="tabAttributes"
-              :actions-manager="actionsManager"
-              :references-manager="referencesManager"
-            />
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </div>
-  </div>
+      <div v-if="isShowedTableRecords">
+        <tab-options
+          :parent-uuid="parentUuid"
+          :container-manager="containerManager"
+          :current-tab-uuid="tabUuid"
+          :tabs-list="tabsList"
+          :all-tabs-list="allTabsList"
+          :tab-attributes="tabAttributes"
+          :references-manager="referencesManager"
+        />
+        <br>
+      </div>
+      <div v-if="isShowedTabs">
+        <!-- records in table to multi records -->
+        <default-table
+          v-if="isShowedTableRecords"
+          key="default-table"
+          :parent-uuid="parentUuid"
+          :container-uuid="tabAttributes.uuid"
+          :container-manager="containerManager"
+          :header="tableHeaders"
+          :data-table="recordsList"
+          :panel-metadata="tabAttributes"
+        />
+        <tab-panel
+          v-else
+          key="tab-panel"
+          :parent-uuid="parentUuid"
+          :container-manager="containerManager"
+          :tabs-list="tabsList"
+          :all-tabs-list="allTabsList"
+          :current-tab-uuid="tabUuid"
+          :tab-attributes="tabAttributes"
+          :actions-manager="actionsManager"
+          :references-manager="referencesManager"
+        />
+      </div>
+    </el-tab-pane>
+  </el-tabs>
 </template>
 
 <script>

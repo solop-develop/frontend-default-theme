@@ -118,6 +118,7 @@ export default defineComponent({
         }
       }
     })
+
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })

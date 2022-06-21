@@ -160,7 +160,7 @@ export default {
           ...DEFAULT_SIZE
         }
       }
-      if (DEFAULT_COLUMNS_PER_ROW >= 0) {
+      if (DEFAULT_COLUMNS_PER_ROW >= 0 && !this.isMobile) {
         const size = parseInt(LAYOUT_MAX_COLUMNS_PER_ROW / this.currentColumnSize, 10)
         return {
           xs: size,
