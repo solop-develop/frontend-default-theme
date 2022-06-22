@@ -96,7 +96,7 @@
             />
 
             <el-button slot="reference" type="text" style="color: #606266;">
-              <label-popover-option :option="option" />
+              <label-popover-option :option="option" style="display: flex;" />
             </el-button>
           </el-popover>
         </el-menu-item>
