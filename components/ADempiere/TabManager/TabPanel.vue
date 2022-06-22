@@ -164,7 +164,7 @@ export default defineComponent({
 
     return {
       // computed
-      listAction, 
+      listAction,
       recordsList,
       isShowedTableRecords,
       tableHeaders,

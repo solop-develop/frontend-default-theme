@@ -272,9 +272,9 @@ export default defineComponent({
         tabData.value.isShowedTableRecords &&
         !isEmptyValue(panelMain) &&
         !isEmptyValue(panelMain.clientHeight)
-      ){
+      ) {
         if (heightTable.value > 400) {
-          return heightTable.value / 2  
+          return heightTable.value / 2
         }
         return heightTable.value
       } else if (
@@ -291,7 +291,7 @@ export default defineComponent({
         tabData.value.isShowedTableRecords &&
         !isEmptyValue(panelMain) &&
         !isEmptyValue(panelMain.clientHeight)
-      ){
+      ) {
         return heightTable.value
       }
       return 'auto'
