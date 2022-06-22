@@ -28,8 +28,7 @@
         :references-manager="referencesManager"
       />
     </span>
-    <div>
-      <!-- {{ tabsList }} -->
+    <div v-if="isMobile">
       <default-table
         v-if="isShowedTableRecords"
         key="default-table"
@@ -48,6 +47,27 @@
         :container-manager="containerManager"
         :group-tab="tabAttributes.tabGroup"
       />
+    </div>
+    <div v-else>
+      <default-table
+        v-if="isShowedTableRecords"
+        key="default-table"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :container-manager="containerManager"
+        :header="tableHeaders"
+        :data-table="recordsList"
+        :panel-metadata="tabAttributes"
+      />
+      <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
+        <panel-definition
+          key="panel-definition"
+          :parent-uuid="parentUuid"
+          :container-uuid="tabAttributes.uuid"
+          :container-manager="containerManager"
+          :group-tab="tabAttributes.tabGroup"
+        />
+      </el-scrollbar>
     </div>
   </div>
 </template>
@@ -119,6 +139,10 @@ export default defineComponent({
       }
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -152,6 +176,15 @@ export default defineComponent({
         containerUuid: props.tabAttributes.uuid
       })
     }
+    function handleViewFullScreen() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isViewFullScreen',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isViewFullScreen,
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabAttributes.uuid
+      })
+    }
 
     return {
       // computed
@@ -159,8 +192,11 @@ export default defineComponent({
       recordsList,
       isShowedTableRecords,
       tableHeaders,
+      tabData,
+      isMobile,
       // methodo
-      changeShowedRecords
+      changeShowedRecords,
+      handleViewFullScreen
     }
   }
 

@@ -57,28 +57,44 @@
       </div>
       <div v-if="isShowedTabs">
         <!-- records in table to multi records -->
-        <default-table
-          v-if="isShowedTableRecords"
-          key="default-table"
-          :parent-uuid="parentUuid"
-          :container-uuid="tabAttributes.uuid"
-          :container-manager="containerManager"
-          :header="tableHeaders"
-          :data-table="recordsList"
-          :panel-metadata="tabAttributes"
-        />
-        <tab-panel
-          v-else
-          key="tab-panel"
-          :parent-uuid="parentUuid"
-          :container-manager="containerManager"
-          :tabs-list="tabsList"
-          :all-tabs-list="allTabsList"
-          :current-tab-uuid="tabUuid"
-          :tab-attributes="tabAttributes"
-          :actions-manager="actionsManager"
-          :references-manager="referencesManager"
-        />
+        <div v-if="isMobile">
+          <tab-panel
+            key="tab-panel"
+            :parent-uuid="parentUuid"
+            :container-manager="containerManager"
+            :tabs-list="tabsList"
+            :all-tabs-list="allTabsList"
+            :current-tab-uuid="tabUuid"
+            :tab-attributes="tabAttributes"
+            :actions-manager="actionsManager"
+            :references-manager="referencesManager"
+          />
+        </div>
+        <div v-else>
+          <default-table
+            v-if="isShowedTableRecords"
+            key="default-table"
+            :parent-uuid="parentUuid"
+            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :header="tableHeaders"
+            :data-table="recordsList"
+            :panel-metadata="tabAttributes"
+          />
+          <el-scrollbar v-else wrap-class="scroll-tab-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
+            <tab-panel
+              key="tab-panel"
+              :parent-uuid="parentUuid"
+              :container-manager="containerManager"
+              :tabs-list="tabsList"
+              :all-tabs-list="allTabsList"
+              :current-tab-uuid="tabUuid"
+              :tab-attributes="tabAttributes"
+              :actions-manager="actionsManager"
+              :references-manager="referencesManager"
+            />
+          </el-scrollbar>
+        </div>
       </div>
     </el-tab-pane>
   </el-tabs>
@@ -170,6 +186,10 @@ export default defineComponent({
       const storedWindow = store.getters.getStoredWindow(props.parentUuid)
 
       return storedWindow.isShowedTabsChildren
+    })
+
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
     })
 
     const isShowedTableRecords = computed(() => {
@@ -389,6 +409,7 @@ export default defineComponent({
       recordsList,
       // computed
       isShowedTabs,
+      isMobile,
       listAction,
       currentTabMetadata,
       recordUuidTabParent,
@@ -403,3 +424,10 @@ export default defineComponent({
 
 })
 </script>
+
+<style>
+.scroll-child {
+  max-height: 300px;
+  overflow-x: hidden;
+}
+</style>
