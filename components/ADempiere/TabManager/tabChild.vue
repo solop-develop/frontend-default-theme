@@ -67,18 +67,19 @@
           :data-table="recordsList"
           :panel-metadata="tabAttributes"
         />
-        <tab-panel
-          v-else
-          key="tab-panel"
-          :parent-uuid="parentUuid"
-          :container-manager="containerManager"
-          :tabs-list="tabsList"
-          :all-tabs-list="allTabsList"
-          :current-tab-uuid="tabUuid"
-          :tab-attributes="tabAttributes"
-          :actions-manager="actionsManager"
-          :references-manager="referencesManager"
-        />
+        <el-scrollbar v-else wrap-class="scroll-tab-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
+          <tab-panel
+            key="tab-panel"
+            :parent-uuid="parentUuid"
+            :container-manager="containerManager"
+            :tabs-list="tabsList"
+            :all-tabs-list="allTabsList"
+            :current-tab-uuid="tabUuid"
+            :tab-attributes="tabAttributes"
+            :actions-manager="actionsManager"
+            :references-manager="referencesManager"
+          />
+        </el-scrollbar>
       </div>
     </el-tab-pane>
   </el-tabs>
@@ -403,3 +404,10 @@ export default defineComponent({
 
 })
 </script>
+
+<style>
+.scroll-child {
+  max-height: 300px;
+  overflow-x: hidden;
+}
+</style>

@@ -33,20 +33,32 @@
           />
         </el-input>
       </el-col>
-      <el-col :span="1">
+      <el-col
+        :span="1"
+        style="text-align: center;"
+      >
         <columns-display-option
           :option="currentOption"
           :container-manager="containerManager"
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
         />
+        <el-button
+          type="text"
+          style="float: right;"
+          @click="handleViewFullScreen"
+        >
+          <svg-icon
+            :icon-class="tabData.isTableViewFullScreen ? 'exit-fullscreen' : 'fullscreen'"
+          />
+        </el-button>
       </el-col>
     </el-row>
     <el-table
       ref="multipleTable"
       v-loading="isLoadingDataTable"
       border
-      :height="heightTable"
+      :height="sizeViewTable"
       :row-key="keyColumn"
       reserve-selection
       highlight-current-row
@@ -170,6 +182,7 @@ export default defineComponent({
   setup(props, { root, refs }) {
     const valueToSearch = ref('')
     const heightTable = ref()
+    const panelMain = document.getElementById('mainWindow')
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -236,6 +249,54 @@ export default defineComponent({
       return recordsWithFilter.value.length
     })
 
+    const tabData = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+    })
+
+    const sizeViewTable = computed(() => {
+      if (
+        !tabData.value.isParentTab &&
+        tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ) {
+        console.log({ qlq: parseInt(panelMain.clientHeight) })
+        return parseInt(panelMain.clientHeight)
+      } else if (
+        !tabData.value.isParentTab &&
+        !tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ){
+        if (heightTable.value > 400) {
+          return heightTable.value / 2  
+        }
+        return heightTable.value
+      } else if (
+        tabData.value.isParentTab &&
+        tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ) {
+        return parseInt(panelMain.clientHeight)
+      } else if (
+        tabData.value.isParentTab &&
+        !tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ){
+        return heightTable.value
+      }
+      return 'auto'
+    })
+
     /**
      * Select record row
      * @param {object} row
@@ -251,6 +312,21 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         row
+      })
+
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isTableViewFullScreen',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isTableViewFullScreen,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isShowedTableRecords,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
       })
     }
 
@@ -383,8 +459,6 @@ export default defineComponent({
     }
 
     function adjustSize() {
-      const panelMain = document.getElementById('mainWindow')
-
       if (!isEmptyValue(panelMain) && !isEmptyValue(panelMain.clientHeight)) {
         const size = parseInt(panelMain.clientHeight) / 2
         if (recordsWithFilter.value.length < 5) {
@@ -395,8 +469,19 @@ export default defineComponent({
       }
     }
     window.addEventListener('resize', setTableHeight)
+
     function setTableHeight() {
       adjustSize()
+    }
+
+    function handleViewFullScreen() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isTableViewFullScreen',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isTableViewFullScreen,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
     }
 
     onMounted(() => {
@@ -427,6 +512,8 @@ export default defineComponent({
       recordsLength,
       currentPage,
       selectionsLength,
+      tabData,
+      sizeViewTable,
       // methods
       filterRecord,
       setTableHeight,
@@ -439,7 +526,8 @@ export default defineComponent({
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
-      isDisplayed
+      isDisplayed,
+      handleViewFullScreen
     }
   }
 })
@@ -448,5 +536,8 @@ export default defineComponent({
 <style lang="scss">
  div#mainWindow{
     width: 100%;
+}
+.el-table .el-table__cell {
+  padding: 0px !important;
 }
 </style>

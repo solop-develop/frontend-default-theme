@@ -29,7 +29,6 @@
       />
     </span>
     <div>
-      <!-- {{ tabsList }} -->
       <default-table
         v-if="isShowedTableRecords"
         key="default-table"
@@ -40,14 +39,15 @@
         :data-table="recordsList"
         :panel-metadata="tabAttributes"
       />
-      <panel-definition
-        v-else
-        key="panel-definition"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :group-tab="tabAttributes.tabGroup"
-      />
+      <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
+        <panel-definition
+          key="panel-definition"
+          :parent-uuid="parentUuid"
+          :container-uuid="tabAttributes.uuid"
+          :container-manager="containerManager"
+          :group-tab="tabAttributes.tabGroup"
+        />
+      </el-scrollbar>
     </div>
   </div>
 </template>
@@ -152,15 +152,26 @@ export default defineComponent({
         containerUuid: props.tabAttributes.uuid
       })
     }
+    function handleViewFullScreen() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isViewFullScreen',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isViewFullScreen,
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabAttributes.uuid
+      })
+    }
 
     return {
       // computed
-      listAction,
+      listAction, 
       recordsList,
       isShowedTableRecords,
       tableHeaders,
+      tabData,
       // methodo
-      changeShowedRecords
+      changeShowedRecords,
+      handleViewFullScreen
     }
   }
 
