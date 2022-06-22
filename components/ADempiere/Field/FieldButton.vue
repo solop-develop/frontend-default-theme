@@ -20,11 +20,12 @@
     v-bind="commonsProperties"
     type="primary"
     plain
+    :disabled="isDisabledButton"
     @click="startProcess"
   >
     <!-- eslint-disable-next-line -->
     <component v-bind="iconProps" />
-    {{ metadata.name }}
+    {{ displayedValue }}
   </el-button>
 </template>
 
@@ -49,8 +50,46 @@ export default {
   ],
 
   computed: {
+    isDisabledButton() {
+      return this.metadata.readonly || !this.emptyValue
+    },
+    emptyValue() {
+      return isEmptyValue(this.value) || this.value <= 0
+    },
+    displayedValue() {
+      if (this.emptyValue) {
+        return this.metadata.name
+      }
+      if (typeof this.value !== 'number') {
+        return this.value
+      }
+
+      // DisplayColumn_'ColumnName'
+      const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
+      // table records values
+      if (inTable) {
+        // implement container manager row
+        if (this.containerManager && this.containerManager.getCell) {
+          return this.containerManager.getCell({
+            containerUuid,
+            rowIndex: this.metadata.rowIndex,
+            columnName
+          })
+        }
+      }
+
+      const displayValue = this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid,
+        columnName
+      })
+      if (!isEmptyValue(displayValue)) {
+        return displayValue
+      }
+      return this.metadata.name + ': ' + this.value
+    },
     iconProps() {
-      if (!isEmptyValue(this.metadata.process)) {
+      if (this.emptyValue && !isEmptyValue(this.metadata.process)) {
         if (this.metadata.process.isReport || this.metadata.process.jasperReport) {
           return {
             is: 'i',
@@ -85,6 +124,20 @@ export default {
       }
     }
   },
+
+  // beforeMount() {
+  //   if (this.metadata.displayed) {
+  //     const value = this.value
+  //     console.log(value, !this.isEmptyValue(this.displayedValue), this.displayedValue)
+  //     if (!this.emptyValue && typeof this.value === 'number') {
+  //       if (this.isEmptyValue(this.displayedValue)) {
+  //         // request lookup
+  //         this.getDefaultValueFromServer()
+  //       }
+  //     }
+  //   }
+  // },
+
   methods: {
     startProcess() {
       if (this.isEmptyValue(this.metadata.process)) {
