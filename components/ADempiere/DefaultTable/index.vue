@@ -182,7 +182,7 @@ export default defineComponent({
   setup(props, { root, refs }) {
     const valueToSearch = ref('')
     const heightTable = ref()
-    const panelMain = document.getElementById('mainWindow')
+    const panelMain = document.getElementById(props.containerManager.panelMain())
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -250,10 +250,12 @@ export default defineComponent({
     })
 
     const tabData = computed(() => {
-      return store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
+      if (props.containerManager.getRecordList) {
+        return props.containerManager.getRecordList({
+          containerUuid: props.containerUuid
+        })
+      }
+      return {}
     })
 
     const sizeViewTable = computed(() => {
@@ -264,7 +266,6 @@ export default defineComponent({
         !isEmptyValue(panelMain) &&
         !isEmptyValue(panelMain.clientHeight)
       ) {
-        console.log({ qlq: parseInt(panelMain.clientHeight) })
         return parseInt(panelMain.clientHeight)
       } else if (
         !tabData.value.isParentTab &&
@@ -293,6 +294,11 @@ export default defineComponent({
         !isEmptyValue(panelMain.clientHeight)
       ) {
         return heightTable.value
+      }
+      if (
+        props.containerManager.panelMain() === 'mainBrowser'
+      ) {
+        return '100%'
       }
       return 'auto'
     })
