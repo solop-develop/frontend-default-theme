@@ -55,6 +55,7 @@
       </el-col>
     </el-row>
     <el-table
+      id="multipleTable"
       ref="multipleTable"
       v-loading="isLoadingDataTable"
       border
@@ -258,6 +259,17 @@ export default defineComponent({
       return {}
     })
 
+    const defaultSize = computed(() => {
+      const main = document.getElementById('multipleTable')
+      if (
+        !isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)
+      ) {
+        return main.clientHeight
+      }
+      return 600
+    })
+
     const sizeViewTable = computed(() => {
       if (
         !tabData.value.isParentTab &&
@@ -298,7 +310,7 @@ export default defineComponent({
       if (
         props.containerManager.panelMain() === 'mainBrowser'
       ) {
-        return '100%'
+        return defaultSize.value
       }
       return 'auto'
     })
@@ -519,6 +531,7 @@ export default defineComponent({
       currentPage,
       selectionsLength,
       tabData,
+      defaultSize,
       sizeViewTable,
       // methods
       filterRecord,
