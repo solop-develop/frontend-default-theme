@@ -31,6 +31,7 @@
             :fields-list="fieldsList"
             :filter-manager="containerManager.changeFieldShowedFromUser"
             :showed-manager="containerManager.isDisplayedField"
+            :fields-to-hidden="containerManager.getFieldsToHidden"
           />
 
           <el-card
