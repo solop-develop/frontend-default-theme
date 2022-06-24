@@ -90,6 +90,10 @@ export default defineComponent({
       type: Function,
       default: ({ filterList }) => { return true }
     },
+    fieldsToHidden: {
+      type: Function,
+      default: ({ filterList }) => { return [] }
+    },
     // isDisplayedField or isDisplayedColumn
     showedManager: {
       type: Function,
@@ -135,7 +139,8 @@ export default defineComponent({
       }
       */
       // get fields not mandatory
-      return store.getters.getFieldsListNotMandatory({
+      return props.fieldsToHidden({
+        parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         fieldsList: props.fieldsList,
         showedMethod: props.showedManager,
@@ -145,7 +150,8 @@ export default defineComponent({
 
     const fieldsListAvailableWithValue = computed(() => {
       // get fields not mandatory with default value
-      return store.getters.getFieldsListNotMandatory({
+      return props.fieldsToHidden({
+        parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         fieldsList: fieldsListAvailable.value,
         isEvaluateDefaultValue: true,

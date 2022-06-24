@@ -258,8 +258,12 @@ export default {
       }
       // validate with container manager
       if (this.containerManager.isDisplayedField(this.field)) {
-        // mandatory not parent column without default value
-        if (this.isMandatoryField && !this.field.isParent && isEmptyValue(this.field.defaultValue)) {
+        const isDisplayedDefault = this.containerManager.isDisplayedDefault({
+          ...this.field,
+          isMandatory: this.isMandatoryField
+        })
+        // madatory. not parent column and without default value to window, mandatory or with default value to others
+        if (isDisplayedDefault) {
           return true
         }
 
