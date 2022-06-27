@@ -54,14 +54,14 @@ export default {
       return this.metadata.readonly || !this.emptyValue
     },
     emptyValue() {
-      return isEmptyValue(this.value) || this.value <= 0
+      return typeof this.value !== 'number' || isEmptyValue(this.value) || this.value <= 0
     },
     displayedValue() {
-      if (this.emptyValue) {
+      if (typeof this.value !== 'number') {
         return this.metadata.name
       }
-      if (typeof this.value !== 'number') {
-        return this.value
+      if (this.emptyValue) {
+        return this.metadata.name
       }
 
       // DisplayColumn_'ColumnName'
@@ -84,7 +84,7 @@ export default {
         columnName
       })
       if (!isEmptyValue(displayValue)) {
-        return displayValue
+        return this.metadata.name + ': ' + displayValue
       }
       return this.metadata.name + ': ' + this.value
     },
