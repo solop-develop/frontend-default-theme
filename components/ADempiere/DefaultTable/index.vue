@@ -107,10 +107,14 @@
 
     <!-- pagination table, set custom or use default change page method -->
     <custom-pagination
+      :container-manager="containerManager"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
       :total="recordsLength"
       :current-page="currentPage"
       :selection="selectionsLength"
       :handle-change-page="handleChangePage"
+      :is-navigation="isNavigation"
     />
   </div>
 </template>
@@ -177,6 +181,10 @@ export default defineComponent({
     isShowSearch: {
       type: Boolean,
       default: true
+    },
+    isNavigation: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -331,21 +339,22 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         row
       })
-
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isTableViewFullScreen',
-        attributeNameControl: undefined,
-        attributeValue: !tabData.value.isTableViewFullScreen,
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isShowedTableRecords',
-        attributeNameControl: undefined,
-        attributeValue: !tabData.value.isShowedTableRecords,
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
+      if (!isEmptyValue(props.parentUuid)) {
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isTableViewFullScreen',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isShowedTableRecords',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+      }
     }
 
     /**
@@ -392,13 +401,12 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         pageNumber
       })
-      const isParentTab = store.getters.getStoredTab(props.parentUuid, props.containerUuid).isParentTab
+      const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
+      const query = isEmptyValue(props.parentUuid) ? { ...root.$route.query, page: pageNumber } : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
       router.push({
         name: root.$route.name,
         query: {
-          ...root.$route.query,
-          page: isParentTab ? pageNumber : root.$route.query.page,
-          pageChild: !isParentTab ? pageNumber : root.$route.query.pageChild
+          ...query
         }
       }, () => {})
     }

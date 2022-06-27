@@ -17,29 +17,52 @@
 -->
 
 <template>
-  <el-footer style="height: 30px;">
-    <div style="float: right;">
+  <el-row :gutter="20" style="margin-left: 0px; margin-right: 0px;margin-top: 1%;">
+    <el-col :span="16" style="float: left;">
+      <b
+        v-if="isNavigation"
+      >
+        <el-button
+          type="text"
+          plain
+          icon="el-icon-arrow-up"
+          style="color: black; font-size: x-large;border: 0px;"
+          :disabled="disabledPrevRecord"
+          @click="prevRecord"
+        />
+        <el-button
+          type="text"
+          plain
+          icon="el-icon-arrow-down"
+          style="color: black; font-size: x-large;border: 0px;"
+          :disabled="disabledNextRecord"
+          @click="nextRecord"
+        />
+      </b>
+    </el-col>
+    <el-col :span="8" style="float: right;">
       <el-pagination
         small
         layout="slot, total, prev, pager, next"
         :current-page="currentPage"
         :page-size="pageSize"
         :total="total"
+        style="float: right;"
         @current-change="handleChangePage"
       >
         <template v-slot>
-          <span v-if="isSelection">
+          <span v-if="!isNavigation">
             {{ $t('table.dataTable.selected') }}: {{ selection }} / <!-- show total records -->
           </span>
         </template>
       </el-pagination>
-    </div>
-  </el-footer>
+    </el-col>
+  </el-row>
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
-
+import { defineComponent, computed, ref } from '@vue/composition-api'
+import store from '@/store'
 // constants
 import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/constants/table'
 
@@ -50,6 +73,18 @@ export default defineComponent({
   name: 'CustomPagination',
 
   props: {
+    parentUuid: {
+      type: String,
+      default: ''
+    },
+    containerUuid: {
+      type: String,
+      default: ''
+    },
+    containerManager: {
+      type: Object,
+      required: true
+    },
     currentPage: {
       type: Number,
       default: 1
@@ -66,6 +101,10 @@ export default defineComponent({
       type: Number,
       default: undefined
     },
+    isNavigation: {
+      type: Boolean,
+      required: false
+    },
     handleChangePage: {
       type: Function,
       default: (pageNumber) => {
@@ -81,9 +120,68 @@ export default defineComponent({
       }
       return true
     })
+    const listRecord = computed(() => {
+      return store.getters.getTabRecordsList({
+        containerUuid: props.containerUuid
+      })
+    })
+
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.containerUuid)
+    })
+
+    const index = computed(() => {
+      return listRecord.value.findIndex(row => row.UUID === recordUuid.value)
+    })
+
+    const disabledPrevRecord = computed(() => {
+      return key.value <= 0
+    })
+
+    const disabledNextRecord = computed(() => {
+      return key.value === (maxRecord.value - 1)
+    })
+
+    const maxRecord = computed(() => {
+      return listRecord.value.length
+    })
+
+    const key = ref(index.value)
+
+    function nextRecord(params) {
+      key.value = index.value + 1
+      props.containerManager.seekRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        row: listRecord.value[index.value + 1]
+      })
+    }
+
+    function prevRecord(params) {
+      key.value = index.value - 1
+      if (key.value <= 0) {
+        return
+      }
+      props.containerManager.seekRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        row: listRecord.value[index.value - 1]
+      })
+    }
 
     return {
-      isSelection
+      key,
+      // Computed
+      index,
+      disabledPrevRecord,
+      disabledNextRecord,
+      isSelection,
+      recordUuid,
+      maxRecord,
+      listRecord,
+      // Methodos
+      nextRecord,
+      prevRecord
     }
   }
 
