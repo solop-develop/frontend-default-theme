@@ -341,6 +341,12 @@ export default {
             this.value = responseLookupItem.value
             this.displayedValue = responseLookupItem.displayedValue
             this.uuidValue = responseLookupItem.uuid
+
+            // TODO: With remote and filter is enabled not working displayed value
+            // https://github.com/ElemeFE/element/issues/20706
+            // https://github.com/ElemeFE/element/issues/21287
+            // https://github.com/ElemeFE/element/issues/21465
+            this.optionsList = []
             this.$nextTick(() => {
               this.optionsList = this.getStoredLookupAll
             })

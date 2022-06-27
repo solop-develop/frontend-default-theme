@@ -27,7 +27,7 @@
       :tab-name="tabMetadata.name"
     />
 
-    <el-tooltip
+    <!-- <el-tooltip
       :content="$t('window.gridToggle')"
       placement="top"
     >
@@ -59,7 +59,7 @@
           style="font-size: 15px; color: black;"
         />
       </el-button>
-    </el-tooltip>
+    </el-tooltip> -->
   </span>
 </template>
 
@@ -105,25 +105,6 @@ export default defineComponent({
       )
     })
 
-    function changeShowedRecords() {
-      if (tabMetadata.value.isParentTab) {
-        root.$store.dispatch('changeTabAttribute', {
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
-          attributeName: 'isShowedTableRecords',
-          attributeValue: true
-        })
-        return
-      }
-
-      root.$store.dispatch('changeTabAttribute', {
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        attributeName: 'isShowedTableRecords',
-        attributeValue: !tabMetadata.value.isShowedTableRecords
-      })
-    }
-
     /**
      * Change if tabsList is collapse
      */
@@ -148,8 +129,7 @@ export default defineComponent({
       // Data
       tabMetadata,
       // Methods
-      changeShowedTab,
-      changeShowedRecords
+      changeShowedTab
     }
   }
 })

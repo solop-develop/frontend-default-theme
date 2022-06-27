@@ -17,46 +17,73 @@
 -->
 
 <template>
-  <div style="height: 100% !important;">
-    <div style="display: flex;">
-      <el-tabs
-        v-model="currentTab"
-        type="border-card"
-        style="width: 99%"
-        @tab-click="handleClick"
-      >
-        <el-tab-pane
-          v-for="(tabAttributes, key) in tabsList"
-          :key="key"
-          :label="tabAttributes.name"
-          :name="String(key)"
-          :tabuuid="tabAttributes.uuid"
-          :tabindex="String(key)"
-          lazy
-          :disabled="isDisabledTab(key)"
-          :style="tabStyle"
-        >
-          <tab-label
-            slot="label"
-            :is-active-tab="tabAttributes.uuid === tabUuid"
+  <!-- <div style="height: 100% !important;">
+    <div style="display: flex;"> -->
+  <el-tabs
+    v-model="currentTab"
+    type="border-card"
+    style="width: 100%"
+    @tab-click="handleClick"
+  >
+    <el-tab-pane
+      v-for="(tabAttributes, key) in tabsList"
+      :key="key"
+      :label="tabAttributes.name"
+      :name="String(key)"
+      :tabuuid="tabAttributes.uuid"
+      :tabindex="String(key)"
+      lazy
+      :disabled="isDisabledTab(key)"
+      :style="tabStyle"
+    >
+      <tab-label
+        slot="label"
+        :is-active-tab="tabAttributes.uuid === tabUuid"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
+      <div v-if="isShowedTableRecords">
+        <tab-options
+          :parent-uuid="parentUuid"
+          :container-manager="containerManager"
+          :current-tab-uuid="tabUuid"
+          :tabs-list="tabsList"
+          :all-tabs-list="allTabsList"
+          :tab-attributes="tabAttributes"
+          :references-manager="referencesManager"
+        />
+        <br>
+      </div>
+      <div v-if="isShowedTabs">
+        <!-- records in table to multi records -->
+        <div v-if="isMobile">
+          <tab-panel
+            key="tab-panel"
+            :parent-uuid="parentUuid"
+            :container-manager="containerManager"
+            :tabs-list="tabsList"
+            :all-tabs-list="allTabsList"
+            :current-tab-uuid="tabUuid"
+            :tab-attributes="tabAttributes"
+            :actions-manager="actionsManager"
+            :references-manager="referencesManager"
+          />
+        </div>
+        <div v-else>
+          <default-table
+            v-if="isShowedTableRecords"
+            key="default-table"
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :header="tableHeaders"
+            :data-table="recordsList"
+            :panel-metadata="tabAttributes"
+            :is-navigation="true"
           />
-
-          <div v-if="isShowedTabs">
-            <!-- records in table to multi records -->
-            <default-table
-              v-if="isShowedTableRecords"
-              key="default-table"
-              :parent-uuid="parentUuid"
-              :container-uuid="tabAttributes.uuid"
-              :container-manager="containerManager"
-              :header="tableHeaders"
-              :data-table="recordsList"
-              :panel-metadata="tabAttributes"
-            />
+          <el-scrollbar v-else wrap-class="scroll-tab-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
             <tab-panel
-              v-else
               key="tab-panel"
               :parent-uuid="parentUuid"
               :container-manager="containerManager"
@@ -64,12 +91,14 @@
               :all-tabs-list="allTabsList"
               :current-tab-uuid="tabUuid"
               :tab-attributes="tabAttributes"
+              :actions-manager="actionsManager"
+              :references-manager="referencesManager"
             />
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </div>
-  </div>
+          </el-scrollbar>
+        </div>
+      </div>
+    </el-tab-pane>
+  </el-tabs>
 </template>
 
 <script>
@@ -77,13 +106,14 @@ import { defineComponent, computed, watch, ref, onUnmounted } from '@vue/composi
 
 import router from '@/router'
 import store from '@/store'
+import language from '@/lang'
 
 // components and mixins
 import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import TabPanel from './TabPanel.vue'
-import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import TabOptions from './TabOptions.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -97,9 +127,9 @@ export default defineComponent({
   components: {
     AuxiliaryPanel,
     DefaultTable,
-    ActionMenu,
     TabPanel,
-    TabLabel
+    TabLabel,
+    TabOptions
   },
 
   props: {
@@ -118,6 +148,15 @@ export default defineComponent({
     tabsList: {
       type: Array,
       default: () => []
+    },
+    actionsManager: {
+      type: Object,
+      default: () => ({})
+    },
+    // used only window
+    referencesManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 
@@ -150,6 +189,10 @@ export default defineComponent({
       return storedWindow.isShowedTabsChildren
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const isShowedTableRecords = computed(() => {
       return currentTabMetadata.value.isShowedTableRecords
     })
@@ -162,6 +205,29 @@ export default defineComponent({
       return key > 0 && (isCreateNew.value || isEmptyValue(recordUuidTabParent.value))
     }
 
+    const listAction = computed(() => {
+      return {
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabsList[currentTab.value].uuid,
+        defaultActionName: language.t('actionMenu.createNewRecord'),
+        tableName: props.tabsList[currentTab.value].tableName,
+        getActionList: () => {
+          return store.getters.getStoredActionsMenu({
+            containerUuid: props.tabsList[currentTab.value].uuid
+          })
+        }
+      }
+    })
+
+    function changeShowedRecords() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: !currentTabMetadata.value.isShowedTableRecords,
+        parentUuid: props.parentUuid,
+        containerUuid: tabUuid.value
+      })
+    }
     function setCurrentTab() {
       store.commit('setCurrentTabChild', {
         parentUuid: props.parentUuid,
@@ -223,17 +289,6 @@ export default defineComponent({
     // get records list
     const recordsList = computed(() => {
       return tabData.value.recordsList
-    })
-
-    const isLoadedParentRecords = computed(() => {
-      return store.getters.getTabData({
-        containerUuid: currentTabMetadata.value.firstTabUuid
-      }).isLoaded
-    })
-
-    const isReadyFromGetData = computed(() => {
-      // TODO: add is loaded context columns
-      return isLoadedParentRecords.value && !tabData.value.isLoaded
     })
 
     const recordUuidTabParent = computed(() => {
@@ -309,8 +364,8 @@ export default defineComponent({
     let unsuscribeChangeParentRecord = () => {}
 
     // if changed record in parent tab, reload tab child
-    watch(isReadyFromGetData, (newValue, oldValue) => {
-      if (newValue) {
+    watch(currentTab, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
         getData()
       }
     })
@@ -355,13 +410,25 @@ export default defineComponent({
       recordsList,
       // computed
       isShowedTabs,
+      isMobile,
+      listAction,
+      currentTabMetadata,
+      recordUuidTabParent,
       isShowedTableRecords,
       tabStyle,
       // methods
       handleClick,
-      isDisabledTab
+      isDisabledTab,
+      changeShowedRecords
     }
   }
 
 })
 </script>
+
+<style>
+.scroll-child {
+  max-height: 300px;
+  overflow-x: hidden;
+}
+</style>

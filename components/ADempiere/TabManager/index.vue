@@ -17,8 +17,8 @@
 -->
 
 <template>
-  <div style="height: 100% !important;">
-    <auxiliary-panel
+  <div>
+    <!-- <auxiliary-panel
       v-if="isShowedTableRecords"
       :parent-uuid="parentUuid"
       :container-uuid="tabUuid"
@@ -30,12 +30,12 @@
         :container-manager="containerManager"
         :current-tab="tabsList[currentTab]"
       />
-    </auxiliary-panel>
+    </auxiliary-panel> -->
     <div style="display: flex;">
       <el-tabs
         v-model="currentTab"
         type="border-card"
-        style="width: 99%"
+        style="width:100%"
         @tab-click="handleClick"
       >
         <el-tab-pane
@@ -55,9 +55,20 @@
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
           />
-
+          <span v-if="currentTabMetadata.isShowedTableRecords">
+            <tab-options
+              :parent-uuid="parentUuid"
+              :container-manager="containerManager"
+              :current-tab-uuid="tabUuid"
+              :tabs-list="tabsList"
+              :all-tabs-list="allTabsList"
+              :tab-attributes="tabAttributes"
+              :references-manager="referencesManager"
+            />
+            <br>
+          </span>
           <!-- Close table when clicking on group of fields -->
-          <div v-if="isShowedTabs" @click="closeRecordNavigation()">
+          <div v-if="isShowedTabs">
             <tab-panel
               :parent-uuid="parentUuid"
               :container-manager="containerManager"
@@ -65,6 +76,8 @@
               :all-tabs-list="allTabsList"
               :current-tab-uuid="tabUuid"
               :tab-attributes="tabAttributes"
+              :actions-manager="actionsManager"
+              :references-manager="referencesManager"
             />
           </div>
         </el-tab-pane>
@@ -97,6 +110,7 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
+import language from '@/lang'
 
 // components and mixins
 import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
@@ -106,7 +120,7 @@ import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
-import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import TabOptions from './TabOptions.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -121,11 +135,11 @@ export default defineComponent({
     AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
-    ActionMenu,
     TabPanel,
     RecordNavigation,
     PanelInfo,
-    TabLabel
+    TabLabel,
+    TabOptions
   },
 
   props: {
@@ -144,6 +158,15 @@ export default defineComponent({
     tabsList: {
       type: Array,
       default: () => []
+    },
+    actionsManager: {
+      type: Object,
+      default: () => ({})
+    },
+    // used only window
+    referencesManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 
@@ -250,6 +273,8 @@ export default defineComponent({
       })
     })
 
+    const query = root.$route.query
+
     // get records list
     const recordsList = computed(() => {
       return tabData.value.recordsList
@@ -276,19 +301,14 @@ export default defineComponent({
 
     const getData = () => {
       const containerUuid = tabUuid.value
-      const filters = []
-      if (!isEmptyValue(root.$route.query) &&
-        !isEmptyValue(root.$route.query.columnName) &&
-        !isEmptyValue(root.$route.query.value)) {
-        filters.push({
-          columnName: root.$route.query.columnName,
-          value: root.$route.query.value
-        })
-      }
+      const filters = query.filters
+      const pageNumber = query.page
+
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,
-        filters
+        filters,
+        pageNumber
       }).then(responseData => {
         if (isCreateNew.value || isEmptyValue(responseData)) {
           // set values in panel
@@ -301,7 +321,7 @@ export default defineComponent({
         }
 
         let row = {}
-        const { action } = root.$route.query
+        const { action } = query
         // uuid into action query
         if (!isEmptyValue(action) && action !== 'create-new') {
           if (action === 'zoomIn') {
@@ -330,17 +350,19 @@ export default defineComponent({
       })
     }
 
-    /**
-     * Close table when clicking on group of fields
-     */
-    const closeRecordNavigation = () => {
-      store.dispatch('changeTabAttribute', {
+    const listAction = computed(() => {
+      return {
         parentUuid: props.parentUuid,
         containerUuid: tabUuid.value,
-        attributeName: 'isShowedTableRecords',
-        attributeValue: false
-      })
-    }
+        defaultActionName: language.t('actionMenu.createNewRecord'),
+        tableName: props.tabsList[currentTab.value].tableName,
+        getActionList: () => {
+          return store.getters.getStoredActionsMenu({
+            containerUuid: tabUuid.value
+          })
+        }
+      }
+    })
 
     if (isReadyFromGetData.value) {
       getData()
@@ -393,6 +415,23 @@ export default defineComponent({
         format: 'object'
       })
     }
+
+    const tabMetadata = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+    })
+
+    function changeShowedRecords() {
+      store.dispatch('changeTabAttribute', {
+        parentUuid: props.parentUuid,
+        containerUuid: currentTabMetadata.value.uuid,
+        attributeName: 'isShowedTableRecords',
+        attributeValue: !currentTabMetadata.value.isShowedTableRecords
+      })
+    }
+
     findRecordLogs(props.allTabsList[0])
 
     setTabNumber(currentTab.value)
@@ -408,12 +447,15 @@ export default defineComponent({
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
+      currentTabMetadata,
       tabStyle,
+      listAction,
+      tabMetadata,
       // methods
       handleClick,
+      changeShowedRecords,
       findRecordLogs,
       openRecordLogs,
-      closeRecordNavigation,
       isDisabledTab
     }
   }

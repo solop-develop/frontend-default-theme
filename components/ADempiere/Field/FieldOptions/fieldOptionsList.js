@@ -111,7 +111,7 @@ export const hideThisField = {
 
 export const optionsListStandad = [
   infoOptionItem,
-  preferenceValueOptionItem,
+  // preferenceValueOptionItem,
   logsOptionItem
 ]
 

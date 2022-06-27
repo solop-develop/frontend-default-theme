@@ -69,11 +69,15 @@
 // components and mixins
 import FieldOptions from '@theme/components/ADempiere/Field/FieldOptions/index.vue'
 
+import store from '@/store'
+
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
-import { TEXT } from '@/utils/ADempiere/references'
+import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
+import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
 
 // utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { evalutateTypeField } from '@/utils/ADempiere/dictionaryUtils'
 
 /**
@@ -127,7 +131,7 @@ export default {
 
   computed: {
     isMobile() {
-      return this.$store.state.app.device === 'mobile'
+      return store.state.app.device === 'mobile'
     },
     classFrom() {
       if (['FieldTextLong', 'FieldImage'].includes(this.field.componentPath)) {
@@ -138,17 +142,36 @@ export default {
       }
       return 'field-standard'
     },
+    currentColumnSize() {
+      return this.$store.getters.getSizeColumn({ containerUuid: this.containerUuid })
+    },
+    isAlignButton() {
+      return this.isOnlyField ? 'display: contents;text-align: center;' : ''
+    },
     sizeField() {
-      if (this.isEmptyValue(this.field.size)) {
+      if (isEmptyValue(this.field.size)) {
+        const size = 24
         return {
-          xs: 24,
-          sm: 24,
-          md: 24,
-          lg: 24,
-          xl: 24
+          xs: size,
+          sm: size,
+          md: size,
+          lg: size,
+          xl: size,
+          ...DEFAULT_SIZE
+        }
+      }
+      if (DEFAULT_COLUMNS_PER_ROW >= 0 && !this.isMobile) {
+        const size = parseInt(LAYOUT_MAX_COLUMNS_PER_ROW / this.currentColumnSize, 10)
+        return {
+          xs: size,
+          sm: size,
+          md: size,
+          lg: size,
+          xl: size
         }
       }
       return {
+        // ...this.field.size,
         xs: this.field.size.xs,
         sm: this.field.size.sm,
         md: this.field.size.md,
@@ -158,7 +181,7 @@ export default {
     },
     // load the component that is indicated in the attributes of received property
     componentRender() {
-      if (this.isEmptyValue(this.field.componentPath || !this.field.isSupported)) {
+      if (isEmptyValue(this.field.componentPath || !this.field.isSupported)) {
         return () => import('@theme/components/ADempiere/Field/FieldText')
       }
       if (this.isSelectCreated) {
@@ -230,11 +253,24 @@ export default {
     },
 
     isDisplayedField() {
+      if (this.inTable) {
+        return true
+      }
       // validate with container manager
-      return this.inTable || (
-        this.containerManager.isDisplayedField(this.field) &&
-        (this.isMandatoryField || this.field.isShowedFromUser)
-      )
+      if (this.containerManager.isDisplayedField(this.field)) {
+        const isDisplayedDefault = this.containerManager.isDisplayedDefault({
+          ...this.field,
+          isMandatory: this.isMandatoryField
+        })
+        // madatory. not parent column and without default value to window, mandatory or with default value to others
+        if (isDisplayedDefault) {
+          return true
+        }
+
+        // showed by user
+        return this.field.isShowedFromUser
+      }
+      return false
     },
 
     /**
@@ -257,7 +293,7 @@ export default {
 
     recordUuid() {
       // is active record
-      return this.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid: this.parentUuid,
         containerUuid: this.containerUuid,
         columnName: UUID
@@ -270,7 +306,7 @@ export default {
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
     },
     getWidth() {
-      return this.$store.getters.getWidthLayout
+      return store.getters.getWidthLayout
     },
     classField() {
       if (this.inTable) {
@@ -296,7 +332,7 @@ export default {
     this.field = this.metadataField
     if (this.field.isCustomField && !this.field.componentPath) {
       let componentReference = evalutateTypeField(this.field.displayType)
-      if (this.isEmptyValue(componentReference)) {
+      if (isEmptyValue(componentReference)) {
         componentReference = {
           componentPath: 'FieldText'
         }
@@ -314,10 +350,12 @@ export default {
   },
 
   methods: {
-    focusField() {
-      if (this.field.handleRequestFocus || (this.field.displayed && !this.field.readonly)) {
-        this.$refs[this.field.columnName].requestFocus()
-      }
+    focusField(columnName) {
+      setTimeout(() => {
+        if (this.field.columnName === columnName && !isEmptyValue(this.$refs)) {
+          this.$refs[columnName].$refs[columnName].focus()
+        }
+      }, 1000)
     }
   }
 }

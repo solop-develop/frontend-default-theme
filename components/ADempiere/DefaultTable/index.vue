@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-main class="default-table">
+  <div :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
         <el-input
@@ -33,27 +33,40 @@
           />
         </el-input>
       </el-col>
-      <el-col :span="1">
+      <el-col
+        :span="1"
+        style="text-align: center;"
+      >
         <columns-display-option
           :option="currentOption"
           :container-manager="containerManager"
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
         />
+        <el-button
+          type="text"
+          style="float: right;"
+          @click="handleViewFullScreen"
+        >
+          <svg-icon
+            :icon-class="tabData.isTableViewFullScreen ? 'exit-fullscreen' : 'fullscreen'"
+          />
+        </el-button>
       </el-col>
     </el-row>
     <el-table
+      id="multipleTable"
       ref="multipleTable"
       v-loading="isLoadingDataTable"
-      style="width: 100%; height: 88% !important;"
       border
-      height="90% !important"
+      :height="sizeViewTable"
       :row-key="keyColumn"
       reserve-selection
       highlight-current-row
       :data="recordsWithFilter"
       :element-loading-text="$t('notifications.loading')"
       element-loading-background="rgba(255, 255, 255, 0.8)"
+      :row-class-name="tableRowClassName"
       @row-click="handleRowClick"
       @row-dblclick="handleRowDblClick"
       @select="handleSelection"
@@ -94,18 +107,23 @@
 
     <!-- pagination table, set custom or use default change page method -->
     <custom-pagination
+      :container-manager="containerManager"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
       :total="recordsLength"
       :current-page="currentPage"
       :selection="selectionsLength"
       :handle-change-page="handleChangePage"
+      :is-navigation="isNavigation"
     />
-  </el-main>
+  </div>
 </template>
 
 <script>
 import { defineComponent, computed, onMounted, ref } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 
 // components and mixins
 import CellInfo from './CellInfo.vue'
@@ -163,12 +181,17 @@ export default defineComponent({
     isShowSearch: {
       type: Boolean,
       default: true
+    },
+    isNavigation: {
+      type: Boolean,
+      default: false
     }
   },
 
   setup(props, { root, refs }) {
     const valueToSearch = ref('')
-
+    const heightTable = ref()
+    const panelMain = document.getElementById(props.containerManager.panelMain())
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -219,9 +242,9 @@ export default defineComponent({
 
     const currentPage = computed(() => {
       if (props.containerManager.getRecordCount) {
-        return props.containerManager.getPageNumber({
+        return parseInt(props.containerManager.getPageNumber({
           containerUuid: props.containerUuid
-        })
+        }), 10)
       }
       return 1
     })
@@ -233,6 +256,71 @@ export default defineComponent({
         })
       }
       return recordsWithFilter.value.length
+    })
+
+    const tabData = computed(() => {
+      if (props.containerManager.getRecordList) {
+        return props.containerManager.getRecordList({
+          containerUuid: props.containerUuid
+        })
+      }
+      return {}
+    })
+
+    const defaultSize = computed(() => {
+      const main = document.getElementById('multipleTable')
+      if (
+        !isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)
+      ) {
+        return main.clientHeight
+      }
+      return 600
+    })
+
+    const sizeViewTable = computed(() => {
+      if (
+        !tabData.value.isParentTab &&
+        tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ) {
+        return parseInt(panelMain.clientHeight)
+      } else if (
+        !tabData.value.isParentTab &&
+        !tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ) {
+        if (heightTable.value > 400) {
+          return heightTable.value / 2
+        }
+        return heightTable.value
+      } else if (
+        tabData.value.isParentTab &&
+        tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ) {
+        return parseInt(panelMain.clientHeight)
+      } else if (
+        tabData.value.isParentTab &&
+        !tabData.value.isTableViewFullScreen &&
+        tabData.value.isShowedTableRecords &&
+        !isEmptyValue(panelMain) &&
+        !isEmptyValue(panelMain.clientHeight)
+      ) {
+        return heightTable.value
+      }
+      if (
+        props.containerManager.panelMain() === 'mainBrowser'
+      ) {
+        return defaultSize.value
+      }
+      return 'auto'
     })
 
     /**
@@ -251,6 +339,22 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         row
       })
+      if (!isEmptyValue(props.parentUuid)) {
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isTableViewFullScreen',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isShowedTableRecords',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+      }
     }
 
     /**
@@ -297,6 +401,14 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         pageNumber
       })
+      const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
+      const query = isEmptyValue(props.parentUuid) ? { ...root.$route.query, page: pageNumber } : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
+      router.push({
+        name: root.$route.name,
+        query: {
+          ...query
+        }
+      }, () => {})
     }
 
     const timeOut = ref(() => {})
@@ -365,8 +477,42 @@ export default defineComponent({
         refs.multipleTable.clearSelection()
       }
     }
+    function tableRowClassName(params) {
+      if (params.row.UUID === root.$route.query.action) {
+        return 'success-row'
+      }
+      return ''
+    }
+
+    function adjustSize() {
+      if (!isEmptyValue(panelMain) && !isEmptyValue(panelMain.clientHeight)) {
+        const size = parseInt(panelMain.clientHeight) / 2
+        if (recordsWithFilter.value.length < 5) {
+          heightTable.value = 'auto'
+          return
+        }
+        heightTable.value = size
+      }
+    }
+    window.addEventListener('resize', setTableHeight)
+
+    function setTableHeight() {
+      adjustSize()
+    }
+
+    function handleViewFullScreen() {
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isTableViewFullScreen',
+        attributeNameControl: undefined,
+        attributeValue: !tabData.value.isTableViewFullScreen,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+    }
 
     onMounted(() => {
+      // adjustSize()
+      // setTableHeight()
       if (props.isTableSelection) {
         const selectionsList = props.containerManager.getSelection({
           containerUuid: props.containerUuid
@@ -380,6 +526,7 @@ export default defineComponent({
       // data
       valueToSearch,
       isLoadFilter,
+      heightTable,
       // computeds
       headerList,
       isLoadingDataTale,
@@ -391,8 +538,14 @@ export default defineComponent({
       recordsLength,
       currentPage,
       selectionsLength,
+      tabData,
+      defaultSize,
+      sizeViewTable,
       // methods
       filterRecord,
+      setTableHeight,
+      adjustSize,
+      tableRowClassName,
       handleChangeSearch,
       headerLabel,
       handleChangePage,
@@ -400,41 +553,18 @@ export default defineComponent({
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
-      isDisplayed
+      isDisplayed,
+      handleViewFullScreen
     }
   }
 })
 </script>
 
 <style lang="scss">
-.default-table {
-  padding: 0px !important;
-  display: contents;
-  height: 50% !important;
-  overflow: hidden;
-
-  .el-form-item {
-    >.el-form-item__content {
-      display: contents !important;
-    }
-  }
-
-  .input-search {
+ div#mainWindow{
     width: 100%;
-    padding-right: 20px;
-    margin-right: 20px;
-    margin-left: 10px;
-    margin-bottom: 10px;
-  }
-
-  .el-table__cell {
-    // height table row
-    padding: 0px !important;
-  }
-
-  .el-table--scrollable-y .el-table__body-wrapper {
-    overflow-y: auto;
-    height: 90% !important;
-  }
+}
+.el-table .el-table__cell {
+  padding: 0px !important;
 }
 </style>

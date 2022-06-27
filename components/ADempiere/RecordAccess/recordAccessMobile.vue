@@ -419,10 +419,10 @@ export default {
     overflow-y: auto;
     overflow-x: hidden;
   }
-  .el-scrollbar__bar.is-vertical > div {
-    width: 100%;
-    transform: translateY(998%);
-  }
+  // .el-scrollbar__bar.is-vertical > div {
+  //   width: 100%;
+  //   transform: translateY(998%);
+  // }
   .board {
     width: 100%;
     margin-left: 20px;
