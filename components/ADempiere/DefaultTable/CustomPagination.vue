@@ -27,7 +27,7 @@
           plain
           icon="el-icon-arrow-up"
           style="color: black; font-size: x-large;border: 0px;"
-          :disabled="key <= 0"
+          :disabled="disabledPrevRecord"
           @click="prevRecord"
         />
         <el-button
@@ -35,7 +35,7 @@
           plain
           icon="el-icon-arrow-down"
           style="color: black; font-size: x-large;border: 0px;"
-          :disabled="key === (maxRecord - 1)"
+          :disabled="disabledNextRecord"
           @click="nextRecord"
         />
       </b>
@@ -131,9 +131,15 @@ export default defineComponent({
     })
 
     const index = computed(() => {
-      // getTabIndexRecord
-      // return store.getters.getTabIndexRecord(props.containerUuid)
       return listRecord.value.findIndex(row => row.UUID === recordUuid.value)
+    })
+
+    const disabledPrevRecord = computed(() => {
+      return key.value <= 0
+    })
+
+    const disabledNextRecord = computed(() => {
+      return key.value === (maxRecord.value - 1)
     })
 
     const maxRecord = computed(() => {
@@ -167,6 +173,8 @@ export default defineComponent({
       key,
       // Computed
       index,
+      disabledPrevRecord,
+      disabledNextRecord,
       isSelection,
       recordUuid,
       maxRecord,

@@ -90,6 +90,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 
 import language from '@/lang'
 import store from '@/store'
+import router from '@/router'
 
 // components and mixins
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
@@ -139,7 +140,7 @@ export default defineComponent({
     }
   },
 
-  setup(props) {
+  setup(props, { root }) {
     const listAction = computed(() => {
       return {
         parentUuid: props.parentUuid,
@@ -233,16 +234,15 @@ export default defineComponent({
     function handleChangePage(pageNumber) {
       props.containerManager.setPage({
         parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
+        containerUuid: props.tabAttributes.uuid,
         pageNumber
       })
-      const isParentTab = store.getters.getStoredTab(props.parentUuid, props.containerUuid).isParentTab
       router.push({
         name: root.$route.name,
         query: {
           ...root.$route.query,
-          page: isParentTab ? pageNumber : root.$route.query.page,
-          pageChild: !isParentTab ? pageNumber : root.$route.query.pageChild
+          page: tabData.value.isParentTab ? pageNumber : root.$route.query.page,
+          pageChild: !tabData.value.isParentTab ? pageNumber : root.$route.query.pageChild
         }
       }, () => {})
     }
