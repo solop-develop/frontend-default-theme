@@ -401,13 +401,12 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         pageNumber
       })
-      const isParentTab = store.getters.getStoredTab(props.parentUuid, props.containerUuid).isParentTab
+      const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
+      const query = isEmptyValue(props.parentUuid) ? { ...root.$route.query, page: pageNumber } : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
       router.push({
         name: root.$route.name,
         query: {
-          ...root.$route.query,
-          page: isParentTab ? pageNumber : root.$route.query.page,
-          pageChild: !isParentTab ? pageNumber : root.$route.query.pageChild
+          ...query
         }
       }, () => {})
     }
