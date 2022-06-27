@@ -58,8 +58,9 @@
         :header="tableHeaders"
         :data-table="recordsList"
         :panel-metadata="tabAttributes"
+        :is-navigation="true"
       />
-      <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
+      <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%; min-height: 25vh;overflow-x: hidden !important;">
         <panel-definition
           key="panel-definition"
           :parent-uuid="parentUuid"
@@ -68,6 +69,18 @@
           :group-tab="tabAttributes.tabGroup"
         />
       </el-scrollbar>
+      <!-- pagination table, set custom or use default change page method -->
+      <custom-pagination
+        v-if="!isShowedTableRecords"
+        :total="recordsLength"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :container-manager="containerManager"
+        :current-page="currentPage"
+        :selection="selectionsLength"
+        :handle-change-page="handleChangePage"
+        :is-navigation="true"
+      />
     </div>
   </div>
 </template>
@@ -82,6 +95,7 @@ import store from '@/store'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabOptions from './TabOptions.vue'
+import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
 
 export default defineComponent({
   name: 'TabPanel',
@@ -89,6 +103,7 @@ export default defineComponent({
   components: {
     PanelDefinition,
     DefaultTable,
+    CustomPagination,
     TabOptions
   },
 
@@ -167,6 +182,36 @@ export default defineComponent({
       return tabData.value.recordsList
     })
 
+    const currentPage = computed(() => {
+      if (props.containerManager.getRecordCount) {
+        return parseInt(props.containerManager.getPageNumber({
+          containerUuid: props.tabAttributes.uuid
+        }), 10)
+      }
+      return 1
+    })
+
+    const recordsLength = computed(() => {
+      if (props.containerManager.getRecordCount) {
+        return props.containerManager.getRecordCount({
+          containerUuid: props.tabAttributes.uuid
+        })
+      }
+      return 0
+    })
+
+    const listRecord = computed(() => {
+      return props.containerManager.getRecordsList({
+        containerUuid: props.tabAttributes.uuid
+      })
+    })
+
+    const selectionsLength = computed(() => {
+      return props.containerManager.getSelection({
+        containerUuid: props.tabAttributes.uuid
+      }).length
+    })
+
     function changeShowedRecords() {
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
@@ -185,6 +230,22 @@ export default defineComponent({
         containerUuid: props.tabAttributes.uuid
       })
     }
+    function handleChangePage(pageNumber) {
+      props.containerManager.setPage({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        pageNumber
+      })
+      const isParentTab = store.getters.getStoredTab(props.parentUuid, props.containerUuid).isParentTab
+      router.push({
+        name: root.$route.name,
+        query: {
+          ...root.$route.query,
+          page: isParentTab ? pageNumber : root.$route.query.page,
+          pageChild: !isParentTab ? pageNumber : root.$route.query.pageChild
+        }
+      }, () => {})
+    }
 
     return {
       // computed
@@ -194,7 +255,13 @@ export default defineComponent({
       tableHeaders,
       tabData,
       isMobile,
+      // Pagination
+      currentPage,
+      recordsLength,
+      listRecord,
+      selectionsLength,
       // methodo
+      handleChangePage,
       changeShowedRecords,
       handleViewFullScreen
     }

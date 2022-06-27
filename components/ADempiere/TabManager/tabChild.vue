@@ -80,6 +80,7 @@
             :header="tableHeaders"
             :data-table="recordsList"
             :panel-metadata="tabAttributes"
+            :is-navigation="true"
           />
           <el-scrollbar v-else wrap-class="scroll-tab-child" style="width: 100%; min-height: 30vh;overflow-x: hidden !important;">
             <tab-panel
