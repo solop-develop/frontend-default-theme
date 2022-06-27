@@ -27,6 +27,7 @@
           plain
           icon="el-icon-arrow-up"
           style="color: black; font-size: x-large;border: 0px;"
+          :disabled="key <= 0"
           @click="prevRecord"
         />
         <el-button
@@ -34,6 +35,7 @@
           plain
           icon="el-icon-arrow-down"
           style="color: black; font-size: x-large;border: 0px;"
+          :disabled="key === (maxRecord - 1)"
           @click="nextRecord"
         />
       </b>
@@ -59,7 +61,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 // constants
 import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/constants/table'
@@ -134,12 +136,14 @@ export default defineComponent({
       return listRecord.value.findIndex(row => row.UUID === recordUuid.value)
     })
 
-    // store.commit('setTabData', {
-    //   containerUuid: props.containerUuid,
-    //   indexRecord: index.value
-    // })
+    const maxRecord = computed(() => {
+      return listRecord.value.length
+    })
+
+    const key = ref(index.value)
 
     function nextRecord(params) {
+      key.value = index.value + 1
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
@@ -148,6 +152,10 @@ export default defineComponent({
     }
 
     function prevRecord(params) {
+      key.value = index.value - 1
+      if (key.value <= 0) {
+        return
+      }
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
@@ -156,10 +164,12 @@ export default defineComponent({
     }
 
     return {
+      key,
       // Computed
       index,
       isSelection,
       recordUuid,
+      maxRecord,
       listRecord,
       // Methodos
       nextRecord,
