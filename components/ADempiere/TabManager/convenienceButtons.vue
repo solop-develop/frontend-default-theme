@@ -97,7 +97,14 @@ export default defineComponent({
       return store.getters.getUuidOfContainer(containerUuid)
     })
 
+    const isSecondaryParentTab = computed(() => {
+      return !isEmptyValue(props.tabAttributes.tabParentIndex) && props.tabAttributes.tabParentIndex > 0
+    })
+
     const isCreateRecord = computed(() => {
+      if (isSecondaryParentTab.value) {
+        return false
+      }
       if (props.tabAttributes.isInsertRecord && !props.tabAttributes.isReadOnly) {
         return !isEmptyValue(recordUuid.value) // && recordUuid.value !== 'create-new'
       }
@@ -106,6 +113,9 @@ export default defineComponent({
     })
 
     const isDeleteRecord = computed(() => {
+      if (isSecondaryParentTab.value) {
+        return false
+      }
       if (props.tabAttributes.isDeleteable) {
         return !isEmptyValue(recordUuid.value) && recordUuid.value !== 'create-new'
       }
