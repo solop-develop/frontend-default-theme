@@ -455,7 +455,7 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      // disble focus with tab key on label
+      // disable focus with tab key on label
       setTimeout(() => {
         tabIndex.value = -1
       }, 1000)
