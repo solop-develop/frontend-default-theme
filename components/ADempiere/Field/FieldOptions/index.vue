@@ -18,7 +18,7 @@
 
 <template>
   <div class="field-options">
-    <el-dropdown
+    <!-- <el-dropdown
       v-if="isMobile"
       key="options-mobile"
       :tabindex="-1"
@@ -51,7 +51,7 @@
       </el-dropdown-menu>
     </el-dropdown>
 
-    <!-- Desktop menu -->
+    Desktop menu
     <el-menu
       v-else-if="!isMobile && metadata.panelType !== 'form'"
       key="options-desktop"
@@ -101,9 +101,9 @@
           </el-popover>
         </el-menu-item>
       </el-submenu>
-    </el-menu>
+    </el-menu> -->
 
-    <span v-else key="options-form">
+    <span key="options-form">
       <!-- label or name of field in form -->
       <label-field
         :is-mandatory="metadata.required"
