@@ -18,7 +18,7 @@
 
 <template>
   <el-row :gutter="20" style="margin-left: 0px; margin-right: 0px;margin-top: 1%;">
-    <el-col :span="16" style="float: left;">
+    <!-- <el-col :span="16" style="float: left;">
       <b
         v-if="isNavigation"
       >
@@ -39,8 +39,8 @@
           @click="nextRecord"
         />
       </b>
-    </el-col>
-    <el-col :span="8" style="float: right;">
+    </el-col> -->
+    <el-col :span="24" style="float: right;">
       <el-pagination
         small
         layout="slot, total, prev, pager, next"
