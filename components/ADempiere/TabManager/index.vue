@@ -301,9 +301,11 @@ export default defineComponent({
 
     const getData = () => {
       const containerUuid = tabUuid.value
-      const filters = query.filters
+      let filters
       const pageNumber = query.page
-
+      if (query.filters) {
+        filters = query.filters
+      }
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,
