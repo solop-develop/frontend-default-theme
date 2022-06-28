@@ -29,6 +29,7 @@
       {{ $t('actionMenu.new') }}
     </el-button>
 
+    <!--
     <el-button
       v-if="isDeleteRecord"
       plain
@@ -39,6 +40,34 @@
     >
       {{ $t('actionMenu.delete') }}
     </el-button>
+    -->
+
+    <el-popover
+      v-if="isDeleteRecord"
+      v-model="isVisibleConfirmDelete"
+      placement="top"
+      class="delete-record-container"
+    >
+      <p>{{ $t('window.confirmDeleteRecord') }}</p>
+      <div style="text-align: right; margin: 0">
+        <el-button size="mini" type="text" @click="isVisibleConfirmDelete = false">
+          {{ $t('window.cancel') }}
+        </el-button>
+        <el-button type="primary" size="mini" @click="deleteCurrentRecord()">
+          {{ $t('window.confirm') }}
+        </el-button>
+      </div>
+
+      <el-button
+        slot="reference"
+        plain
+        size="small"
+        type="danger"
+        class="delete-record-button"
+      >
+        {{ $t('actionMenu.delete') }}
+      </el-button>
+    </el-popover>
 
     <el-button
       v-if="isUndoChanges"
@@ -54,7 +83,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, onUnmounted } from '@vue/composition-api'
+import { defineComponent, computed, onUnmounted, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -93,6 +122,8 @@ export default defineComponent({
 
   setup(props) {
     const containerUuid = props.tabAttributes.uuid
+    const isVisibleConfirmDelete = ref(false)
+
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
     })
@@ -139,6 +170,7 @@ export default defineComponent({
         containerUuid,
         recordUuid: recordUuid.value
       })
+      isVisibleConfirmDelete.value = false
     }
 
     function undoChanges() {
@@ -168,8 +200,7 @@ export default defineComponent({
     })
 
     return {
-      containerUuid,
-      store,
+      isVisibleConfirmDelete,
       // computed
       recordUuid,
       isCreateRecord,
@@ -187,6 +218,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .convenience-buttons-main {
+  .delete-record-container {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
   .el-button {
     padding-left: 9px;
     padding-right: 9px;
