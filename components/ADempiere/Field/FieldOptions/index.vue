@@ -21,7 +21,7 @@
     <el-dropdown
       v-if="isMobile"
       key="options-mobile"
-      :tabindex="-1"
+      :tabindex="tabIndex"
       size="mini"
       hide-on-click
       trigger="click"
@@ -35,7 +35,7 @@
         :is-field-only="metadata.isFieldOnly"
         :is-mobile="true"
       />
-      <el-dropdown-menu slot="dropdown">
+      <el-dropdown-menu slot="dropdown" :tabindex="tabIndex">
         <template
           v-for="(option, key) in optionsList"
         >
@@ -63,7 +63,7 @@
       @close="handleClose"
       @select="handleSelect"
     >
-      <el-submenu index="menu">
+      <el-submenu index="menu" :tabindex="tabIndex">
         <template slot="title">
           <label-field
             :is-mandatory="metadata.required"
@@ -115,7 +115,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref, watch } from '@vue/composition-api'
+import { defineComponent, computed, ref, watch, onMounted } from '@vue/composition-api'
 
 import language from '@/lang'
 import store from '@/store'
@@ -163,6 +163,9 @@ export default defineComponent({
     const showPopoverPath = ref(false)
     const triggerMenu = ref('click')
     const optionColumnName = ref(root.$route.query.fieldColumnName)
+
+    // focus element with tab key
+    const tabIndex = ref(9999)
 
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
@@ -451,7 +454,15 @@ export default defineComponent({
       }
     })
 
+    onMounted(() => {
+      // disble focus with tab key on label
+      setTimeout(() => {
+        tabIndex.value = -1
+      }, 1000)
+    })
+
     return {
+      tabIndex,
       // computed
       currentFieldOption,
       isMobile,
