@@ -265,7 +265,7 @@ export default {
         })
       }
       // enter key sends the values
-      this.preHandleChange(event.target.value)
+      // this.preHandleChange(event.target.value)
     },
     keyReleased(value) {
       if (this.metadata.handleKeyReleased) {
