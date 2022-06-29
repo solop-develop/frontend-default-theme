@@ -125,7 +125,6 @@ export default defineComponent({
         uuid: window.uuid,
         query: {
           action: 'zoomIn',
-          tabParent: 0,
           columnName,
           value: fieldValue.value
         }

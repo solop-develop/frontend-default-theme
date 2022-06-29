@@ -136,9 +136,6 @@ export default {
     change(val) {
       if (val.name) {
         const query = {}
-        if (val.meta && val.meta.type === 'window') {
-          query.tabParent = 0
-        }
 
         this.$router.push({
           name: val.name,
