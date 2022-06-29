@@ -48,7 +48,12 @@
         />
       </el-tab-pane>
     </el-tabs>
-    <el-form :inline="true" label-position="top" class="demo-form-inline">
+    <el-form
+      :inline="true"
+      label-position="top"
+      class="demo-form-inline"
+      @submit.native.prevent="notSubmitForm"
+    >
       <template
         v-for="(item, index) in field"
       >
@@ -61,13 +66,19 @@
 </template>
 
 <script>
+// components and mixins
 import tableFrom from '../tableFrom'
+
+// constants
 import labelTable from '@theme/components/ADempiere/Form/VMatch/labelTable.js'
+
 export default {
-  name: 'Receipt',
+  name: 'VMatchReceipt',
+
   components: {
     tableFrom
   },
+
   data() {
     return {
       labelTable,

@@ -56,6 +56,7 @@
         :inline="true"
         class="form-values"
         size="medium"
+        @submit.native.prevent="notSubmitForm"
       >
         <el-row>
           <el-col

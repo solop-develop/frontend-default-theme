@@ -23,6 +23,7 @@
       v-model="dataRecords"
       label-position="top"
       label-width="200px"
+      @submit.native.prevent="notSubmitForm"
     >
       <template
         v-if="firstGroup && firstGroup.groupFinal === ''"
@@ -137,15 +138,21 @@
 </template>
 
 <script>
+// components and mixins
+import Draggable from 'vuedraggable'
 import mainPanelMixin from './mainPanelMixin.js'
-import draggable from 'vuedraggable'
 
 export default {
   name: 'MainPanelDesktop',
+
   components: {
-    draggable
+    Draggable
   },
-  mixins: [mainPanelMixin],
+
+  mixins: [
+    mainPanelMixin
+  ],
+
   methods: {
     setData(dataTransfer) {
       // to avoid Firefox bug

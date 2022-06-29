@@ -28,7 +28,7 @@
       @close="close"
     >
       <div v-if="caseOrder === 1">
-        <el-form>
+        <el-form @submit.native.prevent="notSubmitForm">
           <el-form-item>
             <el-radio v-model="option" :label="1"> {{ $t('form.pos.collect.overdrawnInvoice.returned') }} {{ formatPrice(currentOrder.refundAmount, currency.iSOCode) }} </el-radio>
             <el-radio v-model="option" :label="3"> {{ $t('form.pos.collect.overdrawnInvoice.returnMoney') }}</el-radio>
@@ -57,6 +57,7 @@
               label-width="10px"
               style="display: flex; line-height: 10px;"
               :disabled="isDisabled"
+              @submit.native.prevent="notSubmitForm"
             >
               <el-row id="fieldListCollection">
                 <el-col
@@ -164,6 +165,7 @@
             <el-form
               label-position="top"
               label-width="10px"
+              @submit.native.prevent="notSubmitForm"
             >
               <el-row>
                 <el-col
@@ -212,6 +214,7 @@
               label-width="10px"
               style="display: flex; line-height: 10px;"
               :disabled="isDisabled"
+              @submit.native.prevent="notSubmitForm"
             >
               <el-row id="fieldListCollection">
                 <el-col

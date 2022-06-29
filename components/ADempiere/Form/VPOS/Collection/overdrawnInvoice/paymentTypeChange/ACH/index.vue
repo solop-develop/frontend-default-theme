@@ -20,6 +20,7 @@
     <el-form
       label-position="top"
       label-width="10px"
+      @submit.native.prevent="notSubmitForm"
     >
       <el-row :gutter="12">
         <el-col

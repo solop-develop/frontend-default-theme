@@ -23,6 +23,7 @@
       v-model="dataRecords"
       label-position="top"
       label-width="200px"
+      @submit.native.prevent="notSubmitForm"
     >
       <template
         v-if="firstGroup && firstGroup.groupFinal === ''"

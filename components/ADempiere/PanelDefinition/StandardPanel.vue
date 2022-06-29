@@ -21,6 +21,7 @@
     <el-form
       label-position="top"
       label-width="200px"
+      @submit.native.prevent="notSubmitForm"
     >
       <div class="cards-not-group">
         <div class="card">
@@ -60,6 +61,7 @@
 
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+
 import store from '@/store'
 
 // components and mixins

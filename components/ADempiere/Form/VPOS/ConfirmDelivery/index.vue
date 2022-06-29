@@ -110,6 +110,7 @@
             <el-form
               label-position="top"
               :style="currentLineInfo === scope.row.uuid ? 'float: right;display: contents;line-height: 30px;' : 'float: right;display: none;line-height: 30px;'"
+              @submit.native.prevent="notSubmitForm"
             >
               <el-row style="margin: 10px!important;">
                 <el-col :span="6">
