@@ -47,16 +47,10 @@ export default {
     redirect(item) {
       this.openItemMenu(item)
 
-      let tabParent
-      if (item.meta && item.meta.type === 'window') {
-        tabParent = 0
-      }
-
       this.$router.push({
         name: item.name,
         query: {
           ...this.$router.query,
-          tabParent
         },
         params: {
           ...this.$router.params,
