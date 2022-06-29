@@ -33,7 +33,7 @@
       {{ defaultActionName }}
     </template>
     <el-button v-else type="primary" plain :size="size">
-      <i class="el-icon-arrow-down el-icon--right" />
+      <svg-icon icon-class="more-vertical" />
     </el-button>
 
     <el-dropdown-menu slot="dropdown" class="action-dropdown-menu">
