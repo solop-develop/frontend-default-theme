@@ -23,7 +23,7 @@
     </span>
 
     <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
-      <el-dropdown-item
+      <!-- <el-dropdown-item
         :disabled="isEmptyValue(selectionsRecords)"
         :command="{
           dispatch: 'deleteSelectedRecordsFromWindow',
@@ -35,7 +35,7 @@
       >
         <i class="el-icon-delete" />
         {{ $t('table.dataTable.deleteSelection') }}
-      </el-dropdown-item>
+      </el-dropdown-item> -->
       <el-dropdown-item
         :command="{
           dispatch: 'selectOption',
