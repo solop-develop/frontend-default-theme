@@ -14,7 +14,12 @@
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <el-form v-if="!isEmptyValue(metadata)" label-position="top" class="from-main">
+  <el-form
+    v-if="!isEmptyValue(metadata)"
+    label-position="top"
+    class="from-main"
+    @submit.native.prevent="notSubmitForm"
+  >
     <el-form-item>
       <el-row>
         <el-col v-for="(field, index) in metadata" :key="index" :span="6">
@@ -34,9 +39,11 @@ import Field from '@theme/components/ADempiere/Field'
 
 export default {
   name: 'SearchCriteria',
+
   components: {
     Field
   },
+
   props: {
     metadata: {
       type: Array,

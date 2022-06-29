@@ -26,6 +26,7 @@
       label-position="top"
       size="small"
       class="create-bp"
+      @submit.native.prevent="notSubmitForm"
     >
       <el-row :gutter="24">
         <el-col :span="24">

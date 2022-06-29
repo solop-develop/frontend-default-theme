@@ -24,6 +24,7 @@
       size="small"
       class="location-address"
       @shortkey.native="keyAction"
+      @submit.native.prevent="notSubmitForm"
     >
       <el-row :gutter="0">
         <template v-if="isLoaded">

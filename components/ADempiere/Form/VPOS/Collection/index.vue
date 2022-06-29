@@ -40,6 +40,7 @@
                 label-width="10px"
                 style="float: right; display: flex; line-height: 10px;"
                 :disabled="validateOpenAmount"
+                @submit.native.prevent="notSubmitForm"
               >
                 <el-row id="fieldListCollection">
                   <el-col

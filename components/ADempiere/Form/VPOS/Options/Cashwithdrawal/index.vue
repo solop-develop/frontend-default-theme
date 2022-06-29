@@ -27,6 +27,7 @@
           <el-form
             label-position="top"
             label-width="10px"
+            @submit.native.prevent="notSubmitForm"
           >
             <el-row id="fieldListCollection">
               <el-col
@@ -169,6 +170,7 @@
                 <el-form
                   label-position="top"
                   label-width="10px"
+                  @submit.native.prevent="notSubmitForm"
                 >
                   <el-row id="fieldListCollection">
                     <el-col

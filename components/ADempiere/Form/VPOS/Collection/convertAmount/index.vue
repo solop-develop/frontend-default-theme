@@ -32,6 +32,7 @@
             label-position="top"
             label-width="10px"
             style="float: right; display: flex; line-height: 10px;"
+            @submit.native.prevent="notSubmitForm"
           >
             <el-form-item :label="$t('form.pos.collect.Currency')">
               <el-select
