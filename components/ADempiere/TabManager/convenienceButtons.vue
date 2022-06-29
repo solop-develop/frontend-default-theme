@@ -197,7 +197,7 @@ export default defineComponent({
     function focusConfirmDelete() {
       if (buttonConfirmDelete.value) {
         Vue.nextTick(() => {
-          // doesn't work
+          // TODO: Doesn't work, focus confirm button with displayed popover.
           // buttonConfirmDelete.value.$el.focus()
         })
       }
