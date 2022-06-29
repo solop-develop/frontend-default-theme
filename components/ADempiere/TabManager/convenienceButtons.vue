@@ -53,7 +53,12 @@
         <el-button size="mini" type="text" @click="isVisibleConfirmDelete = false">
           {{ $t('window.cancel') }}
         </el-button>
-        <el-button type="primary" size="mini" @click="deleteCurrentRecord()">
+        <el-button
+          ref="buttonConfirmDelete"
+          type="primary"
+          size="mini"
+          @click="deleteCurrentRecord()"
+        >
           {{ $t('window.confirm') }}
         </el-button>
       </div>
@@ -64,6 +69,7 @@
         size="small"
         type="danger"
         class="delete-record-button"
+        @click="focusConfirmDelete()"
       >
         {{ $t('actionMenu.delete') }}
       </el-button>
@@ -83,6 +89,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { defineComponent, computed, onUnmounted, ref } from '@vue/composition-api'
 
 import store from '@/store'
@@ -123,6 +130,7 @@ export default defineComponent({
   setup(props) {
     const containerUuid = props.tabAttributes.uuid
     const isVisibleConfirmDelete = ref(false)
+    const buttonConfirmDelete = ref(null)
 
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
@@ -147,10 +155,12 @@ export default defineComponent({
       if (isSecondaryParentTab.value) {
         return false
       }
-      if (props.tabAttributes.isDeleteable) {
-        return !isEmptyValue(recordUuid.value) && recordUuid.value !== 'create-new'
-      }
-      return false
+
+      // is enbaled delete on panel
+      return deleteRecord.enabled({
+        parentUuid: props.parentUuid,
+        containerUuid,
+      })
     })
 
     const isUndoChanges = computed(() => {
@@ -180,6 +190,15 @@ export default defineComponent({
           attributeValue: false,
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid
+        })
+      }
+    }
+
+    function focusConfirmDelete() {
+      if (buttonConfirmDelete.value) {
+        Vue.nextTick(() => {
+          // doesn't work
+          // buttonConfirmDelete.value.$el.focus()
         })
       }
     }
@@ -220,6 +239,7 @@ export default defineComponent({
     })
 
     return {
+      buttonConfirmDelete,
       isVisibleConfirmDelete,
       // computed
       recordUuid,
@@ -230,6 +250,7 @@ export default defineComponent({
       // methods
       newRecord,
       deleteCurrentRecord,
+      focusConfirmDelete,
       undoChanges
     }
   }
