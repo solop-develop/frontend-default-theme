@@ -140,6 +140,12 @@ export default defineComponent({
       return !isEmptyValue(props.tabAttributes.tabParentIndex) && props.tabAttributes.tabParentIndex > 0
     })
 
+    const selectionsRecords = computed(() => {
+      return props.containerManager.getSelection({
+        containerUuid: props.tabAttributes.uuid
+      })
+    })
+
     const isCreateRecord = computed(() => {
       if (isSecondaryParentTab.value) {
         return false
@@ -152,14 +158,10 @@ export default defineComponent({
     })
 
     const isDeleteRecord = computed(() => {
-      if (isSecondaryParentTab.value) {
-        return false
-      }
-
-      // is enbaled delete on panel
       return deleteRecord.enabled({
         parentUuid: props.parentUuid,
-        containerUuid,
+        tabParentIndex: props.tabAttributes.tabParentIndex,
+        containerUuid
       })
     })
 
@@ -204,6 +206,12 @@ export default defineComponent({
     }
 
     function deleteCurrentRecord() {
+      if (getCurrentTab.value.isShowedTableRecords && !isEmptyValue(selectionsRecords.value)) {
+        store.dispatch('deleteSelectedRecordsFromWindow', {
+          parentUuid: props.parentUuid,
+          containerUuid: props.tabAttributes.uuid
+        })
+      }
       deleteRecord.deleteRecord({
         parentUuid: props.parentUuid,
         containerUuid,
@@ -243,6 +251,7 @@ export default defineComponent({
       isVisibleConfirmDelete,
       // computed
       recordUuid,
+      selectionsRecords,
       isCreateRecord,
       isDeleteRecord,
       isUndoChanges,

@@ -24,19 +24,6 @@
 
     <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
       <el-dropdown-item
-        :disabled="isEmptyValue(selectionsRecords)"
-        :command="{
-          dispatch: 'deleteSelectedRecordsFromWindow',
-          value: {
-            parentUuid,
-            containerUuid
-          }
-        }"
-      >
-        <i class="el-icon-delete" />
-        {{ $t('table.dataTable.deleteSelection') }}
-      </el-dropdown-item>
-      <el-dropdown-item
         :command="{
           dispatch: 'selectOption',
           value: $t('table.dataTable.showMinimalistView')
@@ -78,6 +65,7 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
 export default defineComponent({
   name: 'ColumnsDisplayOption',
 
