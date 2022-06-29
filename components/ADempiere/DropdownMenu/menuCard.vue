@@ -50,7 +50,7 @@ export default {
       this.$router.push({
         name: item.name,
         query: {
-          ...this.$router.query,
+          ...this.$router.query
         },
         params: {
           ...this.$router.params,
