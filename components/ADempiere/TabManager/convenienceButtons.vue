@@ -157,11 +157,31 @@ export default defineComponent({
       return isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new'
     })
 
+    const getCurrentTab = computed(() => {
+      const tab = store.getters.getStoredTab(
+        props.parentUuid,
+        props.tabAttributes.uuid
+      )
+      if (tab) {
+        return tab
+      }
+      return props.tabAttributes
+    })
+
     function newRecord() {
       createNewRecord.createNewRecord({
         parentUuid: props.parentUuid,
         containerUuid
       })
+      if (getCurrentTab.value.isShowedTableRecords) {
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isShowedTableRecords',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.tabAttributes.uuid
+        })
+      }
     }
 
     function deleteCurrentRecord() {
@@ -206,6 +226,7 @@ export default defineComponent({
       isCreateRecord,
       isDeleteRecord,
       isUndoChanges,
+      getCurrentTab,
       // methods
       newRecord,
       deleteCurrentRecord,
