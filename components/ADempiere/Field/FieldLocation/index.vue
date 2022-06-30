@@ -68,8 +68,8 @@
 <script>
 // mixins
 import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
-import mixinLocation, { LOCATION_ADDRESS_FORM } from './mixinLocation.js'
-
+import mixinLocation from './mixinLocation.js'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 // components
 import LocationAddressForm from './locationAddressForm.vue'
 
@@ -92,6 +92,10 @@ export default {
     },
     containerUuid: {
       type: String,
+      required: true
+    },
+    containerManager: {
+      type: Object,
       required: true
     }
   },
