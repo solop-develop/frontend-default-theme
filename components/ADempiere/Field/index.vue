@@ -75,6 +75,7 @@ import store from '@/store'
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -149,6 +150,16 @@ export default {
       return this.isOnlyField ? 'display: contents;text-align: center;' : ''
     },
     sizeField() {
+      if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
+        return {
+          // ...this.field.size,
+          xs: 24,
+          sm: 24,
+          md: 24,
+          lg: 24,
+          xl: 24
+        }
+      }
       if (isEmptyValue(this.field.size)) {
         const size = 24
         return {

@@ -27,7 +27,7 @@
     >
       <el-row :gutter="0">
         <template v-if="isLoaded">
-          <el-col v-for="(field) in fieldsListLocation" :key="field.columnName" :span="12">
+          <el-col v-for="(field) in fieldsListLocation" :key="field.columnName" :span="24">
             <field-definition
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
@@ -73,7 +73,8 @@
 <script>
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import mixinLocation, { LOCATION_ADDRESS_FORM } from './mixinLocation.js'
+import mixinLocation from './mixinLocation.js'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 
 // constants
 import FieldsList from './fieldsList.js'
@@ -140,6 +141,11 @@ export default {
 
         getFieldsList({ containerUuid, root }) {
           return root.$store.getters.getFieldLocation
+        },
+
+        isReadOnlyField(field) {
+          const { isReadOnly } = field
+          return isReadOnly
         }
       }
     },

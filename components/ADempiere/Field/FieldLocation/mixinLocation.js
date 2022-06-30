@@ -18,7 +18,7 @@
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
 
 // constants
-export const LOCATION_ADDRESS_FORM = 'Location-Address-Form'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 import FieldsList from './fieldsList.js'
 
 // utils and helpers methods

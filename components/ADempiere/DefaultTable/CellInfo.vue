@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <span v-if="isRowCanBeEdited(dataRow)" key="field-component">
+  <!-- <span v-if="isRowCanBeEdited(dataRow)" key="field-component">
     <field-definition
       key="field-definition"
       :container-uuid="containerUuid"
@@ -32,9 +32,9 @@
       }"
       size="mini"
     />
-  </span>
+  </span> -->
 
-  <span v-else key="info-value">
+  <span key="info-value">
     <document-status-tag
       v-if="fieldAttributes.isColumnDocumentStatus"
       key="document-status"
