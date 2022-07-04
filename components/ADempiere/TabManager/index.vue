@@ -31,9 +31,11 @@
         :current-tab="tabsList[currentTab]"
       />
     </auxiliary-panel> -->
-    <div style="display: flex;">
+    <div style="display: flex;height: 100%;">
       <el-tabs
         v-model="currentTab"
+        ref="el-tabs-container"
+        class="el-tabs-container"
         type="border-card"
         style="width:100%"
         @tab-click="handleClick"
