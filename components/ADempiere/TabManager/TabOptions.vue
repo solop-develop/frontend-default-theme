@@ -63,6 +63,8 @@ import store from '@/store'
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons.vue'
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
   name: 'TabOptions',
@@ -152,10 +154,10 @@ export default defineComponent({
     })
 
     function changeShowedRecords() {
-      if (tabData.value.isShowedTableRecords) {
-        const isSelectionRow = props.containerManager.getSelection({
-          containerUuid: props.tabAttributes.uuid
-        })
+      const isSelectionRow = props.containerManager.getSelection({
+        containerUuid: props.tabAttributes.uuid
+      })
+      if (tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow)) {
         isSelectionRow.sort()
 
         props.containerManager.seekRecord({
