@@ -1,6 +1,6 @@
 <template>
   <el-dropdown trigger="click" class="international" @command="handleSetLanguage">
-    <div>
+    <div style="margin-right: 5px;margin-left: 4px;">
       <svg-icon class-name="international-icon" icon-class="language" />
     </div>
     <el-dropdown-menu slot="dropdown">

@@ -19,6 +19,16 @@
 <template>
   <div style="height: 100% !important;">
     <span v-if="!isShowedTableRecords">
+      <el-button
+        v-if="!isEmptyValue(currentTab.childTabs)"
+        type="text"
+        style="float: right;"
+        @click="handleViewFullScreen()"
+      >
+        <svg-icon
+          :icon-class="iconFullScreen ? 'exit-fullscreen' : 'fullscreen'"
+        />
+      </el-button>
       <tab-options
         :parent-uuid="parentUuid"
         :container-manager="containerManager"
@@ -60,7 +70,7 @@
         :panel-metadata="tabAttributes"
         :is-navigation="true"
       />
-      <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%; min-height: 25vh;overflow-x: hidden !important;">
+      <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
         <panel-definition
           key="panel-definition"
           :parent-uuid="parentUuid"
@@ -69,18 +79,6 @@
           :group-tab="tabAttributes.tabGroup"
         />
       </el-scrollbar>
-      <!-- pagination table, set custom or use default change page method -->
-      <custom-pagination
-        v-if="!isShowedTableRecords"
-        :total="recordsLength"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :current-page="currentPage"
-        :selection="selectionsLength"
-        :handle-change-page="handleChangePage"
-        :is-navigation="true"
-      />
     </div>
   </div>
 </template>
@@ -96,7 +94,7 @@ import router from '@/router'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabOptions from './TabOptions.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+// import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
 
 export default defineComponent({
   name: 'TabPanel',
@@ -104,7 +102,7 @@ export default defineComponent({
   components: {
     PanelDefinition,
     DefaultTable,
-    CustomPagination,
+    // CustomPagination,
     TabOptions
   },
 
@@ -170,6 +168,27 @@ export default defineComponent({
       )
     })
 
+    const currentTab = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.tabAttributes.uuid
+      )
+    })
+
+    const iconFullScreen = computed(() => {
+      if (!currentTab.value.isParentTab) {
+        return currentTab.value.isTabChildFullScreen
+      }
+      return currentTab.value.isTableViewFullScreen
+    })
+
+    const isViewFullScreen = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.currentTabUuid
+      ).isTableViewFullScreen
+    })
+
     const tableHeaders = computed(() => {
       const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
       if (panel && panel.fieldsList) {
@@ -223,14 +242,54 @@ export default defineComponent({
       })
     }
     function handleViewFullScreen() {
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isViewFullScreen',
-        attributeNameControl: undefined,
-        attributeValue: !tabData.value.isViewFullScreen,
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabAttributes.uuid
+      if (!currentTab.value.isParentTab) {
+        changeFullScreen({
+          attributeName: 'isTableViewFullScreen',
+          attributeValue: false,
+          containerUuid: currentTab.value.firstTabUuid,
+          tabChild: {
+            attributeName: 'isTabChildFullScreen',
+            attributeValue: !currentTab.value.isTabChildFullScreen,
+            containerUuid: props.tabAttributes.uuid
+          }
+        })
+        return
+      }
+      const index = parseInt(root.$route.query.tabChild, 10)
+      changeFullScreen({
+        attributeName: 'isTableViewFullScreen',
+        attributeValue: !currentTab.value.isTableViewFullScreen,
+        containerUuid: props.tabAttributes.uuid,
+        tabChild: {
+          attributeName: 'isTabChildFullScreen',
+          attributeValue: false,
+          containerUuid: currentTab.value.childTabs[index].uuid
+        }
       })
     }
+
+    function changeFullScreen({
+      attributeValue,
+      attributeName,
+      containerUuid,
+      tabChild
+    }) {
+      store.dispatch('changeTabAttribute', {
+        attributeName,
+        attributeNameControl: undefined,
+        attributeValue,
+        parentUuid: props.parentUuid,
+        containerUuid
+      })
+      store.dispatch('changeTabAttribute', {
+        attributeName: tabChild.attributeName,
+        attributeNameControl: undefined,
+        attributeValue: tabChild.attributeValue,
+        parentUuid: props.parentUuid,
+        containerUuid: tabChild.containerUuid
+      })
+    }
+
     function handleChangePage(pageNumber) {
       props.containerManager.setPage({
         parentUuid: props.parentUuid,
@@ -254,13 +313,17 @@ export default defineComponent({
       isShowedTableRecords,
       tableHeaders,
       tabData,
+      isViewFullScreen,
+      iconFullScreen,
       isMobile,
+      currentTab,
       // Pagination
       currentPage,
       recordsLength,
       listRecord,
       selectionsLength,
       // methodo
+      changeFullScreen,
       handleChangePage,
       changeShowedRecords,
       handleViewFullScreen
@@ -269,3 +332,20 @@ export default defineComponent({
 
 })
 </script>
+
+<style lang="scss" scoped>
+.scroll-tab-panel {
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  ::v-deep {
+    .el-scrollbar__bar {
+      bottom: 0px;
+    }
+    // .el-scrollbar__wrap {
+    //   height: 49px;
+    // }
+  }
+}
+</style>

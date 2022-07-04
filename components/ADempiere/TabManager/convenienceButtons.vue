@@ -141,8 +141,8 @@ export default defineComponent({
 
     const isDisDisableOptionsTabChild = computed(() => {
       if (!getCurrentTab.value.isParentTab) {
-        if (store.getters.(getCurrentTab.value.firstTabUuid)) {
-          return true  getUuidOfContainer
+        if (store.getters.getUuidOfContainer(getCurrentTab.value.firstTabUuid)) {
+          return true
         }
         return false
       }
