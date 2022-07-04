@@ -314,7 +314,7 @@ export default defineComponent({
           currentTab.isParentTab &&
           !currentTab.isTableViewFullScreen
         ) {
-          return panelMain.clientHeight - 220
+          return panelMain.clientHeight - 200
         } else if (
           !isEmptyValue(panelMain) &&
           !isEmptyValue(panelMain.clientHeight) &&
@@ -328,7 +328,7 @@ export default defineComponent({
           !currentTab.isParentTab &&
           !currentTab.isTabChildFullScreen
         ) {
-          return 'auto'
+          return 280
         } else if (
           !isEmptyValue(panelMain) &&
           !isEmptyValue(panelMain.clientHeight) &&
@@ -362,22 +362,6 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         row
       })
-      if (!isEmptyValue(props.parentUuid)) {
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'isTableViewFullScreen',
-          attributeNameControl: undefined,
-          attributeValue: false,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'isShowedTableRecords',
-          attributeNameControl: undefined,
-          attributeValue: false,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-      }
     }
 
     /**
@@ -388,15 +372,23 @@ export default defineComponent({
     function handleRowDblClick(row, column, event) {
       // disable edit mode
       row.isEditRow = false
-      if (!row.isSelectedRow) {
-        return
-      }
-
-      props.containerManager.confirmRowChanges({
+      // if (!row.isSelectedRow) {
+      //   return
+      // }
+      props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         row
       })
+      if (!isEmptyValue(props.parentUuid)) {
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isShowedTableRecords',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+      }
     }
 
     function headerLabel(field) {
@@ -471,9 +463,10 @@ export default defineComponent({
     }
 
     function handleSelection(selections, rowSelected) {
+      let index = 0
       rowSelected.isSelectedRow = !rowSelected.isSelectedRow
+      rowSelected.rowSelectedIndex = index++
       rowSelected.isEditRow = rowSelected.isSelectedRow // edit record if is selected
-
       props.containerManager.setSelection({
         containerUuid: props.containerUuid,
         recordsSelected: selections
@@ -501,7 +494,8 @@ export default defineComponent({
       }
     }
     function tableRowClassName(params) {
-      if (params.row.UUID === root.$route.query.action) {
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      if (params.row.UUID === recordUuid) {
         return 'success-row'
       }
       return ''
@@ -578,12 +572,21 @@ export default defineComponent({
     onMounted(() => {
       // adjustSize()
       // setTableHeight()
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (props.isTableSelection) {
         const selectionsList = props.containerManager.getSelection({
           containerUuid: props.containerUuid
         })
-
-        toggleSelection(selectionsList)
+        if (!isEmptyValue(selectionsList)) {
+          toggleSelection(selectionsList)
+        } else if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid)) {
+          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+          props.containerManager.setSelection({
+            containerUuid: props.containerUuid,
+            recordsSelected: [currentRow]
+          })
+          toggleSelection([currentRow])
+        }
       }
     })
 
@@ -635,4 +638,7 @@ export default defineComponent({
 .el-table .el-table__cell {
   padding: 0px !important;
 }
+.el-table .success-row {
+    background: #d3e4ec;
+  }
 </style>
