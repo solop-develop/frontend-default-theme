@@ -224,6 +224,8 @@ export default defineComponent({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid
         })
+        isVisibleConfirmDelete.value = false
+        return
       }
       deleteRecord.deleteRecord({
         parentUuid: props.parentUuid,

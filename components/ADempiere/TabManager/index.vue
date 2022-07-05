@@ -33,8 +33,8 @@
     </auxiliary-panel> -->
     <div style="display: flex;height: 100%;">
       <el-tabs
-        v-model="currentTab"
         ref="el-tabs-container"
+        v-model="currentTab"
         class="el-tabs-container"
         type="border-card"
         style="width:100%"

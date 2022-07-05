@@ -152,6 +152,18 @@ export default defineComponent({
     })
 
     function changeShowedRecords() {
+      if (tabData.value.isShowedTableRecords) {
+        const isSelectionRow = props.containerManager.getSelection({
+          containerUuid: props.tabAttributes.uuid
+        })
+        isSelectionRow.sort()
+
+        props.containerManager.seekRecord({
+          parentUuid: props.parentUuid,
+          containerUuid: props.tabAttributes.uuid,
+          row: isSelectionRow[isSelectionRow.length - 1]
+        })
+      }
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
