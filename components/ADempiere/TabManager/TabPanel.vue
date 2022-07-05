@@ -199,7 +199,9 @@ export default defineComponent({
 
     // get records list
     const recordsList = computed(() => {
-      return tabData.value.recordsList
+      return props.containerManager.getRecordsList({
+        containerUuid: props.tabAttributes.uuid
+      })
     })
 
     const currentPage = computed(() => {
@@ -218,12 +220,6 @@ export default defineComponent({
         })
       }
       return 0
-    })
-
-    const listRecord = computed(() => {
-      return props.containerManager.getRecordsList({
-        containerUuid: props.tabAttributes.uuid
-      })
     })
 
     const selectionsLength = computed(() => {
@@ -320,7 +316,6 @@ export default defineComponent({
       // Pagination
       currentPage,
       recordsLength,
-      listRecord,
       selectionsLength,
       // methodo
       changeFullScreen,

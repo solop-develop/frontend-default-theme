@@ -120,6 +120,7 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { getContextAttributes, generateContextKey } from '@/utils/ADempiere/contextUtils'
 
 export default defineComponent({
   name: 'TabManager',
@@ -358,43 +359,75 @@ export default defineComponent({
       })
     }
 
+    const storedContextAttributes = computed(() => {
+      return store.getters.getTabContextKey({
+        containerUuid: props.tabsList[currentTab.value].uuid
+      })
+    })
+
+    const storedOldContextAttibutes = computed(() => {
+      return store.getters.getTabOldContextKey({
+        containerUuid: props.tabsList[currentTab.value].uuid
+      })
+    })
+
+    const storedOldRecord = computed(() => {
+      return store.getters.getCurrentRecordOnPanel(props.tabsList[currentTab.value].uuid)
+    })
+
+    const currentContextAttributes = computed(() => {
+      const contextAttributesList = getContextAttributes({
+        parentUuid: props.parentUuid,
+        contextColumnNames: currentTabMetadata.value.contextColumnNames,
+        keyName: 'key'
+      })
+      return generateContextKey(contextAttributesList, 'key')
+    })
+
     /**
      * Vuex suscription when record parent change
      */
-    let unsuscribeChangeParentRecord = () => {}
+    const unsuscribeChangeParentRecord = () => {}
 
-    // if changed record in parent tab, reload tab child
-    watch(currentTab, (newValue, oldValue) => {
-      if (newValue !== oldValue && !isEmptyValue(newValue)) {
-        getData()
-      }
-    })
+    // // if changed record in parent tab, reload tab child
+    // watch(currentTab, (newValue, oldValue) => {
+    //   if (newValue !== oldValue && !isEmptyValue(newValue)) {
+    //     getData()
+    //   }
+    // })
 
     // if changed record in parent tab, reload tab child
     watch(recordUuidTabParent, (newValue, oldValue) => {
       if (newValue !== oldValue && !isEmptyValue(newValue)) {
-        getData()
-      }
-    })
-
-    unsuscribeChangeParentRecord = store.subscribeAction({
-      after: (action, state) => {
-        if (action.type === 'setTabDefaultValues' && action.payload) {
-          const currentChildTab = currentTabMetadata.value
-          if (action.payload.parentUuid === currentChildTab.parentUuid) {
-            const isChangeParentTab = currentChildTab.parentTabs.some(tabItem => {
-              return tabItem.uuid === action.payload.containerUuid
-            })
-            if (isChangeParentTab) {
-              store.dispatch('setTabDefaultValues', {
-                parentUuid: action.payload.parentUuid,
-                containerUuid: currentChildTab.containerUuid
-              })
-            }
-          }
+        if (currentContextAttributes.value === storedOldContextAttibutes.value) {
+          store.dispatch('setOldAsCurrentTabData', {
+            parentUuid: props.parentUuid,
+            containerUuid: props.tabsList[currentTab.value].uuid
+          })
+        } else {
+          getData()
         }
       }
     })
+
+    // unsuscribeChangeParentRecord = store.subscribeAction({
+    //   after: (action, state) => {
+    //     if (action.type === 'setTabDefaultValues' && action.payload) {
+    //       const currentChildTab = currentTabMetadata.value
+    //       if (action.payload.parentUuid === currentChildTab.parentUuid) {
+    //         const isChangeParentTab = currentChildTab.parentTabs.some(tabItem => {
+    //           return tabItem.uuid === action.payload.containerUuid
+    //         })
+    //         if (isChangeParentTab) {
+    //           store.dispatch('setTabDefaultValues', {
+    //             parentUuid: action.payload.parentUuid,
+    //             containerUuid: currentChildTab.containerUuid
+    //           })
+    //         }
+    //       }
+    //     }
+    //   }
+    // })
 
     setTabNumber(currentTab.value)
 
@@ -409,6 +442,10 @@ export default defineComponent({
       tableHeaders,
       recordsList,
       // computed
+      storedOldRecord,
+      storedContextAttributes,
+      storedOldContextAttibutes,
+      currentContextAttributes,
       isShowedTabs,
       isMobile,
       listAction,
