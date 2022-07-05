@@ -152,10 +152,10 @@ export default defineComponent({
     })
 
     function changeShowedRecords() {
-      if (tabData.value.isShowedTableRecords) {
-        const isSelectionRow = props.containerManager.getSelection({
-          containerUuid: props.tabAttributes.uuid
-        })
+      const isSelectionRow = props.containerManager.getSelection({
+        containerUuid: props.tabAttributes.uuid
+      })
+      if (tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow)) {
         isSelectionRow.sort()
 
         props.containerManager.seekRecord({
