@@ -250,6 +250,10 @@ export default defineComponent({
       return 1
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const recordsLength = computed(() => {
       if (props.containerManager.getRecordCount) {
         return props.containerManager.getRecordCount({
@@ -358,11 +362,21 @@ export default defineComponent({
         row.isEditRow = true
       }
 
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        row
-      })
+      if (isMobile.value && !isEmptyValue(props.parentUuid)) {
+        store.dispatch('changeTabAttribute', {
+          attributeName: 'isShowedTableRecords',
+          attributeNameControl: undefined,
+          attributeValue: false,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+
+        props.containerManager.seekRecord({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          row
+        })
+      }
     }
 
     /**
@@ -376,11 +390,14 @@ export default defineComponent({
       // if (!row.isSelectedRow) {
       //   return
       // }
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        row
-      })
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      if (recordUuid !== row.UUID) {
+        props.containerManager.seekRecord({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          row
+        })
+      }
       if (!isEmptyValue(props.parentUuid)) {
         store.dispatch('changeTabAttribute', {
           attributeName: 'isShowedTableRecords',
@@ -496,7 +513,7 @@ export default defineComponent({
     }
     function tableRowClassName(params) {
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      if (params.row.UUID === recordUuid) {
+      if (params.row.UUID === recordUuid && !isEmptyValue(props.parentUuid)) {
         return 'success-row'
       }
       return ''
@@ -612,6 +629,7 @@ export default defineComponent({
       sizeViewTable,
       isTableViewFullScreen,
       iconFullScreen,
+      isMobile,
       // methods
       filterRecord,
       setTableHeight,
