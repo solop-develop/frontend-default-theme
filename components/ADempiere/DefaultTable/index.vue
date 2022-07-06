@@ -390,11 +390,14 @@ export default defineComponent({
       // if (!row.isSelectedRow) {
       //   return
       // }
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        row
-      })
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      if (recordUuid !== row.UUID) {
+        props.containerManager.seekRecord({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          row
+        })
+      }
       if (!isEmptyValue(props.parentUuid)) {
         store.dispatch('changeTabAttribute', {
           attributeName: 'isShowedTableRecords',
