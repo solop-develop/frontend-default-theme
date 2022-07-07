@@ -115,10 +115,11 @@ export default {
       return typeInput
     },
     inputSize() {
-      if (this.isEmptyValue(this.metadata.inputSize)) {
-        return 'medium'
+      if (!this.isEmptyValue(this.metadata.inputSize)) {
+        return this.metadata.inputSize
       }
-      return this.metadata.inputSize
+      // deafult managed with form of fields
+      return undefined // 'medium'
     }
   }
 }
