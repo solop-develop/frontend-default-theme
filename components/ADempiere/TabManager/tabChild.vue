@@ -348,14 +348,20 @@ export default defineComponent({
         // set first record
         if (isEmptyValue(row)) {
           row = responseData[0]
+          props.containerManager.seekRecord({
+            parentUuid: props.parentUuid,
+            containerUuid,
+            row
+          })
         }
 
         // set values in panel
-        props.containerManager.seekRecord({
-          parentUuid: props.parentUuid,
-          containerUuid,
-          row
-        })
+
+        // props.containerManager.seekRecord({
+        //   parentUuid: props.parentUuid,
+        //   containerUuid,
+        //   row
+        // })
       })
     }
 

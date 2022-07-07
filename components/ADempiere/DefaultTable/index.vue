@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, ref } from '@vue/composition-api'
+import { defineComponent, computed, onMounted, onUpdated, ref } from '@vue/composition-api'
 
 import store from '@/store'
 import router from '@/router'
@@ -192,7 +192,10 @@ export default defineComponent({
   setup(props, { root, refs }) {
     const valueToSearch = ref('')
     const heightTable = ref()
+    const timeOut = ref(() => {})
     const panelMain = document.getElementById('mainWindow')
+    const heightSize = ref()
+    const currentRowSelect = ref({})
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -313,34 +316,34 @@ export default defineComponent({
           props.parentUuid,
           props.containerUuid
         )
+
         if (
           !isEmptyValue(panelMain) &&
-          !isEmptyValue(panelMain.clientHeight) &&
+          !isEmptyValue(heightSize.value) &&
           currentTab.isParentTab &&
           !currentTab.isTableViewFullScreen
         ) {
-          return panelMain.clientHeight - 200
+          return heightSize.value - 200
         } else if (
           !isEmptyValue(panelMain) &&
-          !isEmptyValue(panelMain.clientHeight) &&
+          !isEmptyValue(heightSize.value) &&
           currentTab.isParentTab &&
           currentTab.isTableViewFullScreen
         ) {
-          return panelMain.clientHeight - 250
+          return heightSize.value - 250
         } else if (
-          !isEmptyValue(panelMain) &&
-          !isEmptyValue(panelMain.clientHeight) &&
+          !isEmptyValue(heightSize.value) &&
           !currentTab.isParentTab &&
           !currentTab.isTabChildFullScreen
         ) {
-          return 280
+          return heightSize.value - 210
         } else if (
           !isEmptyValue(panelMain) &&
-          !isEmptyValue(panelMain.clientHeight) &&
+          !isEmptyValue(heightSize.value) &&
           !currentTab.isParentTab &&
           currentTab.isTabChildFullScreen
         ) {
-          return panelMain.clientHeight - 250
+          return heightSize.value - 250
         }
       }
       if (
@@ -357,6 +360,7 @@ export default defineComponent({
      * @param {string} column
      */
     function handleRowClick(row, column, event) {
+      currentRowSelect.value = row
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
@@ -387,15 +391,22 @@ export default defineComponent({
     function handleRowDblClick(row, column, event) {
       // disable edit mode
       row.isEditRow = false
-      // if (!row.isSelectedRow) {
-      //   return
-      // }
+
+      const currentTab = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      if (recordUuid !== row.UUID) {
+      if (recordUuid !== row.UUID && currentTab.isParentTab) {
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.containerUuid,
           row
+        })
+        props.containerManager.setSelection({
+          containerUuid: props.containerUuid,
+          recordsSelected: []
         })
       }
       if (!isEmptyValue(props.parentUuid)) {
@@ -443,8 +454,6 @@ export default defineComponent({
         }
       }, () => {})
     }
-
-    const timeOut = ref(() => {})
 
     function handleChangeSearch(value) {
       clearTimeout(timeOut.value)
@@ -513,7 +522,7 @@ export default defineComponent({
     }
     function tableRowClassName(params) {
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      if (params.row.UUID === recordUuid && !isEmptyValue(props.parentUuid)) {
+      if (params.row.UUID === recordUuid && !isEmptyValue(props.parentUuid) && isEmptyValue(currentRowSelect.value)) {
         return 'success-row'
       }
       return ''
@@ -529,7 +538,6 @@ export default defineComponent({
         heightTable.value = size
       }
     }
-    window.addEventListener('resize', setTableHeight)
 
     function setTableHeight() {
       adjustSize()
@@ -587,6 +595,38 @@ export default defineComponent({
       })
     }
 
+    function loadSelect() {
+      clearTimeout(timeOut.value)
+      timeOut.value = setTimeout(() => {
+        const selectionsList = props.containerManager.getSelection({
+          containerUuid: props.containerUuid
+        })
+        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList)) {
+          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+          props.containerManager.setSelection({
+            containerUuid: props.containerUuid,
+            recordsSelected: [currentRow]
+          })
+          toggleSelection([currentRow])
+        }
+        // if (!isEmptyValue(selectionsList)) {
+        //   toggleSelection(selectionsList)
+        // }
+      }, 1000)
+    }
+
+    onUpdated(() => {
+      const main = document.getElementById('mainWindow')
+      if (
+        !isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)
+      ) {
+        heightSize.value = main.clientHeight
+      }
+      loadSelect()
+    })
+
     onMounted(() => {
       // adjustSize()
       // setTableHeight()
@@ -610,9 +650,11 @@ export default defineComponent({
 
     return {
       // data
+      timeOut,
       valueToSearch,
       isLoadFilter,
       heightTable,
+      heightSize,
       // computeds
       headerList,
       isLoadingDataTale,
@@ -630,6 +672,7 @@ export default defineComponent({
       isTableViewFullScreen,
       iconFullScreen,
       isMobile,
+      currentRowSelect,
       // methods
       filterRecord,
       setTableHeight,
@@ -644,7 +687,8 @@ export default defineComponent({
       handleSelection,
       handleSelectionAll,
       isDisplayed,
-      handleViewFullScreen
+      handleViewFullScreen,
+      loadSelect
     }
   }
 })
@@ -658,6 +702,6 @@ export default defineComponent({
   padding: 0px !important;
 }
 .el-table .success-row {
-    background: #d3e4ec;
+    background: #e8f4ff;
   }
 </style>

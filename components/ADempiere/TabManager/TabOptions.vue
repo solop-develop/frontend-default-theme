@@ -66,9 +66,6 @@ import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenien
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
-
 export default defineComponent({
   name: 'TabOptions',
 
@@ -163,6 +160,13 @@ export default defineComponent({
       isSelectionRow.sort()
       const recordUuid = store.getters.getUuidOfContainer(props.tabAttributes.uuid)
       if (tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow) && isSelectionRow[isSelectionRow.length - 1].UUID !== recordUuid) {
+        props.containerManager.seekRecord({
+          parentUuid: props.parentUuid,
+          containerUuid: props.tabAttributes.uuid,
+          row: isSelectionRow[isSelectionRow.length - 1]
+        })
+      }
+      if (!tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow)) {
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
