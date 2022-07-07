@@ -71,6 +71,8 @@
 </template>
 
 <script>
+import store from '@/store'
+
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import mixinLocation from './mixinLocation.js'
@@ -139,12 +141,11 @@ export default {
       return {
         ...this.containerManager,
 
-        getFieldsList({ containerUuid, root }) {
-          return root.$store.getters.getFieldLocation
+        getFieldsList({ containerUuid }) {
+          return store.getters.getFieldLocation
         },
 
-        isReadOnlyField(field) {
-          const { isReadOnly } = field
+        isReadOnlyField({ isReadOnly }) {
           return isReadOnly
         }
       }
