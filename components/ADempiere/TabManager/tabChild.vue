@@ -20,6 +20,7 @@
   <!-- <div style="height: 100% !important;">
     <div style="display: flex;"> -->
   <el-tabs
+    v-if="!isEmptyValue(showedTabsList)"
     v-model="currentTab"
     type="border-card"
     style="width: 100%"
