@@ -364,7 +364,9 @@ export default {
     focusField(columnName) {
       setTimeout(() => {
         if (!this.isMobile && this.field.columnName === columnName && !isEmptyValue(this.$refs)) {
-          this.$refs[columnName].$refs[columnName].focus()
+          if (this.$refs[columnName] && this.$refs[columnName].$refs && this.$refs[columnName].$refs[columnName]) {
+            this.$refs[columnName].$refs[columnName].focus()
+          }
         }
       }, 1000)
     }
