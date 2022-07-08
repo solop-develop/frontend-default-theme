@@ -37,6 +37,9 @@ export default {
   },
 
   computed: {
+    autoSave() {
+      return this.$store.state.settings.autoSave
+    },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
@@ -212,7 +215,8 @@ export default {
      * validate values before send values to store or server
      * @param {mixed} value
      */
-    preHandleChange(value) {
+    preHandleChange(value, a, b, c) {
+      // console.log({ value, a, b, c }, 3123123, this.value)
       this.handleFieldChange({ value })
     },
     focusGained(value) {
@@ -309,7 +313,7 @@ export default {
       displayedValue
     }) {
       // Global Action performed
-      if (this.metadata.handleActionPerformed) {
+      if (this.metadata.handleActionPerformed && this.autoSave) {
         this.$store.dispatch('notifyActionPerformed', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,

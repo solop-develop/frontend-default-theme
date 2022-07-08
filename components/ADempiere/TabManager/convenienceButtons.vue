@@ -74,9 +74,18 @@
         {{ $t('actionMenu.delete') }}
       </el-button>
     </el-popover>
-
     <el-button
-      v-if="isUndoChanges"
+      v-show="isSaveRecord"
+      plain
+      size="small"
+      type="primary"
+      class="undo-changes-button"
+      @click="saveChanges"
+    >
+      {{ $t('actionMenu.save') }}
+    </el-button>
+    <el-button
+      v-if="isUndoChanges || isSaveRecord"
       plain
       size="small"
       type="info"
@@ -170,6 +179,10 @@ export default defineComponent({
       return false
     })
 
+    const isSaveRecord = computed(() => {
+      return store.getters.getPersistenceAttributes({ containerUuid, recordUuid: recordUuid.value })
+    })
+
     const isDeleteRecord = computed(() => {
       return deleteRecord.enabled({
         parentUuid: props.parentUuid,
@@ -242,6 +255,23 @@ export default defineComponent({
       })
     }
 
+    function saveChanges() {
+      store.dispatch('flushPersistenceQueue', {
+        containerUuid,
+        tableName: props.tabAttributes.tableName,
+        recordUuid: recordUuid.value
+      })
+        .then(() => {
+          store.commit('clearToPersistence', {
+            containerUuid,
+            recordUuid: recordUuid.value
+          })
+        })
+        .catch(() => {
+          console.error('service worker:cannot install')
+        })
+    }
+
     /**
      * Vuex subscription when record parent change
      * TODO: Add support to restart or delete timer by flushPersistenceQueue
@@ -273,11 +303,13 @@ export default defineComponent({
       getCurrentTab,
       isDisDisableOptionsTabChild,
       recordParentTab,
+      isSaveRecord,
       // methods
       newRecord,
       deleteCurrentRecord,
       focusConfirmDelete,
-      undoChanges
+      undoChanges,
+      saveChanges
     }
   }
 
