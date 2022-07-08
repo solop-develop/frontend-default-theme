@@ -39,6 +39,14 @@
 <script>
 import { computed, defineComponent, ref } from '@vue/composition-api'
 
+import store from '@/store'
+
+// constants
+import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere'
+
 export default defineComponent({
   name: 'OperatorComparisonField',
 
@@ -49,14 +57,14 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
+    const { parentUuid, containerUuid, columnName } = props.fieldAttributes
+
     const operatorsList = ref(props.fieldAttributes.operatorsList)
 
     const currentOperator = computed({
       get() {
-        const { columnName, containerUuid } = props.fieldAttributes
-
-        const { operator } = root.$store.getters.getFieldFromColumnName({
+        const { operator } = store.getters.getFieldFromColumnName({
           containerUuid,
           columnName
         })
@@ -64,9 +72,7 @@ export default defineComponent({
         return operator
       },
       set(newValue) {
-        const { columnName, containerUuid } = props.fieldAttributes
-
-        root.$store.dispatch('changeFieldAttribure', {
+        store.dispatch('changeFieldAttribure', {
           containerUuid,
           columnName,
           attributeName: 'operator',
@@ -76,10 +82,8 @@ export default defineComponent({
     })
 
     const fieldValue = computed(() => {
-      const { columnName, containerUuid, parentUuid } = props.fieldAttributes
-
       // main panel values
-      return root.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid,
         containerUuid,
         columnName
@@ -90,9 +94,7 @@ export default defineComponent({
      * @param {mixed} value, main value in component
      */
     const handleChange = (value) => {
-      const { columnName, containerUuid } = props.fieldAttributes
-
-      root.$store.dispatch('notifyFieldChange', {
+      store.dispatch('notifyFieldChange', {
         containerUuid,
         field: props.fieldAttributes,
         columnName,
@@ -105,8 +107,7 @@ export default defineComponent({
      */
     const changeOperator = (operatorValue) => {
       const value = fieldValue.value
-      if (!root.isEmptyValue(value) ||
-        ['NULL', 'NOT_NULL'].includes(operatorValue)) {
+      if (!isEmptyValue(value) || OPERATORS_MULTIPLE_VALUES.includes(operatorValue)) {
         handleChange(value)
       }
     }

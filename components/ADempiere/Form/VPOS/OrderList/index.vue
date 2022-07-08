@@ -265,6 +265,7 @@
 <script>
 // constants
 import fieldsListOrders from './fieldsListOrders.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
@@ -530,8 +531,8 @@ export default {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField' &&
-          !mutation.payload.columnName.includes('DisplayColumn') &&
-          !mutation.payload.columnName.includes('_UUID') &&
+          !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+          !mutation.payload.columnName.endsWith('_UUID') &&
           mutation.payload.containerUuid === this.metadata.containerUuid) {
           clearTimeout(this.timeOut)
           this.isLoadRecord = true
