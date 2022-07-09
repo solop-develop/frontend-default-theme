@@ -180,7 +180,12 @@ export default defineComponent({
     })
 
     const isSaveRecord = computed(() => {
-      return store.getters.getPersistenceAttributes({ containerUuid, recordUuid: recordUuid.value })
+      const persistenceValues = store.getters.getPersistenceAttributes({
+        containerUuid,
+        recordUuid: recordUuid.value
+      })
+
+      return !isEmptyValue(persistenceValues)
     })
 
     const isDeleteRecord = computed(() => {
@@ -261,12 +266,6 @@ export default defineComponent({
         tableName: props.tabAttributes.tableName,
         recordUuid: recordUuid.value
       })
-        .then(() => {
-          store.commit('clearToPersistence', {
-            containerUuid,
-            recordUuid: recordUuid.value
-          })
-        })
         .catch(() => {
           console.error('service worker:cannot install')
         })

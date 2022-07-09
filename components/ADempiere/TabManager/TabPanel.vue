@@ -38,27 +38,8 @@
         :references-manager="referencesManager"
       />
     </span>
-    <div v-if="isMobile">
-      <default-table
-        v-if="isShowedTableRecords"
-        key="default-table"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :header="tableHeaders"
-        :data-table="recordsList"
-        :panel-metadata="tabAttributes"
-      />
-      <panel-definition
-        v-else
-        key="panel-definition"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :group-tab="tabAttributes.tabGroup"
-      />
-    </div>
-    <div v-else>
+
+    <div>
       <default-table
         v-if="isShowedTableRecords"
         key="default-table"
@@ -70,15 +51,25 @@
         :panel-metadata="tabAttributes"
         :is-navigation="true"
       />
-      <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
+      <template v-else>
         <panel-definition
+          v-if="isMobile"
           key="panel-definition"
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
           :container-manager="containerManager"
           :group-tab="tabAttributes.tabGroup"
         />
-      </el-scrollbar>
+        <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
+          <panel-definition
+            key="panel-definition"
+            :parent-uuid="parentUuid"
+            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :group-tab="tabAttributes.tabGroup"
+          />
+        </el-scrollbar>
+      </template>
     </div>
   </div>
 </template>
