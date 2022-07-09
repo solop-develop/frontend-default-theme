@@ -63,8 +63,6 @@ import store from '@/store'
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons.vue'
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
