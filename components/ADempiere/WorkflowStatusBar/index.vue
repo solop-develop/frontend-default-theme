@@ -78,6 +78,9 @@
 </template>
 
 <script>
+// constants
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+
 // components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
@@ -116,7 +119,7 @@ export default {
       typeAction: 0,
       chatNote: '',
       columnName,
-      displayColumnName: `DisplayColumn_${columnName}`,
+      displayColumnName: DISPLAY_COLUMN_PREFIX + columnName,
       documentStatusesList: []
     }
   },

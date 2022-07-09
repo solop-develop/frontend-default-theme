@@ -74,6 +74,7 @@ import store from '@/store'
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
+import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
 import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 
@@ -313,7 +314,7 @@ export default {
 
     isSelectCreated() {
       return this.isAdvancedQuery &&
-        ['IN', 'NOT_IN'].includes(this.field.operator) &&
+        OPERATORS_MULTIPLE_VALUES.includes(this.field.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
     },
     getWidth() {

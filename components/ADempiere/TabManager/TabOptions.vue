@@ -66,6 +66,9 @@ import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenien
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+
 export default defineComponent({
   name: 'TabOptions',
 

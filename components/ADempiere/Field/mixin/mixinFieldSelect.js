@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// constants
+import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
+
 // utils and helper methods
 import { convertBooleanToString } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -32,7 +35,8 @@ export default {
 
   computed: {
     isSelectMultiple() {
-      return ['IN', 'NOT_IN'].includes(this.metadata.operator) && this.metadata.isAdvancedQuery
+      return this.metadata.isAdvancedQuery &&
+        OPERATORS_MULTIPLE_VALUES.includes(this.metadata.operator)
     },
 
     blankOption() {

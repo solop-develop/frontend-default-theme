@@ -19,6 +19,7 @@ import { getLocationAddress } from '@/api/ADempiere/field/location.js'
 
 // constants
 import FieldsList from './fieldsList.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and helpers methods
 import { getSequenceAsList } from '@/utils/ADempiere/location'
@@ -143,7 +144,7 @@ export default {
 
       newFieldsList.forEach(field => {
         const { columnName } = field
-        const displayColumnName = `DisplayColumn_${columnName}`
+        const displayColumnName = DISPLAY_COLUMN_PREFIX + columnName
 
         let currrentValue = ''
         if (!this.isEmptyValue(entityValues[displayColumnName])) {
