@@ -184,7 +184,25 @@ export default defineComponent({
       return false
     })
 
+    const emptyMandatoryFields = computed(() => {
+      return store.getters.getTabFieldsEmptyMandatory({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        formatReturn: false
+      }).filter(itemField => {
+        // omit send to server (to create or update) columns manage by backend
+        return itemField.isAlwaysUpdateable ||
+          !LOG_COLUMNS_NAME_LIST.includes(itemField.columnName)
+      }).map(itemField => {
+        return itemField.name
+      })
+    })
+
     const isSaveRecord = computed(() => {
+      if (!isEmptyValue(emptyMandatoryFields.value)) {
+        return false
+      }
+
       const persistenceValues = store.getters.getPersistenceAttributes({
         containerUuid,
         recordUuid: recordUuid.value
@@ -266,17 +284,7 @@ export default defineComponent({
     }
 
     function saveChanges() {
-      const emptyMandatory = store.getters.getTabFieldsEmptyMandatory({
-        parentUuid: props.parentUuid,
-        containerUuid,
-        formatReturn: false
-      }).filter(itemField => {
-        // omit send to server (to create or update) columns manage by backend
-        return itemField.isAlwaysUpdateable ||
-          !LOG_COLUMNS_NAME_LIST.includes(itemField.columnName)
-      }).map(itemField => {
-        return itemField.name
-      })
+      const emptyMandatory = emptyMandatoryFields.value
 
       if (!isEmptyValue(emptyMandatory)) {
         showMessage({
