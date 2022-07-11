@@ -72,6 +72,7 @@
         {{ $t('actionMenu.delete') }}
       </el-button>
     </el-popover>
+
     <el-button
       v-show="isSaveRecord"
       plain
@@ -287,13 +288,19 @@ export default defineComponent({
         })
         return
       }
+
       store.dispatch('flushPersistenceQueue', {
+        parentUuid: props.parentUuid,
         containerUuid,
         tableName: props.tabAttributes.tableName,
         recordUuid: recordUuid.value
       })
-        .catch(() => {
-          console.error('service worker:cannot install')
+        .catch(error => {
+          console.error('Error saving record', error.message)
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
         })
     }
 
