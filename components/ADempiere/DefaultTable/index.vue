@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, onUpdated, ref } from '@vue/composition-api'
+import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, watch } from '@vue/composition-api'
 
 import store from '@/store'
 import router from '@/router'
@@ -382,6 +382,13 @@ export default defineComponent({
      */
     function handleRowClick(row, column, event) {
       currentRowSelect.value = row
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'currentRowSelect',
+        attributeNameControl: undefined,
+        attributeValue: row,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
@@ -445,7 +452,6 @@ export default defineComponent({
       if (field.isMandatory || field.isMandatoryFromLogic) {
         return '* ' + field.name
       }
-
       return field.name
     }
 
@@ -492,6 +498,18 @@ export default defineComponent({
         })
       }
       return props.dataTable
+    })
+
+    const currentTabChildren = computed(() => {
+      const currentTab = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+      if (!currentTab.isParentTab) {
+        const records = store.getters.getTabCurrentRecord({ containerUuid: props.containerUuid })
+        return records
+      }
+      return {}
     })
 
     const isLoadFilter = ref(false)
@@ -637,6 +655,12 @@ export default defineComponent({
       }, 1000)
     }
 
+    watch(currentTabChildren, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+        loadSelect()
+      }
+    })
+
     onUpdated(() => {
       const main = document.getElementById('mainWindow')
       if (
@@ -645,6 +669,15 @@ export default defineComponent({
       ) {
         heightSize.value = main.clientHeight
       }
+      // const selectionsList = props.containerManager.getSelection({
+      //   containerUuid: props.containerUuid
+      // })
+      // if (!isEmptyValue(selectionsList)) {
+      //   loadSelect()
+      // }
+    })
+
+    onBeforeMount(() => {
       loadSelect()
     })
 
@@ -695,6 +728,7 @@ export default defineComponent({
       iconFullScreen,
       isMobile,
       currentRowSelect,
+      currentTabChildren,
       // methods
       filterRecord,
       setTableHeight,
