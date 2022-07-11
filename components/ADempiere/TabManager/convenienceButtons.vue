@@ -29,18 +29,16 @@
       {{ $t('actionMenu.new') }}
     </el-button>
 
-    <!--
     <el-button
-      v-if="isDeleteRecord"
+      v-if="isUndoChanges || isSaveRecord"
       plain
       size="small"
-      type="danger"
-      class="delete-record-button"
-      @click="deleteCurrentRecord"
+      type="info"
+      class="undo-changes-button"
+      @click="undoChanges"
     >
-      {{ $t('actionMenu.delete') }}
+      {{ $t('actionMenu.undo') }}
     </el-button>
-    -->
 
     <el-popover
       v-if="isDeleteRecord"
@@ -83,16 +81,6 @@
       @click="saveChanges"
     >
       {{ $t('actionMenu.save') }}
-    </el-button>
-    <el-button
-      v-if="isUndoChanges || isSaveRecord"
-      plain
-      size="small"
-      type="info"
-      class="undo-changes-button"
-      @click="undoChanges"
-    >
-      {{ $t('actionMenu.undo') }}
     </el-button>
   </div>
 </template>
@@ -184,6 +172,14 @@ export default defineComponent({
       return false
     })
 
+    const isExistsChanges = computed(() => {
+      const persistenceValues = store.getters.getPersistenceAttributes({
+        containerUuid,
+        recordUuid: recordUuid.value
+      })
+      return !isEmptyValue(persistenceValues)
+    })
+
     const emptyMandatoryFields = computed(() => {
       return store.getters.getTabFieldsEmptyMandatory({
         parentUuid: props.parentUuid,
@@ -203,15 +199,13 @@ export default defineComponent({
         return false
       }
 
-      const persistenceValues = store.getters.getPersistenceAttributes({
-        containerUuid,
-        recordUuid: recordUuid.value
-      })
-
-      return !isEmptyValue(persistenceValues)
+      return isExistsChanges.value
     })
 
     const isDeleteRecord = computed(() => {
+      if (isExistsChanges.value) {
+        return false
+      }
       return deleteRecord.enabled({
         parentUuid: props.parentUuid,
         tabParentIndex: props.tabAttributes.tabParentIndex,
