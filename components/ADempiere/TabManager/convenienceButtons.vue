@@ -102,11 +102,16 @@ import Vue from 'vue'
 import { defineComponent, computed, onUnmounted, ref } from '@vue/composition-api'
 
 import store from '@/store'
+import language from '@/lang'
+
+// constants
+import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 // utils and helper methods
+import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { createNewRecord, deleteRecord, undoChange } from '@/utils/ADempiere/dictionary/window'
 
@@ -261,6 +266,25 @@ export default defineComponent({
     }
 
     function saveChanges() {
+      const emptyMandatory = store.getters.getTabFieldsEmptyMandatory({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        formatReturn: false
+      }).filter(itemField => {
+        // omit send to server (to create or update) columns manage by backend
+        return itemField.isAlwaysUpdateable ||
+          !LOG_COLUMNS_NAME_LIST.includes(itemField.columnName)
+      }).map(itemField => {
+        return itemField.name
+      })
+
+      if (!isEmptyValue(emptyMandatory)) {
+        showMessage({
+          message: language.t('notifications.mandatoryFieldMissing') + emptyMandatory,
+          type: 'info'
+        })
+        return
+      }
       store.dispatch('flushPersistenceQueue', {
         containerUuid,
         tableName: props.tabAttributes.tableName,
