@@ -190,9 +190,9 @@ export default defineComponent({
   },
 
   setup(props, { root, refs }) {
-    const valueToSearch = ref('')
     const heightTable = ref()
     const timeOut = ref(() => {})
+    const timeOutSearch = ref(() => {})
     const panelMain = document.getElementById('mainWindow')
     const heightSize = ref()
     const currentRowSelect = ref({})
@@ -203,6 +203,27 @@ export default defineComponent({
         })
       }
       return !isEmptyValue(props.dataTable)
+    })
+
+    // value of search
+    const valueToSearch = computed({
+      get() {
+        if (!props.isShowSearch) {
+          return ''
+        }
+        return store.getters.getSearchValueTabRecordsList({
+          containerUuid: props.containerUuid
+        })
+      },
+      set(searchValue) {
+        if (!props.isShowSearch) {
+          return ''
+        }
+        store.commit('setSearchValueTabRecordsList', {
+          containerUuid: props.containerUuid,
+          searchValue
+        })
+      }
     })
 
     const currentOption = computed(() => {
@@ -456,8 +477,8 @@ export default defineComponent({
     }
 
     function handleChangeSearch(value) {
-      clearTimeout(timeOut.value)
-      timeOut.value = setTimeout(() => {
+      clearTimeout(timeOutSearch.value)
+      timeOutSearch.value = setTimeout(() => {
         // get records
         filterRecord(value)
       }, 1000)
@@ -651,6 +672,7 @@ export default defineComponent({
     return {
       // data
       timeOut,
+      timeOutSearch,
       valueToSearch,
       isLoadFilter,
       heightTable,
