@@ -53,7 +53,7 @@
           :label="item.columnName"
         >
           <li
-            v-for="(record, key) in listRecordDelete"
+            v-for="(record, key) in listOfRecordsToDeleted"
             :key="key"
           >
             {{ record[item.columnName] }}
@@ -154,7 +154,7 @@ export default defineComponent({
       return store.getters.getUuidOfContainer(containerUuid)
     })
 
-    const listRecordDelete = computed(() => {
+    const listOfRecordsToDeleted = computed(() => {
       if (!getCurrentTab.value.isShowedTableRecords) {
         const records = store.getters.getTabCurrentRecord({ containerUuid })
         return [records]
@@ -350,7 +350,7 @@ export default defineComponent({
       isDisDisableOptionsTabChild,
       recordParentTab,
       isSaveRecord,
-      listRecordDelete,
+      listOfRecordsToDeleted,
       // methods
       newRecord,
       deleteCurrentRecord,
