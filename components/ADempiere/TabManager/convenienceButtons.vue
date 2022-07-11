@@ -46,7 +46,20 @@
       placement="top"
       class="delete-record-container"
     >
-      <p>{{ $t('window.confirmDeleteRecord') }}</p>
+      <el-descriptions :title="$t('window.confirmDeleteRecord')" direction="vertical" :column="tabAttributes.identifierColumns.length" border>
+        <el-descriptions-item
+          v-for="(item, index) in tabAttributes.identifierColumns"
+          :key="index"
+          :label="item.columnName"
+        >
+          <li
+            v-for="(record, key) in listOfRecordsToDeleted"
+            :key="key"
+          >
+            {{ record[item.columnName] }}
+          </li>
+        </el-descriptions-item>
+      </el-descriptions>
       <div style="text-align: right; margin: 0">
         <el-button size="mini" type="text" @click="isVisibleConfirmDelete = false">
           {{ $t('window.cancel') }}
@@ -140,6 +153,14 @@ export default defineComponent({
     })
     const recordParentTab = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
+    })
+
+    const listOfRecordsToDeleted = computed(() => {
+      if (!getCurrentTab.value.isShowedTableRecords) {
+        const records = store.getters.getTabCurrentRecord({ containerUuid })
+        return [records]
+      }
+      return selectionsRecords.value
     })
 
     const isDisDisableOptionsTabChild = computed(() => {
@@ -336,6 +357,7 @@ export default defineComponent({
       isDisDisableOptionsTabChild,
       recordParentTab,
       isSaveRecord,
+      listOfRecordsToDeleted,
       // methods
       newRecord,
       deleteCurrentRecord,
