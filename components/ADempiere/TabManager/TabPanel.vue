@@ -19,16 +19,12 @@
 <template>
   <div style="height: 100% !important;">
     <span v-if="!isShowedTableRecords">
-      <el-button
-        v-if="!isEmptyValue(currentTab.childTabs)"
-        type="text"
+      <full-screen-container
         style="float: right;"
-        @click="handleViewFullScreen()"
-      >
-        <svg-icon
-          :icon-class="iconFullScreen ? 'exit-fullscreen' : 'fullscreen'"
-        />
-      </el-button>
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
       <tab-options
         :parent-uuid="parentUuid"
         :container-manager="containerManager"
@@ -86,14 +82,16 @@ import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.v
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabOptions from './TabOptions.vue'
 // import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 
 export default defineComponent({
   name: 'TabPanel',
 
   components: {
-    PanelDefinition,
-    DefaultTable,
     // CustomPagination,
+    DefaultTable,
+    FullScreenContainer,
+    PanelDefinition,
     TabOptions
   },
 
@@ -166,20 +164,6 @@ export default defineComponent({
       )
     })
 
-    const iconFullScreen = computed(() => {
-      if (!currentTab.value.isParentTab) {
-        return currentTab.value.isTabChildFullScreen
-      }
-      return currentTab.value.isTableViewFullScreen
-    })
-
-    const isViewFullScreen = computed(() => {
-      return store.getters.getStoredTab(
-        props.parentUuid,
-        props.currentTabUuid
-      ).isTableViewFullScreen
-    })
-
     const tableHeaders = computed(() => {
       const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
       if (panel && panel.fieldsList) {
@@ -228,54 +212,6 @@ export default defineComponent({
         containerUuid: props.tabAttributes.uuid
       })
     }
-    function handleViewFullScreen() {
-      if (!currentTab.value.isParentTab) {
-        changeFullScreen({
-          attributeName: 'isTableViewFullScreen',
-          attributeValue: false,
-          containerUuid: currentTab.value.firstTabUuid,
-          tabChild: {
-            attributeName: 'isTabChildFullScreen',
-            attributeValue: !currentTab.value.isTabChildFullScreen,
-            containerUuid: props.tabAttributes.uuid
-          }
-        })
-        return
-      }
-      const index = parseInt(root.$route.query.tabChild, 10)
-      changeFullScreen({
-        attributeName: 'isTableViewFullScreen',
-        attributeValue: !currentTab.value.isTableViewFullScreen,
-        containerUuid: props.tabAttributes.uuid,
-        tabChild: {
-          attributeName: 'isTabChildFullScreen',
-          attributeValue: false,
-          containerUuid: currentTab.value.childTabs[index].uuid
-        }
-      })
-    }
-
-    function changeFullScreen({
-      attributeValue,
-      attributeName,
-      containerUuid,
-      tabChild
-    }) {
-      store.dispatch('changeTabAttribute', {
-        attributeName,
-        attributeNameControl: undefined,
-        attributeValue,
-        parentUuid: props.parentUuid,
-        containerUuid
-      })
-      store.dispatch('changeTabAttribute', {
-        attributeName: tabChild.attributeName,
-        attributeNameControl: undefined,
-        attributeValue: tabChild.attributeValue,
-        parentUuid: props.parentUuid,
-        containerUuid: tabChild.containerUuid
-      })
-    }
 
     function handleChangePage(pageNumber) {
       props.containerManager.setPage({
@@ -294,25 +230,21 @@ export default defineComponent({
     }
 
     return {
-      // computed
+      // computeds
       listAction,
       recordsList,
       isShowedTableRecords,
       tableHeaders,
       tabData,
-      isViewFullScreen,
-      iconFullScreen,
       isMobile,
       currentTab,
-      // Pagination
+      // pagination
       currentPage,
       recordsLength,
       selectionsLength,
-      // methodo
-      changeFullScreen,
+      // methods
       handleChangePage,
-      changeShowedRecords,
-      handleViewFullScreen
+      changeShowedRecords
     }
   }
 
