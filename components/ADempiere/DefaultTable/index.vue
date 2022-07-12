@@ -43,15 +43,12 @@
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
         />
-        <el-button
-          type="text"
+
+        <full-screen-container
           style="float: right;"
-          @click="handleViewFullScreen"
-        >
-          <svg-icon
-            :icon-class="iconFullScreen ? 'exit-fullscreen' : 'fullscreen'"
-          />
-        </el-button>
+          :parent-uuid="parentUuid"
+          :container-uuid="containerUuid"
+        />
       </el-col>
     </el-row>
 
@@ -130,6 +127,8 @@ import router from '@/router'
 import CellInfo from './CellInfo.vue'
 import ColumnsDisplayOption from './ColumnsDisplayOption'
 import CustomPagination from './CustomPagination.vue'
+import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
+import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 
 // utils and helper methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
@@ -140,7 +139,8 @@ export default defineComponent({
   components: {
     CellInfo,
     ColumnsDisplayOption,
-    CustomPagination
+    CustomPagination,
+    FullScreenContainer
   },
 
   props: {
@@ -190,6 +190,13 @@ export default defineComponent({
   },
 
   setup(props, { root, refs }) {
+    const {
+      storedWindow
+    } = useFullScreenContainer({
+      parentUuid: props.parentUuid,
+      containerUuid: props.containerUuid
+    })
+
     const heightTable = ref()
     const timeOut = ref(() => {})
     const timeOutSearch = ref(() => {})
@@ -287,30 +294,6 @@ export default defineComponent({
       return recordsWithFilter.value.length
     })
 
-    const isTableViewFullScreen = computed(() => {
-      if (!isEmptyValue(props.parentUuid)) {
-        return store.getters.getStoredTab(
-          props.parentUuid,
-          props.containerUuid
-        )
-      }
-      return false
-    })
-
-    const iconFullScreen = computed(() => {
-      if (!isEmptyValue(props.parentUuid)) {
-        const currentTab = store.getters.getStoredTab(
-          props.parentUuid,
-          props.containerUuid
-        )
-        if (!currentTab.isParentTab) {
-          return currentTab.isTabChildFullScreen
-        }
-        return currentTab.isTableViewFullScreen
-      }
-      return false
-    })
-
     const tabData = computed(() => {
       if (props.containerManager.getRecordList) {
         return props.containerManager.getRecordList({
@@ -338,38 +321,24 @@ export default defineComponent({
           props.containerUuid
         )
 
-        if (
-          !isEmptyValue(panelMain) &&
-          !isEmptyValue(heightSize.value) &&
-          currentTab.isParentTab &&
-          !currentTab.isTableViewFullScreen
-        ) {
-          return heightSize.value - 200
-        } else if (
-          !isEmptyValue(panelMain) &&
-          !isEmptyValue(heightSize.value) &&
-          currentTab.isParentTab &&
-          currentTab.isTableViewFullScreen
-        ) {
-          return heightSize.value - 250
-        } else if (
-          !isEmptyValue(heightSize.value) &&
-          !currentTab.isParentTab &&
-          !currentTab.isTabChildFullScreen
-        ) {
-          return heightSize.value - 210
-        } else if (
-          !isEmptyValue(panelMain) &&
-          !isEmptyValue(heightSize.value) &&
-          !currentTab.isParentTab &&
-          currentTab.isTabChildFullScreen
-        ) {
-          return heightSize.value - 250
+        if (!isEmptyValue(panelMain) && !isEmptyValue(heightSize.value)) {
+          if (currentTab.isParentTab) {
+            if (storedWindow.value.isFullScreenTabsParent) {
+              return heightSize.value - 250
+            } else {
+              return heightSize.value - 200
+            }
+          } else {
+            if (storedWindow.value.isFullScreenTabsChildren) {
+              return heightSize.value - 250
+            } else {
+              return heightSize.value - 200
+            }
+          }
         }
       }
-      if (
-        props.containerManager.panelMain() === 'mainBrowser'
-      ) {
+
+      if (props.containerManager.panelMain() === 'mainBrowser') {
         return defaultSize.value
       }
       return 'auto'
@@ -582,58 +551,6 @@ export default defineComponent({
       adjustSize()
     }
 
-    function handleViewFullScreen() {
-      const currentTab = store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
-      if (!currentTab.isParentTab) {
-        changeFullScreen({
-          attributeName: 'isTableViewFullScreen',
-          attributeValue: false,
-          containerUuid: props.containerUuid,
-          tabChild: {
-            attributeName: 'isTabChildFullScreen',
-            attributeValue: !currentTab.isTabChildFullScreen,
-            containerUuid: props.containerUuid
-          }
-        })
-        return
-      }
-      changeFullScreen({
-        attributeName: 'isTableViewFullScreen',
-        attributeValue: !currentTab.isTableViewFullScreen,
-        containerUuid: props.containerUuid,
-        tabChild: {
-          attributeName: 'isTabChildFullScreen',
-          attributeValue: false,
-          containerUuid: props.containerUuid
-        }
-      })
-    }
-
-    function changeFullScreen({
-      attributeValue,
-      attributeName,
-      containerUuid,
-      tabChild
-    }) {
-      store.dispatch('changeTabAttribute', {
-        attributeName,
-        attributeNameControl: undefined,
-        attributeValue,
-        parentUuid: props.parentUuid,
-        containerUuid
-      })
-      store.dispatch('changeTabAttribute', {
-        attributeName: tabChild.attributeName,
-        attributeNameControl: undefined,
-        attributeValue: tabChild.attributeValue,
-        parentUuid: props.parentUuid,
-        containerUuid: tabChild.containerUuid
-      })
-    }
-
     function loadSelect() {
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
@@ -724,15 +641,12 @@ export default defineComponent({
       tabData,
       defaultSize,
       sizeViewTable,
-      isTableViewFullScreen,
-      iconFullScreen,
       isMobile,
       currentRowSelect,
       currentTabChildren,
       // methods
       filterRecord,
       setTableHeight,
-      changeFullScreen,
       adjustSize,
       tableRowClassName,
       handleChangeSearch,
@@ -743,7 +657,6 @@ export default defineComponent({
       handleSelection,
       handleSelectionAll,
       isDisplayed,
-      handleViewFullScreen,
       loadSelect
     }
   }
