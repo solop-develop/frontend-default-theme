@@ -19,12 +19,12 @@
 <template>
   <div v-show="isDisDisableOptionsTabChild" class="convenience-buttons-main">
     <el-button
-      v-if="isCreateRecord"
+      v-if="isCreateRecord && !isExistsChanges"
       plain
       size="small"
       type="success"
       class="new-record-button"
-      @click="newRecord"
+      @click="newRecord()"
     >
       {{ $t('actionMenu.new') }}
     </el-button>
@@ -35,9 +35,20 @@
       size="small"
       type="info"
       class="undo-changes-button"
-      @click="undoChanges"
+      @click="undoChanges()"
     >
       {{ $t('actionMenu.undo') }}
+    </el-button>
+
+    <el-button
+      v-show="!isExistsChanges"
+      plain
+      size="small"
+      type="primary"
+      class="undo-changes-button"
+      @click="refreshCurrentRecord()"
+    >
+      {{ $t('actionMenu.refresh') }}
     </el-button>
 
     <el-popover
@@ -92,7 +103,7 @@
       size="small"
       type="primary"
       class="undo-changes-button"
-      @click="saveChanges"
+      @click="saveChanges()"
     >
       {{ $t('actionMenu.save') }}
     </el-button>
@@ -115,7 +126,9 @@ import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 // utils and helper methods
 import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { createNewRecord, deleteRecord, undoChange } from '@/utils/ADempiere/dictionary/window'
+import {
+  createNewRecord, refreshRecord, deleteRecord, undoChange
+} from '@/utils/ADempiere/dictionary/window'
 
 export default defineComponent({
   name: 'ConvenienceButtons',
@@ -266,6 +279,13 @@ export default defineComponent({
       }
     }
 
+    function refreshCurrentRecord() {
+      refreshRecord.refreshRecord({
+        parentUuid: props.parentUuid,
+        containerUuid
+      })
+    }
+
     function focusConfirmDelete() {
       if (buttonConfirmDelete.value) {
         Vue.nextTick(() => {
@@ -351,6 +371,7 @@ export default defineComponent({
       recordUuid,
       selectionsRecords,
       isCreateRecord,
+      isExistsChanges,
       isDeleteRecord,
       isUndoChanges,
       getCurrentTab,
@@ -362,6 +383,7 @@ export default defineComponent({
       newRecord,
       deleteCurrentRecord,
       focusConfirmDelete,
+      refreshCurrentRecord,
       undoChanges,
       saveChanges
     }
