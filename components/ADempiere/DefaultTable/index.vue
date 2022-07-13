@@ -92,6 +92,7 @@
           <template slot-scope="scope">
             <!-- formatted displayed value -->
             <cell-info
+              :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
               :field-attributes="fieldAttributes"
               :container-manager="containerManager"
@@ -316,23 +317,25 @@ export default defineComponent({
 
     const sizeViewTable = computed(() => {
       if (!isEmptyValue(props.parentUuid)) {
-        const currentTab = store.getters.getStoredTab(
-          props.parentUuid,
-          props.containerUuid
-        )
-
         if (!isEmptyValue(panelMain) && !isEmptyValue(heightSize.value)) {
-          if (currentTab.isParentTab) {
-            if (storedWindow.value.isFullScreenTabsParent) {
-              return heightSize.value - 250
+          const currentTab = store.getters.getStoredTab(
+            props.parentUuid,
+            props.containerUuid
+          )
+
+          if (!isEmptyValue(currentTab)) {
+            if (currentTab.isParentTab) {
+              if (storedWindow.value.isFullScreenTabsParent) {
+                return heightSize.value - 250
+              } else {
+                return heightSize.value - 200
+              }
             } else {
-              return heightSize.value - 200
-            }
-          } else {
-            if (storedWindow.value.isFullScreenTabsChildren) {
-              return heightSize.value - 250
-            } else {
-              return heightSize.value - 200
+              if (storedWindow.value.isFullScreenTabsChildren) {
+                return heightSize.value - 250
+              } else {
+                return heightSize.value - 200
+              }
             }
           }
         }
@@ -350,33 +353,36 @@ export default defineComponent({
      * @param {string} column
      */
     function handleRowClick(row, column, event) {
-      currentRowSelect.value = row
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'currentRowSelect',
-        attributeNameControl: undefined,
-        attributeValue: row,
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
       }
 
-      if (isMobile.value && !isEmptyValue(props.parentUuid)) {
+      if (!isEmptyValue(props.parentUuid)) {
+        currentRowSelect.value = row
         store.dispatch('changeTabAttribute', {
-          attributeName: 'isShowedTableRecords',
+          attributeName: 'currentRowSelect',
           attributeNameControl: undefined,
-          attributeValue: false,
+          attributeValue: row,
           parentUuid: props.parentUuid,
           containerUuid: props.containerUuid
         })
 
-        props.containerManager.seekRecord({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
-          row
-        })
+        if (isMobile.value) {
+          store.dispatch('changeTabAttribute', {
+            attributeName: 'isShowedTableRecords',
+            attributeNameControl: undefined,
+            attributeValue: false,
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid
+          })
+
+          props.containerManager.seekRecord({
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid,
+            row
+          })
+        }
       }
     }
 
@@ -389,24 +395,25 @@ export default defineComponent({
       // disable edit mode
       row.isEditRow = false
 
-      const currentTab = store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
-
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      if (recordUuid !== row.UUID && currentTab.isParentTab) {
-        props.containerManager.seekRecord({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
-          row
-        })
-        props.containerManager.setSelection({
-          containerUuid: props.containerUuid,
-          recordsSelected: []
-        })
-      }
       if (!isEmptyValue(props.parentUuid)) {
+        const currentTab = store.getters.getStoredTab(
+          props.parentUuid,
+          props.containerUuid
+        )
+
+        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+        if (recordUuid !== row.UUID && currentTab.isParentTab) {
+          props.containerManager.seekRecord({
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid,
+            row
+          })
+          props.containerManager.setSelection({
+            containerUuid: props.containerUuid,
+            recordsSelected: []
+          })
+        }
+
         store.dispatch('changeTabAttribute', {
           attributeName: 'isShowedTableRecords',
           attributeNameControl: undefined,
@@ -470,11 +477,14 @@ export default defineComponent({
     })
 
     const currentTabChildren = computed(() => {
+      if (isEmptyValue(props.parentUuid)) {
+        return {}
+      }
       const currentTab = store.getters.getStoredTab(
         props.parentUuid,
         props.containerUuid
       )
-      if (!currentTab.isParentTab) {
+      if (!isEmptyValue(currentTab) && !currentTab.isParentTab) {
         const records = store.getters.getTabCurrentRecord({ containerUuid: props.containerUuid })
         return records
       }
@@ -573,7 +583,7 @@ export default defineComponent({
     }
 
     watch(currentTabChildren, (newValue, oldValue) => {
-      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+      if (!isEmptyValue(newValue) && newValue !== oldValue) {
         loadSelect()
       }
     })
