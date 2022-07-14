@@ -19,72 +19,48 @@
 <template>
   <!-- <div style="height: 100% !important;">
     <div style="display: flex;"> -->
-  <el-tabs
-    v-if="!isEmptyValue(showedTabsList)"
-    v-model="currentTab"
-    type="border-card"
-    style="width: 100%"
-    @tab-click="handleClick"
-  >
-    <el-tab-pane
-      v-for="(tabAttributes, key) in showedTabsList"
-      :key="key"
-      :label="tabAttributes.name"
-      :name="String(key)"
-      :tabuuid="tabAttributes.uuid"
-      :tabindex="String(key)"
-      lazy
-      :disabled="isDisabledTab(key)"
-      :style="tabStyle"
+  <span v-if="!tabLoading">
+    <el-tabs
+      v-if="!isEmptyValue(showedTabsList)"
+      v-model="currentTab"
+      type="border-card"
+      style="width: 100%"
+      @tab-click="handleClick"
     >
-      <tab-label
-        slot="label"
-        :is-active-tab="tabAttributes.uuid === tabUuid"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-      />
-
-      <div v-if="isShowedTableRecords">
-        <tab-options
+      <el-tab-pane
+        v-for="(tabAttributes, key) in showedTabsList"
+        :key="key"
+        :label="tabAttributes.name"
+        :name="String(key)"
+        :tabuuid="tabAttributes.uuid"
+        :tabindex="String(key)"
+        lazy
+        :disabled="isDisabledTab(key)"
+        :style="tabStyle"
+      >
+        <tab-label
+          slot="label"
+          :is-active-tab="tabAttributes.uuid === tabUuid"
           :parent-uuid="parentUuid"
-          :container-manager="containerManager"
-          :current-tab-uuid="tabUuid"
-          :tabs-list="tabsList"
-          :all-tabs-list="allTabsList"
-          :tab-attributes="tabAttributes"
-          :references-manager="referencesManager"
+          :container-uuid="tabAttributes.uuid"
         />
-        <br>
-      </div>
 
-      <div v-if="isShowedTabs">
-        <!-- records in table to multi records -->
-        <div v-if="isMobile">
-          <tab-panel
-            key="tab-panel"
+        <div v-if="isShowedTableRecords">
+          <tab-options
             :parent-uuid="parentUuid"
             :container-manager="containerManager"
+            :current-tab-uuid="tabUuid"
             :tabs-list="tabsList"
             :all-tabs-list="allTabsList"
-            :current-tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
-            :actions-manager="actionsManager"
             :references-manager="referencesManager"
           />
+          <br>
         </div>
-        <div v-else>
-          <default-table
-            v-if="isShowedTableRecords"
-            key="default-table"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :header="tableHeaders"
-            :data-table="recordsList"
-            :panel-metadata="tabAttributes"
-            :is-navigation="true"
-          />
-          <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
+
+        <div v-if="isShowedTabs">
+          <!-- records in table to multi records -->
+          <div v-if="isMobile">
             <tab-panel
               key="tab-panel"
               :parent-uuid="parentUuid"
@@ -96,11 +72,41 @@
               :actions-manager="actionsManager"
               :references-manager="referencesManager"
             />
-          </el-scrollbar>
+          </div>
+          <div v-else>
+            <default-table
+              v-if="isShowedTableRecords"
+              key="default-table"
+              :parent-uuid="parentUuid"
+              :container-uuid="tabAttributes.uuid"
+              :container-manager="containerManager"
+              :header="tableHeaders"
+              :data-table="recordsList"
+              :panel-metadata="tabAttributes"
+              :is-navigation="true"
+            />
+            <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
+              <tab-panel
+                key="tab-panel"
+                :parent-uuid="parentUuid"
+                :container-manager="containerManager"
+                :tabs-list="tabsList"
+                :all-tabs-list="allTabsList"
+                :current-tab-uuid="tabUuid"
+                :tab-attributes="tabAttributes"
+                :actions-manager="actionsManager"
+                :references-manager="referencesManager"
+              />
+            </el-scrollbar>
+          </div>
         </div>
-      </div>
-    </el-tab-pane>
-  </el-tabs>
+      </el-tab-pane>
+    </el-tabs>
+  </span>
+  <loading-view
+    v-else
+    key="tab-loading"
+  />
 </template>
 
 <script>
@@ -116,6 +122,7 @@ import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import TabPanel from './TabPanel.vue'
 import TabOptions from './TabOptions.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -132,7 +139,8 @@ export default defineComponent({
     DefaultTable,
     TabPanel,
     TabLabel,
-    TabOptions
+    TabOptions,
+    LoadingView
   },
 
   props: {
@@ -171,6 +179,9 @@ export default defineComponent({
     const currentTab = ref(tabNo)
 
     const tabUuid = ref(props.tabsList[tabNo].uuid)
+
+    const tabLoading = ref(false)
+    const timeOut = ref(() => {})
 
     const tabStyle = computed(() => {
       // height tab content
@@ -411,6 +422,15 @@ export default defineComponent({
     //   }
     // })
 
+    watch(showedTabsList, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+        tabLoading.value = true
+        timeOut.value = setTimeout(() => {
+          tabLoading.value = false
+        }, 100)
+      }
+    })
+
     // if changed record in parent tab, reload tab child
     watch(recordUuidTabParent, (newValue, oldValue) => {
       if (newValue !== oldValue && !isEmptyValue(newValue)) {
@@ -456,6 +476,7 @@ export default defineComponent({
       currentTab,
       tableHeaders,
       recordsList,
+      tabLoading,
       // computed
       storedOldRecord,
       storedOldContextAttibutes,
