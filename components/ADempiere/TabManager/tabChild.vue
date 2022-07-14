@@ -17,16 +17,15 @@
 -->
 
 <template>
-  <!-- <div style="height: 100% !important;">
-    <div style="display: flex;"> -->
   <el-tabs
+    v-if="!isEmptyValue(showedTabsList)"
     v-model="currentTab"
     type="border-card"
     style="width: 100%"
     @tab-click="handleClick"
   >
     <el-tab-pane
-      v-for="(tabAttributes, key) in tabsList"
+      v-for="(tabAttributes, key) in showedTabsList"
       :key="key"
       :label="tabAttributes.name"
       :name="String(key)"
@@ -183,6 +182,13 @@ export default defineComponent({
     // use getter to reactive properties
     const currentTabMetadata = computed(() => {
       return store.getters.getStoredTab(props.parentUuid, tabUuid.value)
+    })
+
+    // tabs with display logic
+    const showedTabsList = computed(() => {
+      return props.tabsList.filter(tab => {
+        return tab.isShowedTab()
+      })
     })
 
     const isShowedTabs = computed(() => {
@@ -453,6 +459,7 @@ export default defineComponent({
       storedOldContextAttibutes,
       currentContextAttributes,
       isShowedTabs,
+      showedTabsList,
       isMobile,
       listAction,
       currentTabMetadata,
