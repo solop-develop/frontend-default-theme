@@ -57,6 +57,7 @@
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
           />
+
           <span v-if="currentTabMetadata.isShowedTableRecords">
             <tab-options
               :parent-uuid="parentUuid"
@@ -69,6 +70,7 @@
             />
             <br>
           </span>
+
           <!-- Close table when clicking on group of fields -->
           <div v-if="isShowedTabs">
             <tab-panel
@@ -115,10 +117,10 @@ import store from '@/store'
 import language from '@/lang'
 
 // components and mixins
-import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
+// import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
+// import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
@@ -134,11 +136,11 @@ export default defineComponent({
   name: 'TabManager',
 
   components: {
-    AuxiliaryPanel,
+    // AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
     TabPanel,
-    RecordNavigation,
+    // RecordNavigation,
     PanelInfo,
     TabLabel,
     TabOptions

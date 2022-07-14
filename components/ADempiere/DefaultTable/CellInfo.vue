@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <!-- <span v-if="isRowCanBeEdited(dataRow)" key="field-component">
+  <span v-if="isRowCanBeEdited(dataRow)" key="field-component">
     <field-definition
       key="field-definition"
       :container-uuid="containerUuid"
@@ -32,9 +32,9 @@
       }"
       size="mini"
     />
-  </span> -->
+  </span>
 
-  <span key="info-value">
+  <span v-else key="info-value">
     <document-status-tag
       v-if="fieldAttributes.isColumnDocumentStatus"
       key="document-status"
@@ -105,6 +105,10 @@ export default defineComponent({
   },
 
   props: {
+    parentUuid: {
+      type: String,
+      default: undefined
+    },
     containerUuid: {
       type: String,
       required: true
@@ -214,6 +218,9 @@ export default defineComponent({
     }
 
     function isRowCanBeEdited(record) {
+      if (!isEmptyValue(props.parentUuid)) {
+        return false
+      }
       if (!record.isSelectedRow) {
         return false
       }

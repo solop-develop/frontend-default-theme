@@ -19,28 +19,37 @@
 <template>
   <div v-show="isDisDisableOptionsTabChild" class="convenience-buttons-main">
     <el-button
-      v-if="isCreateRecord"
+      v-if="isCreateRecord && !isExistsChanges"
       plain
       size="small"
       type="success"
       class="new-record-button"
-      @click="newRecord"
+      @click="newRecord()"
     >
       {{ $t('actionMenu.new') }}
     </el-button>
 
-    <!--
     <el-button
-      v-if="isDeleteRecord"
+      v-if="isUndoChanges || isSaveRecord"
       plain
       size="small"
-      type="danger"
-      class="delete-record-button"
-      @click="deleteCurrentRecord"
+      type="info"
+      class="undo-changes-button"
+      @click="undoChanges()"
     >
-      {{ $t('actionMenu.delete') }}
+      {{ $t('actionMenu.undo') }}
     </el-button>
-    -->
+
+    <el-button
+      v-show="!isExistsChanges"
+      plain
+      size="small"
+      type="primary"
+      class="undo-changes-button"
+      @click="refreshCurrentRecord()"
+    >
+      {{ $t('actionMenu.refresh') }}
+    </el-button>
 
     <el-popover
       v-if="isDeleteRecord"
@@ -48,7 +57,20 @@
       placement="top"
       class="delete-record-container"
     >
-      <p>{{ $t('window.confirmDeleteRecord') }}</p>
+      <el-descriptions :title="$t('window.confirmDeleteRecord')" direction="vertical" :column="tabAttributes.identifierColumns.length" border>
+        <el-descriptions-item
+          v-for="(item, index) in tabAttributes.identifierColumns"
+          :key="index"
+          :label="item.columnName"
+        >
+          <li
+            v-for="(record, key) in listOfRecordsToDeleted"
+            :key="key"
+          >
+            {{ record[item.columnName] }}
+          </li>
+        </el-descriptions-item>
+      </el-descriptions>
       <div style="text-align: right; margin: 0">
         <el-button size="mini" type="text" @click="isVisibleConfirmDelete = false">
           {{ $t('window.cancel') }}
@@ -76,14 +98,14 @@
     </el-popover>
 
     <el-button
-      v-if="isUndoChanges"
+      v-show="isSaveRecord"
       plain
       size="small"
-      type="info"
+      type="primary"
       class="undo-changes-button"
-      @click="undoChanges"
+      @click="saveChanges()"
     >
-      {{ $t('actionMenu.undo') }}
+      {{ $t('actionMenu.save') }}
     </el-button>
   </div>
 </template>
@@ -93,13 +115,20 @@ import Vue from 'vue'
 import { defineComponent, computed, onUnmounted, ref } from '@vue/composition-api'
 
 import store from '@/store'
+import language from '@/lang'
+
+// constants
+import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 
 // utils and helper methods
+import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { createNewRecord, deleteRecord, undoChange } from '@/utils/ADempiere/dictionary/window'
+import {
+  createNewRecord, refreshRecord, deleteRecord, undoChange
+} from '@/utils/ADempiere/dictionary/window'
 
 export default defineComponent({
   name: 'ConvenienceButtons',
@@ -139,6 +168,14 @@ export default defineComponent({
       return store.getters.getUuidOfContainer(containerUuid)
     })
 
+    const listOfRecordsToDeleted = computed(() => {
+      if (!getCurrentTab.value.isShowedTableRecords) {
+        const records = store.getters.getTabCurrentRecord({ containerUuid })
+        return [records]
+      }
+      return selectionsRecords.value
+    })
+
     const isDisDisableOptionsTabChild = computed(() => {
       if (!getCurrentTab.value.isParentTab) {
         if (store.getters.getUuidOfContainer(getCurrentTab.value.firstTabUuid)) {
@@ -170,7 +207,40 @@ export default defineComponent({
       return false
     })
 
+    const isExistsChanges = computed(() => {
+      const persistenceValues = store.getters.getPersistenceAttributes({
+        containerUuid,
+        recordUuid: recordUuid.value
+      })
+      return !isEmptyValue(persistenceValues)
+    })
+
+    const emptyMandatoryFields = computed(() => {
+      return store.getters.getTabFieldsEmptyMandatory({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        formatReturn: false
+      }).filter(itemField => {
+        // omit send to server (to create or update) columns manage by backend
+        return itemField.isAlwaysUpdateable ||
+          !LOG_COLUMNS_NAME_LIST.includes(itemField.columnName)
+      }).map(itemField => {
+        return itemField.name
+      })
+    })
+
+    const isSaveRecord = computed(() => {
+      if (!isEmptyValue(emptyMandatoryFields.value)) {
+        return false
+      }
+
+      return isExistsChanges.value
+    })
+
     const isDeleteRecord = computed(() => {
+      if (isExistsChanges.value) {
+        return false
+      }
       return deleteRecord.enabled({
         parentUuid: props.parentUuid,
         tabParentIndex: props.tabAttributes.tabParentIndex,
@@ -209,6 +279,13 @@ export default defineComponent({
       }
     }
 
+    function refreshCurrentRecord() {
+      refreshRecord.refreshRecord({
+        parentUuid: props.parentUuid,
+        containerUuid
+      })
+    }
+
     function focusConfirmDelete() {
       if (buttonConfirmDelete.value) {
         Vue.nextTick(() => {
@@ -242,6 +319,32 @@ export default defineComponent({
       })
     }
 
+    function saveChanges() {
+      const emptyMandatory = emptyMandatoryFields.value
+
+      if (!isEmptyValue(emptyMandatory)) {
+        showMessage({
+          message: language.t('notifications.mandatoryFieldMissing') + emptyMandatory,
+          type: 'info'
+        })
+        return
+      }
+
+      store.dispatch('flushPersistenceQueue', {
+        parentUuid: props.parentUuid,
+        containerUuid,
+        tableName: props.tabAttributes.tableName,
+        recordUuid: recordUuid.value
+      })
+        .catch(error => {
+          console.error('Error saving record', error.message)
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+    }
+
     /**
      * Vuex subscription when record parent change
      * TODO: Add support to restart or delete timer by flushPersistenceQueue
@@ -268,16 +371,21 @@ export default defineComponent({
       recordUuid,
       selectionsRecords,
       isCreateRecord,
+      isExistsChanges,
       isDeleteRecord,
       isUndoChanges,
       getCurrentTab,
       isDisDisableOptionsTabChild,
       recordParentTab,
+      isSaveRecord,
+      listOfRecordsToDeleted,
       // methods
       newRecord,
       deleteCurrentRecord,
       focusConfirmDelete,
-      undoChanges
+      refreshCurrentRecord,
+      undoChanges,
+      saveChanges
     }
   }
 

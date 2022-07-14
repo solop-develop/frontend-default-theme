@@ -50,11 +50,11 @@
         style="float: right;"
         @current-change="handleChangePage"
       >
-        <template v-slot>
-          <span v-if="!isNavigation">
-            {{ $t('table.dataTable.selected') }}: {{ selection }} / <!-- show total records -->
-          </span>
-        </template>
+        <!-- <template v-slot> -->
+        <span style="margin-right: 10px;font-weight: normal;color: #606266;">
+          {{ $t('table.dataTable.selected') }}: {{ selection }} / <!-- show total records -->
+        </span>
+        <!-- </template> -->
       </el-pagination>
     </el-col>
   </el-row>

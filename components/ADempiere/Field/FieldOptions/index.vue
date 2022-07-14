@@ -245,8 +245,12 @@ export default defineComponent({
       }
       let value = valueField.value
 
-      // TODO: Evaluate reference.keyColumnName: AD_Ref_List.Value
       let columnName = props.metadata.columnName
+      if (isEmptyValue(props.parentUuid)) {
+        columnName = props.metadata.elementName
+      }
+
+      // TODO: Evaluate reference.keyColumnName: AD_Ref_List.Value
       if (props.metadata.displayType === LIST.id) {
         columnName = 'AD_Reference_ID'
         const valueQuery = props.metadata.reference.directQuery

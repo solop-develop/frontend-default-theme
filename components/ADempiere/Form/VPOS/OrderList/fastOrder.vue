@@ -125,6 +125,7 @@
 <script>
 // constants
 import fieldsListOrders from './fieldsListOrders.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import FindOrders from './FindOrders'
@@ -516,8 +517,8 @@ export default {
           if (payload.containerUuid === this.metadata.containerUuid) {
             const { columnName } = payload
 
-            if (!columnName.includes('DisplayColumn') &&
-              !columnName.includes('_UUID')) {
+            if (!columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+              !columnName.endsWith('_UUID')) {
               clearTimeout(this.timeOut)
               this.timeOut = setTimeout(() => {
                 this.listOrdersInvoiced(this.currentOptions)

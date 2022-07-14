@@ -52,6 +52,7 @@
 <script>
 // constants
 import fieldsList from './fieldsList.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
@@ -279,7 +280,7 @@ export default {
       })
       const attributesToServer = attributes.filter(attributeItem => {
         const { columnName } = attributeItem
-        if (columnName.includes('DisplayColumn_')) {
+        if (columnName.startsWith(DISPLAY_COLUMN_PREFIX)) {
           return false
         }
         if (columnName === 'C_Location_ID') {

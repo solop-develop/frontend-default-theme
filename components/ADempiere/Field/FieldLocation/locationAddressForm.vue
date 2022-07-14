@@ -71,6 +71,8 @@
 </template>
 
 <script>
+import store from '@/store'
+
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import mixinLocation from './mixinLocation.js'
@@ -78,6 +80,7 @@ import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 
 // constants
 import FieldsList from './fieldsList.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // api request methods
 import {
@@ -139,12 +142,11 @@ export default {
       return {
         ...this.containerManager,
 
-        getFieldsList({ containerUuid, root }) {
-          return root.$store.getters.getFieldLocation
+        getFieldsList({ containerUuid }) {
+          return store.getters.getFieldLocation
         },
 
-        isReadOnlyField(field) {
-          const { isReadOnly } = field
+        isReadOnlyField({ isReadOnly }) {
           return isReadOnly
         }
       }
@@ -320,7 +322,7 @@ export default {
       const attributesToServer = attributesList
         .filter(attributeItem => {
           const { columnName } = attributeItem
-          if (columnName.includes('DisplayColumn_') || columnName === 'C_Location_ID') {
+          if (columnName.startsWith(DISPLAY_COLUMN_PREFIX) || columnName === 'C_Location_ID') {
             return false
           }
           return true

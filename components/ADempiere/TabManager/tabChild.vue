@@ -56,6 +56,7 @@
         />
         <br>
       </div>
+
       <div v-if="isShowedTabs">
         <!-- records in table to multi records -->
         <div v-if="isMobile">
@@ -110,7 +111,7 @@ import store from '@/store'
 import language from '@/lang'
 
 // components and mixins
-import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
+// import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import TabPanel from './TabPanel.vue'
@@ -127,7 +128,7 @@ export default defineComponent({
   name: 'TabManager',
 
   components: {
-    AuxiliaryPanel,
+    // AuxiliaryPanel,
     DefaultTable,
     TabPanel,
     TabLabel,
@@ -356,31 +357,33 @@ export default defineComponent({
         // set first record
         if (isEmptyValue(row)) {
           row = responseData[0]
+          props.containerManager.seekRecord({
+            parentUuid: props.parentUuid,
+            containerUuid,
+            row
+          })
         }
 
         // set values in panel
-        props.containerManager.seekRecord({
-          parentUuid: props.parentUuid,
-          containerUuid,
-          row
-        })
+
+        // props.containerManager.seekRecord({
+        //   parentUuid: props.parentUuid,
+        //   containerUuid,
+        //   row
+        // })
       })
     }
 
-    const storedContextAttributes = computed(() => {
-      return store.getters.getTabContextKey({
-        containerUuid: props.tabsList[currentTab.value].uuid
-      })
-    })
+    // const storedContextAttributes = computed(() => {
+    //   return store.getters.getTabContextKey({
+    //     containerUuid: props.tabsList[currentTab.value].uuid
+    //   })
+    // })
 
     const storedOldContextAttibutes = computed(() => {
       return store.getters.getTabOldContextKey({
         containerUuid: props.tabsList[currentTab.value].uuid
       })
-    })
-
-    const storedOldRecord = computed(() => {
-      return store.getters.getCurrentRecordOnPanel(props.tabsList[currentTab.value].uuid)
     })
 
     const currentContextAttributes = computed(() => {
@@ -390,6 +393,10 @@ export default defineComponent({
         keyName: 'key'
       })
       return generateContextKey(contextAttributesList, 'key')
+    })
+
+    const storedOldRecord = computed(() => {
+      return store.getters.getCurrentRecordOnPanel(props.tabsList[currentTab.value].uuid)
     })
 
     /**
@@ -451,7 +458,6 @@ export default defineComponent({
       recordsList,
       // computed
       storedOldRecord,
-      storedContextAttributes,
       storedOldContextAttibutes,
       currentContextAttributes,
       isShowedTabs,

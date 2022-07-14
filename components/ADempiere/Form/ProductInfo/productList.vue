@@ -157,6 +157,7 @@ import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPag
 
 // constants
 import fieldsListProductPrice from './fieldsList.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and herlper methods
 import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
@@ -421,7 +422,7 @@ export default {
         //   this.setCurrent(this.listWithPrice[0])
         // }
         if (mutation.type === 'updateValueOfField' &&
-          !mutation.payload.columnName.includes('DisplayColumn') &&
+          !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
           mutation.payload.containerUuid === this.metadata.containerUuid) {
           clearTimeout(this.timeOut)
           this.timeOut = setTimeout(() => {
