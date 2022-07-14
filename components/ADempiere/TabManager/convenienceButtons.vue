@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div v-show="isDisDisableOptionsTabChild" class="convenience-buttons-main">
+  <div v-show="isDisableOptionsTabChild" class="convenience-buttons-main">
     <el-button
       v-if="isCreateRecord && !isExistsChanges"
       plain
@@ -176,7 +176,7 @@ export default defineComponent({
       return selectionsRecords.value
     })
 
-    const isDisDisableOptionsTabChild = computed(() => {
+    const isDisableOptionsTabChild = computed(() => {
       if (!getCurrentTab.value.isParentTab) {
         if (store.getters.getUuidOfContainer(getCurrentTab.value.firstTabUuid)) {
           return true
@@ -200,11 +200,12 @@ export default defineComponent({
       if (isSecondaryParentTab.value) {
         return false
       }
-      if (props.tabAttributes.isInsertRecord && !props.tabAttributes.isReadOnly) {
-        return !isEmptyValue(recordUuid.value) // && recordUuid.value !== 'create-new'
-      }
 
-      return false
+      return createNewRecord.enabled({
+        parentUuid: props.parentUuid,
+        tabParentIndex: props.tabAttributes.tabParentIndex,
+        containerUuid
+      })
     })
 
     const isExistsChanges = computed(() => {
@@ -375,7 +376,7 @@ export default defineComponent({
       isDeleteRecord,
       isUndoChanges,
       getCurrentTab,
-      isDisDisableOptionsTabChild,
+      isDisableOptionsTabChild,
       recordParentTab,
       isSaveRecord,
       listOfRecordsToDeleted,
