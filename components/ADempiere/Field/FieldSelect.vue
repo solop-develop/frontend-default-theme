@@ -252,11 +252,14 @@ export default {
       }
       this.value = value
     },
-    'metadata.displayed'(value) {
-      if (value) {
-        // if is field showed, search into store all options to list
-        this.optionsList = this.getStoredLookupAll
-      }
+    'metadata.displayed': {
+      handler(value) {
+        if (value) {
+          this.setDisplayedValue()
+        }
+      },
+      deep: true,
+      immediate: true
     },
     value(newValue) {
       if (isEmptyValue(newValue)) {
@@ -265,46 +268,13 @@ export default {
         return
       }
 
-      const option = this.findOption(newValue)
-      if (!option.displayedValue) {
-        const displayedValue = this.displayedValue
-        if (!isEmptyValue(displayedValue)) {
-          this.optionsList.push({
-            value: newValue,
-            uuid: option.uuid,
-            displayedValue
-          })
-        } else {
-          // request lookup
-          this.getValueOfLookup()
-        }
-      }
+      this.setDisplayedValue()
     }
   },
 
   beforeMount() {
     if (this.metadata.displayed) {
-      this.optionsList = this.getStoredLookupAll
-      const value = this.value
-      if (!this.isEmptyValue(value) && !this.metadata.isAdvancedQuery) {
-        const option = this.findOption(value)
-        if (option.displayedValue) {
-          this.displayedValue = option.displayedValue
-          this.uuidValue = option.uuid
-        } else {
-          if (!this.isEmptyValue(this.displayedValue)) {
-            // verify if exists to add (in table)
-            this.optionsList.push({
-              value,
-              uuid: option.uuid,
-              displayedValue: this.displayedValue
-            })
-          } else {
-            // request lookup
-            this.getValueOfLookup()
-          }
-        }
-      }
+      this.setDisplayedValue()
     }
   },
 
@@ -327,6 +297,39 @@ export default {
         value: undefined,
         uuid: undefined
       }
+    },
+    setDisplayedValue() {
+      this.optionsList = this.getStoredLookupAll
+      const value = this.value
+      // if empty clear all values
+      if (isEmptyValue(value)) {
+        this.displayedValue = undefined
+        this.uuidValue = undefined
+        return
+      }
+
+      // find local list value
+      const option = this.findOption(value)
+      if (!isEmptyValue(option.displayedValue)) {
+        this.displayedValue = option.displayedValue
+        this.uuidValue = option.uuid
+        return
+      }
+
+      // add to list if no exist
+      const displayedValue = this.displayedValue
+      if (!isEmptyValue(displayedValue)) {
+        // verify if exists to add (in table)
+        this.optionsList.push({
+          value,
+          uuid: option.uuid,
+          displayedValue
+        })
+        return
+      }
+
+      // request lookup
+      this.getValueOfLookup()
     },
     getValueOfLookup() {
       if (this.metadata.isAdvancedQuery && this.isSelectMultiple) {

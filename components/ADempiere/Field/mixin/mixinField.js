@@ -73,6 +73,16 @@ export default {
     isEmptyRequired() {
       return this.isEmptyValue(this.value) && this.metadata.required
     },
+    storedDefaultValue() {
+      return this.$store.getters.getStoredDefaultValue({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        contextColumnNames: this.metadata.contextColumnNames,
+        //
+        uuid: this.metadata.uuid,
+        id: this.metadata.id
+      })
+    },
     value: {
       get() {
         const { columnName, containerUuid, inTable } = this.metadata
@@ -122,38 +132,9 @@ export default {
     }
   },
 
-  async created() {
+  created() {
     if (this.metadata.isGetServerValue && this.isEmptyValue(this.value)) {
-      let value
-      let displayedValue
-      const stoedValues = this.$store.getters.getStoredDefaultValue({
-        parentUuid: this.metadata.parentUuid,
-        containerUuid: this.metadata.containerUuid,
-        contextColumnNames: this.metadata.contextColumnNames,
-        //
-        uuid: this.metadata.uuid,
-        id: this.metadata.id
-      })
-
-      if (this.isEmptyValue(stoedValues)) {
-        // get from server
-        const {
-          value: valueOfServer,
-          displayedValue: displayedValueOfServer
-        } = await this.getDefaultValueFromServer()
-        value = valueOfServer
-        displayedValue = displayedValueOfServer
-      } else {
-        value = stoedValues.value
-        displayedValue = stoedValues.value
-      }
-
-      if (this.metadata.componentPath === 'FieldSelect') {
-        this.displayedValue = displayedValue
-      }
-
-      // set value into component and fieldValue store
-      this.value = this.parseValue(value)
+      this.setDefaultValue()
 
       // change depends fields
       // this.preHandleChange(value)
@@ -200,6 +181,36 @@ export default {
         value: this.parseValue(this.value),
         displayedValue: undefined
       })
+    },
+
+    async setDefaultValue() {
+      let value
+      let displayedValue
+      const storedValues = this.storedDefaultValue
+
+      if (!this.isEmptyValue(storedValues)) {
+        // get from server
+        const {
+          value: valueOfStore,
+          displayedValue: displayedValueOfStore
+        } = storedValues
+
+        value = valueOfStore
+        displayedValue = displayedValueOfStore
+      } else {
+        // get from server
+        const {
+          value: valueOfServer,
+          displayedValue: displayedValueOfServer
+        } = await this.getDefaultValueFromServer()
+
+        value = valueOfServer
+        displayedValue = displayedValueOfServer
+      }
+
+      // set value into component and fieldValue store
+      this.displayedValue = displayedValue
+      this.value = this.parseValue(value)
     },
 
     /**
