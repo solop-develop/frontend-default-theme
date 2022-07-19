@@ -164,6 +164,21 @@ export default defineComponent({
       )
     })
 
+    // const inf = store.getters.getContainerInfo
+
+    const list = store.getters.getTabRecordsList({ containerUuid: currentTab.value.containerUuid })
+    const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(currentTab.value.containerUuid))
+    store.dispatch('panelInfo', {
+      currentTab: currentTab.value,
+      currentRecord
+    })
+    store.dispatch('changeTabAttribute', {
+      parentUuid: currentTab.value.parentUuid,
+      containerUuid: currentTab.value.containerUuid,
+      attributeName: 'isSelected',
+      attributeValue: !currentTab.value.isSelected
+    })
+
     const tableHeaders = computed(() => {
       const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
       if (panel && panel.fieldsList) {

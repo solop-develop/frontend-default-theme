@@ -95,7 +95,7 @@
     </div>
 
     <el-drawer
-      :visible.sync="drawer"
+      :visible.sync="showContainerInfo"
       :with-header="false"
       :before-close="openRecordLogs"
       :size="'50%'"
@@ -201,6 +201,10 @@ export default defineComponent({
       return store.getters.getStoredTab(props.parentUuid, tabUuid.value)
     })
 
+    const showContainerInfo = computed(() => {
+      return store.getters.getShowLogs
+    })
+
     const isShowedTabs = computed(() => {
       const storedWindow = store.getters.getStoredWindow(props.parentUuid)
       return storedWindow.isShowedTabsParent
@@ -243,6 +247,32 @@ export default defineComponent({
       findRecordLogs(props.allTabsList[0])
       setTabNumber(tabindex)
 
+      const inf = store.getters.getContainerInfo
+      const infoTab = props.tabsList.find(row => row.uuid === tabuuid)
+      if (!isEmptyValue(inf)) {
+        if (!isEmptyValue(infoTab)) {
+          if (!isEmptyValue(inf.currentTab)) {
+            store.dispatch('changeTabAttribute', {
+              parentUuid: inf.currentTab.parentUuid,
+              containerUuid: inf.currentTab.containerUuid,
+              attributeName: 'isSelected',
+              attributeValue: false
+            })
+          }
+          const list = store.getters.getTabRecordsList({ containerUuid: infoTab.containerUuid })
+          const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(infoTab.containerUuid))
+          store.dispatch('panelInfo', {
+            currentTab: infoTab,
+            currentRecord
+          })
+          store.dispatch('changeTabAttribute', {
+            parentUuid: infoTab.parentUuid,
+            containerUuid: infoTab.containerUuid,
+            attributeName: 'isSelected',
+            attributeValue: true
+          })
+        }
+      }
       // set metadata tab
       if (tabUuid.value !== tabuuid) {
         tabUuid.value = tabuuid
@@ -257,7 +287,6 @@ export default defineComponent({
       if (tabNumber !== currentTab.value) {
         currentTab.value = tabNumber
       }
-
       router.push({
         query: {
           ...root.$route.query,
@@ -398,16 +427,10 @@ export default defineComponent({
     /**
      * Listar Historico de cambios
      */
-    const openRecordLogs = (a) => {
-      findRecordLogs(props.allTabsList[0])
-      drawer.value = !drawer.value
-      if (drawer.value) {
-        props.containerManager.getRecordLogs({
-          tableName: props.allTabsList[0].tableName,
-          recordId: currentRecordLogs.value[props.allTabsList[parseInt(currentTab.value)].tableName + '_ID'],
-          recordUuid: currentRecordLogs.value.UUID
-        })
-      }
+    const openRecordLogs = () => {
+      store.dispatch('showLogs', {
+        show: !showContainerInfo.value
+      })
       // store.commit('setShowRecordLogs', newValue)
     }
 
@@ -436,6 +459,12 @@ export default defineComponent({
         attributeName: 'isShowedTableRecords',
         attributeValue: !currentTabMetadata.value.isShowedTableRecords
       })
+      store.dispatch('changeTabAttribute', {
+        parentUuid: props.parentUuid,
+        containerUuid: currentTabMetadata.value.uuid,
+        attributeName: 'isSelected',
+        attributeValue: !currentTabMetadata.value.isSelected
+      })
     }
 
     findRecordLogs(props.allTabsList[0])
@@ -457,6 +486,7 @@ export default defineComponent({
       tabStyle,
       listAction,
       tabMetadata,
+      showContainerInfo,
       // methods
       handleClick,
       changeShowedRecords,

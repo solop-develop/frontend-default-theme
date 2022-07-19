@@ -22,16 +22,31 @@
       style="height: 20%;text-align: center;padding-top: 1%;"
     >
       <el-descriptions :column="1">
-        <el-descriptions-item label="Ventana" label-style="{ color: #606266; font-weight: bold; }">
+        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+          <template slot="label">
+            <svg-icon icon-class="tab" style="margin-right: 10px;" />
+            Pestañá
+          </template>
           <span style="color: #606266; font-weight: bold;">
-            {{ allTabsList[0].name }}
-            <svg-icon icon-class="tab" />
+            {{ currentTab.name }}
           </span>
         </el-descriptions-item>
-        <el-descriptions-item label="Registro" label-style="{ color: #606266; font-weight: bold; }">
+        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+          <template slot="label">
+            <svg-icon icon-class="user" style="margin-right: 10px;" />
+            ID del Registro
+          </template>
           <span style="color: #606266; font-weight: bold;">
-            {{ currentRecord.Name }}
-            <svg-icon icon-class="documentation" />
+            {{ currentRecordInfo[currentTab.tableName + '_ID'] }}
+          </span>
+        </el-descriptions-item>
+        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+          <template slot="label">
+            <svg-icon icon-class="user" style="margin-right: 10px;" />
+            UUID del Registro
+          </template>
+          <span style="color: #606266; font-weight: bold;">
+            {{ currentRecordInfo.UUID }}
           </span>
         </el-descriptions-item>
       </el-descriptions>
@@ -106,16 +121,50 @@ export default defineComponent({
     const currentKey = ref(0)
     const typeAction = ref(0)
     const currentTabLogs = ref('0')
+    const tableName = ref('')
     const nameTab = ref('getRecordLogs')
 
     // // use getter to reactive properties
     const isLoadLogs = computed(() => {
       return store.state.utils.showRecordLogs
     })
+
+    /**
+     * Container Info
+     */
+    const containerInfo = computed(() => {
+      const inf = store.getters.getContainerInfo
+      if (inf) {
+        return inf
+      }
+      return {}
+    })
+
+    /**
+     * Current Tab
+     */
+    const currentTab = computed(() => {
+      if (containerInfo.value.currentTab) {
+        return containerInfo.value.currentTab
+      }
+      return {}
+    })
+
+    /**
+     * Current Record
+     */
+    const currentRecordInfo = computed(() => {
+      if (containerInfo.value.currentRecord) {
+        return containerInfo.value.currentRecord
+      }
+      return {}
+    })
+
     /**
      * Record
      */
     const findRecordLogs = (tab) => {
+      tableName.value = root.$store.getters.getTableName(tab.parentUuid, tab.containerUuid)
       currentRecordLogs.value = root.$store.getters.getValuesView({
         parentUuid: tab.parentUuid,
         containerUuid: tab.containerUuid,
@@ -172,6 +221,10 @@ export default defineComponent({
       currentKey,
       isLoadLogs,
       listLogs,
+      tableName,
+      containerInfo,
+      currentRecordInfo,
+      currentTab,
       // methods
       validate,
       showkey,
