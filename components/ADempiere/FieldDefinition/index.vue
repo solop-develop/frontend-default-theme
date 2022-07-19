@@ -23,7 +23,7 @@
       v-if="inTable"
       :id="field.panelType !== 'form' ? field.columnName : ''"
       key="is-table-template"
-      :class="classField"
+      class="in-table"
       :parent-uuid="parentUuid"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
@@ -39,7 +39,6 @@
       :md="sizeField.md"
       :lg="sizeField.lg"
       :xl="sizeField.xl"
-      :class="classField"
     >
       <el-form-item :class="classFrom">
         <template slot="label">
@@ -111,10 +110,10 @@ export default {
       type: Object,
       default: () => ({})
     },
-    inGroup: {
-      type: Boolean,
-      default: false
-    },
+    // inGroup: {
+    //   type: Boolean,
+    //   default: false
+    // },
     inTable: {
       type: Boolean,
       default: false
@@ -146,9 +145,6 @@ export default {
     },
     currentColumnSize() {
       return this.$store.getters.getSizeColumn({ containerUuid: this.containerUuid })
-    },
-    isAlignButton() {
-      return this.isOnlyField ? 'display: contents;text-align: center;' : ''
     },
     sizeField() {
       if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
@@ -316,15 +312,6 @@ export default {
       return this.isAdvancedQuery &&
         OPERATORS_MULTIPLE_VALUES.includes(this.field.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
-    },
-    getWidth() {
-      return store.getters.getWidthLayout
-    },
-    classField() {
-      if (this.inTable) {
-        return 'in-table'
-      }
-      return ''
     },
 
     isOnlyField() {

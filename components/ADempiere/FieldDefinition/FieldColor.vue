@@ -17,44 +17,25 @@
 -->
 
 <template>
-  <el-select
+  <el-color-picker
     v-model="value"
     v-bind="commonsProperties"
-    multiple
-    filterable
-    allow-create
+    show-alpha
     @change="preHandleChange"
-  >
-    <el-option
-      v-for="(option, key) in value"
-      :key="key"
-      :value="option"
-    />
-  </el-select>
+  />
 </template>
 
 <script>
 // components and mixins
-import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldMixinText from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldText.js'
 
-/**
- * This component is a list type field, for IN and NOT IN search with advanced query
- */
 export default {
-  name: 'FieldSelectMultiple',
+  name: 'FieldColor',
 
   mixins: [
-    fieldMixin
-  ],
-
-  computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-select custom-field-select-multiple '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-      return styleClass
-    }
-  }
+    fieldMixin,
+    fieldMixinText
+  ]
 }
 </script>

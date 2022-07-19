@@ -94,7 +94,7 @@
 import fieldsListLine from './fieldsListLine.js'
 
 // components and mixins
-import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
 // api request methods
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'

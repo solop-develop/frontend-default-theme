@@ -129,7 +129,7 @@ import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import FindOrders from './FindOrders'
-import FieldDefinition from '@theme/components/ADempiere/Field'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 

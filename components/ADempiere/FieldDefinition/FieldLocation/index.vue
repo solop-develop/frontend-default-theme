@@ -66,12 +66,13 @@
 </template>
 
 <script>
-// mixins
-import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+// components and mixins
+import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import mixinLocation from './mixinLocation.js'
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
-// components
 import LocationAddressForm from './locationAddressForm.vue'
+
+// constants
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
 
 export default {
   name: 'FieldLocation',

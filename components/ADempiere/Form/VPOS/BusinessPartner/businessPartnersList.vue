@@ -118,7 +118,7 @@ import fieldsList from './fieldsListSearch.js'
 // components and mixins
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
 import BParterMixin from './mixinBusinessPartner.js'
-import FieldDefinition from '@theme/components/ADempiere/Field'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
 // utils and helper methods
 import {

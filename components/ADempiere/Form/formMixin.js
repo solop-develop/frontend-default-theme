@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // components and mixins
-import FieldDefinition from '@theme/components/ADempiere/Field'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition'
 
 // utils and helper methods
 import { createFieldFromDefinition, createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'

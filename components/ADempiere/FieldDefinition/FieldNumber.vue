@@ -60,7 +60,7 @@
 
 <script>
 // components and mixins
-import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
 // utils and helper methods
 import { isDecimalField } from '@/utils/ADempiere/references.js'
