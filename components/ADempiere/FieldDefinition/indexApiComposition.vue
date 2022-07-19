@@ -202,55 +202,8 @@ export default defineComponent({
       if (isSelectCreated.value) {
         return () => import('@theme/components/ADempiere/FieldDefinition/FieldSelectMultiple')
       }
-      let renderComponent
-      switch (field.value.componentPath) {
-        case 'FieldAutocomplete':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldAutocomplete')
-          break
-        case 'FieldBinary':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldBinary')
-          break
-        case 'FieldButton':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldButton')
-          break
-        case 'FieldColor':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldColor')
-          break
-        case 'FieldDate':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldDate')
-          break
-        case 'FieldImage':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldImage')
-          break
-        case 'FieldLocation':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldLocation')
-          break
-        case 'FieldLocator':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldLocator')
-          break
-        case 'FieldNumber':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldNumber')
-          break
-        case 'FieldSelect':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldSelect')
-          break
-        case 'FieldText':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldText')
-          break
-        case 'FieldTextLong':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldTextLong')
-          break
-        case 'FieldTime':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldTime')
-          break
-        case 'FieldUrl':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldUrl')
-          break
-        case 'FieldYesNo':
-          renderComponent = () => import('@theme/components/ADempiere/FieldDefinition/FieldYesNo')
-          break
-      }
-      return renderComponent
+
+      return () => import(`@theme/components/ADempiere/FieldDefinition/${this.field.componentPath}`)
     })
 
     const fieldAttributes = computed(() => {
