@@ -132,13 +132,14 @@ import {
   documentStatusOptionItem, translateOptionItem,
   zoomInOptionItem,
   hideThisField
-} from '@theme/components/ADempiere/Field/FieldOptions/fieldOptionsList.js'
+} from '@theme/components/ADempiere/FieldDefinition/FieldOptions/fieldOptionsList.js'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { isLookup, LIST } from '@/utils/ADempiere/references.js'
 import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
   name: 'FieldOptions',
+
   components: {
     LabelField,
     LabelPopoverOption

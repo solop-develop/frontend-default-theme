@@ -270,7 +270,7 @@ import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 // components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 
 // api request methods

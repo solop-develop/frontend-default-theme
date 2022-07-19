@@ -485,8 +485,10 @@ export default defineComponent({
         props.containerUuid
       )
       if (!isEmptyValue(currentTab) && !currentTab.isParentTab) {
-        const records = store.getters.getTabCurrentRecord({ containerUuid: props.containerUuid })
-        return records
+        const record = store.getters.getTabCurrentRow({
+          containerUuid: props.containerUuid
+        })
+        return record
       }
       return {}
     })

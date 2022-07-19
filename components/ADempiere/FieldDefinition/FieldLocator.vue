@@ -33,7 +33,7 @@
 
 <script>
 // components and mixis
-import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
 // api request methods
 import { getLocatorList } from '@/api/ADempiere/field/locator.js'

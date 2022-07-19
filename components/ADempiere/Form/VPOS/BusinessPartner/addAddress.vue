@@ -80,7 +80,7 @@
 
 <script>
 // constants
-import fieldsList from '@theme/components/ADempiere/Field/FieldLocation/fieldsList.js'
+import fieldsList from '@theme/components/ADempiere/FieldDefinition/FieldLocation/fieldsList.js'
 
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'

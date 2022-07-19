@@ -65,7 +65,7 @@ import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 import store from '@/store'
 
 // components and mixins
-import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 
 // utils and helper methods

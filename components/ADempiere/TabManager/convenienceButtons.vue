@@ -19,7 +19,7 @@
 <template>
   <div v-show="isDisableOptionsTabChild" class="convenience-buttons-main">
     <el-button
-      v-if="isCreateRecord && !isExistsChanges"
+      v-if="isCreateRecord"
       plain
       size="small"
       type="success"
@@ -30,7 +30,7 @@
     </el-button>
 
     <el-button
-      v-if="isUndoChanges || isSaveRecord"
+      v-if="isUndoChanges"
       plain
       size="small"
       type="info"
@@ -41,7 +41,7 @@
     </el-button>
 
     <el-button
-      v-show="!isExistsChanges"
+      v-show="isRefreshRecord"
       plain
       size="small"
       type="primary"
@@ -121,7 +121,7 @@
 
 <script>
 import Vue from 'vue'
-import { defineComponent, computed, onUnmounted, ref } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import store from '@/store'
 import language from '@/lang'
@@ -179,8 +179,10 @@ export default defineComponent({
 
     const listOfRecordsToDeleted = computed(() => {
       if (!getCurrentTab.value.isShowedTableRecords) {
-        const records = store.getters.getTabCurrentRecord({ containerUuid })
-        return [records]
+        const record = store.getters.getTabCurrentRow({
+          containerUuid
+        })
+        return [record]
       }
       return selectionsRecords.value
     })
@@ -201,12 +203,15 @@ export default defineComponent({
 
     const selectionsRecords = computed(() => {
       return props.containerManager.getSelection({
-        containerUuid: props.tabAttributes.uuid
+        containerUuid
       })
     })
 
     const isCreateRecord = computed(() => {
       if (isSecondaryParentTab.value) {
+        return false
+      }
+      if (isExistsChanges.value) {
         return false
       }
 
@@ -218,11 +223,19 @@ export default defineComponent({
     })
 
     const isExistsChanges = computed(() => {
-      const persistenceValues = store.getters.getPersistenceAttributes({
+      const persistenceValues = store.getters.getPersistenceAttributesChanges({
+        parentUuid: props.parentUuid,
         containerUuid,
         recordUuid: recordUuid.value
       })
       return !isEmptyValue(persistenceValues)
+    })
+
+    const isRefreshRecord = computed(() => {
+      if (isEmptyValue(recordUuid.value)) {
+        return false
+      }
+      return !isExistsChanges.value
     })
 
     const emptyMandatoryFields = computed(() => {
@@ -259,13 +272,19 @@ export default defineComponent({
     })
 
     const isUndoChanges = computed(() => {
-      return isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new'
+      if (!isEmptyValue(recordUuid.value)) {
+        return isExistsChanges.value
+      }
+
+      // without old record
+      const oldRecordUuid = store.getters.getCurrentRecordOnPanel(containerUuid)
+      return !isEmptyValue(oldRecordUuid) || isExistsChanges.value
     })
 
     const getCurrentTab = computed(() => {
       const tab = store.getters.getStoredTab(
         props.parentUuid,
-        props.tabAttributes.uuid
+        containerUuid
       )
       if (tab) {
         return tab
@@ -284,7 +303,7 @@ export default defineComponent({
           attributeNameControl: undefined,
           attributeValue: false,
           parentUuid: props.parentUuid,
-          containerUuid: props.tabAttributes.uuid
+          containerUuid
         })
       }
     }
@@ -309,7 +328,7 @@ export default defineComponent({
       if (getCurrentTab.value.isShowedTableRecords && !isEmptyValue(selectionsRecords.value)) {
         store.dispatch('deleteSelectedRecordsFromWindow', {
           parentUuid: props.parentUuid,
-          containerUuid: props.tabAttributes.uuid
+          containerUuid
         })
         isVisibleConfirmDelete.value = false
         return
@@ -371,7 +390,7 @@ export default defineComponent({
      * Vuex subscription when record parent change
      * TODO: Add support to restart or delete timer by flushPersistenceQueue
      */
-    const unsubscribeChangeParentRecord = () => {}
+    // const unsubscribeChangeParentRecord = () => {}
 
     // unsubscribeChangeParentRecord = store.subscribeAction({
     //   before: (action, state) => {
@@ -382,9 +401,9 @@ export default defineComponent({
     // })
 
     // remove susbscriptions
-    onUnmounted(() => {
-      unsubscribeChangeParentRecord()
-    })
+    // onUnmounted(() => {
+    //   unsubscribeChangeParentRecord()
+    // })
 
     return {
       buttonConfirmDelete,
@@ -395,6 +414,7 @@ export default defineComponent({
       isCreateRecord,
       isExistsChanges,
       isDeleteRecord,
+      isRefreshRecord,
       isUndoChanges,
       getCurrentTab,
       isDisableOptionsTabChild,
