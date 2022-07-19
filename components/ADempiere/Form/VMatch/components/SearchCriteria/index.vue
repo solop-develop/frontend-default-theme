@@ -23,7 +23,7 @@
     <el-form-item>
       <el-row>
         <el-col v-for="(field, index) in metadata" :key="index" :span="6">
-          <field
+          <field-definition
             :key="field.columnName"
             :metadata-field="field"
             :v-model="field.value"
@@ -35,13 +35,13 @@
 </template>
 
 <script>
-import Field from '@theme/components/ADempiere/Field'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition'
 
 export default {
   name: 'SearchCriteria',
 
   components: {
-    Field
+    FieldDefinition
   },
 
   props: {

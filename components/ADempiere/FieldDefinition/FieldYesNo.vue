@@ -30,7 +30,7 @@
 
 <script>
 // components and mixins
-import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
 // utils and helper methods
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
@@ -61,7 +61,6 @@ export default {
       return convertStringToBoolean(value)
     },
     preHandleChange(value) {
-      this.metadata.value = value
       this.handleFieldChange({ value })
 
       this.isReadOnlyForm(this.value)

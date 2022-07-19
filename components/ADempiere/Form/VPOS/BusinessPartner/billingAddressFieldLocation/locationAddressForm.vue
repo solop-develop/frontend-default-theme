@@ -51,7 +51,7 @@
 
 <script>
 // constants
-import fieldsList from '@theme/components/ADempiere/Field/FieldLocation/fieldsList.js'
+import fieldsList from '@theme/components/ADempiere/FieldDefinition/FieldLocation/fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins

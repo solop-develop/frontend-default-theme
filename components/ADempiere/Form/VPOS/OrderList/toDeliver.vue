@@ -137,7 +137,7 @@ import fieldsListOrders from './fieldsListOrders.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils.js'
 
 // components and mixins
-import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import CustomPagination from '@theme/components/ADempiere/Pagination'
 

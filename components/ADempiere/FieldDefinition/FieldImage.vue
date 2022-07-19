@@ -32,7 +32,7 @@
 
 <script>
 // components and mixins
-import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
+import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
 // api request methods
 import { getResource, updateResource } from '@/api/ADempiere/field/binary.js'

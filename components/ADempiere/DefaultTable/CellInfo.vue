@@ -84,7 +84,8 @@ import { defineComponent, computed } from '@vue/composition-api'
 
 // components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
-import FieldDefinition from '@theme/components/ADempiere/Field/index.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+
 // utils and helpers methods
 import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
 import { formatField } from '@/utils/ADempiere/valueFormat.js'

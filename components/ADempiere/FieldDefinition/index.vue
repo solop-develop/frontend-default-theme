@@ -23,7 +23,7 @@
       v-if="inTable"
       :id="field.panelType !== 'form' ? field.columnName : ''"
       key="is-table-template"
-      :class="classField"
+      class="in-table"
       :parent-uuid="parentUuid"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
@@ -39,7 +39,6 @@
       :md="sizeField.md"
       :lg="sizeField.lg"
       :xl="sizeField.xl"
-      :class="classField"
     >
       <el-form-item :class="classFrom">
         <template slot="label">
@@ -66,10 +65,10 @@
 </template>
 
 <script>
-// components and mixins
-import FieldOptions from '@theme/components/ADempiere/Field/FieldOptions/index.vue'
-
 import store from '@/store'
+
+// components and mixins
+import FieldOptions from '@theme/components/ADempiere/FieldDefinition/FieldOptions/index.vue'
 
 // constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
@@ -111,10 +110,10 @@ export default {
       type: Object,
       default: () => ({})
     },
-    inGroup: {
-      type: Boolean,
-      default: false
-    },
+    // inGroup: {
+    //   type: Boolean,
+    //   default: false
+    // },
     inTable: {
       type: Boolean,
       default: false
@@ -145,10 +144,7 @@ export default {
       return 'field-standard'
     },
     currentColumnSize() {
-      return this.$store.getters.getSizeColumn({ containerUuid: this.containerUuid })
-    },
-    isAlignButton() {
-      return this.isOnlyField ? 'display: contents;text-align: center;' : ''
+      return store.getters.getSizeColumn({ containerUuid: this.containerUuid })
     },
     sizeField() {
       if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
@@ -194,60 +190,14 @@ export default {
     // load the component that is indicated in the attributes of received property
     componentRender() {
       if (isEmptyValue(this.field.componentPath || !this.field.isSupported)) {
-        return () => import('@theme/components/ADempiere/Field/FieldText')
+        return () => import('@theme/components/ADempiere/FieldDefinition/FieldText')
       }
       if (this.isSelectCreated) {
-        return () => import('@theme/components/ADempiere/Field/FieldSelectMultiple')
+        return () => import('@theme/components/ADempiere/FieldDefinition/FieldSelectMultiple')
       }
-      let field
-      switch (this.field.componentPath) {
-        case 'FieldAutocomplete':
-          field = () => import('@theme/components/ADempiere/Field/FieldAutocomplete')
-          break
-        case 'FieldBinary':
-          field = () => import('@theme/components/ADempiere/Field/FieldBinary')
-          break
-        case 'FieldButton':
-          field = () => import('@theme/components/ADempiere/Field/FieldButton')
-          break
-        case 'FieldColor':
-          field = () => import('@theme/components/ADempiere/Field/FieldColor')
-          break
-        case 'FieldDate':
-          field = () => import('@theme/components/ADempiere/Field/FieldDate')
-          break
-        case 'FieldImage':
-          field = () => import('@theme/components/ADempiere/Field/FieldImage')
-          break
-        case 'FieldLocation':
-          field = () => import('@theme/components/ADempiere/Field/FieldLocation')
-          break
-        case 'FieldLocator':
-          field = () => import('@theme/components/ADempiere/Field/FieldLocator')
-          break
-        case 'FieldNumber':
-          field = () => import('@theme/components/ADempiere/Field/FieldNumber')
-          break
-        case 'FieldSelect':
-          field = () => import('@theme/components/ADempiere/Field/FieldSelect')
-          break
-        case 'FieldText':
-          field = () => import('@theme/components/ADempiere/Field/FieldText')
-          break
-        case 'FieldTextLong':
-          field = () => import('@theme/components/ADempiere/Field/FieldTextLong')
-          break
-        case 'FieldTime':
-          field = () => import('@theme/components/ADempiere/Field/FieldTime')
-          break
-        case 'FieldUrl':
-          field = () => import('@theme/components/ADempiere/Field/FieldUrl')
-          break
-        case 'FieldYesNo':
-          field = () => import('@theme/components/ADempiere/Field/FieldYesNo')
-          break
-      }
-      return field
+
+      // return () => import('@theme/components/ADempiere/FieldDefinition/' + this.field.componentPath)
+      return () => import(`@theme/components/ADempiere/FieldDefinition/${this.field.componentPath}`)
     },
     fieldAttributes() {
       return {
@@ -316,15 +266,6 @@ export default {
       return this.isAdvancedQuery &&
         OPERATORS_MULTIPLE_VALUES.includes(this.field.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
-    },
-    getWidth() {
-      return store.getters.getWidthLayout
-    },
-    classField() {
-      if (this.inTable) {
-        return 'in-table'
-      }
-      return ''
     },
 
     isOnlyField() {
