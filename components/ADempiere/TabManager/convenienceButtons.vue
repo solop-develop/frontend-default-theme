@@ -96,17 +96,6 @@
         {{ $t('actionMenu.delete') }}
       </el-button>
     </el-popover>
-
-    <el-button
-      v-show="isSaveRecord"
-      plain
-      size="small"
-      type="primary"
-      class="undo-changes-button"
-      @click="saveChanges()"
-    >
-      {{ $t('actionMenu.save') }}
-    </el-button>
   </div>
 </template>
 
@@ -365,6 +354,18 @@ export default defineComponent({
         })
     }
 
+    function openLog() {
+      const list = store.getters.getTabRecordsList({ containerUuid })
+      const currentRecord = list.find(row => row.UUID === recordUuid.value)
+      store.dispatch('showLogs', {
+        tableName: props.tabAttributes.tableName,
+        recordUuid: recordUuid.value,
+        containerUuid,
+        currentRecord,
+        show: true
+      })
+    }
+
     /**
      * Vuex subscription when record parent change
      * TODO: Add support to restart or delete timer by flushPersistenceQueue
@@ -406,7 +407,8 @@ export default defineComponent({
       focusConfirmDelete,
       refreshCurrentRecord,
       undoChanges,
-      saveChanges
+      saveChanges,
+      openLog
     }
   }
 

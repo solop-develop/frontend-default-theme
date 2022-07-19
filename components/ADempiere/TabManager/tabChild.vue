@@ -258,6 +258,33 @@ export default defineComponent({
     const handleClick = (tabHTML) => {
       const { tabuuid, tabindex } = tabHTML.$attrs
 
+      const inf = store.getters.getContainerInfo
+      const infoTab = props.tabsList.find(row => row.uuid === tabuuid)
+      if (!isEmptyValue(inf)) {
+        if (!isEmptyValue(infoTab)) {
+          if (!isEmptyValue(inf.currentTab)) {
+            store.dispatch('changeTabAttribute', {
+              parentUuid: inf.currentTab.parentUuid,
+              containerUuid: inf.currentTab.containerUuid,
+              attributeName: 'isSelected',
+              attributeValue: false
+            })
+          }
+          const list = store.getters.getTabRecordsList({ containerUuid: infoTab.containerUuid })
+          const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(infoTab.containerUuid))
+          store.dispatch('panelInfo', {
+            currentTab: infoTab,
+            currentRecord
+          })
+          store.dispatch('changeTabAttribute', {
+            parentUuid: infoTab.parentUuid,
+            containerUuid: infoTab.containerUuid,
+            attributeName: 'isSelected',
+            attributeValue: true
+          })
+        }
+      }
+
       setTabNumber(tabindex)
 
       // set metadata tab
