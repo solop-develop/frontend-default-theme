@@ -96,26 +96,6 @@
         {{ $t('actionMenu.delete') }}
       </el-button>
     </el-popover>
-
-    <el-button
-      v-show="isSaveRecord"
-      plain
-      size="small"
-      type="primary"
-      class="undo-changes-button"
-      @click="saveChanges()"
-    >
-      {{ $t('actionMenu.save') }}
-    </el-button>
-    <el-button
-      type="primary"
-      plain
-      size="small"
-      @click="openLog()"
-    >
-      <svg-icon icon-class="tree-table" />
-      Bitacora
-    </el-button>
   </div>
 </template>
 

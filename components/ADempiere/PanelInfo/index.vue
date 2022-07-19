@@ -25,7 +25,7 @@
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
           <template slot="label">
             <svg-icon icon-class="tab" style="margin-right: 10px;" />
-            Pestañá
+            {{ $t('window.containerInfo.log.tab') }}
           </template>
           <span style="color: #606266; font-weight: bold;">
             {{ currentTab.name }}
@@ -34,7 +34,7 @@
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
           <template slot="label">
             <svg-icon icon-class="user" style="margin-right: 10px;" />
-            ID del Registro
+            {{ $t('window.containerInfo.log.recordID') }}
           </template>
           <span style="color: #606266; font-weight: bold;">
             {{ currentRecordInfo[currentTab.tableName + '_ID'] }}
@@ -43,7 +43,7 @@
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
           <template slot="label">
             <svg-icon icon-class="user" style="margin-right: 10px;" />
-            UUID del Registro
+            {{ $t('window.containerInfo.log.recordUUID') }}
           </template>
           <span style="color: #606266; font-weight: bold;">
             {{ currentRecordInfo.UUID }}
@@ -61,7 +61,7 @@
         <el-tab-pane name="getRecordLogs">
           <span slot="label">
             <svg-icon icon-class="tree-table" />
-            Historico de Cambios
+            {{ $t('window.containerInfo.log.changeHistory') }}
           </span>
           <record-logs />
         </el-tab-pane>
