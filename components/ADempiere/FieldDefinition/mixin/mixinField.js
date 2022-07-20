@@ -129,6 +129,15 @@ export default {
           value
         })
       }
+    },
+    currentTab() {
+      return this.$store.getters.getStoredTab(
+        this.metadata.parentUuid,
+        this.metadata.containerUuid
+      )
+    },
+    currentRecord() {
+      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
     }
   },
 
@@ -246,6 +255,7 @@ export default {
           value: this.value
         })
       }
+      this.setContainerInformation()
     },
     focusLost(value) {
       if (this.metadata.handleFocusLost) {
@@ -353,6 +363,14 @@ export default {
         field: this.metadata,
         columnName: this.metadata.columnName
       })
+    },
+    setContainerInformation() {
+      if (!this.isEmptyValue(this.currentTab) && !this.isEmptyValue(this.currentRecord)) {
+        this.$store.dispatch('panelInfo', {
+          currentTab: this.currentTab,
+          currentRecord: this.currentRecord
+        })
+      }
     }
   }
 }

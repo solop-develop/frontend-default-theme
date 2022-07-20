@@ -96,6 +96,16 @@
         {{ $t('actionMenu.delete') }}
       </el-button>
     </el-popover>
+    <el-button
+      v-show="isSaveRecord"
+      plain
+      size="small"
+      type="primary"
+      class="undo-changes-button"
+      @click="saveChanges()"
+    >
+      {{ $t('actionMenu.save') }}
+    </el-button>
   </div>
 </template>
 

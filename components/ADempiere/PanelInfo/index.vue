@@ -17,9 +17,9 @@
 -->
 
 <template>
-  <el-container>
+  <el-container style="height: 100% !important;">
     <el-header
-      style="height: 20%;text-align: center;padding-top: 1%;"
+      style="height: 10%;text-align: center;padding-top: 1%;"
     >
       <el-descriptions :column="1">
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -29,6 +29,15 @@
           </template>
           <span style="color: #606266; font-weight: bold;">
             {{ currentTab.name }}
+          </span>
+        </el-descriptions-item>
+        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+          <template slot="label">
+            <svg-icon icon-class="table" style="margin-right: 10px;" />
+            {{ $t('window.containerInfo.log.tableName') }}
+          </template>
+          <span style="color: #606266; font-weight: bold;">
+            {{ currentTab.tableName }}
           </span>
         </el-descriptions-item>
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -51,11 +60,12 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-header>
-    <el-main style="padding:0px">
-      <hr>
+    <el-main style="padding:0px; height: 100% !important;">
       <el-tabs
         v-model="nameTab"
         type="border-card"
+        style="height: 100% !important;"
+        class="qlq"
         @tab-click="handleClick"
       >
         <el-tab-pane name="getRecordLogs">
@@ -63,7 +73,9 @@
             <svg-icon icon-class="tree-table" />
             {{ $t('window.containerInfo.log.changeHistory') }}
           </span>
-          <record-logs />
+          <el-scrollbar class="scroll-panel-info">
+            <record-logs />
+          </el-scrollbar>
         </el-tab-pane>
         <el-tab-pane name="getAttachment">
           <span slot="label">
@@ -75,6 +87,16 @@
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
             :record-uuid="currentRecord.UUID"
+          />
+        </el-tab-pane>
+        <el-tab-pane name="listChats" style="height: 100% !important;">
+          <span slot="label">
+            <svg-icon icon-class="message" />
+            {{ $t('window.containerInfo.notes') }}
+          </span>
+          <chats
+            :table-name="allTabsList[0].tableName"
+            :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
           />
         </el-tab-pane>
       </el-tabs>
@@ -91,13 +113,15 @@ import store from '@/store'
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 import Attachment from './Component/Attachment/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
+import Chats from './Component/chats/index.vue'
 
 export default defineComponent({
   name: 'ContainerInfo',
 
   components: {
     RecordLogs,
-    Attachment
+    Attachment,
+    Chats
   },
 
   props: {
@@ -112,6 +136,10 @@ export default defineComponent({
     currentRecord: {
       type: Object,
       required: true
+    },
+    showContainerInfo: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -125,6 +153,10 @@ export default defineComponent({
     const nameTab = ref('getRecordLogs')
 
     // // use getter to reactive properties
+
+    const openInfo = computed(() => {
+      return props.showContainerInfo
+    })
     const isLoadLogs = computed(() => {
       return store.state.utils.showRecordLogs
     })
@@ -178,6 +210,14 @@ export default defineComponent({
       }
     })
 
+    watch(openInfo, (newValue, oldValue) => {
+      if (newValue && newValue !== oldValue && nameTab.value !== 'getRecordLogs') {
+        handleClick({
+          name: nameTab.value
+        })
+      }
+    })
+
     findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
 
     /**
@@ -206,9 +246,9 @@ export default defineComponent({
     const handleClick = (tab, event) => {
       nameTab.value = tab.name
       props.containerManager[tab.name]({
-        tableName: props.allTabsList[0].tableName,
-        recordId: props.currentRecord[props.allTabsList[0].tableName + '_ID'],
-        recordUuid: props.currentRecord.UUID
+        tableName: currentTab.value.tableName,
+        recordId: currentRecordInfo.value[currentTab.value.tableName + '_ID'],
+        recordUuid: currentRecordInfo.value.UUID
       })
     }
     const drawer = ref(false)
@@ -237,3 +277,10 @@ export default defineComponent({
 
 })
 </script>
+
+<style>
+.scroll-panel-info {
+  width: 100%;
+  height: 800px;
+}
+</style>
