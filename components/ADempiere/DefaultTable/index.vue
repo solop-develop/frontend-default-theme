@@ -422,6 +422,14 @@ export default defineComponent({
           containerUuid: props.containerUuid
         })
       }
+
+      if (props.containerManager.confirmRowChanges) {
+        props.containerManager.confirmRowChanges({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          row
+        })
+      }
     }
 
     function headerLabel(field) {
