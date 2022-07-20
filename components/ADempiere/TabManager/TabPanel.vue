@@ -172,12 +172,15 @@ export default defineComponent({
       currentTab: currentTab.value,
       currentRecord
     })
-    store.dispatch('changeTabAttribute', {
-      parentUuid: currentTab.value.parentUuid,
-      containerUuid: currentTab.value.containerUuid,
-      attributeName: 'isSelected',
-      attributeValue: !currentTab.value.isSelected
-    })
+
+    if (props.tabAttributes.isParentTab) {
+      store.dispatch('changeTabAttribute', {
+        parentUuid: currentTab.value.parentUuid,
+        containerUuid: currentTab.value.containerUuid,
+        attributeName: 'isSelected',
+        attributeValue: !currentTab.value.isSelected
+      })
+    }
 
     const tableHeaders = computed(() => {
       const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)

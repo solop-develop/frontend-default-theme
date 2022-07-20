@@ -102,6 +102,7 @@
     >
       <panel-info
         :all-tabs-list="allTabsList"
+        :show-container-info="showContainerInfo"
         :container-manager="containerManager"
         :current-record="currentRecordLogs"
       />
