@@ -252,7 +252,6 @@ export default {
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
-    createFieldFromDictionary,
     actionList(event) {
       this.$store.dispatch('changePopoverListBusinessPartner', false)
     },
@@ -311,7 +310,7 @@ export default {
       const list = []
       // Product Code
       this.fieldsList.forEach(element => {
-        this.createFieldFromDictionary(element)
+        createFieldFromDictionary(element)
           .then(response => {
             const data = response
             list.push({

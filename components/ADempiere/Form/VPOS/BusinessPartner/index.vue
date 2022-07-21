@@ -340,30 +340,26 @@ export default {
     },
     displayedValue: {
       get() {
+        if (this.isEmptyValue(this.oldValueCustomer) && !this.isEmptyValue(this.newCustomer) && !this.editBusinessPartner &&
+          this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
+          return this.newCustomer.value + this.newCustomer.name
+        }
+        if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
+          if (!this.isEmptyValue(this.oldValueCustomer)) {
+            return this.oldValueCustomerData + this.displayAddress(this.selectAddress.first_name)
+          }
+          if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
+            return this.templateCustomerData + this.displayAddress(this.selectAddress.first_name)
+          } else {
+            return this.orderCustomerData + this.displayAddress(this.selectAddress.first_name)
+          }
+        }
+
         const display = this.$store.getters.getValueOfField({
           containerUuid: this.parentMetadata.containerUuid,
           columnName: 'DisplayColumn_C_BPartner_ID' // this.parentMetadata.displayColumnName
         })
-        if (this.isEmptyValue(this.oldValueCustomer) && !this.isEmptyValue(this.newCustomer) && !this.editBusinessPartner && this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
-          return this.newCustomer.value + this.newCustomer.name
-        }
-        if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
-          if (!this.isEmptyValue(this.oldValueCustomer) && !this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
-            return this.oldValueCustomerData + this.displayAddress(this.selectAddress.first_name)
-          }
-          if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
-            return this.templateCustomerData + this.displayAddress(this.selectAddress.first_name)
-          }
-          return display
-        } else {
-          if (!this.isEmptyValue(this.oldValueCustomer) && !this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
-            return this.oldValueCustomerData + this.displayAddress(this.selectAddress.first_name)
-          }
-          if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
-            return this.orderCustomerData + this.displayAddress(this.selectAddress.first_name)
-          }
-          return display
-        }
+        return display
       },
       set(value) {
         this.$store.commit('updateValueOfField', {

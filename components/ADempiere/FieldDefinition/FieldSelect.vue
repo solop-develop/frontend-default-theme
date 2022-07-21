@@ -33,6 +33,13 @@
     @visible-change="getDataLookupList"
     @clear="clearLookup"
   >
+    <svg-icon
+      v-if="isSearchField"
+      slot="prefix"
+      icon-class="search"
+      style="margin-left: 5px; font-size: 16px;"
+    />
+
     <el-option
       v-for="(option, key) in optionsList"
       :key="key"
@@ -58,9 +65,6 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
  *
  * TODO: String values add single quotation marks 'value'
  * TODO: No blanck option enabled if is mandatory field
- * TODO: ALL: Although in the future these will have different components, and
- * are currently not supported is also displayed as a substitute for fields:
- * - Search Field
  */
 export default {
   name: 'FieldSelect',
@@ -71,6 +75,12 @@ export default {
   ],
 
   computed: {
+    /**
+     * Lookup search type unsupported
+     */
+    isSearchField() {
+      return this.metadata.componentPath === 'FieldSearch'
+    },
     cssClassStyle() {
       let styleClass = ' custom-field-select '
       if (this.isSelectMultiple) {
