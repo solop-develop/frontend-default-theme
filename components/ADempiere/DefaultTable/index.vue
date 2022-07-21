@@ -360,6 +360,12 @@ export default defineComponent({
 
       if (!isEmptyValue(props.parentUuid)) {
         currentRowSelect.value = row
+        toggleSelection()
+        props.containerManager.setSelection({
+          containerUuid: props.containerUuid,
+          recordsSelected: [row]
+        })
+        toggleSelection([row])
         store.dispatch('changeTabAttribute', {
           attributeName: 'currentRowSelect',
           attributeNameControl: undefined,
