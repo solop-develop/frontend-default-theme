@@ -45,6 +45,10 @@ export function isDisplayedField({ displayType, isActive, isDisplayed, isDisplay
   return isActive && isDisplayed && isDisplayedFromLogic
 }
 
+export function isDisplayedDefault({ isMandatory }) {
+  return true
+}
+
 export function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
   return isQueryCriteria && isReadOnlyFromLogic
 }

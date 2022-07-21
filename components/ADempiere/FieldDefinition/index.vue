@@ -144,7 +144,9 @@ export default {
       return 'field-standard'
     },
     currentColumnSize() {
-      return store.getters.getSizeColumn({ containerUuid: this.containerUuid })
+      return store.getters.getSizeColumn({
+        containerUuid: this.containerUuid
+      })
     },
     sizeField() {
       if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
@@ -157,6 +159,17 @@ export default {
           xl: 24
         }
       }
+      if (!this.field.isCustomField && DEFAULT_COLUMNS_PER_ROW >= 0 && !this.isMobile) {
+        const size = parseInt(LAYOUT_MAX_COLUMNS_PER_ROW / this.currentColumnSize, 10)
+        return {
+          xs: size,
+          sm: size,
+          md: size,
+          lg: size,
+          xl: size
+        }
+      }
+
       if (isEmptyValue(this.field.size)) {
         const size = 24
         return {
@@ -166,16 +179,6 @@ export default {
           lg: size,
           xl: size,
           ...DEFAULT_SIZE
-        }
-      }
-      if (DEFAULT_COLUMNS_PER_ROW >= 0 && !this.isMobile) {
-        const size = parseInt(LAYOUT_MAX_COLUMNS_PER_ROW / this.currentColumnSize, 10)
-        return {
-          xs: size,
-          sm: size,
-          md: size,
-          lg: size,
-          xl: size
         }
       }
       return {
