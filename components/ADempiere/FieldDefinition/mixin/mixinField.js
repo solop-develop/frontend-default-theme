@@ -235,8 +235,7 @@ export default {
      * validate values before send values to store or server
      * @param {mixed} value
      */
-    preHandleChange(value, a, b, c) {
-      // console.log({ value, a, b, c }, 3123123, this.value)
+    preHandleChange(value) {
       this.handleFieldChange({ value })
     },
     focusGained(value) {

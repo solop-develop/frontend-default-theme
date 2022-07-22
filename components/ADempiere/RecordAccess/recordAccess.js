@@ -14,9 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { setRecordAccess } from '@/api/ADempiere/actions/record-access.js'
-import { showMessage } from '@/utils/ADempiere/notification.js'
 import language from '@/lang'
+
+// api request methods
+import { setRecordAccess } from '@/api/ADempiere/actions/record-access.js'
+
+// utils and helpers methods
+import { isLookup } from '@/utils/ADempiere/references'
+import { showMessage } from '@/utils/ADempiere/notification.js'
+
 export default {
   name: 'MixinRecordAccess',
   props: {
@@ -89,7 +95,7 @@ export default {
     },
     getIdentifiersList() {
       return this.identifiersList
-        .filter(item => item.componentPath !== 'FieldSelect')
+        .filter(item => !isLookup(item.displayType))
     },
     listRecordAccess() {
       return this.$store.getters.getRecordAccess
