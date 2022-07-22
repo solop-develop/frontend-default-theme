@@ -131,6 +131,9 @@ export default {
       }
     },
     currentTab() {
+      if (this.isEmptyValue(this.metadata.parentUuid)) {
+        return {}
+      }
       return this.$store.getters.getStoredTab(
         this.metadata.parentUuid,
         this.metadata.containerUuid
