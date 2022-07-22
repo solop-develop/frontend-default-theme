@@ -17,41 +17,40 @@
 -->
 
 <template>
-  <div>
-    <el-autocomplete
-      ref="displayBPartner"
-      v-model="displayedValue"
-      v-bind="commonsProperties"
-      value-key="name"
-      style="width: 100%;"
-      popper-class="custom-field-bpartner-info"
-      :trigger-on-focus="false"
-      :fetch-suggestions="localSearch"
-      :select-when-unmatched="false"
-      @select="handleSelect"
-      @clear="setBusinessPartner(blankBPartner)"
-      @focus="setNewDisplayedValue"
-      @blur="setOldDisplayedValue"
-    >
-      <!--
-      @keyup.enter.native="getBPartnerWithEnter"
-       -->
-      <template slot-scope="recordRow">
-        <div class="header">
-          <b> {{ recordRow.item.name }} {{ recordRow.item.lastName }}</b>
-        </div>
-        <span class="info">
-          {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
-        </span>
-      </template>
+  <el-autocomplete
+    ref="displayBPartner"
+    v-model="displayedValue"
+    v-bind="commonsProperties"
+    value-key="name"
+    clearable
+    style="width: 100%;"
+    popper-class="custom-field-bpartner-info"
+    :trigger-on-focus="false"
+    :fetch-suggestions="localSearch"
+    :select-when-unmatched="false"
+    @select="handleSelect"
+    @clear="clearValues"
+    @focus="setNewDisplayedValue"
+    @blur="setOldDisplayedValue"
+  >
+    <!--
+    @keyup.enter.native="getBPartnerWithEnter"
+      -->
+    <template slot-scope="recordRow">
+      <div class="header">
+        <b> {{ recordRow.item.name }} {{ recordRow.item.lastName }}</b>
+      </div>
+      <span class="info">
+        {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
+      </span>
+    </template>
 
-      <button-business-partners-list
-        slot="append"
-        :parent-metadata="metadata"
-        :is-disabled="isDisabled"
-      />
-    </el-autocomplete>
-  </div>
+    <button-business-partners-list
+      slot="append"
+      :parent-metadata="metadata"
+      :is-disabled="isDisabled"
+    />
+  </el-autocomplete>
 </template>
 
 <script>
@@ -59,12 +58,12 @@ import store from '@/store'
 
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
 import businessPartnerMixin from './mixinBusinessPartner'
 import ButtonBusinessPartnersList from './buttonBusinessPartnersList.vue'
 
 // utils and helper methods
-import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
-import { trimPercentage } from '@/utils/ADempiere/valueFormat'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'BusinessPartnerInfo',
@@ -75,6 +74,7 @@ export default {
 
   mixins: [
     fieldMixin,
+    fieldSearchMixin,
     businessPartnerMixin
   ],
 
@@ -86,202 +86,19 @@ export default {
           containerUuid: ''
         }
       }
-    },
-    showsPopovers: {
-      type: Object,
-      default: () => {
-        return {
-          isShowCreate: false,
-          isShowList: false
-        }
-      }
-    }
-  },
-
-  data() {
-    return {
-      timeOut: null,
-      searchText: '',
-      controlDisplayed: this.displayedValue
     }
   },
 
   computed: {
-    recordsBusinessPartners() {
-      return this.$store.getters.getBusinessPartnerRecordsList({
-        containerUuid: this.metadata.containerUuid
-      })
-    },
-    value: {
-      get() {
-        const { columnName, containerUuid, inTable } = this.metadata
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.getCell) {
-            return this.containerManager.getCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName
-            })
-          }
-        }
-
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName
-        })
-      },
-      set(value) {
-        const { columnName, containerUuid, inTable } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName,
-              value
-            })
-          }
-        }
-
-        // const option = this.findOption(value)
-        // // always update uuid
-        // this.uuidValue = option.uuid
-
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName,
-          value
-        })
-        // update element column name
-        if (columnName !== this.metadata.elementName) {
-          this.$store.commit('updateValueOfField', {
-            parentUuid: this.metadata.parentUuid,
-            containerUuid,
-            columnName: this.metadata.elementName,
-            value
-          })
-        }
-      }
-    },
-    displayedValue: {
-      get() {
-        const display = store.getters.getValueOfField({
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName
-        })
-        return display
-      },
-      set(value) {
-        store.commit('updateValueOfField', {
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName,
-          value
-        })
-      }
+    // to recrods list overwrite
+    uuidForm() {
+      return this.metadata.containerUuid
     }
   },
 
-  created() {
-    this.unsubscribe = this.subscribeChanges()
-  },
-
-  beforeDestroy() {
-    this.unsubscribe()
-  },
-
   methods: {
-    setNewDisplayedValue() {
-      const displayValue = this.displayedValue
-      this.displayedValue = '' // clear to enter search
-      if (!isSameValues(this.controlDisplayed, displayValue)) {
-        this.controlDisplayed = displayValue
-      }
-    },
-    setOldDisplayedValue() {
-      if (!isSameValues(this.controlDisplayed, this.displayedValue)) {
-        this.displayedValue = this.controlDisplayed
-      }
-    },
-    subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'updateValueOfField') {
-          if (mutation.payload.containerUuid === this.metadata.containerUuid) {
-            // add displayed value to persistence
-            if (mutation.payload.columnName === this.metadata.columnName) {
-              this.preHandleChange(mutation.payload.value)
-
-              this.$store.dispatch('notifyFieldChange', {
-                containerUuid: this.metadata.containerUuid,
-                containerManager: this.containerManager,
-                field: this.metadata,
-                columnName: this.metadata.displayColumnName
-              })
-            }
-
-            if (mutation.payload.columnName === this.metadata.displayColumnName) {
-              // set current displayed value to clean on focus
-              this.controlDisplayed = mutation.payload.value
-            }
-          }
-        }
-      })
-    },
-    localSearch(stringToMatch, callBack) {
-      if (isEmptyValue(stringToMatch)) {
-        // not show list
-        callBack([])
-        return
-      }
-
-      const recordsList = this.recordsBusinessPartners
-      let results = recordsList
-      if (stringToMatch) {
-        const parsedValue = trimPercentage(stringToMatch.toLowerCase().trim())
-
-        results = recordsList.filter(rowBPartner => {
-          for (const columnBPartner in rowBPartner) {
-            const valueToCompare = String(rowBPartner[columnBPartner]).toLowerCase()
-
-            if (valueToCompare.includes(parsedValue)) {
-              return true
-            }
-          }
-          return false
-        })
-
-        // Remote search
-        if (this.isEmptyValue(results) && String(stringToMatch.length > 3)) {
-          clearTimeout(this.timeOut)
-
-          this.timeOut = setTimeout(() => {
-            this.remoteSearch(stringToMatch)
-              .then(remoteResponse => {
-                callBack(remoteResponse)
-              })
-          }, 2000)
-          return
-        }
-      }
-
-      // call callback function to return suggestions
-      callBack(results)
-    },
-
     remoteSearch(searchValue) {
       return new Promise(resolve => {
-        const message = {
-          message: this.$t('notifications.searchWithOutRecords'),
-          type: 'info',
-          showClose: true
-        }
-
         store.dispatch('getBusinessPartners', {
           containerUuid: this.metadata.containerUuid,
           pageNumber: 1,
@@ -289,7 +106,7 @@ export default {
         })
           .then(responseRecords => {
             if (isEmptyValue(responseRecords)) {
-              this.$message(message)
+              this.whitOutResultsMessage()
             }
 
             resolve(responseRecords)
@@ -297,20 +114,10 @@ export default {
           .catch(error => {
             console.warn(error.message)
 
-            this.$message(message)
+            this.whitOutResultsMessage()
             resolve([])
           })
       })
-    },
-
-    handleSelect(businessPartnerSelected) {
-      if (this.isEmptyValue(businessPartnerSelected)) {
-        businessPartnerSelected = this.blankBPartner
-      }
-      this.setBusinessPartner(businessPartnerSelected)
-
-      // prevent losing display value with focus
-      this.controlDisplayed = this.generateDisplayedValue(businessPartnerSelected)
     }
   }
 }
