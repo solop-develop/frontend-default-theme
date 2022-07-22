@@ -20,6 +20,7 @@ import { fieldIsDisplayed } from '@/utils/ADempiere/dictionaryUtils.js'
 import { parsedValueComponent } from '@/utils/ADempiere/valueUtils.js'
 import { convertObjectToKeyValue } from '@/utils/ADempiere/valueFormat.js'
 import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
+import { isLookup } from '@/utils/ADempiere/references'
 
 export default {
   name: 'MainPanelMixin',
@@ -576,7 +577,7 @@ export default {
               // records in columns manage by backend
               LOG_COLUMNS_NAME_LIST.includes(itemField.columnName)) &&
               itemField.isUpdateable &&
-              itemField.componentPath !== 'FieldSelect') {
+              !isLookup(itemField.displayType)) {
               return true
             }
           }

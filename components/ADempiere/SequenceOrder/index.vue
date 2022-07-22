@@ -72,7 +72,11 @@
 </template>
 
 <script>
+// components and mixins
 import draggable from 'vuedraggable'
+
+// utils and helpers methods
+import { isLookup } from '@/utils/ADempiere/references'
 
 export default {
   name: 'SequenceOrder',
@@ -134,7 +138,7 @@ export default {
     },
     getIdentifiersList() {
       return this.identifiersList
-        .filter(item => item.componentPath !== 'FieldSelect')
+        .filter(item => !isLookup(item.displayType))
     }
   },
   methods: {

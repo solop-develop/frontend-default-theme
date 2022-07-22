@@ -19,6 +19,7 @@
 <template>
   <el-main
     v-shortkey="shortsKey"
+    v-loading="isLoadingFields"
     class="business-partners-list-container"
     style="padding-top: 0px"
     @shortkey.native="keyAction"
@@ -26,10 +27,7 @@
     <el-collapse v-model="activeAccordion" accordion class="business-partners-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
-          {{ $t('form.pos.order.BusinessPartnerCreate.businessPartner') }}
-          <template v-if="!isEmptyValue(metadata.name) ">
-            ({{ metadata.name }})
-          </template>
+          {{ title }}
         </template>
 
         <el-form
@@ -54,7 +52,7 @@
       ref="businessPartnerTable"
       v-loading="isLoadingRecords"
       class="business-partners-table"
-      :data="businessPartnersList"
+      :data="recordsList"
       highlight-current-row
       border
       fit
@@ -100,7 +98,7 @@
       <el-col :span="12">
         <custom-pagination
           :total="businessParnerData.recordCount"
-          :current-page="1"
+          :current-page="pageNumber"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
           :selection="selection"
@@ -113,15 +111,15 @@
             type="danger"
             class="custom-button-create-bp"
             icon="el-icon-close"
-            @click="closeList"
+            @click="closeList(); clearValues();"
           />
+
           <el-button
             type="primary"
             class="custom-button-create-bp"
             icon="el-icon-check"
             @click="changeBusinessPartner"
           />
-          <!-- :disabled="isDisabled" -->
         </samp>
       </el-col>
     </el-row>
@@ -141,7 +139,7 @@ import fieldsList from './fieldsListSearch'
 import businessPartnerMixin from './mixinBusinessPartner'
 
 // utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
   // createFieldFromDefinition,
   createFieldFromDictionary
@@ -198,6 +196,13 @@ export default {
   },
 
   computed: {
+    title() {
+      let title = this.$t('form.pos.order.BusinessPartnerCreate.businessPartner')
+      if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
+        title += ` (${this.metadata.panelName})`
+      }
+      return title
+    },
     uuidForm() {
       if (!isEmptyValue(this.metadata.containerUuid)) {
         return BUSINESS_PARTNERS_LIST_FORM + '_' + this.metadata.containerUuid
@@ -236,10 +241,8 @@ export default {
         containerUuid: this.uuidForm
       })
     },
-    businessPartnersList() {
-      return this.$store.getters.getBusinessPartnerRecordsList({
-        containerUuid: this.uuidForm
-      })
+    pageNumber() {
+      return this.businessParnerData.pageNumber
     },
     isReadyFromGetData() {
       const { isLoaded } = this.businessParnerData
@@ -308,7 +311,6 @@ export default {
       this.currentRow = row
     },
     keyAction(event) {
-      console.log({ ...event })
       switch (event.srcKey) {
         case 'refreshList':
           /**
@@ -325,7 +327,7 @@ export default {
     },
     changeBusinessPartner() {
       if (!isEmptyValue(this.currentRow)) {
-        this.setBusinessPartner(this.currentRow)
+        this.setValues(this.currentRow)
         this.closeList()
       }
     },
@@ -349,18 +351,21 @@ export default {
       this.isLoadingFields = true
       this.fieldsList.forEach(element => {
         createFieldFromDictionary(element)
-          .then(response => {
-            const data = response
+          .then(responseField => {
             list.push({
-              ...data,
+              ...responseField,
               containerUuid: this.uuidForm
             })
           }).catch(error => {
             console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
           })
+          .finally(() => {
+            if (list.length === this.fieldsList.length) {
+              this.metadataList = list
+              this.isLoadingFields = false
+            }
+          })
       })
-      this.metadataList = list
-      this.isLoadingFields = false
     },
     searchBPartnerList(pageNumber = 0, isConvert = true) {
       const values = this.$store.getters.getValuesView({
@@ -390,6 +395,12 @@ export default {
                 message: this.$t('businessPartner.notFound')
               })
             }
+
+            this.$nextTick(() => {
+              if (this.$refs.businessPartnerTable) {
+                this.$refs.businessPartnerTable.setCurrentRow(this.currentRow)
+              }
+            })
           })
           .finally(() => {
             this.isLoadingRecords = false
