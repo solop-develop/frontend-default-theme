@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-row :gutter="20" style="margin-left: 0px; margin-right: 0px;margin-top: 1%;">
+  <el-row class="custom-pagination-content" :gutter="20">
     <!-- <el-col :span="16" style="float: left;">
       <b
         v-if="isNavigation"
@@ -28,7 +28,7 @@
           icon="el-icon-arrow-up"
           style="color: black; font-size: x-large;border: 0px;"
           :disabled="disabledPrevRecord"
-          @click="prevRecord"
+          @click="changePrevRecord"
         />
         <el-button
           type="text"
@@ -36,10 +36,11 @@
           icon="el-icon-arrow-down"
           style="color: black; font-size: x-large;border: 0px;"
           :disabled="disabledNextRecord"
-          @click="nextRecord"
+          @click="changeNextRecord"
         />
       </b>
     </el-col> -->
+
     <el-col :span="24" style="float: right;">
       <el-pagination
         small
@@ -50,19 +51,19 @@
         style="float: right;"
         @current-change="handleChangePage"
       >
-        <!-- <template v-slot> -->
-        <span style="margin-right: 10px;font-weight: normal;color: #606266;">
+        <span v-if="isSelection" class="selections-number">
           {{ $t('table.dataTable.selected') }}: {{ selection }} / <!-- show total records -->
         </span>
-        <!-- </template> -->
       </el-pagination>
     </el-col>
   </el-row>
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
-import store from '@/store'
+import { defineComponent, computed } from '@vue/composition-api'
+
+// import store from '@/store'
+
 // constants
 import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/constants/table'
 
@@ -73,14 +74,14 @@ export default defineComponent({
   name: 'CustomPagination',
 
   props: {
-    parentUuid: {
-      type: String,
-      default: ''
-    },
-    containerUuid: {
-      type: String,
-      default: ''
-    },
+    // parentUuid: {
+    //   type: String,
+    //   default: ''
+    // },
+    // containerUuid: {
+    //   type: String,
+    //   default: ''
+    // },
     containerManager: {
       type: Object,
       required: true
@@ -101,10 +102,10 @@ export default defineComponent({
       type: Number,
       default: undefined
     },
-    isNavigation: {
-      type: Boolean,
-      required: false
-    },
+    // isNavigation: {
+    //   type: Boolean,
+    //   required: false
+    // },
     handleChangePage: {
       type: Function,
       default: (pageNumber) => {
@@ -120,70 +121,85 @@ export default defineComponent({
       }
       return true
     })
-    const listRecord = computed(() => {
-      return store.getters.getTabRecordsList({
-        containerUuid: props.containerUuid
-      })
-    })
 
-    const recordUuid = computed(() => {
-      return store.getters.getUuidOfContainer(props.containerUuid)
-    })
+    // const listRecord = computed(() => {
+    //   return store.getters.getTabRecordsList({
+    //     containerUuid: props.containerUuid
+    //   })
+    // })
 
-    const index = computed(() => {
-      return listRecord.value.findIndex(row => row.UUID === recordUuid.value)
-    })
+    // const recordUuid = computed(() => {
+    //   return store.getters.getUuidOfContainer(props.containerUuid)
+    // })
 
-    const disabledPrevRecord = computed(() => {
-      return key.value <= 0
-    })
+    // const index = computed(() => {
+    //   return listRecord.value.findIndex(row => row.UUID === recordUuid.value)
+    // })
 
-    const disabledNextRecord = computed(() => {
-      return key.value === (maxRecord.value - 1)
-    })
+    // const disabledPrevRecord = computed(() => {
+    //   return key.value <= 0
+    // })
 
-    const maxRecord = computed(() => {
-      return listRecord.value.length
-    })
+    // const disabledNextRecord = computed(() => {
+    //   return key.value === (maxRecord.value - 1)
+    // })
 
-    const key = ref(index.value)
+    // const maxRecord = computed(() => {
+    //   return listRecord.value.length
+    // })
 
-    function nextRecord(params) {
-      key.value = index.value + 1
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        row: listRecord.value[index.value + 1]
-      })
-    }
+    // const key = ref(index.value)
 
-    function prevRecord(params) {
-      key.value = index.value - 1
-      if (key.value <= 0) {
-        return
-      }
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        row: listRecord.value[index.value - 1]
-      })
-    }
+    // function changeNextRecord(params) {
+    //   key.value = index.value + 1
+    //   props.containerManager.seekRecord({
+    //     parentUuid: props.parentUuid,
+    //     containerUuid: props.containerUuid,
+    //     row: listRecord.value[index.value + 1]
+    //   })
+    // }
+
+    // function changePrevRecord(params) {
+    //   key.value = index.value - 1
+    //   if (key.value <= 0) {
+    //     return
+    //   }
+    //   props.containerManager.seekRecord({
+    //     parentUuid: props.parentUuid,
+    //     containerUuid: props.containerUuid,
+    //     row: listRecord.value[index.value - 1]
+    //   })
+    // }
 
     return {
-      key,
+      // key,
       // Computed
-      index,
-      disabledPrevRecord,
-      disabledNextRecord,
-      isSelection,
-      recordUuid,
-      maxRecord,
-      listRecord,
-      // Methodos
-      nextRecord,
-      prevRecord
+      // index,
+      // disabledPrevRecord,
+      // disabledNextRecord,
+      isSelection
+      // recordUuid,
+      // maxRecord,
+      // listRecord,
+      // Methods
+      // changeNextRecord,
+      // changePrevRecord
     }
   }
 
 })
 </script>
+
+<style lang="scss">
+.custom-pagination-content {
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 1%;
+
+  .selections-number {
+    margin-right: 10px;
+    font-weight: normal;
+    color: #606266;
+  }
+}
+</style>
