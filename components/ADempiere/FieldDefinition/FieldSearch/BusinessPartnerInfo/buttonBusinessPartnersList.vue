@@ -18,13 +18,15 @@
 
 <template>
   <el-popover
-    v-model="popoverListBusinessParnet"
-    placement="left-start"
+    ref="businessParnerListPopover"
+    v-model="showedPopoverBusinessPartnerList"
+    placement="top"
     width="900"
     trigger="click"
   >
     <business-partners-list
-      :show-popover="popoverListBusinessParnet"
+      v-if="showedPopoverBusinessPartnerList"
+      :show-popover="showedPopoverBusinessPartnerList"
       :metadata="parentMetadata"
     />
 
@@ -46,7 +48,7 @@ import store from '@/store'
 import BusinessPartnersList from './businessPartnersList.vue'
 
 export default {
-  name: 'ButtonBsuinessPartnersList',
+  name: 'ButtonBusinessPartnersList',
 
   components: {
     BusinessPartnersList
@@ -71,7 +73,7 @@ export default {
   },
 
   computed: {
-    popoverListBusinessParnet: {
+    showedPopoverBusinessPartnerList: {
       get() {
         return store.getters.getBusinessPartnerPopoverList
       },
@@ -88,7 +90,7 @@ export default {
   padding-left: 9px !important;
   padding-right: 0px !important;
 
-  i {
+  i, svg {
     font-size: 20px !important;
   }
 }

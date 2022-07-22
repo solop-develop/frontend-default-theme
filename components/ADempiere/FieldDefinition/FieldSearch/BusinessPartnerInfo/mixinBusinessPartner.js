@@ -40,26 +40,46 @@ export default {
   },
 
   computed: {
-    blankBPartner() {
+    blankValues() {
       return {
         id: undefined,
         uuid: undefined,
+        value: undefined,
         name: undefined,
         lastName: undefined,
-        value: undefined
+        description: undefined
       }
+    },
+    recordsList() {
+      return this.$store.getters.getBusinessPartnerRecordsList({
+        containerUuid: this.uuidForm
+      })
     }
   },
   methods: {
+    clearValues() {
+      this.setValues(this.blankValues)
+    },
     generateDisplayedValue({ value, name, lastName }) {
-      let displayedValue = value + ' - ' + name
+      let displayedValue
+
+      if (!isEmptyValue(value)) {
+        displayedValue = value
+      }
+      if (!isEmptyValue(name)) {
+        if (!isEmptyValue(displayedValue)) {
+          displayedValue += ' - ' + name
+        } else {
+          displayedValue = name
+        }
+      }
       if (!isEmptyValue(lastName)) {
         displayedValue += ' ' + lastName
       }
 
       return displayedValue
     },
-    setBusinessPartner({ id, uuid, value, name, lastName, description }) {
+    setValues({ id, uuid, value, name, lastName, description }) {
       const { parentUuid, containerUuid, columnName, elementName } = this.metadata
       const displayedValue = this.generateDisplayedValue({
         value,

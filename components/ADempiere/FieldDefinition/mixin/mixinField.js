@@ -131,13 +131,13 @@ export default {
       }
     },
     currentTab() {
-      if (this.isEmptyValue(this.metadata.parentUuid)) {
+      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
         return {}
       }
-      return this.$store.getters.getStoredTab(
-        this.metadata.parentUuid,
-        this.metadata.containerUuid
-      )
+      return this.containerManager.getPanel({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid
+      })
     },
     currentRecord() {
       return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
@@ -238,8 +238,7 @@ export default {
      * validate values before send values to store or server
      * @param {mixed} value
      */
-    preHandleChange(value, a, b, c) {
-      // console.log({ value, a, b, c }, 3123123, this.value)
+    preHandleChange(value) {
       this.handleFieldChange({ value })
     },
     focusGained(value) {
