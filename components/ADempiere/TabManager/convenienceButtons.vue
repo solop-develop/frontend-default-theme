@@ -172,6 +172,9 @@ export default defineComponent({
         const record = store.getters.getTabCurrentRow({
           containerUuid
         })
+        if (isEmptyValue(record)) {
+          return []
+        }
         return [record]
       }
       return selectionsRecords.value

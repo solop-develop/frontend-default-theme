@@ -188,6 +188,14 @@ export default {
     }
   },
 
+  created() {
+    this.unsubscribe = this.subscribeChanges()
+  },
+
+  beforeDestroy() {
+    this.unsubscribe()
+  },
+
   methods: {
     setNewDisplayedValue() {
       const displayValue = this.displayedValue
@@ -200,6 +208,30 @@ export default {
       if (!isSameValues(this.controlDisplayed, this.displayedValue)) {
         this.displayedValue = this.controlDisplayed
       }
+    },
+    subscribeChanges() {
+      return this.$store.subscribe((mutation, state) => {
+        if (mutation.type === 'updateValueOfField') {
+          if (mutation.payload.containerUuid === this.metadata.containerUuid) {
+            // add displayed value to persistence
+            if (mutation.payload.columnName === this.metadata.columnName) {
+              this.preHandleChange(mutation.payload.value)
+
+              this.$store.dispatch('notifyFieldChange', {
+                containerUuid: this.metadata.containerUuid,
+                containerManager: this.containerManager,
+                field: this.metadata,
+                columnName: this.metadata.displayColumnName
+              })
+            }
+
+            if (mutation.payload.columnName === this.metadata.displayColumnName) {
+              // set current displayed value to clean on focus
+              this.controlDisplayed = mutation.payload.value
+            }
+          }
+        }
+      })
     },
     localSearch(stringToMatch, callBack) {
       if (isEmptyValue(stringToMatch)) {
