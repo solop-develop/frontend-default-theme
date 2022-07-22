@@ -131,10 +131,13 @@ export default {
       }
     },
     currentTab() {
-      return this.$store.getters.getStoredTab(
-        this.metadata.parentUuid,
-        this.metadata.containerUuid
-      )
+      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+        return {}
+      }
+      return this.containerManager.getPanel({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid
+      })
     },
     currentRecord() {
       return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
