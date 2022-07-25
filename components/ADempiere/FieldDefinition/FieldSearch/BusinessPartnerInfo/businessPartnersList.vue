@@ -332,7 +332,10 @@ export default {
       }
     },
     closeList() {
-      this.$store.commit('changePopoverListBusinessPartner', false)
+      this.$store.commit('setBusinessPartnerShow', {
+        containerUuid: this.uuidForm,
+        BPshow: false
+      })
     },
     setPage(pageNumber) {
       this.searchBPartnerList(pageNumber)

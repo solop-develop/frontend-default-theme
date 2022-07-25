@@ -192,10 +192,9 @@ export default defineComponent({
 
 <style lang="scss">
 .custom-pagination-content {
-  margin-left: 0px;
-  margin-right: 0px;
-  margin-top: 1%;
-
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+  margin-top: 1% !important;
   .selections-number {
     margin-right: 10px;
     font-weight: normal;
