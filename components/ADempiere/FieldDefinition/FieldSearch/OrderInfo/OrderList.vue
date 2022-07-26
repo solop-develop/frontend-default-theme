@@ -187,7 +187,7 @@ export default {
       timeOutRecords: null,
       isLoadingRecords: false,
       timeOutFields: null,
-      isLoadingFields: false,
+      isLoadingFields: false
       // unsubscribe: () => {}
     }
   },

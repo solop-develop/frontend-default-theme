@@ -44,8 +44,8 @@
 
 <script>
 import store from '@/store'
-
 import BusinessPartnersList from './businessPartnersList.vue'
+import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 
 export default {
   name: 'ButtonBusinessPartnersList',
@@ -73,12 +73,21 @@ export default {
   },
 
   computed: {
+    uuidForm() {
+      if (!this.isEmptyValue(this.parentMetadata.containerUuid)) {
+        return BUSINESS_PARTNERS_LIST_FORM + '_' + this.parentMetadata.containerUuid
+      }
+      return BUSINESS_PARTNERS_LIST_FORM
+    },
     showedPopoverBusinessPartnerList: {
       get() {
-        return store.getters.getBusinessPartnerPopoverList
+        return store.getters.getBPShow({ containerUuid: this.uuidForm })
       },
       set(value) {
-        store.commit('changePopoverListBusinessPartner', value)
+        store.commit('setBusinessPartnerShow', {
+          containerUuid: this.uuidForm,
+          BPshow: value
+        })
       }
     }
   }
