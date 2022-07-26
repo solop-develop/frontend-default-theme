@@ -208,6 +208,7 @@ export default {
         return
       }
 
+
       const recordsList = this.orderList
       let results = recordsList
       if (stringToMatch) {
@@ -252,7 +253,7 @@ export default {
         store.dispatch('findOrder', {
           containerUuid: this.metadata.containerUuid,
           pageNumber: 1,
-          documentNo: 600,
+          documentNo: searchValue,
           searchValue
         })
           .then(responseRecords => {
