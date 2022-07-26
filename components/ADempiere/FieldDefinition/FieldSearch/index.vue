@@ -57,7 +57,6 @@ export default {
       if (isEmptyValue(this.metadata.reference)) {
         return fieldRender
       }
-
       switch (this.metadata.reference.tableName) {
         case 'C_BPartner':
           fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/BusinessPartnerInfo')
@@ -71,9 +70,9 @@ export default {
         // case 'A_Asset':
         //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/AssetInfo')
         //   break
-        // case 'C_Order':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/OrderInfo')
-        //   break
+        case 'C_Order':
+          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/OrderInfo')
+          break
         // case 'M_InOut':
         //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/InOutPartnerInfo')
         //   break
