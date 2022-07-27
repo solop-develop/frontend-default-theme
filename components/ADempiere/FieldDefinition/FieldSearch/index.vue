@@ -53,7 +53,7 @@ export default {
     // load the component that is indicated in the attributes of received property
     componentRender() {
       // let fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/GeneralInfo')
-      let fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSelect')
+      let fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/GeneralInfoSearch')
       if (isEmptyValue(this.metadata.reference)) {
         return fieldRender
       }
@@ -61,17 +61,17 @@ export default {
         case 'C_BPartner':
           fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/BusinessPartnerInfo')
           break
-        // case 'M_Product':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/ProductInfo')
-        //   break
-        // case 'C_Invoice':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/InvoiceInfo')
-        //   break
-        // case 'A_Asset':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/AssetInfo')
-        //   break
+        case 'M_Product':
+          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/ProductInfoSearch')
+          break
+        case 'C_Invoice':
+          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/InvoiceInfoSearch')
+          break
+        case 'A_Asset':
+          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/AssetInfoSearch')
+          break
         case 'C_Order':
-          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/OrderInfo')
+          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/OrderInfoSearch')
           break
         // case 'M_InOut':
         //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/InOutPartnerInfo')
