@@ -29,7 +29,7 @@
       :fetch-suggestions="localSearch"
       :select-when-unmatched="false"
       @select="handleSelect"
-      @clear="setBusinessPartner(blankBPartner)"
+      @clear="setOrderSelectedRow(blankBPartner)"
       @focus="setNewDisplayedValue"
       @blur="setOldDisplayedValue"
     >
@@ -38,11 +38,11 @@
        -->
       <template slot-scope="recordRow">
         <div class="header">
-          <b> {{ recordRow.item.name }} {{ recordRow.item.lastName }}</b>
+          <b> {{ recordRow.item.documentNo }} {{ recordRow.item.dateOrdered }} </b>
         </div>
-        <span class="info">
-          {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
-        </span>
+        <!-- <span class="info">
+          <b> {{ $t('form.byInvoice.salesRepresentative') }} </b> {{ recordRow.item.customer.name }} <b> {{ $t('form.productInfo.grandTotal') }} </b> {{ recordRow.item.total_lines }}
+        </span> -->
       </template>
 
       <button-order-list
@@ -107,8 +107,8 @@ export default {
   },
 
   computed: {
-    recordsBusinessPartners() {
-      return this.$store.getters.getBusinessPartnerRecordsList({
+    orderList() {
+      return this.$store.getters.getOrderList({
         containerUuid: this.metadata.containerUuid
       })
     },
@@ -208,11 +208,11 @@ export default {
         return
       }
 
-      const recordsList = this.recordsBusinessPartners
+
+      const recordsList = this.orderList
       let results = recordsList
       if (stringToMatch) {
         const parsedValue = trimPercentage(stringToMatch.toLowerCase().trim())
-
         results = recordsList.filter(rowBPartner => {
           for (const columnBPartner in rowBPartner) {
             const valueToCompare = String(rowBPartner[columnBPartner]).toLowerCase()
@@ -250,9 +250,10 @@ export default {
           showClose: true
         }
 
-        store.dispatch('getBusinessPartners', {
+        store.dispatch('findOrder', {
           containerUuid: this.metadata.containerUuid,
           pageNumber: 1,
+          documentNo: searchValue,
           searchValue
         })
           .then(responseRecords => {
@@ -275,7 +276,7 @@ export default {
       if (this.isEmptyValue(businessPartnerSelected)) {
         businessPartnerSelected = this.blankBPartner
       }
-      this.setBusinessPartner(businessPartnerSelected)
+      this.setOrderSelectedRow(businessPartnerSelected)
 
       // prevent losing display value with focus
       this.controlDisplayed = this.generateDisplayedValue(businessPartnerSelected)

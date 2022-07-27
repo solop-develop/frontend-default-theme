@@ -19,15 +19,16 @@
 <template>
   <el-popover
     ref="businessParnerListPopover"
-    v-model="showedPopoverBusinessPartnerList"
+    v-model="showedPopoverGeneralInfoPanel"
     placement="top"
     width="900"
     trigger="click"
   >
-    <business-partners-list
-      v-if="showedPopoverBusinessPartnerList"
-      :show-popover="showedPopoverBusinessPartnerList"
+    <panel-general-info-search
+      v-if="showedPopoverGeneralInfoPanel"
+      :show-popover="showedPopoverGeneralInfoPanel"
       :metadata="parentMetadata"
+      :container-manager="containerManager"
     />
 
     <el-button
@@ -35,23 +36,21 @@
       class="button-search"
       :disabled="isDisabled"
     >
-      <i
-        class="el-icon-user-solid"
-      />
+      <svg-icon icon-class="user" />
     </el-button>
   </el-popover>
 </template>
 
 <script>
 import store from '@/store'
-import BusinessPartnersList from './businessPartnersList.vue'
-// import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
+
+import PanelGeneralInfoSearch from './panelGeneralInfoSearch.vue'
 
 export default {
-  name: 'ButtonBusinessPartnersList',
+  name: 'GeneralInfoSearch',
 
   components: {
-    BusinessPartnersList
+    PanelGeneralInfoSearch
   },
 
   props: {
@@ -60,15 +59,17 @@ export default {
       default: () => {
         return {
           parentUuid: undefined,
-          containerUuid: undefined,
-          columnName: 'C_BPartner_ID',
-          elementName: 'C_BPartner_ID'
+          containerUuid: undefined
         }
       }
     },
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    containerManager: {
+      type: Object,
+      required: true
     }
   },
 
@@ -79,12 +80,12 @@ export default {
       }
       return this.parentMetadata.columnName
     },
-    showedPopoverBusinessPartnerList: {
+    showedPopoverGeneralInfoPanel: {
       get() {
-        return store.getters.getBPShow({ containerUuid: this.uuidForm })
+        return store.getters.getGeneralInfoShow({ containerUuid: this.uuidForm })
       },
       set(value) {
-        store.commit('setBusinessPartnerShow', {
+        store.commit('setGeneralInfoShow', {
           containerUuid: this.uuidForm,
           show: value
         })

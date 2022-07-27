@@ -35,7 +35,7 @@
       />
     </span>
 
-    <div>
+    <div style="width: 100%;">
       <default-table
         v-if="isShowedTableRecords"
         key="default-table"
