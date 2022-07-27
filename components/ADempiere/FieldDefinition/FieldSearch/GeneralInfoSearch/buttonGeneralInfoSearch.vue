@@ -28,6 +28,7 @@
       v-if="showedPopoverGeneralInfoPanel"
       :show-popover="showedPopoverGeneralInfoPanel"
       :metadata="parentMetadata"
+      :container-manager="containerManager"
     />
 
     <el-button
@@ -65,6 +66,10 @@ export default {
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    containerManager: {
+      type: Object,
+      required: true
     }
   },
 

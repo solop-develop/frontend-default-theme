@@ -17,7 +17,7 @@
  */
 
 // constants
-// import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -54,6 +54,15 @@ export default {
       return this.$store.getters.getGeneralInfoRecordsList({
         containerUuid: this.uuidForm
       })
+    },
+    listFilter() {
+      const listIdentifier = this.$store.getters.getIdentifier({
+        containerUuid: this.uuidForm
+      })
+      if (this.isEmptyValue(listIdentifier)) {
+        return []
+      }
+      return listIdentifier.filter(identifier => identifier.overwriteDefinition.identifierSequence > 0)
     }
   },
   methods: {
@@ -80,59 +89,61 @@ export default {
       return displayedValue
     },
     setValues(rowData, list) {
-      const { parentUuid, containerUuid, columnName } = this.metadata
-      // const displayedValue = this.generateDisplayedValue({
-      //   value: rowData[list[0].columnName]
-      // })
+      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
+      const { id, uuid } = rowData
+      console.log({ parentUuid, containerUuid, columnName, elementName, id, uuid })
+      const displayedValue = this.generateDisplayedValue({
+        value: rowData[this.listFilter[0].columnName]
+      })
 
       // set ID value
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
         columnName,
-        value: rowData[list[0].columnName]
+        value: id
       })
       // set display column (name) value
-      // this.$store.commit('updateValueOfField', {
-      //   parentUuid,
-      //   containerUuid,
-      //   // DisplayColumn_'ColumnName'
-      //   columnName: DISPLAY_COLUMN_PREFIX + columnName,
-      //   value: displayedValue
-      // })
-      // // set UUID value
-      // this.$store.commit('updateValueOfField', {
-      //   parentUuid,
-      //   containerUuid,
-      //   columnName: columnName + '_UUID',
-      //   value: uuid
-      // })
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        // DisplayColumn_'ColumnName'
+        columnName: DISPLAY_COLUMN_PREFIX + columnName,
+        value: displayedValue
+      })
+      // set UUID value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName: columnName + '_UUID',
+        value: uuid
+      })
 
-      // // set on element name, used by columns views aliases
-      // if (!isEmptyValue(elementName) && columnName !== elementName) {
-      //   // set ID value
-      //   this.$store.commit('updateValueOfField', {
-      //     parentUuid,
-      //     containerUuid,
-      //     columnName: elementName,
-      //     value: id
-      //   })
-      //   // set display column (name) value
-      //   this.$store.commit('updateValueOfField', {
-      //     parentUuid,
-      //     containerUuid,
-      //     // DisplayColumn_'ColumnName'
-      //     columnName: DISPLAY_COLUMN_PREFIX + elementName,
-      //     value: displayedValue
-      //   })
-      //   // set UUID value
-      //   this.$store.commit('updateValueOfField', {
-      //     parentUuid,
-      //     containerUuid,
-      //     columnName: elementName + '_UUID',
-      //     value: uuid
-      //   })
-      // }
+      // set on element name, used by columns views aliases
+      if (!isEmptyValue(elementName) && columnName !== elementName) {
+        // set ID value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          columnName: elementName,
+          value: id
+        })
+        // set display column (name) value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          // DisplayColumn_'ColumnName'
+          columnName: DISPLAY_COLUMN_PREFIX + elementName,
+          value: displayedValue
+        })
+        // set UUID value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          columnName: elementName + '_UUID',
+          value: uuid
+        })
+      }
     }
   }
 }

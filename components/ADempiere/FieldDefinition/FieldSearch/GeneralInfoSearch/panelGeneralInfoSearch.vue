@@ -84,7 +84,7 @@
             :parent-uuid="metadata.parentUuid"
             :container-uuid="uuidForm"
             :field-attributes="heard"
-            :container-manager="containerManager"
+            :container-manager="containerManagerBPList"
             :scope="scope"
             :data-row="scope.row"
           />
@@ -156,15 +156,15 @@ export default {
   ],
 
   props: {
-    containerManager: {
-      type: Object,
-      default: () => ({
-        actionPerformed: () => {},
-        getFieldsLit: () => {},
-        isReadOnlyColumn: ({ field, row }) => { return true },
-        setDefaultValues: () => {}
-      })
-    },
+    // containerManager: {
+    //   type: Object,
+    //   default: () => ({
+    //     actionPerformed: () => {},
+    //     getFieldsLit: () => {},
+    //     isReadOnlyColumn: ({ field, row }) => { return true },
+    //     setDefaultValues: () => {}
+    //   })
+    // },
     metadata: {
       type: Object,
       default: () => {
@@ -177,6 +177,10 @@ export default {
     showPopover: {
       type: Boolean,
       default: () => false
+    },
+    containerManager: {
+      type: Object,
+      required: true
     }
   },
 
@@ -222,6 +226,10 @@ export default {
       return {
         ...this.containerManager,
         ...containerManagerForm,
+        actionPerformed: () => {},
+        getFieldsLit: () => {},
+        isReadOnlyColumn: ({ field, row }) => { return true },
+        setDefaultValues: () => {},
         setPage: this.setPage
       }
     },
@@ -367,7 +375,8 @@ export default {
     setFieldsList() {
       const list = []
       this.isLoadingFields = true
-      this.$store.dispatch('searchTableHeader', {
+      console.log(this.containerManager)
+      this.containerManager.searchTableHeader({
         containerUuid: this.uuidForm,
         tableName: this.metadata.reference.tableName
       })
@@ -406,7 +415,7 @@ export default {
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
-        this.$store.dispatch('findGeneralInfo', {
+        this.containerManager.generalInfoSearch({
           // ...parsedValues,
           containerUuid: this.uuidForm,
           tableName: this.metadata.reference.tableName,

@@ -38,28 +38,27 @@
       -->
     <template slot-scope="recordRow">
       <div class="header">
-        <b> {{ recordRow.item.name }} {{ recordRow.item.lastName }}</b>
+        <span v-for="(identifier, key) in listFilter" :key="key">
+          {{ recordRow.item[identifier.columnName] }}
+        </span>
       </div>
-      <span class="info">
-        {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
-      </span>
     </template>
 
     <button-general-info-search
       slot="append"
       :parent-metadata="metadata"
       :is-disabled="isDisabled"
+      :container-manager="containerManager"
     />
   </el-autocomplete>
 </template>
 
 <script>
-import store from '@/store'
 
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
-import businessPartnerMixin from './mixinGeneralInfoSearch'
+import generalInfoSearchMixin from './mixinGeneralInfoSearch'
 import ButtonGeneralInfoSearch from './buttonGeneralInfoSearch.vue'
 
 // utils and helper methods
@@ -75,7 +74,7 @@ export default {
   mixins: [
     fieldMixin,
     fieldSearchMixin,
-    businessPartnerMixin
+    generalInfoSearchMixin
   ],
 
   props: {
@@ -86,6 +85,10 @@ export default {
           containerUuid: ''
         }
       }
+    },
+    containerManager: {
+      type: Object,
+      required: true
     }
   },
 
@@ -93,15 +96,26 @@ export default {
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid
+    },
+    listFilter() {
+      const listIdentifier = this.$store.getters.getIdentifier({
+        containerUuid: this.uuidForm
+      })
+      if (this.isEmptyValue(listIdentifier)) {
+        return []
+      }
+      return listIdentifier.filter(identifier => identifier.overwriteDefinition.identifierSequence > 0)
     }
   },
 
   methods: {
     remoteSearch(searchValue) {
       return new Promise(resolve => {
-        store.dispatch('getBusinessPartners', {
+        this.containerManager.generalInfoSearch({
           containerUuid: this.metadata.containerUuid,
           pageNumber: 1,
+          tableName: this.metadata.reference.tableName,
+          fieldUuid: this.metadata.uuid,
           searchValue
         })
           .then(responseRecords => {
