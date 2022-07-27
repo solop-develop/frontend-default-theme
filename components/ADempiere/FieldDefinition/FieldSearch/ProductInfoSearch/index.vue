@@ -38,10 +38,10 @@
       -->
     <template slot-scope="recordRow">
       <div class="header">
-        <!-- <span v-for="(identifier, key) in listFilter" :key="key">
+        <span v-for="(identifier, key) in listFilter" :key="key">
           {{ recordRow.item[identifier.columnName] }}
-        </span> -->
-        {{ recordRow.item[identifier[0].identifier.columnName] }}
+        </span>
+        <!-- {{ recordRow.item[identifier[0].identifier.columnName] }} -->
       </div>
     </template>
 

@@ -375,7 +375,6 @@ export default {
     setFieldsList() {
       const list = []
       this.isLoadingFields = true
-      console.log(this.containerManager)
       this.containerManager.searchTableHeader({
         containerUuid: this.uuidForm,
         tableName: this.metadata.reference.tableName
