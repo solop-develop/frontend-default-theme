@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
- Contributor(s): Elsio Sanchez elsiosanchez@gmail.com https://github.com/elsiosanchez
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -19,13 +19,15 @@
 <template>
   <el-main
     v-shortkey="shortsKey"
+    v-loading="isLoadingFields"
+    class="business-partners-list-container"
     style="padding-top: 0px"
     @shortkey.native="keyAction"
   >
-    <el-collapse v-model="activeAccordion" accordion class="order-query-criteria">
+    <el-collapse v-model="activeAccordion" accordion class="business-partners-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
-          {{ $t('orderList.label') }}
+          {{ metadata.panelName }}
         </template>
 
         <el-form
@@ -35,31 +37,31 @@
         >
           <el-row>
             <field-definition
-              v-for="(field) in fieldsListFind"
-              :key="field.sequence"
+              v-for="(field) in metadataList"
+              :key="field.columnName"
               :metadata-field="field"
-              :container-uuid="'Order-List'"
-              :container-manager="containerManagerOrderList"
+              :container-uuid="'Business-Partner-List'"
+              :container-manager="containerManagerBPList"
             />
           </el-row>
         </el-form>
       </el-collapse-item>
     </el-collapse>
     <el-table
-      ref="OrderTable"
-      v-loading="isLoadingRecords"
-      class="order-table"
-      :data="orderList"
+      ref="businessPartnerTable"
+      v-loading="isloadingTable"
+      class="business-partners-table"
+      :data="recordsList"
       highlight-current-row
       border
       fit
       :max-height="300"
       size="small"
       @current-change="handleCurrentChange"
-      @row-dblclick="changeOrder"
+      @row-dblclick="changeBusinessPartner"
     >
       <p slot="empty" style="width: 100%;">
-        {{ $t('orderList.emptyOrderList') }}
+        {{ $t('businessPartner.emptyBusinessPartner') }}
       </p>
 
       <el-table-column
@@ -70,36 +72,35 @@
       />
 
       <el-table-column
-        v-for="(heard, key) in labelTable"
+        v-for="(heard, key) in tableHeader"
         :key="key"
-        :label="heard.label"
-        prop="value"
-        header-align="center"
+        :label="heard.name"
+        :prop="heard.columnName"
+        min-width="210"
       >
-        <span v-if="heard.columnName === 'DocumentNo'" slot-scope="scope">
-          {{ scope.row.documentNo }}
-        </span>
-        <span v-else-if="heard.columnName === 'C_BPartner_ID'" slot-scope="scope">
-          {{ scope.row.customer.name }}
-        </span>
-        <span v-else-if="heard.columnName === 'Name'" slot-scope="scope">
-          {{ scope.row.name }}
-        </span>
-        <span v-else-if="heard.columnName === 'Name2'" slot-scope="scope">
-          {{ scope.row.lastName }}
-        </span>
+        <template slot-scope="scope">
+          <!-- formatted displayed value -->
+          <cell-info
+            :parent-uuid="metadata.parentUuid"
+            :container-uuid="uuidForm"
+            :field-attributes="heard"
+            :container-manager="containerManager"
+            :scope="scope"
+            :data-row="scope.row"
+          />
+        </template>
       </el-table-column>
     </el-table>
-    <br>
-    <el-row :gutter="24" class="order-footer">
+
+    <el-row :gutter="24" class="business-partners-footer">
       <el-col :span="12">
         <custom-pagination
-          :total="orderListRecordCount"
-          :current-page="1"
-          :container-manager="containerManagerOrderList"
+          :total="businessParnerData.recordCount"
+          :current-page="pageNumber"
+          :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
           :selection="selection"
-          style="float: left"
+          style="float: left !important;"
         />
       </el-col>
 
@@ -109,13 +110,14 @@
             type="danger"
             class="custom-button-create-bp"
             icon="el-icon-close"
-            @click="closeList"
+            @click="closeList(); clearValues();"
           />
+
           <el-button
             type="primary"
             class="custom-button-create-bp"
             icon="el-icon-check"
-            @click="changeOrder"
+            @click="changeBusinessPartner"
           />
         </samp>
       </el-col>
@@ -124,19 +126,16 @@
 </template>
 
 <script>
-
-import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-
 // constants
-import { ORDER_LIST_FORM } from '@/utils/ADempiere/dictionary/form/order/orderList.js'
-import fieldsList from './fieldsListSearch'
+import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 
 // components and mixins
-import orderListMixin from './mixinOrder'
-
+import businessPartnerMixin from './mixinGeneralInfoSearch'
+import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
 // utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
   // createFieldFromDefinition,
   createFieldFromDictionary
@@ -144,15 +143,16 @@ import {
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form'
 
 export default {
-  name: 'OrderList',
+  name: 'PanelGeneralInfoSearch',
 
   components: {
     CustomPagination,
-    FieldDefinition
+    FieldDefinition,
+    CellInfo
   },
 
   mixins: [
-    orderListMixin
+    businessPartnerMixin
   ],
 
   props: {
@@ -161,6 +161,7 @@ export default {
       default: () => ({
         actionPerformed: () => {},
         getFieldsLit: () => {},
+        isReadOnlyColumn: ({ field, row }) => { return true },
         setDefaultValues: () => {}
       })
     },
@@ -168,7 +169,7 @@ export default {
       type: Object,
       default: () => {
         return {
-          containerUuid: ORDER_LIST_FORM,
+          containerUuid: BUSINESS_PARTNERS_LIST_FORM,
           columnName: 'C_BPartner_ID'
         }
       }
@@ -182,22 +183,28 @@ export default {
   data() {
     return {
       activeAccordion: 'query-criteria',
-      fieldsList,
       metadataList: [],
       timeOutRecords: null,
       isLoadingRecords: false,
       timeOutFields: null,
-      isLoadingFields: false
-      // unsubscribe: () => {}
+      isLoadingFields: false,
+      unsubscribe: () => {}
     }
   },
 
   computed: {
+    title() {
+      let title = this.$t('form.pos.order.BusinessPartnerCreate.businessPartner')
+      if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
+        title += ` (${this.metadata.panelName})`
+      }
+      return title
+    },
     uuidForm() {
       if (!isEmptyValue(this.metadata.containerUuid)) {
-        return ORDER_LIST_FORM + '_' + this.metadata.containerUuid
+        return this.metadata.columnName + '_' + this.metadata.containerUuid
       }
-      return ORDER_LIST_FORM
+      return BUSINESS_PARTNERS_LIST_FORM
     },
     shortsKey() {
       return {
@@ -211,24 +218,12 @@ export default {
       }
       return 1
     },
-    containerManagerOrderList() {
+    containerManagerBPList() {
       return {
         ...this.containerManager,
         ...containerManagerForm,
         setPage: this.setPage
       }
-    },
-    fieldsListFind() {
-      const list = this.metadataList.map(field => {
-        // if (field.columnName === 'C_BPartner_ID') {
-        //   return {
-        //     ...field,
-        //     containerUuid: ORDER_LIST_FORM
-        //   }
-        // }
-        return field
-      })
-      return this.fieldSort(list)
     },
     labelTable() {
       return this.metadataList.map(field => {
@@ -238,34 +233,40 @@ export default {
         }
       })
     },
-    orderListData() {
-      return this.$store.getters.getOrderData({
+    tableHeader() {
+      return this.$store.getters.getTableHeader({
         containerUuid: this.uuidForm
       })
     },
-    orderListRecordCount() {
-      return this.$store.getters.getOrderListRecordCount({
+    listFilter() {
+      return this.$store.getters.getIdentifier({
         containerUuid: this.uuidForm
       })
     },
-    orderList() {
-      return this.$store.getters.getOrderList({
+    isloadingTable() {
+      return this.isLoadingRecords && !this.isEmptyValue(this.tableHeader)
+    },
+    businessParnerData() {
+      return this.$store.getters.getGeneralInfoData({
         containerUuid: this.uuidForm
       })
+    },
+    pageNumber() {
+      return this.businessParnerData.pageNumber
     },
     isReadyFromGetData() {
-      const { isLoaded } = this.orderListData
+      const { isLoaded } = this.businessParnerData
       return !isLoaded && this.showPopover
     },
     currentRow: {
       set(rowSelected) {
-        this.$store.commit('setOrderSelectedRow', {
+        this.$store.commit('setGeneralInfoSelectedRow', {
           containerUuid: this.uuidForm,
           currentRow: rowSelected
         })
       },
       get() {
-        return this.$store.getters.getOrderCurrentRow({
+        return this.$store.getters.getGeneralInfoCurrentRow({
           containerUuid: this.uuidForm
         })
       }
@@ -275,7 +276,7 @@ export default {
   watch: {
     isReadyFromGetData(isToLoad) {
       if (isToLoad) {
-        this.searchOrderList()
+        this.searchBPartnerList()
       }
     },
     showPopover(value) {
@@ -290,15 +291,16 @@ export default {
 
   created() {
     this.unsubscribe = this.subscribeChanges()
+
     if (this.isReadyFromGetData) {
-      this.searchOrderList()
+      this.searchBPartnerList()
     }
   },
 
   mounted() {
     this.$nextTick(() => {
-      if (this.$refs.OrderTable) {
-        this.$refs.OrderTable.setCurrentRow(this.currentRow)
+      if (this.$refs.businessPartnerTable) {
+        this.$refs.businessPartnerTable.setCurrentRow(this.currentRow)
       }
     })
 
@@ -325,7 +327,7 @@ export default {
            * TODO: When refreshing you are making 2 list requests, you can be the
            * observer that activates the second request
           */
-          this.searchOrderList()
+          this.searchBPartnerList()
           break
 
         case 'close':
@@ -333,23 +335,31 @@ export default {
           break
       }
     },
-    changeOrder() {
+    changeBusinessPartner() {
       if (!isEmptyValue(this.currentRow)) {
-        this.setOrderSelectedRow(this.currentRow)
+        const listIdentifier = this.listFilter.filter(identifier => {
+          if (identifier.overwriteDefinition.identifierSequence > 0) {
+            return identifier
+          }
+        })
+        this.setValues(this.currentRow, listIdentifier)
         this.closeList()
       }
     },
     closeList() {
-      this.$store.commit('changePopoverListOrder', false)
+      this.$store.commit('setGeneralInfoShow', {
+        containerUuid: this.uuidForm,
+        show: false
+      })
     },
     setPage(pageNumber) {
-      this.searchOrderList(pageNumber)
+      this.searchBPartnerList(pageNumber)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
           if (mutation.payload.containerUuid === this.uuidForm) {
-            this.searchOrderList()
+            this.searchBPartnerList()
           }
         }
       })
@@ -357,48 +367,66 @@ export default {
     setFieldsList() {
       const list = []
       this.isLoadingFields = true
-      this.fieldsList.forEach(element => {
-        createFieldFromDictionary(element)
-          .then(response => {
-            const data = response
-            list.push({
-              ...data,
-              containerUuid: this.uuidForm
-            })
-          }).catch(error => {
-            console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
-          })
+      this.$store.dispatch('searchTableHeader', {
+        containerUuid: this.uuidForm,
+        tableName: this.metadata.reference.tableName
       })
-      this.metadataList = list
-      this.isLoadingFields = false
+        .then(findList => {
+          this.listFilter.forEach(element => {
+            createFieldFromDictionary(element)
+              .then(responseField => {
+                list.push({
+                  ...responseField,
+                  containerUuid: this.uuidForm
+                })
+              }).catch(error => {
+                console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
+              })
+              .finally(() => {
+                if (list.length === this.listFilter.length) {
+                  this.metadataList = list
+                  this.isLoadingFields = false
+                }
+              })
+          })
+        })
     },
-    searchOrderList(pageNumber = 0, isConvert = true) {
+    searchBPartnerList(pageNumber = 0, isConvert = true) {
       const values = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
-        format: 'object'
-      })
+        format: 'array'
+      }).filter(alo => !this.isEmptyValue(alo.value))
 
-      let parsedValues = values
-      if (isConvert && !isEmptyValue(values)) {
-        parsedValues = this.convertValuesToSend(values)
-      }
+      // let parsedValues = values
+      // if (isConvert && !isEmptyValue(values)) {
+      //   parsedValues = this.convertValuesToSend(values)
+      // }
       this.isLoadingRecords = true
+
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
-        this.$store.dispatch('findOrder', {
-          ...parsedValues,
+        this.$store.dispatch('findGeneralInfo', {
+          // ...parsedValues,
           containerUuid: this.uuidForm,
-          pageNumber
+          tableName: this.metadata.reference.tableName,
+          fieldUuid: this.metadata.uuid,
+          parametersList: values
         })
           .then(response => {
             if (isEmptyValue(response)) {
               this.$message({
                 type: 'warning',
                 showClose: true,
-                message: this.$t('orderList.notFound')
+                message: this.$t('businessPartner.notFound')
               })
             }
+
+            this.$nextTick(() => {
+              if (this.$refs.businessPartnerTable) {
+                this.$refs.businessPartnerTable.setCurrentRow(this.currentRow)
+              }
+            })
           })
           .finally(() => {
             this.isLoadingRecords = false
@@ -419,53 +447,28 @@ export default {
           return
         }
         switch (key) {
-          case 'DocumentNo':
-            valuesToSend['documentNo'] = value
+          // case 'TaxID':
+          //   valuesToSend['taxId'] = value
+          //   break
+          case 'Value':
+            valuesToSend['value'] = value
             break
           case 'Name':
             valuesToSend['name'] = value
             break
-          case 'C_BPartner_ID_UUID':
-            valuesToSend['businessPartnerUuid'] = value
-            break
-          case 'DateOrderedFrom':
-            valuesToSend['dateOrderedFrom'] = value
-            break
-          case 'DateOrderedTo':
-            valuesToSend['dateOrderedTo'] = value
-            break
-          case 'IsPaid':
-            valuesToSend['isWaitingForPay'] = value
-            break
-          case 'Processed':
-            valuesToSend['isOnlyProcessed'] = value
-            break
-          case 'IsInvoiced':
-            valuesToSend['isWaitingForInvoice'] = value
-            break
         }
       })
-      // valuesToSend['posUuid'] = this.$store.getters.posAttributes.currentPointOfSales.uuid
+
+      valuesToSend['posUuid'] = this.$store.getters.posAttributes.currentPointOfSales.uuid
       return valuesToSend
-    },
-    fieldSort(list) {
-      return list.sort((a, b) => {
-        if (a.sequence > b.sequence) {
-          return 1
-        }
-        if (a.sequence < b.sequence) {
-          return -1
-        }
-        return 0
-      })
     }
   }
 }
 </script>
 
 <style lang="scss">
-.order-list-container {
-  .order-query-criteria {
+.business-partners-list-container {
+  .business-partners-query-criteria {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;

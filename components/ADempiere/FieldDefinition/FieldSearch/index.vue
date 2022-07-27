@@ -53,7 +53,7 @@ export default {
     // load the component that is indicated in the attributes of received property
     componentRender() {
       // let fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/GeneralInfo')
-      let fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSelect')
+      let fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/GeneralInfoSearch')
       if (isEmptyValue(this.metadata.reference)) {
         return fieldRender
       }
