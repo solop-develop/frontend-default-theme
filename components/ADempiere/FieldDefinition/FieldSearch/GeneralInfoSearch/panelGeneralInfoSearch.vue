@@ -20,14 +20,14 @@
   <el-main
     v-shortkey="shortsKey"
     v-loading="isLoadingFields"
-    class="business-partners-list-container"
+    class="general-info-list-container"
     style="padding-top: 0px"
     @shortkey.native="keyAction"
   >
-    <el-collapse v-model="activeAccordion" accordion class="business-partners-query-criteria">
+    <el-collapse v-model="activeAccordion" accordion class="general-info-list-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
-          {{ metadata.panelName }}
+          {{ title }}
         </template>
 
         <el-form
@@ -37,20 +37,21 @@
         >
           <el-row>
             <field-definition
-              v-for="(field) in metadataList"
-              :key="field.columnName"
-              :metadata-field="field"
-              :container-uuid="'Business-Partner-List'"
+              v-for="(fieldAttributes) in fieldsListQueryCriteria"
+              :key="fieldAttributes.columnName"
+              :metadata-field="fieldAttributes"
+              :container-uuid="uuidForm"
               :container-manager="containerManagerBPList"
             />
           </el-row>
         </el-form>
       </el-collapse-item>
     </el-collapse>
+
     <el-table
-      ref="businessPartnerTable"
+      ref="generalInfoTable"
       v-loading="isloadingTable"
-      class="business-partners-table"
+      class="general-info-table"
       :data="recordsList"
       highlight-current-row
       border
@@ -58,7 +59,7 @@
       :max-height="300"
       size="small"
       @current-change="handleCurrentChange"
-      @row-dblclick="changeBusinessPartner"
+      @row-dblclick="changeRecord"
     >
       <p slot="empty" style="width: 100%;">
         {{ $t('businessPartner.emptyBusinessPartner') }}
@@ -72,10 +73,10 @@
       />
 
       <el-table-column
-        v-for="(heard, key) in tableHeader"
+        v-for="(fieldAttributes, key) in storedFieldsList"
         :key="key"
-        :label="heard.name"
-        :prop="heard.columnName"
+        :label="fieldAttributes.name"
+        :prop="fieldAttributes.columnName"
         min-width="210"
       >
         <template slot-scope="scope">
@@ -83,7 +84,7 @@
           <cell-info
             :parent-uuid="metadata.parentUuid"
             :container-uuid="uuidForm"
-            :field-attributes="heard"
+            :field-attributes="fieldAttributes"
             :container-manager="containerManagerBPList"
             :scope="scope"
             :data-row="scope.row"
@@ -95,7 +96,7 @@
     <el-row :gutter="24" class="business-partners-footer">
       <el-col :span="12">
         <custom-pagination
-          :total="businessParnerData.recordCount"
+          :total="generalInfoData.recordCount"
           :current-page="pageNumber"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
@@ -108,16 +109,14 @@
         <samp style="float: right; padding-right: 10px;">
           <el-button
             type="danger"
-            class="custom-button-create-bp"
             icon="el-icon-close"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
-            class="custom-button-create-bp"
             icon="el-icon-check"
-            @click="changeBusinessPartner"
+            @click="changeRecord"
           />
         </samp>
       </el-col>
@@ -127,20 +126,19 @@
 
 <script>
 // constants
-import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
+import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/form/generalInfoSearch'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
-import businessPartnerMixin from './mixinGeneralInfoSearch'
+import fieldSearchMixin from '../mixinFieldSearch'
 import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
-import {
-  // createFieldFromDefinition,
-  createFieldFromDictionary
-} from '@/utils/ADempiere/lookupFactory'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form'
+import { OPERATOR_LIKE } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'PanelGeneralInfoSearch',
@@ -152,7 +150,7 @@ export default {
   },
 
   mixins: [
-    businessPartnerMixin
+    fieldSearchMixin
   ],
 
   props: {
@@ -169,8 +167,9 @@ export default {
       type: Object,
       default: () => {
         return {
-          containerUuid: BUSINESS_PARTNERS_LIST_FORM,
-          columnName: 'C_BPartner_ID'
+          containerUuid: GENERAL_INFO_SEARCH_LIST_FORM,
+          columnName: undefined,
+          elementName: undefined
         }
       }
     },
@@ -198,7 +197,7 @@ export default {
 
   computed: {
     title() {
-      let title = this.$t('form.pos.order.BusinessPartnerCreate.businessPartner')
+      let title = this.metadata.name
       if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
         title += ` (${this.metadata.panelName})`
       }
@@ -208,7 +207,7 @@ export default {
       if (!isEmptyValue(this.metadata.containerUuid)) {
         return this.metadata.columnName + '_' + this.metadata.containerUuid
       }
-      return BUSINESS_PARTNERS_LIST_FORM
+      return GENERAL_INFO_SEARCH_LIST_FORM
     },
     shortsKey() {
       return {
@@ -233,37 +232,29 @@ export default {
         setPage: this.setPage
       }
     },
-    labelTable() {
-      return this.metadataList.map(field => {
-        return {
-          label: field.name,
-          columnName: field.columnName
-        }
-      })
-    },
-    tableHeader() {
+    storedFieldsList() {
       return this.$store.getters.getTableHeader({
         containerUuid: this.uuidForm
       })
     },
-    listFilter() {
-      return this.$store.getters.getIdentifier({
+    fieldsListQueryCriteria() {
+      return this.$store.getters.getQueryFieldsList({
         containerUuid: this.uuidForm
       })
     },
     isloadingTable() {
-      return this.isLoadingRecords && !this.isEmptyValue(this.tableHeader)
+      return this.isLoadingRecords && !this.isEmptyValue(this.storedFieldsList)
     },
-    businessParnerData() {
+    generalInfoData() {
       return this.$store.getters.getGeneralInfoData({
         containerUuid: this.uuidForm
       })
     },
     pageNumber() {
-      return this.businessParnerData.pageNumber
+      return this.generalInfoData.pageNumber
     },
     isReadyFromGetData() {
-      const { isLoaded } = this.businessParnerData
+      const { isLoaded } = this.generalInfoData
       return !isLoaded && this.showPopover
     },
     currentRow: {
@@ -284,7 +275,7 @@ export default {
   watch: {
     isReadyFromGetData(isToLoad) {
       if (isToLoad) {
-        this.searchBPartnerList()
+        this.getListGeneralInfoSearch()
       }
     },
     showPopover(value) {
@@ -301,14 +292,14 @@ export default {
     this.unsubscribe = this.subscribeChanges()
 
     if (this.isReadyFromGetData) {
-      this.searchBPartnerList()
+      this.getListGeneralInfoSearch()
     }
   },
 
   mounted() {
     this.$nextTick(() => {
-      if (this.$refs.businessPartnerTable) {
-        this.$refs.businessPartnerTable.setCurrentRow(this.currentRow)
+      if (this.$refs.generalInfoTable) {
+        this.$refs.generalInfoTable.setCurrentRow(this.currentRow)
       }
     })
 
@@ -335,7 +326,7 @@ export default {
            * TODO: When refreshing you are making 2 list requests, you can be the
            * observer that activates the second request
           */
-          this.searchBPartnerList()
+          this.getListGeneralInfoSearch()
           break
 
         case 'close':
@@ -343,14 +334,9 @@ export default {
           break
       }
     },
-    changeBusinessPartner() {
+    changeRecord() {
       if (!isEmptyValue(this.currentRow)) {
-        const listIdentifier = this.listFilter.filter(identifier => {
-          if (identifier.overwriteDefinition.identifierSequence > 0) {
-            return identifier
-          }
-        })
-        this.setValues(this.currentRow, listIdentifier)
+        this.setValues(this.currentRow)
         this.closeList()
       }
     },
@@ -361,65 +347,63 @@ export default {
       })
     },
     setPage(pageNumber) {
-      this.searchBPartnerList(pageNumber)
+      this.getListGeneralInfoSearch(pageNumber)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
           if (mutation.payload.containerUuid === this.uuidForm) {
-            this.searchBPartnerList()
+            this.getListGeneralInfoSearch()
           }
         }
       })
     },
     setFieldsList() {
-      const list = []
       this.isLoadingFields = true
       this.containerManager.searchTableHeader({
         containerUuid: this.uuidForm,
         tableName: this.metadata.reference.tableName
+      }).then(fieldsListResponse => {
+        this.metadataList = fieldsListResponse
+      }).finally(() => {
+        this.isLoadingFields = false
       })
-        .then(findList => {
-          this.listFilter.forEach(element => {
-            createFieldFromDictionary(element)
-              .then(responseField => {
-                list.push({
-                  ...responseField,
-                  containerUuid: this.uuidForm
-                })
-              }).catch(error => {
-                console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
-              })
-              .finally(() => {
-                if (list.length === this.listFilter.length) {
-                  this.metadataList = list
-                  this.isLoadingFields = false
-                }
-              })
-          })
-        })
     },
-    searchBPartnerList(pageNumber = 0, isConvert = true) {
+    getListGeneralInfoSearch(pageNumber = 0) {
       const values = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
-      }).filter(alo => !this.isEmptyValue(alo.value))
+      })
+        .filter(attribute => {
+          if (attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX)) {
+            return false
+          }
+          return !this.isEmptyValue(attribute.value)
+        })
+        .map(attribute => {
+          if (attribute.value.startsWith('%') || attribute.value.endsWith('%')) {
+            return {
+              ...attribute,
+              operator: OPERATOR_LIKE.operator
+            }
+          }
+          return attribute
+        })
 
-      // let parsedValues = values
-      // if (isConvert && !isEmptyValue(values)) {
-      //   parsedValues = this.convertValuesToSend(values)
-      // }
       this.isLoadingRecords = true
 
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
         this.containerManager.generalInfoSearch({
-          // ...parsedValues,
           containerUuid: this.uuidForm,
           tableName: this.metadata.reference.tableName,
-          fieldUuid: this.metadata.uuid,
-          parametersList: values
+          columnName: this.metadata.columnName,
+          uuid: this.metadata.uuid,
+          //
+          contextColumnNames: this.metadata.reference.contextColumnNames,
+          filters: values,
+          pageNumber
         })
           .then(response => {
             if (isEmptyValue(response)) {
@@ -431,8 +415,8 @@ export default {
             }
 
             this.$nextTick(() => {
-              if (this.$refs.businessPartnerTable) {
-                this.$refs.businessPartnerTable.setCurrentRow(this.currentRow)
+              if (this.$refs.generalInfoTable) {
+                this.$refs.generalInfoTable.setCurrentRow(this.currentRow)
               }
             })
           })
@@ -440,43 +424,14 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
-    },
-    /**
-     * ColumnName equals property to set into request's system-core
-     * TODO: Add keyServer and keyClient
-     * @param {object} values
-     * @returns {object}
-     */
-    convertValuesToSend(values) {
-      const valuesToSend = {}
-      Object.keys(values).forEach(key => {
-        const value = values[key]
-        if (isEmptyValue(value)) {
-          return
-        }
-        switch (key) {
-          // case 'TaxID':
-          //   valuesToSend['taxId'] = value
-          //   break
-          case 'Value':
-            valuesToSend['value'] = value
-            break
-          case 'Name':
-            valuesToSend['name'] = value
-            break
-        }
-      })
-
-      valuesToSend['posUuid'] = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      return valuesToSend
     }
   }
 }
 </script>
 
 <style lang="scss">
-.business-partners-list-container {
-  .business-partners-query-criteria {
+.general-info-list-container {
+  .general-info-list-query-criteria {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;

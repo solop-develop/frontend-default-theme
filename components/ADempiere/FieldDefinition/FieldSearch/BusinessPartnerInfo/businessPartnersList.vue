@@ -334,9 +334,8 @@ export default {
     closeList() {
       this.$store.commit('setBusinessPartnerShow', {
         containerUuid: this.uuidForm,
-        show: value
+        show: false
       })
-      
     },
     setPage(pageNumber) {
       this.searchBPartnerList(pageNumber)

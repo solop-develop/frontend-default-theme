@@ -39,7 +39,7 @@
       v-if="fieldAttributes.isColumnDocumentStatus"
       key="document-status"
       size="small"
-      :value="fieldValue"
+      :value="cellValue"
       :displayed-value="displayedValue"
     />
 
@@ -135,7 +135,7 @@ export default defineComponent({
   setup(props) {
     const { columnName } = props.fieldAttributes
 
-    const fieldValue = computed(() => {
+    const cellValue = computed(() => {
       return props.dataRow[columnName]
     })
 
@@ -176,7 +176,7 @@ export default defineComponent({
       switch (componentPath) {
         case 'FieldDate':
         case 'FieldTime': {
-          let cell = fieldValue.value
+          let cell = cellValue.value
           if (typeValue(cell) === 'DATE') {
             cell = cell.getTime()
           }
@@ -186,20 +186,25 @@ export default defineComponent({
         }
 
         case 'FieldNumber':
-          if (isEmptyValue(fieldValue.value)) {
+          if (isEmptyValue(cellValue.value)) {
             valueToShow = undefined
             break
           }
           // TODO: Add currency of row
           valueToShow = formatNumber({
             displayType,
-            value: fieldValue.value
+            value: cellValue.value
           })
           break
 
         case 'FieldSelect':
+        case 'FieldSearch':
           valueToShow = row[displayColumnName]
-          if (isEmptyValue(valueToShow) && fieldValue.value === 0) {
+          if (isEmptyValue(valueToShow)) {
+            // set value
+            valueToShow = row[columnName]
+          }
+          if (isEmptyValue(valueToShow) && cellValue.value === 0) {
             valueToShow = field.defaultValue
             break
           }
@@ -207,11 +212,11 @@ export default defineComponent({
 
         case 'FieldYesNo':
           // replace boolean true-false value for 'Yes' or 'Not' ('Si' or 'No' for spanish)
-          valueToShow = convertBooleanToTranslationLang(fieldValue.value)
+          valueToShow = convertBooleanToTranslationLang(cellValue.value)
           break
 
         default:
-          valueToShow = fieldValue.value
+          valueToShow = cellValue.value
           break
       }
 
@@ -236,7 +241,7 @@ export default defineComponent({
       OPERATORS_FIELD_TEXT_LONG,
       // computeds
       cellCssClass,
-      fieldValue,
+      cellValue,
       displayedValue,
       // methods
       isRowCanBeEdited

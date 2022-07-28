@@ -34,14 +34,15 @@
     @blur="setOldDisplayedValue"
   >
     <!--
-    @keyup.enter.native="getBPartnerWithEnter"
+    @keyup.enter.native="getRecord"
       -->
     <template slot-scope="recordRow">
       <div class="header">
-        <span v-for="(identifier, key) in listFilter" :key="key">
-          {{ recordRow.item[identifier.columnName] }}
-        </span>
+        <b> {{ generateDisplayedValue(recordRow.item) }} </b>
       </div>
+      <span class="info">
+        {{ generatedDescription(recordRow.item) }}
+      </span>
     </template>
 
     <button-general-info-search
@@ -58,7 +59,6 @@
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
-import generalInfoSearchMixin from './mixinGeneralInfoSearch'
 import ButtonGeneralInfoSearch from './buttonGeneralInfoSearch.vue'
 
 // utils and helper methods
@@ -73,8 +73,7 @@ export default {
 
   mixins: [
     fieldMixin,
-    fieldSearchMixin,
-    generalInfoSearchMixin
+    fieldSearchMixin
   ],
 
   props: {
@@ -97,14 +96,10 @@ export default {
     uuidForm() {
       return this.metadata.containerUuid
     },
-    listFilter() {
-      const listIdentifier = this.$store.getters.getIdentifier({
+    recordsList() {
+      return this.$store.getters.getGeneralInfoRecordsList({
         containerUuid: this.uuidForm
       })
-      if (this.isEmptyValue(listIdentifier)) {
-        return []
-      }
-      return listIdentifier.filter(identifier => identifier.overwriteDefinition.identifierSequence > 0)
     }
   },
 
@@ -114,6 +109,7 @@ export default {
         this.containerManager.generalInfoSearch({
           containerUuid: this.metadata.containerUuid,
           pageNumber: 1,
+          contextColumnNames: this.metadata.reference.contextColumnNames,
           tableName: this.metadata.reference.tableName,
           fieldUuid: this.metadata.uuid,
           searchValue
