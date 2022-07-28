@@ -208,7 +208,6 @@ export default {
         return
       }
 
-
       const recordsList = this.orderList
       let results = recordsList
       if (stringToMatch) {

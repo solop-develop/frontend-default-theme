@@ -23,12 +23,12 @@
         </div>
         <el-table
           v-show="!collapse"
-          v-loading="isEmptyValue(activityList)"
+          v-loading="isLoadActivity"
           :data="activityList"
           highlight-current-row
-          style="width: 100%;height: 85% !important;"
+          style="width: 100%;height: 70% !important;"
           border
-          height="90% !important"
+          height="60% !important"
           @current-change="handleCurrentChange"
         >
           <el-table-column
@@ -40,6 +40,13 @@
             :prop="valueOrder.columnName"
           />
         </el-table>
+        <custom-pagination
+          v-show="!collapse"
+          :total="recordCount"
+          :current-page="1"
+          :container-manager="containerManagerBPList"
+          :handle-change-page="setPage"
+        />
       </el-card>
     </el-header>
     <el-main class="main">
@@ -81,10 +88,13 @@
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import fieldsList from './fieldsList.js'
 import Workflow from '@theme/components/ADempiere/Workflow'
+import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import { generatePageToken } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'WorkflowActivity',
   components: {
+    CustomPagination,
     Workflow
   },
   mixins: [
@@ -154,8 +164,31 @@ export default {
       }
       return []
     },
+    recordCount() {
+      return this.$store.getters.getRecordCount
+    },
     currentActivity() {
       return this.$store.getters.getCurrentActivity
+    },
+    isLoadActivity() {
+      return this.$store.getters.getIsLoadActivity
+    },
+    containerManagerBPList() {
+      return {
+        // ...this.containerManager,
+        // ...containerManagerForm,
+        actionPerformed: () => {},
+        getFieldsLit: () => {},
+        isReadOnlyColumn: ({ field, row }) => { return true },
+        setDefaultValues: () => {},
+        setPage: this.setPage
+      }
+    },
+    selection() {
+      // if (isEmptyValue(this.currentRow)) {
+      //   return 0
+      // }
+      return 0
     }
   },
   watch: {
@@ -171,9 +204,13 @@ export default {
     }
   },
   methods: {
-    setCurrent() {
-      const activity = this.activityList.find(activity => activity.node === this.currentActivity.node)
-      this.$refs.WorkflowActivity.setCurrentRow(activity)
+    setCurrent(activity) {
+      activity = this.activityList.find(activity => activity.node === this.currentActivity.node)
+      // this.$refs.WorkflowActivity.setCurrentRow(activity)
+    },
+    setPage(pageNumber) {
+      const pageToken = generatePageToken({ pageNumber })
+      this.$store.dispatch('serverListActivity', pageToken)
     },
     handleCurrentChange(activity) {
       this.$store.dispatch('selectedActivity', activity)
