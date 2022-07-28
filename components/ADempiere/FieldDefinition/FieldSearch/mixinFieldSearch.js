@@ -19,6 +19,9 @@
 import lang from '@/lang'
 import store from '@/store'
 
+// constants
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { trimPercentage } from '@/utils/ADempiere/valueFormat'
@@ -36,8 +39,14 @@ export default {
   },
 
   computed: {
+    uuidForm() {
+      return this.metadata.containerUuid
+    },
+
     blankValues() {
       return {
+        [this.metadata.columnName]: undefined,
+        [this.metadata.elementName]: undefined,
         id: undefined,
         uuid: undefined,
         name: undefined
@@ -45,7 +54,9 @@ export default {
     },
     // implement to overwrite
     recordsList() {
-      return []
+      return this.$store.getters.getGeneralInfoRecordsList({
+        containerUuid: this.uuidForm
+      })
     },
     value: {
       get() {
@@ -120,6 +131,25 @@ export default {
           value
         })
       }
+    },
+    storedIdentifierColumns() {
+      const listIdentifier = this.$store.getters.getIdentifier({
+        containerUuid: this.uuidForm
+      })
+      if (this.isEmptyValue(listIdentifier)) {
+        return []
+      }
+      return listIdentifier
+        .filter(field => {
+          // return field.displayType === field.displayType === CHAR.id
+          return field.identifierSequence > 0
+        })
+        .sort((fieldA, fieldB) => {
+          return fieldA.identifierSequence > fieldB.identifierSequence
+        })
+        .map(field => {
+          return field.columnName
+        })
     }
   },
 
@@ -192,8 +222,18 @@ export default {
         const parsedValue = trimPercentage(stringToMatch.toLowerCase().trim())
 
         results = recordsList.filter(row => {
-          for (const column in row) {
-            const valueToCompare = String(row[column]).toLowerCase()
+          // find on all columns
+          // for (const column in row) {
+          //   const valueToCompare = String(row[column]).toLowerCase()
+
+          //   if (valueToCompare.includes(parsedValue)) {
+          //     return true
+          //   }
+          // }
+
+          // find on identifier columns
+          for (const columnName of this.identifierColumns) {
+            const valueToCompare = String(row[columnName]).toLowerCase()
 
             if (valueToCompare.includes(parsedValue)) {
               return true
@@ -203,7 +243,7 @@ export default {
         })
 
         // Remote search
-        if (isEmptyValue(results) && String(stringToMatch.length > 3)) {
+        if (isEmptyValue(results) && String(stringToMatch.length > 2)) {
           clearTimeout(this.timeOutSearchRecords)
 
           this.timeOutSearchRecords = setTimeout(() => {
@@ -232,12 +272,136 @@ export default {
       })
     },
 
-    generateDisplayedValue({ name }) {
-      let displayedValue
-      if (!isEmptyValue(name)) {
-        displayedValue = name
+    setValues(rowData) {
+      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
+      const { [columnName]: id, UUID: uuid } = rowData
+
+      const displayedValue = this.generateDisplayedValue(rowData)
+
+      // set ID value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName,
+        value: id
+      })
+      // set display column (name) value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        // DisplayColumn_'ColumnName'
+        columnName: DISPLAY_COLUMN_PREFIX + columnName,
+        value: displayedValue
+      })
+      // set UUID value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName: columnName + '_UUID',
+        value: uuid
+      })
+
+      // set on element name, used by columns views aliases
+      if (!isEmptyValue(elementName) && columnName !== elementName) {
+        // set ID value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          columnName: elementName,
+          value: id
+        })
+        // set display column (name) value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          // DisplayColumn_'ColumnName'
+          columnName: DISPLAY_COLUMN_PREFIX + elementName,
+          value: displayedValue
+        })
+        // set UUID value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          columnName: elementName + '_UUID',
+          value: uuid
+        })
       }
+    },
+
+    generateDisplayedValueWithIdentifiers(row) {
+      let displayedValue
+      const identifierColumns = this.storedIdentifierColumns
+      if (isEmptyValue(identifierColumns)) {
+        return displayedValue
+      }
+
+      // generate with identifier columns
+      this.storedIdentifierColumns.forEach(columnName => {
+        const currentValue = row[columnName]
+        if (isEmptyValue(currentValue)) {
+          // omit empty value
+          return
+        }
+        if (isEmptyValue(displayedValue)) {
+          // set first value
+          displayedValue = currentValue
+          return
+        }
+        // concat additional values
+        displayedValue += ' - ' + currentValue
+      })
+
       return displayedValue
+    },
+
+    generateDisplayedValue(recordRow) {
+      let displayedValue = this.generateDisplayedValueWithIdentifiers(recordRow)
+      if (!isEmptyValue(displayedValue)) {
+        return displayedValue
+      }
+
+      // generate with standard columns
+      const { Value, Name, Description } = recordRow
+
+      if (!isEmptyValue(Value)) {
+        displayedValue = Value
+      }
+      if (!isEmptyValue(Name)) {
+        if (!isEmptyValue(displayedValue)) {
+          displayedValue += ' - ' + Name
+        } else {
+          displayedValue = Name
+        }
+      }
+      if (!isEmptyValue(Description)) {
+        if (!isEmptyValue(displayedValue)) {
+          displayedValue += ' - ' + Description
+        } else {
+          displayedValue = Description
+        }
+      }
+
+      return displayedValue
+    },
+
+    generatedDescription(recordRow) {
+      let displayedDescription
+
+      const description = recordRow['Description']
+      if (!isEmptyValue(description) && !this.storedIdentifierColumns.includes('Description')) {
+        displayedDescription = description
+      }
+
+      const help = recordRow['Help']
+      if (!isEmptyValue(help) && !this.storedIdentifierColumns.includes('Help')) {
+        if (!isEmptyValue(displayedDescription)) {
+          displayedDescription += ' - ' + help
+        } else {
+          displayedDescription = help
+        }
+      }
+
+      return displayedDescription
     },
 
     handleSelect(recordSelected) {
