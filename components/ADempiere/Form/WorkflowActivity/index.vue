@@ -43,7 +43,7 @@
         <custom-pagination
           v-show="!collapse"
           :total="recordCount"
-          :current-page="1"
+          :current-page="currentPagePagination"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
         />
@@ -89,7 +89,6 @@ import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import fieldsList from './fieldsList.js'
 import Workflow from '@theme/components/ADempiere/Workflow'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-import { generatePageToken } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'WorkflowActivity',
@@ -184,11 +183,8 @@ export default {
         setPage: this.setPage
       }
     },
-    selection() {
-      // if (isEmptyValue(this.currentRow)) {
-      //   return 0
-      // }
-      return 0
+    currentPagePagination() {
+      return this.$store.getters.getCurrentPageNumber
     }
   },
   watch: {
@@ -209,8 +205,7 @@ export default {
       // this.$refs.WorkflowActivity.setCurrentRow(activity)
     },
     setPage(pageNumber) {
-      const pageToken = generatePageToken({ pageNumber })
-      this.$store.dispatch('serverListActivity', pageToken)
+      this.$store.dispatch('serverListActivity', pageNumber)
     },
     handleCurrentChange(activity) {
       this.$store.dispatch('selectedActivity', activity)
