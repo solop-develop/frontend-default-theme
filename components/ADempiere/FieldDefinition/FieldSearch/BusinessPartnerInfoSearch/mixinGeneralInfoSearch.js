@@ -63,7 +63,6 @@ export default {
         return []
       }
       const list = listIdentifier.filter(identifier => identifier.overwriteDefinition.identifierSequence > 0)
-      console.log({ list })
       return list
     }
   },

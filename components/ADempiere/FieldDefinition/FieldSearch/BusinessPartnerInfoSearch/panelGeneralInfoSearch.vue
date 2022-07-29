@@ -64,11 +64,8 @@
         {{ $t('businessPartner.emptyBusinessPartner') }}
       </p>
 
-      <el-table-column
-        type="index"
-        label="#"
-        width="35"
-        header-align="center"
+      <index-column
+        :page-number="pageNumber"
       />
 
       <el-table-column
@@ -93,7 +90,7 @@
     </el-table>
 
     <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="12">
+      <el-col :span="18">
         <custom-pagination
           :total="businessParnerData.recordCount"
           :current-page="pageNumber"
@@ -104,20 +101,25 @@
         />
       </el-col>
 
-      <el-col :span="12">
-        <samp style="float: right; padding-right: 10px;">
+      <el-col :span="6">
+        <samp style="float: right; padding-top: 4px;">
+          <el-button
+            :loading="isLoadingRecords"
+            type="success"
+            icon="el-icon-refresh-right"
+            @click="searchBPartnerList();"
+          />
+
           <el-button
             type="danger"
-            class="custom-button-create-bp"
             icon="el-icon-close"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
-            class="custom-button-create-bp"
             icon="el-icon-check"
-            @click="changeBusinessPartner"
+            @click="changeBusinessPartner()"
           />
         </samp>
       </el-col>
@@ -134,6 +136,8 @@ import businessPartnerMixin from './mixinGeneralInfoSearch'
 import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
+
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
@@ -148,7 +152,8 @@ export default {
   components: {
     CustomPagination,
     FieldDefinition,
-    CellInfo
+    CellInfo,
+    IndexColumn
   },
 
   mixins: [
@@ -375,7 +380,6 @@ export default {
     setFieldsList() {
       const list = []
       this.isLoadingFields = true
-      console.log(this.containerManager)
       this.containerManager.searchTableHeader({
         containerUuid: this.uuidForm,
         tableName: this.metadata.reference.tableName
@@ -481,6 +485,13 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
+    }
+  }
+
+  .business-partners-footer {
+    button {
+      padding: 4px 8px;
+      font-size: 24px;
     }
   }
 }
