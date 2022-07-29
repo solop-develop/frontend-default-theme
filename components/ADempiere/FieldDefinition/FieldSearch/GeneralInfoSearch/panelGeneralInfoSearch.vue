@@ -65,11 +65,8 @@
         {{ $t('businessPartner.emptyBusinessPartner') }}
       </p>
 
-      <el-table-column
-        type="index"
-        label="#"
-        width="35"
-        header-align="center"
+      <index-column
+        :page-number="pageNumber"
       />
 
       <el-table-column
@@ -134,6 +131,7 @@ import fieldSearchMixin from '../mixinFieldSearch'
 import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
@@ -146,7 +144,8 @@ export default {
   components: {
     CustomPagination,
     FieldDefinition,
-    CellInfo
+    CellInfo,
+    IndexColumn
   },
 
   mixins: [
