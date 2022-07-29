@@ -65,7 +65,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 // import store from '@/store'
 
 // constants
-import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/constants/table'
+import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/tableUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
