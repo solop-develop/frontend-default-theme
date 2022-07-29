@@ -41,7 +41,7 @@
               :key="fieldAttributes.columnName"
               :metadata-field="fieldAttributes"
               :container-uuid="uuidForm"
-              :container-manager="containerManagerBPList"
+              :container-manager="containerManagerList"
             />
           </el-row>
         </el-form>
@@ -82,7 +82,7 @@
             :parent-uuid="metadata.parentUuid"
             :container-uuid="uuidForm"
             :field-attributes="fieldAttributes"
-            :container-manager="containerManagerBPList"
+            :container-manager="containerManagerList"
             :scope="scope"
             :data-row="scope.row"
           />
@@ -90,30 +90,39 @@
       </el-table-column>
     </el-table>
 
-    <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="12">
+    <el-row :gutter="24" class="general-info-list-footer">
+      <el-col :span="18">
         <custom-pagination
           :total="generalInfoData.recordCount"
           :current-page="pageNumber"
-          :container-manager="containerManagerBPList"
+          :container-manager="containerManagerList"
           :handle-change-page="setPage"
           :selection="selection"
           style="float: left !important;"
         />
       </el-col>
 
-      <el-col :span="12">
-        <samp style="float: right; padding-right: 10px;">
+      <el-col :span="6">
+        <samp style="float: right; paddint-top: 4px;">
+          <el-button
+            :loading="isLoadingRecords"
+            type="success"
+            icon="el-icon-refresh-right"
+            size="small"
+            @click="getListGeneralInfoSearch();"
+          />
+
           <el-button
             type="danger"
             icon="el-icon-close"
+            size="small"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
             icon="el-icon-check"
-            @click="changeRecord"
+            @click="changeRecord()"
           />
         </samp>
       </el-col>
@@ -220,7 +229,7 @@ export default {
       }
       return 1
     },
-    containerManagerBPList() {
+    containerManagerList() {
       return {
         ...this.containerManager,
         ...containerManagerForm,
@@ -434,6 +443,13 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
+    }
+  }
+
+  .general-info-list-footer {
+    button {
+      padding: 4px 8px;
+      font-size: 24px;
     }
   }
 }

@@ -62,11 +62,8 @@
         {{ $t('orderList.emptyOrderList') }}
       </p>
 
-      <el-table-column
-        type="index"
-        label="#"
-        width="35"
-        header-align="center"
+      <index-column
+        :page-number="pageNumber"
       />
 
       <el-table-column
@@ -91,31 +88,38 @@
       </el-table-column>
     </el-table>
     <br>
+
     <el-row :gutter="24" class="order-footer">
-      <el-col :span="12">
+      <el-col :span="18">
         <custom-pagination
-          :total="orderListRecordCount"
-          :current-page="1"
-          :container-manager="containerManagerOrderList"
+          :total="businessParnerData.recordCount"
+          :current-page="pageNumber"
+          :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
           :selection="selection"
-          style="float: left"
+          style="float: left !important;"
         />
       </el-col>
 
-      <el-col :span="12">
-        <samp style="float: right; padding-right: 10px;">
+      <el-col :span="6">
+        <samp style="float: right; padding-top: 4px;">
+          <el-button
+            :loading="isLoadingRecords"
+            type="success"
+            icon="el-icon-refresh-right"
+            @click="searchBPartnerList();"
+          />
+
           <el-button
             type="danger"
-            class="custom-button-create-bp"
             icon="el-icon-close"
-            @click="closeList"
+            @click="closeList(); clearValues();"
           />
+
           <el-button
             type="primary"
-            class="custom-button-create-bp"
             icon="el-icon-check"
-            @click="changeOrder"
+            @click="changeBusinessPartner()"
           />
         </samp>
       </el-col>
@@ -124,16 +128,15 @@
 </template>
 
 <script>
-
-import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-
 // constants
 import { ORDER_LIST_FORM } from '@/utils/ADempiere/dictionary/form/order/orderList.js'
 import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import orderListMixin from './mixinOrder'
+import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -148,7 +151,8 @@ export default {
 
   components: {
     CustomPagination,
-    FieldDefinition
+    FieldDefinition,
+    IndexColumn
   },
 
   mixins: [
