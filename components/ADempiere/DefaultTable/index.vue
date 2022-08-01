@@ -405,7 +405,6 @@ export default defineComponent({
      */
     function handleRowDblClick(row, column, event) {
       // disable edit mode
-      row.isEditRow = false
 
       if (!isEmptyValue(props.parentUuid)) {
         const currentTab = store.getters.getStoredTab(
@@ -435,7 +434,8 @@ export default defineComponent({
         })
       }
 
-      if (props.containerManager.confirmRowChanges) {
+      if (props.containerManager.confirmRowChanges && row.isSelectedRow && row.isEditRow) {
+        row.isEditRow = false
         props.containerManager.confirmRowChanges({
           parentUuid: props.parentUuid,
           containerUuid: props.containerUuid,
