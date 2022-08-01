@@ -62,6 +62,7 @@
       reserve-selection
       highlight-current-row
       :data="recordsWithFilter"
+      size="small"
       :element-loading-text="$t('notifications.loading')"
       element-loading-background="rgba(255, 255, 255, 0.8)"
       :row-class-name="tableRowClassName"
@@ -389,6 +390,11 @@ export default defineComponent({
             row
           })
         }
+        props.containerManager.seekRecord({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          row
+        })
       }
     }
 
@@ -409,11 +415,11 @@ export default defineComponent({
 
         const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
         if (recordUuid !== row.UUID && currentTab.isParentTab) {
-          props.containerManager.seekRecord({
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid,
-            row
-          })
+          // props.containerManager.seekRecord({
+          //   parentUuid: props.parentUuid,
+          //   containerUuid: props.containerUuid,
+          //   row
+          // })
           props.containerManager.setSelection({
             containerUuid: props.containerUuid,
             recordsSelected: []
@@ -697,6 +703,17 @@ export default defineComponent({
   padding: 0px !important;
 }
 .el-table .success-row {
-    background: #e8f4ff;
-  }
+  background: #e8f4ff;
+}
+.el-table .cell {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
 </style>
