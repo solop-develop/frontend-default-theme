@@ -238,6 +238,18 @@ export default {
           value
         })
       }
+    },
+    currentTab() {
+      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+        return {}
+      }
+      return this.containerManager.getPanel({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid
+      })
+    },
+    currentRecord() {
+      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
     }
   },
 
@@ -373,6 +385,8 @@ export default {
      * @param {boolean} isShowList triggers when the pull-down menu appears or disappears
      */
     getDataLookupList(isShowList) {
+      // Establish
+      this.setContainerInformation()
       // get stored list values
       const list = this.getStoredLookupList
       // refresh local list component
@@ -451,6 +465,14 @@ export default {
           // set empty value
           this.value = this.blankOption.value
         })
+    },
+    setContainerInformation() {
+      if (!this.isEmptyValue(this.currentTab)) {
+        this.$store.dispatch('panelInfo', {
+          currentTab: this.currentTab,
+          currentRecord: this.currentRecord
+        })
+      }
     }
   }
 

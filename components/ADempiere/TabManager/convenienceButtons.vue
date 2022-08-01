@@ -299,6 +299,19 @@ export default defineComponent({
           containerUuid
         })
       }
+
+      this.$store.dispatch('panelInfo', {
+        currentTab: props.tabAttributes,
+        currentRecord: recordParentTab.value
+      })
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.new')
+      }
+      this.$store.dispatch('fieldListInfo', { info })
     }
 
     function refreshCurrentRecord() {
@@ -306,6 +319,15 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         containerUuid
       })
+
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.refresh')
+      }
+      this.$store.dispatch('fieldListInfo', { info })
     }
 
     function focusConfirmDelete() {
@@ -326,6 +348,12 @@ export default defineComponent({
         isVisibleConfirmDelete.value = false
         return
       }
+
+      const info = {
+        fieldsList: props.tabAttributes.fieldsList,
+        option: language.t('actionMenu.delete')
+      }
+      this.$store.dispatch('fieldListInfo', { info })
       deleteRecord.deleteRecord({
         parentUuid: props.parentUuid,
         containerUuid,
@@ -335,6 +363,19 @@ export default defineComponent({
     }
 
     function undoChanges() {
+      // this.$store.dispatch('fieldListInfo', {
+      //   fieldsList: props.tabAttributes.fieldsList,
+      //   option: language.t('actionMenu.undo')
+      // })
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.undo')
+      }
+
+      this.$store.dispatch('fieldListInfo', { info })
       undoChange.undoChange({
         parentUuid: props.parentUuid,
         containerUuid
@@ -351,6 +392,16 @@ export default defineComponent({
         })
         return
       }
+
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.save')
+      }
+
+      this.$store.dispatch('fieldListInfo', { info })
 
       store.dispatch('flushPersistenceQueue', {
         parentUuid: props.parentUuid,

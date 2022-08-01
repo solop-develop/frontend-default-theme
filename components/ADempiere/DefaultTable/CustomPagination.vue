@@ -84,7 +84,7 @@ export default defineComponent({
     // },
     containerManager: {
       type: Object,
-      required: true
+      required: false
     },
     currentPage: {
       type: Number,

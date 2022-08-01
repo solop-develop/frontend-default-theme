@@ -20,7 +20,7 @@
   <span>
     <el-container>
       <el-main style="overflow: auto;">
-        <el-empty v-if="isEmptyValue(listChats)" />
+        <el-empty v-if="isEmptyValue(listChats)" style="height: 600px;" />
         <el-scrollbar v-else class="scroll-chats">
           <el-timeline>
             <el-timeline-item

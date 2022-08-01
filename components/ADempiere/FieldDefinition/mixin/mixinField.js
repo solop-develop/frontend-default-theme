@@ -141,6 +141,20 @@ export default {
     },
     currentRecord() {
       return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
+    },
+    currentFieldList() {
+      return this.$store.getters.getCurrentFieldList
+    }
+  },
+
+  watch: {
+    currentFieldList(value) {
+      const tabPanel = this.$store.getters.getContainerInfo
+      const fieldFocusColumnName = this.$store.getters.getFieldFocusColumnName
+      if (fieldFocusColumnName && this.metadata.columnName === fieldFocusColumnName && tabPanel.currentTab.containerUuid === this.metadata.containerUuid) {
+        this.$refs[fieldFocusColumnName].focus()
+      }
+      // this.$refs[fieldFocusColumnName].focus()
     }
   },
 
@@ -242,6 +256,12 @@ export default {
       this.handleFieldChange({ value })
     },
     focusGained(value) {
+      // const info = {
+      //   columnName: this.metadata.columnName
+      // }
+      // this.$store.dispatch('fieldListInfo', { info })
+      this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
+
       if (this.metadata.handleContentSelection) {
         // select all the content inside the text box
         if (!this.isEmptyValue(value.target.selectionStart) &&
@@ -260,6 +280,7 @@ export default {
       this.setContainerInformation()
     },
     focusLost(value) {
+      this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
       if (this.metadata.handleFocusLost) {
         this.$store.dispatch('notifyFocusLost', {
           containerUuid: this.metadata.containerUuid,
@@ -336,6 +357,12 @@ export default {
       displayedValue
     }) {
       // Global Action performed
+      const info = {
+        columnName: this.metadata.columnName
+      }
+      this.$store.dispatch('fieldListInfo', { info })
+      this.setContainerInformation()
+      this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
       if (this.metadata.handleActionPerformed && this.autoSave) {
         this.$store.dispatch('notifyActionPerformed', {
           containerUuid: this.metadata.containerUuid,
@@ -367,7 +394,7 @@ export default {
       })
     },
     setContainerInformation() {
-      if (!this.isEmptyValue(this.currentTab) && !this.isEmptyValue(this.currentRecord)) {
+      if (!this.isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
