@@ -98,7 +98,7 @@
       :visible.sync="showContainerInfo"
       :with-header="false"
       :before-close="openRecordLogs"
-      :size="'50%'"
+      :size="'90%'"
     >
       <panel-info
         :all-tabs-list="allTabsList"
