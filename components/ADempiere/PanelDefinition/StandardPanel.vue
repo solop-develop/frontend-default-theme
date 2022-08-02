@@ -39,7 +39,20 @@
             :shadow="shadowGroup"
             :body-style="{ padding: '5px' }"
           >
-            <el-scrollbar wrap-class="scroll-tab-panel-conten" :style="styleScrollPanelTab">
+            <el-row v-if="!isMobile">
+              <template v-for="(fieldAttributes, subKey) in fieldsList">
+                <field-definition
+                  ref="fieldDefinitionRef"
+                  :key="subKey"
+                  :parent-uuid="parentUuid"
+                  :container-uuid="containerUuid"
+                  :container-manager="containerManager"
+                  :field-metadata="fieldAttributes"
+                  :metadata-field="fieldAttributes"
+                />
+              </template>
+            </el-row>
+            <el-scrollbar v-else :wrap-class="panelMetadata.isParentTab ? 'scroll-tab-panel-conten' : 'scroll-tab-child-panel-conten'" :style="styleScrollPanelTab">
               <el-row>
                 <template v-for="(fieldAttributes, subKey) in fieldsList">
                   <field-definition
@@ -132,6 +145,10 @@ export default defineComponent({
       return store.getters.getCurrentFieldList
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const recordUuid = computed(() => {
       // TODO: Change query name 'action'
       const { action } = root.$route.query
@@ -139,7 +156,7 @@ export default defineComponent({
     })
 
     const shadowGroup = computed(() => {
-      if (store.state.app.device === 'mobile') {
+      if (isMobile.value) {
         return 'never'
       }
       return 'hover'
@@ -206,9 +223,24 @@ export default defineComponent({
     })
 
     const styleScrollPanelTab = computed(() => {
+      if (props.panelMetadata.isParentTab) {
+        const isFullScreenTabsParent = store.getters.getStoredWindow(props.panelMetadata.parentUuid).isFullScreenTabsParent 
+        if (isFullScreenTabsParent) {
+          return {
+            'max-height': '550px',
+            'min-height': '150px',
+            'overflow-x': 'hidden'
+          }
+        }
+        return {
+          'max-height': '650px!important;',
+          'min-height': '150px',
+          'overflow-x': 'hidden'
+        }
+      }
       return {
-        'max-height': '500px',
-        'min-height': '150px',
+        'max-height': '550px',
+        'min-height': '250px',
         'overflow-x': 'hidden'
       }
     })
@@ -221,6 +253,7 @@ export default defineComponent({
       styleScrollPanelTab,
       fieldDefinitionRef,
       recordUuid,
+      isMobile,
       // methodos
       setFocus
     }
@@ -240,6 +273,11 @@ export default defineComponent({
 .scroll-tab-panel-conten {
   max-height: 500px;
   min-height: 150px;
+  overflow-x: hidden;
+}
+.scroll-tab-child-panel-conten {
+  max-height: 300px;
+  min-height: 200px;
   overflow-x: hidden;
 }
 </style>

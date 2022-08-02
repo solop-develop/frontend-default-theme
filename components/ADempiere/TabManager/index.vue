@@ -98,7 +98,7 @@
       :visible.sync="showContainerInfo"
       :with-header="false"
       :before-close="openRecordLogs"
-      :size="'90%'"
+      :size="isDrawerWidth"
     >
       <panel-info
         :all-tabs-list="allTabsList"
@@ -182,6 +182,17 @@ export default defineComponent({
     const currentTab = ref(tabNo)
 
     const tabUuid = ref(props.tabsList[tabNo].uuid)
+    
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
+    const isDrawerWidth = computed(() => {
+      if (isMobile.value) {
+        return '90%'
+      }
+      return '50%'
+    })
 
     const tabStyle = computed(() => {
       // height tab content
@@ -480,6 +491,8 @@ export default defineComponent({
       drawer,
       currentRecordLogs,
       // computed
+      isMobile,
+      isDrawerWidth,
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
