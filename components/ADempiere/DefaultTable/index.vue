@@ -317,6 +317,9 @@ export default defineComponent({
     })
 
     const sizeViewTable = computed(() => {
+      if (isMobile.value) {
+        return 500
+      }
       if (!isEmptyValue(props.parentUuid)) {
         if (!isEmptyValue(panelMain) && !isEmptyValue(heightSize.value)) {
           const currentTab = store.getters.getStoredTab(

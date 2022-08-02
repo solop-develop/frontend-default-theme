@@ -27,7 +27,7 @@
       >
         <span style="padding: 10px;">
           <svg-icon icon-class="table" />
-          <b>
+          <b v-show="!isMobile">
             {{ label }}
           </b>
         </span>
@@ -123,6 +123,10 @@ export default defineComponent({
       }
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -192,6 +196,7 @@ export default defineComponent({
 
     return {
       // computed
+      isMobile,
       listAction,
       recordsList,
       isShowedTableRecords,

@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div class="wrapper" style="margin-right: 10px">
+  <div id="tab-panel-content-from" class="wrapper" style="margin-right: 10px">
     <el-form
       label-position="top"
       label-width="200px"
@@ -37,21 +37,23 @@
 
           <el-card
             :shadow="shadowGroup"
-            :body-style="{ padding: '10px' }"
+            :body-style="{ padding: '5px' }"
           >
-            <el-row>
-              <template v-for="(fieldAttributes, subKey) in fieldsList">
-                <field-definition
-                  ref="fieldDefinitionRef"
-                  :key="subKey"
-                  :parent-uuid="parentUuid"
-                  :container-uuid="containerUuid"
-                  :container-manager="containerManager"
-                  :field-metadata="fieldAttributes"
-                  :metadata-field="fieldAttributes"
-                />
-              </template>
-            </el-row>
+            <el-scrollbar wrap-class="scroll-tab-panel-conten" :style="styleScrollPanelTab">
+              <el-row>
+                <template v-for="(fieldAttributes, subKey) in fieldsList">
+                  <field-definition
+                    ref="fieldDefinitionRef"
+                    :key="subKey"
+                    :parent-uuid="parentUuid"
+                    :container-uuid="containerUuid"
+                    :container-manager="containerManager"
+                    :field-metadata="fieldAttributes"
+                    :metadata-field="fieldAttributes"
+                  />
+                </template>
+              </el-row>
+            </el-scrollbar>
           </el-card>
         </div>
       </div>
@@ -179,10 +181,31 @@ export default defineComponent({
       )
     }
 
+    const heightPanel = computed(() => {
+      const main = document.getElementById('mainWindow')
+      if (
+        !isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)
+      ) {
+        return main.clientHeight + 200 + 'px'
+      }
+      return 500 + 'px'
+    })
+
+    const styleScrollPanelTab = computed(() => {
+      return {
+        'max-height': '500px',
+        'min-height': '150px',
+        'overflow-x': 'hidden'
+      }
+    })
+
     return {
       fieldsList,
       shadowGroup,
+      heightPanel,
       query,
+      styleScrollPanelTab,
       fieldDefinitionRef,
       recordUuid,
       // methodos
@@ -192,8 +215,18 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
+<style>
 .el-card {
   width: 100% !important;
+}
+.el-tabs--border-card > .el-tabs__content {
+  padding: 15px;
+  height: 100%;
+  overflow: hidden;
+}
+.scroll-tab-panel-conten {
+  max-height: 500px;
+  min-height: 150px;
+  overflow-x: hidden;
 }
 </style>
