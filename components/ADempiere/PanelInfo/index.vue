@@ -19,7 +19,7 @@
 <template>
   <el-container style="height: 100% !important;">
     <el-header
-      style="height: 10%;text-align: center;padding-top: 1%;"
+      style="height: 13%;text-align: center;padding-top: 1%;"
     >
       <el-descriptions :column="1">
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">

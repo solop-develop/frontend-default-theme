@@ -128,6 +128,9 @@ export default defineComponent({
 
       return []
     })
+    const currentFieldList = computed(() => {
+      return store.getters.getCurrentFieldList
+    })
 
     const recordUuid = computed(() => {
       // TODO: Change query name 'action'
@@ -165,6 +168,16 @@ export default defineComponent({
       if (newValue !== oldValue) {
         if (!isEmptyValue(fieldDefinitionRef.value) && !isEmptyValue(fieldIndex.value)) {
           fieldDefinitionRef.value[fieldIndex.value].focusField(fieldDefinitionRef.value[fieldIndex.value].field.columnName)
+        }
+      }
+    })
+
+    watch(currentFieldList, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue) && !isEmptyValue(newValue.fieldsList) && !isEmptyValue(newValue.columnName)) {
+        const fieldFocusColumnName = store.getters.getFieldFocusColumnName
+        const index = newValue.fieldsList.findIndex(field => field.columnName === fieldFocusColumnName)
+        if (!isEmptyValue(fieldDefinitionRef.value[index])) {
+          fieldDefinitionRef.value[index].focusField(fieldFocusColumnName)
         }
       }
     })
