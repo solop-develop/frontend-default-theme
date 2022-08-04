@@ -24,7 +24,7 @@ const fieldBase = {
 export default [
   {
     ...fieldBase,
-    elementColumnName: 'C_Country_ID',
+    // elementColumnName: 'C_Country_ID',
     columnName: 'C_Country_ID',
     overwriteDefinition: {
       isCustomField: true,
@@ -39,7 +39,7 @@ export default [
   },
   {
     ...fieldBase,
-    elementColumnName: 'C_Region_ID',
+    // elementColumnName: 'C_Region_ID',
     columnName: 'C_Region_ID',
     overwriteDefinition: {
       isCustomField: true,
@@ -52,7 +52,7 @@ export default [
   },
   {
     ...fieldBase,
-    elementColumnName: 'C_City_ID',
+    // elementColumnName: 'C_City_ID',
     columnName: 'C_City_ID',
     overwriteDefinition: {
       isCustomField: true,

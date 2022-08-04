@@ -35,6 +35,7 @@
             ...containerManager,
             getLookupList,
             isDisplayedField,
+            isDisplayedDefault,
             isMandatoryField,
             isReadOnlyField,
             changeFieldShowedFromUser
@@ -56,6 +57,7 @@ import FieldLocation from './shippingFieldLocation'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -150,6 +152,7 @@ export default {
   },
   methods: {
     getLookupList,
+    isDisplayedDefault,
     isDisplayedField,
     isMandatoryField,
     isReadOnlyField,

@@ -224,7 +224,7 @@ export default defineComponent({
 
     const styleScrollPanelTab = computed(() => {
       if (props.panelMetadata.isParentTab) {
-        const isFullScreenTabsParent = store.getters.getStoredWindow(props.panelMetadata.parentUuid).isFullScreenTabsParent 
+        const isFullScreenTabsParent = store.getters.getStoredWindow(props.panelMetadata.parentUuid).isFullScreenTabsParent
         if (isFullScreenTabsParent) {
           return {
             'max-height': '550px',

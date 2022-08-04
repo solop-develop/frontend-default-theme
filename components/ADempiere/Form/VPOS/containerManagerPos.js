@@ -17,11 +17,17 @@
 import store from '@/store'
 import { isHiddenField } from '@/utils/ADempiere/references'
 
-export function getLookupList({ parentUuid, containerUuid, uuid }) {
+export function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, tableName, searchValue, isAddBlankValue, blankValue }) {
   return store.dispatch('getLookupListFromServer', {
     parentUuid,
     containerUuid,
-    fieldUuid: uuid
+    contextColumnNames,
+    tableName,
+    columnName,
+    searchValue,
+    // app attributes
+    isAddBlankValue,
+    blankValue
   })
 }
 
@@ -42,8 +48,21 @@ export function isDisplayedField({ displayType, isActive, isDisplayed, isDisplay
     return false
   }
   // verify if field is active
-  return isActive && isDisplayed && isDisplayedFromLogic
+  return isActive && isDisplayed
 }
+
+// export function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, searchValue, isAddBlankValue, blankValue }) {
+//   return store.dispatch('getLookupListFromServer', {
+//     parentUuid,
+//     containerUuid,
+//     contextColumnNames,
+//     columnName,
+//     searchValue,
+//     // app attributes
+//     isAddBlankValue,
+//     blankValue
+//   })
+// }
 
 export function isDisplayedDefault({ isMandatory }) {
   return true

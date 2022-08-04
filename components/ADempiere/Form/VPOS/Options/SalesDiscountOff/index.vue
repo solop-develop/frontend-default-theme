@@ -29,6 +29,7 @@
           ...containerManager,
           getLookupList,
           isDisplayedField,
+          isDisplayedDefault,
           isMandatoryField,
           isReadOnlyField,
           changeFieldShowedFromUser
@@ -44,6 +45,7 @@ import fieldListDiscount from './fieldsList.js'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -82,6 +84,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser

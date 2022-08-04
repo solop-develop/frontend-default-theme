@@ -28,6 +28,7 @@
         :container-manager="{
           ...containerManager,
           getLookupList,
+          isDisplayedDefault,
           isDisplayedField,
           isMandatoryField,
           isReadOnlyField,
@@ -45,6 +46,7 @@ import fieldListDiscount from './fieldsList.js'
 import formMixin from '@theme/components/ADempiere/Form/formMixin'
 import {
   getLookupList,
+  isDisplayedDefault,
   isDisplayedField,
   isMandatoryField,
   isReadOnlyField,
@@ -83,6 +85,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser

@@ -73,6 +73,7 @@
                       ...containerManager,
                       getLookupList,
                       isDisplayedField,
+                      isDisplayedDefault,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -123,6 +124,7 @@
                       ...containerManager,
                       getLookupList,
                       isDisplayedField,
+                      isDisplayedDefault,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -182,6 +184,7 @@
                       ...containerManager,
                       getLookupList,
                       isDisplayedField,
+                      isDisplayedDefault,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -230,6 +233,7 @@
                       ...containerManager,
                       getLookupList,
                       isDisplayedField,
+                      isDisplayedDefault,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -297,6 +301,7 @@
                       ...containerManager,
                       getLookupList,
                       isDisplayedField,
+                      isDisplayedDefault,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -401,6 +406,7 @@ import { processOrder } from '@/api/ADempiere/form/point-of-sales.js'
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   getLookupList,
+  isDisplayedDefault,
   isDisplayedField,
   isMandatoryField,
   isReadOnlyField,
@@ -828,6 +834,7 @@ export default {
     formatPrice,
     formatDateToSend,
     getLookupList,
+    isDisplayedDefault,
     isDisplayedField,
     isMandatoryField,
     isReadOnlyField,

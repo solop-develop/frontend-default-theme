@@ -43,6 +43,7 @@
                     ...containerManager,
                     getLookupList,
                     isDisplayedField,
+                    isDisplayedDefault,
                     isMandatoryField,
                     isReadOnlyField,
                     changeFieldShowedFromUser
@@ -205,6 +206,7 @@
                           ...containerManager,
                           getLookupList,
                           isDisplayedField,
+                          isDisplayedDefault,
                           isMandatoryField,
                           isReadOnlyField,
                           changeFieldShowedFromUser
@@ -221,6 +223,7 @@
                           ...containerManager,
                           getLookupList,
                           isDisplayedField,
+                          isDisplayedDefault,
                           isMandatoryField,
                           isReadOnlyField,
                           changeFieldShowedFromUser
@@ -272,6 +275,7 @@ import { requestLookupList } from '@/api/ADempiere/window.js'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -724,6 +728,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
