@@ -50,6 +50,7 @@
                   ...containerManager,
                   getLookupList,
                   isDisplayedField,
+                  isDisplayedDefault,
                   isMandatoryField,
                   isReadOnlyField,
                   changeFieldShowedFromUser
@@ -146,6 +147,7 @@ import { requestGetCountryDefinition } from '@/api/ADempiere/system-core.js'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -300,6 +302,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

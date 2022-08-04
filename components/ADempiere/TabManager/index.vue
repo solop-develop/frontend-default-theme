@@ -182,7 +182,7 @@ export default defineComponent({
     const currentTab = ref(tabNo)
 
     const tabUuid = ref(props.tabsList[tabNo].uuid)
-    
+
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })

@@ -42,6 +42,7 @@
                   :container-manager="{
                     ...containerManager,
                     getLookupList,
+                    isDisplayedDefault,
                     isDisplayedField,
                     isMandatoryField,
                     isReadOnlyField,
@@ -203,6 +204,7 @@
                           ...containerManager,
                           getLookupList,
                           isDisplayedField,
+                          isDisplayedDefault,
                           isMandatoryField,
                           isReadOnlyField,
                           changeFieldShowedFromUser
@@ -219,6 +221,7 @@
                           ...containerManager,
                           getLookupList,
                           isDisplayedField,
+                          isDisplayedDefault,
                           isMandatoryField,
                           isReadOnlyField,
                           changeFieldShowedFromUser
@@ -272,6 +275,7 @@ import { formatPrice, formatDate, formatDateToSend } from '@/utils/ADempiere/val
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -718,6 +722,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

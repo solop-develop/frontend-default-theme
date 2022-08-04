@@ -58,6 +58,7 @@
                         ...containerManager,
                         getLookupList,
                         isDisplayedField,
+                        isDisplayedDefault,
                         isMandatoryField,
                         isReadOnlyField,
                         changeFieldShowedFromUser
@@ -109,6 +110,7 @@
                         ...containerManager,
                         getLookupList,
                         isDisplayedField,
+                        isDisplayedDefault,
                         isMandatoryField,
                         isReadOnlyField,
                         changeFieldShowedFromUser
@@ -220,6 +222,7 @@ import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat.js'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -813,6 +816,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

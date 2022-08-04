@@ -34,6 +34,7 @@
           ...containerManager,
           getLookupList,
           isDisplayedField,
+          isDisplayedDefault,
           isMandatoryField,
           isReadOnlyField,
           changeFieldShowedFromUser
@@ -56,6 +57,7 @@ import FieldLocation from './BillingFieldLocation'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -159,6 +161,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser

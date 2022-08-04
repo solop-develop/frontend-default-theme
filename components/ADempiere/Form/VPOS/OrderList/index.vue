@@ -42,6 +42,7 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -280,6 +281,7 @@ import { holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -420,6 +422,7 @@ export default {
     formatQuantity,
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

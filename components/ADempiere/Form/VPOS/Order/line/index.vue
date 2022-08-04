@@ -39,6 +39,7 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -53,6 +54,7 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -68,6 +70,7 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -99,6 +102,8 @@ import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.v
 // api request methods
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
 
+import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
+
 // utils and helper methods
 import {
   createFieldFromDictionary
@@ -106,6 +111,7 @@ import {
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -117,6 +123,10 @@ export default {
   components: {
     FieldDefinition
   },
+
+  mixins: [
+    orderLineMixin
+  ],
 
   props: {
     dataLine: {
@@ -148,6 +158,7 @@ export default {
       isLoaded: false,
       isLoadedField: false,
       panelType: 'custom',
+      defaultData: {},
       fieldsListLine,
       fieldsList: []
     }
@@ -196,21 +207,8 @@ export default {
         this.isLoadedField = true
       }
       if (value) {
-        let price
-        if (this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-          price = this.currentLine.price
-        }
-        if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-          price = this.currentLine.priceListWithTax
-        }
-        if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          price = this.currentLine.priceList
-        }
-        if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          price = this.currentLine.price
-        }
         this.fillOrderLineQuantities({
-          currentPrice: price,
+          currentPrice: this.fieldShowValue(this.currentLine, { columnName: 'CurrentPrice' }),
           quantityOrdered: this.currentLine.quantity,
           discount: this.currentLine.discount
         })
@@ -230,6 +228,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
@@ -256,6 +255,11 @@ export default {
       quantityOrdered,
       discount
     }) {
+      this.defaultData = {
+        currentPrice,
+        quantityOrdered,
+        discount
+      }
       const containerUuid = 'line'
       // Editable fields
       if (!this.isEmptyValue(quantityOrdered)) {
@@ -304,12 +308,72 @@ export default {
         })
       this.closePing()
     },
+    convertValuesToSend(values) {
+      const valuesToSend = {}
+      Object.keys(values).forEach(key => {
+        const value = values[key]
+        if (this.isEmptyValue(value)) {
+          return
+        }
+        switch (value.columnName) {
+          case 'PriceEntered':
+            valuesToSend['currentPrice'] = value.value
+            break
+          case 'QtyEntered':
+            valuesToSend['quantityOrdered'] = value.value
+            break
+          case 'Discount':
+            valuesToSend['discount'] = value.value
+            break
+        }
+      })
+      return valuesToSend
+    },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'addFocusGained' && this.isPosRequiredPin && (mutation.payload.columnName === 'PriceEntered' || mutation.payload.columnName === 'Discount')) {
+        if (mutation.type === 'addFocusGained' && this.isPosRequiredPin && (mutation.payload.columnName === 'PriceEntered' || mutation.payload.columnName === 'Discount' || mutation.payload.columnName === 'QtyEntered')) {
           this.columnNameVisible = mutation.payload.columnName
           this.visible = true
         }
+        // if (mutation.type === 'updateValueOfField' && (mutation.payload.columnName === 'PriceEntered' || mutation.payload.columnName === 'Discount' || mutation.payload.columnName === 'QtyEntered')) {
+        //   const values = this.$store.getters.getValuesView({
+        //     containerUuid: mutation.payload.containerUuid,
+        //     format: 'array'
+        //   })
+        //   const { currentPrice, quantityOrdered, discount } = this.convertValuesToSend(values)
+
+        //   if (!this.isEmptyValue(currentPrice) && this.defaultData.currentPrice !== currentPrice) {
+        //     this.fillOrderLineQuantities({
+        //       currentPrice,
+        //       quantityOrdered,
+        //       discount
+        //     })
+        //     this.updateOrderLine({
+        //       columnName: mutation.payload.columnName,
+        //       value: mutation.payload.value
+        //     })
+        //   } else if (!this.isEmptyValue(discount) && this.defaultData.discount !== discount) {
+        //     this.fillOrderLineQuantities({
+        //       currentPrice,
+        //       quantityOrdered,
+        //       discount
+        //     })
+        //     this.updateOrderLine({
+        //       columnName: mutation.payload.columnName,
+        //       value: mutation.payload.value
+        //     })
+        //   } else if (!this.isEmptyValue(quantityOrdered) && this.defaultData.quantityOrdered !== quantityOrdered) {
+        //     this.fillOrderLineQuantities({
+        //       currentPrice,
+        //       quantityOrdered,
+        //       discount
+        //     })
+        //     this.updateOrderLine({
+        //       columnName: mutation.payload.columnName,
+        //       value: mutation.payload.value
+        //     })
+        //   }
+        // }
       })
     }
   }

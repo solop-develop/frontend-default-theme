@@ -35,6 +35,7 @@
               ...containerManager,
               getLookupList,
               isDisplayedField,
+              isDisplayedDefault,
               isMandatoryField,
               isReadOnlyField,
               changeFieldShowedFromUser
@@ -92,6 +93,7 @@ import { updateCustomer, customer } from '@/api/ADempiere/form/point-of-sales.js
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -244,6 +246,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
