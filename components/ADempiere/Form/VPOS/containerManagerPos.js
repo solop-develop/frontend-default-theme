@@ -71,3 +71,34 @@ export function isDisplayedDefault({ isMandatory }) {
 export function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
   return isQueryCriteria && isReadOnlyFromLogic
 }
+
+export function generalInfoSearch({
+  containerUuid,
+  contextColumnNames,
+  filters,
+  uuid,
+  searchValue,
+  tableName,
+  columnName,
+  pageNumber
+}) {
+  return store.dispatch('findGeneralInfo', {
+    containerUuid,
+    contextColumnNames,
+    filters,
+    // fieldUuid: uuid,
+    searchValue,
+    tableName,
+    columnName,
+    pageNumber
+  })
+}
+export function searchTableHeader({
+  containerUuid,
+  tableName
+}) {
+  return store.dispatch('searchTableHeader', {
+    containerUuid,
+    tableName
+  })
+}

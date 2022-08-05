@@ -19,7 +19,6 @@ import {
   updateOrderLine,
   deleteOrderLine
 } from '@/api/ADempiere/form/point-of-sales.js'
-import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat'
 import { formatPercent, formatDateToSend, formatPrice } from '@/utils/ADempiere/valueFormat.js'
 
 export default {
@@ -202,7 +201,6 @@ export default {
     updateOrderLine(line) {
       // const line.columnName = line.value
       let updateLine
-      let quantity, price, discountRate
       const currentLine = this.$store.state['pointOfSales/orderLine/index'].line
       switch (line.columnName) {
         case 'QtyEntered':

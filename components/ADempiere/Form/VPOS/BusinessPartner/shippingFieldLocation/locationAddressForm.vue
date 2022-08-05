@@ -38,6 +38,8 @@
                 isDisplayedField,
                 isDisplayedDefault,
                 isMandatoryField,
+                generalInfoSearch,
+                searchTableHeader,
                 isReadOnlyField,
                 changeFieldShowedFromUser
               }"
@@ -136,9 +138,9 @@ export default {
       }
     },
     fieldsListLocation() {
-      if (!this.isEmptyValue(this.$store.getters.getFieldsListLocationShipping)) {
-        return this.$store.getters.getFieldsListLocationShipping
-      }
+      // if (!this.isEmptyValue(this.$store.getters.getFieldsListLocationShipping)) {
+      //   return this.$store.getters.getFieldsListLocationShipping
+      // }
       return this.fieldsList
     },
     locationId() {

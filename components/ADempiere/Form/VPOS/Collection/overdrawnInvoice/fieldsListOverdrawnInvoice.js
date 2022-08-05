@@ -39,7 +39,6 @@ export default [
   {
     elementColumnName: 'Name',
     columnName: 'Name',
-    fieldUuid: '8cf0a87c-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8cf0a87c-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -55,7 +54,6 @@ export default [
   {
     elementColumnName: 'Value',
     columnName: 'Value',
-    fieldUuid: '8d382fa8-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d382fa8-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -70,7 +68,9 @@ export default [
     }
   },
   {
-    elementColumnName: 'BankAccountType',
+    // columnName: 'BankAccountType',
+    // tableName: 'C_BankAccount',
+    uuid: '8cf2a1c2-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
       sequence: 2,
@@ -78,6 +78,9 @@ export default [
       handleActionPerformed: true,
       handleContentSelection: true,
       size: 24,
+      reference: {
+        tableName: 'C_BankAccount'
+      },
       displayLogicPayment: 'D,K,T,A,P,C',
       isActiveLogics: true,
       isMandatory: true
