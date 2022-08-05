@@ -45,6 +45,7 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -128,6 +129,7 @@ import {
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -249,6 +251,7 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

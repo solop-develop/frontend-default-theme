@@ -26,6 +26,7 @@ import { getSequenceAsList } from '@/utils/ADempiere/location'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -76,6 +77,7 @@ export default {
 
   methods: {
     getLookupList,
+    isDisplayedDefault,
     isDisplayedField,
     isMandatoryField,
     isReadOnlyField,

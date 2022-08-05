@@ -36,6 +36,7 @@
           ...containerManager,
           getLookupList,
           isDisplayedField,
+          isDisplayedDefault,
           isMandatoryField,
           isReadOnlyField,
           changeFieldShowedFromUser
@@ -164,6 +165,7 @@ import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
 import {
   getLookupList,
   isDisplayedField,
+  isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -311,6 +313,7 @@ export default {
     formatQuantity,
     getLookupList,
     isDisplayedField,
+    isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

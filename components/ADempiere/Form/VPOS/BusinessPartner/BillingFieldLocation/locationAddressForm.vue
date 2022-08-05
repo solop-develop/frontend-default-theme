@@ -36,6 +36,7 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser

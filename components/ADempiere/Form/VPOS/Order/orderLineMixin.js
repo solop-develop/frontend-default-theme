@@ -19,7 +19,8 @@ import {
   updateOrderLine,
   deleteOrderLine
 } from '@/api/ADempiere/form/point-of-sales.js'
-import { formatPercent, formatDateToSend } from '@/utils/ADempiere/valueFormat.js'
+import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat'
+import { formatPercent, formatDateToSend, formatPrice } from '@/utils/ADempiere/valueFormat.js'
 
 export default {
   name: 'OrderLineMixin',
@@ -138,6 +139,7 @@ export default {
   methods: {
     formatPercent,
     formatDateToSend,
+    formatPrice,
     currentValuePriceLine(line) {
       if (this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
         return line.price
@@ -159,11 +161,6 @@ export default {
           break
         //
         case this.$t('form.pos.tableProduct.editQuantities'):
-          this.fillOrderLineQuantities({
-            currentPrice: this.currentOrderLine.priceList,
-            quantityOrdered: this.currentOrderLine.quantityOrdered,
-            discount: this.currentOrderLine.discount
-          })
           this.currentOrderLine.uuid = command.uuid
           this.edit = true
           break
@@ -203,38 +200,50 @@ export default {
       }
     },
     updateOrderLine(line) {
+      // const line.columnName = line.value
+      let updateLine
       let quantity, price, discountRate
       const currentLine = this.$store.state['pointOfSales/orderLine/index'].line
       switch (line.columnName) {
         case 'QtyEntered':
-          quantity = line.value
-          price = currentLine.price
-          discountRate = currentLine.discountRate
+          // quantity = line.value
+          // // this.fieldShowValue(currentLine, { columnName: 'CurrentPrice' })
+          // price = this.fieldShowValue(currentLine, { columnName: 'CurrentPrice' })
+          // discountRate = currentLine.discountRate
+          updateLine = {
+            orderLineUuid: currentLine.uuid,
+            quantity: line.value,
+            priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
+            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+          }
           break
         case 'PriceEntered':
-          price = line.value
-          quantity = currentLine.quantity
-          discountRate = currentLine.discountRate
+          updateLine = {
+            orderLineUuid: currentLine.uuid,
+            price: line.value,
+            priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
+            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+          }
+          // price = line.value
+          // quantity = currentLine.quantity
+          // discountRate = currentLine.discountRate
           break
         case 'Discount':
-          discountRate = line.value
-          quantity = currentLine.quantity
+          updateLine = {
+            orderLineUuid: currentLine.uuid,
+            discountRate: line.value,
+            priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
+            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+          }
+          // discountRate = line.value
+          // price = this.fieldShowValue(currentLine, { columnName: 'CurrentPrice' }),
+          // quantity = currentLine.quantity
           break
       }
-      updateOrderLine({
-        orderLineUuid: currentLine.uuid,
-        quantity,
-        price,
-        discountRate,
-        priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
-        warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
-      })
+      updateOrderLine(
+        updateLine
+      )
         .then(response => {
-          this.fillOrderLineQuantities({
-            currentPrice: response.priceList,
-            quantityOrdered: response.quantity,
-            discount: response.discountRate
-          })
           this.$store.commit('pin', false)
           this.fillOrderLine(response)
           this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
@@ -305,7 +314,7 @@ export default {
         if (this.isEmptyValue(row.product.value)) return row.charge.name
         return row.product.value + ' - ' + row.product.name
       }
-      const currency = this.pointOfSalesCurrency.iSOCode
+      const currency = this.$store.getters.posAttributes.currentPointOfSales.currentPriceList.currency.iSOCode
       if (columnName === 'CurrentPrice') {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
           return this.formatPrice(row.price, currency)
@@ -339,6 +348,44 @@ export default {
         return this.formatPrice(row.totalDiscountAmount, currency)
       } else if (columnName === 'DisplayTaxAmount') {
         return this.formatPrice(row.totalTaxAmount, currency)
+      }
+    },
+
+    fieldShowValue(row, orderLine) {
+      const { columnName } = orderLine
+      // const iSOCode = this.isEmptyValue(this.currentPointOfSales.displayCurrency) ? '' : this.currentPointOfSales.displayCurrency.iSOCode
+      if (columnName === 'LineDescription') {
+        if (this.isEmptyValue(row.product.value)) return row.charge.name
+        return row.product.value + ' - ' + row.product.name
+      }
+      if (columnName === 'CurrentPrice') {
+        if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
+          return row.price
+        }
+        if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
+          return row.priceWithTax
+        }
+        if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
+          return row.priceList
+        }
+        if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
+          return row.priceList
+        }
+      } else if (columnName === 'QtyEntered') {
+        return this.formatQuantity(row.quantityOrdered)
+      } else if (columnName === 'Discount') {
+        return this.formatQuantity(row.discount) + ' %'
+      } else if (columnName === 'taxIndicator') {
+        return this.formatQuantity(row.taxIndicator)
+      } else if (columnName === 'GrandTotal') {
+        if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
+          return row.totalAmount
+        }
+        return row.totalAmountWithTax
+      } else if (columnName === 'DiscountTotal') {
+        return row.totalDiscountAmount
+      } else if (columnName === 'DisplayTaxAmount') {
+        return row.totalTaxAmount
       }
     },
     productPrice(price, discount) {
