@@ -330,17 +330,14 @@ export default defineComponent({
         ]
         return optionsButton.concat(menuOptions)
       }
-      let optionsList
-      optionsList = optionsListStandad
+
+      const optionsList = optionsListStandad
+
       /**
        * Show change history only in windows
        */
-      if (isEmptyValue(props.metadata.parentUuid)) {
-        optionsList = optionsListStandad.filter(option => {
-          if (option.name !== language.t('field.logsField')) {
-            return option
-          }
-        })
+      if (!isEmptyValue(props.metadata.parentUuid)) {
+        optionsList.push(logsOptionItem)
       }
       return optionsList.concat(menuOptions)
     })

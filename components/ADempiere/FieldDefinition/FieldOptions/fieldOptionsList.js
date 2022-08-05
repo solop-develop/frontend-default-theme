@@ -110,9 +110,9 @@ export const hideThisField = {
 }
 
 export const optionsListStandad = [
-  infoOptionItem,
+  infoOptionItem
   // preferenceValueOptionItem,
-  logsOptionItem
+  // logsOptionItem
 ]
 
 export const optionsListAdvancedQuery = [
