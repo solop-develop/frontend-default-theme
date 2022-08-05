@@ -40,6 +40,8 @@
                 getLookupList,
                 isDisplayedField,
                 isDisplayedDefault,
+                generalInfoSearch,
+                searchTableHeader,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -54,6 +56,8 @@
                 ...containerManager,
                 getLookupList,
                 isDisplayedField,
+                generalInfoSearch,
+                searchTableHeader,
                 isDisplayedDefault,
                 isMandatoryField,
                 isReadOnlyField,
@@ -71,6 +75,8 @@
                 getLookupList,
                 isDisplayedField,
                 isDisplayedDefault,
+                generalInfoSearch,
+                searchTableHeader,
                 isMandatoryField,
                 isReadOnlyField,
                 changeFieldShowedFromUser
@@ -113,6 +119,8 @@ import {
   isDisplayedField,
   isDisplayedDefault,
   isMandatoryField,
+  generalInfoSearch,
+  searchTableHeader,
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
@@ -229,6 +237,8 @@ export default {
     getLookupList,
     isDisplayedField,
     isDisplayedDefault,
+    generalInfoSearch,
+    searchTableHeader,
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,

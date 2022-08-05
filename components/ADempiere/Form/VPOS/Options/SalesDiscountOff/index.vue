@@ -31,6 +31,8 @@
           isDisplayedField,
           isDisplayedDefault,
           isMandatoryField,
+          generalInfoSearch,
+          searchTableHeader,
           isReadOnlyField,
           changeFieldShowedFromUser
         }"
@@ -46,6 +48,8 @@ import {
   getLookupList,
   isDisplayedField,
   isDisplayedDefault,
+  generalInfoSearch,
+  searchTableHeader,
   isMandatoryField,
   isReadOnlyField,
   changeFieldShowedFromUser
@@ -86,6 +90,8 @@ export default {
     isDisplayedField,
     isDisplayedDefault,
     isMandatoryField,
+    generalInfoSearch,
+    searchTableHeader,
     isReadOnlyField,
     changeFieldShowedFromUser
   }

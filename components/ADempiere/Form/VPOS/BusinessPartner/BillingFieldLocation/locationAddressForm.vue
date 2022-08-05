@@ -27,8 +27,28 @@
       @submit.native.prevent="notSubmitForm"
     >
       <el-row :gutter="0">
+        daksnkjdajksbkdbjk
+        {{ isLoaded }}
         <template v-if="isLoaded">
           <el-col v-for="(field) in fieldsListLocation" :key="field.columnName" :span="12">
+            <field-definition
+              :parent-uuid="parentUuid"
+              :container-uuid="containerUuid"
+              :container-manager="{
+                ...containerManager,
+                getLookupList,
+                isDisplayedField,
+                isDisplayedDefault,
+                generalInfoSearch,
+                searchTableHeader,
+                isMandatoryField,
+                isReadOnlyField,
+                changeFieldShowedFromUser
+              }"
+              :metadata-field="field"
+            />
+          </el-col>
+          <!-- <el-col v-for="(field) in fieldsListLocation" :key="field.columnName" :span="12">
             <field-definition
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
@@ -43,7 +63,7 @@
               }"
               :metadata-field="field"
             />
-          </el-col>
+          </el-col> -->
         </template>
 
         <div
@@ -136,9 +156,9 @@ export default {
       }
     },
     fieldsListLocation() {
-      if (!this.isEmptyValue(this.$store.getters.getFieldsListLocationBilling)) {
-        return this.$store.getters.getFieldsListLocationBilling
-      }
+      // if (!this.isEmptyValue(this.$store.getters.getFieldsListLocationBilling)) {
+      //   return this.$store.getters.getFieldsListLocationBilling
+      // }
 
       return this.fieldsList
 

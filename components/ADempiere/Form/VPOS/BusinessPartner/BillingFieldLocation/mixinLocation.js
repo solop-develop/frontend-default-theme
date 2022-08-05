@@ -26,6 +26,8 @@ import { getSequenceAsList } from '@/utils/ADempiere/location'
 import {
   getLookupList,
   isDisplayedField,
+  generalInfoSearch,
+  searchTableHeader,
   isDisplayedDefault,
   isMandatoryField,
   isReadOnlyField,
@@ -78,6 +80,8 @@ export default {
   methods: {
     getLookupList,
     isDisplayedField,
+    generalInfoSearch,
+    searchTableHeader,
     isDisplayedDefault,
     isMandatoryField,
     isReadOnlyField,

@@ -70,7 +70,8 @@ export default [
     }
   },
   {
-    elementColumnName: 'BankAccountType',
+    columnName: 'BankAccountType',
+    tableName: 'C_BankAccount',
     isFromDictionary: true,
     overwriteDefinition: {
       sequence: 2,
@@ -78,6 +79,9 @@ export default [
       handleActionPerformed: true,
       handleContentSelection: true,
       size: 24,
+      reference: {
+        tableName: 'C_BankAccount'
+      },
       displayLogicPayment: 'D,K,T,A,P,C',
       isActiveLogics: true,
       isMandatory: true
