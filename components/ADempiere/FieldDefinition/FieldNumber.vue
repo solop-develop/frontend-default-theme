@@ -133,12 +133,16 @@ export default {
       // show right controls
       return 'right'
     },
-    displayedValue() {
-      return formatNumber({
-        value: this.value,
-        displayType: this.metadata.displayType,
-        currency: this.currencyCode
-      })
+    displayedValue: {
+      set(newValue) {
+      },
+      get() {
+        return formatNumber({
+          value: this.value,
+          displayType: this.metadata.displayType,
+          currency: this.currencyCode
+        })
+      }
     },
     currencyCode() {
       const currencyIsoCode = this.$store.getters.getCurrencyCode
