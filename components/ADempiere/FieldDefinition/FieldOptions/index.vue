@@ -137,6 +137,7 @@ import {
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { isLookup, LIST } from '@/utils/ADempiere/references.js'
 import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
+import { logsOptionItem } from './fieldOptionsList'
 
 export default defineComponent({
   name: 'FieldOptions',
@@ -241,28 +242,40 @@ export default defineComponent({
     })
 
     function redirect() {
-      let window = props.metadata.reference.zoomWindows
+      const { reference } = props.metadata
+      let window = reference.zoomWindows
       if (typeValue(window) === 'ARRAY') {
         window = window[0]
       }
       let value = valueField.value
 
-      let columnName = props.metadata.columnName
-      if (isEmptyValue(props.parentUuid)) {
-        columnName = props.metadata.elementName
+      let columnName = reference.keyColumnName
+        .match(/(\.)(\b\w*)/ig)
+        .toString()
+        .replace('.', '')
+
+      if (isEmptyValue(columnName)) {
+        columnName = props.metadata.columnName
+        // to Smart Browser
+        if (isEmptyValue(props.parentUuid)) {
+          columnName = props.metadata.elementName
+        }
       }
 
       // TODO: Evaluate reference.keyColumnName: AD_Ref_List.Value
       if (props.metadata.displayType === LIST.id) {
         columnName = 'AD_Reference_ID'
-        const valueQuery = props.metadata.reference.directQuery
-          .match(/AD_Reference_ID=\d+/i)
-          .toString()
-        value = Number(valueQuery.replace(/[^\d]/g, ''))
+        // TODO: Direct query is deprecated
+        // const valueQuery = reference.directQuery
+        //   .match(/AD_Reference_ID=\d+/i)
+        //   .toString()
+        // value = Number(valueQuery.replace(/[^\d]/g, ''))
+        value = reference.id
       }
+
       const filters = [{
-        columnName: columnName,
-        value: value
+        columnName,
+        value
       }]
 
       zoomIn({
