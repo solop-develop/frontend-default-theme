@@ -44,6 +44,9 @@ export default [
       isActiveLogics: true, // enable logics
       defaultValue: '@#C_Country_ID@',
       size: 24,
+      reference: {
+        tableName: 'C_Location'
+      },
       sequenceFields: 'CO',
       index: 2,
       isMandatory: true
@@ -59,6 +62,9 @@ export default [
       isUpdateable: true,
       size: 24,
       sequenceFields: 'R',
+      reference: {
+        tableName: 'C_Location'
+      },
       index: 3,
       isMandatory: false
     }
@@ -70,6 +76,9 @@ export default [
     uuid: '8cfb4d90-fb40-11e8-a479-7a0060f0aa01',
     overwriteDefinition: {
       isCustomField: true,
+      reference: {
+        tableName: 'C_Location'
+      },
       isUpdateable: true,
       componentPath: 'FieldSelect',
       size: 24,

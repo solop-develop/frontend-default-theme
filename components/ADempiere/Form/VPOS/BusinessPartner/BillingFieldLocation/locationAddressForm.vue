@@ -27,8 +27,6 @@
       @submit.native.prevent="notSubmitForm"
     >
       <el-row :gutter="0">
-        daksnkjdajksbkdbjk
-        {{ isLoaded }}
         <template v-if="isLoaded">
           <el-col v-for="(field) in fieldsListLocation" :key="field.columnName" :span="12">
             <field-definition
