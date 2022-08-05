@@ -39,7 +39,7 @@
             :shadow="shadowGroup"
             :body-style="{ padding: '5px' }"
           >
-            <el-row v-if="!isMobile">
+            <el-row v-if="!isMobile || isEmptyValue(panelMetadata.childTabs)">
               <template v-for="(fieldAttributes, subKey) in fieldsList">
                 <field-definition
                   ref="fieldDefinitionRef"
@@ -52,21 +52,21 @@
                 />
               </template>
             </el-row>
-            <el-scrollbar v-else :wrap-class="panelMetadata.isParentTab ? 'scroll-tab-panel-conten' : 'scroll-tab-child-panel-conten'" :style="styleScrollPanelTab">
-              <el-row>
-                <template v-for="(fieldAttributes, subKey) in fieldsList">
-                  <field-definition
-                    ref="fieldDefinitionRef"
-                    :key="subKey"
-                    :parent-uuid="parentUuid"
-                    :container-uuid="containerUuid"
-                    :container-manager="containerManager"
-                    :field-metadata="fieldAttributes"
-                    :metadata-field="fieldAttributes"
-                  />
-                </template>
-              </el-row>
-            </el-scrollbar>
+            <!-- <el-scrollbar v-else :wrap-class="panelMetadata.isParentTab ? 'scroll-tab-panel-conten' : 'scroll-tab-child-panel-conten'" :style="styleScrollPanelTab"> -->
+            <el-row v-else>
+              <template v-for="(fieldAttributes, subKey) in fieldsList">
+                <field-definition
+                  ref="fieldDefinitionRef"
+                  :key="subKey"
+                  :parent-uuid="parentUuid"
+                  :container-uuid="containerUuid"
+                  :container-manager="containerManager"
+                  :field-metadata="fieldAttributes"
+                  :metadata-field="fieldAttributes"
+                />
+              </template>
+            </el-row>
+            <!-- </el-scrollbar> -->
           </el-card>
         </div>
       </div>
@@ -221,7 +221,6 @@ export default defineComponent({
       }
       return 500 + 'px'
     })
-
     const styleScrollPanelTab = computed(() => {
       if (props.panelMetadata.isParentTab) {
         const isFullScreenTabsParent = store.getters.getStoredWindow(props.panelMetadata.parentUuid).isFullScreenTabsParent
@@ -267,8 +266,8 @@ export default defineComponent({
 }
 .el-tabs--border-card > .el-tabs__content {
   padding: 15px;
-  height: 100%;
-  overflow: hidden;
+  overflow: auto;
+  height: 90%;
 }
 .scroll-tab-panel-conten {
   max-height: 500px;

@@ -24,7 +24,8 @@ const fieldBase = {
 export default [
   {
     ...fieldBase,
-    // elementColumnName: 'C_Country_ID',
+    uuid: '8ceddfca-fb40-11e8-a479-7a0060f0aa01',
+    elementColumnName: 'C_Country_ID',
     columnName: 'C_Country_ID',
     overwriteDefinition: {
       isCustomField: true,
@@ -40,7 +41,8 @@ export default [
   {
     ...fieldBase,
     // elementColumnName: 'C_Region_ID',
-    columnName: 'C_Region_ID',
+    // columnName: 'C_Region_ID',
+    uuid: '8ced32aa-fb40-11e8-a479-7a0060f0aa01',
     overwriteDefinition: {
       isCustomField: true,
       isUpdateable: true,
@@ -53,7 +55,8 @@ export default [
   {
     ...fieldBase,
     // elementColumnName: 'C_City_ID',
-    columnName: 'C_City_ID',
+    // columnName: 'C_City_ID',
+    uuid: '8cfb4d90-fb40-11e8-a479-7a0060f0aa01',
     overwriteDefinition: {
       isCustomField: true,
       isUpdateable: true,
