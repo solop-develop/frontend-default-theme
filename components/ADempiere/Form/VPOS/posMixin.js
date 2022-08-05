@@ -667,8 +667,8 @@ export default {
           if (mutation.type === 'updateValueOfField') {
             switch (mutation.payload.columnName) {
               case 'QtyEntered':
-                const QtyEntered = this.fieldShowValue(this.currentLineOrder, { columnName: 'QtyEntered' })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(QtyEntered)) {
+                // const qtyEntered = this.fieldShowValue(this.currentLineOrder, { columnName: 'QtyEntered' })
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(this.fieldShowValue(this.currentLineOrder, { columnName: 'QtyEntered' }))) {
                   return
                 }
                 if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
@@ -684,8 +684,7 @@ export default {
                 }
                 break
               case 'PriceEntered':
-                const PriceEntered = this.fieldShowValue(this.currentLineOrder, { columnName: 'CurrentPrice' })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === PriceEntered) {
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.fieldShowValue(this.currentLineOrder, { columnName: 'CurrentPrice' })) {
                   return
                 }
                 if (this.modifyPrice) {
@@ -701,8 +700,8 @@ export default {
                 }
                 break
               case 'Discount':
-                const Discount = this.fieldShowValue(this.currentLineOrder, { columnName: 'Discount' })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(Discount)) {
+                // const discount = this.fieldShowValue(this.currentLineOrder, { columnName: 'Discount' })
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(this.fieldShowValue(this.currentLineOrder, { columnName: 'Discount' }))) {
                   return
                 }
                 if (this.modifyPrice) {

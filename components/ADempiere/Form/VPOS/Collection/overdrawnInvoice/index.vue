@@ -74,6 +74,8 @@
                       getLookupList,
                       isDisplayedField,
                       isDisplayedDefault,
+                      generalInfoSearch,
+                      searchTableHeader,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -125,6 +127,8 @@
                       getLookupList,
                       isDisplayedField,
                       isDisplayedDefault,
+                      generalInfoSearch,
+                      searchTableHeader,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -185,6 +189,8 @@
                       getLookupList,
                       isDisplayedField,
                       isDisplayedDefault,
+                      generalInfoSearch,
+                      searchTableHeader,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -234,6 +240,8 @@
                       getLookupList,
                       isDisplayedField,
                       isDisplayedDefault,
+                      generalInfoSearch,
+                      searchTableHeader,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -302,6 +310,8 @@
                       getLookupList,
                       isDisplayedField,
                       isDisplayedDefault,
+                      generalInfoSearch,
+                      searchTableHeader,
                       isMandatoryField,
                       isReadOnlyField,
                       changeFieldShowedFromUser
@@ -409,6 +419,8 @@ import {
   isDisplayedDefault,
   isDisplayedField,
   isMandatoryField,
+  generalInfoSearch,
+  searchTableHeader,
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
@@ -835,6 +847,8 @@ export default {
     formatDateToSend,
     getLookupList,
     isDisplayedDefault,
+    generalInfoSearch,
+    searchTableHeader,
     isDisplayedField,
     isMandatoryField,
     isReadOnlyField,
