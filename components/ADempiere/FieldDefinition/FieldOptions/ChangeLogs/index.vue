@@ -26,53 +26,67 @@
     </div>
 
     <div>
-      <el-scrollbar v-if="!isEmptyValue(listLogsField)" :wrap-class="classIsMobilePanel">
-        <el-timeline>
-          <el-timeline-item
-            v-for="(listLogs) in listLogsField.sort(sortSequence)"
-            :key="listLogs.logId"
-            :type="listLogs.type"
-            :timestamp="translateDate(listLogs.logDate)"
-            placement="top"
-          >
-            <el-card shadow="hover" class="clearfix">
-              <div>
-                {{ listLogs.userName }}
-              </div>
-              <!-- <el-collapse-transition> -->
-              <div>
-                <span v-for="(list, index) in listLogs.changeLogsList" :key="index">
-                  <p v-if="DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)">
-                    <b> {{ list.displayColumnName }} :</b>
-                    <strike>
-                      <document-status-tag
-                        :value="list.oldValue"
-                        :displayed-value="list.oldDisplayValue"
-                      />
-                    </strike>
-                    <document-status-tag
-                      :value="list.newValue"
-                      :displayed-value="list.newDisplayValue"
-                    />
-                  </p>
-                  <p v-else>
-                    <b> {{ list.displayColumnName }} :</b>
-                    <strike>
-                      <el-link type="danger">
-                        {{ list.oldDisplayValue }}
-                      </el-link>
-                    </strike>
-                    <el-link type="success">
-                      {{ list.newDisplayValue }}
-                    </el-link>
-                  </p>
-                </span>
-              </div>
-              <!-- </el-collapse-transition> -->
-            </el-card>
-          </el-timeline-item>
-        </el-timeline>
-      </el-scrollbar>
+      <el-table
+        v-if="!isEmptyValue(fieldLogs)"
+        :data="fieldLogs"
+        border
+        highlight-current-row
+        :header-row-class-name="tableHeardClassName"
+        :row-class-name="tableRowClassName"
+        style="width: 100%"
+      >
+        <el-table-column
+          v-for="(item, index) in listLabel"
+          :key="index"
+          :prop="item.key"
+          :label="item.label"
+          width="180"
+        >
+          <template slot-scope="scope">
+            <p
+              v-if="item.key === 'newDisplayValue'"
+              style="max-height: 40px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;"
+            >
+              <el-popover
+                v-if="scope.row[item.key].length > 10"
+                placement="top-start"
+                width="300"
+                :title="item.label"
+                trigger="hover"
+                :open-delay="400"
+              >
+                <el-link type="success"> {{ scope.row[item.key] }} </el-link>
+                <el-link slot="reference" type="success"> {{ scope.row[item.key] }} </el-link> <br>
+              </el-popover>
+              <span v-else>
+                <el-link type="success"> {{ scope.row[item.key] }} </el-link>
+              </span>
+            </p>
+            <p
+              v-else-if="item.key === 'oldDisplayValue'"
+              style="max-height: 40px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;"
+            >
+              <el-popover
+                v-if="scope.row[item.key].length > 10"
+                placement="top-start"
+                width="300"
+                :title="item.label"
+                trigger="hover"
+                :open-delay="400"
+              >
+                <el-link type="danger"> {{ scope.row[item.key] }} </el-link>
+                <el-link slot="reference" type="danger"> {{ scope.row[item.key] }} </el-link> <br>
+              </el-popover>
+              <span v-else>
+                <el-link type="danger"> {{ scope.row[item.key] }} </el-link>
+              </span>
+            </p>
+            <span v-else>
+              {{ scope.row[item.key] }} <br>
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
       <p v-else>
         {{ $t('field.logsFieldEmpty') }}
       </p>
@@ -81,18 +95,15 @@
 </template>
 
 <script>
-// components and mixins
-import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
-
 // constants
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
+import language from '@/lang'
+import {
+  formatDate
+} from '@/utils/ADempiere/valueFormat.js'
 
 export default {
   name: 'ChangeLogsField',
-
-  components: {
-    DocumentStatusTag
-  },
 
   props: {
     fieldAttributes: {
@@ -110,7 +121,26 @@ export default {
       DOCUMENT_STATUS_COLUMNS_LIST,
       isLoading: false,
       currentKey: 0,
-      typeAction: 0
+      typeAction: 0,
+      format: 'YYYY-MM-DD \ HH:MM:SS',
+      listLabel: [
+        {
+          label: language.t('window.containerInfo.log.updated'),
+          key: 'logDate'
+        },
+        {
+          label: language.t('window.containerInfo.log.updatedBy'),
+          key: 'userName'
+        },
+        {
+          label: language.t('window.containerInfo.log.newValue'),
+          key: 'newDisplayValue'
+        },
+        {
+          label: language.t('window.containerInfo.log.oldValue'),
+          key: 'oldDisplayValue'
+        }
+      ]
     }
   },
 
@@ -143,15 +173,35 @@ export default {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
+    title() {
+      // language.t('table.ProcessActivity.zoomIn'),
+      return language.t('field.logsField')
+    },
     classIsMobilePanel() {
       if (this.isMobile) {
         return 'panel-mobile'
       }
-      return 'scroll-child'
+      return 'scroll-logs-field'
+    },
+    fieldLogs() {
+      return this.$store.getters.getFieldLogs.map(field => {
+        return {
+          ...field.changeLogsList[0],
+          logDate: this.formatDate(field.logDate, true, this.format),
+          userName: field.userName
+        }
+      })
     }
   },
 
   methods: {
+    formatDate,
+    tableHeardClassName({ row, rowIndex }) {
+      return 'defautl-heard'
+    },
+    tableRowClassName({ row, rowIndex }) {
+      return 'defautl'
+    },
     sortSequence(itemA, itemB) {
       return new Date().setTime(new Date(itemB.logDate).getTime()) - new Date().setTime(new Date(itemA.logDate).getTime())
     },
@@ -196,5 +246,23 @@ export default {
   }
   .panel-mobile {
     height: 80vh;
+  }
+  .scroll-logs-field {
+    max-height: 200px;
+    overflow-x: hidden;
+  }
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+
+  .el-table .defautl-heard {
+    height: 35px;
+  }
+  .el-table .defautl {
+    height: 10px;
   }
 </style>

@@ -82,19 +82,20 @@
             :panel-metadata="tabAttributes"
             :is-navigation="true"
           />
-          <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
-            <tab-panel
-              key="tab-panel"
-              :parent-uuid="parentUuid"
-              :container-manager="containerManager"
-              :tabs-list="tabsList"
-              :all-tabs-list="allTabsList"
-              :current-tab-uuid="tabUuid"
-              :tab-attributes="tabAttributes"
-              :actions-manager="actionsManager"
-              :references-manager="referencesManager"
-            />
-          </el-scrollbar>
+          <!-- <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel"> -->
+          <tab-panel
+            v-else
+            key="tab-panel"
+            :parent-uuid="parentUuid"
+            :container-manager="containerManager"
+            :tabs-list="tabsList"
+            :all-tabs-list="allTabsList"
+            :current-tab-uuid="tabUuid"
+            :tab-attributes="tabAttributes"
+            :actions-manager="actionsManager"
+            :references-manager="referencesManager"
+          />
+          <!-- </el-scrollbar> -->
         </div>
       </div>
     </el-tab-pane>

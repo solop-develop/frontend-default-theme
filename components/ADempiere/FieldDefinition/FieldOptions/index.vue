@@ -92,6 +92,7 @@
               :field-attributes="metadata"
               :field-value="valueField"
               :record-uuid="recordUuid"
+              :show="visibleForDesktop"
               :container-manager="containerManager"
             />
 
@@ -329,7 +330,16 @@ export default defineComponent({
         ]
         return optionsButton.concat(menuOptions)
       }
-      return optionsListStandad.concat(menuOptions)
+
+      const optionsList = optionsListStandad
+
+      /**
+       * Show change history only in windows
+       */
+      if (!isEmptyValue(props.metadata.parentUuid)) {
+        optionsList.push(logsOptionItem)
+      }
+      return optionsList.concat(menuOptions)
     })
 
     const openOptionField = computed({
@@ -410,6 +420,16 @@ export default defineComponent({
         return
       }
 
+      if (optionName === language.t('field.logsField')) {
+        const currrentRecord = store.getters.getTabCurrentRow({ containerUuid: props.metadata.containerUuid })
+        const { tabTableName, columnName } = props.metadata
+        store.dispatch('findFieldLogs', {
+          tableName: tabTableName,
+          recordId: currrentRecord[tabTableName + '_ID'],
+          recordUuid: currrentRecord.UUID,
+          columnName
+        })
+      }
       if (isMobile.value) {
         store.commit('changeShowRigthPanel', true)
       } else {

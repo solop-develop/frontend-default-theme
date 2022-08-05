@@ -49,7 +49,7 @@
       />
       <template v-else>
         <panel-definition
-          v-if="isMobile"
+          v-if="isMobile || isEmptyValue(tabAttributes.childTabs)"
           key="panel-definition"
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
@@ -57,7 +57,6 @@
           :group-tab="tabAttributes.tabGroup"
         />
         <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 200px;">
-          <!-- <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel"> -->
           <panel-definition
             key="panel-definition"
             :parent-uuid="parentUuid"
