@@ -70,6 +70,9 @@ export default {
         case 'VGetWeight':
           form = import('@theme/components/ADempiere/Form/VGetWeight')
           break
+        case 'VHRActionNotice':
+          form = import('@theme/components/ADempiere/Form/VHRActionNotice')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
