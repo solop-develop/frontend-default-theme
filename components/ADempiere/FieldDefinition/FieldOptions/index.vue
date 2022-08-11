@@ -344,7 +344,10 @@ export default defineComponent({
         return optionsButton.concat(menuOptions)
       }
 
-      const optionsList = optionsListStandad
+      // destruct to avoid deleting the reference to the original variable and to avoid mutating
+      const optionsList = [
+        ...optionsListStandad
+      ]
 
       /**
        * Show change history only in windows
