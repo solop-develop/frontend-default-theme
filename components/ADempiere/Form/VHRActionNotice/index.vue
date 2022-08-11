@@ -85,26 +85,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               </el-select>
             </el-form-item>
           </el-col>
-          <!-- {{ formatDate(ValidFrom, true, 'YYYY-MM-DD T HH:MM:SS') }} 1 -->
           <el-col :span="8">
             <el-form-item label="Fecha">
               <el-date-picker
                 v-model="ValidFrom"
                 type="date"
-                :value-format="format"
                 placeholder="Pick a day"
                 style="display: contents;"
               />
             </el-form-item>
           </el-col>
-          <!-- <el-col :span="8">
+          <el-col v-if="conceptDefinition.ColumnType === 'T' && !isEmptyValue(conceptDefinition.referenceUuid)" :span="8">
             <el-form-item label="Valor">
-              <type-field
-                :row="currentRow"
-              />
+              <el-select
+                :id="$t('actionNotice.payrollConcept')"
+                v-model="valueReference"
+                :placeholder="$t('actionNotice.select') + $t('actionNotice.payrollConcept')"
+                style="display: contents;"
+                @visible-change="findConceptDefinition"
+              >
+                <el-option
+                  v-for="item in listReference"
+                  :key="item.uuid"
+                  :label="item.displayedValue"
+                  :value="item.value"
+                />
+              </el-select>
             </el-form-item>
-          </el-col> -->
-          <el-col v-if="currentRow.ColumnType === 'Texto'" :span="8">
+          </el-col>
+          <el-col v-else-if="conceptDefinition.ColumnType === 'T'" :span="8">
             <el-form-item label="Valor">
               <el-input
                 v-model="FieldValue"
@@ -112,7 +121,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               />
             </el-form-item>
           </el-col>
-          <el-col v-else :span="8">
+          <el-col v-if="conceptDefinition.ColumnType !== 'T'" :span="8">
             <el-form-item label="Valor">
               <el-input-number
                 v-model="FieldValue"
@@ -168,6 +177,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       :data="listConcepts"
       border
       style="width: 100%"
+      highlight-current-row
       @row-click="select"
       @selection-change="handleSelectionChange"
     >
@@ -175,7 +185,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         type="selection"
         width="55"
       />
-      <template v-for="(attributes, key) in header">
+      <template v-for="(attributes, key) in HEADER_TABLE">
         <el-table-column
           :key="key"
           :prop="attributes.key"
@@ -190,6 +200,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 
+// Constants
+import { HEADER_TABLE, DATA_ATRIBUTES } from '@/utils/ADempiere/constants/form/VHRActionNotice.js'
+// src/utils/ADempiere/constants/form/VHRActionNotice.js
 // Components
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
 import TypeField from '@theme/components/ADempiere/Form/VHRActionNotice/typeField'
@@ -197,6 +210,7 @@ import TypeField from '@theme/components/ADempiere/Form/VHRActionNotice/typeFiel
 // Utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatDate } from '@/utils/ADempiere/valueFormat.js'
+import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat.js'
 
 export default defineComponent({
   name: 'VHRActionNotice',
@@ -252,7 +266,7 @@ export default defineComponent({
       },
       set(value) {
         store.commit('setEmployee', {
-          listOptions: optionsPayrollProcess.value,
+          listOptions: optionsPayrollEmployee.value,
           value
         })
         return value
@@ -265,11 +279,20 @@ export default defineComponent({
       },
       set(value) {
         store.commit('setPayrollConcept', {
-          listOptions: optionsPayrollProcess.value,
+          listOptions: optionsPayrollConcept.value,
           value
         })
+
+        if (conceptDefinition.value.ColumnType === 'A') {
+          findConceptDefinition()
+        }
+        store.dispatch('conceptDefinition', { id: value })
         return value
       }
+    })
+
+    const conceptDefinition = computed(() => {
+      return store.getters.getConceptDefinitio
     })
 
     // validate
@@ -296,37 +319,6 @@ export default defineComponent({
     const description = ref('')
     const ValidFrom = ref('')
 
-    const header = ref([
-      {
-        label: 'Organización',
-        key: 'DisplayColumn_AD_Org_ID'
-      },
-      {
-        label: 'Concepto Nómina',
-        key: 'DisplayColumn_HR_Movement_ID'
-      },
-      {
-        label: 'Válido Desde',
-        key: 'ValidFrom'
-      },
-      {
-        label: 'Cantidad',
-        key: 'Qty'
-      },
-      {
-        label: 'Monto',
-        key: 'Amount'
-      },
-      {
-        label: 'Mensaje de texto',
-        key: 'TextMsg'
-      },
-      {
-        label: 'Descripción',
-        key: 'Description'
-      }
-    ])
-
     const uuids = ref([])
     const id = ref([])
     const FieldValue = ref()
@@ -346,6 +338,13 @@ export default defineComponent({
       return format
     })
 
+    const listReference = ref([])
+    const valueReference = ref(0)
+    const selectvalue = ref({
+      key: '',
+      value: undefined
+    })
+
     /**
      * Functions
      */
@@ -362,66 +361,45 @@ export default defineComponent({
     }
 
     function sendAtribute() {
-      store.dispatch('saveMovement', {
-        id: currentRow.value.id,
-        attributes: [
-          {
-            key: 'AD_Org_ID',
-            value: 0
-          },
-          {
-            key: 'HR_Process_ID',
-            value: displayValuePrecess.value
-          },
-          {
-            key: 'C_BPartner_ID',
-            value: displayValueEmployee.value
-          },
-          {
-            key: 'HR_Concept_ID',
-            value: displayValueConcept.value
-          },
-          {
-            key: 'DisplayColumn_AD_Org_ID',
-            value: '*'
-          },
-          {
-            key: 'DisplayColumn_HR_Movement_ID',
-            value: 'i_A'
-          },
-          {
-            key: 'ColumnType',
-            value: 'Monto'
-          },
-          {
-            key: 'HR_Movement_ID',
-            value: currentRow.value.id
-          },
-          {
-            key: 'Description',
-            value: description.value
-          },
-          {
-            key: 'ValidFrom',
-            value: ValidFrom.value
-          },
-          {
+      // let selectvalue = {}
+      let ColumnType
+      switch (conceptDefinition.value.ColumnType) {
+        case 'A':
+          selectvalue.value = {
             key: 'Amount',
             value: FieldValue.value
-          },
-          {
-            key: 'TextMsg',
-            value: TextMsg.value
-          },
-          {
-            key: 'Qty',
-            value: Qty.value
           }
-        ]
+          ColumnType = 'Monto'
+          break
+        case 'Q':
+          selectvalue.value = {
+            key: 'Qty',
+            value: FieldValue.value
+          }
+          ColumnType = 'Cantidad'
+          break
+        case 'T':
+          selectvalue.value = {
+            key: 'TextMsg',
+            value: isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
+          }
+          ColumnType = 'Texto'
+          break
+      }
+      const attributes = parseAttributes({
+        listAattributes: DATA_ATRIBUTES,
+        setData: selectvalue.value,
+        ColumnType
       })
+
+      store.dispatch('saveMovement', {
+        attributes
+      })
+      clearData()
     }
 
     function select(params) {
+      displayValueConcept.value = parseInt(params.HR_Concept_ID)
       currentRow.value = params
       ValidFrom.value = params.ValidFrom
       description.value = params.Description
@@ -430,6 +408,7 @@ export default defineComponent({
         case 'Texto':
           columnNameChange.value = 'TextMsg'
           TextMsg.value = params.TextMsg
+          valueReference.value = params.TextMsg
           FieldValue.value = params.TextMsg
           break
         case 'Monto':
@@ -459,30 +438,174 @@ export default defineComponent({
     }
 
     function updateMovements(currentMovements) {
-      const { attributes, id, uuid } = currentMovements
-      const attributesFilter = attributes.filter(row => (row.key !== 'Description'))
-      attributesFilter.push(
-        {
-          key: 'Description',
-          value: description.value
-        },
-        {
-          key: columnNameChange.value,
-          value: FieldValue.value
-        }
-      )
-      store.dispatch('saveMovement', {
+      const { id, uuid } = currentMovements
+      switch (conceptDefinition.ColumnType) {
+        case 'T':
+          columnNameChange.value = 'TextMsg'
+          break
+        case 'A':
+          columnNameChange.value = 'Amount'
+          break
+        case 'Q':
+          columnNameChange.value = 'Qty'
+          break
+      }
+      console.log({
+        selectvalue: selectvalue.value,
         id,
+        columnNameChange: columnNameChange.value,
         uuid,
-        attributes: attributesFilter
+        FieldValue: FieldValue.value,
+        conceptDefinition: conceptDefinition.value,
+        attributes: parseAttributes({
+          listAattributes: DATA_ATRIBUTES,
+          setData: {
+            key: columnNameChange.value,
+            ColumnType: conceptDefinition.ColumnType,
+            // value: FieldValue.value
+            value: isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
+          }
+        })
       })
+      // const attributesFilter = attributes.filter(row => (row.key !== 'Description' && row.key !== columnNameChange.value))
+      // attributesFilter.push(
+      //   {
+      //     key: 'Description',
+      //     value: description.value
+      //   },
+      //   {
+      //     key: columnNameChange.value,
+      //     value: FieldValue.value
+      //   }
+      // )
+      // store.dispatch('saveMovement', {
+      //   id,
+      //   uuid,
+      //   attributes: parseAttributes({
+      //     listAattributes: DATA_ATRIBUTES,
+      //     setData: {
+      //       key: columnNameChange.value,
+      //       value: isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
+      //     }
+      //   })
+      // })
+      clearData()
+    }
+
+    function findConceptDefinition(params) {
+      store.dispatch('getLookupListFromServer', {
+        referenceUuid: conceptDefinition.value.referenceUuid
+      })
+        .then(responseLookupList => {
+          listReference.value = responseLookupList
+        })
+    }
+
+    function parseAttributes({
+      listAattributes,
+      setData,
+      ColumnType,
+      isUpdate = false
+    }) {
+      return listAattributes.map(params => {
+        switch (params.key) {
+          case 'HR_Process_ID':
+            return {
+              key: params.key,
+              value: displayValuePrecess.value
+            }
+          case 'C_BPartner_ID':
+            return {
+              key: params.key,
+              value: displayValueEmployee.value
+            }
+          case 'HR_Concept_ID':
+            return {
+              key: params.key,
+              value: displayValueConcept.value
+            }
+          case 'ColumnType':
+            return {
+              key: params.key,
+              value: ColumnType
+            }
+          case 'Description':
+            return {
+              key: params.key,
+              value: description.value
+            }
+          case 'ValidFrom':
+            return {
+              key: params.key,
+              value: dateTimeFormats(ValidFrom.value, 'YYYY-MM-DD HH:mm:ss')
+            }
+          case setData.key:
+            console.log({ setData })
+            return {
+              key: setData.key,
+              value: setData.value
+            }
+          default:
+            return params
+        }
+      })
+      // if (!isUpdate) {
+      //   console.log({ listAattributes })
+      //   return listAattributes.map(attribute => {
+      //     console.log({ attribute }, attribute.key, displayValuePrecess)
+      //     switch (attribute.key) {
+      //       // case 'HR_Process_ID':
+      //       //   return {
+      //       //     key: attribute.key,
+      //       //     value: displayValuePrecess.value
+      //       //   }
+      //       // case 'C_BPartner_ID':
+      //       //   return {
+      //       //     key: attribute.key,
+      //       //     value: displayValueEmployee.value
+      //       //   }
+      //       // case 'HR_Concept_ID':
+      //       //   return {
+      //       //     key: attribute.key,
+      //       //     value: displayValueConcept.value
+      //       //   }
+      //       // case 'ColumnType':
+      //       //   return {
+      //       //     key: attribute.key,
+      //       //     value: ColumnType
+      //       //   }
+      //       // case 'Description':
+      //       //   return {
+      //       //     key: attribute.key,
+      //       //     value: displayValueEmployee.value
+      //       //   }
+      //       // case 'ValidFrom':
+      //       //   return {
+      //       //     key: attribute.key,
+      //       //     value: dateTimeFormats(ValidFrom.value, 'YYYY-MM-DD HH:mm:ss')
+      //       //   }
+      //       // case setData.key:
+      //       //   return setData
+      //       default:
+      //         return attribute
+      //     }
+      //   })
+      // }
+    }
+
+    function clearData() {
+      ValidFrom.value = ''
+      FieldValue.value = undefined
+      valueReference.value = undefined
+      description.value = ''
     }
 
     return {
+      // Constants
+      HEADER_TABLE,
       // Ref
       ValidFrom,
       description,
-      header,
       uuids,
       id,
       currentRow,
@@ -490,7 +613,10 @@ export default defineComponent({
       TextMsg,
       Qty,
       format,
+      selectvalue,
       Amount,
+      listReference,
+      valueReference,
       columnNameChange,
       // Computed
       optionsPayrollProcess,
@@ -501,6 +627,7 @@ export default defineComponent({
       displayValueConcept,
       listConcepts,
       validateDelete,
+      conceptDefinition,
       // methodos
       findPayrollConcept,
       findPayrollProcess,
@@ -510,7 +637,11 @@ export default defineComponent({
       handleSelectionChange,
       deleteConcepts,
       refresh,
-      updateMovements
+      updateMovements,
+      findConceptDefinition,
+      formatDate,
+      dateTimeFormats,
+      clearData
     }
   }
 
