@@ -35,6 +35,7 @@ export default {
     // load the component that is indicated in the attributes of received property
     componentRender() {
       let form
+      console.log(this.metadata.fileName)
       switch (this.metadata.fileName) {
         case 'PriceChecking':
           form = import('@theme/components/ADempiere/Form/PriceChecking')
@@ -72,6 +73,9 @@ export default {
           break
         case 'VHRActionNotice':
           form = import('@theme/components/ADempiere/Form/VHRActionNotice')
+          break
+        case 'WFPanel':
+          form = import('@theme/components/ADempiere/Form/WFPanel')
           break
         default:
           form = import('@/views/ADempiere/Unsupported')
