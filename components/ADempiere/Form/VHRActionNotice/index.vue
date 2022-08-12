@@ -90,7 +90,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               <el-date-picker
                 v-model="ValidFrom"
                 type="date"
-                placeholder="Pick a day"
+                :placeholder="$t('actionNotice.validFrom')"
                 style="display: contents;"
               />
             </el-form-item>
@@ -121,7 +121,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               />
             </el-form-item>
           </el-col>
-          <el-col v-if="conceptDefinition.ColumnType !== 'T'" :span="8">
+          <el-col v-else-if="conceptDefinition.ColumnType === 'D'" :span="8">
+            <el-form-item label="Valor">
+              <el-date-picker
+                v-model="FieldValue"
+                type="date"
+                placeholder="Pick a day"
+                style="display: contents;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col v-else-if="conceptDefinition.ColumnType !== 'T'" :span="8">
             <el-form-item label="Valor">
               <el-input-number
                 v-model="FieldValue"
@@ -133,7 +143,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Descripción">
+            <el-form-item :label="$t('actionNotice.description')">
               <el-input
                 v-model="description"
                 style="display: contents;"
@@ -202,7 +212,6 @@ import store from '@/store'
 
 // Constants
 import { HEADER_TABLE, DATA_ATRIBUTES } from '@/utils/ADempiere/constants/form/VHRActionNotice.js'
-// src/utils/ADempiere/constants/form/VHRActionNotice.js
 // Components
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
 import TypeField from '@theme/components/ADempiere/Form/VHRActionNotice/typeField'
@@ -307,6 +316,7 @@ export default defineComponent({
       return store.getters.getDataListConcept.map(concepts => {
         return {
           ...concepts,
+          ServiceDate: formatDate(concepts.ServiceDate),
           ValidFrom: formatDate(concepts.ValidFrom)
         }
       })
@@ -327,16 +337,7 @@ export default defineComponent({
     const TextMsg = ref('')
     const Qty = ref(0)
     const columnNameChange = ref('')
-    const format = computed(() => {
-      let format = ''
-      if (isEmptyValue(format)) {
-        format = 'yyyy-MM-dd'
-      }
-      // if (this.typePicker.replace('range', '') === 'datetime') {
-      format = format + ' hh:mm:ss'
-      // }
-      return format
-    })
+    const format = 'YYYY-MM-DD HH:mm:ss'
 
     const listReference = ref([])
     const valueReference = ref(0)
@@ -361,7 +362,6 @@ export default defineComponent({
     }
 
     function sendAtribute() {
-      // let selectvalue = {}
       let ColumnType
       switch (conceptDefinition.value.ColumnType) {
         case 'A':
@@ -378,12 +378,19 @@ export default defineComponent({
           }
           ColumnType = 'Cantidad'
           break
+        case 'D':
+          selectvalue.value = {
+            key: 'ServiceDate',
+            value: dateTimeFormats(FieldValue.value, format)
+          }
+          ColumnType = 'Fecha'
+          break
         case 'T':
           selectvalue.value = {
             key: 'TextMsg',
             value: isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
           }
-          ColumnType = 'Texto'
+          ColumnType = 'Fecha'
           break
       }
       const attributes = parseAttributes({
@@ -403,7 +410,6 @@ export default defineComponent({
       currentRow.value = params
       ValidFrom.value = params.ValidFrom
       description.value = params.Description
-
       switch (params.ColumnType) {
         case 'Texto':
           columnNameChange.value = 'TextMsg'
@@ -420,6 +426,10 @@ export default defineComponent({
           columnNameChange.value = 'Qty'
           Qty.value = params.Qty
           FieldValue.value = params.Qty
+          break
+        case 'Fecha':
+          columnNameChange.value = 'ServiceDate'
+          FieldValue.value = params.ServiceDate
           break
       }
     }
@@ -439,56 +449,36 @@ export default defineComponent({
 
     function updateMovements(currentMovements) {
       const { id, uuid } = currentMovements
-      switch (conceptDefinition.ColumnType) {
+      let valueConcept
+      switch (conceptDefinition.value.ColumnType) {
         case 'T':
           columnNameChange.value = 'TextMsg'
+          valueConcept = isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
           break
         case 'A':
           columnNameChange.value = 'Amount'
+          valueConcept = FieldValue.value
           break
         case 'Q':
           columnNameChange.value = 'Qty'
+          valueConcept = FieldValue.value
+          break
+        case 'D':
+          columnNameChange.value = 'ServiceDate'
+          valueConcept = dateTimeFormats(FieldValue.value, format)
           break
       }
-      console.log({
-        selectvalue: selectvalue.value,
+      store.dispatch('saveMovement', {
         id,
-        columnNameChange: columnNameChange.value,
         uuid,
-        FieldValue: FieldValue.value,
-        conceptDefinition: conceptDefinition.value,
         attributes: parseAttributes({
           listAattributes: DATA_ATRIBUTES,
           setData: {
             key: columnNameChange.value,
-            ColumnType: conceptDefinition.ColumnType,
-            // value: FieldValue.value
-            value: isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
+            value: valueConcept
           }
         })
       })
-      // const attributesFilter = attributes.filter(row => (row.key !== 'Description' && row.key !== columnNameChange.value))
-      // attributesFilter.push(
-      //   {
-      //     key: 'Description',
-      //     value: description.value
-      //   },
-      //   {
-      //     key: columnNameChange.value,
-      //     value: FieldValue.value
-      //   }
-      // )
-      // store.dispatch('saveMovement', {
-      //   id,
-      //   uuid,
-      //   attributes: parseAttributes({
-      //     listAattributes: DATA_ATRIBUTES,
-      //     setData: {
-      //       key: columnNameChange.value,
-      //       value: isEmptyValue(conceptDefinition.value.referenceUuid) ? FieldValue.value : valueReference.value
-      //     }
-      //   })
-      // })
       clearData()
     }
 
@@ -537,10 +527,9 @@ export default defineComponent({
           case 'ValidFrom':
             return {
               key: params.key,
-              value: dateTimeFormats(ValidFrom.value, 'YYYY-MM-DD HH:mm:ss')
+              value: dateTimeFormats(ValidFrom.value, format)
             }
           case setData.key:
-            console.log({ setData })
             return {
               key: setData.key,
               value: setData.value
@@ -549,48 +538,6 @@ export default defineComponent({
             return params
         }
       })
-      // if (!isUpdate) {
-      //   console.log({ listAattributes })
-      //   return listAattributes.map(attribute => {
-      //     console.log({ attribute }, attribute.key, displayValuePrecess)
-      //     switch (attribute.key) {
-      //       // case 'HR_Process_ID':
-      //       //   return {
-      //       //     key: attribute.key,
-      //       //     value: displayValuePrecess.value
-      //       //   }
-      //       // case 'C_BPartner_ID':
-      //       //   return {
-      //       //     key: attribute.key,
-      //       //     value: displayValueEmployee.value
-      //       //   }
-      //       // case 'HR_Concept_ID':
-      //       //   return {
-      //       //     key: attribute.key,
-      //       //     value: displayValueConcept.value
-      //       //   }
-      //       // case 'ColumnType':
-      //       //   return {
-      //       //     key: attribute.key,
-      //       //     value: ColumnType
-      //       //   }
-      //       // case 'Description':
-      //       //   return {
-      //       //     key: attribute.key,
-      //       //     value: displayValueEmployee.value
-      //       //   }
-      //       // case 'ValidFrom':
-      //       //   return {
-      //       //     key: attribute.key,
-      //       //     value: dateTimeFormats(ValidFrom.value, 'YYYY-MM-DD HH:mm:ss')
-      //       //   }
-      //       // case setData.key:
-      //       //   return setData
-      //       default:
-      //         return attribute
-      //     }
-      //   })
-      // }
     }
 
     function clearData() {
@@ -612,7 +559,6 @@ export default defineComponent({
       FieldValue,
       TextMsg,
       Qty,
-      format,
       selectvalue,
       Amount,
       listReference,
