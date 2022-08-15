@@ -157,7 +157,16 @@ export default {
       // if (!this.isEmptyValue(this.$store.getters.getFieldsListLocationBilling)) {
       //   return this.$store.getters.getFieldsListLocationBilling
       // }
-
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'Billing-Address',
+        columnName: 'C_Country_ID',
+        value: undefined
+      })
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'Billing-Address',
+        columnName: 'C_Region_ID',
+        value: undefined
+      })
       return this.fieldsList
 
       // return this.getterPanel.fieldsList
@@ -485,6 +494,16 @@ export default {
         .finally(() => {
           this.isGettingLocation = false
         })
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'Billing-Address',
+        columnName: 'C_Country_ID',
+        value: undefined
+      })
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'Billing-Address',
+        columnName: 'C_Region_ID',
+        value: undefined
+      })
     }
   }
 }

@@ -211,7 +211,7 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 
 // Constants
-import { HEADER_TABLE, DATA_ATRIBUTES } from '@/utils/ADempiere/constants/form/VHRActionNotice.js'
+// import { HEADER_TABLE, DATA_ATRIBUTES } from '@/utils/ADempiere/constants/form/VHRActionNotice.js'
 // Components
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
 import TypeField from '@theme/components/ADempiere/Form/VHRActionNotice/typeField'

@@ -616,12 +616,12 @@ export default {
       this.$store.commit('setShowAddressUpdate', true)
       this.$store.commit('setShowPanelAddress', true)
       this.addressUpdate = address
-      this.loadAddresses(address, 'Add-Location-Address')
-      this.$store.commit('updateValueOfField', {
-        containerUuid: 'Add-Location-Address',
-        columnName: 'C_Country_ID',
-        value: address.country_id
-      })
+      // this.loadAddresses(address, 'Add-Location-Address')
+      // this.$store.commit('updateValueOfField', {
+      //   containerUuid: 'Add-Location-Address',
+      //   columnName: 'C_Country_ID',
+      //   value: address.country_id
+      // })
     }
   }
 }
