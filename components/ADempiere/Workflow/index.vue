@@ -89,32 +89,32 @@ export default {
       topContextualMenu: 0,
       leftContextualMenu: 0
     }
-  },
-  methods: {
-    onLabelClicked(type, id) {
-      this.infoNode = type.find(node => node.id === id)
-      const nodeLogs = this.workflowLogs.filter(node => node.node_uuid === this.infoNode.uuid)
-      this.infoNode.nodeLogs = nodeLogs
-      const menuMinWidth = 105
-      const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
-      const offsetWidth = this.$el.offsetWidth // container width
-      const maxLeft = offsetWidth - menuMinWidth // left boundary
-      const left = event.clientX - offsetLeft + 15 // 15: margin right
-
-      this.leftContextualMenu = left
-      if (left > maxLeft) {
-        this.leftContextualMenu = maxLeft
-      }
-
-      const offsetTop = this.$el.getBoundingClientRect().top
-      const top = event.clientY - offsetTop + 500
-      this.topContextualMenu = top
-      this.show = true
-    },
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
-    }
   }
+  // methods: {
+  //   onLabelClicked(type, id) {
+  //     this.infoNode = type.find(node => node.id === id)
+  //     const nodeLogs = this.workflowLogs.filter(node => node.node_uuid === this.infoNode.uuid)
+  //     this.infoNode.nodeLogs = nodeLogs
+  //     const menuMinWidth = 105
+  //     const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
+  //     const offsetWidth = this.$el.offsetWidth // container width
+  //     const maxLeft = offsetWidth - menuMinWidth // left boundary
+  //     const left = event.clientX - offsetLeft + 15 // 15: margin right
+
+  //     this.leftContextualMenu = left
+  //     if (left > maxLeft) {
+  //       this.leftContextualMenu = maxLeft
+  //     }
+
+  //     const offsetTop = this.$el.getBoundingClientRect().top
+  //     const top = event.clientY - offsetTop + 500
+  //     this.topContextualMenu = top
+  //     this.show = true
+  //   },
+  //   translateDate(value) {
+  //     return this.$d(new Date(value), 'long', this.language)
+  //   }
+  // }
 }
 </script>
 
