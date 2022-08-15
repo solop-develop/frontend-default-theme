@@ -19,58 +19,38 @@
   <el-card shadow="always" class="box-card">
     <el-container>
       <el-header class="header">
-        <!-- <el-container :class="'container-number' + isMobile">
-          <el-aside :class="'aside' + isMobile">
-            <h1 class="title">
-              {{
-                $t('form.weight')
-              }}
-            </h1> <br>
-          </el-aside>
-          <el-main class="main">
-            <el-row style="height: 100%; border: 1px solid #eee;">
-              <el-col :span="24" style="height: 100%">
-                <p class="weight">
-                  {{
-                    weight
-                  }}
-                </p>
+        <el-card class="box-card">
+          <el-form
+            label-position="top"
+            label-width="10px"
+            class="from-wf-panel"
+          >
+            <el-row :gutter="24">
+              <el-col :span="8">
+                <el-form-item label="Seleccione un Flujo de Trabajo">
+                  <el-select
+                    v-model="value"
+                    @visible-change="findPayrollProcess"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
               </el-col>
             </el-row>
-          </el-main>
-        </el-container> -->
-        {{ metadata.name }}
-        <!-- <el-select v-model="value" placeholder="Select">
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select> -->
+          </el-form>
+        </el-card>
       </el-header>
-      <el-main class="main">
-        <template v-if="!isEmptyValue(scales)">
-          <el-button
-            v-for="(scale, key) in scales"
-            :key="key"
-            type="primary"
-            plain
-            class="button-scale"
-            @click="selectScale(scale)"
-          >
-            {{ scale.name }}
-          </el-button>
-        </template>
-        <el-button type="primary" icon="el-icon-check" class="button-action" />
-        <el-button type="danger" icon="el-icon-close" class="button-action" />
-      </el-main>
     </el-container>
   </el-card>
 </template>
 
 <script>
-import { getListScale, getWeight } from '@/api/ADempiere/form/weight.js'
+// import { getListScale, getWeight } from '@/api/ADempiere/form/weight.js'
 
 export default {
   name: 'WFPanel',
@@ -80,111 +60,38 @@ export default {
       default: () => {
         return {
           uuid: 'WFPanel',
-          containerUuid: 'WFPanel',
-          fieldsList
+          containerUuid: 'WFPanel'
         }
       }
     }
+  },
+  data() {
+    return {
+      options: [],
+      value: ''
+    }
+  },
+  methods: {
+    findPayrollProcess(params) {
+      console.log(params)
+      this.$store.dispatch('getLookupListFromServer', {
+        tableName: 'AD_Form',
+        columnName: 'AD_Form_ID'
+      })
+        .then(response => {
+          const { recordsList } = response
+          this.options = recordsList
+        })
+        .catch(error => {
+            console.warn(`Get Lookup List, Select Base - Error ${error.code}: ${error.message}.`)
+          })
+    }
   }
-  // data() {
-  //   return {
-  //     weight: 0,
-  //     scales: [],
-  //     currentScale: {}
-  //   }
-  // },
-  // computed: {
-  //   device() {
-  //     return this.$store.state.app.device
-  //   },
-  //   isMobile() {
-  //     if (this.device === 'mobile') {
-  //       return '-mobile'
-  //     }
-  //     return ''
-  //   }
-  // },
-  // mounted() {
-  //   this.getLlistScale()
-  //   if (!this.isEmptyValue(this.currentScale)) {
-  //     this.selectScale(this.currentScale)
-  //   }
-  // },
-  // methods: {
-  //   getListScale,
-  //   getWeight,
-  //   getLlistScale() {
-  //     console.log('getLlistScale')
-  //     this.getListScale()
-  //       .then(response => {
-  //         this.scales = response
-  //       })
-  //       .catch(error => {
-  //         console.warn(`Error getting listScale: ${error.message}. Code: ${error.code}.`)
-  //       })
-  //   },
-  //   selectScale(scale) {
-  //     console.log('selectScale')
-  //     this.getWeight({
-  //       idScale: scale.id
-  //     })
-  //       .then(scale => {
-  //         this.weight = scale.weight
-  //         this.currentScale = scale
-  //       })
-  //       .catch(error => {
-  //         console.warn(`Error getting getWeight: ${error.message}. Code: ${error.code}.`)
-  //       })
-  //   }
-  // }
 }
 </script>
 <style scoped>
-  .header {
-    padding: 0px;
-    margin: 0px;
-    height: -webkit-fill-available !important;
-    display: contents;
-  }
-  .main  {
-    padding: 0px;
-    overflow: hidden;
-    display: inline-table;
-  }
-  aside {
-    background: white;
-    width: 20%;
-    overflow: hidden;
-    height: 130% !important;
-  }
-  .aside-mobile {
-    background: white;
-    width: 64%!important;
-    overflow: hidden;
-    height: 65% !important;
-    padding: 0px;
-    margin: 0px;
+.from-wf-panel {
+  padding-left: 20px;
+  padding-right: 20px;
 }
-  .weight {
-    font-size: 140px;
-    font-weight: bold;
-    margin: 0;
-    height: 100%;
-    line-height: 100%;
-  }
-  .button-action {
-    float: right;
-  }
-  .button-scale {
-    float: left;
-  }
-  .container-number-mobile {
-    display: contents
-  }
-  .title {
-    padding: 0px;
-    margin: 0px;
-    margin-top: 15%;
-    font-size: 5em;
-  }
 </style>
