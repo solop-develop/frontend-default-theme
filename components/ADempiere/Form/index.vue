@@ -71,9 +71,9 @@ export default {
         case 'VGetWeight':
           form = import('@theme/components/ADempiere/Form/VGetWeight')
           break
-        case 'VHRActionNotice':
-          form = import('@theme/components/ADempiere/Form/VHRActionNotice')
-          break
+        // case 'VHRActionNotice':
+        //   form = import('@theme/components/ADempiere/Form/VHRActionNotice')
+        //   break
         case 'WFPanel':
           form = import('@theme/components/ADempiere/Form/WFPanel')
           break

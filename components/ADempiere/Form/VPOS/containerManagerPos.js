@@ -17,7 +17,7 @@
 import store from '@/store'
 import { isHiddenField } from '@/utils/ADempiere/references'
 
-export function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, tableName, searchValue, isAddBlankValue, blankValue }) {
+export function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, tableName, searchValue, isAddBlankValue, referenceUuid, blankValue }) {
   return store.dispatch('getLookupListFromServer', {
     parentUuid,
     containerUuid,
@@ -25,6 +25,7 @@ export function getLookupList({ parentUuid, containerUuid, contextColumnNames, c
     tableName,
     columnName,
     searchValue,
+    referenceUuid,
     // app attributes
     isAddBlankValue,
     blankValue

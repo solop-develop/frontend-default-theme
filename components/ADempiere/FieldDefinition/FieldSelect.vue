@@ -430,6 +430,7 @@ export default {
         tableName: this.metadata.reference.tableName,
         columnName: this.metadata.columnName,
         searchValue: searchQuery,
+        referenceUuid: this.metadata.reference.uuid,
         // app attributes
         isAddBlankValue: true,
         blankValue: this.blankOption.value

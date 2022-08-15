@@ -61,6 +61,7 @@ export default [
       isCustomField: true,
       isUpdateable: true,
       size: 24,
+      displayType: 19,
       sequenceFields: 'C',
       index: 4,
       isMandatory: true
