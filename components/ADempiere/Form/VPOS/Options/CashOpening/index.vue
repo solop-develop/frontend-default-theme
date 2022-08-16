@@ -191,7 +191,7 @@
                           <el-option
                             v-for="item in listCollectAgent"
                             :key="item.id"
-                            :label="item.values.DisplayColumn"
+                            :label="item.name"
                             :value="item.uuid"
                           />
                         </el-select>
@@ -276,7 +276,6 @@ import {
   cashOpening,
   deletePayment
 } from '@/api/ADempiere/form/point-of-sales.js'
-import { requestLookupList } from '@/api/ADempiere/window.js'
 // utils and helper methods
 import {
   getLookupList,
@@ -288,6 +287,9 @@ import {
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
+import {
+  availableSellers
+} from '@/api/ADempiere/form/point-of-sales.js'
 import { formatPrice, formatDate, formatDateToSend } from '@/utils/ADempiere/valueFormat.js'
 
 export default {
@@ -748,12 +750,20 @@ export default {
       this.collectAgentUuid = value
     },
     getListCampaign(campaing) {
-      requestLookupList({
-        tableName: campaing.tableName,
-        query: campaing.query
+      availableSellers({
+        posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+        isOnlyAllocated: false
       })
-        .then(responseLookupItem => {
-          this.listCollectAgent = responseLookupItem.recordsList
+        .then(response => {
+          this.listCollectAgent = response.records
+        })
+        .catch(error => {
+          this.$message({
+            message: error.message,
+            isShowClose: true,
+            type: 'error'
+          })
+          console.warn(`Error: ${error.message}. Code: ${error.code}.`)
         })
     },
     amountConvert(currency) {
