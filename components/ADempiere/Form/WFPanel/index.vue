@@ -19,172 +19,218 @@
   <el-card shadow="always" class="box-card">
     <el-container>
       <el-header class="header">
-        <!-- <el-container :class="'container-number' + isMobile">
-          <el-aside :class="'aside' + isMobile">
-            <h1 class="title">
-              {{
-                $t('form.weight')
-              }}
-            </h1> <br>
-          </el-aside>
-          <el-main class="main">
-            <el-row style="height: 100%; border: 1px solid #eee;">
-              <el-col :span="24" style="height: 100%">
-                <p class="weight">
-                  {{
-                    weight
-                  }}
-                </p>
+        <el-card class="box-card">
+          <el-form
+            label-position="top"
+            label-width="10px"
+            class="from-wf-panel"
+          >
+            <el-row :gutter="24">
+              <el-col :span="8">
+                <el-form-item label="Seleccione un Flujo de Trabajo">
+                  <el-select
+                    v-model="value"
+                    @visible-change="findOKptionsWorkflow"
+                    @change="selectWorkflow"
+                  >
+                    <el-option
+                      v-for="item in listOptions"
+                      :key="item.value"
+                      :label="item.displayedValue"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
               </el-col>
             </el-row>
-          </el-main>
-        </el-container> -->
-        {{ metadata.name }}
-        <!-- <el-select v-model="value" placeholder="Select">
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select> -->
+          </el-form>
+        </el-card>
       </el-header>
-      <el-main class="main">
-        <template v-if="!isEmptyValue(scales)">
-          <el-button
-            v-for="(scale, key) in scales"
-            :key="key"
-            type="primary"
-            plain
-            class="button-scale"
-            @click="selectScale(scale)"
-          >
-            {{ scale.name }}
-          </el-button>
-        </template>
-        <el-button type="primary" icon="el-icon-check" class="button-action" />
-        <el-button type="danger" icon="el-icon-close" class="button-action" />
-      </el-main>
     </el-container>
+    <br>
+    <br>
+    <panel-workflow
+      v-if="!isEmptyValue(node)"
+      :node-transition-list="listWorkflowTransition"
+      :node-list="node"
+      :current-node="currentNode"
+    />
+    <loading-view
+      v-if="isLoadWorkflow"
+      key="window-loading"
+    />
   </el-card>
 </template>
 
 <script>
-import { getListScale, getWeight } from '@/api/ADempiere/form/weight.js'
+import { defineComponent, ref } from '@vue/composition-api'
+import store from '@/store'
 
-export default {
+// Utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import panelWorkflow from '@theme/components/ADempiere/Workflow'
+
+// Components
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
+// Constants
+import { TABLE_NAME, COLUMN_NAME } from '@/utils/ADempiere/constants/form/workflowEditor.js'
+
+export default defineComponent({
   name: 'WFPanel',
+
+  components: {
+    panelWorkflow,
+    LoadingView
+  },
+
   props: {
     metadata: {
       type: Object,
       default: () => {
         return {
           uuid: 'WFPanel',
-          containerUuid: 'WFPanel',
-          fieldsList
+          containerUuid: 'WFPanel'
         }
       }
     }
+  },
+
+  setup(props) {
+    const value = ref()
+
+    const listOptions = ref([])
+
+    const node = ref([])
+
+    const currentNode = ref([
+      {
+        classname: 'delete',
+        id: ''
+      }
+    ])
+
+    const listWorkflowTransition = ref([])
+
+    const transitions = ref([])
+
+    const isLoadWorkflow = ref(false)
+
+    // methodos
+
+    function findOKptionsWorkflow(params) {
+      store.dispatch('getLookupListFromServer', {
+        tableName: TABLE_NAME,
+        columnName: COLUMN_NAME
+      })
+        .then(response => {
+          listOptions.value = response
+        })
+        .catch(error => {
+          listOptions.value = []
+          console.warn(`Get Lookup List, Select Base - Error ${error.code}: ${error.message}.`)
+        })
+    }
+
+    function selectWorkflow(params) {
+      isLoadWorkflow.value = true
+      store.dispatch('getWorkflowFromServer', {
+        id: params
+      })
+        .then(response => {
+          listWorkflow(response)
+        })
+        .catch(error => {
+          console.warn(`Get Workflow From Server - Error ${error.code}: ${error.message}.`)
+        })
+        .finally(() => {
+          isLoadWorkflow.value = false
+        })
+    }
+
+    function listWorkflow(workflow) {
+      if (!isEmptyValue(workflow.node) && !isEmptyValue(workflow.node.uuid)) {
+        currentNode.value = [{
+          classname: 'delete',
+          id: workflow.start_node.uuid
+        }]
+      }
+      const nodes = workflow.workflow_nodes.filter(node => !isEmptyValue(node.uuid))
+      listNodeTransitions(nodes)
+      if (!isEmptyValue(nodes)) {
+        node.value = nodes.map((workflow, key) => {
+          return {
+            ...workflow,
+            transitions: workflow.transitions,
+            id: workflow.uuid,
+            key,
+            label: workflow.name
+          }
+        })
+      } else {
+        node.value = []
+      }
+    }
+
+    function listNodeTransitions(nodes) {
+      nodes.forEach(element => {
+        const uuid = element.uuid
+        const id = element.value
+        if (!isEmptyValue(element.transitions)) {
+          element.transitions.forEach((nextNode, key) => {
+            if (!isEmptyValue(nextNode.node_next_uuid)) {
+              if (isEmptyValue(nextNode.description)) {
+                transitions.value.push({
+                  id: id + key,
+                  target: uuid,
+                  source: nextNode.node_next_uuid
+                })
+              } else {
+                transitions.value.push({
+                  id: id + key,
+                  label: nextNode.description,
+                  target: uuid,
+                  source: nextNode.node_next_uuid
+                })
+              }
+            }
+          })
+        }
+      })
+      const blon = nodes.map(item => {
+        return {
+          uuid: item.uuid
+        }
+      })
+      listWorkflowTransition.value = transitions.value.filter(data => {
+        const verificar = blon.find(mode => mode.uuid === data.source)
+        if (!isEmptyValue(verificar)) {
+          return data
+        }
+      })
+    }
+
+    return {
+      // ref
+      value,
+      isLoadWorkflow,
+      listOptions,
+      node,
+      currentNode,
+      listWorkflowTransition,
+      transitions,
+      // methodos
+      findOKptionsWorkflow,
+      selectWorkflow,
+      listWorkflow,
+      listNodeTransitions
+    }
   }
-  // data() {
-  //   return {
-  //     weight: 0,
-  //     scales: [],
-  //     currentScale: {}
-  //   }
-  // },
-  // computed: {
-  //   device() {
-  //     return this.$store.state.app.device
-  //   },
-  //   isMobile() {
-  //     if (this.device === 'mobile') {
-  //       return '-mobile'
-  //     }
-  //     return ''
-  //   }
-  // },
-  // mounted() {
-  //   this.getLlistScale()
-  //   if (!this.isEmptyValue(this.currentScale)) {
-  //     this.selectScale(this.currentScale)
-  //   }
-  // },
-  // methods: {
-  //   getListScale,
-  //   getWeight,
-  //   getLlistScale() {
-  //     console.log('getLlistScale')
-  //     this.getListScale()
-  //       .then(response => {
-  //         this.scales = response
-  //       })
-  //       .catch(error => {
-  //         console.warn(`Error getting listScale: ${error.message}. Code: ${error.code}.`)
-  //       })
-  //   },
-  //   selectScale(scale) {
-  //     console.log('selectScale')
-  //     this.getWeight({
-  //       idScale: scale.id
-  //     })
-  //       .then(scale => {
-  //         this.weight = scale.weight
-  //         this.currentScale = scale
-  //       })
-  //       .catch(error => {
-  //         console.warn(`Error getting getWeight: ${error.message}. Code: ${error.code}.`)
-  //       })
-  //   }
-  // }
-}
+})
 </script>
 <style scoped>
-  .header {
-    padding: 0px;
-    margin: 0px;
-    height: -webkit-fill-available !important;
-    display: contents;
-  }
-  .main  {
-    padding: 0px;
-    overflow: hidden;
-    display: inline-table;
-  }
-  aside {
-    background: white;
-    width: 20%;
-    overflow: hidden;
-    height: 130% !important;
-  }
-  .aside-mobile {
-    background: white;
-    width: 64%!important;
-    overflow: hidden;
-    height: 65% !important;
-    padding: 0px;
-    margin: 0px;
+.from-wf-panel {
+  padding-left: 20px;
+  padding-right: 20px;
 }
-  .weight {
-    font-size: 140px;
-    font-weight: bold;
-    margin: 0;
-    height: 100%;
-    line-height: 100%;
-  }
-  .button-action {
-    float: right;
-  }
-  .button-scale {
-    float: left;
-  }
-  .container-number-mobile {
-    display: contents
-  }
-  .title {
-    padding: 0px;
-    margin: 0px;
-    margin-top: 15%;
-    font-size: 5em;
-  }
 </style>
