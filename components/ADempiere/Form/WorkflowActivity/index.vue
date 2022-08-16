@@ -52,7 +52,7 @@
     <el-main class="main">
       <el-container style="height: 100%;">
         <el-aside v-if="!isEmptyValue(currentActivity)" id="workflow" width="70%" style="background: white;">
-          <workflow
+          <workflow-diagram
             v-if="!isEmptyValue(node) && !isEmptyValue(currentActivity)"
             :node-transition-list="listWorkflowTransition"
             :node-list="node"
@@ -85,16 +85,19 @@
 </template>
 
 <script>
+// components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import fieldsList from './fieldsList.js'
-import Workflow from '@theme/components/ADempiere/Workflow'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
+
+// constants
+import fieldsList from './fieldsList.js'
 
 export default {
   name: 'WorkflowActivity',
   components: {
     CustomPagination,
-    Workflow
+    WorkflowDiagram
   },
   mixins: [
     formMixin
@@ -245,7 +248,9 @@ export default {
           id: activity.node.uuid
         }]
       }
-      const nodes = activity.workflow.workflow_nodes.filter(node => !this.isEmptyValue(node.uuid))
+
+      // TODO: Verify it filter or replace with id
+      const nodes = activity.workflow.workflow_nodes // .filter(node => !this.isEmptyValue(node.uuid))
       this.listNodeTransitions(nodes)
       if (!this.isEmptyValue(nodes)) {
         this.node = nodes.map((workflow, key) => {
@@ -271,15 +276,15 @@ export default {
               if (this.isEmptyValue(nextNode.description)) {
                 this.transitions.push({
                   id: id + key,
-                  target: uuid,
-                  source: nextNode.node_next_uuid
+                  target: nextNode.node_next_uuid,
+                  source: uuid
                 })
               } else {
                 this.transitions.push({
                   id: id + key,
                   label: nextNode.description,
-                  target: uuid,
-                  source: nextNode.node_next_uuid
+                  target: nextNode.node_next_uuid,
+                  source: uuid
                 })
               }
             }
