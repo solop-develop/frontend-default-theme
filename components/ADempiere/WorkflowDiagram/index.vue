@@ -13,11 +13,12 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-container style="height: 100% !important;">
     <el-main style="overflow: hidden;">
       <transition name="el-zoom-in-bottom">
-        <el-card v-show="show" :style="{position: 'absolute', zIndex: '5', left: leftContextualMenu + 'px', top: topContextualMenu + 'px'}" class="box-card">
+        <el-card v-show="show" :style="{ position: 'absolute', zIndex: '5', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }" class="box-card">
           <div slot="header" class="clearfix">
             <span>
               {{ infoNode.description }}
@@ -41,6 +42,7 @@
           </div>
         </el-card>
       </transition>
+
       <workflow-chart
         v-if="!isEmptyValue(nodeList)"
         id="Diagrama"
@@ -57,10 +59,12 @@
 import WorkflowChart from 'vue-workflow-chart'
 
 export default {
-  name: 'Workflow',
+  name: 'WorkflowDiagram',
+
   components: {
     WorkflowChart
   },
+
   props: {
     nodeList: {
       type: Array,
@@ -82,6 +86,7 @@ export default {
       default: () => []
     }
   },
+
   data() {
     return {
       show: false,
@@ -89,32 +94,32 @@ export default {
       topContextualMenu: 0,
       leftContextualMenu: 0
     }
+  },
+  methods: {
+    onLabelClicked(type, id) {
+      this.infoNode = type.find(node => node.id === id)
+      const nodeLogs = this.workflowLogs.filter(node => node.node_uuid === this.infoNode.uuid)
+      this.infoNode.nodeLogs = nodeLogs
+      const menuMinWidth = 105
+      const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
+      const offsetWidth = this.$el.offsetWidth // container width
+      const maxLeft = offsetWidth - menuMinWidth // left boundary
+      const left = event.clientX - offsetLeft + 15 // 15: margin right
+
+      this.leftContextualMenu = left
+      if (left > maxLeft) {
+        this.leftContextualMenu = maxLeft
+      }
+
+      const offsetTop = this.$el.getBoundingClientRect().top
+      const top = event.clientY - offsetTop + 500
+      this.topContextualMenu = top
+      this.show = true
+    },
+    translateDate(value) {
+      return this.$d(new Date(value), 'long', this.language)
+    }
   }
-  // methods: {
-  //   onLabelClicked(type, id) {
-  //     this.infoNode = type.find(node => node.id === id)
-  //     const nodeLogs = this.workflowLogs.filter(node => node.node_uuid === this.infoNode.uuid)
-  //     this.infoNode.nodeLogs = nodeLogs
-  //     const menuMinWidth = 105
-  //     const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
-  //     const offsetWidth = this.$el.offsetWidth // container width
-  //     const maxLeft = offsetWidth - menuMinWidth // left boundary
-  //     const left = event.clientX - offsetLeft + 15 // 15: margin right
-
-  //     this.leftContextualMenu = left
-  //     if (left > maxLeft) {
-  //       this.leftContextualMenu = maxLeft
-  //     }
-
-  //     const offsetTop = this.$el.getBoundingClientRect().top
-  //     const top = event.clientY - offsetTop + 500
-  //     this.topContextualMenu = top
-  //     this.show = true
-  //   },
-  //   translateDate(value) {
-  //     return this.$d(new Date(value), 'long', this.language)
-  //   }
-  // }
 }
 </script>
 

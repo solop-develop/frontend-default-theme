@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt edwinBetanc0urt@hotmail.com www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-card shadow="always" class="box-card">
     <el-container>
@@ -26,15 +27,20 @@
             class="from-wf-panel"
           >
             <el-row :gutter="24">
-              <el-col :span="8">
-                <el-form-item label="Seleccione un Flujo de Trabajo">
+              <el-col :xl="8" :lg="10" :md="12" :sm="24">
+                <el-form-item label="Seleccione un Flujo de Trabajo" class="workflow-field-label">
                   <el-select
                     v-model="value"
-                    @visible-change="findOKptionsWorkflow"
+                    class="workflow-field-select"
+                    :filterable="true"
+                    remote
+                    :remote-method="remoteSearch"
+                    :loading="isLoading"
+                    @visible-change="getWorkflowsList"
                     @change="selectWorkflow"
                   >
                     <el-option
-                      v-for="item in listOptions"
+                      v-for="item in optionsList"
                       :key="item.value"
                       :label="item.displayedValue"
                       :value="item.value"
@@ -49,12 +55,14 @@
     </el-container>
     <br>
     <br>
-    <panel-workflow
+
+    <workflow-diagram
       v-if="!isEmptyValue(node)"
-      :node-transition-list="listWorkflowTransition"
+      :node-transition-list="workflowTranstitionsList"
       :node-list="node"
       :current-node="currentNode"
     />
+
     <loading-view
       v-if="isLoadWorkflow"
       key="window-loading"
@@ -63,24 +71,30 @@
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
+
 import store from '@/store'
 
-// Utils and helper methods
+// utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import panelWorkflow from '@theme/components/ADempiere/Workflow'
 
-// Components
+// components and mixins
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
 
-// Constants
-import { TABLE_NAME, COLUMN_NAME } from '@/utils/ADempiere/constants/form/workflowEditor.js'
+// constants
+import { WORKFLOW_EDITOR_FORM, TABLE_NAME, COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/workflowEditor.js'
 
+/**
+ * TODO: Add field select with lookup factory from dictionary to zoom, label name and validations rule, and reduce duplicated logic.
+ * TODO: Set workflow definition WorkflowDiagram component to unifiy logics.
+ * TODO: Store workflow diagram on vuex to cache on client side.
+ */
 export default defineComponent({
   name: 'WFPanel',
 
   components: {
-    panelWorkflow,
+    WorkflowDiagram,
     LoadingView
   },
 
@@ -89,17 +103,21 @@ export default defineComponent({
       type: Object,
       default: () => {
         return {
-          uuid: 'WFPanel',
-          containerUuid: 'WFPanel'
+          uuid: WORKFLOW_EDITOR_FORM,
+          containerUuid: WORKFLOW_EDITOR_FORM
         }
       }
     }
   },
 
-  setup(props) {
+  setup(props, { root }) {
+    const formUuid = root.$route.meta.uuid
+    const timeOut = ref(null)
+    const isLoading = ref(false)
+
     const value = ref()
 
-    const listOptions = ref([])
+    const optionsList = ref([])
 
     const node = ref([])
 
@@ -110,32 +128,101 @@ export default defineComponent({
       }
     ])
 
-    const listWorkflowTransition = ref([])
+    const workflowTranstitionsList = ref([])
 
     const transitions = ref([])
 
     const isLoadWorkflow = ref(false)
 
-    // methodos
+    const isWithSearchValue = computed(() => {
+      return Boolean(
+        store.getters.getStoredSearchValueLookup({
+          containerUuid: props.metadata.containerUuid
+        })
+      )
+    })
 
-    function findOKptionsWorkflow(params) {
-      store.dispatch('getLookupListFromServer', {
+    const getStoredLookupList = computed(() => {
+      // add blanck option in firts element on list
+      return store.getters.getStoredLookupList({
+        containerUuid: props.metadata.containerUuid,
+        //
         tableName: TABLE_NAME,
         columnName: COLUMN_NAME
       })
-        .then(response => {
-          listOptions.value = response
+    })
+
+    // methods
+    /**
+     * @param {boolean} isShowList triggers when the pull-down menu appears or disappears
+     */
+    function getWorkflowsList(isShowList) {
+      // get stored list values
+      const list = getStoredLookupList.value
+      // refresh local list component
+      optionsList.value = list
+      if (isShowList) {
+        if (isEmptyValue(list) || isWithSearchValue.value) {
+          loadListFromServer()
+        }
+      }
+    }
+
+    function remoteSearch(searchQuery = '') {
+      clearTimeout(timeOut.value)
+      const results = localSearch(searchQuery)
+      if (isEmptyValue(results) || isEmptyValue(searchQuery) ||
+        (!isEmptyValue(searchQuery) && searchQuery.length > 2)) {
+        timeOut.value = setTimeout(() => {
+          loadListFromServer(searchQuery)
+        }, 600)
+        return
+      }
+      // use this, if remote is enabled, local search not working
+      optionsList.value = results
+    }
+
+    function localSearch(searchQuery = '') {
+      if (isEmptyValue(searchQuery)) {
+        return optionsList.value
+      }
+      return optionsList.value.filter(option => {
+        return option.displayedValue.toLowerCase().includes(searchQuery.toLowerCase())
+      })
+    }
+
+    function loadListFromServer(searchQuery = '') {
+      isLoading.value = true
+
+      store.dispatch('getLookupListFromServer', {
+        containerUuid: props.metadata.containerUuid,
+        searchValue: searchQuery,
+        tableName: TABLE_NAME,
+        columnName: COLUMN_NAME,
+        isAddBlankValue: true
+      })
+        .then(responseLookupList => {
+          optionsList.value = responseLookupList
         })
         .catch(error => {
-          listOptions.value = []
+          optionsList.value = []
           console.warn(`Get Lookup List, Select Base - Error ${error.code}: ${error.message}.`)
+        })
+        .finally(() => {
+          isLoading.value = false
         })
     }
 
-    function selectWorkflow(params) {
+    function selectWorkflow(workflowId) {
+      if (isEmptyValue(workflowId)) {
+        // clear diagram
+        node.value = []
+        return
+      }
+
       isLoadWorkflow.value = true
       store.dispatch('getWorkflowFromServer', {
-        id: params
+        id: workflowId
       })
         .then(response => {
           listWorkflow(response)
@@ -155,7 +242,7 @@ export default defineComponent({
           id: workflow.start_node.uuid
         }]
       }
-      const nodes = workflow.workflow_nodes.filter(node => !isEmptyValue(node.uuid))
+      const nodes = workflow.workflow_nodes // .filter(node => !isEmptyValue(node.uuid))
       listNodeTransitions(nodes)
       if (!isEmptyValue(nodes)) {
         node.value = nodes.map((workflow, key) => {
@@ -182,15 +269,15 @@ export default defineComponent({
               if (isEmptyValue(nextNode.description)) {
                 transitions.value.push({
                   id: id + key,
-                  target: uuid,
-                  source: nextNode.node_next_uuid
+                  target: nextNode.node_next_uuid,
+                  source: uuid
                 })
               } else {
                 transitions.value.push({
                   id: id + key,
                   label: nextNode.description,
-                  target: uuid,
-                  source: nextNode.node_next_uuid
+                  target: nextNode.node_next_uuid,
+                  source: uuid
                 })
               }
             }
@@ -202,7 +289,7 @@ export default defineComponent({
           uuid: item.uuid
         }
       })
-      listWorkflowTransition.value = transitions.value.filter(data => {
+      workflowTranstitionsList.value = transitions.value.filter(data => {
         const verificar = blon.find(mode => mode.uuid === data.source)
         if (!isEmptyValue(verificar)) {
           return data
@@ -212,25 +299,40 @@ export default defineComponent({
 
     return {
       // ref
+      formUuid,
       value,
       isLoadWorkflow,
-      listOptions,
+      isLoading,
+      optionsList,
       node,
       currentNode,
-      listWorkflowTransition,
+      workflowTranstitionsList,
       transitions,
-      // methodos
-      findOKptionsWorkflow,
-      selectWorkflow,
-      listWorkflow,
-      listNodeTransitions
+      // methods
+      getWorkflowsList,
+      loadListFromServer,
+      remoteSearch,
+      selectWorkflow
     }
   }
 })
 </script>
-<style scoped>
-.from-wf-panel {
-  padding-left: 20px;
-  padding-right: 20px;
-}
+
+<style lang="scss">
+  .from-wf-panel {
+    padding-left: 20px;
+    padding-right: 20px;
+
+    .workflow-field-select {
+      width: 100%;
+    }
+
+    /**
+    * Reduce the spacing between the form element and its label
+    */
+    .el-form-item__label, .workflow-field-label {
+      padding-bottom: 0px !important;
+    }
+
+  }
 </style>
