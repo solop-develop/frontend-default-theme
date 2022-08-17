@@ -151,7 +151,15 @@ export default {
     currentFieldList(value) {
       const tabPanel = this.$store.getters.getContainerInfo
       const fieldFocusColumnName = this.$store.getters.getFieldFocusColumnName
-      if (!this.isEmptyValue(fieldFocusColumnName) && !this.isEmptyValue(tabPanel) && fieldFocusColumnName && this.metadata.columnName === fieldFocusColumnName && tabPanel.currentTab.containerUuid === this.metadata.containerUuid) {
+      if (
+        !this.isEmptyValue(fieldFocusColumnName) &&
+        !this.isEmptyValue(tabPanel) &&
+        fieldFocusColumnName &&
+        this.metadata.columnName === fieldFocusColumnName &&
+        tabPanel.currentTab.containerUuid === this.metadata.containerUuid &&
+        !this.isEmptyValue(this.$refs) &&
+        !this.isEmptyValue(this.$refs[fieldFocusColumnName])
+      ) {
         this.$refs[fieldFocusColumnName].focus()
       }
       // this.$refs[fieldFocusColumnName].focus()
