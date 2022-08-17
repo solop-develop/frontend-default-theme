@@ -630,11 +630,29 @@ export default defineComponent({
     }
 
     function handleCommandActions(params) {
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.undo')
+      }
+
+      this.$store.dispatch('fieldListInfo', { info })
       selectDocActions.value = params
       visible.value = true
     }
 
     function handleClickdActions(docsAction) {
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.undo')
+      }
+
+      this.$store.dispatch('fieldListInfo', { info })
       selectDocActions.value = docsAction
       showClickActions.value = true
     }

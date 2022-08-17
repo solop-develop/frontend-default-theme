@@ -99,6 +99,19 @@
             :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
           />
         </el-tab-pane>
+        <el-tab-pane v-if="isWorkflowLog" name="searchWorkflowHistory" style="height: 100% !important;">
+          <span slot="label">
+            <svg-icon icon-class="tree-table" />
+            {{ 'Historico de WorkFlow' }}
+          </span>
+          <workflow-logs
+            :container-uuid="currentTab.containerUuid"
+          />
+          <!-- <chats
+            :table-name="allTabsList[0].tableName"
+            :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
+          /> -->
+        </el-tab-pane>
       </el-tabs>
     </el-main>
   </el-container>
@@ -114,6 +127,7 @@ import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/system
 import Attachment from './Component/Attachment/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
 import Chats from './Component/chats/index.vue'
+import workflowLogs from './Component/workflowLogs/index.vue'
 
 export default defineComponent({
   name: 'ContainerInfo',
@@ -121,7 +135,8 @@ export default defineComponent({
   components: {
     RecordLogs,
     Attachment,
-    Chats
+    Chats,
+    workflowLogs
   },
 
   props: {
@@ -152,7 +167,7 @@ export default defineComponent({
     const tableName = ref('')
     const nameTab = ref('getRecordLogs')
 
-    // // use getter to reactive properties
+    // use getter to reactive properties
 
     const openInfo = computed(() => {
       return props.showContainerInfo
@@ -180,6 +195,23 @@ export default defineComponent({
         return containerInfo.value.currentTab
       }
       return {}
+    })
+
+    /**
+     * Current window
+     */
+    const storedWindow = computed(() => {
+      if (currentTab.value && currentTab.value.parentUuid) {
+        return store.getters.getStoredWindow(currentTab.value.parentUuid)
+      }
+      return {}
+    })
+
+    const isWorkflowLog = computed(() => {
+      if (storedWindow.value) {
+        return storedWindow.value.windowType === 'T' && currentTab.value.isParentTab
+      }
+      return false
     })
 
     /**
@@ -247,6 +279,7 @@ export default defineComponent({
       nameTab.value = tab.name
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,
+        containerUuid: currentTab.value.containerUuid,
         recordId: currentRecordInfo.value[currentTab.value.tableName + '_ID'],
         recordUuid: currentRecordInfo.value.UUID
       })
@@ -260,6 +293,7 @@ export default defineComponent({
       currentRecordLogs,
       currentKey,
       isLoadLogs,
+      isWorkflowLog,
       listLogs,
       tableName,
       containerInfo,
