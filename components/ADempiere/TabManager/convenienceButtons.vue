@@ -106,6 +106,134 @@
     >
       {{ $t('actionMenu.save') }}
     </el-button>
+    <span v-if="!getCurrentTab.isShowedTableRecords">
+      <el-dropdown
+        v-if="!isEmptyValue(additionalOptions)"
+        @command="handleCommandActions"
+      >
+        <el-popover
+          v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+          :value="showClickActions"
+          placement="top"
+          trigger="click"
+        >
+          <h3> {{ '¿Está seguro de que quiere cambiar el estado de documento?' }} </h3>
+          <el-steps :space="200" simple>
+            <el-step icon="el-icon-d-arrow-right">
+              <template slot="title">
+                <document-status-tag
+                  key="document-status"
+                  size="small"
+                  :value="currentDocStatus"
+                  :displayed-value="displayDocStatus.name"
+                />
+              </template>
+            </el-step>
+            <el-step icon="el-icon-d-arrow-right">
+              <template slot="title">
+                <document-status-tag
+                  key="document-actions"
+                  size="small"
+                  :value="displayDocumentActions(selectDocActions).value"
+                  :displayed-value="displayDocumentActions(selectDocActions).name"
+                />
+              </template>
+            </el-step>
+          </el-steps>
+          <div style="text-align: right; margin: 0">
+            <el-button size="mini" type="text" @click="showClickActions = false">cancel</el-button>
+            <el-button type="primary" size="mini" @click="sendAction()">confirm</el-button>
+          </div>
+          <el-button
+            slot="reference"
+            plain
+            :loading="isDisabledDocument"
+            size="small"
+            :type="tagRender(additionalOptions.currentDocument)"
+            @click="handleClickdActions(additionalOptions.currentDocument.value)"
+          >
+            {{ additionalOptions.currentDocument.name }}
+            <el-divider direction="vertical" />
+            <i class="el-icon-arrow-down el-icon--right" />
+          </el-button>
+        </el-popover>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item
+            v-for="(documents, key) in additionalOptions.options"
+            :key="key"
+            :command="documents.value"
+          >
+            {{ documents.name }}
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+      <el-popover
+        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+        v-model="visible"
+        placement="top"
+      >
+        <h3> {{ '¿Está seguro de que quiere cambiar el estado de documento?' }} </h3>
+
+        <el-steps :space="200" simple>
+          <el-step icon="el-icon-d-arrow-right">
+            <template slot="title">
+              <document-status-tag
+                key="document-status"
+                size="small"
+                :value="currentDocStatus"
+                :displayed-value="displayDocStatus.name"
+              />
+            </template>
+          </el-step>
+          <el-step icon="el-icon-d-arrow-right">
+            <template slot="title">
+              <document-status-tag
+                key="document-actions"
+                size="small"
+                :value="displayDocumentActions(selectDocActions).value"
+                :displayed-value="displayDocumentActions(selectDocActions).name"
+              />
+            </template>
+          </el-step>
+        </el-steps>
+        <div style="text-align: right; margin: 0">
+          <el-button size="mini" type="text" @click="visible = false">cancel</el-button>
+          <el-button type="primary" size="mini" @click="sendAction()">confirm</el-button>
+        </div>
+        <el-button slot="reference" type="text" />
+      </el-popover>
+      <el-popover
+        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+        trigger="hover"
+        width="900"
+      >
+        <el-descriptions :title="docStatus.description" direction="vertical" :column="2" border>
+          <template slot="extra">
+            <document-status-tag
+              key="document-status"
+              size="small"
+              :value="currentDocStatus"
+              :displayed-value="displayDocStatus.name"
+            />
+          </template>
+          <el-descriptions-item label="Acciones">
+            <el-steps :active="indexStepActions" :space="500" align-center finish-status="success">
+              <el-step
+                v-for="(actions, key) in listActions"
+                :key="key"
+                :title="actions.name"
+              />
+            </el-steps>
+          </el-descriptions-item>
+        </el-descriptions>
+        <el-button
+          slot="reference"
+          :type="tagRender({ value: currentDocStatus })"
+          circle
+          style="height: 67% !important;padding-bottom: 1.5%;"
+        />
+      </el-popover>
+    </span>
   </div>
 </template>
 
@@ -121,6 +249,7 @@ import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns
 
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
 // utils and helper methods
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -128,12 +257,14 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
   createNewRecord, refreshRecord, deleteRecord, undoChange
 } from '@/utils/ADempiere/dictionary/window'
+import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default defineComponent({
   name: 'ConvenienceButtons',
 
   components: {
-    ActionMenu
+    ActionMenu,
+    DocumentStatusTag
   },
 
   props: {
@@ -152,6 +283,10 @@ export default defineComponent({
     tabAttributes: {
       type: Object,
       default: () => ({})
+    },
+    additionalOptions: {
+      type: Object,
+      default: () => ({})
     }
   },
 
@@ -159,6 +294,9 @@ export default defineComponent({
     const containerUuid = props.tabAttributes.uuid
     const isVisibleConfirmDelete = ref(false)
     const buttonConfirmDelete = ref(null)
+    const visible = ref(false)
+    const showClickActions = ref(false)
+    const selectDocActions = ref('')
 
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
@@ -166,6 +304,22 @@ export default defineComponent({
     const recordParentTab = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
     })
+
+    // const showACtions = computed(() => {
+    //   return visible.value || showClickActions.value
+    // })
+
+    // const showACtions = computed({
+    //   // getter
+    //   get() {
+    //     return visible.value || showClickActions.value
+    //   },
+    //   // setter
+    //   set(newValue) {
+    //     // Note: we are using destructuring assignment syntax here.
+    //     return newValue
+    //   }
+    // })
 
     const listOfRecordsToDeleted = computed(() => {
       if (!getCurrentTab.value.isShowedTableRecords) {
@@ -283,6 +437,51 @@ export default defineComponent({
         return tab
       }
       return props.tabAttributes
+    })
+
+    const isDisabledDocument = computed(() => {
+      const processing = store.getters.getValueOfFieldOnContainer({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        columnName: 'Processing'
+      })
+      return convertStringToBoolean(processing)
+    })
+
+    const displayDocStatus = computed(() => {
+      if (isEmptyValue(listActions.value)) {
+        return {
+          name: ''
+        }
+      }
+      return listActions.value.find(docs => docs.value === currentDocStatus.value)
+    })
+
+    const listActions = computed(() => {
+      const list = store.getters.getWorkFlowActions({ containerUuid })
+      if (isEmptyValue(list)) {
+        return []
+      }
+      return list.options
+    })
+
+    const indexStepActions = computed(() => {
+      if (isEmptyValue(listActions.value)) {
+        return 0
+      }
+      return listActions.value.findIndex(docs => docs.value === currentDocStatus.value)
+    })
+
+    const currentDocStatus = computed(() => {
+      return store.getters.getValueOfFieldOnContainer({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        columnName: 'DocStatus'
+      })
+    })
+
+    const docStatus = computed(() => {
+      return props.tabAttributes.fieldsList.find(field => field.columnName === 'DocStatus')
     })
 
     function newRecord() {
@@ -430,6 +629,16 @@ export default defineComponent({
       })
     }
 
+    function handleCommandActions(params) {
+      selectDocActions.value = params
+      visible.value = true
+    }
+
+    function handleClickdActions(docsAction) {
+      selectDocActions.value = docsAction
+      showClickActions.value = true
+    }
+
     /**
      * Vuex subscription when record parent change
      * TODO: Add support to restart or delete timer by flushPersistenceQueue
@@ -449,9 +658,80 @@ export default defineComponent({
     //   unsubscribeChangeParentRecord()
     // })
 
+    function tagRender(typeDoc) {
+      let type = 'info'
+
+      switch (typeDoc.value) {
+        case 'AP':
+          type = 'success'
+          break
+
+        case 'CO':
+          type = 'success'
+          break
+
+        case '??':
+        case 'DR':
+          type = 'info'
+          break
+
+        case 'CL':
+          type = 'primary'
+          break
+        case 'IP':
+          type = 'warning'
+          break
+
+        case 'WC':
+        case 'WP':
+          type = 'warning'
+          break
+
+        case 'VO':
+          type = 'danger'
+          break
+
+        case 'NA':
+        case 'IN':
+        case 'RE':
+          type = 'danger'
+          break
+        default:
+          type = ''
+          break
+      }
+      return type
+    }
+
+    function displayDocumentActions(nextStatus) {
+      if (isEmptyValue(nextStatus)) {
+        return {
+          name: '',
+          value: ''
+        }
+      }
+      return props.additionalOptions.options.find(docs => docs.value === nextStatus)
+    }
+
+    function sendAction(params) {
+      visible.value = false
+      showClickActions.value = false
+      store.dispatch('changeActionsDoc', {
+        tableName: props.tabAttributes.tableName,
+        uuid: recordUuid.value,
+        docAction: selectDocActions.value
+      })
+      setTimeout(() => {
+        refreshCurrentRecord()
+      }, 7000)
+    }
+
     return {
       buttonConfirmDelete,
       isVisibleConfirmDelete,
+      visible,
+      showClickActions,
+      selectDocActions,
       // computed
       recordUuid,
       selectionsRecords,
@@ -465,6 +745,12 @@ export default defineComponent({
       recordParentTab,
       isSaveRecord,
       listOfRecordsToDeleted,
+      isDisabledDocument,
+      currentDocStatus,
+      docStatus,
+      displayDocStatus,
+      listActions,
+      indexStepActions,
       // methods
       newRecord,
       deleteCurrentRecord,
@@ -472,7 +758,12 @@ export default defineComponent({
       refreshCurrentRecord,
       undoChanges,
       saveChanges,
-      openLog
+      openLog,
+      tagRender,
+      displayDocumentActions,
+      handleCommandActions,
+      handleClickdActions,
+      sendAction
     }
   }
 

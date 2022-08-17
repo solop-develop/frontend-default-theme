@@ -38,6 +38,7 @@
         :container-uuid="currentTabUuid"
         :container-manager="containerManager"
         :tab-attributes="tabAttributes"
+        :additional-options="adicionalesOptions"
       />
     </div>
 
@@ -102,6 +103,10 @@ export default defineComponent({
     },
     // used only window
     referencesManager: {
+      type: Object,
+      default: () => ({})
+    },
+    adicionalesOptions: {
       type: Object,
       default: () => ({})
     }

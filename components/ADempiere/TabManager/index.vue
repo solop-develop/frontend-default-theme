@@ -67,6 +67,7 @@
               :all-tabs-list="allTabsList"
               :tab-attributes="tabAttributes"
               :references-manager="referencesManager"
+              :convenience-options="additionalOptions"
             />
             <br>
           </span>
@@ -82,6 +83,7 @@
               :tab-attributes="tabAttributes"
               :actions-manager="actionsManager"
               :references-manager="referencesManager"
+              :convenience-options="additionalOptions"
             />
           </div>
         </el-tab-pane>
@@ -170,6 +172,10 @@ export default defineComponent({
     },
     // used only window
     referencesManager: {
+      type: Object,
+      default: () => ({})
+    },
+    additionalOptions: {
       type: Object,
       default: () => ({})
     }
