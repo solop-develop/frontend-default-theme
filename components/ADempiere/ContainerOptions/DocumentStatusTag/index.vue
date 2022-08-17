@@ -20,7 +20,6 @@
   <el-tag
     :size="size"
     :type="tagRender.type"
-    :effect="tagRender.effect"
     disable-transitions
   >
     {{ displayText }}
@@ -60,7 +59,6 @@ export default defineComponent({
     const tagRender = computed(() => {
       let effect = 'plain'
       let type = 'info'
-
       switch (props.value) {
         case 'AP':
           type = 'success'
@@ -104,7 +102,6 @@ export default defineComponent({
           effect = 'light'
           break
       }
-
       return {
         type,
         effect

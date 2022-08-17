@@ -24,7 +24,6 @@
         :parent-uuid="parentUuid"
         :container-uuid="tabAttributes.uuid"
       />
-
       <tab-options
         :parent-uuid="parentUuid"
         :container-manager="containerManager"
@@ -32,6 +31,7 @@
         :tabs-list="tabsList"
         :tab-attributes="tabAttributes"
         :references-manager="referencesManager"
+        :adicionales-options="convenienceOptions"
       />
     </span>
 
@@ -122,6 +122,10 @@ export default defineComponent({
     },
     // used only window
     referencesManager: {
+      type: Object,
+      default: () => ({})
+    },
+    convenienceOptions: {
       type: Object,
       default: () => ({})
     }
