@@ -96,8 +96,13 @@
 <script>
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 import { formatQuantity } from '@/utils/ADempiere/valueFormat.js'
+import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
+
 export default {
   name: 'KeyLayout',
+  mixins: [
+    posMixin
+  ],
   data() {
     return {
       resource: {},
@@ -183,13 +188,7 @@ export default {
       if (!this.isEmptyValue(keyValue.subKeyLayoutUuid)) {
         this.loadKeyLayout(keyValue.subKeyLayoutUuid)
       } else {
-        this.$store.dispatch('notifyActionKeyPerformed', {
-          columnName: 'ProductValue',
-          value: {
-            QtyEntered: keyValue.quantity,
-            value: keyValue.productValue
-          }
-        })
+        this.findProduct(keyValue.productValue)
       }
     },
     handleCommand(command) {
