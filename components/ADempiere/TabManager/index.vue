@@ -31,70 +31,73 @@
         :current-tab="tabsList[currentTab]"
       />
     </auxiliary-panel> -->
-    <div style="display: flex;height: 100%;">
-      <el-tabs
-        ref="el-tabs-container"
-        v-model="currentTab"
-        class="el-tabs-container"
-        type="border-card"
-        style="width:100%"
-        @tab-click="handleClick"
+    <!-- <div style="display: flex;height: 100%;"> -->
+    <el-tabs
+      ref="el-tabs-container"
+      v-model="currentTab"
+      class="el-tabs-container"
+      type="border-card"
+      style="width:100%;height: 100%"
+      @tab-click="handleClick"
+    >
+      <el-tab-pane
+        v-for="(tabAttributes, key) in tabsList"
+        :key="key"
+        :label="tabAttributes.name"
+        :name="String(key)"
+        :tabuuid="tabAttributes.uuid"
+        :tabindex="String(key)"
+        lazy
+        :disabled="isDisabledTab(key)"
+        :style="tabStyle"
       >
-        <el-tab-pane
-          v-for="(tabAttributes, key) in tabsList"
-          :key="key"
-          :label="tabAttributes.name"
-          :name="String(key)"
-          :tabuuid="tabAttributes.uuid"
-          :tabindex="String(key)"
-          lazy
-          :disabled="isDisabledTab(key)"
-          :style="tabStyle"
-        >
-          <tab-label
-            slot="label"
-            :is-active-tab="tabAttributes.uuid === tabUuid"
+        <tab-label
+          slot="label"
+          :is-active-tab="tabAttributes.uuid === tabUuid"
+          :parent-uuid="parentUuid"
+          :container-uuid="tabAttributes.uuid"
+        />
+
+        <span v-if="currentTabMetadata.isShowedTableRecords">
+          <tab-options
             :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :current-tab-uuid="tabUuid"
+            :tabs-list="tabsList"
+            :all-tabs-list="allTabsList"
+            :tab-attributes="tabAttributes"
+            :references-manager="referencesManager"
+            :convenience-options="additionalOptions"
           />
+          <br>
+        </span>
 
-          <span v-if="currentTabMetadata.isShowedTableRecords">
-            <tab-options
-              :parent-uuid="parentUuid"
-              :container-manager="containerManager"
-              :current-tab-uuid="tabUuid"
-              :tabs-list="tabsList"
-              :all-tabs-list="allTabsList"
-              :tab-attributes="tabAttributes"
-              :references-manager="referencesManager"
-              :convenience-options="additionalOptions"
-            />
-            <br>
-          </span>
+        <!-- Close table when clicking on group of fields -->
+        <div
+          v-if="isShowedTabs"
+          @click="selectTab(tabsList[parseInt(currentTab)])"
+        >
+          <tab-panel
+            :parent-uuid="parentUuid"
+            :container-manager="containerManager"
+            :tabs-list="tabsList"
+            :all-tabs-list="allTabsList"
+            :current-tab-uuid="tabUuid"
+            :tab-attributes="tabAttributes"
+            :actions-manager="actionsManager"
+            :references-manager="referencesManager"
+            :convenience-options="additionalOptions"
+          />
+        </div>
+      </el-tab-pane>
+    </el-tabs>
 
-          <!-- Close table when clicking on group of fields -->
-          <div v-if="isShowedTabs">
-            <tab-panel
-              :parent-uuid="parentUuid"
-              :container-manager="containerManager"
-              :tabs-list="tabsList"
-              :all-tabs-list="allTabsList"
-              :current-tab-uuid="tabUuid"
-              :tab-attributes="tabAttributes"
-              :actions-manager="actionsManager"
-              :references-manager="referencesManager"
-              :convenience-options="additionalOptions"
-            />
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-
-      <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 50%;">
-        <el-button type="primary" size="mini" circle @click="openRecordLogs">
-          <svg-icon icon-class="tree-table" />
-        </el-button>
-      </div>
+    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 50%;">
+      <el-button type="primary" size="mini" circle @click="openRecordLogs">
+        <svg-icon icon-class="tree-table" />
+      </el-button>
     </div>
+    <!-- </div> -->
 
     <el-drawer
       :visible.sync="showContainerInfo"
@@ -202,9 +205,13 @@ export default defineComponent({
 
     const tabStyle = computed(() => {
       // height tab content
+      if (currentTabMetadata.value.isShowedTableRecords) {
+        return {
+          overflow: 'auto'
+        }
+      }
       return {
-        // height: '75vh',
-        height: 'auto',
+        height: '100% !important',
         overflow: 'auto'
       }
     })
@@ -485,6 +492,12 @@ export default defineComponent({
       })
     }
 
+    function selectTab(params) {
+      store.dispatch('panelInfo', {
+        currentTab: params
+      })
+    }
+
     findRecordLogs(props.allTabsList[0])
 
     setTabNumber(currentTab.value)
@@ -512,7 +525,8 @@ export default defineComponent({
       changeShowedRecords,
       findRecordLogs,
       openRecordLogs,
-      isDisabledTab
+      isDisabledTab,
+      selectTab
     }
   }
 

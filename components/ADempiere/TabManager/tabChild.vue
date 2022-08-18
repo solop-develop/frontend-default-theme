@@ -42,7 +42,9 @@
         :container-uuid="tabAttributes.uuid"
       />
 
-      <div v-if="isShowedTableRecords">
+      <div
+        v-if="isShowedTableRecords"
+      >
         <tab-options
           :parent-uuid="parentUuid"
           :container-manager="containerManager"
@@ -55,7 +57,11 @@
         <br>
       </div>
 
-      <div v-if="isShowedTabs">
+      <div
+        v-if="isShowedTabs"
+        style="height: 100% !important;"
+        @click="selectTab(tabsList[parseInt(currentTab)])"
+      >
         <!-- records in table to multi records -->
         <div v-if="isMobile">
           <tab-panel
@@ -174,8 +180,7 @@ export default defineComponent({
     const tabStyle = computed(() => {
       // height tab content
       return {
-        // height: '75vh',
-        height: 'auto',
+        height: '100% !important',
         overflow: 'auto'
       }
     })
@@ -477,6 +482,12 @@ export default defineComponent({
       unsuscribeChangeParentRecord()
     })
 
+    function selectTab(params) {
+      store.dispatch('panelInfo', {
+        currentTab: params
+      })
+    }
+
     return {
       tabUuid,
       currentTab,
@@ -497,7 +508,8 @@ export default defineComponent({
       // methods
       handleClick,
       isDisabledTab,
-      changeShowedRecords
+      changeShowedRecords,
+      selectTab
     }
   }
 

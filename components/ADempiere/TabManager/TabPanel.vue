@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div style="height: 100% !important;">
+  <div>
     <span v-if="!isShowedTableRecords">
       <full-screen-container
         style="float: right;"
@@ -56,7 +56,7 @@
           :container-manager="containerManager"
           :group-tab="tabAttributes.tabGroup"
         />
-        <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 200px;">
+        <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 300px;">
           <panel-definition
             key="panel-definition"
             :parent-uuid="parentUuid"
