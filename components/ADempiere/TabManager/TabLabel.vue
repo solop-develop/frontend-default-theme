@@ -126,7 +126,6 @@ export default defineComponent({
         !isEmptyValue(store.getters.getContainerInfo.currentTab.name) &&
         (store.getters.getContainerInfo.currentTab.name === tabMetadata.value.name)
       ) {
-        console.log(store.getters.getContainerInfo)
         return true
       }
       return false

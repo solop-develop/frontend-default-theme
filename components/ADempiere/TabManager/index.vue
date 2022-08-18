@@ -78,6 +78,7 @@
           @click="selectTab(tabsList[parseInt(currentTab)])"
         >
           <tab-panel
+            id="epale"
             :parent-uuid="parentUuid"
             :container-manager="containerManager"
             :tabs-list="tabsList"
