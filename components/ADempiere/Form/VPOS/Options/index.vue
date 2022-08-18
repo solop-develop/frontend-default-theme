@@ -171,17 +171,19 @@
           </el-col>
 
           <!-- printTicket -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
-              <p
+              <el-button
+                type="text"
+                :disabled="(isEmptyValue(currentOrder.uuid) || !isProcessed)"
                 :class="(isEmptyValue(currentOrder.uuid) || !isProcessed) ? 'is-disabled-option-card' : 'is-enable-option-card'"
+                style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
                 @click="printTicket()"
               >
                 <i class="el-icon-printer" />
-                <br>
+                <br><br>
                 {{ $t('form.pos.optionsPoinSales.salesOrder.print') }}
-              </p>
+              </el-button>
             </el-card>
           </el-col>
 
