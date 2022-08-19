@@ -663,62 +663,6 @@ export default {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         // TODO: Add container uuid comparison
-        if (!this.isEmptyValue(mutation.payload) && !this.isEmptyValue(mutation.payload.containerUuid) && mutation.payload.containerUuid === 'line') {
-          if (mutation.type === 'updateValueOfField') {
-            switch (mutation.payload.columnName) {
-              case 'QtyEntered':
-                // const qtyEntered = this.fieldShowValue(this.currentLineOrder, { columnName: 'QtyEntered' })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(this.fieldShowValue(this.currentLineOrder, { columnName: 'QtyEntered' }))) {
-                  return
-                }
-                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
-                  this.updateOrderLine(mutation.payload)
-                } else {
-                  const attributePin = {
-                    ...mutation.payload,
-                    type: 'updateOrder',
-                    label: this.$t('form.pos.pinMessage.qtyEntered')
-                  }
-                  this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-                  this.visible = true
-                }
-                break
-              case 'PriceEntered':
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.fieldShowValue(this.currentLineOrder, { columnName: 'CurrentPrice' })) {
-                  return
-                }
-                if (this.modifyPrice) {
-                  this.updateOrderLine(mutation.payload)
-                } else {
-                  const attributePin = {
-                    ...mutation.payload,
-                    type: 'updateOrder',
-                    label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
-                  }
-                  this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-                  this.visible = true
-                }
-                break
-              case 'Discount':
-                // const discount = this.fieldShowValue(this.currentLineOrder, { columnName: 'Discount' })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(this.fieldShowValue(this.currentLineOrder, { columnName: 'Discount' }))) {
-                  return
-                }
-                if (this.modifyPrice) {
-                  this.updateOrderLine(mutation.payload)
-                } else {
-                  const attributePin = {
-                    ...mutation.payload,
-                    type: 'updateOrder',
-                    label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
-                  }
-                  this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-                  this.visible = true
-                }
-                break
-            }
-          }
-        }
         if (mutation.type === 'addActionPerformed') {
           switch (mutation.payload.columnName) {
             case 'QtyEntered':
