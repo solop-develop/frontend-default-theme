@@ -139,6 +139,7 @@ import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import businessPartnerMixin from './mixinBusinessPartner'
+import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
@@ -153,7 +154,8 @@ export default {
 
   components: {
     CustomPagination,
-    FieldDefinition
+    FieldDefinition,
+    IndexColumn
   },
 
   mixins: [

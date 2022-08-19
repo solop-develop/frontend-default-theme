@@ -77,6 +77,7 @@
       fit
       height="450"
       highlight-current-row
+      @cell-dblclick="editDelivery"
       @shortkey.native="keyAction"
     >
       <el-table-column
@@ -91,8 +92,21 @@
         prop="quantity"
         :label="$t('form.pos.tableProduct.quantity')"
         align="right"
-        width="90"
-      />
+        :width="isEditQuantity ? '200px' : '90px'"
+      >
+        <template slot-scope="scope">
+          <el-input-number
+            v-if="isEditQuantity"
+            v-model="scope.row.quantity"
+            controls-position="right"
+            :min="1"
+            @change="handleChange(scope.row)"
+          />
+          <span v-else>
+            {{ scope.row.quantity }}
+          </span>
+        </template>
+      </el-table-column>
       <el-table-column
         :label="$t('form.pos.tableProduct.options')"
         column-key="value"
@@ -267,6 +281,7 @@ export default {
       deliveryList: [],
       showInfo: false,
       value: false,
+      isEditQuantity: false,
       isLoadedConfirm: false,
       isLoadedProcessShipment: false,
       timeOut: null
@@ -403,14 +418,17 @@ export default {
       this.timeOut = setTimeout(() => {
         this.isSearchProduct = true
         const product = this.findProductFromOrder(searchValue)
-        this.addLineShipment({ shipmentUuid: this.currentShipment.uuid, orderLineUuid: product.uuid })
+        const quantity = !Number.isInteger(product.quantity) ? product.quantity : undefined
+        this.addLineShipment({ shipmentUuid: this.currentShipment.uuid, orderLineUuid: product.uuid, quantity })
         this.input = ''
       }, 500)
     },
-    addLineShipment({ shipmentUuid, orderLineUuid }) {
+    addLineShipment({ shipmentUuid, orderLineUuid, quantity }) {
       createShipmentLine({
+        posUuid: this.currentPointOfSales.uuid,
         shipmentUuid,
-        orderLineUuid
+        orderLineUuid,
+        quantity
       })
         .then(response => {
           return response
@@ -465,6 +483,7 @@ export default {
     },
     deleteLine(line) {
       deleteShipment({
+        posUuid: this.currentPointOfSales.uuid,
         shipmentLineUuid: line.uuid
       })
         .then(response => {
@@ -568,6 +587,16 @@ export default {
     closeDialog() {
       this.dialogVisible = false
       this.$store.commit('setConfirmDelivery', false)
+    },
+    editDelivery(row, column, cell, event) {
+      if (column.property === 'quantity') {
+        this.isEditQuantity = !this.isEditQuantity
+      }
+    },
+    handleChange(row) {
+      const product = this.findProductFromOrder(row.product.value)
+      this.addLineShipment({ shipmentUuid: this.currentShipment.uuid, orderLineUuid: product.uuid, quantity: row.quantity })
+      this.isEditQuantity = false
     }
   }
 }
