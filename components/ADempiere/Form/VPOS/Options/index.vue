@@ -235,13 +235,13 @@
 
           <!-- confirmDelivery -->
 
-          <el-col v-if="allowsConfirmShipment" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
                 v-model="popoverConfirmDelivery"
                 placement="right"
                 trigger="click"
-                width="800"
+                width="900"
                 :disabled="!isProcessed"
               >
                 <confirm-delivery
