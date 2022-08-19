@@ -96,11 +96,6 @@ export default {
         })
       }
     }
-  },
-  created() {
-    if (this.metadata.fileName === 'VPOS') {
-      this.$store.dispatch('loadDataFromServer')
-    }
   }
 }
 </script>
