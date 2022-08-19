@@ -1105,6 +1105,15 @@ export default {
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
           this.visible = true
         } else {
+          if (!this.isEmptyValue(this.currentOrder.uuid)) {
+            this.$store.dispatch('updateOrder', {
+              orderUuid: this.currentOrder.uuid,
+              posUuid: this.currentPointOfSales.uuid,
+              documentTypeUuid: this.currentOrder.documentStatus.uuid,
+              priceListUuid: priceList.uuid,
+              warehouseUuid: this.currentPointOfSales.warehouse.uuid
+            })
+          }
           this.$store.commit('setCurrentPriceList', priceList)
         }
       }
