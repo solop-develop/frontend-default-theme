@@ -783,6 +783,16 @@ export default {
       this.clearAccountData(clear)
       this.currentFieldPaymentMethods = this.isEmptyValue(this.searchPaymentMethods) ? '' : this.searchPaymentMethods[0].uuid
       this.selectionTypeRefund = {}
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'OverdrawnInvoice',
+        columnName: 'Name',
+        value: this.currentPointOfSales.currentOrder.businessPartner.name
+      })
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'OverdrawnInvoice',
+        columnName: 'Value',
+        value: this.currentPointOfSales.currentOrder.businessPartner.value
+      })
       if (value === 1 && !this.isEmptyValue(this.paymentTypeListRefund)) {
         this.selectPayment(this.paymentTypeListRefund[0])
       }
@@ -840,6 +850,16 @@ export default {
       containerUuid,
       columnName: 'PayAmt',
       value: this.currentPointOfSales.currentOrder.refundAmount
+    })
+    this.$store.commit('updateValueOfField', {
+      containerUuid: 'OverdrawnInvoice',
+      columnName: 'Name',
+      value: this.currentPointOfSales.currentOrder.businessPartner.name
+    })
+    this.$store.commit('updateValueOfField', {
+      containerUuid: 'OverdrawnInvoice',
+      columnName: 'Value',
+      value: this.currentPointOfSales.currentOrder.businessPartner.value
     })
   },
   methods: {
@@ -1171,14 +1191,6 @@ export default {
       this.$store.commit('updateValuesOfContainer', {
         containerUuid,
         attributes: [
-          {
-            columnName: 'Name',
-            value: undefined
-          },
-          {
-            columnName: 'Value',
-            value: undefined
-          },
           {
             columnName: 'AccountNo',
             value: undefined
