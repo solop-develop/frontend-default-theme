@@ -18,6 +18,12 @@
 
 <template>
   <span>
+    <b
+      v-if="isActiveCurrentTab"
+      style="width: 100% !important;color: #1890ff;font-size: 17px;height: 100% !important;margin: 0px;padding: 0px;height: 100% !important;"
+    >
+      |
+    </b>
     <lock-record
       slot="label"
       :is-active-tab="isActiveTab"
@@ -65,9 +71,11 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
-
+import store from '@/store'
 // components and mixins
 import LockRecord from '@theme/components/ADempiere/ContainerOptions/LockRecord/index.vue'
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'TabLabel',
@@ -104,6 +112,24 @@ export default defineComponent({
         props.parentUuid
       )
     })
+    const classActiveTab = computed(() => {
+      if (isActiveCurrentTab.value) {
+        return 'is-active-current-tab'
+      }
+      return ''
+    })
+
+    const isActiveCurrentTab = computed(() => {
+      if (
+        !isEmptyValue(tabMetadata.value.name) &&
+        !isEmptyValue(store.getters.getContainerInfo) &&
+        !isEmptyValue(store.getters.getContainerInfo.currentTab.name) &&
+        (store.getters.getContainerInfo.currentTab.name === tabMetadata.value.name)
+      ) {
+        return true
+      }
+      return false
+    })
 
     /**
      * Change if tabsList is collapse
@@ -128,9 +154,34 @@ export default defineComponent({
     return {
       // Data
       tabMetadata,
+      // computed
+      isActiveCurrentTab,
+      classActiveTab,
       // Methods
       changeShowedTab
     }
   }
 })
 </script>
+
+<style>
+.is-active-current-tab {
+  display: block;
+  border-top-color: blue;
+  border-top-style: solid;
+  border-top-width: 0px;
+  border-right-color: blue;
+  border-right-style: solid;
+  border-right-width: 0px;
+  border-bottom-color: blue;
+  border-bottom-style: solid;
+  border-bottom-width: 0px;
+  border-left-color: #1890ff;
+  border-left-style: solid;
+  border-left-width: 5px;
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+}
+</style>
