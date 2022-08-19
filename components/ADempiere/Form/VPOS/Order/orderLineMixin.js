@@ -315,7 +315,7 @@ export default {
         if (this.isEmptyValue(row.product.value)) return row.charge.name
         return row.product.value + ' - ' + row.product.name
       }
-      const currency = this.$store.getters.posAttributes.currentPointOfSales.currentPriceList.currency.iSOCode
+      const currency = this.$store.getters.posAttributes.currentPointOfSales.priceList.currency.iSOCode
       if (columnName === 'CurrentPrice') {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
           return this.formatPrice(row.price, currency)

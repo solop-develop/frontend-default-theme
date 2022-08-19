@@ -457,7 +457,7 @@ export default {
           orderUuid: this.$route.query.action,
           posUuid: this.currentPointOfSales.uuid,
           customerUuid: update.value,
-          priceListUuid: this.currentPointOfSales.priceList.uuid,
+          priceListUuid: this.$store.getters.currentPriceList.uuid,
           warehouseUuid: this.currentPointOfSales.warehouse.uuid,
           documentTypeUuid
         })
@@ -708,7 +708,7 @@ export default {
                 this.$store.dispatch('updateOrder', {
                   orderUuid: this.$route.query.action,
                   posUuid: this.currentPointOfSales.uuid,
-                  priceListUuid: this.currentPointOfSales.priceList.uuid,
+                  priceListUuid: this.$store.getters.currentPriceList.uuid,
                   warehouseUuid: this.currentPointOfSales.warehouse.uuid,
                   documentTypeUuid
                 })
