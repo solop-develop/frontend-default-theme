@@ -23,31 +23,25 @@
         <el-card class="box-card">
           <el-form
             label-position="top"
-            label-width="10px"
+            label-width="200px"
             class="from-wf-panel"
           >
             <el-row :gutter="24">
-              <el-col :xl="8" :lg="10" :md="12" :sm="24">
-                <el-form-item label="Seleccione un Flujo de Trabajo" class="workflow-field-label">
-                  <el-select
-                    v-model="value"
-                    class="workflow-field-select"
-                    :filterable="true"
-                    remote
-                    :remote-method="remoteSearch"
-                    :loading="isLoading"
-                    @visible-change="getWorkflowsList"
-                    @change="selectWorkflow"
-                  >
-                    <el-option
-                      v-for="item in optionsList"
-                      :key="item.value"
-                      :label="item.displayedValue"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
+              <field-definition
+                v-for="(fieldMetadata) in fieldsList"
+                :key="fieldMetadata.columnName"
+                :metadata-field="{
+                  ...fieldMetadata,
+                  size: {
+                    xl: 8,
+                    lg:10,
+                    md:12,
+                    sm: 24
+                  }
+                }"
+                :container-uuid="'Business-Partner-List'"
+                :container-manager="containerManager"
+              />
             </el-row>
           </el-form>
         </el-card>
@@ -64,38 +58,40 @@
     />
 
     <loading-view
-      v-if="isLoadWorkflow"
+      v-if="isLoadingWorkFlow"
       key="window-loading"
     />
   </el-card>
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
+import { defineComponent, ref, onUnmounted, computed } from '@vue/composition-api'
 
 import store from '@/store'
+
+// constants
+import { COLUMN_NAME, WORKFLOW_EDITOR_FORM } from '@/utils/ADempiere/dictionary/form/workflowEditor.js'
+import fieldsListDefinition from './fieldsList.js'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 // components and mixins
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import useForm from '@theme/components/ADempiere/Form/useForm'
 import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
 
-// constants
-import { WORKFLOW_EDITOR_FORM, TABLE_NAME, COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/workflowEditor.js'
-
 /**
- * TODO: Add field select with lookup factory from dictionary to zoom, label name and validations rule, and reduce duplicated logic.
- * TODO: Set workflow definition WorkflowDiagram component to unifiy logics.
  * TODO: Store workflow diagram on vuex to cache on client side.
  */
 export default defineComponent({
   name: 'WFPanel',
 
   components: {
-    WorkflowDiagram,
-    LoadingView
+    FieldDefinition,
+    LoadingView,
+    WorkflowDiagram
   },
 
   props: {
@@ -112,10 +108,21 @@ export default defineComponent({
 
   setup(props, { root }) {
     const formUuid = root.$route.meta.uuid
-    const timeOut = ref(null)
-    const isLoading = ref(false)
 
-    const value = ref()
+    // TODO: Manage with uuid
+    // TODO: When enabled it duplicates the requests for the fields
+    // show title
+    // store.commit('changeShowTitleForm', true)
+
+    const {
+      containerManager,
+      fieldsList,
+      isLoading
+    } = useForm({
+      containerUuid: formUuid,
+      metadata: props.metadata,
+      fieldsListDefinition
+    })
 
     const optionsList = ref([])
 
@@ -132,97 +139,37 @@ export default defineComponent({
 
     const transitions = ref([])
 
-    const isLoadWorkflow = ref(false)
+    const isLoadingWorkFlow = ref(false)
 
-    const isWithSearchValue = computed(() => {
-      return Boolean(
-        store.getters.getStoredSearchValueLookup({
-          containerUuid: props.metadata.containerUuid
-        })
-      )
-    })
-
-    const getStoredLookupList = computed(() => {
-      // add blanck option in firts element on list
-      return store.getters.getStoredLookupList({
-        containerUuid: props.metadata.containerUuid,
-        //
-        tableName: TABLE_NAME,
+    const storedValue = computed(() => {
+      return store.getters.getValueOfFieldOnContainer({
+        containerUuid: formUuid,
         columnName: COLUMN_NAME
       })
     })
 
+    const currentWorkfllowId = ref(storedValue.value)
+
     // methods
-    /**
-     * @param {boolean} isShowList triggers when the pull-down menu appears or disappears
-     */
-    function getWorkflowsList(isShowList) {
-      // get stored list values
-      const list = getStoredLookupList.value
-      // refresh local list component
-      optionsList.value = list
-      if (isShowList) {
-        if (isEmptyValue(list) || isWithSearchValue.value) {
-          loadListFromServer()
-        }
-      }
-    }
-
-    function remoteSearch(searchQuery = '') {
-      clearTimeout(timeOut.value)
-      const results = localSearch(searchQuery)
-      if (isEmptyValue(results) || isEmptyValue(searchQuery) ||
-        (!isEmptyValue(searchQuery) && searchQuery.length > 2)) {
-        timeOut.value = setTimeout(() => {
-          loadListFromServer(searchQuery)
-        }, 600)
-        return
-      }
-      // use this, if remote is enabled, local search not working
-      optionsList.value = results
-    }
-
-    function localSearch(searchQuery = '') {
-      if (isEmptyValue(searchQuery)) {
-        return optionsList.value
-      }
-      return optionsList.value.filter(option => {
-        return option.displayedValue.toLowerCase().includes(searchQuery.toLowerCase())
-      })
-    }
-
-    function loadListFromServer(searchQuery = '') {
-      isLoading.value = true
-
-      store.dispatch('getLookupListFromServer', {
-        containerUuid: props.metadata.containerUuid,
-        searchValue: searchQuery,
-        tableName: TABLE_NAME,
-        columnName: COLUMN_NAME,
-        isAddBlankValue: true
-      })
-        .then(responseLookupList => {
-          optionsList.value = responseLookupList
-        })
-        .catch(error => {
-          optionsList.value = []
-          console.warn(`Get Lookup List, Select Base - Error ${error.code}: ${error.message}.`)
-        })
-        .finally(() => {
-          isLoading.value = false
-        })
-    }
-
-    function selectWorkflow(workflowId) {
-      if (isEmptyValue(workflowId)) {
+    function selectWorkflow({ workflowId, workflowUuid }) {
+      if (isEmptyValue(workflowId) && isEmptyValue(workflowUuid)) {
         // clear diagram
         node.value = []
         return
       }
 
-      isLoadWorkflow.value = true
+      isLoadingWorkFlow.value = true
+
+      const workflow = store.getters.getStoredWorkflowById(workflowId)
+      if (workflow) {
+        listWorkflow(workflow)
+        isLoadingWorkFlow.value = true
+        return
+      }
+
       store.dispatch('getWorkflowFromServer', {
-        id: workflowId
+        id: workflowId,
+        uuid: workflowUuid
       })
         .then(response => {
           listWorkflow(response)
@@ -231,7 +178,7 @@ export default defineComponent({
           console.warn(`Get Workflow From Server - Error ${error.code}: ${error.message}.`)
         })
         .finally(() => {
-          isLoadWorkflow.value = false
+          isLoadingWorkFlow.value = false
         })
     }
 
@@ -297,22 +244,41 @@ export default defineComponent({
       })
     }
 
+    function subscribeWorkflowChange() {
+      return store.subscribe((mutation, state) => {
+        if (mutation.type === 'updateValueOfField') {
+          if (mutation.payload.containerUuid === formUuid && mutation.payload.columnName === COLUMN_NAME) {
+            if (mutation.payload.value === currentWorkfllowId.value) {
+              return
+            }
+
+            currentWorkfllowId.value = mutation.payload.value
+            selectWorkflow({
+              workflowId: mutation.payload.value
+            })
+          }
+        }
+      })
+    }
+
+    const unsubscribeWorkflowChange = subscribeWorkflowChange()
+
+    onUnmounted(() => {
+      unsubscribeWorkflowChange()
+    })
+
     return {
       // ref
       formUuid,
-      value,
-      isLoadWorkflow,
+      isLoadingWorkFlow,
       isLoading,
       optionsList,
       node,
       currentNode,
       workflowTranstitionsList,
       transitions,
-      // methods
-      getWorkflowsList,
-      loadListFromServer,
-      remoteSearch,
-      selectWorkflow
+      fieldsList,
+      containerManager
     }
   }
 })
@@ -320,19 +286,8 @@ export default defineComponent({
 
 <style lang="scss">
   .from-wf-panel {
+    padding-top: 10px;
     padding-left: 20px;
     padding-right: 20px;
-
-    .workflow-field-select {
-      width: 100%;
-    }
-
-    /**
-    * Reduce the spacing between the form element and its label
-    */
-    .el-form-item__label, .workflow-field-label {
-      padding-bottom: 0px !important;
-    }
-
   }
 </style>
