@@ -53,7 +53,7 @@
 
     <!-- Desktop menu -->
     <el-menu
-      v-else-if="!isMobile && metadata.panelType !== 'form'"
+      v-else-if="!isMobile && (metadata.panelType !== 'form' || metadata.isEnabledOptionsFields)"
       key="options-desktop"
       mode="horizontal"
       unique-opened

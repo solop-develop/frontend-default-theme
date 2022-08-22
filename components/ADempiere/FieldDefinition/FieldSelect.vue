@@ -429,6 +429,7 @@ export default {
         //
         tableName: this.metadata.reference.tableName,
         columnName: this.metadata.columnName,
+        columnUuid: this.metadata.columnUuid,
         searchValue: searchQuery,
         referenceUuid: this.metadata.reference.uuid,
         // app attributes
