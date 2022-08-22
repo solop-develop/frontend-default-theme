@@ -15,22 +15,35 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
+  <el-container
+    v-shortkey="{ close: ['esc'] }"
+    style="height: 100% !important;"
+    @shortkey.native="closeNodeInfo"
+  >
     <el-main style="overflow: hidden;">
       <transition name="el-zoom-in-bottom">
-        <el-card v-show="show" :style="{ position: 'absolute', zIndex: '5', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }" class="box-card">
+        <el-card v-show="showedInfo" :style="{ position: 'absolute', zIndex: '5', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }" class="box-card">
           <div slot="header" class="clearfix">
             <span>
               {{ infoNode.description }}
             </span>
-            <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-close" @click="show = !show" />
+
+            <el-button
+              style="float: right; padding: 3px 0"
+              type="text"
+              icon="el-icon-close"
+              @click="showedInfo = !showedInfo"
+            />
           </div>
-          <div v-if="!isEmptyValue(infoNode.nodeLogs)" class="text item" style="padding: 20px">
+
+          {{ infoNode.help }}
+
+          <div v-if="!isEmptyValue(nodeLogs)" class="text item" style="padding: 20px">
             <el-timeline class="info">
               <el-timeline-item
-                v-for="(logs, key) in infoNode.nodeLogs"
+                v-for="(logs, key) in nodeLogs"
                 :key="key"
-                :timestamp="translateDate(logs.log_date)"
+                :timestamp="translateDateByLong(logs.log_date)"
                 placement="top"
               >
                 <el-card style="padding: 20px!important;">
@@ -43,26 +56,32 @@
         </el-card>
       </transition>
 
-      <workflow-chart
+      <vue-workflow-chart
         v-if="!isEmptyValue(nodeList)"
         id="Diagrama"
         :transitions="nodeTransitionList"
         :states="nodeList"
         :state-semantics="currentNode"
-        @state-click="onLabelClicked(nodeList, $event)"
+        @state-click="onLabelClicked($event)"
       />
     </el-main>
   </el-container>
 </template>
 
 <script>
-import WorkflowChart from 'vue-workflow-chart'
+import { ref } from '@vue/composition-api'
+
+// components and mixins
+import VueWorkflowChart from 'vue-workflow-chart'
+
+// utils and helper methods
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowDiagram',
 
   components: {
-    WorkflowChart
+    VueWorkflowChart
   },
 
   props: {
@@ -86,38 +105,48 @@ export default {
       default: () => []
     }
   },
+  setup(props) {
+    const showedInfo = ref(false)
+    const infoNode = ref({})
+    const nodeLogs = ref([])
+    const topContextualMenu = ref(0)
+    const leftContextualMenu = ref(0)
 
-  data() {
-    return {
-      show: false,
-      infoNode: {},
-      topContextualMenu: 0,
-      leftContextualMenu: 0
+    function closeNodeInfo() {
+      showedInfo.value = false
     }
-  },
-  methods: {
-    onLabelClicked(type, id) {
-      this.infoNode = type.find(node => node.id === id)
-      const nodeLogs = this.workflowLogs.filter(node => node.node_uuid === this.infoNode.uuid)
-      this.infoNode.nodeLogs = nodeLogs
+
+    function onLabelClicked(id) {
+      infoNode.value = props.nodeList.find(node => node.id === id)
+      nodeLogs.value = props.workflowLogs.filter(node => node.node_uuid === infoNode.value.uuid)
+
       const menuMinWidth = 105
       const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
       const offsetWidth = this.$el.offsetWidth // container width
       const maxLeft = offsetWidth - menuMinWidth // left boundary
       const left = event.clientX - offsetLeft + 15 // 15: margin right
 
-      this.leftContextualMenu = left
+      leftContextualMenu.value = left
       if (left > maxLeft) {
-        this.leftContextualMenu = maxLeft
+        leftContextualMenu.value = maxLeft
       }
 
       const offsetTop = this.$el.getBoundingClientRect().top
       const top = event.clientY - offsetTop + 500
-      this.topContextualMenu = top
-      this.show = true
-    },
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
+      topContextualMenu.value = top
+      showedInfo.value = true
+    }
+
+    return {
+      showedInfo,
+      infoNode,
+      nodeLogs,
+      topContextualMenu,
+      leftContextualMenu,
+      // methods
+      closeNodeInfo,
+      onLabelClicked,
+      translateDateByLong
     }
   }
 }
@@ -131,24 +160,24 @@ export default {
   padding: 10px;
 }
 .vue-workflow-chart-state {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 3px;
-    color: #11353d;
-    font-size: 15px;
-    font-family: Open Sans;
-    /* font-weight: 600; */
-    margin-right: 20px;
-    margin-bottom: 20px;
-    max-width: 15%;
-    text-align: center;
-    -webkit-box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 3px;
+  color: #11353d;
+  font-size: 15px;
+  font-family: Open Sans;
+  /* font-weight: 600; */
+  margin-right: 20px;
+  margin-bottom: 20px;
+  max-width: 15%;
+  text-align: center;
+  -webkit-box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
+  box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
 }
-  .panel_main {
-    height: 100%;
-    width: 100%;
-  }
+.panel_main {
+  height: 100%;
+  width: 100%;
+}
 </style>
 <style lang='scss'>
 .scroll-child {

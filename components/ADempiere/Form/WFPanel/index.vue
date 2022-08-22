@@ -51,10 +51,10 @@
     <br>
 
     <workflow-diagram
-      v-if="!isEmptyValue(node)"
+      v-if="!isEmptyValue(workflowStatesList)"
       :node-transition-list="workflowTranstitionsList"
-      :node-list="node"
-      :current-node="currentNode"
+      :node-list="workflowStatesList"
+      :current-node="stateSemanticsList"
     />
 
     <loading-view
@@ -116,30 +116,19 @@ export default defineComponent({
 
     const {
       containerManager,
-      fieldsList,
-      isLoading
+      fieldsList
     } = useForm({
       containerUuid: formUuid,
       metadata: props.metadata,
       fieldsListDefinition
     })
 
-    const optionsList = ref([])
-
-    const node = ref([])
-
-    const currentNode = ref([
-      {
-        classname: 'delete',
-        id: ''
-      }
-    ])
-
-    const workflowTranstitionsList = ref([])
-
-    const transitions = ref([])
-
     const isLoadingWorkFlow = ref(false)
+
+    const stateSemanticsList = ref([])
+
+    const workflowStatesList = ref([])
+    const workflowTranstitionsList = ref([])
 
     const storedValue = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
@@ -154,7 +143,7 @@ export default defineComponent({
     function selectWorkflow({ workflowId, workflowUuid }) {
       if (isEmptyValue(workflowId) && isEmptyValue(workflowUuid)) {
         // clear diagram
-        node.value = []
+        workflowStatesList.value = []
         return
       }
 
@@ -162,7 +151,7 @@ export default defineComponent({
 
       const workflow = store.getters.getStoredWorkflowById(workflowId)
       if (workflow) {
-        listWorkflow(workflow)
+        generateWorkflow(workflow)
         isLoadingWorkFlow.value = true
         return
       }
@@ -172,7 +161,7 @@ export default defineComponent({
         uuid: workflowUuid
       })
         .then(response => {
-          listWorkflow(response)
+          generateWorkflow(response)
         })
         .catch(error => {
           console.warn(`Get Workflow From Server - Error ${error.code}: ${error.message}.`)
@@ -182,66 +171,11 @@ export default defineComponent({
         })
     }
 
-    function listWorkflow(workflow) {
-      if (!isEmptyValue(workflow.node) && !isEmptyValue(workflow.node.uuid)) {
-        currentNode.value = [{
-          classname: 'delete',
-          id: workflow.start_node.uuid
-        }]
-      }
-      const nodes = workflow.workflow_nodes // .filter(node => !isEmptyValue(node.uuid))
-      listNodeTransitions(nodes)
-      if (!isEmptyValue(nodes)) {
-        node.value = nodes.map((workflow, key) => {
-          return {
-            ...workflow,
-            transitions: workflow.transitions,
-            id: workflow.uuid,
-            key,
-            label: workflow.name
-          }
-        })
-      } else {
-        node.value = []
-      }
-    }
-
-    function listNodeTransitions(nodes) {
-      nodes.forEach(element => {
-        const uuid = element.uuid
-        const id = element.value
-        if (!isEmptyValue(element.transitions)) {
-          element.transitions.forEach((nextNode, key) => {
-            if (!isEmptyValue(nextNode.node_next_uuid)) {
-              if (isEmptyValue(nextNode.description)) {
-                transitions.value.push({
-                  id: id + key,
-                  target: nextNode.node_next_uuid,
-                  source: uuid
-                })
-              } else {
-                transitions.value.push({
-                  id: id + key,
-                  label: nextNode.description,
-                  target: nextNode.node_next_uuid,
-                  source: uuid
-                })
-              }
-            }
-          })
-        }
-      })
-      const blon = nodes.map(item => {
-        return {
-          uuid: item.uuid
-        }
-      })
-      workflowTranstitionsList.value = transitions.value.filter(data => {
-        const verificar = blon.find(mode => mode.uuid === data.source)
-        if (!isEmptyValue(verificar)) {
-          return data
-        }
-      })
+    function generateWorkflow(workflowDefinition) {
+      const { diagramMetadata } = workflowDefinition
+      workflowStatesList.value = diagramMetadata.statesList
+      workflowTranstitionsList.value = diagramMetadata.transitionsList
+      stateSemanticsList.value = diagramMetadata.stateSemanticsList
     }
 
     function subscribeWorkflowChange() {
@@ -271,12 +205,9 @@ export default defineComponent({
       // ref
       formUuid,
       isLoadingWorkFlow,
-      isLoading,
-      optionsList,
-      node,
-      currentNode,
+      stateSemanticsList,
+      workflowStatesList,
       workflowTranstitionsList,
-      transitions,
       fieldsList,
       containerManager
     }
