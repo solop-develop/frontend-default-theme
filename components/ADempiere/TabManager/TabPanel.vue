@@ -48,7 +48,6 @@
         :is-navigation="true"
       />
       <template v-else>
-        {{ alo }}
         <panel-definition
           v-if="isMobile || isEmptyValue(tabAttributes.childTabs)"
           key="panel-definition"
@@ -79,13 +78,11 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
-import TabOptions from './TabOptions.vue'
 // import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+import TabOptions from './TabOptions.vue'
 
 export default defineComponent({
   name: 'TabPanel',
@@ -254,20 +251,6 @@ export default defineComponent({
       }, () => {})
     }
 
-    const main = document.getElementById('epale')
-
-    const alo = computed(() => {
-      console.log({ main })
-      if (
-        !isEmptyValue(main) &&
-        !isEmptyValue(main.clientHeight)
-      ) {
-        console.log(main.clientHeight)
-        return main.clientHeight
-      }
-      return 300
-    })
-
     return {
       // computeds
       listAction,
@@ -277,7 +260,6 @@ export default defineComponent({
       tabData,
       isMobile,
       currentTab,
-      alo,
       // pagination
       currentPage,
       recordsLength,

@@ -78,7 +78,7 @@
           @click="selectTab(tabsList[parseInt(currentTab)])"
         >
           <tab-panel
-            id="epale"
+            id="tab-panel"
             :parent-uuid="parentUuid"
             :container-manager="containerManager"
             :tabs-list="tabsList"
@@ -98,7 +98,6 @@
         <svg-icon icon-class="tree-table" />
       </el-button>
     </div>
-    <!-- </div> -->
 
     <el-drawer
       :visible.sync="showContainerInfo"
