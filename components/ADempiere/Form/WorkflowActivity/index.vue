@@ -21,6 +21,7 @@
           <span> {{ $t('form.activity.title') }} </span>
           <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
         </div>
+
         <el-table
           v-show="!collapse"
           v-loading="isLoadActivity"
@@ -32,12 +33,12 @@
           @current-change="handleCurrentChange"
         >
           <el-table-column
-            v-for="(valueOrder) in orderLineDefinition"
-            :key="valueOrder.columnName"
-            :column-key="valueOrder.columnName"
-            :label="valueOrder.name"
-            :align="valueOrder.isNumeric ? 'right' : 'left'"
-            :prop="valueOrder.columnName"
+            v-for="(workflowColumn) in workflowTableDefinition"
+            :key="workflowColumn.columnName"
+            :column-key="workflowColumn.columnName"
+            :label="workflowColumn.name"
+            :align="workflowColumn.isNumeric ? 'right' : 'left'"
+            :prop="workflowColumn.columnName"
           />
         </el-table>
         <custom-pagination
@@ -49,13 +50,14 @@
         />
       </el-card>
     </el-header>
+
     <el-main class="main">
       <el-container style="height: 100%;">
         <el-aside v-if="!isEmptyValue(currentActivity)" id="workflow" width="70%" style="background: white;">
           <workflow-diagram
-            v-if="!isEmptyValue(node) && !isEmptyValue(currentActivity)"
-            :node-transition-list="listWorkflowTransition"
-            :node-list="node"
+            v-if="!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity)"
+            :node-transition-list="workflowTranstitionsList"
+            :node-list="workflowStatesList"
             :current-node="currentNode"
             :workflow-logs="listProcessWorkflow"
           />
@@ -70,7 +72,7 @@
                 <el-timeline-item
                   v-for="(nodes, key) in listProcessWorkflow"
                   :key="key"
-                  :timestamp="translateDate(nodes.log_date)"
+                  :timestamp="translateDateByLong(nodes.log_date)"
                   placement="top"
                 >
                   <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
@@ -92,6 +94,10 @@ import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
 
 // constants
 import fieldsList from './fieldsList.js'
+
+// utils and helper methods
+import { generateWorkflowDiagram } from '@/utils/ADempiere/dictionary/workflow'
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowActivity',
@@ -117,13 +123,6 @@ export default {
   data() {
     return {
       fieldsList,
-      node: [],
-      transitions: [],
-      topContextualMenu: 0,
-      leftContextualMenu: 0,
-      infoNode: {},
-      visible: false,
-      show: false,
       collapse: false,
       currentNode: [{
         classname: 'delete',
@@ -131,8 +130,9 @@ export default {
       }],
       currentWorkflow: {},
       listProcessWorkflow: [],
-      listWorkflowTransition: [],
-      orderLineDefinition: [
+      workflowStatesList: [],
+      workflowTranstitionsList: [],
+      workflowTableDefinition: [
         {
           columnName: 'workflow.name',
           name: this.$t('table.ProcessActivity.Name'),
@@ -192,17 +192,18 @@ export default {
   },
   watch: {
     currentActivity(value) {
-      this.listWorkflow(value)
+      this.generateWorkflow(value)
       this.setCurrent()
     }
   },
   mounted() {
     this.$store.dispatch('serverListActivity')
     if (!this.isEmptyValue(this.currentActivity)) {
-      this.listWorkflow(this.currentActivity)
+      this.generateWorkflow(this.currentActivity)
     }
   },
   methods: {
+    translateDateByLong,
     setCurrent(activity) {
       activity = this.activityList.find(activity => activity.node === this.currentActivity.node)
       // this.$refs.WorkflowActivity.setCurrentRow(activity)
@@ -213,35 +214,11 @@ export default {
     handleCurrentChange(activity) {
       this.$store.dispatch('selectedActivity', activity)
     },
-    onLabelClicked(type, id) {
-      this.visible = true
-      this.infoNode = type.find(node => node.id === id)
-      const nodeLogs = this.listProcessWorkflow.filter(node => node.node_uuid === this.infoNode.uuid)
-      this.infoNode.nodeLogs = nodeLogs
-      const menuMinWidth = 105
-      const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
-      const offsetWidth = this.$el.offsetWidth // container width
-      const maxLeft = offsetWidth - menuMinWidth // left boundary
-      const left = event.clientX - offsetLeft + 15 // 15: margin right
-
-      this.leftContextualMenu = left
-      if (left > maxLeft) {
-        this.leftContextualMenu = maxLeft
-      }
-
-      const offsetTop = this.$el.getBoundingClientRect().top
-      let top = event.clientY - offsetTop
-      if (this.panelType === 'browser' && this.panelMetadata.isShowedCriteria) {
-        top = event.clientY - 200
-      }
-      this.topContextualMenu = top
-      this.show = true
-    },
-    listWorkflow(activity) {
+    generateWorkflow(activity) {
       // Highlight Current Node
       this.currentWorkflow = activity
       this.listProcessWorkflow = !this.isEmptyValue(this.currentWorkflow.workflow_process) ? this.currentWorkflow.workflow_process.workflow_events.reverse() : []
-      this.transitions = []
+
       if (!this.isEmptyValue(activity.node.uuid)) {
         this.currentNode = [{
           classname: 'delete',
@@ -249,62 +226,13 @@ export default {
         }]
       }
 
-      // TODO: Verify it filter or replace with id
-      const nodes = activity.workflow.workflow_nodes // .filter(node => !this.isEmptyValue(node.uuid))
-      this.listNodeTransitions(nodes)
-      if (!this.isEmptyValue(nodes)) {
-        this.node = nodes.map((workflow, key) => {
-          return {
-            ...workflow,
-            transitions: workflow.transitions,
-            id: workflow.uuid,
-            key,
-            label: workflow.name
-          }
-        })
-      } else {
-        this.node = []
-      }
-    },
-    listNodeTransitions(nodes) {
-      nodes.forEach(element => {
-        const uuid = element.uuid
-        const id = element.value
-        if (!this.isEmptyValue(element.transitions)) {
-          element.transitions.forEach((nextNode, key) => {
-            if (!this.isEmptyValue(nextNode.node_next_uuid)) {
-              if (this.isEmptyValue(nextNode.description)) {
-                this.transitions.push({
-                  id: id + key,
-                  target: nextNode.node_next_uuid,
-                  source: uuid
-                })
-              } else {
-                this.transitions.push({
-                  id: id + key,
-                  label: nextNode.description,
-                  target: nextNode.node_next_uuid,
-                  source: uuid
-                })
-              }
-            }
-          })
-        }
-      })
-      const blon = nodes.map(item => {
-        return {
-          uuid: item.uuid
-        }
-      })
-      this.listWorkflowTransition = this.transitions.filter(data => {
-        const verificar = blon.find(mode => mode.uuid === data.source)
-        if (!this.isEmptyValue(verificar)) {
-          return data
-        }
-      })
-    },
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
+      const {
+        transitionsList,
+        statesList
+      } = generateWorkflowDiagram(activity.workflow)
+
+      this.workflowTranstitionsList = transitionsList
+      this.workflowStatesList = statesList
     }
   }
 }
