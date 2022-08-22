@@ -274,6 +274,15 @@ export default {
     isOnlyField() {
       return this.field.isFieldOnly ||
         this.field.componentPath === 'FieldButton'
+    },
+    currentTab() {
+      if (this.isEmptyValue(this.parentUuid) || !this.containerManager.getPanel) {
+        return {}
+      }
+      return this.containerManager.getPanel({
+        parentUuid: this.parentUuid,
+        containerUuid: this.containerUuid
+      })
     }
   },
 
@@ -307,9 +316,17 @@ export default {
 
   methods: {
     focusField(columnName) {
+      const tabPanel = this.$store.getters.getContainerInfo
       setTimeout(() => {
         if (!this.isMobile && this.field.columnName === columnName && !isEmptyValue(this.$refs)) {
-          if (this.$refs[columnName] && this.$refs[columnName].$refs && this.$refs[columnName].$refs[columnName]) {
+          if (
+            this.$refs[columnName] &&
+            this.$refs[columnName].$refs &&
+            this.$refs[columnName].$refs[columnName] &&
+            !this.isEmptyValue(tabPanel) &&
+            !this.isEmptyValue(tabPanel.currentTab) &&
+            tabPanel.id === this.currentTab.id
+          ) {
             this.$refs[columnName].$refs[columnName].focus()
           }
         }

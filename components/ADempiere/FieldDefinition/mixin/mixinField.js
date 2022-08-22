@@ -158,7 +158,8 @@ export default {
         this.metadata.columnName === fieldFocusColumnName &&
         tabPanel.currentTab.containerUuid === this.metadata.containerUuid &&
         !this.isEmptyValue(this.$refs) &&
-        !this.isEmptyValue(this.$refs[fieldFocusColumnName])
+        !this.isEmptyValue(this.$refs[fieldFocusColumnName]) &&
+        tabPanel.id === this.currentTab.id
       ) {
         this.$refs[fieldFocusColumnName].focus()
       }
@@ -177,7 +178,13 @@ export default {
   },
 
   mounted() {
-    if (this.metadata.handleRequestFocus) {
+    const tabPanel = this.$store.getters.getContainerInfo
+    if (
+      this.metadata.handleRequestFocus &&
+      !this.isEmptyValue(tabPanel) &&
+      !this.isEmptyValue(tabPanel.currentTab) &&
+      tabPanel.id === this.currentTab.id
+    ) {
       this.requestFocus()
     }
   },

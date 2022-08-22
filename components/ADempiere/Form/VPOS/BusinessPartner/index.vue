@@ -72,7 +72,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate"
               >
                 <i
                   class="el-icon-plus"
@@ -123,7 +123,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate"
               >
                 <i
                   class="el-icon-edit"
@@ -152,7 +152,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate"
               >
                 <i
                   class="el-icon-add-location"
@@ -303,6 +303,9 @@ export default {
   },
 
   computed: {
+    isAllowsBusinessPartnerCreate() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsBusinessPartnerCreate
+    },
     copyShippingAddress: {
       get() {
         return this.$store.getters.getCopyShippingAddress
@@ -429,7 +432,7 @@ export default {
         return this.$store.getters.getPopoverListBusinessParnet
       },
       set(value) {
-        this.$store.dispatch('changePopoverListBusinessPartner', value)
+        this.$store.commit('changePopoverListBusinessPartner', value)
         return value
       }
     },
@@ -847,7 +850,9 @@ export default {
 
         this.showsPopovers.isShowList = false
         this.showsPopovers.isShowCreate = true
-        this.$store.commit('popoverCreateBusinessPartner', true)
+        if (this.isAllowsBusinessPartnerCreate) {
+          this.$store.commit('popoverCreateBusinessPartner', true)
+        }
       }
 
       this.searchBPartnerList({

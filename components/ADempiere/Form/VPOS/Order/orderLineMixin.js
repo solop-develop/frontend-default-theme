@@ -19,7 +19,10 @@ import {
   updateOrderLine,
   deleteOrderLine
 } from '@/api/ADempiere/form/point-of-sales.js'
-import { formatPercent, formatDateToSend, formatPrice } from '@/utils/ADempiere/valueFormat.js'
+
+import { formatDateToSend, formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { formatPercent, formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'OrderLineMixin',
@@ -312,7 +315,7 @@ export default {
         if (this.isEmptyValue(row.product.value)) return row.charge.name
         return row.product.value + ' - ' + row.product.name
       }
-      const currency = this.$store.getters.posAttributes.currentPointOfSales.currentPriceList.currency.iSOCode
+      const currency = this.$store.getters.posAttributes.currentPointOfSales.priceList.currency.iSOCode
       if (columnName === 'CurrentPrice') {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
           return this.formatPrice(row.price, currency)
@@ -327,11 +330,15 @@ export default {
           return this.formatPrice(row.priceList, currency)
         }
       } else if (columnName === 'QtyEntered') {
-        return this.formatQuantity(row.quantityOrdered)
+        return formatQuantity({ value: row.quantityOrdered })
       } else if (columnName === 'Discount') {
-        return this.formatQuantity(row.discount) + ' %'
+        return formatQuantity({ value: row.discount }) + ' %'
       } else if (columnName === 'taxIndicator') {
-        return this.formatQuantity(row.taxIndicator)
+        let taxIndicator = row.taxIndicator
+        if (isEmptyValue(taxIndicator)) {
+          taxIndicator = 0
+        }
+        return Number.parseFloat(taxIndicator).toFixed(2) + ' %'
       } else if (columnName === 'GrandTotal') {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
           return this.formatPrice(row.totalAmount, currency)
@@ -349,11 +356,10 @@ export default {
       }
     },
 
-    fieldShowValue(row, orderLine) {
-      const { columnName } = orderLine
+    fieldShowValue({ row, columnName }) {
       // const iSOCode = this.isEmptyValue(this.currentPointOfSales.displayCurrency) ? '' : this.currentPointOfSales.displayCurrency.iSOCode
       if (columnName === 'LineDescription') {
-        if (this.isEmptyValue(row.product.value)) return row.charge.name
+        if (isEmptyValue(row.product.value)) return row.charge.name
         return row.product.value + ' - ' + row.product.name
       }
       if (columnName === 'CurrentPrice') {
@@ -370,11 +376,11 @@ export default {
           return row.priceList
         }
       } else if (columnName === 'QtyEntered') {
-        return this.formatQuantity(row.quantityOrdered)
+        return formatQuantity({ value: row.quantityOrdered })
       } else if (columnName === 'Discount') {
-        return this.formatQuantity(row.discount) + ' %'
+        return formatQuantity({ value: row.discount }) + ' %'
       } else if (columnName === 'taxIndicator') {
-        return this.formatQuantity(row.taxIndicator)
+        return formatQuantity({ value: row.taxIndicator })
       } else if (columnName === 'GrandTotal') {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
           return row.totalAmount

@@ -262,7 +262,7 @@ export default {
     isReadOnlyField,
     changeFieldShowedFromUser,
     actionList(event) {
-      this.$store.dispatch('changePopoverListBusinessPartner', false)
+      this.closeListCustomer()
     },
     handleCurrentChange(row) {
       this.selectCustomer = row
@@ -274,7 +274,7 @@ export default {
       }
     },
     closeListCustomer() {
-      this.$store.dispatch('changePopoverListBusinessPartner', false)
+      this.$store.commit('changePopoverListBusinessPartner', false)
     },
     handleChangePage(newPage) {
       this.$store.dispatch('setBPartnerPageNumber', newPage)

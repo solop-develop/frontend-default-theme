@@ -665,9 +665,11 @@ export default {
         posUuid,
         customerUuid: !this.isEmptyValue(currentOrder.uuid) ? '' : this.$store.getters.getNewCustomer.uuid,
         salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
+        priceListUuid: this.$store.getters.currentPriceList.uuid,
         documentTypeUuid
       })
         .then(response => {
+          this.$store.commit('setCurrentPriceList', response.priceList)
           this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
           this.$router.push({
             params: {
