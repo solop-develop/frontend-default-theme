@@ -175,7 +175,7 @@
             <el-card shadow="hover" style="height: 100px">
               <el-button
                 type="text"
-                :disabled="(isEmptyValue(currentOrder.uuid) || !isProcessed)"
+                :disabled="(isEmptyValue(currentOrder.uuid) || !isProcessed || !isAllowsPrintDocument)"
                 :class="(isEmptyValue(currentOrder.uuid) || !isProcessed) ? 'is-disabled-option-card' : 'is-enable-option-card'"
                 style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
                 @click="printTicket()"
@@ -688,6 +688,9 @@ export default {
     },
     allowsConfirmShipment() {
       return this.currentPointOfSales.isAllowsConfirmShipment
+    },
+    isAllowsPrintDocument() {
+      return this.currentPointOfSales.isAllowsPrintDocument
     },
     isDisplayCount() {
       return this.currentPointOfSales.isDisplayDiscount

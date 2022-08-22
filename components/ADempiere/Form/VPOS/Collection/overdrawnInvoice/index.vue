@@ -19,7 +19,7 @@
   <div>
     <el-dialog
       v-shortkey="showDialogo ? {close: ['esc']} : {}"
-      :title="$t('form.pos.collect.overdrawnInvoice.title')"
+      :title="caseOrder === 2 ? $t('form.pos.collect.overdrawnInvoice.below') : $t('form.pos.collect.overdrawnInvoice.title')"
       :visible.sync="showDialogo"
       :before-close="close"
       width="85%"
@@ -347,7 +347,14 @@
       <div v-if="caseOrder === 2">
         <el-card>
           <div slot="header" class="clearfix">
-            <span> {{ $t('form.pos.collect.overdrawnInvoice.below') }} </span>
+            <b>
+              <el-radio
+                v-model="option"
+                :label="4"
+              >
+                {{ $t('form.pos.collect.overdrawnInvoice.adjustDocument') }}
+              </el-radio>
+            </b>
           </div>
           <el-form label-width="120px">
             <el-form-item>
@@ -1573,9 +1580,9 @@ export default {
           })
         })
         .finally(() => {
-          this.$store.dispatch('listOrdersFromServer', {
-            posUuid: this.currentPointOfSales.uuid
-          })
+          // this.$store.dispatch('listOrdersFromServer', {
+          //   posUuid: this.currentPointOfSales.uuid
+          // })
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
         })

@@ -304,7 +304,7 @@ export default {
 
   computed: {
     isAllowsBusinessPartnerCreate() {
-      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsBusinessPartnerCreate
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsCreateCustomer
     },
     copyShippingAddress: {
       get() {
