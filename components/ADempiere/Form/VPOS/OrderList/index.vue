@@ -514,7 +514,6 @@ export default {
         const orderUuid = this.$route.query.action
         this.$store.dispatch('listPayments', { posUuid, orderUuid })
       }
-      console.log(this.changeOrder, currentOrder)
       if (this.changeOrder.documentStatus.value === 'DR') {
         holdOrder({
           posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
