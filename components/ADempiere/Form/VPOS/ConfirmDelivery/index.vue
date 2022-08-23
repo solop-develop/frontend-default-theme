@@ -269,6 +269,10 @@ export default {
     popoverName: {
       type: String,
       default: 'isShowPopoverField'
+    },
+    isCompleteProducts: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -526,10 +530,31 @@ export default {
       }
     },
     createDelivery({ posUuid, orderUuid, salesRepresentativeUuid }) {
+      if (this.isCompleteProducts) {
+        createShipment({
+          posUuid,
+          orderUuid,
+          salesRepresentativeUuid,
+          isCreateLinesFromOrder: true
+        })
+          .then(shipment => {
+            this.$store.commit('setShipment', shipment)
+          })
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: error.message,
+              duration: 1500,
+              showClose: true
+            })
+          })
+        return
+      }
       createShipment({
         posUuid,
         orderUuid,
-        salesRepresentativeUuid
+        salesRepresentativeUuid,
+        isCreateLinesFromOrder: false
       })
         .then(shipment => {
           this.$store.commit('setShipment', shipment)
