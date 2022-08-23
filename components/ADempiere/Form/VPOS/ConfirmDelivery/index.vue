@@ -530,31 +530,11 @@ export default {
       }
     },
     createDelivery({ posUuid, orderUuid, salesRepresentativeUuid }) {
-      if (this.isCompleteProducts) {
-        createShipment({
-          posUuid,
-          orderUuid,
-          salesRepresentativeUuid,
-          isCreateLinesFromOrder: true
-        })
-          .then(shipment => {
-            this.$store.commit('setShipment', shipment)
-          })
-          .catch(error => {
-            this.$message({
-              type: 'error',
-              message: error.message,
-              duration: 1500,
-              showClose: true
-            })
-          })
-        return
-      }
       createShipment({
         posUuid,
         orderUuid,
         salesRepresentativeUuid,
-        isCreateLinesFromOrder: false
+        isCreateLinesFromOrder: this.isCompleteProducts
       })
         .then(shipment => {
           this.$store.commit('setShipment', shipment)
