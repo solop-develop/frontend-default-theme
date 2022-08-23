@@ -262,6 +262,36 @@
             </el-card>
           </el-col>
 
+          <!-- confirmDelivery -->
+
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <el-popover
+                v-model="popoverDeliverAllProducts"
+                placement="right"
+                trigger="click"
+                width="900"
+                :disabled="!isProcessed"
+              >
+                <confirm-delivery
+                  :is-selectable="false"
+                  :is-visible="popoverDeliverAllProducts"
+                  :is-complete-products="true"
+                  popover-name="isShowPopoverMenu"
+                />
+                <div
+                  slot="reference"
+                  :class="classOptionPopoverConfirmDelivery"
+                  @click="openAllProducts()"
+                >
+                  <svg-icon icon-class="shopping" />
+                  <br>
+                  {{ $t('form.pos.optionsPoinSales.salesOrder.deliverAllProducts') }}
+                </div>
+              </el-popover>
+            </el-card>
+          </el-col>
+
           <!-- applyDiscountOnOrder -->
 
           <el-col v-if="isAllowsApplyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
@@ -692,6 +722,9 @@ export default {
     isAllowsPrintDocument() {
       return this.currentPointOfSales.isAllowsPrintDocument
     },
+    isAllowsConfirmShipmentByOrder() {
+      return this.currentPointOfSales.isAllowsConfirmShipmentByOrder
+    },
     isDisplayCount() {
       return this.currentPointOfSales.isDisplayDiscount
     },
@@ -834,6 +867,17 @@ export default {
         }
       }
     },
+    // deliverAllProducts
+    popoverDeliverAllProducts: {
+      get() {
+        return this.$store.getters.getDeliverAllProducts
+      },
+      set(value) {
+        if (!this.isEmptyValue(this.currentOrder.uuid)) {
+          this.$store.commit('setDeliverAllProducts', value)
+        }
+      }
+    },
     isProcessed() {
       if (!this.isEmptyValue(this.currentOrder.documentStatus.value) && this.currentOrder.documentStatus.value === 'CO') {
         return true
@@ -882,6 +926,32 @@ export default {
         }]
       })
     },
+    openAllProducts() {
+      if (!this.isProcessed || !this.isAllowsConfirmShipmentByOrder) {
+        return
+      }
+      createShipment({
+        posUuid: this.currentPointOfSales.uuid,
+        orderUuid: this.currentOrder.uuid,
+        salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
+        isCreateLinesFromOrder: true
+      })
+        .then(shipment => {
+          this.$store.commit('setShipment', shipment)
+          shipments({ shipmentUuid: shipment.uuid })
+            .then(response => {
+              this.$store.commit('setDeliveryList', response.records)
+            })
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            duration: 1500,
+            showClose: true
+          })
+        })
+    },
     openDelivery() {
       if (!this.isProcessed) {
         return
@@ -889,7 +959,8 @@ export default {
       createShipment({
         posUuid: this.currentPointOfSales.uuid,
         orderUuid: this.currentOrder.uuid,
-        salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid
+        salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
+        isCreateLinesFromOrder: false
       })
         .then(shipment => {
           this.$store.commit('setShipment', shipment)

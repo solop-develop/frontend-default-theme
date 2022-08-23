@@ -269,6 +269,10 @@ export default {
     popoverName: {
       type: String,
       default: 'isShowPopoverField'
+    },
+    isCompleteProducts: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -529,7 +533,8 @@ export default {
       createShipment({
         posUuid,
         orderUuid,
-        salesRepresentativeUuid
+        salesRepresentativeUuid,
+        isCreateLinesFromOrder: this.isCompleteProducts
       })
         .then(shipment => {
           this.$store.commit('setShipment', shipment)

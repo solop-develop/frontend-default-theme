@@ -1055,6 +1055,7 @@ export function daleteCustomerBankAccounts({
 export function createShipment({
   posUuid,
   orderUuid,
+  isCreateLinesFromOrder,
   salesRepresentativeUuid
 }) {
   return request({
@@ -1063,6 +1064,7 @@ export function createShipment({
     data: {
       pos_uuid: posUuid,
       order_uuid: orderUuid,
+      is_create_lines_from_order: isCreateLinesFromOrder,
       sales_representative_uuid: salesRepresentativeUuid
     }
   })
