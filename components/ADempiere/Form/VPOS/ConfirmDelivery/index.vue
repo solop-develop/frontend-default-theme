@@ -400,6 +400,7 @@ export default {
     },
     close() {
       this.$store.commit('setShowFastConfirmDelivery', false)
+      this.$store.commit('setDeliverAllProducts', false)
       this.$store.commit('setConfirmDelivery', false)
     },
     listShipments({ shipmentUuid }) {

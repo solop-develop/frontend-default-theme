@@ -271,7 +271,7 @@
                 placement="right"
                 trigger="click"
                 width="900"
-                :disabled="!isProcessed"
+                :disabled="!isProcessed || !isAllowsConfirmShipmentByOrder"
               >
                 <confirm-delivery
                   :is-selectable="false"
@@ -281,7 +281,7 @@
                 />
                 <div
                   slot="reference"
-                  :class="classOptionPopoverConfirmDelivery"
+                  :class="(isEmptyValue(currentOrder.uuid) || !isProcessed || !isAllowsConfirmShipmentByOrder) ? 'is-disabled-option-card' : 'is-enable-option-card'"
                   @click="openAllProducts()"
                 >
                   <svg-icon icon-class="shopping" />
