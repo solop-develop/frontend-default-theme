@@ -68,9 +68,7 @@ export default [
     }
   },
   {
-    // columnName: 'BankAccountType',
-    // tableName: 'C_BankAccount',
-    uuid: '8cf2a1c2-fb40-11e8-a479-7a0060f0aa01',
+    elementColumnName: 'BankAccountType',
     isFromDictionary: true,
     overwriteDefinition: {
       sequence: 2,
