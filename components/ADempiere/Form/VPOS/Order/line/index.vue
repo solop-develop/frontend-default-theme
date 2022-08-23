@@ -21,17 +21,15 @@
     <el-row
       v-if="!isEmptyValue(metadataList) && isLoadedField"
     >
-      <template
-        v-for="(field, index) in metadataList"
-      >
-        <el-col :key="index" :span="8">
-          <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
+      <el-col :span="8" style="width: 100% !important;">
+        <el-form label-position="top" :inline="true" label-width="10px" style="display: flex;" @submit.native.prevent="notSubmitForm">
+          <el-col :span="24" style>
             <field-definition
-              v-if="field.columnName === 'PriceEntered'"
-              :key="field.columnName"
-              :ref="field.columnName"
+              v-if="!isEmptyValue(metadataList[0].columnName)"
+              :key="metadataList[0].columnName"
+              :ref="metadataList[0].columnName"
               :metadata-field="{
-                ...field,
+                ...metadataList[0],
                 labelCurrency: currencyPointOfSales.iSOCode,
               }"
               :container-uuid="'line'"
@@ -47,28 +45,16 @@
                 changeFieldShowedFromUser
               }"
             />
+          </el-col>
+          <el-col :span="24">
             <field-definition
-              v-if="field.columnName === 'QtyEntered'"
-              :key="field.columnName"
-              :metadata-field="field"
-              :container-uuid="'line'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                generalInfoSearch,
-                searchTableHeader,
-                isDisplayedDefault,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
+              v-if="!isEmptyValue(metadataList[1].columnName)"
+              :key="metadataList[1].columnName"
+              :ref="metadataList[1].columnName"
+              :metadata-field="{
+                ...metadataList[1],
+                labelCurrency: currencyPointOfSales.iSOCode,
               }"
-            />
-            <field-definition
-              v-if="field.columnName === 'Discount'"
-              :ref="field.columnName"
-              :key="field.columnName"
-              :metadata-field="field"
               :container-uuid="'line'"
               :container-manager="{
                 ...containerManager,
@@ -82,9 +68,47 @@
                 changeFieldShowedFromUser
               }"
             />
-          </el-form>
-        </el-col>
-      </template>
+          </el-col>
+          <el-col :span="24">
+            <field-definition
+              v-if="!isEmptyValue(metadataList[2].columnName)"
+              :key="metadataList[2].columnName"
+              :ref="metadataList[2].columnName"
+              :metadata-field="{
+                ...metadataList[2],
+                labelCurrency: currencyPointOfSales.iSOCode,
+              }"
+              :container-uuid="'line'"
+              :container-manager="{
+                ...containerManager,
+                getLookupList,
+                isDisplayedField,
+                isDisplayedDefault,
+                generalInfoSearch,
+                searchTableHeader,
+                isMandatoryField,
+                isReadOnlyField,
+                changeFieldShowedFromUser
+              }"
+            />
+          </el-col>
+          <el-col :span="24">
+            <el-form-item :label="$t('route.warehouse')">
+              <el-select
+                v-model="stock"
+                @change="changeWarehouseLine"
+              >
+                <el-option
+                  v-for="(item, key) in listWarehouseLine"
+                  :key="key"
+                  :label="item.label + ' | Cantidad: ' + item.qty"
+                  :value="item.uuid"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-form>
+      </el-col>
     </el-row>
     <div
       v-else
@@ -97,7 +121,6 @@
     />
   </div>
 </template>
-
 <script>
 // constants
 import fieldsListLine from './fieldsListLine.js'
@@ -106,7 +129,7 @@ import fieldsListLine from './fieldsListLine.js'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
 // api request methods
-import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
+import { validatePin, updateOrderLine } from '@/api/ADempiere/form/point-of-sales.js'
 
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
 
@@ -169,6 +192,8 @@ export default {
       defaultData: {},
       fieldsListLine,
       fieldsList: [],
+      options: [],
+      stock: '',
       unsubscribe: () => {}
     }
   },
@@ -212,11 +237,32 @@ export default {
     },
     isDisplayDiscount() {
       return this.currentPointOfSales.isDisplayDiscount
+    },
+    listWarehouseLine() {
+      const listWarehouseLine = this.$store.getters.getListWarehouseLine
+      let defaultLineWarehouse
+      if (!this.isEmptyValue(this.currentLine.warehouse)) {
+        defaultLineWarehouse = listWarehouseLine.find(stock => stock.uuid === this.currentLine.warehouse.uuid)
+      }
+      if (this.isEmptyValue(defaultLineWarehouse)) {
+        const list = listWarehouseLine.push({
+          ...this.currentLine.warehouse,
+          qty: 0
+        })
+        return list
+      }
+      return listWarehouseLine
     }
   },
 
   watch: {
     showField(value) {
+      if (!this.isEmptyValue(this.currentLine.product)) {
+        this.$store.dispatch('findWarehouse', {
+          value: this.currentLine.product.value,
+          sku: this.currentLine.product.sku
+        })
+      }
       this.visible = false
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
         this.metadataList = this.setFieldsList()
@@ -232,6 +278,9 @@ export default {
           discount: this.currentLine.discount
         })
         this.isLoadedField = true
+      }
+      if (!this.isEmptyValue(this.currentLine.warehouse)) {
+        this.stock = this.currentLine.warehouse.uuid
       }
     }
   },
@@ -349,6 +398,13 @@ export default {
         }
       })
       return valuesToSend
+    },
+    changeWarehouseLine(value) {
+      updateOrderLine({
+        posUuid: this.currentPointOfSales.uuid,
+        orderLineUuid: this.currentLine.uuid,
+        warehouseUuid: value
+      })
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
