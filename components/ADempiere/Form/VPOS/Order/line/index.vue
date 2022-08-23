@@ -92,21 +92,26 @@
               }"
             />
           </el-col>
-          <el-col :span="24">
-            <el-form-item :label="$t('route.warehouse')">
-              <el-select
-                v-model="stock"
-                @change="changeWarehouseLine"
+        </el-form>
+      </el-col>
+      <el-col :span="24">
+        <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
+          <el-form-item :label="$t('route.warehouse')">
+            <el-select
+              v-model="stock"
+              @change="changeWarehouseLine"
+            >
+              <el-option
+                v-for="(item, key) in listWarehouseLine"
+                :key="key"
+                :label="item.label"
+                :value="item.uuid"
               >
-                <el-option
-                  v-for="(item, key) in listWarehouseLine"
-                  :key="key"
-                  :label="item.label + ' | Cantidad: ' + item.qty"
-                  :value="item.uuid"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
+                <span style="float: left">{{ item.label }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.qty }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item>
         </el-form>
       </el-col>
     </el-row>
