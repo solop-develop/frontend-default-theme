@@ -723,7 +723,7 @@ export default {
       return this.currentPointOfSales.isAllowsPrintDocument
     },
     isAllowsConfirmShipmentByOrder() {
-      return this.currentPointOfSales.isAllowsConfirmShipmentByOrder
+      return this.currentPointOfSales.isConfirmCompleteShipment
     },
     isDisplayCount() {
       return this.currentPointOfSales.isDisplayDiscount
