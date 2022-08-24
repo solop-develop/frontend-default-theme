@@ -21,15 +21,17 @@
     <el-row
       v-if="!isEmptyValue(metadataList) && isLoadedField"
     >
-      <el-col :span="8" style="width: 100% !important;">
-        <el-form label-position="top" :inline="true" label-width="10px" style="display: flex;" @submit.native.prevent="notSubmitForm">
-          <el-col :span="24" style>
+      <template
+        v-for="(field, index) in metadataList"
+      >
+        <el-col :key="index" :span="8">
+          <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
             <field-definition
-              v-if="!isEmptyValue(metadataList[0].columnName)"
-              :key="metadataList[0].columnName"
-              :ref="metadataList[0].columnName"
+              v-if="field.columnName === 'PriceEntered'"
+              :key="field.columnName"
+              :ref="field.columnName"
               :metadata-field="{
-                ...metadataList[0],
+                ...field,
                 labelCurrency: currencyPointOfSales.iSOCode,
               }"
               :container-uuid="'line'"
@@ -45,16 +47,28 @@
                 changeFieldShowedFromUser
               }"
             />
-          </el-col>
-          <el-col :span="24">
             <field-definition
-              v-if="!isEmptyValue(metadataList[1].columnName)"
-              :key="metadataList[1].columnName"
-              :ref="metadataList[1].columnName"
-              :metadata-field="{
-                ...metadataList[1],
-                labelCurrency: currencyPointOfSales.iSOCode,
+              v-if="field.columnName === 'QtyEntered'"
+              :key="field.columnName"
+              :metadata-field="field"
+              :container-uuid="'line'"
+              :container-manager="{
+                ...containerManager,
+                getLookupList,
+                isDisplayedField,
+                generalInfoSearch,
+                searchTableHeader,
+                isDisplayedDefault,
+                isMandatoryField,
+                isReadOnlyField,
+                changeFieldShowedFromUser
               }"
+            />
+            <field-definition
+              v-if="field.columnName === 'Discount'"
+              :ref="field.columnName"
+              :key="field.columnName"
+              :metadata-field="field"
               :container-uuid="'line'"
               :container-manager="{
                 ...containerManager,
@@ -68,35 +82,12 @@
                 changeFieldShowedFromUser
               }"
             />
-          </el-col>
-          <el-col :span="24">
-            <field-definition
-              v-if="!isEmptyValue(metadataList[2].columnName)"
-              :key="metadataList[2].columnName"
-              :ref="metadataList[2].columnName"
-              :metadata-field="{
-                ...metadataList[2],
-                labelCurrency: currencyPointOfSales.iSOCode,
-              }"
-              :container-uuid="'line'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-          </el-col>
-        </el-form>
-      </el-col>
-      <el-col :span="24">
+          </el-form>
+        </el-col>
+      </template>
+      <el-col :span="8">
         <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item :label="$t('route.warehouse')">
+          <el-form-item :label="$t('route.warehouse')" style="margin-left: 5%;">
             <el-select
               v-model="stock"
               @change="changeWarehouseLine"
@@ -108,7 +99,7 @@
                 :value="item.uuid"
               >
                 <span style="float: left">{{ item.label }}</span>
-                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.qty }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.sumaryQty }}</span>
               </el-option>
             </el-select>
           </el-form-item>
@@ -250,10 +241,14 @@ export default {
         defaultLineWarehouse = listWarehouseLine.find(stock => stock.uuid === this.currentLine.warehouse.uuid)
       }
       if (this.isEmptyValue(defaultLineWarehouse)) {
-        const list = listWarehouseLine.push({
+        listWarehouseLine.push({
           ...this.currentLine.warehouse,
-          qty: 0
+          label: this.currentLine.warehouse.name,
+          id: this.currentLine.warehouse.id,
+          uuid: this.currentLine.warehouse.uuid,
+          sumaryQty: 0
         })
+        const list = listWarehouseLine
         return list
       }
       return listWarehouseLine
@@ -410,6 +405,22 @@ export default {
         orderLineUuid: this.currentLine.uuid,
         warehouseUuid: value
       })
+        .then(response => {
+          this.$message({
+            type: 'success',
+            message: 'Acción a realizar',
+            showClose: true
+          })
+        })
+        .catch(error => {
+          this.stock = this.currentLine.warehouse.uuid
+          console.warn(error.message)
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
