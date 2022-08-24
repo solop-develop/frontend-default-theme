@@ -242,7 +242,9 @@ export default {
 
   created() {
     this.unsubscribe = this.subscribeChanges()
-
+    if (this.isEmptyValue(this.metadataList)) {
+      this.setFieldsList()
+    }
     if (this.isReadyFromGetData) {
       this.searchBPartnerList({})
     }
