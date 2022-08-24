@@ -187,6 +187,23 @@
             </el-card>
           </el-col>
 
+          <!-- printTicketPreviwer -->
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <el-button
+                type="text"
+                :disabled="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument"
+                :class="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument ? 'is-disabled-option-card' : 'is-enable-option-card'"
+                style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
+                @click="printTicketPreviwer()"
+              >
+                <i class="el-icon-printer" />
+                <br><br>
+                {{ $t('form.pos.optionsPoinSales.salesOrder.preview') }}
+              </el-button>
+            </el-card>
+          </el-col>
+
           <!-- createNewReturnOrder -->
 
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
@@ -559,7 +576,11 @@ import {
 } from '@/api/ADempiere/form/point-of-sales.js'
 import { createShipment, shipments } from '@/api/ADempiere/form/point-of-sales.js'
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
+import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 // import posProcess from '@/utils/ADempiere/constants/posProcess'
+import {
+  buildLinkHref
+} from '@/utils/ADempiere/resource.js'
 
 export default {
   name: 'PointOfSalesOptions',
@@ -721,6 +742,9 @@ export default {
     },
     isAllowsPrintDocument() {
       return this.currentPointOfSales.isAllowsPrintDocument
+    },
+    IsAllowsPreviewDocument() {
+      return this.currentPointOfSales.isAllowsPreviewDocument
     },
     isAllowsConfirmShipmentByOrder() {
       return this.currentPointOfSales.isConfirmCompleteShipment
@@ -1137,6 +1161,9 @@ export default {
         case this.$t('form.pos.optionsPoinSales.salesOrder.print'):
           this.printTicket()
           break
+        case this.$t('form.pos.optionsPoinSales.salesOrder.preview'):
+          this.printTicketPreviwer()
+          break
         case this.$t('form.pos.optionsPoinSales.salesOrder.copyOrder'):
           this.copyOrder()
           break
@@ -1171,6 +1198,61 @@ export default {
           this.transfer()
           break
       }
+    },
+    printTicketPreviwer() {
+      const orderUuid = this.currentOrder.uuid
+      const posUuid = this.currentPointOfSales.uuid
+      this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+        .then(response => {
+          const { processLog } = response
+          if (!this.isEmptyValue(processLog)) {
+            const link = buildLinkHref({
+              fileName: processLog.output.file_name,
+              outputStream: processLog.output.output_stream,
+              mimeType: processLog.output.mime_type
+            })
+            this.$store.commit('setReportOutput', {
+              download: link.download,
+              format: processLog.output.report_type,
+              fileName: processLog.output.file_name,
+              link,
+              content: processLog.output.output,
+              mimeType: processLog.output.mime_type,
+              name: processLog.output.name,
+              output: processLog.output,
+              outputStream: processLog.output.output_stream,
+              outputStream_asB64: processLog.output.output_stream_asB64,
+              outputStream_asU8: processLog.output.output_stream_asU8,
+              reportType: processLog.output.report_type,
+              reportUuid: processLog.uuid,
+              reportViewUuid: processLog.uuid,
+              tableName: 'C_Order',
+              url: link.href,
+              uuid: processLog.uuid,
+              instanceUuid: processLog.instance_uuid
+            })
+            this.$router.push({
+              name: REPORT_VIEWER_NAME,
+              params: {
+                processId: 110,
+                reportUuid: processLog.uuid,
+                tableName: 'C_Order',
+                menuParentUuid: '',
+                instanceUuid: processLog.instance_uuid,
+                fileName: processLog.output.name,
+                name: processLog.output.name,
+                mimeType: processLog.output.mime_type
+              }
+            }, () => {})
+          }
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
     },
     printTicket() {
       const orderUuid = this.currentOrder.uuid
