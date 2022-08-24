@@ -345,7 +345,7 @@ export default {
       get() {
         if (this.isEmptyValue(this.oldValueCustomer) && !this.isEmptyValue(this.newCustomer) && !this.editBusinessPartner &&
           this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
-          return this.newCustomer.value + this.newCustomer.name
+          return this.newCustomer.value + ' - ' + this.newCustomer.name
         }
         if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
           if (!this.isEmptyValue(this.oldValueCustomer)) {
