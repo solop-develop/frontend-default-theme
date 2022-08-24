@@ -182,7 +182,7 @@
                     placement="right"
                     trigger="click"
                     :title="$t('form.pos.tableProduct.editQuantities')"
-                    width="600"
+                    width="700"
                     @hide="showFieldLine = false"
                   >
                     <field-line
