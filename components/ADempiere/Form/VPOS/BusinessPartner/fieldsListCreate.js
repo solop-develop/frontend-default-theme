@@ -48,22 +48,20 @@ export default [
     }
   },
 
-  // {
-  //   elementColumnName: 'PersonType',
-  //   columnName: 'PersonType',
-  //   fieldUuid: 'e699d070-8e2e-11e9-a13e-6ba4b8556bd1',
-  //   uuid: 'e699d070-8e2e-11e9-a13e-6ba4b8556bd1',
-  //   isFromDictionary: true,
-  //   overwriteDefinition: {
-  //     isCustomField: true,
-  //     tabindex: 0,
-  //     handleFocusGained: true,
-  //     handleFocusLost: true,
-  //     sequence: 0,
-  //     size: 8,
-  //     isMandatory: true
-  //   }
-  // },
+  {
+    fieldUuid: 'e699d070-8e2e-11e9-a13e-6ba4b8556bd1',
+    uuid: 'e699d070-8e2e-11e9-a13e-6ba4b8556bd1',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      isCustomField: true,
+      tabindex: 0,
+      handleFocusGained: true,
+      handleFocusLost: true,
+      sequence: 0,
+      size: 8,
+      isMandatory: true
+    }
+  },
   {
     elementColumnName: 'Name',
     columnName: 'Name',
@@ -115,6 +113,20 @@ export default [
       isCustomField: true,
       isMandatory: true,
       size: 8
+    }
+  },
+  {
+    fieldUuid: '06d18869-f3af-4021-bddb-bb63a9a1f3ad',
+    uuid: '06d18869-f3af-4021-bddb-bb63a9a1f3ad',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      isCustomField: true,
+      tabindex: 0,
+      handleFocusGained: true,
+      handleFocusLost: true,
+      sequence: 0,
+      size: 8,
+      isMandatory: true
     }
   }
 ]
