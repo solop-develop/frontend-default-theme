@@ -866,7 +866,7 @@ export default {
 
   mounted() {
     setTimeout(() => {
-      if (!this.isEmptyValue(this.fieldCampaign.reference) && this.isEmptyValue(this.listCampaign)) {
+      if (!this.isEmptyValue(this.fieldCampaign.reference) && !this.isEmptyValue(this.fieldCampaign.reference.tableName) && this.isEmptyValue(this.listCampaign)) {
         this.getListCampaign(this.fieldCampaign.reference)
       }
     }, 500)

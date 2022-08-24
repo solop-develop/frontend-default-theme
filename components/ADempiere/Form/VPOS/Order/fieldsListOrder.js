@@ -29,14 +29,15 @@ export default [
     }
   },
   {
-    tableName: 'C_Campaign',
     elementColumnName: 'C_Campaign_ID',
-    columnName: 'C_Campaign_ID',
     isFromDictionary: true,
     overwriteDefinition: {
       size: 24,
       handleFocusGained: true,
       handleActionPerformed: true,
+      reference: {
+        tableName: 'C_Campaign'
+      },
       handleActionKeyPerformed: true
     }
   }
