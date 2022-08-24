@@ -355,6 +355,11 @@
                 {{ $t('form.pos.collect.overdrawnInvoice.adjustDocument') }}
               </el-radio>
             </b>
+            <span style="float: right;text-align: end">
+              <b>
+                {{ $t('form.pos.collect.overdrawnInvoice.customerLimit') }}: {{ formatPrice(currentPointOfSales.writeOffAmountTolerance, currentPointOfSales.priceList.currency.iSOCode) }}
+              </b>
+            </span>
           </div>
           <el-form label-width="120px">
             <el-form-item>
@@ -1364,8 +1369,23 @@ export default {
         })
       })
       if (this.option === 4) {
-        this.completePreparedOrder(posUuid, orderUuid, payments)
-        this.$store.commit('dialogoInvoce', { show: false, success: true })
+        console.log({ values })
+        if (this.currentPointOfSales.currentOrder.openAmount > this.currentPointOfSales.writeOffAmountTolerance) {
+          const attributePin = {
+            posUuid,
+            orderUuid,
+            payments,
+            typeRefund: this.option,
+            action: 'openBalanceInvoice',
+            type: 'actionPos',
+            label: this.$t('form.pos.pinMessage.invoiceOpen')
+          }
+          this.visible = true
+          this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+          return
+        }
+        // this.completePreparedOrder(posUuid, orderUuid, payments)
+        // this.$store.commit('dialogoInvoce', { show: false, success: true })
         return
       }
       this.$store.dispatch('addRefundLoaded', values)
@@ -1412,6 +1432,7 @@ export default {
       })
     },
     optionSelected({ posUuid, orderUuid, customerDetails, payments }) {
+      console.log({ option: this.option })
       switch (this.option) {
         case 1:
           if (this.currentOrder.paymentAmount < this.currentOrder.grandTotal && Math.abs(this.currentOrder.openAmount) > this.currentPointOfSales.writeOffAmountTolerance) {

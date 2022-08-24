@@ -367,6 +367,9 @@ export default {
               case 3:
                 this.refundAllowed(action.posUuid, action.orderUuid, action.payments)
                 break
+              case 4:
+                this.refundAllowed(action.posUuid, action.orderUuid, action.payments)
+                break
             }
             this.$store.commit('dialogoInvoce', { show: true, type: 2 })
             this.$store.commit('dialogoInvoce', { show: false })
