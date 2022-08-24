@@ -429,7 +429,7 @@ export default {
     },
     popoverListBusinessParnet: {
       get() {
-        return this.$store.getters.getPopoverListBusinessParnet
+        return this.$store.getters.getBusinessPartnerPopoverList
       },
       set(value) {
         this.$store.commit('changePopoverListBusinessPartner', value)
