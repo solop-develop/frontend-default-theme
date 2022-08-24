@@ -241,10 +241,14 @@ export default {
         defaultLineWarehouse = listWarehouseLine.find(stock => stock.uuid === this.currentLine.warehouse.uuid)
       }
       if (this.isEmptyValue(defaultLineWarehouse)) {
-        const list = listWarehouseLine.push({
+        listWarehouseLine.push({
           ...this.currentLine.warehouse,
+          label: this.currentLine.warehouse.name,
+          id: this.currentLine.warehouse.id,
+          uuid: this.currentLine.warehouse.uuid,
           sumaryQty: 0
         })
+        const list = listWarehouseLine
         return list
       }
       return listWarehouseLine
@@ -401,6 +405,22 @@ export default {
         orderLineUuid: this.currentLine.uuid,
         warehouseUuid: value
       })
+        .then(response => {
+          this.$message({
+            type: 'success',
+            message: 'Acción a realizar',
+            showClose: true
+          })
+        })
+        .catch(error => {
+          this.stock = this.currentLine.warehouse.uuid
+          console.warn(error.message)
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
