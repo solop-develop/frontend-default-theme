@@ -531,17 +531,25 @@ export default {
     },
     hiddenFieldsList() {
       return this.fieldsList.filter(field => {
-        if (field.sequence > 1 && field.displayLogicPayment.includes(this.currentAvailablePaymentMethods.tender_type)) {
+        if (field.sequence > 1 && field.displayLogicPayment.includes(this.currentAvailablePaymentMethods.payment_method.tender_type)) {
           return field
         }
       })
     },
     currentAvailablePaymentMethods() {
-      const payment = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      const payment = this.searchPaymentMethods.find(payment => {
+        if (payment.uuid === this.currentFieldPaymentMethods) {
+          return payment
+        }
+      })
       if (!this.isEmptyValue(payment)) {
         return payment
       }
-      const defaultPayment = this.searchPaymentMethods.find(payment => payment.tender_type === 'X')
+      const defaultPayment = this.searchPaymentMethods.find(payment => {
+        if (payment.payment_method.tender_type === 'X') {
+          return payment
+        }
+      })
       if (!this.isEmptyValue(defaultPayment)) {
         return defaultPayment
       }
@@ -863,16 +871,18 @@ export default {
       columnName: 'PayAmt',
       value: this.currentPointOfSales.currentOrder.refundAmount
     })
-    this.$store.commit('updateValueOfField', {
-      containerUuid: 'OverdrawnInvoice',
-      columnName: 'Name',
-      value: this.currentPointOfSales.currentOrder.businessPartner.name
-    })
-    this.$store.commit('updateValueOfField', {
-      containerUuid: 'OverdrawnInvoice',
-      columnName: 'Value',
-      value: this.currentPointOfSales.currentOrder.businessPartner.value
-    })
+    if (!this.isEmptyValue(this.currentPointOfSales.currentOrder.businessPartner)) {
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'OverdrawnInvoice',
+        columnName: 'Name',
+        value: this.currentPointOfSales.currentOrder.businessPartner.name
+      })
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'OverdrawnInvoice',
+        columnName: 'Value',
+        value: this.currentPointOfSales.currentOrder.businessPartner.value
+      })
+    }
   },
   methods: {
     formatPrice,
@@ -932,6 +942,7 @@ export default {
         account = refund.phone
       }
       const currencySelected = this.listCurrency.find(currency => currency.iso_code === this.refundReferenceCurrency)
+      const paymentCurrency = this.paymentTypeList.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       if (this.isEmptyValue(this.currentBankAccount)) {
         this.$store.dispatch('customerBankAccount', {
           ...refund,
@@ -953,7 +964,7 @@ export default {
               sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== currencySelected.uuid) ? refund.amount / this.dayRate.multiplyRate : refund.amount,
               isReceipt: false,
               customerBankAccountUuid: response.customerBankAccountUuid,
-              currencyUuid: this.isEmptyValue(currencySelected) ? this.defaultReferenceCurrency : currencySelected.uuid,
+              currencyUuid: paymentCurrency.refund_reference_currency.uuid,
               tenderTypeCode: payment.tender_type,
               customerUuid: refund.customerUuid,
               posUuid: refund.posUuid,
@@ -963,7 +974,7 @@ export default {
               name: nameAccount,
               bankAccountType: refund.bankAccountType,
               bankUuid: refund.bankID,
-              paymentMethodUuid: payment.uuid,
+              paymentMethodUuid: payment.payment_method.uuid,
               isAch: true,
               AccountNo: account
             })
@@ -976,8 +987,8 @@ export default {
         sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== currencySelected.uuid) ? refund.amount / this.dayRate.multiplyRate : refund.amount,
         isReceipt: false,
         customerBankAccountUuid: this.currentBankAccount,
-        currencyUuid: this.isEmptyValue(currencySelected) ? this.defaultReferenceCurrency : currencySelected.uuid,
-        tenderTypeCode: payment.tender_type,
+        currencyUuid: paymentCurrency.refund_reference_currency.uuid,
+        tenderTypeCode: payment.payment_method.tender_type,
         customerUuid: refund.customerUuid,
         posUuid: refund.posUuid,
         email: refund.email,
@@ -986,7 +997,7 @@ export default {
         name: nameAccount,
         bankAccountType: refund.bankAccountType,
         bankUuid: refund.bankAccountType,
-        paymentMethodUuid: payment.uuid,
+        paymentMethodUuid: payment.payment_method.uuid,
         isAch: true,
         AccountNo: account
       })
@@ -1270,9 +1281,6 @@ export default {
         containerUuid,
         columnName: 'DateTrx'
       })
-      const currencySelected = this.listCurrency.find(currency => currency.iso_code === this.refundReferenceCurrency)
-      const currencyUuid = this.isEmptyValue(currencySelected) ? this.defaultReferenceCurrency : currencySelected.uuid
-      const tenderTypeCode = this.currentAvailablePaymentMethods.tender_type
       const paymentMethodUuid = this.currentAvailablePaymentMethods.uuid
       const referenceNo = this.$store.getters.getValueOfField({
         containerUuid,
@@ -1280,6 +1288,7 @@ export default {
       })
       const filterPayment = this.listRefund.filter(payment => payment.paymentMethodUuid === paymentMethodUuid || payment.payment_method_uuid === paymentMethodUuid)
       const allPayMaximunRefund = this.sumRefund(filterPayment)
+      const paymentCurrency = this.paymentTypeList.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       if (this.maximumRefundAllowed < amount || (this.maximumRefundAllowed - allPayMaximunRefund) < amount) {
         this.visiblePin = true
         setTimeout(() => {
@@ -1293,9 +1302,9 @@ export default {
           amount: amount,
           convertedAmount: amount * this.dayRate.divideRate,
           paymentDate,
-          tenderTypeCode,
-          paymentMethodUuid,
-          currencyUuid
+          tenderTypeCode: paymentCurrency.payment_method.tender_type,
+          paymentMethodUuid: paymentCurrency.payment_method.uuid,
+          currencyUuid: paymentCurrency.refund_reference_currency.uuid
         }
         return
       }
@@ -1307,9 +1316,9 @@ export default {
         amount: amount,
         convertedAmount: amount * this.dayRate.divideRate,
         paymentDate,
-        tenderTypeCode,
-        paymentMethodUuid,
-        currencyUuid
+        tenderTypeCode: paymentCurrency.payment_method.tender_type,
+        paymentMethodUuid: paymentCurrency.payment_method.uuid,
+        currencyUuid: paymentCurrency.refund_reference_currency.uuid
       })
       this.currentFieldPaymentMethods = this.isEmptyValue(this.searchPaymentMethods) ? '' : this.searchPaymentMethods[0].uuid
     },
@@ -1369,7 +1378,6 @@ export default {
         })
       })
       if (this.option === 4) {
-        console.log({ values })
         if (this.currentPointOfSales.currentOrder.openAmount > this.currentPointOfSales.writeOffAmountTolerance) {
           const attributePin = {
             posUuid,
@@ -1432,7 +1440,6 @@ export default {
       })
     },
     optionSelected({ posUuid, orderUuid, customerDetails, payments }) {
-      console.log({ option: this.option })
       switch (this.option) {
         case 1:
           if (this.currentOrder.paymentAmount < this.currentOrder.grandTotal && Math.abs(this.currentOrder.openAmount) > this.currentPointOfSales.writeOffAmountTolerance) {
