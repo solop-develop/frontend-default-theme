@@ -13,9 +13,23 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import language from '@/lang'
 
 // List of fields to send in search
 export default [
+  {
+    elementColumnName: 'Code',
+    columnName: 'Code',
+    tableName: 'C_BPartner',
+    overwriteDefinition: {
+      sequence: 0,
+      size: 6,
+      name: language.t('form.pos.order.BusinessPartnerCreate.searchValue'),
+      componentPath: 'FieldText',
+      displayType: 10,
+      isCustomField: true
+    }
+  },
   {
     elementColumnName: 'Value',
     columnName: 'Value',

@@ -272,6 +272,7 @@ export default {
     },
     changeCustomer() {
       if (!this.isEmptyValue(this.selectCustomer)) {
+        this.$store.commit('customer', this.selectCustomer)
         this.setBusinessPartner(this.selectCustomer)
         this.closeListCustomer()
       }
