@@ -380,7 +380,7 @@ export default {
         containerUuid: this.$route.meta.uuid,
         columnName: 'DisplayColumn_C_BPartner_ID' // this.parentMetadata.columnName
       }).split(['-'])
-      const searchValue = this.isEmptyValue(this.currentBusinessPartner.value) ? displayCustomer[0] : this.currentBusinessPartner.value
+      const searchValue = this.isEmptyValue(this.currentBusinessPartner.value) ? displayCustomer[0].replace(/ /g, '') : this.currentBusinessPartner.value
       customer({
         searchValue
       })

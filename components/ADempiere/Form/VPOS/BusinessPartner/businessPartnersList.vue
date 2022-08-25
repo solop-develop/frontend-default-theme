@@ -66,6 +66,7 @@
       fit
       height="250"
       @current-change="handleCurrentChange"
+      @row-dblclick="changeCustomer"
     >
       <p slot="empty" style="width: 100%;">
         {{ $t('businessPartner.emptyBusinessPartner') }}
@@ -276,6 +277,11 @@ export default {
       }
     },
     closeListCustomer() {
+      this.$store.commit('setBusinessPartnersList', {
+        businessPartnersList: [],
+        isLoaded: true,
+        isReload: false
+      })
       this.$store.commit('changePopoverListBusinessPartner', false)
     },
     handleChangePage(newPage) {

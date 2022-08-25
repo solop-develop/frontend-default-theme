@@ -1485,7 +1485,7 @@ export default {
     },
     newOrder() {
       const posUuid = this.currentPointOfSales.uuid
-      let customerUuid = this.$store.getters.getValueOfField({
+      const bpartner = this.$store.getters.getValueOfField({
         containerUuid: this.$route.meta.uuid,
         columnName: 'C_BPartner_ID_UUID'
       })
@@ -1497,12 +1497,13 @@ export default {
         containerUuid: this.$route.meta.uuid,
         columnName: 'C_DocTypeTarget_ID_UUID'
       })
+      let customerUuid = this.isEmptyValue(bpartner) ? this.$store.getters.getNewCustomer.uuid : bpartner
       if (this.isEmptyValue(customerUuid) || id === 1000006) {
         customerUuid = this.currentPointOfSales.templateCustomer.uuid
       }
       this.$store.dispatch('createOrder', {
         posUuid,
-        customerUuid: this.isEmptyValue(this.$store.getters.getNewCustomer) ? customerUuid : this.$store.getters.getNewCustomer.uuid,
+        customerUuid,
         salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
         documentTypeUuid
       })

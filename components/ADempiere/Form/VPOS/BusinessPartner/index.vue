@@ -109,7 +109,6 @@
           </el-dropdown-item>
           <el-dropdown-item>
             <el-popover
-              v-if="!isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)"
               v-model="showUpdate"
               placement="left-start"
               width="950"
@@ -123,7 +122,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled || !isAllowsBusinessPartnerCreate"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate"
               >
                 <i
                   class="el-icon-edit"
@@ -303,6 +302,14 @@ export default {
   },
 
   computed: {
+    isDisabledUpdate() {
+      return this.isEmptyValue(
+        this.$store.getters.getValueOfField({
+          containerUuid: this.$route.meta.uuid,
+          columnName: 'DisplayColumn_C_BPartner_ID'
+        })
+      )
+    },
     isAllowsBusinessPartnerCreate() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsCreateCustomer
     },
@@ -598,10 +605,12 @@ export default {
       }))
       createBillingAddress.is_default_billing = true
       createBillingAddress.is_default_shipping = false
+      createBillingAddress.phone = values.phone
       let createShippingAddress = this.addressForm(this.$store.getters.getValuesView({
         containerUuid: 'Shipping-Address',
         format: 'object'
       }))
+      createShippingAddress.phone = values.phone
       createShippingAddress = {
         ...createShippingAddress,
         is_default_billing: true,
