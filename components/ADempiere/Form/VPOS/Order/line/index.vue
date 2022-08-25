@@ -85,7 +85,7 @@
           </el-form>
         </el-col>
       </template>
-      <el-col :span="8">
+      <el-col :span="16">
         <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
           <el-form-item :label="$t('route.warehouse')" style="margin-left: 5%;">
             <el-select

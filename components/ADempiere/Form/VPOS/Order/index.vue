@@ -60,7 +60,7 @@
           </el-row>
         </el-form>
       </el-header>
-      <el-main style="background: white; padding: 0px; height: 100% !important; overflow: hidden">
+      <el-main style="background: white; padding: 0px; height: 100% !important; overflow: hidden;z-index: 9">
         <el-container style="background: white; padding: 0px; height: 100% !important;">
           <el-main style="padding-top: 0px; padding-right: 10px; padding-bottom: 0px; padding-left: 10px;">
             <el-table
@@ -182,7 +182,7 @@
                     placement="right"
                     trigger="click"
                     :title="$t('form.pos.tableProduct.editQuantities')"
-                    width="700"
+                    width="950"
                     @hide="showFieldLine = false"
                   >
                     <field-line
@@ -866,7 +866,7 @@ export default {
 
   mounted() {
     setTimeout(() => {
-      if (!this.isEmptyValue(this.fieldCampaign.reference) && !this.isEmptyValue(this.fieldCampaign.reference.tableName) && this.isEmptyValue(this.listCampaign)) {
+      if (!this.isEmptyValue(this.fieldCampaign.reference) && this.isEmptyValue(this.listCampaign)) {
         this.getListCampaign(this.fieldCampaign.reference)
       }
     }, 500)

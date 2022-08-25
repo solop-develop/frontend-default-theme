@@ -38,7 +38,7 @@
                     <div class="top clearfix">
                       <span>
                         {{
-                          labelTenderType(value)
+                          value.paymentMethod.name
                         }}
                       </span>
                     </div>

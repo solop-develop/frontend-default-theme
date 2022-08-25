@@ -647,7 +647,7 @@ export default {
       }
     },
     defaulValuePaymentMethods() {
-      const defaultPayment = this.availablePaymentMethods.find(payment => payment.tender_type === 'X')
+      const defaultPayment = this.availablePaymentMethods.find(payment => payment.payment_method.tender_type === 'X')
       if (!this.isEmptyValue(defaultPayment)) {
         return defaultPayment
       }
@@ -927,6 +927,7 @@ export default {
         format: 'object'
       })
       const params = { referenceNo: values.DocumentNo, description: values.Description, paymentDate: values.DateTrx }
+      const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       if (this.currentAvailablePaymentMethods.is_payment_reference) {
         this.$store.dispatch('refundReference', {
           ...params,
@@ -941,7 +942,7 @@ export default {
           tenderTypeCode,
           customerUuid: this.currentOrder.customer.uuid,
           salesRepresentativeUuid: this.currentOrder.salesRepresentative.uuid,
-          currencyUuid: this.dayRate.currencyTo.uuid
+          currencyUuid: paymentCurrency.refund_reference_currency.uuid
         })
         this.addCollect()
         return
@@ -955,9 +956,9 @@ export default {
           referenceNo,
           amount: this.round(this.amontSend, this.standardPrecision),
           convertedAmount: this.amontSend * this.dayRate.divideRate,
+          paymentMethodUuid: paymentCurrency.payment_method.uuid,
           tenderTypeCode,
-          paymentMethodUuid,
-          currencyUuid: this.dayRate.currencyTo.uuid
+          currencyUuid: paymentCurrency.reference_currency.uuid
         })
       } else {
         this.$store.dispatch('createPayments', {
@@ -967,9 +968,9 @@ export default {
           bankUuid,
           amount: this.round(this.amontSend, this.standardPrecision),
           convertedAmount: this.amontSend * this.dayRate.divideRate,
-          paymentMethodUuid,
+          paymentMethodUuid: paymentCurrency.payment_method.uuid,
           tenderTypeCode,
-          currencyUuid: this.dayRate.currencyTo.uuid
+          currencyUuid: paymentCurrency.reference_currency.uuid
         })
           .then((response) => {
             if (response.type !== 'error') {
