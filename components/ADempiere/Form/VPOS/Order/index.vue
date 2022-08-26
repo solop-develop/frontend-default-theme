@@ -993,6 +993,14 @@ export default {
       const orderUuid = this.$route.query.action
       this.$store.dispatch('listPayments', { posUuid: this.currentPointOfSales.uuid, orderUuid })
       this.$store.commit('setShowPOSOptions', false)
+      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+        this.$store.dispatch('searchConversion', {
+          conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
+          currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
+          currencyToUuid: this.currentPointOfSales.displayCurrency.uuid,
+          conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
+        })
+      }
     },
     open() {
       if (!this.seeConversion) {
