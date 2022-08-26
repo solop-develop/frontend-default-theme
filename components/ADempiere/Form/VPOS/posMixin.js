@@ -265,7 +265,6 @@ export default {
     },
     openPin(pin) {
       const { requestedAccess } = this.$store.getters.getOverdrawnInvoice.attributePin
-      console.log({ pin, requestedAccess }, this.$store.getters.getOverdrawnInvoice)
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
         pin,
@@ -281,7 +280,9 @@ export default {
             message: 'Acción a realizar',
             showClose: true
           })
-          this.$refs.showFieldLine.doClose()
+          if (!this.isEmptyValue(this.$refs) && !this.isEmptyValue(this.$refs.showFieldLine)) {
+            this.$refs.showFieldLine.doClose()
+          }
           this.exitEdit()
         })
         .catch(error => {
@@ -723,7 +724,8 @@ export default {
               if (this.isPosRequiredPin && !this.isEmptyValue(documentTypeUuid) && !this.isEmptyValue(this.currentOrder.documentType.uuid)) {
                 const attributePin = {
                   ...mutation.payload,
-                  type: 'updateOrder'
+                  type: 'updateOrder',
+                  requestedAccess: 'IsAllowsChangeListDocumentType'
                 }
                 this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
                 this.visible = true

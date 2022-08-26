@@ -171,7 +171,7 @@
           </el-col>
 
           <!-- printTicket -->
-          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="isAllowsPrintDocument" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-button
                 type="text"
@@ -188,7 +188,7 @@
           </el-col>
 
           <!-- printTicketPreviwer -->
-          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="IsAllowsPreviewDocument" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-button
                 type="text"

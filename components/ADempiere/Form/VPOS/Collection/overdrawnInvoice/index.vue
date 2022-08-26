@@ -1386,7 +1386,8 @@ export default {
             typeRefund: this.option,
             action: 'openBalanceInvoice',
             type: 'actionPos',
-            label: this.$t('form.pos.pinMessage.invoiceOpen')
+            label: this.$t('form.pos.pinMessage.invoiceOpen'),
+            requestedAccess: 'IsAllowsInvoiceOpen'
           }
           this.visible = true
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1450,7 +1451,8 @@ export default {
               typeRefund: this.option,
               action: 'openBalanceInvoice',
               type: 'actionPos',
-              label: this.$t('form.pos.pinMessage.invoiceOpen')
+              label: this.$t('form.pos.pinMessage.invoiceOpen'),
+              requestedAccess: 'IsAllowsInvoiceOpen'
             }
             this.visible = true
             this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1462,7 +1464,8 @@ export default {
               typeRefund: this.option,
               action: 'openBalanceInvoice',
               type: 'actionPos',
-              label: this.$t('form.pos.collect.overdrawnInvoice.incompleteChange')
+              label: this.$t('form.pos.collect.overdrawnInvoice.incompleteChange'),
+              requestedAccess: 'IsAllowsIncompleteChange'
             }
             this.visible = true
             this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1497,7 +1500,8 @@ export default {
                 typeRefund: this.option,
                 action: 'openBalanceInvoice',
                 type: 'actionPos',
-                label: this.$t('form.pos.pinMessage.invoiceOpen')
+                label: this.$t('form.pos.pinMessage.invoiceOpen'),
+                requestedAccess: 'IsAllowsInvoiceOpen'
               }
               this.visible = true
               this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1509,7 +1513,8 @@ export default {
                 typeRefund: this.option,
                 action: 'openBalanceInvoice',
                 type: 'actionPos',
-                label: this.$t('form.pos.collect.overdrawnInvoice.incompleteChange')
+                label: this.$t('form.pos.collect.overdrawnInvoice.incompleteChange'),
+                requestedAccess: 'IsAllowsIncompleteChange'
               }
               this.visible = true
               this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1544,7 +1549,8 @@ export default {
               typeRefund: this.option,
               action: 'openBalanceInvoice',
               type: 'actionPos',
-              label: this.$t('form.pos.pinMessage.invoiceOpen')
+              label: this.$t('form.pos.pinMessage.invoiceOpen'),
+              requestedAccess: 'IsAllowsInvoiceOpen'
             }
             this.visible = true
             this.$store.dispatch('sendCreateCustomerAccount', this.$store.getters.getAddRefund)
