@@ -66,7 +66,7 @@
                       >
                         <p v-if="!isEmptyValue(value.orderCurrencyRate) && value.orderCurrencyRate !== 1" class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
-                            {{ formatPrice(value.amount, iSOCode(value)) }}
+                            {{ formatPrice(value.amount, value.currency.iso_code) }}
                           </b>
                         </p>
                         <br>
@@ -330,7 +330,6 @@ export default {
       return ''
     },
     iSOCode(value) {
-      console.log({ value })
       const currencyPay = this.listCurrency.find(currency => {
         if (currency.uuid === value.currencyUuid) {
           return currency
