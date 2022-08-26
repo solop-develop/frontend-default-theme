@@ -27,7 +27,7 @@
             v-for="(listLogs, key) in gettersListRecordLogs.sort(sortSequence)"
             :key="listLogs.logId"
             :type="listLogs.type"
-            :timestamp="translateDate(listLogs.logDate)"
+            :timestamp="translateDateByLong(listLogs.logDate)"
             placement="top"
           >
             <el-card shadow="hover" class="clearfix">

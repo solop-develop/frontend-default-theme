@@ -32,7 +32,7 @@
             v-for="(chats, key) in chatList"
             :key="key"
             icon="el-icon-postcard"
-            :timestamp="translateDate(chats.logDate)"
+            :timestamp="translateDateByLong(chats.logDate)"
             placement="top"
           >
             <el-card shadow="always" style="border: 2px solid #d2e1ffd6;">
@@ -68,10 +68,14 @@
 </template>
 
 <script>
+// components and mixins
 import MixinChatEntries from './mixinChat.js'
+
 export default {
   name: 'ChatEntriesModeMobile',
+
   mixins: [MixinChatEntries],
+
   props: {
     rightPanel: {
       type: Boolean,
