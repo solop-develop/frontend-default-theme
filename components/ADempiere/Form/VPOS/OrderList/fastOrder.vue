@@ -648,6 +648,7 @@ export default {
           customer: this.currentPointOfSales.templateCustomer.uuid,
           action: 'newOrder',
           type: 'actionPos',
+          requestedAccess: 'IsAllowsCreateOrder',
           label: this.$t('form.pos.pinMessage.newOrder')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })

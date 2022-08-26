@@ -264,9 +264,12 @@ export default {
       }
     },
     openPin(pin) {
+      const { requestedAccess } = this.$store.getters.getOverdrawnInvoice.attributePin
+      console.log({ pin, requestedAccess }, this.$store.getters.getOverdrawnInvoice)
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
-        pin
+        pin,
+        requestedAccess
       })
         .then(response => {
           this.validatePin = true
@@ -658,7 +661,8 @@ export default {
         const attributePin = {
           ...lineSelection,
           type: 'deleteLine',
-          label: this.$t('form.pos.pinMessage.delete')
+          label: this.$t('form.pos.pinMessage.delete'),
+          requestedAccess: 'IsAllowsModifyQuantity'
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
@@ -676,13 +680,27 @@ export default {
                 const attributePin = {
                   ...mutation.payload,
                   type: 'updateOrder',
-                  label: this.$t('form.pos.pinMessage.qtyEntered')
+                  label: this.$t('form.pos.pinMessage.qtyEntered'),
+                  requestedAccess: 'IsAllowsModifyQuantity'
                 }
                 this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
                 this.visible = true
               }
               break
             case 'PriceEntered':
+              if (this.modifyPrice) {
+                this.updateOrderLine(mutation.payload)
+              } else {
+                const attributePin = {
+                  ...mutation.payload,
+                  type: 'updateOrder',
+                  label: this.$t('form.pos.pinMessage.price'),
+                  requestedAccess: 'IsModifyPrice'
+                }
+                this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+                this.visible = true
+              }
+              break
             case 'Discount':
               if (this.modifyPrice) {
                 this.updateOrderLine(mutation.payload)
@@ -690,7 +708,8 @@ export default {
                 const attributePin = {
                   ...mutation.payload,
                   type: 'updateOrder',
-                  label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+                  label: this.$t('form.pos.pinMessage.discount'),
+                  requestedAccess: 'isAllowsApplyDiscount'
                 }
                 this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
                 this.visible = true

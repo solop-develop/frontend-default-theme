@@ -35,7 +35,7 @@
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
-                @click="!allowsCreateOrder ? validateOption($t('form.pos.pinMessage.newOrder')) : newOrder()"
+                @click="!allowsCreateOrder ? validateOption($t('form.pos.pinMessage.newOrder'), 'IsAllowsCreateOrder') : newOrder()"
               >
                 <i class="el-icon-news" />
                 <br>
@@ -1105,9 +1105,12 @@ export default {
     },
     openPin(pin) {
       this.focusPin()
+      const { requestedAccess } = this.$store.getters.getOverdrawnInvoice.attributePin
+      console.log({ pin, requestedAccess }, this.$store.getters.getOverdrawnInvoice)
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
-        pin
+        pin,
+        requestedAccess
       })
         .then(response => {
           this.validatePin = true
@@ -1134,11 +1137,12 @@ export default {
           this.visible = false
         })
     },
-    validateOption(name) {
+    validateOption(name, requestedAccess) {
       this.visible = true
       this.attributePin = {
         type: 'updateOrder',
-        label: name
+        label: name,
+        requestedAccess
       }
     },
     optionPin(action) {

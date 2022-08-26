@@ -134,6 +134,9 @@
         </el-header>
         <!-- Panel where they show the payments registered from the collection container -->
         <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px;">
+          {{ listCurrency }}
+          <hr>
+          {{ currentFieldCurrency }}
           <type-collection
             v-if="!updateOrderPaymentPos"
             id="cardCollection"

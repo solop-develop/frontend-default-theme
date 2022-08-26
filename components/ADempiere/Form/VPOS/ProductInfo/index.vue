@@ -307,6 +307,7 @@ export default {
           columnName: 'ProductValue',
           value: valueProduct,
           type: 'addProduct',
+          requestedAccess: 'IsAllowsCreateOrder',
           label: this.$t('form.pos.pinMessage.addProduct')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })

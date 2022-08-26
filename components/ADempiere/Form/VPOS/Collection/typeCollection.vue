@@ -330,6 +330,7 @@ export default {
       return ''
     },
     iSOCode(value) {
+      console.log({ value })
       const currencyPay = this.listCurrency.find(currency => {
         if (currency.uuid === value.currencyUuid) {
           return currency
