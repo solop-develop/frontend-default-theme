@@ -201,7 +201,6 @@
                       :span="8"
                     >
                       <field-definition
-                        v-if="isShowFieldBankAccount"
                         :metadata-field="fieldsList[3]"
                         :container-uuid="'Cash-Opening'"
                         :container-manager="{
