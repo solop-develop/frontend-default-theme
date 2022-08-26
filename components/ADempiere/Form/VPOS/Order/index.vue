@@ -532,7 +532,6 @@ export default {
       showFieldLine: false,
       pin: '',
       attributePin: {},
-      validatePin: true,
       visible: false,
       isEditQtyOrdered: false,
       isEditLine: {},
@@ -556,9 +555,6 @@ export default {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
-    isShowedPOSKeyLaout() {
-      return this.$store.getters.getShowPOSKeyLayout
-    },
     classOrderFooter() {
       if (this.isMobile) {
         return 'footer-mobile'
@@ -573,15 +569,6 @@ export default {
         return 'position: absolute;top: 34%;z-index: 100;right: 0;'
       }
       return 'position: relative;padding-top: 30vh; z-index: 100;'
-    },
-    colFieldBusinessPartner() {
-      if (this.isMobile) {
-        return 12
-      }
-      if (this.isEmptyValue(this.currentOrder)) {
-        return 9
-      }
-      return 7
     },
     colFieldProductCode() {
       if (this.isMobile) {
@@ -653,18 +640,6 @@ export default {
     multiplyRate() {
       return this.$store.getters.getMultiplyRate
     },
-    converCurrency() {
-      return this.$store.getters.getValueOfField({
-        containerUuid: 'Collection-Convert-Amount',
-        columnName: 'C_Currency_ID_UUID'
-      })
-    },
-    currencyUuid() {
-      return this.$store.getters.getValueOfField({
-        containerUuid: 'Collection-Convert-Amount',
-        columnName: 'C_Currency_ID_UUID'
-      })
-    },
     labelButtonCollections() {
       return this.isDisabled ? this.$t('form.pos.order.collections') : this.$t('form.pos.order.collect')
     },
@@ -689,12 +664,6 @@ export default {
     },
     listPointOfSales() {
       return this.$store.getters.posAttributes.pointOfSalesList
-    },
-    ordersList() {
-      if (this.isEmptyValue(this.currentPointOfSales)) {
-        return []
-      }
-      return this.currentPointOfSales.listOrder
     },
     currentOrder() {
       if (this.isEmptyValue(this.currentPointOfSales)) {
@@ -838,9 +807,6 @@ export default {
       if (value > 0) {
         this.convertedAmount()
       }
-    },
-    currentOrder(value) {
-      this.validatePin = true
     },
     visible(value) {
       if (value && !this.isEmptyValue(this.$refs)) {

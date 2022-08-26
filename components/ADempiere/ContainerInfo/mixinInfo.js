@@ -14,16 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// utils and helper methods
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+
 export default {
   name: 'MixinContainerInfo',
-  computed: {
-    language() {
-      return this.$store.getters.language
-    }
-  },
+
   methods: {
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
-    }
+    translateDateByLong
   }
 }

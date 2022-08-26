@@ -27,7 +27,7 @@
             v-for="(chats, key) in chatEntryList"
             :key="key"
             icon="el-icon-postcard"
-            :timestamp="translateDate(chats.logDate)"
+            :timestamp="translateDateByLong(chats.logDate)"
             placement="top"
           >
             <el-card shadow="always" style="border: 2px solid #d2e1ffd6;">
@@ -46,8 +46,12 @@
 </template>
 
 <script>
+// utils and helper methods
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+
 export default {
   name: 'ListChatEntry',
+
   computed: {
     chatEntryList() {
       const commentLogs = this.$store.getters.getChatEntries
@@ -60,15 +64,11 @@ export default {
       //   return c - d
       // })
       return commentLogs
-    },
-    language() {
-      return this.$store.getters.language
     }
   },
+
   methods: {
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
-    }
+    translateDateByLong
   }
 }
 </script>
