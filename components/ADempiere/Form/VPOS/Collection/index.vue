@@ -134,9 +134,6 @@
         </el-header>
         <!-- Panel where they show the payments registered from the collection container -->
         <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px;">
-          {{ listCurrency }}
-          <hr>
-          {{ currentFieldCurrency }}
           <type-collection
             v-if="!updateOrderPaymentPos"
             id="cardCollection"
@@ -598,7 +595,7 @@ export default {
     },
     hiddenFieldsList() {
       return this.fieldsList.filter(field => {
-        if (field.sequence > 1 && field.displayLogicPayment.includes(this.currentAvailablePaymentMethods.tender_type)) {
+        if (field.sequence > 1 && field.displayLogicPayment.includes(this.currentAvailablePaymentMethods.payment_method.tender_type)) {
           return field
         }
       })
