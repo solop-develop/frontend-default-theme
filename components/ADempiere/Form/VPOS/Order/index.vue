@@ -90,11 +90,10 @@
                     <template v-if="isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
                       <el-input-number
                         ref="editField"
-                        v-model="currentEditLine"
+                        v-model="currentPriceTableEdit"
                         v-shortkey="shortKeysInputTable"
                         :autofocus="true"
                         controls-position="right"
-                        @change="changeEdit(currentEditLine, 'PriceEntered')"
                         @shortkey.native="theActionEdit"
                       />
                     </template>
@@ -179,6 +178,7 @@
                     <el-button slot="reference" type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
                   </el-popover>
                   <el-popover
+                    ref="showFieldLine"
                     placement="right"
                     trigger="click"
                     :title="$t('form.pos.tableProduct.editQuantities')"
@@ -197,7 +197,13 @@
               </el-table-column>
             </el-table>
           </el-main>
-          <el-dialog ref="dialog" :title="$t('form.pos.pinMessage.pin') + infowOverdrawnInvoice.label" width="40%" :visible.sync="visible">
+          <el-dialog
+            ref="dialog"
+            :title="$t('form.pos.pinMessage.pin') + infowOverdrawnInvoice.label"
+            width="40%"
+            :visible.sync="visible"
+            :append-to-body="true"
+          >
             <el-input
               id="pin"
               ref="pin"
@@ -558,6 +564,20 @@ export default {
     },
     isShowedPOSKeyLaout() {
       return this.$store.getters.getShowPOSKeyLayout
+    },
+    currentPriceTableEdit: {
+      get(value) {
+        return this.fieldShowValue({
+          row: this.currentLineOrder,
+          columnName: 'CurrentPrice'
+        })
+      },
+      set(value) {
+        if (value !== this.currentValuePriceLine(this.currentLineOrder)) {
+          this.changeEdit(value, 'PriceEntered')
+        }
+        return value
+      }
     },
     classOrderFooter() {
       if (this.isMobile) {

@@ -378,7 +378,7 @@ export default {
       } else if (columnName === 'QtyEntered') {
         return formatQuantity({ value: row.quantityOrdered })
       } else if (columnName === 'Discount') {
-        return formatQuantity({ value: row.discount }) + ' %'
+        return row.discount
       } else if (columnName === 'taxIndicator') {
         return formatQuantity({ value: row.taxIndicator })
       } else if (columnName === 'GrandTotal') {
