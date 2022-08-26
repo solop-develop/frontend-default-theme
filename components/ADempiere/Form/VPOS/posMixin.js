@@ -278,6 +278,7 @@ export default {
             message: 'Acción a realizar',
             showClose: true
           })
+          this.$refs.showFieldLine.doClose()
           this.exitEdit()
         })
         .catch(error => {

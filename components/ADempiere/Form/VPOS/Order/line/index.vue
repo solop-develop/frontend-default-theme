@@ -87,10 +87,12 @@
       </template>
       <el-col :span="16">
         <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item :label="$t('route.warehouse')" style="margin-left: 5%;">
+          <el-form-item :label="$t('route.warehouse')" style="margin-left: 2%;width: 100% !important;">
             <el-select
               v-model="stock"
+              style="display: block;"
               @change="changeWarehouseLine"
+              @visible-change="loadStock"
             >
               <el-option
                 v-for="(item, key) in listWarehouseLine"
@@ -128,7 +130,6 @@ import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.v
 import { validatePin, updateOrderLine } from '@/api/ADempiere/form/point-of-sales.js'
 
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
-
 // utils and helper methods
 import {
   createFieldFromDictionary
@@ -257,12 +258,6 @@ export default {
 
   watch: {
     showField(value) {
-      if (!this.isEmptyValue(this.currentLine.product)) {
-        this.$store.dispatch('findWarehouse', {
-          value: this.currentLine.product.value,
-          sku: this.currentLine.product.sku
-        })
-      }
       this.visible = false
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
         this.metadataList = this.setFieldsList()
@@ -303,6 +298,16 @@ export default {
     isReadOnlyField,
     changeFieldShowedFromUser,
     createFieldFromDictionary,
+    loadStock(value) {
+      if (value) {
+        if (!this.isEmptyValue(this.currentLine.product)) {
+          this.$store.dispatch('findWarehouse', {
+            value: this.currentLine.product.value,
+            sku: this.currentLine.product.sku
+          })
+        }
+      }
+    },
     setFieldsList() {
       const fieldsList = []
       // Product Code
@@ -474,7 +479,7 @@ export default {
                   row: this.currentLineOrder,
                   columnName: 'Discount'
                 })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(discount)) {
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === discount) {
                   return
                 }
                 if (this.modifyPrice) {
