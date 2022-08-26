@@ -181,7 +181,7 @@
                     <el-col
                       :span="8"
                     >
-                      <el-form-item :label="fieldsList[1].name" class="from-field">
+                      <el-form-item label="Agente Cobrador" class="from-field">
                         <el-select
                           v-model="labelCollectAgent"
                           style="display: block;"
@@ -201,7 +201,6 @@
                       :span="8"
                     >
                       <field-definition
-                        v-if="isShowFieldBankAccount"
                         :metadata-field="fieldsList[3]"
                         :container-uuid="'Cash-Opening'"
                         :container-manager="{
@@ -540,8 +539,8 @@ export default {
         fieldsList: this.fieldsList,
         isValidate: true
       })
-      const paymentMethods = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
-      if (paymentMethods.tender_type === 'X') {
+      const paymentMethods = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
+      if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
         return false
       }
       if (this.isEmptyValue(fieldsEmpty)) {
@@ -620,11 +619,11 @@ export default {
           name: ''
         }
       }
-      const payment = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      const payment = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       if (!this.isEmptyValue(payment)) {
         return payment
       }
-      const defaultPayment = this.availablePaymentMethods.find(payment => payment.tender_type === 'X')
+      const defaultPayment = this.availablePaymentMethods.find(payment => payment.payment_method.tender_type === 'X')
       if (!this.isEmptyValue(defaultPayment)) {
         return defaultPayment
       }
@@ -633,7 +632,7 @@ export default {
       }
     },
     defaulValuePaymentMethods() {
-      const defaultPayment = this.availablePaymentMethods.find(payment => payment.tender_type === 'X')
+      const defaultPayment = this.availablePaymentMethods.find(payment => payment.payment_method.tender_type === 'X')
       if (!this.isEmptyValue(defaultPayment)) {
         return defaultPayment
       }
@@ -704,8 +703,8 @@ export default {
       }
     },
     currentFieldPaymentMethods(value) {
-      const payment = this.availablePaymentMethods.find(payment => payment.uuid === value)
-      if (!this.isEmptyValue(payment.reference_currency)) {
+      const payment = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === value)
+      if (!this.isEmptyValue(payment) && !this.isEmptyValue(payment.reference_currency)) {
         this.changeCurrency(payment.reference_currency.iso_code)
       } else {
         this.changeCurrency(this.pointOfSalesCurrency.iSOCode)
@@ -959,7 +958,7 @@ export default {
         return
       }
       const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentFieldCurrency)
-      const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.uuid === this.currentFieldPaymentMethods)
+      const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.payment_method.uuid === this.currentFieldPaymentMethods)
       payment.currency = this.currentFieldCurrency
       payment.amount = payment.PayAmt
       payment.tenderTypeCode = paymentMethodsPos.tender_type
@@ -1010,7 +1009,7 @@ export default {
     },
     displayTenderType(tenderType) {
       const currentTenderType = this.availablePaymentMethods.find(label => {
-        if (label.uuid === tenderType.paymentMethodUuid) {
+        if (label.payment_method.uuid === tenderType.paymentMethodUuid) {
           return label
         }
       })
