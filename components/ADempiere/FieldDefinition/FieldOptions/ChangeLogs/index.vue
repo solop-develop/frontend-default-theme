@@ -98,9 +98,12 @@
 // constants
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 import language from '@/lang'
+
+// utils and helper methods
 import {
   formatDate
 } from '@/utils/ADempiere/valueFormat.js'
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'ChangeLogsField',
@@ -145,9 +148,6 @@ export default {
   },
 
   computed: {
-    language() {
-      return this.$store.getters.language
-    },
     listLogsField() {
       const log = this.$store.getters.getRecordLogs.entityLogs
       if (log) {
@@ -196,6 +196,7 @@ export default {
 
   methods: {
     formatDate,
+    translateDateByLong,
     tableHeardClassName({ row, rowIndex }) {
       return 'defautl-heard'
     },
@@ -204,9 +205,6 @@ export default {
     },
     sortSequence(itemA, itemB) {
       return new Date().setTime(new Date(itemB.logDate).getTime()) - new Date().setTime(new Date(itemA.logDate).getTime())
-    },
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
     },
     showkey(key, index) {
       if (key === this.currentKey && index === this.typeAction) {

@@ -27,6 +27,7 @@ export default [
       name: language.t('form.pos.order.BusinessPartnerCreate.searchValue'),
       componentPath: 'FieldText',
       displayType: 10,
+      isMandatory: false,
       isCustomField: true
     }
   },
@@ -39,6 +40,7 @@ export default [
       sequence: 1,
       componentPath: 'FieldText',
       size: 6,
+      isMandatory: false,
       isCustomField: true
     }
   },
@@ -51,6 +53,7 @@ export default [
     overwriteDefinition: {
       sequence: 2,
       size: 6,
+      isMandatory: false,
       isCustomField: true
     }
   },
@@ -62,6 +65,7 @@ export default [
     overwriteDefinition: {
       sequence: 3,
       size: 6,
+      isMandatory: false,
       isCustomField: true
     }
   }

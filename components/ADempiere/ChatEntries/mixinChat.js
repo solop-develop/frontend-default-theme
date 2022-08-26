@@ -13,10 +13,15 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import inputChat from './inputChat'
+
+// utils and helper methods
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'MixinChatEntries',
+
   components: {
     inputChat
   },
@@ -59,9 +64,6 @@ export default {
       })
       return commentLogs
     },
-    language() {
-      return this.$store.getters.language
-    },
     tableNameToSend() {
       if (this.isEmptyValue(this.tableName)) {
         return this.$route.params.tableName
@@ -81,7 +83,9 @@ export default {
       return this.$store.getters.getSplitHeight
     }
   },
+
   methods: {
+    translateDateByLong,
     sendComment() {
       const comment = this.$store.getters.getChatTextLong
 
@@ -95,9 +99,6 @@ export default {
     },
     clear() {
       this.$store.commit('setChatText', '')
-    },
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
     }
   }
 }

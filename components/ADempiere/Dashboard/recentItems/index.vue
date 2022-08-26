@@ -42,7 +42,7 @@
             </el-tag>
             <br>
             <span class="time">
-              {{ translateDate(row.updated) }}
+              {{ translateDateByLong(row.updated) }}
             </span>
           </template>
         </el-table-column>
@@ -53,8 +53,12 @@
 
 <script>
 import { requestListRecentItems } from '@/api/ADempiere/dashboard/user'
-import { convertAction } from '@/utils/ADempiere/dictionaryUtils'
+
 import mixinDashboard from '@theme/components/ADempiere/Dashboard/mixinDashboard.js'
+
+// utils and helper methods
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import { convertAction } from '@/utils/ADempiere/dictionaryUtils'
 
 export default {
   name: 'RecentItems',
@@ -90,6 +94,7 @@ export default {
     this.unsubscribe()
   },
   methods: {
+    translateDateByLong,
     getRecentItems({ pageToken, pageSize }) {
       return new Promise(resolve => {
         requestListRecentItems({
@@ -128,9 +133,6 @@ export default {
           this.getRecentItems()
         }
       })
-    },
-    translateDate(value) {
-      return this.$d(new Date(value), 'long', this.language)
     }
   }
 }
