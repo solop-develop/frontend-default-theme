@@ -940,6 +940,7 @@ export default {
           columnName,
           value,
           type: 'updateOrder',
+          requestedAccess: 'IsAllowsModifyQuantity',
           label: this.$t('form.pos.pinMessage.qtyEntered')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -951,6 +952,7 @@ export default {
           columnName,
           value,
           type: 'updateOrder',
+          requestedAccess: 'IsModifyPrice',
           label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1008,6 +1010,7 @@ export default {
           customer: this.currentPointOfSales.templateCustomer.uuid,
           action: 'newOrder',
           type: 'actionPos',
+          requestedAccess: 'IsAllowsCreateOrder',
           label: this.$t('form.pos.pinMessage.newOrder')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1043,7 +1046,8 @@ export default {
             ...warehouse,
             action: 'changeWarehouse',
             type: 'actionPos',
-            label: this.$t('form.pos.pinMessage.warehouse')
+            label: this.$t('form.pos.pinMessage.warehouse'),
+            requestedAccess: 'IsAllowsChangeListWarehouse'
           }
           const visible = true
           this.visible = visible
@@ -1075,6 +1079,7 @@ export default {
             ...documentType,
             action: 'changeDocumentType',
             type: 'actionPos',
+            requestedAccess: 'IsAllowsChangeListDocumentType',
             label: this.$t('form.pos.pinMessage.documentType')
           }
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1089,6 +1094,7 @@ export default {
             ...priceList,
             action: 'changePriceList',
             type: 'actionPos',
+            requestedAccess: 'IsAllowsChangeListPrice',
             label: this.$t('form.pos.pinMessage.priceList')
           }
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })

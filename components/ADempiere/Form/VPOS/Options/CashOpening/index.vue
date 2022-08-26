@@ -882,7 +882,8 @@ export default {
             typeRefund: 0,
             action: 'openBalanceInvoice',
             type: 'actionPos',
-            label: this.$t('form.pos.pinMessage.invoiceOpen')
+            label: this.$t('form.pos.pinMessage.invoiceOpen'),
+            requestedAccess: 'IsAllowsInvoiceOpen'
           }
           this.visible = true
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -899,7 +900,8 @@ export default {
           customer: this.currentPointOfSales.templateCustomer.uuid,
           action: 'newOrder',
           type: 'actionPos',
-          label: this.$t('form.pos.pinMessage.newOrder')
+          label: this.$t('form.pos.pinMessage.newOrder'),
+          requestedAccess: 'IsAllowsCreateOrder'
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true

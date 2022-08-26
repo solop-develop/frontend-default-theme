@@ -134,6 +134,9 @@
         </el-header>
         <!-- Panel where they show the payments registered from the collection container -->
         <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px;">
+          {{ listCurrency }}
+          <hr>
+          {{ currentFieldCurrency }}
           <type-collection
             v-if="!updateOrderPaymentPos"
             id="cardCollection"
@@ -1126,7 +1129,8 @@ export default {
             typeRefund: 0,
             action: 'openBalanceInvoice',
             type: 'actionPos',
-            label: this.$t('form.pos.pinMessage.invoiceOpen')
+            label: this.$t('form.pos.pinMessage.invoiceOpen'),
+            requestedAccess: 'IsAllowsInvoiceOpen'
           }
           this.visible = true
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })

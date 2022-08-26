@@ -111,7 +111,7 @@ export default [
     isFromDictionary: true,
     overwriteDefinition: {
       isCustomField: true,
-      isMandatory: true,
+      isMandatory: false,
       size: 8
     }
   },
