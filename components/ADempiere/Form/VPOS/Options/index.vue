@@ -1507,7 +1507,7 @@ export default {
       }
       this.$store.dispatch('createOrder', {
         posUuid,
-        customerUuid,
+        customerUuid: this.currentPointOfSales.templateCustomer.uuid,
         salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
         documentTypeUuid
       })
