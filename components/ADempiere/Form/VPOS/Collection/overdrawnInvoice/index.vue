@@ -100,7 +100,7 @@
                 <el-col :span="8">
                   <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field">
                     <el-select
-                      v-model="refundReferenceCurrency"
+                      v-model="currentFieldCurrencyRefund"
                       :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
                       style="display: block;"
                       @change="changeCurrency"
@@ -266,7 +266,7 @@
                 <el-col :span="8">
                   <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field">
                     <el-select
-                      v-model="refundReferenceCurrency"
+                      v-model="currentFieldCurrencyRefund"
                       :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
                       style="display: block;"
                       @change="changeCurrency"
@@ -494,6 +494,7 @@ export default {
       selectionTypeRefund: {},
       fieldsList: fieldsListOverdrawnInvoice,
       currentFieldCurrency: '',
+      currentFieldCurrencyRefund: '',
       currentFieldPaymentMethods: '',
       currentPaymentType: '',
       visiblePin: false,
@@ -646,20 +647,28 @@ export default {
       }
       return this.$store.getters.posAttributes.currentPointOfSales.maximumDailyRefundAllowed
     },
-    refundReferenceCurrency() {
-      if (!this.isEmptyValue(this.currentFieldPaymentMethods)) {
-        const currency = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
-        if (!this.isEmptyValue(currency)) {
-          return currency.reference_currency.iso_code
+    refundReferenceCurrency: {
+      get() {
+        if (!this.isEmptyValue(this.currentFieldPaymentMethods)) {
+          const currency = this.searchPaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
+          if (!this.isEmptyValue(currency)) {
+            this.currentFieldCurrencyRefund = currency.reference_currency.iso_code
+            return currency.reference_currency.iso_code
+          }
         }
+        if (!this.isEmptyValue(this.selectionTypeRefund) && !this.isEmptyValue(this.selectionTypeRefund.refund_reference_currency)) {
+          this.currentFieldCurrencyRefund = this.selectionTypeRefund.refund_reference_currency.iso_code
+          return this.selectionTypeRefund.refund_reference_currency.iso_code
+        }
+
+        if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency)) {
+          return ''
+        }
+        return this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency.iso_code
+      },
+      set(value) {
+        return value
       }
-      if (!this.isEmptyValue(this.selectionTypeRefund) && !this.isEmptyValue(this.selectionTypeRefund.refund_reference_currency)) {
-        return this.selectionTypeRefund.refund_reference_currency.iso_code
-      }
-      if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency)) {
-        return ''
-      }
-      return this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency.iso_code
     },
     defaultReferenceCurrency() {
       if (!this.isEmptyValue(this.selectionTypeRefund) && !this.isEmptyValue(this.selectionTypeRefund.refund_reference_currency)) {
@@ -732,8 +741,12 @@ export default {
       return this.$store.getters.getRefundLoaded
     },
     dayRate() {
-      const selectCurrency = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
-      const currency = this.listCurrency.find(currency => !this.isEmptyValue(selectCurrency) && currency.iso_code === selectCurrency.reference_currency.iso_code)
+      const selectCurrency = this.searchPaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
+      const currency = this.listCurrency.find(currency => {
+        if (!this.isEmptyValue(selectCurrency) && currency.iso_code === selectCurrency.reference_currency.iso_code) {
+          return currency 
+        }
+      })
       const convert = this.convertionsList.find(convert => {
         if (!this.isEmptyValue(currency) && !this.isEmptyValue(convert.currencyTo) && currency.id === convert.currencyTo.id && this.currentPointOfSales.currentPriceList.currency.id !== currency.id) {
           return convert
@@ -1288,11 +1301,12 @@ export default {
       })
       const filterPayment = this.listRefund.filter(payment => payment.paymentMethodUuid === paymentMethodUuid || payment.payment_method_uuid === paymentMethodUuid)
       const allPayMaximunRefund = this.sumRefund(filterPayment)
-      const paymentCurrency = this.paymentTypeList.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      const paymentCurrency = this.paymentTypeListRefund.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrencyRefund)
       if (this.maximumRefundAllowed < amount || (this.maximumRefundAllowed - allPayMaximunRefund) < amount) {
         this.visiblePin = true
         setTimeout(() => {
-          this.$refs.pinPostPayment.focus()
+          this.$refs.pinPostPayment.focus() 
         }, 500)
         this.refundOptionVAlidate = {
           posUuid,
@@ -1304,7 +1318,7 @@ export default {
           paymentDate,
           tenderTypeCode: paymentCurrency.payment_method.tender_type,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
-          currencyUuid: paymentCurrency.refund_reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid :  paymentCurrency.refund_reference_currency.uuid
         }
         return
       }
@@ -1318,7 +1332,7 @@ export default {
         paymentDate,
         tenderTypeCode: paymentCurrency.payment_method.tender_type,
         paymentMethodUuid: paymentCurrency.payment_method.uuid,
-        currencyUuid: paymentCurrency.refund_reference_currency.uuid
+        currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid :  paymentCurrency.reference_currency.uuid
       })
       this.currentFieldPaymentMethods = this.isEmptyValue(this.searchPaymentMethods) ? '' : this.searchPaymentMethods[0].uuid
     },
@@ -1429,7 +1443,8 @@ export default {
       this.$store.commit('dialogoInvoce', { show: false })
     },
     changeCurrency(value) {
-      this.currentFieldCurrency = value
+      this.currentFieldCurrencyRefund = value
+      // this.currentFieldCurrency = value
     },
     changePaymentType(value) {
       this.$store.commit('currentTenderChange', value)
