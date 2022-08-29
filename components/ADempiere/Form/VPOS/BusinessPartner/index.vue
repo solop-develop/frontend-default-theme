@@ -670,7 +670,7 @@ export default {
             if (!this.isEmptyValue(documentStatus) && documentStatus.value === 'DR') {
               this.$store.commit('customer', responseBPartner)
               this.setBusinessPartner(responseBPartner)
-            }            
+            }
             this.clearValues()
             this.$message({
               type: 'success',
