@@ -71,7 +71,7 @@
               <el-col :span="8">
                 <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field">
                   <el-select
-                    v-model="currentFieldCurrency"
+                    v-model="currentMethodsCurrency"
                     style="display: block;"
                     :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
                     @change="changeCurrency"
@@ -130,7 +130,7 @@
                             <div class="top clearfix">
                               <span>
                                 {{
-                                  displayTenderType(payment)
+                                  payment.paymentMethod.name
                                 }}
                               </span>
                             </div>
@@ -157,7 +157,7 @@
                               >
                                 <p class="total">
                                   <b style="float: right;">
-                                    {{ formatPrice(payment.amount, currencyPayment(payment)) }}
+                                    {{ formatPrice(payment.amount, payment.currency.iso_code) }}
                                   </b>
                                 </p>
                               </div>
@@ -273,6 +273,7 @@ import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 import {
   createPayment,
   cashOpening,
+  updatePayment,
   deletePayment
 } from '@/api/ADempiere/form/point-of-sales.js'
 // utils and helper methods
@@ -356,6 +357,7 @@ export default {
       amontSend: 0,
       listCollectAgent: [],
       currentFieldCurrency: '',
+      currentMethodsCurrency: '',
       currentFieldPaymentMethods: ''
     }
   },
@@ -619,7 +621,8 @@ export default {
           name: ''
         }
       }
-      const payment = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
+      const payment = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      // const payment = this.availablePaymentMethods.find(payment => !this.isEmptyValue(payment.reference_currency) && payment.reference_currency.iso_code === this.currentMethodsCurrency)
       if (!this.isEmptyValue(payment)) {
         return payment
       }
@@ -715,11 +718,15 @@ export default {
     },
     precision() {
       return this.$store.getters.getCurrency.standardPrecision
+    },
+    currentFieldPaymentMethods(value) {
+      const findCurrency = this.availablePaymentMethods.find(payemnt => payemnt.uuid === value)
+      this.currentMethodsCurrency = this.isEmptyValue(findCurrency.reference_currency) ? this.pointOfSalesCurrency.iSOCode : findCurrency.reference_currency.iso_code
     }
   },
 
   created() {
-    this.currentFieldCurrency = this.pointOfSalesCurrency.iSOCode
+    // this.currentMethodsCurrency = this.pointOfSalesCurrency.iso_code
     this.$store.dispatch('addRateConvertion', this.pointOfSalesCurrency)
     // this.defaultValueCurrency()
     this.currentFieldPaymentMethods = this.defaulValuePaymentMethods.uuid
@@ -921,6 +928,8 @@ export default {
       })
     },
     changePaymentMethods(value) {
+      const findCurrency = this.availablePaymentMethods.find(payemnt => payemnt.uuid === value)
+      this.currentMethodsCurrency = this.isEmptyValue(findCurrency.reference_currency) ? this.pointOfSalesCurrency.iSOCode : findCurrency.reference_currency.iso_code
       this.currentFieldPaymentMethods = value
     },
     changeCurrency(value) {
@@ -957,34 +966,80 @@ export default {
         })
         return
       }
-      const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentFieldCurrency)
-      const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.payment_method.uuid === this.currentFieldPaymentMethods)
-      payment.currency = this.currentFieldCurrency
+      const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentMethodsCurrency)
+      const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.uuid === this.currentFieldPaymentMethods)
+      payment.currency = paymentMethodsPos.reference_currency
       payment.amount = payment.PayAmt
-      payment.tenderTypeCode = paymentMethodsPos.tender_type
-      payment.paymentMethodUuid = this.currentFieldPaymentMethods
+      payment.tenderTypeCode = paymentMethodsPos.payment_method.tender_type
+      payment.paymentMethodUuid = paymentMethodsPos.payment_method.uuid
       payment.paymentMethods = paymentMethodsPos
       payment.chargeUuid = this.currentPointOfSales.defaultOpeningChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
-      payment.currencyUuid = selectCurrency.uuid
+      payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
       this.sendPayment(payment)
     },
     sendPayment(payment) {
-      createPayment(payment)
-        .then(response => {
-          this.clearField()
-        })
-        .catch(error => {
-          this.$message({
-            message: error.message,
-            isShowClose: true,
-            type: 'error'
+      const listPayments = this.listCastOpen.find(payments => {
+        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
+          return payment
+        }
+        return undefined
+      })
+      if (this.isEmptyValue(listPayments)) {
+        createPayment(payment)
+          .then(response => {
+            this.clearField()
+            this.listPaymentOpen()
           })
-          console.warn(`Error: ${error.message}. Code: ${error.code}.`)
+          .catch(error => {
+            console.warn(`ListPaymentsFromServer: ${error.message}. Code: ${error.code}.`)
+            showMessage({
+              type: 'error',
+              message: error.message,
+              showClose: true
+            })
+            return {
+              ...error,
+              type: 'error'
+            }
+          })
+      } else {
+        updatePayment({
+          paymentUuid: listPayments.uuid,
+          amount: listPayments.amount + payment.amount
         })
-        .finally(() => {
-          this.listPaymentOpen()
-        })
+          .then(response => {
+            this.clearField()
+            this.listPaymentOpen()
+          })
+          .catch(error => {
+            console.warn(`ListPaymentsFromServer: ${error.message}. Code: ${error.code}.`)
+            showMessage({
+              type: 'error',
+              message: error.message,
+              showClose: true
+            })
+            return {
+              ...error,
+              type: 'error'
+            }
+          })
+      }
+      // createPayment(payment)
+        // .then(response => {
+        //   this.clearField()
+        // })
+        // .catch(error => {
+        //   this.$message({
+        //     message: error.message,
+        //     isShowClose: true,
+        //     type: 'error'
+        //   })
+        //   console.warn(`Error: ${error.message}. Code: ${error.code}.`)
+        // })
+        // .finally(() => {
+        //   this.listPaymentOpen()
+        // })
     },
     listPaymentOpen() {
       const posUuid = this.currentPointOfSales.uuid
@@ -1019,7 +1074,6 @@ export default {
       return ''
     },
     cashOpening() {
-      console.log(this.currentPanel)
       const attribute = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Opening',
         format: 'object'
