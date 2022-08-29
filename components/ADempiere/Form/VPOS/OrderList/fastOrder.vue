@@ -45,7 +45,7 @@
                 v-model="option.isVisible"
                 placement="right"
                 trigger="click"
-                width="900"
+                width="1200"
               >
                 <find-orders
                   :data="option"
