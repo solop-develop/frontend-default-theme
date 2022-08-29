@@ -340,7 +340,7 @@
                 </el-dropdown>
                 <br>
                 <el-dropdown
-                  v-if="!isEmptyValue(currentOrder) && !isEmptyValue(listCampaign)"
+                  v-if="!isEmptyValue(listCampaign)"
                   trigger="click"
                   class="info-pos"
                   @command="changeCampaign"

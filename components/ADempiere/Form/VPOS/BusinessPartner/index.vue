@@ -72,7 +72,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled || !isAllowsBusinessPartnerCreate"
+                :disabled="!isAllowsBusinessPartnerCreate"
               >
                 <i
                   class="el-icon-plus"
@@ -666,9 +666,11 @@ export default {
           posUuid
         })
           .then(responseBPartner => {
-            this.$store.commit('customer', responseBPartner)
-            // TODO: Add new record into vuex store.
-            this.setBusinessPartner(responseBPartner)
+            const { documentStatus } = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
+            if (!this.isEmptyValue(documentStatus) && documentStatus.value === 'DR') {
+              this.$store.commit('customer', responseBPartner)
+              this.setBusinessPartner(responseBPartner)
+            }            
             this.clearValues()
             this.$message({
               type: 'success',
