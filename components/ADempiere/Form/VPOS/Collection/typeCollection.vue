@@ -107,7 +107,7 @@
                     <div class="top clearfix">
                       <span>
                         {{
-                          labelTenderType(value)
+                          value.paymentMethod.name
                         }}
                       </span>
                     </div>
@@ -135,15 +135,15 @@
                         class="clearfix"
                         style="padding-bottom: 20px;"
                       >
-                        <p class="total">
-                          <b style="float: right;color: red;">
-                            {{ formatPrice(value.amount, searchRate(value).currencyTo.iSOCode) }}
+                        <p v-if="!isEmptyValue(value.orderCurrencyRate) && value.orderCurrencyRate !== 1" class="total">
+                          <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
+                            {{ formatPrice(value.amount, value.currency.iso_code) }}
                           </b>
                         </p>
                         <br>
-                        <p v-if="(!isEmptyValue(value.currencyUuid) && currentPointOfSales.priceList.currency.uuid !== value.currencyUuid) || (!isEmptyValue(value.currency) && currentPointOfSales.priceList.currency.uuid !== value.currency.uuid)" class="total">
-                          <b style="float: right;color: red;">
-                            {{ formatPrice(value.amount * (isEmptyValue(value.orderCurrencyRate) ? searchRate(value).divideRate : value.orderCurrencyRate), currentPointOfSales.currentPriceList.currency.iSOCode) }}
+                        <p class="total">
+                          <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
+                            {{ formatPrice(value.amount * value.orderCurrencyRate, currency.iSOCode) }}
                           </b>
                         </p>
                       </div>

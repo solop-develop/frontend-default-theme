@@ -920,6 +920,7 @@ export default {
       })
       const params = { referenceNo: values.DocumentNo, description: values.Description, paymentDate: values.DateTrx }
       const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
       if (this.currentAvailablePaymentMethods.is_payment_reference) {
         this.$store.dispatch('refundReference', {
           ...params,
@@ -934,7 +935,7 @@ export default {
           tenderTypeCode,
           customerUuid: this.currentOrder.customer.uuid,
           salesRepresentativeUuid: this.currentOrder.salesRepresentative.uuid,
-          currencyUuid: paymentCurrency.refund_reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? alo.uuid :  paymentCurrency.refund_reference_currency.uuid
         })
         this.addCollect()
         return
@@ -950,7 +951,7 @@ export default {
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
           tenderTypeCode,
-          currencyUuid: paymentCurrency.reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid :  paymentCurrency.reference_currency.uuid
         })
       } else {
         this.$store.dispatch('createPayments', {
@@ -962,7 +963,7 @@ export default {
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
           tenderTypeCode,
-          currencyUuid: paymentCurrency.reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid :  paymentCurrency.reference_currency.uuid
         })
           .then((response) => {
             if (response.type !== 'error') {
