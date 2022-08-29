@@ -935,7 +935,7 @@ export default {
           tenderTypeCode,
           customerUuid: this.currentOrder.customer.uuid,
           salesRepresentativeUuid: this.currentOrder.salesRepresentative.uuid,
-          currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? alo.uuid :  paymentCurrency.refund_reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid
         })
         this.addCollect()
         return
@@ -951,7 +951,7 @@ export default {
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
           tenderTypeCode,
-          currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid :  paymentCurrency.reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
         })
       } else {
         this.$store.dispatch('createPayments', {
@@ -963,7 +963,7 @@ export default {
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
           tenderTypeCode,
-          currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid :  paymentCurrency.reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
         })
           .then((response) => {
             if (response.type !== 'error') {

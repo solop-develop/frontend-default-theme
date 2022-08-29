@@ -647,28 +647,21 @@ export default {
       }
       return this.$store.getters.posAttributes.currentPointOfSales.maximumDailyRefundAllowed
     },
-    refundReferenceCurrency: {
-      get() {
-        if (!this.isEmptyValue(this.currentFieldPaymentMethods)) {
-          const currency = this.searchPaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
-          if (!this.isEmptyValue(currency)) {
-            this.currentFieldCurrencyRefund = currency.reference_currency.iso_code
-            return currency.reference_currency.iso_code
-          }
+    refundReferenceCurrency() {
+      if (!this.isEmptyValue(this.currentFieldPaymentMethods)) {
+        const currency = this.searchPaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
+        if (!this.isEmptyValue(currency)) {
+          return currency.reference_currency.iso_code
         }
-        if (!this.isEmptyValue(this.selectionTypeRefund) && !this.isEmptyValue(this.selectionTypeRefund.refund_reference_currency)) {
-          this.currentFieldCurrencyRefund = this.selectionTypeRefund.refund_reference_currency.iso_code
-          return this.selectionTypeRefund.refund_reference_currency.iso_code
-        }
-
-        if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency)) {
-          return ''
-        }
-        return this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency.iso_code
-      },
-      set(value) {
-        return value
       }
+      if (!this.isEmptyValue(this.selectionTypeRefund) && !this.isEmptyValue(this.selectionTypeRefund.refund_reference_currency)) {
+        return this.selectionTypeRefund.refund_reference_currency.iso_code
+      }
+
+      if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency)) {
+        return ''
+      }
+      return this.$store.getters.posAttributes.currentPointOfSales.refundReferenceCurrency.iso_code
     },
     defaultReferenceCurrency() {
       if (!this.isEmptyValue(this.selectionTypeRefund) && !this.isEmptyValue(this.selectionTypeRefund.refund_reference_currency)) {
@@ -744,7 +737,7 @@ export default {
       const selectCurrency = this.searchPaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       const currency = this.listCurrency.find(currency => {
         if (!this.isEmptyValue(selectCurrency) && currency.iso_code === selectCurrency.reference_currency.iso_code) {
-          return currency 
+          return currency
         }
       })
       const convert = this.convertionsList.find(convert => {
@@ -867,6 +860,9 @@ export default {
         columnName: 'PayAmt',
         value: value / this.dayRate.divideRate
       })
+    },
+    refundReferenceCurrency(value) {
+      this.currentFieldCurrencyRefund = value
     },
     currentBankAccount(value) {
       if (this.isEmptyValue(value)) {
@@ -1306,7 +1302,7 @@ export default {
       if (this.maximumRefundAllowed < amount || (this.maximumRefundAllowed - allPayMaximunRefund) < amount) {
         this.visiblePin = true
         setTimeout(() => {
-          this.$refs.pinPostPayment.focus() 
+          this.$refs.pinPostPayment.focus()
         }, 500)
         this.refundOptionVAlidate = {
           posUuid,
@@ -1318,7 +1314,7 @@ export default {
           paymentDate,
           tenderTypeCode: paymentCurrency.payment_method.tender_type,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
-          currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid :  paymentCurrency.refund_reference_currency.uuid
+          currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid
         }
         return
       }
@@ -1332,7 +1328,7 @@ export default {
         paymentDate,
         tenderTypeCode: paymentCurrency.payment_method.tender_type,
         paymentMethodUuid: paymentCurrency.payment_method.uuid,
-        currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid :  paymentCurrency.reference_currency.uuid
+        currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
       })
       this.currentFieldPaymentMethods = this.isEmptyValue(this.searchPaymentMethods) ? '' : this.searchPaymentMethods[0].uuid
     },
