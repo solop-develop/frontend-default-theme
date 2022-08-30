@@ -440,7 +440,7 @@
               <p class="total">
                 {{ $t('form.pos.order.itemQuantity') }}:
                 <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                  {{ getItemQuantity }}
+                  {{ formatQuantity(getItemQuantity) }}
                 </b>
               </p>
               <p class="total">
