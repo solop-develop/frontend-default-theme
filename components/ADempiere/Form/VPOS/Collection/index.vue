@@ -153,6 +153,7 @@
             class="view-loading"
           />
         </el-main>
+
         <!-- Collection container bottom panel -->
         <el-footer id="infoInvoce" height="auto" style="padding-left: 0px; padding-right: 0px;">
           <el-row :gutter="24">
@@ -168,9 +169,27 @@
                     </b>
                   </p>
 
-                  <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total"><b> {{ $t('form.pos.collect.convertedAmount') }}: </b><b style="float: right;">{{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}</b> </p>
+                  <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total">
+                    <b>{{ $t('form.pos.collect.convertedAmount') }}: </b>
+                    <b style="float: right;">
+                      {{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}
+                    </b>
+                  </p>
                 </div>
                 <div style="padding-left: 10px;padding-right: 10px;">
+                  <p class="total">
+                    {{ $t('pointOfSales.collection.installmentAmount') }}:
+                    <b style="float: right;">
+                      {{ formatPrice2({ value: currentOrder.installmentAmount, currency: pointOfSalesCurrency.iSOCode }) }}
+                    </b>
+                  </p>
+                  <p class="total">
+                    {{ $t('pointOfSales.collection.chargeAmount') }}:
+                    <b style="float: right;">
+                      {{ formatPrice2({ value: currentOrder.chargeAmount, currency: pointOfSalesCurrency.iSOCode }) }}
+                    </b>
+                  </p>
+
                   <p class="total">
                     {{ $t('form.pos.collect.payment') }}:
                     <b style="float: right;">
@@ -222,6 +241,7 @@ import overdrawnInvoice from './overdrawnInvoice'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
+import { formatPrice as formatPrice2 } from '@/utils/ADempiere/formatValue/numberFormat'
 import { formatPrice, formatDateToSend } from '@/utils/ADempiere/valueFormat.js'
 import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat'
 import {
@@ -836,6 +856,7 @@ export default {
     isReadOnlyField,
     changeFieldShowedFromUser,
     formatDateToSend,
+    formatPrice2,
     showDayRate(rate) {
       const amount = rate.divideRate > rate.multiplyRate ? rate.divideRate : rate.multiplyRate
       const currency = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
