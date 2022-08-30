@@ -221,8 +221,9 @@ import typeCollection from '@theme/components/ADempiere/Form/VPOS/Collection/typ
 import overdrawnInvoice from './overdrawnInvoice'
 
 // utils and helper methods
+import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { formatPrice, formatDateToSend } from '@/utils/ADempiere/valueFormat.js'
-import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat.js'
+import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat'
 import {
   getLookupList,
   isDisplayedField,
@@ -233,6 +234,7 @@ import {
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
+
 // api request methods
 import { processOrder } from '@/api/ADempiere/form/point-of-sales.js'
 
@@ -709,11 +711,16 @@ export default {
 
   watch: {
     dateConvertions(value) {
-      if (!this.isEmptyValue(this.currentPointOfSales.conversionTypeUuid) && !this.isEmptyValue(this.currentPointOfSales.priceList.currency.uuid) && !this.isEmptyValue(this.selectCurrentFieldCurrency.uuid) && !this.isEmptyValue(value) && this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered) !== value) {
+      const currencyFromUuid = this.currentPointOfSales.priceList.currency.uuid
+      const currencyToUuid = this.selectCurrentFieldCurrency.uuid
+      if (!isEmptyValue(this.currentPointOfSales.conversionTypeUuid) &&
+        !isEmptyValue(currencyFromUuid) && !isEmptyValue(currencyToUuid) &&
+        !isSameValues(currencyFromUuid, currencyToUuid) &&
+        !isEmptyValue(value) && this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered) !== value) {
         this.$store.dispatch('searchConversion', {
           conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
-          currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
-          currencyToUuid: this.selectCurrentFieldCurrency.uuid,
+          currencyFromUuid,
+          currencyToUuid,
           conversionDate: clientDateTime(value, 'd')
         })
       }
