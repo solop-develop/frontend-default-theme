@@ -712,17 +712,19 @@ export default {
       } else {
         this.changeCurrency(this.pointOfSalesCurrency.iSOCode)
       }
+      const findCurrency = this.availablePaymentMethods.find(payemnt => payemnt.uuid === value)
+      this.currentMethodsCurrency = this.isEmptyValue(findCurrency.reference_currency) ? this.pointOfSalesCurrency.iSOCode : findCurrency.reference_currency.iso_code
       // if (!this.isEmptyValue(this.dayRate)) {
       //   this.showDayRate(this.dayRate)
       // }
     },
     precision() {
       return this.$store.getters.getCurrency.standardPrecision
-    },
-    currentFieldPaymentMethods(value) {
-      const findCurrency = this.availablePaymentMethods.find(payemnt => payemnt.uuid === value)
-      this.currentMethodsCurrency = this.isEmptyValue(findCurrency.reference_currency) ? this.pointOfSalesCurrency.iSOCode : findCurrency.reference_currency.iso_code
     }
+    // currentFieldPaymentMethods(value) {
+    //   const findCurrency = this.availablePaymentMethods.find(payemnt => payemnt.uuid === value)
+    //   this.currentMethodsCurrency = this.isEmptyValue(findCurrency.reference_currency) ? this.pointOfSalesCurrency.iSOCode : findCurrency.reference_currency.iso_code
+    // }
   },
 
   created() {
@@ -993,7 +995,7 @@ export default {
           })
           .catch(error => {
             console.warn(`ListPaymentsFromServer: ${error.message}. Code: ${error.code}.`)
-            showMessage({
+            this.$message({
               type: 'error',
               message: error.message,
               showClose: true
@@ -1014,7 +1016,7 @@ export default {
           })
           .catch(error => {
             console.warn(`ListPaymentsFromServer: ${error.message}. Code: ${error.code}.`)
-            showMessage({
+            this.$message({
               type: 'error',
               message: error.message,
               showClose: true
@@ -1025,21 +1027,6 @@ export default {
             }
           })
       }
-      // createPayment(payment)
-        // .then(response => {
-        //   this.clearField()
-        // })
-        // .catch(error => {
-        //   this.$message({
-        //     message: error.message,
-        //     isShowClose: true,
-        //     type: 'error'
-        //   })
-        //   console.warn(`Error: ${error.message}. Code: ${error.code}.`)
-        // })
-        // .finally(() => {
-        //   this.listPaymentOpen()
-        // })
     },
     listPaymentOpen() {
       const posUuid = this.currentPointOfSales.uuid

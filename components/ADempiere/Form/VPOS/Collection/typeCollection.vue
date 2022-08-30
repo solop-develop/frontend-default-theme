@@ -135,7 +135,7 @@
                         class="clearfix"
                         style="padding-bottom: 20px;"
                       >
-                        <p v-if="!isEmptyValue(value.orderCurrencyRate) && value.orderCurrencyRate !== 1" class="total">
+                        <p class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
                             {{ formatPrice(value.amount, value.currency.iso_code) }}
                           </b>
@@ -218,7 +218,6 @@ export default {
   },
   computed: {
     listRefunds() {
-      console.log(this.currentPointOfSales.currentOrder.listPayments.payments.filter(payments => payments.isRefund))
       return this.currentPointOfSales.currentOrder.listPayments.payments.filter(payments => payments.isRefund)
     },
     typesPayment() {

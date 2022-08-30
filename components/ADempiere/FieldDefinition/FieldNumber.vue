@@ -171,12 +171,16 @@ export default {
       // this.focusGained(event)
       this.$nextTick(() => {
         // this.$refs[this.metadata.columnName].focus()
-        this.$refs[this.metadata.columnName].select()
+        if (!this.isEmptyValue(this.$refs) && !this.isEmptyValue(this.$refs[this.metadata.columnName])) {
+          this.$refs[this.metadata.columnName].select()
+        }
       })
     },
     select() {
       this.$nextTick(() => {
-        this.$refs[this.metadata.columnName].select()
+        if (!this.isEmptyValue(this.$refs) && !this.isEmptyValue(this.$refs[this.metadata.columnName])) {
+          this.$refs[this.metadata.columnName].select()
+        }
       })
     },
     customFocusLost(event) {

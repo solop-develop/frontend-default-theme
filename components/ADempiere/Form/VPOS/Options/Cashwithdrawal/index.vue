@@ -984,7 +984,7 @@ export default {
           })
           .catch(error => {
             console.warn(`ListPaymentsFromServer: ${error.message}. Code: ${error.code}.`)
-            showMessage({
+            this.$message({
               type: 'error',
               message: error.message,
               showClose: true
@@ -1005,7 +1005,7 @@ export default {
           })
           .catch(error => {
             console.warn(`ListPaymentsFromServer: ${error.message}. Code: ${error.code}.`)
-            showMessage({
+            this.$message({
               type: 'error',
               message: error.message,
               showClose: true
@@ -1016,21 +1016,6 @@ export default {
             }
           })
       }
-      // createPayment(payment)
-        // .then(response => {
-        //   this.clearField()
-        // })
-        // .catch(error => {
-        //   this.$message({
-        //     message: error.message,
-        //     isShowClose: true,
-        //     type: 'error'
-        //   })
-        //   console.warn(`Error: ${error.message}. Code: ${error.code}.`)
-        // })
-        // .finally(() => {
-        //   this.listPaymentOpen()
-        // })
     },
     listPaymentOpen() {
       const posUuid = this.currentPointOfSales.uuid
