@@ -768,7 +768,7 @@ export default {
                   row: this.currentLineOrder,
                   columnName: 'QtyEntered'
                 })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === parseInt(qtyEntered, 10)) {
+                if (mutation.payload.value.toString() === qtyEntered) {
                   return
                 }
                 if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
