@@ -26,7 +26,7 @@
       <el-table
         v-loading="isLoadingTable"
         :data="dataList"
-        height="450"
+        height="550"
         style="width: 100%"
         border
         :empty-text="$t('form.byInvoice.emptyList')"
