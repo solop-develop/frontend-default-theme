@@ -85,6 +85,26 @@
                   </el-select>
                 </el-form-item>
               </el-col>
+              <el-col
+                v-if="isAddAcount"
+                :span="8"
+              >
+                <field-definition
+                  :metadata-field="fieldsList[3]"
+                  :container-uuid="'Cash-Opening'"
+                  :container-manager="{
+                    ...containerManager,
+                    getLookupList,
+                    isDisplayedField,
+                    isDisplayedDefault,
+                    generalInfoSearch,
+                    searchTableHeader,
+                    isMandatoryField,
+                    isReadOnlyField,
+                    changeFieldShowedFromUser
+                  }"
+                />
+              </el-col>
             </el-row>
           </el-form>
           <br>
@@ -98,10 +118,16 @@
           <el-button
             type="info"
             icon="el-icon-minus"
-            style="float: right;margin-left: 0px;"
+            style="float: right;margin-left: 10px;"
             :disabled="isEmptyValue(listCastOpen)"
             @click="undoPatment()"
           />
+          <el-checkbox
+            v-model="isAddAcount"
+            style="float: right;"
+          >
+            {{ 'Transferencia Hacia' }}
+          </el-checkbox>
         </div>
       </el-card>
       <el-card class="box-card" style="padding-left: 0px; padding-right: 0px">
@@ -196,25 +222,6 @@
                           />
                         </el-select>
                       </el-form-item>
-                    </el-col>
-                    <el-col
-                      :span="8"
-                    >
-                      <field-definition
-                        :metadata-field="fieldsList[3]"
-                        :container-uuid="'Cash-Opening'"
-                        :container-manager="{
-                          ...containerManager,
-                          getLookupList,
-                          isDisplayedField,
-                          isDisplayedDefault,
-                          generalInfoSearch,
-                          searchTableHeader,
-                          isMandatoryField,
-                          isReadOnlyField,
-                          changeFieldShowedFromUser
-                        }"
-                      />
                     </el-col>
                     <el-col
                       :span="8"
@@ -354,6 +361,7 @@ export default {
       fieldsList: fieldsListCashOpen,
       sendToServer: false,
       value: '',
+      isAddAcount: false,
       amontSend: 0,
       listCollectAgent: [],
       currentFieldCurrency: '',

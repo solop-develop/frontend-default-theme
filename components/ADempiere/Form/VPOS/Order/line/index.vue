@@ -207,7 +207,7 @@
       </el-col>
     </el-row>
     <el-row
-      v-if="!isEmptyValue(metadataList) && isLoadedField" 
+      v-if="!isEmptyValue(metadataList) && isLoadedField"
       :gutter="20"
     >
       <el-col :span="12">
@@ -245,8 +245,8 @@
         </el-form>
       </el-col>
     </el-row>
-      <!-- </template> -->
-      <!-- <el-col :span="16">
+    <!-- </template> -->
+    <!-- <el-col :span="16">
         <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
           <el-form-item :label="$t('route.warehouse')" style="margin-left: 2%;width: 100% !important;">
             <el-select
@@ -729,7 +729,7 @@ export default {
     },
     changUomLine(value) {
       const uom = this.uomList.find(uom => value.uuid === uom.product_uom.uuid)
-      if (uom.divide_rate >= uom.multiply_rate ) {
+      if (uom.divide_rate >= uom.multiply_rate) {
         this.num = uom.divide_rate
       } else {
         this.num = uom.multiply_rate
@@ -768,7 +768,7 @@ export default {
                   row: this.currentLineOrder,
                   columnName: 'QtyEntered'
                 })
-                if (mutation.payload.value.toString() === qtyEntered) {
+                if (this.formatQuantity(mutation.payload.value).toString() === qtyEntered) {
                   return
                 }
                 if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
