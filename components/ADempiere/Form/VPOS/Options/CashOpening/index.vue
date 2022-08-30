@@ -36,7 +36,7 @@
                 <field-definition
                   :metadata-field="{
                     ...fieldsList[0],
-                    labelCurrency: currentFieldCurrency
+                    labelCurrency: currentMethodsCurrency
                   } "
                   :container-uuid="'Cash-Opening'"
                   :container-manager="{
@@ -1090,10 +1090,11 @@ export default {
         payments: this.listCastOpen
       })
         .then(response => {
+          const message = (this.currentPanel.getters === 'getShowCashOpen') ? this.$t('form.pos.optionsPoinSales.cashManagement.cashOpenBox') : 'Dinero Ingresado'
           this.$message({
             type: 'success',
             showClose: true,
-            message: this.$t('form.pos.optionsPoinSales.cashManagement.cashOpenBox')
+            message
           })
           this.close()
         })

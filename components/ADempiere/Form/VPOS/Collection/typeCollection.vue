@@ -38,7 +38,7 @@
                     <div class="top clearfix">
                       <span>
                         {{
-                          value.paymentMethod.name
+                          isEmptyValue(value.payment_method) ? value.paymentMethod.name : value.payment_method.name
                         }}
                       </span>
                     </div>
@@ -107,7 +107,7 @@
                     <div class="top clearfix">
                       <span>
                         {{
-                          value.paymentMethod.name
+                          isEmptyValue(value.payment_method) ? value.paymentMethod.name : value.payment_method.name
                         }}
                       </span>
                     </div>
@@ -119,7 +119,7 @@
                       >
                         {{ value.documentNo }}
                       </el-button>
-                      <p v-if="!isEmptyValue(value.description)">
+                      <p v-if="!isEmptyValue(value.description)" style="width: 100%;line-height: 1;">
                         {{ value.description }}
                       </p>
                       <el-button
@@ -218,6 +218,7 @@ export default {
   },
   computed: {
     listRefunds() {
+      console.log(this.currentPointOfSales.currentOrder.listPayments.payments.filter(payments => payments.isRefund))
       return this.currentPointOfSales.currentOrder.listPayments.payments.filter(payments => payments.isRefund)
     },
     typesPayment() {
