@@ -335,6 +335,9 @@ export default {
         return formatQuantity({ value: row.discount }) + ' %'
       } else if (columnName === 'taxIndicator') {
         let taxIndicator = row.taxIndicator
+        if (taxIndicator === 'EX') {
+          return row.taxRate.name
+        }
         if (isEmptyValue(taxIndicator)) {
           taxIndicator = 0
         }
