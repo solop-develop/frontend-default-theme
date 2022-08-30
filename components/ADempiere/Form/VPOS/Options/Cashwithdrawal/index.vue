@@ -36,7 +36,7 @@
                 <field-definition
                   :metadata-field="{
                     ...fieldsList[0],
-                    labelCurrency: currentFieldCurrency
+                    labelCurrency: currentMethodsCurrency
                   } "
                   :container-uuid="'Cash-Withdrawal'"
                   :container-manager="{
