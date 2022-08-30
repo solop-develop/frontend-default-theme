@@ -280,10 +280,10 @@ export default {
     convertedAmount() {
       if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency) && this.totalAmountConverted === 1) {
         this.$store.dispatch('searchConversion', {
+          // conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered),
           conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
           currencyFromUuid: this.currentPointOfSales.currentPriceList.currency.uuid,
-          currencyToUuid: this.currentPointOfSales.displayCurrency.uuid,
-          conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
+          currencyToUuid: this.currentPointOfSales.displayCurrency.uuid
         })
       }
     },
