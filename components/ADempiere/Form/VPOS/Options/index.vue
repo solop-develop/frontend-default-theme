@@ -50,6 +50,7 @@
                 v-model="showListOrdes"
                 placement="right"
                 trigger="click"
+                width="1200"
                 @show="seeOrderList"
               >
                 <orders-list

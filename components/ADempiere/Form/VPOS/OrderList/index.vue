@@ -73,7 +73,7 @@
       :empty-text="$t('form.byInvoice.emptyList')"
       fit
       highlight-current-row
-      :height="heightTable"
+      height="550"
       @shortkey.native="keyAction"
       @current-change="handleCurrentChange"
       @row-dblclick="selectionChangeOrder"
