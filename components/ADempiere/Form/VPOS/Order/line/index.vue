@@ -547,6 +547,11 @@ export default {
         this.uomList.push(this.currentLine.uom)
         this.uomValue = this.currentLine.uom.uuid
         this.uomValueRate = this.currentLine.uom.product_uom.name
+        if (this.currentLine.uom.divide_rate >= this.currentLine.uom.multiply_rate) {
+          this.num = this.currentLine.uom.divide_rate
+        } else {
+          this.num = this.currentLine.uom.multiply_rate
+        }
       }
       this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceActual
       this.visible = false
