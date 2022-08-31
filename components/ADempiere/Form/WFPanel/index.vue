@@ -201,6 +201,19 @@ export default defineComponent({
       unsubscribeWorkflowChange()
     })
 
+    // without field uuid
+    function getLookupList({ parentUuid, containerUuid, referenceUuid, tableName, columnName, columnUuid, searchValue }) {
+      return store.dispatch('getLookupListFromServer', {
+        parentUuid,
+        containerUuid,
+        referenceUuid,
+        tableName,
+        columnName,
+        columnUuid,
+        searchValue
+      })
+    }
+
     return {
       // ref
       formUuid,
@@ -209,7 +222,10 @@ export default defineComponent({
       workflowStatesList,
       workflowTranstitionsList,
       fieldsList,
-      containerManager
+      containerManager: {
+        ...containerManager,
+        getLookupList
+      }
     }
   }
 })
