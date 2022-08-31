@@ -675,9 +675,6 @@ export default {
         if (mutation.type === 'addActionPerformed') {
           switch (mutation.payload.columnName) {
             case 'QtyEntered':
-              if (mutation.payload.value.toString() === qtyEntered) {
-                return
-              }
               if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
                 this.updateOrderLine(mutation.payload)
               } else {

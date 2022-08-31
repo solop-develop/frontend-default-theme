@@ -962,6 +962,10 @@ export default {
         })
         return
       }
+      const bank = this.$store.getters.getValuesView({
+        containerUuid: 'Cash-Opening',
+        format: 'object'
+      })
       const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentMethodsCurrency)
       const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.uuid === this.currentFieldPaymentMethods)
       payment.currency = paymentMethodsPos.reference_currency
@@ -970,7 +974,7 @@ export default {
       payment.paymentMethodUuid = paymentMethodsPos.payment_method.uuid
       payment.paymentMethods = paymentMethodsPos
       payment.isRefund = true
-      payment.referenceBankAccountUuid = attribute.C_BankAccount_ID_UUID
+      payment.referenceBankAccountUuid = bank.C_BankAccount_ID_UUID
       payment.chargeUuid = this.currentPointOfSales.defaultWithdrawalChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid

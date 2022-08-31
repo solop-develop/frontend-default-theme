@@ -963,10 +963,6 @@ export default {
     },
     // Open Cash
     addPayment() {
-      const attribute = this.$store.getters.getValuesView({
-        containerUuid: 'Cash-Opening',
-        format: 'object'
-      })
       const payment = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Opening',
         format: 'object'
@@ -979,7 +975,7 @@ export default {
         })
         return
       }
-      const attribute = this.$store.getters.getValuesView({
+      const bank = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Opening',
         format: 'object'
       })
@@ -992,7 +988,7 @@ export default {
       payment.paymentMethods = paymentMethodsPos
       payment.chargeUuid = this.currentPointOfSales.defaultOpeningChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
-      payment.referenceBankAccountUuid = attribute.C_BankAccount_ID_UUID
+      payment.referenceBankAccountUuid = bank.C_BankAccount_ID_UUID
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
       this.sendPayment(payment)
     },

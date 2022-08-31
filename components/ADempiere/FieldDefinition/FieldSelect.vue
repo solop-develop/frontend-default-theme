@@ -336,7 +336,7 @@ export default {
         this.uuidValue = option.uuid
       }
 
-     if (!isEmptyValue(option.displayedValue)) {
+      if (!isEmptyValue(option.displayedValue)) {
         this.displayedValue = option.displayedValue
         return
       }
