@@ -22,7 +22,7 @@
       v-if="!isEmptyValue(metadataList) && isLoadedField"
     >
       <!-- <template> -->
-      <el-col :span="6">
+      <el-col :span="8">
         <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
           <field-definition
             v-if="!isEmptyValue(fieldPriceProduct)"
@@ -46,11 +46,12 @@
           />
         </el-form>
       </el-col>
-      <el-col :span="6">
-        <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Unidad de Medida" style="width: 100% !important;">
+      <el-col :span="8">
+        <el-form label-position="top" @submit.native.prevent="notSubmitForm">
+          <el-form-item label="Unidad de Medida">
             <el-select
               v-model="uomValue"
+              style="width: 100% !important;"
               @change="changUomLine"
               @visible-change="findUomList"
             >
@@ -66,7 +67,7 @@
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="8">
         <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
           <field-definition
             v-if="!isEmptyValue(fieldQtyProduct)"
@@ -86,105 +87,48 @@
           />
         </el-form>
       </el-col>
-      <el-col :span="6">
-        <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Conversión" style="width: 100% !important;">
+      <el-col :span="24">
+        <el-row :gutter="10">
+          <el-col :span="8">
+            <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
+              <el-form-item label="Precio Base">
+                <el-input
+                  v-model="priceBase"
+                  :disabled="true"
+                  controls-position="right"
+                />
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="8">
+            <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
+              <el-form-item label="Unidad de Medida Base">
+                <el-input
+                  v-model="currentLine.productUom.product_uom.name"
+                  :disabled="true"
+                  controls-position="right"
+                  style="width: 100% !important;"
+                />
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="8">
+            <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
+              <el-form-item label="Cantidad Base">
             <el-input
-              v-model="uomValueRate"
+              v-model="currentLine.quantityOrdered"
               :disabled="true"
               controls-position="right"
+              style="width: 100% !important;"
             />
           </el-form-item>
-        </el-form>
+            </el-form>
+          </el-col>
+        </el-row>
       </el-col>
-      <el-col :span="6">
-        <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Precio Base" style="width: 100% !important;padding-left: 10px;padding-right: 10px;">
-            <el-input
-              v-model="priceBase"
-              :disabled="true"
-              controls-position="right"
-            />
-          </el-form-item>
-        </el-form>
-        <!-- <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <field-definition
-            v-if="!isEmptyValue(fieldPriceProduct)"
-            :ref="fieldPriceProduct.columnName"
-            :metadata-field="{
-              ...fieldPriceProduct,
-              name: 'Precio Base',
-              labelCurrency: currencyPointOfSales.iSOCode,
-            }"
-            :container-uuid="'line'"
-            :container-manager="{
-              ...containerManager,
-              getLookupList,
-              isDisplayedField,
-              isDisplayedDefault,
-              generalInfoSearch,
-              searchTableHeader,
-              isMandatoryField,
-              isReadOnlyField: () => { return true },
-              changeFieldShowedFromUser
-            }"
-          />
-        </el-form> -->
-      </el-col>
-      <el-col :span="6">
-        <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Unidad de Medida Basse" style="width: 100% !important;padding-right: 2px;">
-            <el-input
-              v-model="currentLine.product.uomName"
-              :disabled="true"
-              controls-position="right"
-            />
-          </el-form-item>
-        </el-form>
-      </el-col>
-      <el-col :span="6">
-        <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Cantidad Base" style="width: 100% !important;padding-left: 10px;padding-right: 10px;">
-            <el-input
-              v-model="num"
-              :disabled="true"
-              controls-position="right"
-            />
-          </el-form-item>
-        </el-form>
-        <!-- <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <field-definition
-            v-if="!isEmptyValue(fieldUOMProduct)"
-            :metadata-field="{
-              ...fieldUOMProduct,
-              name: 'Cantidad Base'
-            }"
-            :container-uuid="'line'"
-            :container-manager="{
-              ...containerManager,
-              getLookupList,
-              isDisplayedField,
-              generalInfoSearch,
-              searchTableHeader,
-              isDisplayedDefault,
-              isMandatoryField,
-              isReadOnlyField: () => { return true },
-              changeFieldShowedFromUser
-            }"
-          />
-        </el-form> -->
-      </el-col>
-      <el-col :span="6">
-        <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Equivale A" style="width: 100% !important;">
-            <el-input
-              v-model="num"
-              :disabled="true"
-              controls-position="right"
-            />
-          </el-form-item>
-        </el-form>
-      </el-col>
+      <el-divider>
+        {{ num }}
+      </el-divider>
       <el-col :span="24">
         <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
           <field-definition
@@ -246,120 +190,6 @@
         </el-form>
       </el-col>
     </el-row>
-    <!-- </template> -->
-    <!-- <el-col :span="16">
-        <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item :label="$t('route.warehouse')" style="margin-left: 2%;width: 100% !important;">
-            <el-select
-              v-model="stock"
-              style="display: block;"
-              @change="changeWarehouseLine"
-              @visible-change="loadStock"
-            >
-              <el-option
-                v-for="(item, key) in listWarehouseLine"
-                :key="key"
-                :label="item.label"
-                :value="item.uuid"
-              >
-                <span style="float: left">{{ item.label }}</span>
-                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.sumaryQty }}</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </el-col> -->
-    <!-- </el-row> -->
-    <!-- <el-row
-      v-if="!isEmptyValue(metadataList) && isLoadedField"
-    >
-      <template
-        v-for="(field, index) in metadataList"
-      >
-        <el-col :key="index" :span="8">
-          <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-            <field-definition
-              v-if="field.columnName === 'PriceEntered'"
-              :key="field.columnName"
-              :ref="field.columnName"
-              :metadata-field="{
-                ...field,
-                labelCurrency: currencyPointOfSales.iSOCode,
-              }"
-              :container-uuid="'line'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-            <field-definition
-              v-if="field.columnName === 'QtyEntered'"
-              :key="field.columnName"
-              :metadata-field="field"
-              :container-uuid="'line'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                generalInfoSearch,
-                searchTableHeader,
-                isDisplayedDefault,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-            <field-definition
-              v-if="field.columnName === 'Discount'"
-              :ref="field.columnName"
-              :key="field.columnName"
-              :metadata-field="field"
-              :container-uuid="'line'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-          </el-form>
-        </el-col>
-      </template>
-      <el-col :span="16">
-        <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item :label="$t('route.warehouse')" style="margin-left: 2%;width: 100% !important;">
-            <el-select
-              v-model="stock"
-              style="display: block;"
-              @change="changeWarehouseLine"
-              @visible-change="loadStock"
-            >
-              <el-option
-                v-for="(item, key) in listWarehouseLine"
-                :key="key"
-                :label="item.label"
-                :value="item.uuid"
-              >
-                <span style="float: left">{{ item.label }}</span>
-                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.sumaryQty }}</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </el-col>
-    </el-row> -->
     <div
       v-else
       key="form-loading"
@@ -544,16 +374,6 @@ export default {
 
   watch: {
     showField(value) {
-      if (this.isEmptyValue(this.uomList) && !this.isEmptyValue(this.currentLine.uom)) {
-        this.uomList.push(this.currentLine.uom)
-        this.uomValue = this.currentLine.uom.uuid
-        this.uomValueRate = this.currentLine.uom.product_uom.name
-        if (this.currentLine.uom.divide_rate >= this.currentLine.uom.multiply_rate) {
-          this.num = this.currentLine.uom.divide_rate
-        } else {
-          this.num = this.currentLine.uom.multiply_rate
-        }
-      }
       this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceActual
       // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: true })
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
@@ -574,6 +394,14 @@ export default {
       if (!this.isEmptyValue(this.currentLine.warehouse)) {
         this.stock = this.currentLine.warehouse.uuid
       }
+      this.uomValue = this.currentLine.productUom.uuid
+      this.uomValueRate = this.currentLine.productUom.uom.name
+      if (this.currentLine.productUom.divide_rate >= this.currentLine.productUom.multiply_rate) {
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.currentLine.productUom.divide_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+      } else {
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.currentLine.productUom.multiply_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+      } 
+      this.findUomList(value)
     }
   },
 
@@ -745,11 +573,13 @@ export default {
           return uom
         }
       })
-      this.uomValueRate = uom.product_uom.name
+      this.uomValueRate = uom.uom.name
       if (uom.divide_rate >= uom.multiply_rate) {
-        this.num = uom.divide_rate
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + uom.divide_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+        // this.num = uom.divide_rate
       } else {
-        this.num = uom.multiply_rate
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + uom.multiply_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+        // this.num = uom.multiply_rate
       }
       updateOrderLine({
         posUuid: this.currentPointOfSales.uuid,
@@ -762,6 +592,9 @@ export default {
             message: 'Acción a realizar',
             showClose: true
           })
+          this.$store.dispatch('currentLine', response)
+          this.fillOrderLine(response)
+          this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
         })
         .catch(error => {
           this.stock = this.currentLine.warehouse.uuid
