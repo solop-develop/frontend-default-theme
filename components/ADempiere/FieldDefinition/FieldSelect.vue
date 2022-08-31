@@ -332,9 +332,12 @@ export default {
 
       // find local list value
       const option = this.findOption(value)
+      if (!isEmptyValue(option.uuid)) {
+        this.uuidValue = option.uuid
+      }
+
       if (!isEmptyValue(option.displayedValue)) {
         this.displayedValue = option.displayedValue
-        this.uuidValue = option.uuid
         return
       }
 

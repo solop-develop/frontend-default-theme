@@ -85,25 +85,22 @@
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col
-                v-if="isAddAcount"
-                :span="8"
-              >
-                <field-definition
-                  :metadata-field="fieldsList[3]"
-                  :container-uuid="'Cash-Opening'"
-                  :container-manager="{
-                    ...containerManager,
-                    getLookupList,
-                    isDisplayedField,
-                    isDisplayedDefault,
-                    generalInfoSearch,
-                    searchTableHeader,
-                    isMandatoryField,
-                    isReadOnlyField,
-                    changeFieldShowedFromUser
-                  }"
-                />
+              <el-col v-if="isAddAcount" :span="8">
+                <el-form-item :label="$t('form.pos.collect.bankAcount')" class="from-field">
+                  <el-select
+                    v-model="currentBankAcount"
+                    style="display: block;"
+                    @change="changeBankAcount"
+                    @visible-change="loadAvailableCash"
+                  >
+                    <el-option
+                      v-for="item in listBankAcount"
+                      :key="item.id"
+                      :label="item.bank_account.name"
+                      :value="item.uuid"
+                    />
+                  </el-select>
+                </el-form-item>
               </el-col>
             </el-row>
           </el-form>
@@ -126,7 +123,7 @@
             v-model="isAddAcount"
             style="float: right;"
           >
-            {{ 'Retirar Desde' }}
+            {{ $t('form.pos.collect.transferFunds') }}
           </el-checkbox>
         </div>
       </el-card>
@@ -253,7 +250,6 @@
         style="float: right;margin-left: 10px;"
         type="primary"
         icon="el-icon-check"
-        :disabled="validateCash"
         @click="cashWithdrawal()"
       />
       <el-button
@@ -280,7 +276,8 @@ import {
   cashWithdrawal,
   deletePayment,
   updatePayment,
-  availableSellers
+  availableSellers,
+  availableCash
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
@@ -361,6 +358,8 @@ export default {
       isAddAcount: false,
       value: '',
       amontSend: 0,
+      currentBankAcount: '',
+      listBankAcount: [],
       currentFieldCurrency: '',
       currentMethodsCurrency: '',
       currentFieldPaymentMethods: ''
@@ -564,6 +563,13 @@ export default {
         fieldsList: this.fieldsList,
         isValidate: true
       })
+      const amount = this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: 'PayAmt'
+      })
+      if (amount === 0) {
+        return true
+      }
       const paymentMethods = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
         return false
@@ -949,20 +955,23 @@ export default {
         conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
       })
     },
+    loadAvailableCash() {
+      availableCash({
+        posUuid: this.currentPointOfSales.uuid
+      })
+        .then(response => {
+          this.listBankAcount = response.records
+        })
+    },
+    changeBankAcount(value) {
+      this.currentBankAcount = value
+    },
     // Open Cash
     addPayment() {
       const payment = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Withdrawal',
         format: 'object'
       })
-      if (this.isEmptyValue(this.listCurrency)) {
-        this.$message({
-          type: 'error',
-          showClose: true,
-          message: this.$t('form.pos.collect.emptyRate')
-        })
-        return
-      }
       const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentMethodsCurrency)
       const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.uuid === this.currentFieldPaymentMethods)
       payment.currency = paymentMethodsPos.reference_currency
@@ -971,6 +980,7 @@ export default {
       payment.paymentMethodUuid = paymentMethodsPos.payment_method.uuid
       payment.paymentMethods = paymentMethodsPos
       payment.isRefund = true
+      payment.referenceBankAccountUuid = this.currentBankAcount
       payment.chargeUuid = this.currentPointOfSales.defaultWithdrawalChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
@@ -978,7 +988,7 @@ export default {
     },
     sendPayment(payment) {
       const listPayments = this.listCashWithdrawaln.find(payments => {
-        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
+        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) || (!this.isEmptyValue(payments.referenceBankAccount) && !this.isEmptyValue(payment.referenceBankAccountUuid) && payments.referenceBankAccount.uuid === payment.referenceBankAccountUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
           return payment
         }
         return undefined
@@ -1125,13 +1135,20 @@ export default {
       return require('@/image/ADempiere/pos/typePayment/' + image)
     },
     clearField() {
+      this.currentBankAcount = ''
       this.$store.commit('updateValuesOfContainer', {
         containerUuid: 'Cash-Withdrawal',
         attributes: [{
           columnName: 'PayAmt',
           value: 0
         }, {
-          columnName: 'CollectingAgent_ID',
+          columnName: 'C_BankAccount_ID',
+          value: undefined
+        }, {
+          columnName: 'C_BankAccount_ID_UUID',
+          value: undefined
+        }, {
+          columnName: 'DisplayColumn_C_BankAccount_ID',
           value: undefined
         }, {
           columnName: 'Description',

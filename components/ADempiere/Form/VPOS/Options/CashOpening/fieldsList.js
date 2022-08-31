@@ -42,6 +42,7 @@ export default [
       handleActionKeyPerformed: true,
       handleActionPerformed: true,
       handleContentSelection: true,
+      isMandatory: false,
       size: 24
     }
   },
@@ -63,6 +64,9 @@ export default [
     overwriteDefinition: {
       isCustomField: true,
       isMandatory: false,
+      handleActionKeyPerformed: true,
+      handleActionPerformed: true,
+      handleContentSelection: true,
       size: 24
     }
   }

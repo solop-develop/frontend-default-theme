@@ -42,7 +42,8 @@ export default [
       handleActionKeyPerformed: true,
       handleActionPerformed: true,
       handleContentSelection: true,
-      size: 24
+      size: 24,
+      isMandatory: false
     }
   },
   {
