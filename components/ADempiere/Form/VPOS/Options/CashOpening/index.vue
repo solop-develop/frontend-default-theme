@@ -126,7 +126,7 @@
             v-model="isAddAcount"
             style="float: right;"
           >
-            {{ 'Transferencia Hacia' }}
+            {{ 'Usar Fondos de Caja' }}
           </el-checkbox>
         </div>
       </el-card>
@@ -548,6 +548,13 @@ export default {
         fieldsList: this.fieldsList,
         isValidate: true
       })
+      const amount = this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: 'PayAmt'
+      })
+      if (amount === 0) {
+        return true
+      }
       const paymentMethods = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
         return false
@@ -967,14 +974,6 @@ export default {
         containerUuid: 'Cash-Opening',
         format: 'object'
       })
-      if (this.isEmptyValue(this.listCurrency)) {
-        this.$message({
-          type: 'error',
-          showClose: true,
-          message: this.$t('form.pos.collect.emptyRate')
-        })
-        return
-      }
       const bank = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Opening',
         format: 'object'
@@ -994,7 +993,7 @@ export default {
     },
     sendPayment(payment) {
       const listPayments = this.listCastOpen.find(payments => {
-        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
+        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) && (payments.referenceBankAccount.uuid === payment.referenceBankAccountUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
           return payment
         }
         return undefined

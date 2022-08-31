@@ -91,7 +91,7 @@
               >
                 <field-definition
                   :metadata-field="fieldsList[3]"
-                  :container-uuid="'Cash-Opening'"
+                  :container-uuid="'Cash-Withdrawal'"
                   :container-manager="{
                     ...containerManager,
                     getLookupList,
@@ -563,6 +563,13 @@ export default {
         fieldsList: this.fieldsList,
         isValidate: true
       })
+      const amount = this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: 'PayAmt'
+      })
+      if (amount === 0) {
+        return true
+      }
       const paymentMethods = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
         return false
@@ -954,16 +961,8 @@ export default {
         containerUuid: 'Cash-Withdrawal',
         format: 'object'
       })
-      if (this.isEmptyValue(this.listCurrency)) {
-        this.$message({
-          type: 'error',
-          showClose: true,
-          message: this.$t('form.pos.collect.emptyRate')
-        })
-        return
-      }
       const bank = this.$store.getters.getValuesView({
-        containerUuid: 'Cash-Opening',
+        containerUuid: 'Cash-Withdrawal',
         format: 'object'
       })
       const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentMethodsCurrency)
@@ -982,7 +981,7 @@ export default {
     },
     sendPayment(payment) {
       const listPayments = this.listCashWithdrawaln.find(payments => {
-        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
+        if ((payments.paymentMethod.uuid === payment.paymentMethodUuid) || (!this.isEmptyValue(payments.referenceBankAccount) && !this.isEmptyValue(payment.referenceBankAccountUuid) && payments.referenceBankAccount.uuid === payment.referenceBankAccountUuid) && (payments.tenderTypeCode === 'X') && (payment.currencyUuid === payments.currency.uuid)) {
           return payment
         }
         return undefined
@@ -1130,7 +1129,7 @@ export default {
     },
     clearField() {
       this.$store.commit('updateValuesOfContainer', {
-        containerUuid: 'Cash-Opening',
+        containerUuid: 'Cash-Withdrawal',
         attributes: [{
           columnName: 'PayAmt',
           value: 0

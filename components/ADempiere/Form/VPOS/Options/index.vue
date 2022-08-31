@@ -474,7 +474,7 @@
               </p>
             </el-card>
           </el-col>
-          <el-col v-if="isAllowsAllocateSeller" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <!-- <el-col v-if="isAllowsAllocateSeller" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
@@ -485,7 +485,7 @@
                 {{ $t('form.pos.optionsPoinSales.cashManagement.transfer') }}
               </p>
             </el-card>
-          </el-col>
+          </el-col> -->
           <el-col v-if="isAllowsAllocateSeller" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -1067,11 +1067,27 @@ export default {
       }
     },
     openCashOpening() {
+      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+        this.$store.dispatch('searchConversion', {
+          conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
+          currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
+          currencyToUuid: this.currentPointOfSales.displayCurrency.uuid,
+          conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
+        })
+      }
       const posUuid = this.currentPointOfSales.uuid
       this.$store.dispatch('listPaymentOpen', posUuid)
       this.$store.commit('setshowCashOpen', true)
     },
     openCashWithdrawal() {
+      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+        this.$store.dispatch('searchConversion', {
+          conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
+          currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
+          currencyToUuid: this.currentPointOfSales.displayCurrency.uuid,
+          conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
+        })
+      }
       const posUuid = this.currentPointOfSales.uuid
       this.$store.dispatch('listPaymentWithdrawal', posUuid)
       this.$store.commit('setShowCashWithdrawl', true)
@@ -1088,6 +1104,14 @@ export default {
       this.$store.commit('setShowUnassignSeller', true)
     },
     moneyIncome() {
+      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+        this.$store.dispatch('searchConversion', {
+          conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
+          currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
+          currencyToUuid: this.currentPointOfSales.displayCurrency.uuid,
+          conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
+        })
+      }
       this.$store.commit('setShowMoneyIncome', true)
     },
     transfer() {
