@@ -543,7 +543,7 @@ export default {
   watch: {
     showField(value) {
       this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceActual
-      this.visible = false
+      // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: true })
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
         this.metadataList = this.setFieldsList()
         this.isLoadedField = true
@@ -659,7 +659,7 @@ export default {
     },
     closePing() {
       this.$refs.ping[this.$refs.ping.length - 1].showPopper = false
-      this.visible = false
+      // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: false })
     },
     checkclosePin(pin) {
       const { requestedAccess } = this.$store.getters.getOverdrawnInvoice.attributePin
@@ -781,7 +781,6 @@ export default {
                     label: this.$t('form.pos.pinMessage.qtyEntered')
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-                  this.visible = true
                 }
                 break
               case 'PriceEntered':
@@ -802,7 +801,6 @@ export default {
                     label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-                  this.visible = true
                 }
                 break
               case 'Discount':
@@ -823,7 +821,6 @@ export default {
                     label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-                  this.visible = true
                 }
                 break
             }
@@ -831,7 +828,7 @@ export default {
         }
         if (mutation.type === 'addFocusGained' && this.isPosRequiredPin && (mutation.payload.columnName === 'PriceEntered' || mutation.payload.columnName === 'Discount' || mutation.payload.columnName === 'QtyEntered')) {
           this.columnNameVisible = mutation.payload.columnName
-          this.visible = true
+          // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: true })
         }
         // if (mutation.type === 'updateValueOfField' && (mutation.payload.columnName === 'PriceEntered' || mutation.payload.columnName === 'Discount' || mutation.payload.columnName === 'QtyEntered')) {
         //   const values = this.$store.getters.getValuesView({
