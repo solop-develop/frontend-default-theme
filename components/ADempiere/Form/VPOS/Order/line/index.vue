@@ -58,7 +58,7 @@
                 v-for="(item, key) in uomList"
                 :key="key"
                 :label="item.uom.name"
-                :value="item.product_uom"
+                :value="item.uuid"
               >
                 <span style="float: left">{{ item.uom.name }}</span>
               </el-option>
@@ -90,7 +90,7 @@
         <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
           <el-form-item label="Conversión" style="width: 100% !important;">
             <el-input
-              v-model="uomValue.name"
+              v-model="uomValueRate"
               :disabled="true"
               controls-position="right"
             />
@@ -441,8 +441,8 @@ export default {
       metadataList: [],
       panelMetadata: {},
       isLoaded: false,
-      num: '3.5 Mts 2',
-      conver: '1 Caja',
+      num: '',
+      conver: '',
       qtyAvalible: 5,
       isLoadedField: false,
       panelType: 'custom',
@@ -453,6 +453,7 @@ export default {
       priceBase: '',
       stock: '',
       uomValue: '',
+      uomValueRate: '',
       uomList: [],
       unsubscribe: () => {}
     }
@@ -542,6 +543,16 @@ export default {
 
   watch: {
     showField(value) {
+      if (this.isEmptyValue(this.uomList)) {
+        this.uomList.push(this.currentLine.uom)
+        this.uomValue = this.currentLine.uom.uuid
+        this.uomValueRate = this.currentLine.uom.product_uom.name
+        if (this.currentLine.uom.divide_rate >= this.currentLine.uom.multiply_rate) {
+          this.num = this.currentLine.uom.divide_rate
+        } else {
+          this.num = this.currentLine.uom.multiply_rate
+        }
+      }
       this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceActual
       this.visible = false
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
@@ -728,7 +739,12 @@ export default {
         })
     },
     changUomLine(value) {
-      const uom = this.uomList.find(uom => value.uuid === uom.product_uom.uuid)
+      const uom = this.uomList.find(uom => {
+        if (value === uom.uuid) {
+          return uom
+        }
+      })
+      this.uomValueRate = uom.product_uom.name
       if (uom.divide_rate >= uom.multiply_rate) {
         this.num = uom.divide_rate
       } else {
