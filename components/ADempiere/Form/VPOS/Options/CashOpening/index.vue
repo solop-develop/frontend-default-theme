@@ -255,7 +255,6 @@
         style="float: right;margin-left: 10px;"
         type="primary"
         icon="el-icon-check"
-        :disabled="validateCash"
         @click="cashOpening()"
       />
       <el-button
@@ -964,6 +963,10 @@ export default {
     },
     // Open Cash
     addPayment() {
+      const attribute = this.$store.getters.getValuesView({
+        containerUuid: 'Cash-Opening',
+        format: 'object'
+      })
       const payment = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Opening',
         format: 'object'
@@ -976,6 +979,10 @@ export default {
         })
         return
       }
+      const attribute = this.$store.getters.getValuesView({
+        containerUuid: 'Cash-Opening',
+        format: 'object'
+      })
       const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentMethodsCurrency)
       const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.uuid === this.currentFieldPaymentMethods)
       payment.currency = paymentMethodsPos.reference_currency
@@ -985,6 +992,7 @@ export default {
       payment.paymentMethods = paymentMethodsPos
       payment.chargeUuid = this.currentPointOfSales.defaultOpeningChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
+      payment.referenceBankAccountUuid = attribute.C_BankAccount_ID_UUID
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
       this.sendPayment(payment)
     },
@@ -1144,9 +1152,15 @@ export default {
           columnName: 'PayAmt',
           value: 0
         }, {
-        //   columnName: 'CollectingAgent_ID',
-        //   value: undefined
-        // }, {
+          columnName: 'C_BankAccount_ID',
+          value: undefined
+        }, {
+          columnName: 'C_BankAccount_ID_UUID',
+          value: undefined
+        }, {
+          columnName: 'DisplayColumn_C_BankAccount_ID',
+          value: undefined
+        }, {
           columnName: 'Description',
           value: undefined
         }]

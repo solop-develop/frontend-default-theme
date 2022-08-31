@@ -126,7 +126,7 @@
             v-model="isAddAcount"
             style="float: right;"
           >
-            {{ 'Retirar Desde' }}
+            {{ 'Transferir Fondos' }}
           </el-checkbox>
         </div>
       </el-card>
@@ -253,7 +253,6 @@
         style="float: right;margin-left: 10px;"
         type="primary"
         icon="el-icon-check"
-        :disabled="validateCash"
         @click="cashWithdrawal()"
       />
       <el-button
@@ -971,6 +970,7 @@ export default {
       payment.paymentMethodUuid = paymentMethodsPos.payment_method.uuid
       payment.paymentMethods = paymentMethodsPos
       payment.isRefund = true
+      payment.referenceBankAccountUuid = attribute.C_BankAccount_ID_UUID
       payment.chargeUuid = this.currentPointOfSales.defaultWithdrawalChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
@@ -1126,12 +1126,18 @@ export default {
     },
     clearField() {
       this.$store.commit('updateValuesOfContainer', {
-        containerUuid: 'Cash-Withdrawal',
+        containerUuid: 'Cash-Opening',
         attributes: [{
           columnName: 'PayAmt',
           value: 0
         }, {
-          columnName: 'CollectingAgent_ID',
+          columnName: 'C_BankAccount_ID',
+          value: undefined
+        }, {
+          columnName: 'C_BankAccount_ID_UUID',
+          value: undefined
+        }, {
+          columnName: 'DisplayColumn_C_BankAccount_ID',
           value: undefined
         }, {
           columnName: 'Description',
