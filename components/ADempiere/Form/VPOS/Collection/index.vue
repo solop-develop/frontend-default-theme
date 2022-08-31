@@ -178,9 +178,9 @@
                 </div>
                 <div style="padding-left: 10px;padding-right: 10px;">
                   <p class="total">
-                    {{ $t('pointOfSales.collection.installmentAmount') }}:
+                    {{ $t('pointOfSales.collection.creditAmount') }}:
                     <b style="float: right;">
-                      {{ formatPrice2({ value: currentOrder.installmentAmount, currency: pointOfSalesCurrency.iSOCode }) }}
+                      {{ formatPrice2({ value: currentOrder.creditAmount, currency: pointOfSalesCurrency.iSOCode }) }}
                     </b>
                   </p>
                   <p class="total">
