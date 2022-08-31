@@ -85,25 +85,22 @@
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col
-                v-if="isAddAcount"
-                :span="8"
-              >
-                <field-definition
-                  :metadata-field="fieldsList[3]"
-                  :container-uuid="'Cash-Withdrawal'"
-                  :container-manager="{
-                    ...containerManager,
-                    getLookupList,
-                    isDisplayedField,
-                    isDisplayedDefault,
-                    generalInfoSearch,
-                    searchTableHeader,
-                    isMandatoryField,
-                    isReadOnlyField,
-                    changeFieldShowedFromUser
-                  }"
-                />
+              <el-col v-if="isAddAcount" :span="8">
+                <el-form-item :label="$t('form.pos.collect.bankAcount')" class="from-field">
+                  <el-select
+                    v-model="currentBankAcount"
+                    style="display: block;"
+                    @change="changeBankAcount"
+                    @visible-change="loadAvailableCash"
+                  >
+                    <el-option
+                      v-for="item in listBankAcount"
+                      :key="item.id"
+                      :label="item.bank_account.name"
+                      :value="item.uuid"
+                    />
+                  </el-select>
+                </el-form-item>
               </el-col>
             </el-row>
           </el-form>
@@ -126,7 +123,7 @@
             v-model="isAddAcount"
             style="float: right;"
           >
-            {{ 'Transferir Fondos' }}
+            {{ $t('form.pos.collect.transferFunds') }}
           </el-checkbox>
         </div>
       </el-card>
@@ -279,7 +276,8 @@ import {
   cashWithdrawal,
   deletePayment,
   updatePayment,
-  availableSellers
+  availableSellers,
+  availableCash
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
@@ -360,6 +358,8 @@ export default {
       isAddAcount: false,
       value: '',
       amontSend: 0,
+      currentBankAcount: '',
+      listBankAcount: [],
       currentFieldCurrency: '',
       currentMethodsCurrency: '',
       currentFieldPaymentMethods: ''
@@ -955,13 +955,20 @@ export default {
         conversionDate: this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered)
       })
     },
+    loadAvailableCash() {
+      availableCash({
+        posUuid: this.currentPointOfSales.uuid
+      })
+        .then(response => {
+          this.listBankAcount = response.records
+        })
+    },
+    changeBankAcount(value) {
+      this.currentBankAcount = value
+    },
     // Open Cash
     addPayment() {
       const payment = this.$store.getters.getValuesView({
-        containerUuid: 'Cash-Withdrawal',
-        format: 'object'
-      })
-      const bank = this.$store.getters.getValuesView({
         containerUuid: 'Cash-Withdrawal',
         format: 'object'
       })
@@ -973,7 +980,7 @@ export default {
       payment.paymentMethodUuid = paymentMethodsPos.payment_method.uuid
       payment.paymentMethods = paymentMethodsPos
       payment.isRefund = true
-      payment.referenceBankAccountUuid = bank.C_BankAccount_ID_UUID
+      payment.referenceBankAccountUuid = this.currentBankAcount
       payment.chargeUuid = this.currentPointOfSales.defaultWithdrawalChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
@@ -1128,6 +1135,7 @@ export default {
       return require('@/image/ADempiere/pos/typePayment/' + image)
     },
     clearField() {
+      this.currentBankAcount = ''
       this.$store.commit('updateValuesOfContainer', {
         containerUuid: 'Cash-Withdrawal',
         attributes: [{

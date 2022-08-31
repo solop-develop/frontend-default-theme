@@ -85,25 +85,22 @@
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col
-                v-if="isAddAcount"
-                :span="8"
-              >
-                <field-definition
-                  :metadata-field="fieldsList[3]"
-                  :container-uuid="'Cash-Opening'"
-                  :container-manager="{
-                    ...containerManager,
-                    getLookupList,
-                    isDisplayedField,
-                    isDisplayedDefault,
-                    generalInfoSearch,
-                    searchTableHeader,
-                    isMandatoryField,
-                    isReadOnlyField,
-                    changeFieldShowedFromUser
-                  }"
-                />
+              <el-col v-if="isAddAcount" :span="8">
+                <el-form-item :label="$t('form.pos.collect.bankAcount')" class="from-field">
+                  <el-select
+                    v-model="currentBankAcount"
+                    style="display: block;"
+                    @change="changeBankAcount"
+                    @visible-change="loadAvailableCash"
+                  >
+                    <el-option
+                      v-for="item in listBankAcount"
+                      :key="item.id"
+                      :label="item.bank_account.name"
+                      :value="item.uuid"
+                    />
+                  </el-select>
+                </el-form-item>
               </el-col>
             </el-row>
           </el-form>
@@ -126,7 +123,7 @@
             v-model="isAddAcount"
             style="float: right;"
           >
-            {{ 'Usar Fondos de Caja' }}
+            {{ $t('form.pos.collect.isCashWith') }}
           </el-checkbox>
         </div>
       </el-card>
@@ -280,7 +277,8 @@ import {
   createPayment,
   cashOpening,
   updatePayment,
-  deletePayment
+  deletePayment,
+  availableCash
 } from '@/api/ADempiere/form/point-of-sales.js'
 // utils and helper methods
 import {
@@ -362,6 +360,8 @@ export default {
       value: '',
       isAddAcount: false,
       amontSend: 0,
+      currentBankAcount: '',
+      listBankAcount: [],
       listCollectAgent: [],
       currentFieldCurrency: '',
       currentMethodsCurrency: '',
@@ -768,6 +768,17 @@ export default {
     changeFieldShowedFromUser,
     formatDateToSend,
     formatDate,
+    loadAvailableCash() {
+      availableCash({
+        posUuid: this.currentPointOfSales.uuid
+      })
+        .then(response => {
+          this.listBankAcount = response.records
+        })
+    },
+    changeBankAcount(value) {
+      this.currentBankAcount = value
+    },
     loadListCollectAgent(value) {
       this.collectAgentUuid = value
     },
@@ -974,10 +985,6 @@ export default {
         containerUuid: 'Cash-Opening',
         format: 'object'
       })
-      const bank = this.$store.getters.getValuesView({
-        containerUuid: 'Cash-Opening',
-        format: 'object'
-      })
       const selectCurrency = this.listCurrency.find(payemnt => payemnt.iso_code === this.currentMethodsCurrency)
       const paymentMethodsPos = this.availablePaymentMethods.find(payemnt => payemnt.uuid === this.currentFieldPaymentMethods)
       payment.currency = paymentMethodsPos.reference_currency
@@ -987,7 +994,7 @@ export default {
       payment.paymentMethods = paymentMethodsPos
       payment.chargeUuid = this.currentPointOfSales.defaultOpeningChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
-      payment.referenceBankAccountUuid = bank.C_BankAccount_ID_UUID
+      payment.referenceBankAccountUuid = this.currentBankAcount
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
       this.sendPayment(payment)
     },
@@ -1141,6 +1148,7 @@ export default {
       return require('@/image/ADempiere/pos/typePayment/' + image)
     },
     clearField() {
+      this.currentBankAcount = ''
       this.$store.commit('updateValuesOfContainer', {
         containerUuid: 'Cash-Opening',
         attributes: [{
