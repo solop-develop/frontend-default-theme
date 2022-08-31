@@ -135,16 +135,16 @@
                         class="clearfix"
                         style="padding-bottom: 20px;"
                       >
-                        <!-- <p class="total">
-                          <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
-                            {{ formatPrice(value.amount, value.currency.iso_code) }}
-                          </b>
-                        </p> -->
-                        <p v-if="!isEmptyValue(value.orderCurrencyRate) && value.orderCurrencyRate !== 1" class="total">
+                        <p class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
                             {{ formatPrice(value.amount, value.currency.iso_code) }}
                           </b>
                         </p>
+                        <!-- <p v-if="!isEmptyValue(value.orderCurrencyRate) && value.orderCurrencyRate !== 1" class="total">
+                          <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
+                            {{ formatPrice(value.amount, value.currency.iso_code) }}
+                          </b>
+                        </p> -->
                         <br>
                         <p class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
