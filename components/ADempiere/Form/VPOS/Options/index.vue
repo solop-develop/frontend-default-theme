@@ -506,31 +506,42 @@
       </el-collapse-item>
     </el-collapse>
 
-    <el-dialog ref="dialog" :title="$t('form.pos.pinMessage.pin') + attributePin.label" width="40%" :visible.sync="visible">
-      <el-input
-        id="pin"
-        ref="pin"
-        v-model="pin"
-        v-shortkey="visible ? {close: ['esc'], enter: ['enter']} : {}"
-        autofocus
-        type="password"
-        :placeholder="$t('form.pos.tableProduct.pin')"
-        :focus="true"
-        @shortkey.native="theAction"
-      />
-      <span style="float: right;">
-        <el-button
-          type="danger"
-          icon="el-icon-close"
-          @click="closePin"
+    <el-dialog
+      ref="dialog"
+      class="options-dialog-pin"
+      :title="$t('form.pos.pinMessage.pin') + attributePin.label"
+      width="40%"
+      :visible.sync="visible"
+      :append-to-body="true"
+    >
+      <el-form autocomplete="off">
+        <el-input
+          id="pin"
+          ref="pin"
+          v-model="pin"
+          v-shortkey="visible ? {close: ['esc'], enter: ['enter']} : {}"
+          autofocus
+          type="password"
+          :placeholder="$t('form.pos.tableProduct.pin')"
+          :focus="true"
+          autocomplete="off"
+          @shortkey.native="theAction"
         />
-        <el-button
-          type="primary"
-          icon="el-icon-check"
-          @click="openPin(pin)"
-        />
-      </span>
+        <span style="float: right;">
+          <el-button
+            type="danger"
+            icon="el-icon-close"
+            @click="closePin"
+          />
+          <el-button
+            type="primary"
+            icon="el-icon-check"
+            @click="openPin(pin)"
+          />
+        </span>
+      </el-form>
     </el-dialog>
+
     <el-dialog
       v-shortkey="isComputedRender ? {close: ['esc'], enter: ['enter']} : {}"
       :title="$t(isLabelPanel)"
