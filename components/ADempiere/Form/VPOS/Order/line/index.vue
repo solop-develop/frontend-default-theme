@@ -543,7 +543,7 @@ export default {
 
   watch: {
     showField(value) {
-      if (this.isEmptyValue(this.uomList)) {
+      if (this.isEmptyValue(this.uomList) && !this.isEmptyValue(this.currentLine.uom)) {
         this.uomList.push(this.currentLine.uom)
         this.uomValue = this.currentLine.uom.uuid
         this.uomValueRate = this.currentLine.uom.product_uom.name
