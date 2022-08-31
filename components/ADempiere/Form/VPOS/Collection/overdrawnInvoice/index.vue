@@ -734,7 +734,7 @@ export default {
       return this.$store.getters.getRefundLoaded
     },
     dayRate() {
-      const selectCurrency = this.searchPaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
+      const selectCurrency = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       const currency = this.listCurrency.find(currency => {
         if (!this.isEmptyValue(selectCurrency) && currency.iso_code === selectCurrency.reference_currency.iso_code) {
           return currency
