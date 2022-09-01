@@ -27,7 +27,6 @@
       @shortkey.native="actionOverdrawnInvoice"
       @close="close"
     >
-      {{ option }}
       <div v-if="caseOrder === 1">
         <el-form @submit.native.prevent="notSubmitForm">
           <el-form-item>
@@ -145,7 +144,6 @@
               :disabled="validPay"
               @click="addPayRefund"
             />
-            {{ 2 }}
             <el-button
               style="float: right;margin-left: 9px;margin-right: 5px;"
               type="info"
@@ -322,7 +320,6 @@
                 </el-col>
               </el-row>
             </el-form>
-            {{ 23 }}
             <el-button
               style="float: right"
               type="success"
