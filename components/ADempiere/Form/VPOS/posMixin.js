@@ -556,11 +556,11 @@ export default {
       if (this.isEmptyValue(orderUuid) || newOrder) {
         const posUuid = this.currentPointOfSales.uuid
         const bpartner = this.$store.getters.getValueOfField({
-          containerUuid: this.metadata.containerUuid,
+          containerUuid: this.$route.meta.uuid,
           columnName: 'C_BPartner_ID_UUID'
         })
         const id = this.$store.getters.getValueOfField({
-          containerUuid: this.metadata.containerUuid,
+          containerUuid: this.$route.meta.uuid,
           columnName: 'C_BPartner_ID'
         })
         const documentTypeUuid = this.$store.getters.getValueOfField({

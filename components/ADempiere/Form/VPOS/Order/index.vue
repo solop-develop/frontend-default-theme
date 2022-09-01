@@ -410,7 +410,7 @@
               <p class="total">
                 {{ $t('form.pos.order.itemQuantity') }}:
                 <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                  {{ formatQuantity(getItemQuantity) }}
+                  {{ formatQuantityPanel({ value: getItemQuantity }) }}
                 </b>
               </p>
               <p class="total">
@@ -514,7 +514,7 @@ import {
   formatPrice,
   formatQuantity
 } from '@/utils/ADempiere/valueFormat.js'
-
+import { formatQuantity as formatQuantityPanel } from '@/utils/ADempiere/formatValue/numberFormat.js'
 // api request methods
 import { requestLookupList } from '@/api/ADempiere/window.js'
 import { releaseOrder } from '@/api/ADempiere/form/point-of-sales.js'
@@ -890,6 +890,7 @@ export default {
     formatDateToSend,
     formatPrice,
     formatQuantity,
+    formatQuantityPanel,
     releaseSalesOrder() {
       releaseOrder({
         posUuid: this.currentPointOfSales.uuid,
