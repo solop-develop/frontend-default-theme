@@ -64,7 +64,7 @@
                 </div>
                 <div class="footer-product">
                   <p class="quantity">
-                    Cantidad: {{ formatQuantity(keyValue.quantity) }}
+                    {{ $t('pointOfSales.keyLayout.quantity') }}: {{ formatQuantity({ value: keyValue.quantity }) }}
                   </p>
                   <br>
                 </div>
@@ -94,15 +94,28 @@
 </template>
 
 <script>
+import lang from '@/lang'
+import store from '@/store'
+
+// api request methods
+import { findProduct } from '@/api/ADempiere/form/point-of-sales.js'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getImagePath } from '@/utils/ADempiere/resource.js'
-import { formatQuantity } from '@/utils/ADempiere/valueFormat.js'
+import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
+import { showMessage } from '@/utils/ADempiere/notification'
+
+// components and mixins
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 
 export default {
   name: 'KeyLayout',
+
   mixins: [
     posMixin
   ],
+
   data() {
     return {
       resource: {},
@@ -120,6 +133,12 @@ export default {
     },
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
+    },
+    currentPriceList() {
+      if (!isEmptyValue(store.getters.currentPriceList)) {
+        return store.getters.currentPriceList
+      }
+      return {}
     },
     getKeyLayout() {
       return this.$store.getters.getKeyLayout
@@ -174,13 +193,35 @@ export default {
       this.loadKeyLayout(this.currentPointOfSales.keyLayoutUuid)
     }
   },
+
   methods: {
     formatQuantity,
+    withoutPOSTerminal() {
+      if (isEmptyValue(this.currentPointOfSales)) {
+        showMessage({
+          type: 'warn',
+          message: lang.t('pointOfSales.withoutPOSTerminal')
+        })
+        return true
+      }
+      return false
+    },
+    withoutPriceList() {
+      if (isEmptyValue(this.currentPriceList)) {
+        showMessage({
+          type: 'warn',
+          message: lang.t('pointOfSales.withoutPriceList')
+        })
+        return true
+      }
+      return false
+    },
     loadKeyLayout(uuid = null) {
       const KeyLayoutUuid = this.isEmptyValue(uuid) ? this.currentPointOfSales.keyLayoutUuid : uuid
 
+      this.isLoadedKeyLayout = false
       this.$store.dispatch('getKeyLayoutFromServer', KeyLayoutUuid)
-        .then(() => {
+        .finally(() => {
           this.isLoadedKeyLayout = true
         })
     },
@@ -188,18 +229,56 @@ export default {
       if (!this.isEmptyValue(keyValue.subKeyLayoutUuid)) {
         this.loadKeyLayout(keyValue.subKeyLayoutUuid)
       } else {
-        this.findProduct(keyValue.productValue)
+        this.setProduct(keyValue.productValue)
       }
     },
     handleCommand(command) {
       const point = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      const toReturn = this.getKeyList.find(keyLayoutItem => keyLayoutItem.subKeyLayoutUuid === point)
+      const toReturn = this.getKeyList.find(keyLayoutItem => {
+        return keyLayoutItem.subKeyLayoutUuid === point
+      })
 
       let keyLayoutUuid = this.currentPointOfSales.keyLayoutUuid
       if (!this.isEmptyValue(toReturn)) {
         keyLayoutUuid = toReturn.subKeyLayoutUuid
       }
       this.loadKeyLayout(keyLayoutUuid)
+    },
+    setProduct(searchValue) {
+      if (this.withoutPOSTerminal()) {
+        return
+      }
+
+      if (this.isEmptyValue(this.curretnPriceList)) {
+        return
+      }
+      findProduct({
+        searchValue,
+        posUuid: this.currentPointOfSales.uuid,
+        priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
+        warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+      })
+        .then(productPrice => {
+          this.product = productPrice.product
+          this.createOrder({ withLine: true })
+        })
+        .catch(error => {
+          console.warn(error.message)
+          this.$message({
+            type: 'info',
+            message: error.message,
+            showClose: true
+          })
+        })
+        .finally(() => {
+          this.$store.commit('updateValuesOfContainer', {
+            containerUuid: this.$route.meta.uuid,
+            attributes: [{
+              columnName: 'ProductValue',
+              value: undefined
+            }]
+          })
+        })
     },
     getDefaultImage(keyValue) {
       const { fileName } = keyValue.resourceReference
