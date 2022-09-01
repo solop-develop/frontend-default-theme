@@ -988,7 +988,7 @@ export default {
           .then(response => {
             this.$store.dispatch('refundReference', {
               ...refund,
-              sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount / dayRate.multiplyRate) : refund.amount,
+              sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
               isReceipt: false,
               customerBankAccountUuid: response.customerBankAccountUuid,
               currencyUuid: refundCurrencyUuid.uuid,
@@ -1011,7 +1011,7 @@ export default {
       }
       this.$store.dispatch('refundReference', {
         ...refund,
-        sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount / dayRate.multiplyRate) : refund.amount,
+        sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
         isReceipt: false,
         customerBankAccountUuid: this.currentBankAccount,
         currencyUuid: refundCurrencyUuid.uuid,
