@@ -146,7 +146,7 @@
                           </b>
                         </p> -->
                         <br>
-                        <p class="total">
+                        <p v-show="value.currency.iso_code !== currentPointOfSales.priceList.currency.iSOCode" class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
                             {{ formatPrice(value.amount * value.orderCurrencyRate, currency.iSOCode) }}
                           </b>

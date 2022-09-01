@@ -115,13 +115,13 @@
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
               <el-form-item label="Cantidad Base">
-            <el-input
-              v-model="currentLine.quantityOrdered"
-              :disabled="true"
-              controls-position="right"
-              style="width: 100% !important;"
-            />
-          </el-form-item>
+                <el-input
+                  v-model="currentLine.quantityOrdered"
+                  :disabled="true"
+                  controls-position="right"
+                  style="width: 100% !important;"
+                />
+              </el-form-item>
             </el-form>
           </el-col>
         </el-row>
@@ -400,7 +400,7 @@ export default {
         this.num = '1 ' + this.uomValueRate + ' ~ ' + this.currentLine.productUom.divide_rate + ' ' + this.currentLine.productUom.product_uom.symbol
       } else {
         this.num = '1 ' + this.uomValueRate + ' ~ ' + this.currentLine.productUom.multiply_rate + ' ' + this.currentLine.productUom.product_uom.symbol
-      } 
+      }
       this.findUomList(value)
     }
   },
