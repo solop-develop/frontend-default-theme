@@ -432,7 +432,7 @@ export default {
       if (this.isEmptyValue(this.currentPointOfSales)) {
         this.$message({
           type: 'warn',
-          message: 'Without POS Terminal',
+          message: this.$t('pointOfSales.withoutPOSTerminal'),
           showClose: true
         })
         return true
@@ -511,11 +511,15 @@ export default {
       if (this.withoutPOSTerminal()) {
         return
       }
-
-      const searchProduct = (typeof searchValue === 'object') ? searchValue.value : searchValue
       if (this.isEmptyValue(this.curretnPriceList)) {
+        this.$message({
+          type: 'warn',
+          message: this.$t('pointOfSales.withoutPriceList'),
+          showClose: true
+        })
         return
       }
+      const searchProduct = (typeof searchValue === 'object') ? searchValue.value : searchValue
       findProduct({
         searchValue: searchProduct,
         posUuid: this.currentPointOfSales.uuid,
