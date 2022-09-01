@@ -232,7 +232,7 @@
                   <field-definition
                     :metadata-field="{
                       ...fieldsList[0],
-                      labelCurrency: refundReferenceCurrency
+                      labelCurrency: currentFieldCurrency
                     }"
                     :container-uuid="'OverdrawnInvoice'"
                     :container-manager="{
@@ -853,7 +853,7 @@ export default {
         this.currentFieldCurrencyRefund = this.isEmptyValue(paymentCurrency.reference_currency.iso_code) ? '' : paymentCurrency.reference_currency.iso_code
       }
       if (this.option === 3) {
-        this.currentFieldCurrencyRefund = this.isEmptyValue(paymentCurrency.refund_reference_currency.iso_code) ? '' : paymentCurrency.refund_reference_currency.iso_code
+        this.currentFieldCurrency = this.isEmptyValue(paymentCurrency.refund_reference_currency.iso_code) ? '' : paymentCurrency.refund_reference_currency.iso_code
       }
       this.$store.commit('updateValueOfField', {
         containerUuid: this.metadata.containerUuid,
