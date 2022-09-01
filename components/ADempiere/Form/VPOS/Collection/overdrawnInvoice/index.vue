@@ -27,6 +27,7 @@
       @shortkey.native="actionOverdrawnInvoice"
       @close="close"
     >
+      {{ option }}
       <div v-if="caseOrder === 1">
         <el-form @submit.native.prevent="notSubmitForm">
           <el-form-item>
@@ -144,6 +145,7 @@
               :disabled="validPay"
               @click="addPayRefund"
             />
+            {{ 2 }}
             <el-button
               style="float: right;margin-left: 9px;margin-right: 5px;"
               type="info"
@@ -266,8 +268,8 @@
                 <el-col :span="8">
                   <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field">
                     <el-select
-                      v-model="currentFieldCurrencyRefund"
-                      :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
+                      v-model="currentFieldCurrency"
+                      :disabled="!isEmptyValue(currentAvailablePaymentMethods.refund_reference_currency)"
                       style="display: block;"
                       @change="changeCurrency"
                     >
@@ -320,6 +322,7 @@
                 </el-col>
               </el-row>
             </el-form>
+            {{ 23 }}
             <el-button
               style="float: right"
               type="success"
@@ -826,6 +829,7 @@ export default {
         this.selectPayment(this.paymentTypeList[0])
       }
       if (value === 3) {
+        this.currentFieldCurrency = this.currentAvailablePaymentMethods.refund_reference_currency.iso_code
         this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })
       }
       this.$store.commit('updateValueOfField', {
@@ -957,8 +961,18 @@ export default {
       } else if (this.isEmptyValue(refund.AccountNo) && payment.tender_type === 'P') {
         account = refund.phone
       }
-      const currencySelected = this.listCurrency.find(currency => currency.iso_code === this.refundReferenceCurrency)
+      let refundCurrencyUuid
       const paymentCurrency = this.paymentTypeList.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      if (this.isEmptyValue(paymentCurrency.refund_reference_currency)) {
+        refundCurrencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
+      } else {
+        refundCurrencyUuid = paymentCurrency.refund_reference_currency
+      }
+      const dayRate = this.convertionsList.find(convert => {
+        if (!this.isEmptyValue(refundCurrencyUuid) && refundCurrencyUuid.id === convert.currencyTo.id && this.currentPointOfSales.currentPriceList.currency.id !== refundCurrencyUuid.id) {
+          return convert
+        }
+      })
       if (this.isEmptyValue(this.currentBankAccount)) {
         this.$store.dispatch('customerBankAccount', {
           ...refund,
@@ -977,11 +991,11 @@ export default {
           .then(response => {
             this.$store.dispatch('refundReference', {
               ...refund,
-              sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== currencySelected.uuid) ? refund.amount / this.dayRate.multiplyRate : refund.amount,
+              sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount / dayRate.multiplyRate) : refund.amount,
               isReceipt: false,
               customerBankAccountUuid: response.customerBankAccountUuid,
-              currencyUuid: paymentCurrency.refund_reference_currency.uuid,
-              tenderTypeCode: payment.tender_type,
+              currencyUuid: refundCurrencyUuid.uuid,
+              tenderTypeCode: payment.payment_method.tender_type,
               customerUuid: refund.customerUuid,
               posUuid: refund.posUuid,
               email: refund.email,
@@ -1000,10 +1014,10 @@ export default {
       }
       this.$store.dispatch('refundReference', {
         ...refund,
-        sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== currencySelected.uuid) ? refund.amount / this.dayRate.multiplyRate : refund.amount,
+        sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount / dayRate.multiplyRate) : refund.amount,
         isReceipt: false,
         customerBankAccountUuid: this.currentBankAccount,
-        currencyUuid: paymentCurrency.refund_reference_currency.uuid,
+        currencyUuid: refundCurrencyUuid.uuid,
         tenderTypeCode: payment.payment_method.tender_type,
         customerUuid: refund.customerUuid,
         posUuid: refund.posUuid,
@@ -1446,6 +1460,7 @@ export default {
       this.$store.commit('dialogoInvoce', { show: false })
     },
     changeCurrency(value) {
+      this.currentFieldCurrency = value
       this.currentFieldCurrencyRefund = value
       // this.currentFieldCurrency = value
     },

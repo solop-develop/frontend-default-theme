@@ -672,28 +672,21 @@ export default {
         this.cashOpening()
       }
     },
-    pending(value) {
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.containerUuid,
-        columnName: 'PayAmt',
-        value: this.round(value, this.standardPrecision)
-      })
-    },
     convertAllPayment(value) {
       if (!this.isEmptyValue(value)) {
         this.allPayCurrency = this.pay / value
       }
       this.allPayCurrency = this.pay
     },
-    isLoaded(value) {
-      if (value) {
-        this.$store.commit('updateValueOfField', {
-          containerUuid: this.containerUuid,
-          columnName: 'PayAmt',
-          value: this.round(this.pending, this.standardPrecision)
-        })
-      }
-    },
+    // isLoaded(value) {
+    //   if (value) {
+    //     this.$store.commit('updateValueOfField', {
+    //       containerUuid: this.containerUuid,
+    //       columnName: 'PayAmt',
+    //       value: this.round(this.pending, this.standardPrecision)
+    //     })
+    //   }
+    // },
     fieldsPaymentType(value) {
       const displayPaymentType = this.$store.getters.getValueOfField({
         containerUuid: 'Collection',
