@@ -965,11 +965,11 @@ export default {
       } else {
         refundCurrencyUuid = paymentCurrency.refund_reference_currency
       }
-      const dayRate = this.convertionsList.find(convert => {
-        if (!this.isEmptyValue(refundCurrencyUuid) && refundCurrencyUuid.id === convert.currencyTo.id && this.currentPointOfSales.currentPriceList.currency.id !== refundCurrencyUuid.id) {
-          return convert
-        }
-      })
+      // const dayRate = this.convertionsList.find(convert => {
+      //   if (!this.isEmptyValue(refundCurrencyUuid) && refundCurrencyUuid.id === convert.currencyTo.id && this.currentPointOfSales.currentPriceList.currency.id !== refundCurrencyUuid.id) {
+      //     return convert
+      //   }
+      // })
       if (this.isEmptyValue(this.currentBankAccount)) {
         this.$store.dispatch('customerBankAccount', {
           ...refund,
