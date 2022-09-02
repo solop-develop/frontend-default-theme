@@ -922,7 +922,8 @@ export default {
     getListCampaign(campaing) {
       requestLookupList({
         tableName: campaing.tableName,
-        query: campaing.query
+        query: campaing.query,
+        pageSize: 50
       })
         .then(responseLookupItem => {
           this.listCampaign = responseLookupItem.recordsList
