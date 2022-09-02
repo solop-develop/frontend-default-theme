@@ -1421,7 +1421,7 @@ export default {
           this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
           return
         }
-        // this.completePreparedOrder(posUuid, orderUuid, payments)
+        this.completePreparedOrder(posUuid, orderUuid, payments)
         // this.$store.commit('dialogoInvoce', { show: false, success: true })
         return
       }
