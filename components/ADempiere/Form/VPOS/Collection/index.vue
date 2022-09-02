@@ -936,8 +936,7 @@ export default {
         containerUuid,
         columnName: 'PayAmt'
       })
-      const tenderTypeCode = this.currentAvailablePaymentMethods.tender_type
-      const paymentMethodUuid = this.currentAvailablePaymentMethods.uuid
+      // const tenderTypeCode = this.currentAvailablePaymentMethods.tender_type
       const referenceNo = this.$store.getters.getValueOfField({
         containerUuid,
         columnName: 'ReferenceNo'
@@ -959,8 +958,8 @@ export default {
           bankUuid,
           amount: this.round(this.amontSend, this.standardPrecision),
           sourceAmount: this.amontSend * this.dayRate.divideRate,
-          paymentMethodUuid,
-          tenderTypeCode,
+          paymentMethodUuid: paymentCurrency.payment_method.uuid,
+          tenderTypeCode: this.currentAvailablePaymentMethods.payment_method.tender_type,
           customerUuid: this.currentOrder.customer.uuid,
           salesRepresentativeUuid: this.currentOrder.salesRepresentative.uuid,
           currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid
@@ -978,7 +977,7 @@ export default {
           amount: this.round(this.amontSend, this.standardPrecision),
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
-          tenderTypeCode,
+          tenderTypeCode: this.currentAvailablePaymentMethods.payment_method.tender_type,
           currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
         })
       } else {
@@ -990,7 +989,7 @@ export default {
           amount: this.round(this.amontSend, this.standardPrecision),
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
-          tenderTypeCode,
+          tenderTypeCode: this.currentAvailablePaymentMethods.payment_method.tender_type,
           currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
         })
           .then((response) => {
