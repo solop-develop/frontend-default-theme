@@ -1146,7 +1146,8 @@ export default {
     },
     validateOrder(payment) {
       // this.porcessInvoce = true
-      if (this.currentOrder.paymentAmount > this.currentOrder.grandTotal) {
+      const allTotal = (this.currentOrder.chargeAmount + this.currentOrder.grandTotal) - this.currentOrder.creditAmount
+      if (this.currentOrder.paymentAmount > allTotal) {
         this.$store.commit('dialogoInvoce', { show: true, type: 1 })
       } else if (this.currentOrder.paymentAmount < this.currentOrder.grandTotal && Math.abs(this.currentOrder.openAmount) > this.currentPointOfSales.writeOffAmountTolerance) {
         if (this.isPosRequiredPin) {
