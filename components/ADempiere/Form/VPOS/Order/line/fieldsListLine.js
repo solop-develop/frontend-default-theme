@@ -43,6 +43,21 @@ export default [
     }
   },
   {
+    fieldUuid: '8d55dbf2-fb40-11e8-a479-7a0060f0aa01',
+    // tableName: 'C_OrderLine',
+    // columnName: 'C_UOM_ID',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      size: 24,
+      valueMin: 0,
+      sequence: 10,
+      handleActionPerformed: true,
+      handleContentSelection: true,
+      handleFocusGained: true,
+      handleActionKeyPerformed: true
+    }
+  },
+  {
     elementColumnName: 'Discount',
     columnName: 'Discount',
     isFromDictionary: true,
