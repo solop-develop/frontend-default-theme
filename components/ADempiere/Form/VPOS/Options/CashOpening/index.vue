@@ -552,9 +552,6 @@ export default {
         containerUuid: this.containerUuid,
         columnName: 'PayAmt'
       })
-      if (amount === 0) {
-        return true
-      }
       const paymentMethods = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
         return false
