@@ -411,8 +411,8 @@ export default {
       return {
         uuid: undefined,
         id: undefined,
-        name: undefined,
-        value: undefined
+        name: '',
+        value: ''
       }
     },
     currentOrder() {
@@ -667,8 +667,8 @@ export default {
         })
           .then(responseBPartner => {
             const { documentStatus } = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
+            this.$store.commit('customer', responseBPartner)
             if (!this.isEmptyValue(documentStatus) && documentStatus.value === 'DR') {
-              this.$store.commit('customer', responseBPartner)
               this.setBusinessPartner(responseBPartner)
             }
             this.clearValues()
@@ -749,15 +749,16 @@ export default {
       this.editBusinessPartner = true
       this.visibleSelectAddress = false
       const displayValue = this.displayedValue
+      this.customerValue = this.isEmptyValue(this.updatedCustomerValue) ? this.updatedCustomerValue : this.updatedCustomerValue + ' - '
       if (this.controlDisplayed !== displayValue) {
-        this.controlDisplayed = displayValue
+        this.controlDisplayed = this.customerValue + displayValue
       }
     },
     setOldDisplayedValue() {
       this.visibleSelectAddress = true
       this.editBusinessPartner = false
       this.customerValue = this.isEmptyValue(this.updatedCustomerValue) ? this.updatedCustomerValue : this.updatedCustomerValue + ' - '
-      if (this.controlDisplayed !== this.displayedValue) {
+      if (this.controlDisplayed !== this.displayedValue && !this.isEmptyValue(this.controlDisplayed)) {
         this.displayedValue = this.controlDisplayed
       }
     },

@@ -715,11 +715,14 @@ export default {
     amountForTheRate() {
       const amount = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
       const convert = this.convertionsList.find(convert => {
-        if (!this.isEmptyValue(amount) && !this.isEmptyValue(convert.currencyTo) && amount.id === convert.currencyTo.id && this.currentPointOfSales.currentPriceList.currency.id !== amount.id) {
+        if (!this.isEmptyValue(amount) &&
+          !this.isEmptyValue(convert.currencyTo) &&
+          amount.id === convert.currencyTo.id
+        ) {
           return convert
         }
       })
-      if (!this.isEmptyValue(convert) && this.currentPointOfSales.currentPriceList.currency.id !== amount.id) {
+      if (!this.isEmptyValue(convert)) {
         return convert.divideRate
       }
       return 1
@@ -825,6 +828,13 @@ export default {
     },
     precision() {
       return this.$store.getters.getCurrency.standardPrecision
+    },
+    totalAmountConverted(value) {
+      this.$store.commit('updateValueOfField', {
+        containerUuid: this.containerUuid,
+        columnName: 'PayAmt',
+        value: this.currentOrder.openAmount / this.amountForTheRate
+      })
     }
   },
 
