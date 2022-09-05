@@ -109,7 +109,7 @@
                       />
                     </template>
                     <template v-else-if="valueOrder.columnName === 'UOM'">
-                      {{ isEmptyValue(scope.row.productUom.product_uom.symbol) ? scope.row.productUom.product_uom.name : scope.row.productUom.product_uom.symbol }}
+                      {{ isEmptyValue(scope.row.uom.uom.symbol) ? scope.row.uom.uom.name : scope.row.uom.uom.symbol }}
                     </template>
                     <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
                       <el-input-number
