@@ -108,6 +108,9 @@
                         @shortkey.native="theActionEdit"
                       />
                     </template>
+                    <template v-else-if="valueOrder.columnName === 'UOM'">
+                      {{ isEmptyValue(scope.row.productUom.product_uom.symbol) ? scope.row.productUom.product_uom.name : scope.row.productUom.product_uom.symbol }}
+                    </template>
                     <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
                       <el-input-number
                         ref="editField"
