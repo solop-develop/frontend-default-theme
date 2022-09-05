@@ -47,10 +47,10 @@ export default {
           isNumeric: true,
           size: '82px'
         },
-        quantityOrdered: {
+        uom: {
           columnName: 'UOM',
-          label: 'UM',
-          isNumeric: true,
+          label: this.$t('form.pos.tableProduct.uom'),
+          isNumeric: false,
           size: '82px'
         },
         discount: {
