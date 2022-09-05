@@ -306,7 +306,7 @@ export default {
         if (!this.isEmptyValue(qty.qty)) {
           return this.formatQuantity(qty.qty)
         }
-        return 0
+        return this.currentLine.availableQuantity
       },
       set(value) {
         return value
@@ -363,7 +363,7 @@ export default {
           label: this.currentLine.warehouse.name,
           id: this.currentLine.warehouse.id,
           uuid: this.currentLine.warehouse.uuid,
-          sumaryQty: 0
+          sumaryQty: this.currentLine.availableQuantity
         })
         const list = listWarehouseLine
         return list

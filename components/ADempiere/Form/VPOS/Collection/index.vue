@@ -38,7 +38,7 @@
               <el-form
                 label-position="top"
                 label-width="10px"
-                style="float: right; display: flex; line-height: 10px;"
+                style="float: right; display: contents; line-height: 10px;"
                 :disabled="validateOpenAmount"
                 @submit.native.prevent="notSubmitForm"
               >
@@ -84,7 +84,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="size">
-                    <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field">
+                    <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field" style="margin-left: 10px;margin-right: 10px;">
                       <el-select
                         v-model="currentFieldCurrency"
                         :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
