@@ -28,7 +28,7 @@
                 </el-col>
                 <el-col :span="18" style="padding-right: 0px;padding-left: 40px;">
                   <el-button
-                    v-if="!isDisabled"
+                    v-if="isValidateDelete(value)"
                     type="text"
                     icon="el-icon-close"
                     style="float: right; margin-right: 10px; color: red; padding-top: 10px;"
@@ -97,7 +97,7 @@
                 </el-col>
                 <el-col :span="18" style="padding-right: 0px;padding-left: 40px;">
                   <el-button
-                    v-if="!isDisabled"
+                    v-if="isValidateDelete(value)"
                     type="text"
                     icon="el-icon-close"
                     style="float: right; margin-right: 10px; color: red; padding-top: 10px;"
@@ -480,6 +480,12 @@ export default {
         paymentUuid
       })
       this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
+    },
+    isValidateDelete(value) {
+      if (value.isRefund) {
+        return !value.is_automatic || !value.is_processed
+      }
+      return !this.is_processed
     },
     // Payment card label
     tenderTypeDisplaye({
