@@ -116,7 +116,7 @@
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
               <el-form-item label="Cantidad Base" style="margin-right: 10px;margin-left: 10px;">
                 <el-input
-                  v-model="currentLine.quantityOrderedLine"
+                  v-model="baseUom"
                   :disabled="true"
                   controls-position="right"
                   style="width: 100% !important;"
@@ -218,9 +218,10 @@ import {
 } from '@/utils/ADempiere/lookupFactory'
 
 // Format of values ( Date, Price, Quantity )
-import {
-  formatQuantity
-} from '@/utils/ADempiere/valueFormat.js'
+// import {
+//   formatQuantity
+// } from '@/utils/ADempiere/valueFormat.js'
+import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
 
 import {
   getLookupList,
@@ -286,6 +287,7 @@ export default {
       uomValue: '',
       uomValueRate: '',
       uomList: [],
+      baseUom: 0,
       unsubscribe: () => {}
     }
   },
@@ -374,6 +376,7 @@ export default {
 
   watch: {
     showField(value) {
+      this.baseUom = this.currentLine.quantityOrderedLine
       this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceActual
       // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: true })
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
@@ -397,9 +400,9 @@ export default {
       this.uomValue = this.currentLine.productUom.uuid
       this.uomValueRate = this.currentLine.productUom.uom.name
       if (this.currentLine.productUom.divide_rate >= this.currentLine.productUom.multiply_rate) {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.currentLine.productUom.divide_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: this.currentLine.productUom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
       } else {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.currentLine.productUom.multiply_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: this.currentLine.productUom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
       }
       this.findUomList(value)
     }
@@ -573,12 +576,12 @@ export default {
           return uom
         }
       })
-      this.uomValueRate = uom.uom.name
+      // this.uomValueRate = uom.uom.name
       if (uom.divide_rate >= uom.multiply_rate) {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + uom.divide_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
         // this.num = uom.divide_rate
       } else {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + uom.multiply_rate + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: uom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
         // this.num = uom.multiply_rate
       }
       updateOrderLine({
@@ -592,6 +595,7 @@ export default {
             message: 'Acción a realizar',
             showClose: true
           })
+          this.baseUom = response.quantityOrdered
           this.$store.dispatch('currentLine', response)
           this.fillOrderLine(response)
           this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
