@@ -1142,7 +1142,6 @@ export default {
     openPin(pin) {
       this.focusPin()
       const { requestedAccess } = this.$store.getters.getOverdrawnInvoice.attributePin
-      console.log({ pin, requestedAccess }, this.$store.getters.getOverdrawnInvoice)
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
         pin,
