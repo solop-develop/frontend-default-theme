@@ -383,7 +383,7 @@ export default {
       return payment
     },
     validatePaymentBeforeProcessing() {
-      return this.validateOpenAmount
+      return this.currentOrder.isProcessed
     },
     validateOpenAmount() {
       if (this.currentOrder.openAmount > 0) {
