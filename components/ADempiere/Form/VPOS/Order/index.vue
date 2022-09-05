@@ -120,6 +120,12 @@
                       />
                     </template>
                     <span v-else>
+                      <el-button
+                        v-show="valueOrder.columnName === 'LineDescription'"
+                        type="text"
+                        icon="el-icon-document-copy"
+                        @click="copyCode(scope.row)"
+                      />
                       {{ displayValue(scope.row, valueOrder) }}
                     </span>
                   </template>
@@ -514,6 +520,7 @@ import {
   formatPrice,
   formatQuantity
 } from '@/utils/ADempiere/valueFormat.js'
+import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 import { formatQuantity as formatQuantityPanel } from '@/utils/ADempiere/formatValue/numberFormat.js'
 // api request methods
 import { requestLookupList } from '@/api/ADempiere/window.js'
@@ -897,6 +904,7 @@ export default {
     formatPrice,
     formatQuantity,
     formatQuantityPanel,
+    copyToClipboard,
     releaseSalesOrder() {
       releaseOrder({
         posUuid: this.currentPointOfSales.uuid,
@@ -918,6 +926,12 @@ export default {
           })
           console.warn(`Error Hold Order ${error.message}. Code: ${error.code}.`)
         })
+    },
+    copyCode(value) {
+      copyToClipboard({
+        text: value.product.value,
+        isShowMessage: true
+      })
     },
     getListCampaign(campaing) {
       requestLookupList({
