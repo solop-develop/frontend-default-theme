@@ -91,7 +91,7 @@
         <el-row :gutter="10">
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-              <el-form-item label="Precio Base">
+              <el-form-item label="Precio Base" style="margin-right: 10px;margin-left: 10px;">
                 <el-input
                   v-model="priceBase"
                   :disabled="true"
@@ -102,7 +102,7 @@
           </el-col>
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-              <el-form-item label="Unidad de Medida Base">
+              <el-form-item label="Unidad de Medida Base" style="margin-right: 10px;margin-left: 10px;">
                 <el-input
                   v-model="currentLine.productUom.product_uom.name"
                   :disabled="true"
@@ -114,9 +114,9 @@
           </el-col>
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-              <el-form-item label="Cantidad Base">
+              <el-form-item label="Cantidad Base" style="margin-right: 10px;margin-left: 10px;">
                 <el-input
-                  v-model="currentLine.quantityOrdered"
+                  v-model="currentLine.quantityOrderedLine"
                   :disabled="true"
                   controls-position="right"
                   style="width: 100% !important;"
@@ -178,7 +178,7 @@
       </el-col>
       <el-col :span="12">
         <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="Cantidad Disponible" style="width: 100% !important;">
+          <el-form-item label="Cantidad Disponible" style="width: 98% !important;">
             <el-input-number
               v-model="currentWarehouseQty"
               :disabled="true"
