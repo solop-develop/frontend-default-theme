@@ -171,8 +171,11 @@
 
                   <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total">
                     <b>{{ $t('form.pos.collect.convertedAmount') }}: </b>
-                    <b style="float: right;">
+                    <b v-if="totalAmountConverted !== 1" style="float: right;">
                       {{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}
+                    </b>
+                    <b v-else style="float: right;">
+                      {{ formatPrice(0.00, currentPointOfSales.displayCurrency.iso_code) }}
                     </b>
                   </p>
                 </div>
@@ -752,31 +755,7 @@ export default {
       this.defaultValueCurrency()
       this.currentFieldPaymentMethods = this.defaulValuePaymentMethods.uuid
       this.cancel()
-    },
-    pending(value) {
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.containerUuid,
-        columnName: 'PayAmt',
-        value: this.currentOrder.openAmount / this.amountForTheRate
-      })
-    },
-    convertAllPayment(value) {
-      if (!this.isEmptyValue(value)) {
-        this.allPayCurrency = this.pay / value
-      }
-      this.allPayCurrency = this.pay
-    },
-    isLoaded(value) {
-      if (value) {
-        this.$store.commit('updateValueOfField', {
-          containerUuid: this.containerUuid,
-          columnName: 'PayAmt',
-          value: this.currentOrder.openAmount / this.amountForTheRate
-        })
-      }
-    },
-    dayRate(value) {
-      if (!this.isEmptyValue(value.divideRate)) {
+      if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
         this.$store.commit('updateValueOfField', {
           containerUuid: this.containerUuid,
           columnName: 'PayAmt',
@@ -786,8 +765,77 @@ export default {
         this.$store.commit('updateValueOfField', {
           containerUuid: this.containerUuid,
           columnName: 'PayAmt',
+          value: 0.00
+        })
+      }
+    },
+    pending(value) {
+      if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.containerUuid,
+          columnName: 'PayAmt',
           value: this.currentOrder.openAmount / this.amountForTheRate
         })
+      } else {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.containerUuid,
+          columnName: 'PayAmt',
+          value: 0.00
+        })
+      }
+    },
+    convertAllPayment(value) {
+      if (!this.isEmptyValue(value)) {
+        this.allPayCurrency = this.pay / value
+      }
+      this.allPayCurrency = this.pay
+    },
+    isLoaded(value) {
+      if (value) {
+        if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: this.currentOrder.openAmount / this.amountForTheRate
+          })
+        } else {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: 0.00
+          })
+        }
+      }
+    },
+    dayRate(value) {
+      if (!this.isEmptyValue(value.divideRate)) {
+        if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: this.currentOrder.openAmount / this.amountForTheRate
+          })
+        } else {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: 0.00
+          })
+        }
+      } else {
+        if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: this.currentOrder.openAmount / this.amountForTheRate
+          })
+        } else {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: 0.00
+          })
+        }
       }
     },
     fieldsPaymentType(value) {
@@ -830,11 +878,19 @@ export default {
       return this.$store.getters.getCurrency.standardPrecision
     },
     totalAmountConverted(value) {
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.containerUuid,
-        columnName: 'PayAmt',
-        value: this.currentOrder.openAmount / this.amountForTheRate
-      })
+      if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.containerUuid,
+          columnName: 'PayAmt',
+          value: this.currentOrder.openAmount / this.amountForTheRate
+        })
+      } else {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.containerUuid,
+          columnName: 'PayAmt',
+          value: 0.00
+        })
+      }
     }
   },
 
@@ -846,11 +902,19 @@ export default {
     setTimeout(() => {
       if (!this.isEmptyValue(this.dayRate.divideRate)) {
         this.showDayRate(this.dayRate, this.dayRate.divideRate)
-        this.$store.commit('updateValueOfField', {
-          containerUuid: this.containerUuid,
-          columnName: 'PayAmt',
-          value: this.currentOrder.openAmount / this.amountForTheRate
-        })
+        if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: this.currentOrder.openAmount / this.amountForTheRate
+          })
+        } else {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: 0.00
+          })
+        }
       }
     }, 1500)
     this.currentFieldPaymentMethods = this.defaulValuePaymentMethods.uuid
@@ -871,10 +935,10 @@ export default {
       const amount = rate.divideRate > rate.multiplyRate ? rate.divideRate : rate.multiplyRate
       const currency = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
       if (this.isEmptyValue(currency)) {
-        return this.$t('form.pos.collect.emptyRate')
+        return this.formatPrice(0.00, this.currentFieldCurrency)
       }
       if (!this.isEmptyValue(currency) && !this.isEmptyValue(rate.currencyTo.iSOCode) && rate.currencyTo.iSOCode !== currency.iso_code) {
-        return this.$t('form.pos.collect.emptyRate')
+        return this.formatPrice(0.00, currency.iso_code)
       }
       if (!this.isEmptyValue(rate.currencyTo.iSOCode) && rate.currencyTo.iSOCode === this.currentPointOfSales.priceList.currency.iSOCode) {
         const convert = this.convertionsList.find(convert => {
@@ -885,7 +949,7 @@ export default {
         const convertAmount = !this.isEmptyValue(convert) ? (convert.divideRate > convert.multiplyRate ? convert.divideRate : convert.multiplyRate) : ''
         const displayCurrency = this.isEmptyValue(this.currentPointOfSales.displayCurrency) ? '' : this.currentPointOfSales.displayCurrency.iso_code
         if (this.isEmptyValue(convertAmount)) {
-          return this.formatPrice(1, displayCurrency)
+          return this.formatPrice(0.00, this.currentFieldCurrency)
         }
         return this.formatPrice(1, displayCurrency) + ' ~ ' + this.formatPrice(convertAmount, this.currentPointOfSales.priceList.currency.iSOCode)
       }
@@ -1039,11 +1103,19 @@ export default {
           columnName: 'DisplayColumn_TenderType',
           value: this.defaultLabel
         })
-        this.$store.commit('updateValueOfField', {
-          containerUuid: this.containerUuid,
-          columnName: 'PayAmt',
-          value: this.currentOrder.openAmount / this.amountForTheRate
-        })
+        if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: this.currentOrder.openAmount / this.amountForTheRate
+          })
+        } else {
+          this.$store.commit('updateValueOfField', {
+            containerUuid: this.containerUuid,
+            columnName: 'PayAmt',
+            value: 0.00
+          })
+        }
       })
       this.defaultValueCurrency()
       this.$store.commit('currencyDivideRateCollection', 1)
@@ -1069,11 +1141,19 @@ export default {
         columnName: 'C_Currency_ID',
         value: this.pointOfSalesCurrency.id
       })
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.containerUuid,
-        columnName: 'PayAmt',
-        value: this.currentOrder.openAmount / this.amountForTheRate
-      })
+      if (this.amountForTheRate !== 1 || this.currentFieldCurrency === this.pointOfSalesCurrency.iSOCode) {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.containerUuid,
+          columnName: 'PayAmt',
+          value: this.currentOrder.openAmount / this.amountForTheRate
+        })
+      } else {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.containerUuid,
+          columnName: 'PayAmt',
+          value: 0.00
+        })
+      }
       this.defaultValueCurrency()
       this.$store.commit('currencyDivideRateCollection', 1)
       this.$store.commit('currencyMultiplyRate', 1)
