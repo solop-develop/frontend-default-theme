@@ -139,9 +139,6 @@ export default {
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
-    popoverCreateBusinessParnet() {
-      return this.$store.getters.getPopoverCreateBusinessParnet
-    },
     copyShippingAddress: {
       get() {
         return this.$store.getters.getCopyShippingAddress

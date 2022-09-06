@@ -200,8 +200,8 @@ export default {
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
-    popoverCreateBusinessParnet() {
-      return this.$store.getters.getPopoverCreateBusinessParnet
+    popoverCreateBusinessPartner() {
+      return this.$store.getters.getPopoverCreateBusinessPartner
     },
     currentBusinessPartner() {
       const customer = this.$store.getters.posAttributes.currentPointOfSales.currentOrder

@@ -67,10 +67,10 @@ export default {
       return shippingAddress
     },
     showCustomer() {
-      return this.$store.getters.getPopoverCreateBusinessParnet
+      return this.$store.getters.getPopoverCreateBusinessPartner
     },
     showPopover() {
-      if (this.$store.getters.getPopoverCreateBusinessParnet || this.$store.getters.getShowUpdateCustomer) {
+      if (this.$store.getters.getPopoverCreateBusinessPartner || this.$store.getters.getShowUpdateCustomer) {
         return true
       }
       return false

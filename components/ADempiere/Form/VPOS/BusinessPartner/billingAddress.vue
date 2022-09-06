@@ -157,9 +157,6 @@ export default {
     },
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
-    },
-    popoverCreateBusinessParnet() {
-      return this.$store.getters.getPopoverCreateBusinessParnet
     }
   },
   methods: {
