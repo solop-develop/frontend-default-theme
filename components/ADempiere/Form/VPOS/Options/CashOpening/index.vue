@@ -548,10 +548,6 @@ export default {
         fieldsList: this.fieldsList,
         isValidate: true
       })
-      const amount = this.$store.getters.getValueOfField({
-        containerUuid: this.containerUuid,
-        columnName: 'PayAmt'
-      })
       const paymentMethods = this.availablePaymentMethods.find(payment => payment.payment_method.uuid === this.currentFieldPaymentMethods)
       if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
         return false

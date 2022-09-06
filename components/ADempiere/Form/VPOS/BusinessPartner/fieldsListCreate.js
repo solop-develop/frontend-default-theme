@@ -128,5 +128,19 @@ export default [
       size: 8,
       isMandatory: true
     }
+  },
+  {
+    fieldUuid: 'fc86d8ec-b415-42d0-a32c-a66a22e76553',
+    uuid: 'fc86d8ec-b415-42d0-a32c-a66a22e76553',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      isCustomField: true,
+      tabindex: 0,
+      handleFocusGained: true,
+      handleFocusLost: true,
+      sequence: 0,
+      size: 8,
+      isMandatory: false
+    }
   }
 ]

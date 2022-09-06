@@ -636,6 +636,13 @@ export default {
           })
         },
         {
+          key: 'TaxpayerType',
+          value: this.$store.getters.getValueOfField({
+            containerUuid: 'Business-Partner-Create',
+            columnName: 'TaxpayerType'
+          })
+        },
+        {
           key: 'PersonType',
           value: this.$store.getters.getValueOfField({
             containerUuid: 'Business-Partner-Create',
