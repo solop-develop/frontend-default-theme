@@ -306,7 +306,7 @@ export default {
       get() {
         const qty = this.listWarehouseLine.find(warehouse => warehouse.uuid === this.stock)
         if (!this.isEmptyValue(qty.qty)) {
-          return this.formatQuantity(qty.qty)
+          return this.formatQuantity({ value: qty.qty })
         }
         return this.currentLine.availableQuantity
       },
@@ -554,6 +554,8 @@ export default {
         warehouseUuid: value
       })
         .then(response => {
+          this.$store.dispatch('currentLine', response)
+          this.stock = response.warehouse.uuid
           this.$message({
             type: 'success',
             message: 'Acción a realizar',
