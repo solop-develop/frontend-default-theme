@@ -54,6 +54,7 @@
         :fetch-suggestions="localSearch"
         :select-when-unmatched="true"
         :highlight-first-item="false"
+        @keyup.native="enterKey"
         @focus="searchFocus"
         @shortkey.native="shortcutKeyMethod"
         @select="handleSelect"
@@ -228,6 +229,9 @@ export default {
           break
       }
     },
+    enterKey(event) {
+      // TODO: Implement key enter event.
+    },
     searchFocus() {
       if (this.isEmptyValue(this.sendProduct) || this.listWithPrice.length <= 1) {
         this.$refs.product.close()
@@ -299,7 +303,7 @@ export default {
         // TODO: Verify with 'value' or 'searchValue' attribute
         value: valueProduct
       })
-      // this.findProduct(valueProduct)
+
       if (this.allowsCreateOrder) {
         this.findProduct(valueProduct)
       } else {
@@ -338,7 +342,13 @@ export default {
           clearTimeout(this.timeOutProduct)
           this.timeOutProduct = setTimeout(() => {
             if (this.listWithPrice.length === 1 && this.KeyPerformed && !this.isEmptyValue(this.sendProduct)) {
-              this.handleSelect(this.listWithPrice[0])
+              const productSelected = this.listWithPrice.at()
+              this.$message({
+                message: 'Producto Agregado: ' + productSelected.product.name,
+                type: 'success',
+                showClose: true
+              })
+              this.handleSelect(productSelected)
             }
           }, 2000)
         }

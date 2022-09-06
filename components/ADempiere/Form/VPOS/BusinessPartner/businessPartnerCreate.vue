@@ -19,7 +19,7 @@
 <template>
   <el-container style="max-height: 450px; border: 1px solid #eee; border: 0px">
     <el-main
-      v-shortkey="{ close: ['esc'], enter: ['enter'] }"
+      v-shortkey="popoverCreateBusinessPartner ? { close: ['esc'], enter: ['enter'] } : {}"
       style="height: -webkit-fill-available;overflow: hidden;"
       @shortkey.native="actionCreate"
     >
@@ -178,6 +178,9 @@ export default {
     },
     currentCustomerTemplatePointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales.templateCustomer
+    },
+    popoverCreateBusinessPartner() {
+      return this.$store.getters.getPopoverCreateBusinessPartner
     },
     copyShippingAddress: {
       get() {
