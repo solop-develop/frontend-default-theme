@@ -397,12 +397,12 @@ export default {
       if (!this.isEmptyValue(this.currentLine.warehouse)) {
         this.stock = this.currentLine.warehouse.uuid
       }
-      this.uomValue = this.currentLine.productUom.uuid
+      this.uomValue = this.currentLine.uom.uuid
       this.uomValueRate = this.currentLine.productUom.uom.name
       if (this.currentLine.productUom.divide_rate >= this.currentLine.productUom.multiply_rate) {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: this.currentLine.productUom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + this.currentLine.uom.uom.name + '( ' + this.currentLine.uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + '( ' + this.currentLine.productUom.product_uom.symbol + ')'
       } else {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: this.currentLine.productUom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + this.currentLine.uom.uom.name + '( ' + this.currentLine.uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + '(' + this.currentLine.productUom.product_uom.symbol + ')'
       }
       this.findUomList(value)
     }
@@ -576,13 +576,12 @@ export default {
           return uom
         }
       })
-      // this.uomValueRate = uom.uom.name
+      // this.uomValueRate = uom.uom.name + ' ' + this.currentLine.productUom.product_uom.name + ' ( ' + this.currentLine.productUom.product_uom.symbol + ')'
       if (uom.divide_rate >= uom.multiply_rate) {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
+        this.num = '1 ' + uom.uom.name + '(' + uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.name + '(' + this.currentLine.productUom.product_uom.symbol + ')'
         // this.num = uom.divide_rate
       } else {
-        this.num = '1 ' + this.uomValueRate + ' ~ ' + this.formatQuantity({ value: uom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.symbol
-        // this.num = uom.multiply_rate
+        this.num = '1 ' + uom.uom.name + '(' + uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: uom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.name + '(' + this.currentLine.productUom.product_uom.symbol + ')'
       }
       updateOrderLine({
         posUuid: this.currentPointOfSales.uuid,
@@ -622,7 +621,7 @@ export default {
                   row: this.currentLineOrder,
                   columnName: 'QtyEntered'
                 })
-                if (this.formatQuantity(mutation.payload.value).toString() === qtyEntered) {
+                if (this.formatQuantity({ value: mutation.payload.value }).toString() === qtyEntered) {
                   return
                 }
                 if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {

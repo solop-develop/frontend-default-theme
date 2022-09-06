@@ -64,13 +64,13 @@
                         class="clearfix"
                         style="padding-bottom: 20px;"
                       >
-                        <p v-if="!isEmptyValue(value.orderCurrencyRate) && value.orderCurrencyRate !== 1" class="total">
+                        <p class="total" :style="value.currency.iso_code === currentPointOfSales.priceList.currency.iSOCode ? 'margin-top: 15%;' : ''">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
                             {{ formatPrice(value.amount, value.currency.iso_code) }}
                           </b>
                         </p>
                         <br>
-                        <p class="total">
+                        <p v-if="value.currency.iso_code !== currentPointOfSales.priceList.currency.iSOCode" class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
                             {{ formatPrice(value.amount * value.orderCurrencyRate, currency.iSOCode) }}
                           </b>
@@ -146,7 +146,7 @@
                           </b>
                         </p> -->
                         <br>
-                        <p v-show="value.currency.iso_code !== currentPointOfSales.priceList.currency.iSOCode" class="total">
+                        <p v-if="value.currency.iso_code !== currentPointOfSales.priceList.currency.iSOCode" class="total">
                           <b :style=" isRefundReference ? 'float: right;color: red' : 'float: right;'">
                             {{ formatPrice(value.amount * value.orderCurrencyRate, currency.iSOCode) }}
                           </b>

@@ -269,7 +269,7 @@
                       :command="item"
                       :disabled="isDisabled"
                     >
-                      {{ item.name }}
+                      {{ item.key }}
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
