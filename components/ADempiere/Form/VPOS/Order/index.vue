@@ -585,10 +585,7 @@ export default {
     },
     currentPriceTableEdit: {
       get(value) {
-        return this.fieldShowValue({
-          row: this.currentLineOrder,
-          columnName: 'CurrentPrice'
-        })
+        return this.currentValuePriceLine(this.currentLineOrder)
       },
       set(value) {
         if (value !== this.currentValuePriceLine(this.currentLineOrder)) {
@@ -968,7 +965,7 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
+      if (this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
           columnName,

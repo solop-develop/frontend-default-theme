@@ -373,6 +373,13 @@ export default {
             containerUuid: 'Business-Partner-Update',
             columnName: 'PersonType'
           })
+        },
+        {
+          key: 'EMail',
+          value: this.$store.getters.getValueOfField({
+            containerUuid: 'Business-Partner-Update',
+            columnName: 'EMail'
+          })
         }
       ]
       values.posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
