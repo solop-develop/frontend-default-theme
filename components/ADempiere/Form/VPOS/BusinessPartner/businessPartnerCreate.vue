@@ -19,7 +19,7 @@
 <template>
   <el-container style="max-height: 450px; border: 1px solid #eee; border: 0px">
     <el-main
-      v-shortkey="popoverCreateBusinessParnet ? {close: ['esc'], enter: ['enter']} : {}"
+      v-shortkey="{ close: ['esc'], enter: ['enter'] }"
       style="height: -webkit-fill-available;overflow: hidden;"
       @shortkey.native="actionCreate"
     >
@@ -37,7 +37,7 @@
                   {{ $t('form.pos.order.BusinessPartnerCreate.customerData') }}
                 </span>
               </div>
-              <div class="text item">
+              <el-row class="text item">
                 <field-definition
                   v-for="(field) in metaDataFromList"
                   :ref="field.columnName"
@@ -56,7 +56,7 @@
                     changeFieldShowedFromUser
                   }"
                 />
-              </div>
+              </el-row>
             </el-card>
           </el-col>
         </el-row>
@@ -179,9 +179,6 @@ export default {
     currentCustomerTemplatePointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales.templateCustomer
     },
-    popoverCreateBusinessParnet() {
-      return this.$store.getters.getPopoverCreateBusinessParnet
-    },
     copyShippingAddress: {
       get() {
         return this.$store.getters.getCopyShippingAddress
@@ -190,7 +187,7 @@ export default {
         this.$store.dispatch('changeCopyShippingAddress', value)
       }
     },
-    getCodigo() {
+    getCode() {
       return this.$store.getters.getValueOfField({
         containerUuid: 'Business-Partner-Create',
         columnName: 'Value'
@@ -207,7 +204,7 @@ export default {
         }, 1500)
       }
     },
-    getCodigo(value) {
+    getCode(value) {
       if (!this.isEmptyValue(value)) {
         this.$store.commit('updateValueOfField', {
           containerUuid: 'Business-Partner-Create',
@@ -429,7 +426,7 @@ export default {
       }
     },
     clearValues() {
-      this.$store.dispatch('changePopover', false)
+      this.$store.dispatch('popoverCreateBusinessPartner', false)
       this.showsPopovers.isShowCreate = false
 
       this.$store.dispatch('setDefaultValues', {
@@ -512,8 +509,8 @@ export default {
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'addFocusLost' && mutation.payload.columnName === 'Value' && !this.isEmptyValue(this.getCodigo) && mutation.payload.containerUuid === 'Business-Partner-Create') {
-          this.getCustomer(this.getCodigo)
+        if (mutation.type === 'addFocusLost' && mutation.payload.columnName === 'Value' && !this.isEmptyValue(this.getCode) && mutation.payload.containerUuid === 'Business-Partner-Create') {
+          this.getCustomer(this.getCode)
         }
       })
     }
@@ -522,17 +519,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .create-bp {
-    .el-form-item {
-        margin-bottom: 0px !important;
-    }
+.create-bp {
+  .el-form-item {
+    margin-bottom: 0px !important;
   }
-  .scroll-customer-create {
-    max-height: 250px;
-    max-width: 1000px;
-  }
-  .custom-button-create-bp {
-    float: right;
-    margin-right: 10px;
-  }
+}
+.scroll-customer-create {
+  max-height: 250px;
+  max-width: 1000px;
+}
+.custom-button-create-bp {
+  float: right;
+  margin-right: 10px;
+}
 </style>
