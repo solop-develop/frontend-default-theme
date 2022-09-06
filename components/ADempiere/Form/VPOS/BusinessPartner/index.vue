@@ -27,7 +27,7 @@
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item>
             <el-popover
-              v-model="popoverCreateBusinessParnet"
+              v-model="popoverCreateBusinessPartner"
               placement="left-start"
               width="900"
               trigger="click"
@@ -36,7 +36,7 @@
               <el-scrollbar wrap-class="scroll-child">
                 <business-partner-create
                   :parent-metadata="parentMetadata"
-                  :show-field="popoverCreateBusinessParnet"
+                  :show-field="popoverCreateBusinessPartner"
                   :is-visible-address="isVisibleAddress"
                 />
               </el-scrollbar>
@@ -78,7 +78,7 @@
                   class="el-icon-plus"
                   style="font-size: 20px"
                 />
-                Crear Nuevo Socio de Negocio
+                {{ $t('pointOfSales.customer.newBusinessPartner') }}
               </el-button>
             </el-popover>
           </el-dropdown-item>
@@ -103,7 +103,7 @@
                   class="el-icon-search"
                   style="font-size: 20px"
                 />
-                Listar Socio de Negocio
+                {{ $t('pointOfSales.customer.listBusinessPartners') }}
               </el-button>
             </el-popover>
           </el-dropdown-item>
@@ -128,7 +128,7 @@
                   class="el-icon-edit"
                   style="font-size: 22px"
                 />
-                Actualizar Socio de Negocio
+                {{ $t('pointOfSales.customer.updateBusinessPartner') }}
               </el-button>
             </el-popover>
           </el-dropdown-item>
@@ -425,13 +425,12 @@ export default {
       }
       return customer
     },
-    popoverCreateBusinessParnet: {
+    popoverCreateBusinessPartner: {
       get() {
-        return this.$store.getters.getPopoverCreateBusinessParnet
+        return this.$store.getters.getPopoverCreateBusinessPartner
       },
       set(value) {
         this.$store.commit('popoverCreateBusinessPartner', value)
-        return value
       }
     },
     popoverListBusinessParnet: {
@@ -440,7 +439,6 @@ export default {
       },
       set(value) {
         this.$store.commit('changePopoverListBusinessPartner', value)
-        return value
       }
     },
     showUpdateCustomer() {
@@ -455,7 +453,6 @@ export default {
           this.$store.commit('setShowAddressUpdate', value)
         }
         this.$store.commit('setShowAddNewAddress', value)
-        return value
       }
     },
     showUpdate: {
@@ -467,7 +464,6 @@ export default {
       },
       set(value) {
         this.$store.dispatch('changeShowUpdateCustomer', value)
-        return value
       }
     },
     updatedCustomerValue() {
@@ -502,7 +498,7 @@ export default {
         })
       }
     },
-    popoverCreateBusinessParnet(value) {
+    popoverCreateBusinessPartner(value) {
       this.showCreate = value
     },
     showUpdateCustomer(value) {
@@ -528,7 +524,7 @@ export default {
       this.$store.dispatch('changeCopyShippingAddress', value)
     },
     clearValues() {
-      this.$store.dispatch('changePopover', false)
+      this.$store.dispatch('popoverCreateBusinessPartner', false)
 
       this.$store.dispatch('setDefaultValues', {
         containerUuid: this.containerUuid,
@@ -622,12 +618,22 @@ export default {
           is_default_shipping: true
         }
       }
-      values.addresses = [createBillingAddress, createShippingAddress]
       const emptyMandatoryFields = this.$store.getters.getFieldsListEmptyMandatory({
         containerUuid: 'Business-Partner-Create',
         formatReturn: 'name'
       })
-      values.additionalAttributes = [
+      if (!this.isEmptyValue(emptyMandatoryFields)) {
+        this.$message({
+          type: 'warn',
+          message: this.$t('notifications.mandatoryFieldMissing') + emptyMandatoryFields,
+          duration: 1500,
+          showClose: true
+        })
+        return
+      }
+
+      values.addresses = [createBillingAddress, createShippingAddress]
+      const additionalAttributes = [
         {
           key: 'IsTaxpayer',
           value: this.$store.getters.getValueOfField({
@@ -643,64 +649,55 @@ export default {
           })
         }
       ]
-      if (this.isEmptyValue(emptyMandatoryFields)) {
-        this.isLoadingRecord = true
-        const { value, taxId, duns, naics, name, lastName, description, addresses, phone, posUuid, additionalAttributes } = values
-        this.$message({
-          message: this.$t('notifications.actionToTake'),
-          showClose: true
-        })
-        // actionToTake
-        this.$store.commit('popoverCreateBusinessPartner', false)
-        createCustomer({
-          value,
-          taxId,
-          duns,
-          naics,
-          name,
-          lastName,
-          description,
-          additionalAttributes,
-          addresses,
-          phone,
-          posUuid
-        })
-          .then(responseBPartner => {
-            const { documentStatus } = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
-            this.$store.commit('customer', responseBPartner)
-            if (!this.isEmptyValue(documentStatus) && documentStatus.value === 'DR') {
-              this.setBusinessPartner(responseBPartner)
-            }
-            this.clearValues()
-            this.$message({
-              type: 'success',
-              message: this.$t('form.pos.order.BusinessPartnerCreate.successfullyCreated'),
-              duration: 1500,
-              showClose: true
-            })
+      this.isLoadingRecord = true
+      const { value, taxId, duns, naics, name, lastName, description, addresses, phone, posUuid } = values
+      // this.$message({
+      //   message: this.$t('notifications.actionToTake'),
+      //   showClose: true
+      // })
+      // actionToTake
+      this.$store.commit('popoverCreateBusinessPartner', false)
+      createCustomer({
+        value,
+        taxId,
+        duns,
+        naics,
+        name,
+        lastName,
+        description,
+        additionalAttributes,
+        addresses,
+        phone,
+        posUuid
+      })
+        .then(responseBPartner => {
+          const { documentStatus } = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
+          this.$store.commit('customer', responseBPartner)
+          if (!this.isEmptyValue(documentStatus) && documentStatus.value === 'DR') {
+            this.setBusinessPartner(responseBPartner)
+          }
+          this.clearValues()
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.order.BusinessPartnerCreate.successfullyCreated'),
+            duration: 1500,
+            showClose: true
           })
-          .catch(error => {
-            this.$store.commit('popoverCreateBusinessPartner', true)
-            this.showsPopovers.isShowCreate = true
-            this.$message({
-              type: 'warning',
-              message: error.message + 'Name',
-              duration: 1500,
-              showClose: true
-            })
-            console.warn(`Error create Business Partner. Message: ${error.message}, code ${error.code}.`)
-          })
-          .finally(() => {
-            this.isLoadingRecord = false
-          })
-      } else {
-        this.$message({
-          type: 'warn',
-          message: this.$t('notifications.mandatoryFieldMissing') + emptyMandatoryFields,
-          duration: 1500,
-          showClose: true
         })
-      }
+        .catch(error => {
+          // this.$store.commit('popoverCreateBusinessPartner', true)
+          // this.showsPopovers.isShowCreate = true
+          this.$message({
+            type: 'warning',
+            message: error.message + 'Name',
+            duration: 1500,
+            showClose: true
+          })
+          console.warn(`Error create Business Partner. Message: ${error.message}, code ${error.code}.`)
+        })
+        .finally(() => {
+          this.isLoadingRecord = false
+        })
     },
     datesForm(values) {
       const valuesToSend = {}
@@ -952,7 +949,7 @@ export default {
         })
     },
     popoverOpen(value) {
-      this.$store.dispatch('changePopover', true)
+      this.$store.dispatch('popoverCreateBusinessPartner', true)
     },
     popoverClose(value) {
       this.$store.commit('setShowedLocation', false)
