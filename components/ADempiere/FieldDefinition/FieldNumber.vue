@@ -26,8 +26,10 @@
   >
     <el-input-number
       v-if="isFocus"
+      :ref="metadata.columnName"
       key="number-input-focus"
       v-model="value"
+      v-shortkey="{ close: ['esc'], enter: ['enter'] }"
       v-bind="commonsProperties"
       type="number"
       :min="minValue"
@@ -42,6 +44,7 @@
       @blur="customFocusLost"
       @keydown.native="keyPressed"
       @keyup.native="keyReleased"
+      @shortkey.native="keyPressField"
       @keyup.native.enter="select"
     />
 
@@ -156,6 +159,12 @@ export default {
   },
 
   methods: {
+    keyPressField() {
+      if (!this.isEmptyValue(this.$refs[this.metadata.columnName])) {
+        this.$refs[this.metadata.columnName].handleBlur()
+        this.preHandleChange(this.$refs[this.metadata.columnName].currentValue)
+      }
+    },
     parseValue(value) {
       if (this.isEmptyValue(value)) {
         return undefined
