@@ -94,6 +94,7 @@
                         v-shortkey="shortKeysInputTable"
                         :autofocus="true"
                         controls-position="right"
+                        style="width: 100%;"
                         @shortkey.native="theActionEdit"
                       />
                     </template>
@@ -104,6 +105,7 @@
                         v-shortkey="shortKeysInputTable"
                         :autofocus="true"
                         controls-position="right"
+                        style="width: 100%;"
                         @change="changeEdit(scope.row.quantityOrdered, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />
@@ -118,6 +120,7 @@
                         v-shortkey="shortKeysInputTable"
                         :autofocus="true"
                         controls-position="right"
+                        style="width: 100%;"
                         @change="changeEdit(scope.row.discount, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />

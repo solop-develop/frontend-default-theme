@@ -39,19 +39,19 @@ export default {
           columnName: 'CurrentPrice',
           label: this.$t('form.productInfo.price'),
           isNumeric: true,
-          size: '120px'
+          size: '150px'
         },
         quantityOrdered: {
           columnName: 'QtyEntered',
           label: this.$t('form.pos.tableProduct.quantity'),
           isNumeric: true,
-          size: '82px'
+          size: '125px'
         },
         uom: {
           columnName: 'UOM',
           label: this.$t('form.pos.tableProduct.uom'),
           isNumeric: false,
-          size: '82px'
+          size: '75px'
         },
         discount: {
           columnName: 'Discount',
