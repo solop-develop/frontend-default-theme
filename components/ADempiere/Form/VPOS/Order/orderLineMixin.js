@@ -330,10 +330,10 @@ export default {
           return this.formatPrice(row.priceWithTax, currency)
         }
         if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          return this.formatPrice(row.priceList, currency)
+          return this.formatPrice(row.price, currency)
         }
         if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          return this.formatPrice(row.priceList, currency)
+          return this.formatPrice(row.price, currency)
         }
       } else if (columnName === 'QtyEntered') {
         return formatQuantity({ value: row.quantityOrdered })
@@ -372,18 +372,19 @@ export default {
         return row.product.value + ' - ' + row.product.name
       }
       if (columnName === 'CurrentPrice') {
-        if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-          return row.price
-        }
-        if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-          return row.priceWithTax
-        }
-        if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          return row.priceList
-        }
-        if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          return row.priceList
-        }
+        return row.price
+        // if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
+        //   return row.price
+        // }
+        // if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
+        //   return row.priceWithTax
+        // }
+        // if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
+        //   return row.priceList
+        // }
+        // if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
+        //   return row.priceList
+        // }
       } else if (columnName === 'QtyEntered') {
         return formatQuantity({ value: row.quantityOrdered })
       } else if (columnName === 'Discount') {

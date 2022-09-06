@@ -91,7 +91,7 @@
         <el-row :gutter="10">
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-              <el-form-item label="Precio Base" style="margin-right: 10px;margin-left: 10px;">
+              <el-form-item label="Precio Base" style="margin-left: 10px;">
                 <el-input
                   v-model="priceBase"
                   :disabled="true"
@@ -102,7 +102,7 @@
           </el-col>
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-              <el-form-item label="Unidad de Medida Base" style="margin-right: 10px;margin-left: 10px;">
+              <el-form-item label="Unidad de Medida Base" style="margin-right: -4px !important;">
                 <el-input
                   v-model="currentLine.productUom.product_uom.name"
                   :disabled="true"
@@ -114,7 +114,7 @@
           </el-col>
           <el-col :span="8">
             <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
-              <el-form-item label="Cantidad Base" style="margin-right: 10px;margin-left: 10px;">
+              <el-form-item label="Cantidad Base" style="margin-right: 9px;margin-left: 10px;">
                 <el-input
                   v-model="baseUom"
                   :disabled="true"
@@ -377,7 +377,7 @@ export default {
   watch: {
     showField(value) {
       this.baseUom = this.currentLine.quantityOrderedLine
-      this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceActual
+      this.priceBase = this.currencyPointOfSales.curSymbol + this.currentLine.priceBase
       // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: true })
       if (value && this.isEmptyValue(this.metadataList) && (this.dataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid)) {
         this.metadataList = this.setFieldsList()
@@ -400,9 +400,9 @@ export default {
       this.uomValue = this.currentLine.uom.uuid
       this.uomValueRate = this.currentLine.productUom.uom.name
       if (this.currentLine.productUom.divide_rate >= this.currentLine.productUom.multiply_rate) {
-        this.num = '1 ' + this.currentLine.uom.uom.name + '( ' + this.currentLine.uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + '( ' + this.currentLine.productUom.product_uom.symbol + ')'
+        this.num = '1 ' + this.currentLine.uom.uom.name + ' ( ' + this.currentLine.uom.uom.symbol + ' ) ' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + ' ( ' + this.currentLine.productUom.product_uom.symbol + ' ) '
       } else {
-        this.num = '1 ' + this.currentLine.uom.uom.name + '( ' + this.currentLine.uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + '(' + this.currentLine.productUom.product_uom.symbol + ')'
+        this.num = '1 ' + this.currentLine.uom.uom.name + ' ( ' + this.currentLine.uom.uom.symbol + ' ) ' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + ' ( ' + this.currentLine.productUom.product_uom.symbol + ' ) '
       }
       this.findUomList(value)
     }
@@ -578,10 +578,10 @@ export default {
       })
       // this.uomValueRate = uom.uom.name + ' ' + this.currentLine.productUom.product_uom.name + ' ( ' + this.currentLine.productUom.product_uom.symbol + ')'
       if (uom.divide_rate >= uom.multiply_rate) {
-        this.num = '1 ' + uom.uom.name + '(' + uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.name + '(' + this.currentLine.productUom.product_uom.symbol + ')'
+        this.num = '1 ' + uom.uom.name + ' ( ' + uom.uom.symbol + ' ) ' + ' ~ ' + this.formatQuantity({ value: uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.name + ' ( ' + this.currentLine.productUom.product_uom.symbol + ' ) '
         // this.num = uom.divide_rate
       } else {
-        this.num = '1 ' + uom.uom.name + '(' + uom.uom.symbol + ')' + ' ~ ' + this.formatQuantity({ value: uom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.name + '(' + this.currentLine.productUom.product_uom.symbol + ')'
+        this.num = '1 ' + uom.uom.name + ' ( ' + uom.uom.symbol + ' ) ' + ' ~ ' + this.formatQuantity({ value: uom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.name + ' ( ' + this.currentLine.productUom.product_uom.symbol + ' ) '
       }
       updateOrderLine({
         posUuid: this.currentPointOfSales.uuid,
@@ -594,9 +594,15 @@ export default {
             message: 'Acción a realizar',
             showClose: true
           })
-          this.baseUom = response.quantityOrdered
           this.$store.dispatch('currentLine', response)
+          this.baseUom = response.quantityOrdered
+          this.$store.commit('updateValueOfField', {
+            containerUuid: 'line',
+            columnName: 'PriceEntered',
+            value: response.price
+          })
           this.fillOrderLine(response)
+          this.priceBase = this.currencyPointOfSales.curSymbol + response.priceBase
           this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
         })
         .catch(error => {
@@ -613,7 +619,7 @@ export default {
       return this.$store.subscribe((mutation, state) => {
         if (!this.isEmptyValue(mutation.payload) && !this.isEmptyValue(mutation.payload.containerUuid) && mutation.payload.containerUuid === 'line') {
           if (mutation.type === 'updateValueOfField') {
-            let qtyEntered, priceEntered, discount
+            let qtyEntered, discount
 
             switch (mutation.payload.columnName) {
               case 'QtyEntered':
@@ -637,11 +643,7 @@ export default {
                 }
                 break
               case 'PriceEntered':
-                priceEntered = this.fieldShowValue({
-                  row: this.currentLineOrder,
-                  columnName: 'CurrentPrice'
-                })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === priceEntered) {
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.price) {
                   return
                 }
                 if (this.modifyPrice) {
