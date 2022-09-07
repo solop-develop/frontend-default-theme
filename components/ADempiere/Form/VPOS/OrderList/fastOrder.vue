@@ -156,7 +156,7 @@ import {
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
-import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat.js'
+import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat.js'
 import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 
 export default {
@@ -594,8 +594,7 @@ export default {
         return
       }
       */
-
-      const dateOrderedTo = clientDateTime(this.dateOrderedFrom, 'd')
+      const dateOrderedTo = dateTimeFormats(this.dateOrderedFrom, 'YYYY-MM-DD')
 
       const values = {
         ...this.currentOptions.params,
