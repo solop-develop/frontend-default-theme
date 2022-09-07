@@ -625,14 +625,12 @@ export default {
       return this.$store.subscribe((mutation, state) => {
         if (!this.isEmptyValue(mutation.payload) && !this.isEmptyValue(mutation.payload.containerUuid) && mutation.payload.containerUuid === 'line') {
           if (mutation.type === 'updateValueOfField') {
-            let qtyEntered, discount
-
             switch (mutation.payload.columnName) {
               case 'QtyEntered':
-                qtyEntered = this.fieldShowValue({
-                  row: this.currentLineOrder,
-                  columnName: 'QtyEntered'
-                })
+                // qtyEntered = this.fieldShowValue({
+                //   row: this.currentLineOrder,
+                //   columnName: 'QtyEntered'
+                // })
                 if (mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.quantity) {
                   return
                 }
@@ -665,11 +663,11 @@ export default {
                 }
                 break
               case 'Discount':
-                discount = this.fieldShowValue({
-                  row: this.currentLineOrder,
-                  columnName: 'Discount'
-                })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === discount) {
+                // discount = this.fieldShowValue({
+                //   row: this.currentLineOrder,
+                //   columnName: 'Discount'
+                // })
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discount) {
                   return
                 }
                 if (this.modifyPrice) {

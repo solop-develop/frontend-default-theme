@@ -617,6 +617,7 @@ export default {
           // this.ordersInvoiced = response.ordersList
         })
         .catch(error => {
+          this.orderList = []
           this.isloading = false
           console.warn(`listOrdersFromServer: ${error.message}. Code: ${error.code}.`)
         })

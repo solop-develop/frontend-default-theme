@@ -252,10 +252,10 @@ export default {
           startValue = undefined
           endValue = undefined
         }
-
         if (typeof startValue !== 'object' && startValue !== undefined) {
-          startValue = new Date(startValue)
-          endValue = new Date(endValue)
+          const [year, month, day] = value.split('-')
+          startValue = new Date(+year, +month - 1, +day)
+          endValue = new Date(+year, +month - 1, +day)
         }
         this.$store.commit('updateValueOfField', {
           parentUuid: this.metadata.parentUuid,
