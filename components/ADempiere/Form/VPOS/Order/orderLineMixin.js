@@ -337,7 +337,10 @@ export default {
           return this.formatPrice(row.price, currency)
         }
       } else if (columnName === 'QtyEntered') {
-        return formatQuantity({ value: row.quantityOrdered })
+        return formatQuantity({
+          value: row.quantityOrdered,
+          precision: row.uom.uom.starndard_precision
+        })
       } else if (columnName === 'Discount') {
         return formatQuantity({ value: row.discount }) + ' %'
       } else if (columnName === 'taxIndicator') {
@@ -387,7 +390,10 @@ export default {
         //   return row.priceList
         // }
       } else if (columnName === 'QtyEntered') {
-        return formatQuantity({ value: row.quantityOrdered })
+        return formatQuantity({
+          value: row.quantityOrdered,
+          precision: row.uom.uom.starndard_precision
+        })
       } else if (columnName === 'Discount') {
         return row.discount
       } else if (columnName === 'taxIndicator') {
