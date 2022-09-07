@@ -302,17 +302,9 @@ export default {
     fieldDiscountProduct() {
       return this.metadataList.find(field => field.columnName === 'Discount')
     },
-    currentWarehouseQty: {
-      get() {
-        const qty = this.listWarehouseLine.find(warehouse => warehouse.uuid === this.stock)
-        if (!this.isEmptyValue(qty.qty)) {
-          return this.formatQuantity({ value: qty.qty })
-        }
-        return this.currentLine.availableQuantity
-      },
-      set(value) {
-        return value
-      }
+    currentWarehouseQty() {
+      const warehouseQty = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
+      return warehouseQty.quantityOrdered
     },
     currentLineOrder() {
       const line = this.$store.state['pointOfSales/orderLine/index'].line
@@ -399,10 +391,10 @@ export default {
       }
       this.uomValue = this.currentLine.uom.uuid
       this.uomValueRate = this.currentLine.productUom.uom.name
-      if (this.currentLine.productUom.divide_rate >= this.currentLine.productUom.multiply_rate) {
-        this.num = '1 ' + this.currentLine.uom.uom.name + ' (' + this.currentLine.uom.uom.symbol + ') ' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + ' (' + this.currentLine.productUom.product_uom.symbol + ') '
+      if (this.currentLine.uom.divide_rate >= this.currentLine.uom.multiply_rate) {
+        this.num = '1 ' + this.currentLine.uom.uom.name + ' (' + this.currentLine.uom.uom.symbol + ') ' + ' ~ ' + this.formatQuantity({ value: this.currentLine.uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.name + ' (' + this.currentLine.productUom.product_uom.symbol + ') '
       } else {
-        this.num = '1 ' + this.currentLine.uom.uom.name + ' (' + this.currentLine.uom.uom.symbol + ') ' + ' ~ ' + this.formatQuantity({ value: this.baseUom }) + ' ' + this.currentLine.productUom.product_uom.name + ' (' + this.currentLine.productUom.product_uom.symbol + ') '
+        this.num = '1 ' + this.currentLine.uom.uom.name + ' (' + this.currentLine.uom.uom.symbol + ') ' + ' ~ ' + this.formatQuantity({ value: this.currentLine.uom.multiply_rate }) + ' ' + this.currentLine.productUom.product_uom.name + ' (' + this.currentLine.productUom.product_uom.symbol + ') '
       }
       this.findUomList(value)
     }
@@ -629,7 +621,7 @@ export default {
                   row: this.currentLineOrder,
                   columnName: 'QtyEntered'
                 })
-                if (this.formatQuantity({ value: mutation.payload.value }).toString() === qtyEntered) {
+                if (mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.quantity) {
                   return
                 }
                 if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
