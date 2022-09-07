@@ -252,6 +252,7 @@ export default {
       )
         .then(response => {
           this.$store.commit('pin', false)
+          this.$store.dispatch('currentLine', response)
           this.fillOrderLine(response)
           this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
         })
