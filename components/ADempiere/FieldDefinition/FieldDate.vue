@@ -44,6 +44,9 @@ import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinF
 import { DATE_PLUS_TIME } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 
+// utils and helper methods
+import { changeTimeZone } from '@/utils/ADempiere/formatValue/dateFormat'
+
 /**
  * TODO: Improves set values into store and set in vales in component
  */
@@ -252,11 +255,12 @@ export default {
           startValue = undefined
           endValue = undefined
         }
+
         if (typeof startValue !== 'object' && startValue !== undefined) {
-          const [year, month, day] = value.split('-')
-          startValue = new Date(+year, +month - 1, +day)
-          endValue = new Date(+year, +month - 1, +day)
+          startValue = changeTimeZone({ value: startValue })
+          endValue = changeTimeZone({ value: endValue })
         }
+
         this.$store.commit('updateValueOfField', {
           parentUuid: this.metadata.parentUuid,
           containerUuid,
