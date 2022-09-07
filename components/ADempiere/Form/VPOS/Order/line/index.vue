@@ -59,7 +59,7 @@
                 v-for="(item, key) in uomList"
                 :key="key"
                 :label="item.uom.name"
-                :value="item.uuid"
+                :value="item.uom.uuid"
               >
                 <span style="float: left">{{ item.uom.name }}</span>
               </el-option>
@@ -73,7 +73,7 @@
             v-if="!isEmptyValue(fieldQtyProduct)"
             :metadata-field="{
               ...fieldQtyProduct,
-              precision: currentLineOrde.uom.uom.starndard_precision
+              precision: precisionUom
             }"
             :container-uuid="'line'"
             :container-manager="{
@@ -216,6 +216,7 @@ import { validatePin, updateOrderLine } from '@/api/ADempiere/form/point-of-sale
 
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
 // utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
@@ -309,6 +310,21 @@ export default {
       const line = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
       return line
     },
+    precisionUom() {
+      if (!isEmptyValue(this.uomValue) && this.currentLine.uom.uom !== this.uomValue) {
+        const uomSelected = this.uomList.find(uomItem => {
+          return uomItem.uom.uuid === this.uomValue
+        })
+        if (!isEmptyValue(this.uomSelected)) {
+          console.log(uomSelected.uom.starndard_precision)
+          return uomSelected.uom.starndard_precision
+        }
+      }
+      if (this.currentLine.uom && this.currentLine.uom.uom) {
+        return this.currentLine.uom.uom.starndard_precision
+      }
+      return undefined
+    },
     currentWarehouseQty: {
       get() {
         const warehouseQty = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
@@ -401,7 +417,7 @@ export default {
       if (!this.isEmptyValue(this.currentLine.warehouse)) {
         this.stock = this.currentLine.warehouse.uuid
       }
-      this.uomValue = this.currentLine.uom.uuid
+      this.uomValue = this.currentLine.uom.uom.uuid
       this.uomValueRate = this.currentLine.productUom.uom.name
       if (this.currentLine.uom.divide_rate >= this.currentLine.uom.multiply_rate) {
         this.num = '1 ' + this.currentLine.uom.uom.name + ' (' + this.currentLine.uom.uom.symbol + ') ' + ' ~ ' + this.formatQuantity({ value: this.currentLine.uom.divide_rate }) + ' ' + this.currentLine.productUom.product_uom.name + ' (' + this.currentLine.productUom.product_uom.symbol + ') '
@@ -578,7 +594,7 @@ export default {
     },
     changUomLine(value) {
       const uom = this.uomList.find(uom => {
-        if (value === uom.uuid) {
+        if (value === uom.uom.uuid) {
           return uom
         }
       })
