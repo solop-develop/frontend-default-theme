@@ -113,6 +113,9 @@ export default {
     },
     precision() {
       // Amount, Costs+Prices, Number, Quantity
+      if (!this.isEmptyValue(this.metadata.precision)) {
+        return this.metadata.precision
+      }
       if (isDecimalField(this.metadata.displayType)) {
         return this.$store.getters.getStandardPrecision
       }

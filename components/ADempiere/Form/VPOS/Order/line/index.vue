@@ -71,7 +71,10 @@
         <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm">
           <field-definition
             v-if="!isEmptyValue(fieldQtyProduct)"
-            :metadata-field="fieldQtyProduct"
+            :metadata-field="{
+              ...fieldQtyProduct,
+              precision: currentLineOrde.uom.uom.starndard_precision
+            }"
             :container-uuid="'line'"
             :container-manager="{
               ...containerManager,
@@ -180,7 +183,7 @@
         <el-form label-position="top" :inline="true" label-width="10px" @submit.native.prevent="notSubmitForm">
           <el-form-item label="Cantidad Disponible" style="width: 98% !important;">
             <el-input-number
-              v-model="currentWarehouseQty"
+              v-model="$store.state['pointOfSales/orderLine/index'].line.availableQuantity"
               :disabled="true"
               controls-position="right"
               :precision="2"
@@ -302,9 +305,18 @@ export default {
     fieldDiscountProduct() {
       return this.metadataList.find(field => field.columnName === 'Discount')
     },
-    currentWarehouseQty() {
-      const warehouseQty = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
-      return warehouseQty.quantityOrdered
+    currentLineOrde() {
+      const line = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
+      return line
+    },
+    currentWarehouseQty: {
+      get() {
+        const warehouseQty = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
+        return warehouseQty.quantityOrdered
+      },
+      set(value) {
+        return value
+      }
     },
     currentLineOrder() {
       const line = this.$store.state['pointOfSales/orderLine/index'].line
