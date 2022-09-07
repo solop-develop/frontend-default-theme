@@ -146,7 +146,8 @@ export default {
         return formatNumber({
           value: this.value,
           displayType: this.metadata.displayType,
-          currency: this.currencyCode
+          currency: this.currencyCode,
+          precision: this.metadata.precision
         })
       }
     },
