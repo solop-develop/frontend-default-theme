@@ -106,6 +106,7 @@
                         :autofocus="true"
                         controls-position="right"
                         style="width: 100%;"
+                        :precision="scope.row.uom.uom.starndard_precision"
                         @change="changeEdit(scope.row.quantityOrdered, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />
