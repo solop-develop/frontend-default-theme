@@ -339,7 +339,7 @@ export default {
       } else if (columnName === 'QtyEntered') {
         // TODO: Remove it with fix on ADempiere (Box UOM)
         let precision = row.uom.uom.starndard_precision
-        if (row.uom.uom.uuid === '38b534ca-8e2b-11e9-bc85-0242ac140008') {
+        if (row.uom.uom.code === 'BX') {
           precision = undefined
         }
         return formatQuantity({
@@ -397,7 +397,7 @@ export default {
       } else if (columnName === 'QtyEntered') {
         // TODO: Remove it with fix on ADempiere (Box UOM)
         let precision = row.uom.uom.starndard_precision
-        if (row.uom.uom.uuid === '38b534ca-8e2b-11e9-bc85-0242ac140008') {
+        if (row.uom.uom.code === 'BX') {
           precision = undefined
         }
         return formatQuantity({
