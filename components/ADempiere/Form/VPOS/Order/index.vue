@@ -437,7 +437,7 @@
           <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important;">
             <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
               <div style="width: 100% !important;">
-                <el-row style="display: flex;">
+                <el-row :gutter="24">
                   <!-- <el-button type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
                   <el-button type="info" icon="el-icon-bottom" :disabled="isDisabled" @click="arrowBottom" />
                   <el-button v-show="isValidForDeleteLine(listOrderLine)" type="danger" icon="el-icon-delete" :disabled="isDisabled" @click="deleteOrderLine(currentOrderLine)" /> -->
@@ -469,7 +469,7 @@
               <span>
                 <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
                 <!-- <p class="total">
-                  {{ $t('form.pos.order.date') }}: 
+                  {{ $t('form.pos.order.date') }}:
                   <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
                     {{ orderDate }}
                   </b>
@@ -1043,7 +1043,7 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      if (this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
+      if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
           columnName,

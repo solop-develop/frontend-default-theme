@@ -337,9 +337,14 @@ export default {
           return this.formatPrice(row.price, currency)
         }
       } else if (columnName === 'QtyEntered') {
+        // TODO: Remove it with fix on ADempiere (Box UOM)
+        let precision = row.uom.uom.starndard_precision
+        if (row.uom.uom.code === 'BX') {
+          precision = undefined
+        }
         return formatQuantity({
           value: row.quantityOrdered,
-          precision: row.uom.uom.starndard_precision
+          precision
         })
       } else if (columnName === 'Discount') {
         return formatQuantity({ value: row.discount }) + ' %'
@@ -390,9 +395,14 @@ export default {
         //   return row.priceList
         // }
       } else if (columnName === 'QtyEntered') {
+        // TODO: Remove it with fix on ADempiere (Box UOM)
+        let precision = row.uom.uom.starndard_precision
+        if (row.uom.uom.code === 'BX') {
+          precision = undefined
+        }
         return formatQuantity({
           value: row.quantityOrdered,
-          precision: row.uom.uom.starndard_precision
+          precision
         })
       } else if (columnName === 'Discount') {
         return row.discount

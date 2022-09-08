@@ -286,7 +286,12 @@ export default {
           this.exitEdit()
         })
         .catch(error => {
-          console.error(error.message)
+          this.reloadOrder(true, this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)
+          this.$store.commit('updateValueOfField', {
+            containerUuid: 'line',
+            columnName: 'QtyEntered',
+            value: this.currentOrderLine.quantity
+          })
           this.$message({
             type: 'error',
             message: error.message,

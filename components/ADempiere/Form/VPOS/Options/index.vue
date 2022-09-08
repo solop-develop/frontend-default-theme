@@ -651,7 +651,7 @@ export default {
   computed: {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
-    },
+    }
     isShowedPOSOptions: {
       get() {
         return this.$store.getters.getIsShowPOSOptions
