@@ -21,27 +21,26 @@
       <Split :gutter-size="isShowedPOSOptions ? 10 : 0" @onDrag="onDragOption">
         <SplitArea :size="isShowedPOSOptions ? 90 : 1">
           <el-container style="height: 100% !important;">
-            <el-aside :width="isShowedPOSOptions ? '100%' : '0%'" style="background: white; padding: 0px !important; margin-bottom: 0px">
-              <options
-                :metadata="metadata"
-              />
+            <el-aside width="100%" style="background: white; padding: 0px !important; margin-bottom: 0px">
+              <el-drawer
+                :visible.sync="isShowedPOSOptions"
+                :with-header="false"
+                :before-close="handleClose"
+                direction="ltr"
+                size="100%"
+              >
+                <options
+                  :metadata="metadata"
+                />
+              </el-drawer>
             </el-aside>
             <div style="width: 36px;padding-top: 30vh; z-index: 100;">
               <el-button
-                v-if="isShowedPOSKeyLayout"
                 :circle="true"
                 type="primary"
                 :icon="isShowedPOSOptions ? 'el-icon-arrow-left' : 'el-icon-arrow-right'"
                 :style="isShowedPOSOptions ? 'position: absolute;': 'position: absolute;left: 0.8%;'"
                 @click="isShowedPOSOptions = !isShowedPOSOptions"
-              />
-              <el-button
-                v-else
-                :circle="true"
-                type="primary"
-                :icon="isShowedPOSKeyLayout ? 'el-icon-arrow-left' : 'el-icon-arrow-right'"
-                :style="isShowedPOSKeyLayout ? 'position: absolute;': 'position: absolute;left: 0.8%;'"
-                @click="isShowedPOSKeyLayout = !isShowedPOSKeyLayout"
               />
             </div>
           </el-container>
@@ -49,23 +48,30 @@
 
         <SplitArea :size="isShowedPOSOptions ? 80 : 99" :min-size="990">
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
-            <SplitArea :size="isShowedPOSKeyLaout ? 99 : 1" style="overflow: hidden">
+            <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: hidden">
               <order
                 :metadata="metadata"
               />
             </SplitArea>
+            <el-drawer
+              title="Cobranza"
+              :visible.sync="showCollection"
+              :with-header="false"
+              :before-close="handleClose"
+              size="100%"
+            >
+              <collection
+                key="collection-component"
+              />
+            </el-drawer>
             <SplitArea
-              :size="isShowedPOSKeyLaout ? 1: 99"
+              v-show="isShowedPOSKeyLaout"
+              :size="isShowedPOSKeyLaout ? 31: 1"
               :min-size="300"
               style="overflow: auto"
             >
               <key-layout
-                v-if="!showCollection"
                 key="layout-component"
-              />
-              <collection
-                v-else
-                key="collection-component"
               />
             </SplitArea>
           </Split>
@@ -101,6 +107,9 @@ export default {
     }
   },
   computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    },
     isShowedPOSKeyLayout: {
       get() {
         return this.$store.getters.getShowPOSKeyLayout
@@ -158,6 +167,9 @@ export default {
           this.$store.dispatch('listPointOfSalesFromServer')
         }
       })
+    },
+    handleClose() {
+      this.$store.commit('setShowPOSKeyLayout', val)
     },
     onDragKeyLayout(size) {
       const sizeWidthRight = size[1] / 10
