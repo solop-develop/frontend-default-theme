@@ -310,6 +310,9 @@ export default {
       const line = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
       return line
     },
+    allowsModifyQuantity() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyQuantity
+    },
     precisionUom() {
       if (!isEmptyValue(this.uomValue) && this.currentLine.uom.uom !== this.uomValue) {
         const uomSelected = this.uomList.find(uomItem => {

@@ -966,7 +966,7 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      if (this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
+      if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
           columnName,
