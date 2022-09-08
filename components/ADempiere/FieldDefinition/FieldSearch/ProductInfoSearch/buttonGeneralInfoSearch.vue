@@ -36,7 +36,8 @@
       class="button-search"
       :disabled="isDisabled"
     >
-      <svg-icon icon-class="shopping" />
+      <i v-if="icon.type === 'i'" :class="icon.class" />
+      <svg-icon v-else :icon-class="icon.class" />
     </el-button>
   </el-popover>
 </template>
@@ -70,6 +71,15 @@ export default {
     containerManager: {
       type: Object,
       required: true
+    },
+    icon: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'svg',
+          class: 'search'
+        }
+      }
     }
   },
 

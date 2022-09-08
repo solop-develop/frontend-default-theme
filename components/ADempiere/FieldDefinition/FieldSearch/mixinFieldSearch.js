@@ -191,7 +191,6 @@ export default {
     },
     setNewDisplayedValue() {
       const displayValue = this.displayedValue
-      this.displayedValue = '' // clear to enter search
       if (!isSameValues(this.controlDisplayed, displayValue)) {
         this.controlDisplayed = displayValue
       }
@@ -230,9 +229,8 @@ export default {
           //     return true
           //   }
           // }
-
           // find on identifier columns
-          for (const columnName of this.identifierColumns) {
+          for (const columnName of this.storedIdentifierColumns) {
             const valueToCompare = String(row[columnName]).toLowerCase()
 
             if (valueToCompare.includes(parsedValue)) {

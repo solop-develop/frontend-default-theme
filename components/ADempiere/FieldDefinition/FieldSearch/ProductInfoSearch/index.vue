@@ -50,6 +50,7 @@
       :parent-metadata="metadata"
       :is-disabled="isDisabled"
       :container-manager="containerManager"
+      :icon="icon"
     />
   </el-autocomplete>
 </template>
@@ -87,6 +88,15 @@ export default {
         }
       }
     },
+    icon: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'svg',
+          class: 'search'
+        }
+      }
+    },
     containerManager: {
       type: Object,
       required: true
@@ -105,7 +115,7 @@ export default {
       if (this.isEmptyValue(listIdentifier)) {
         return []
       }
-      return listIdentifier.filter(identifier => identifier.overwriteDefinition.identifierSequence > 0)
+      return listIdentifier.filter(identifier => identifier.identifierSequence > 0)
     }
   },
 

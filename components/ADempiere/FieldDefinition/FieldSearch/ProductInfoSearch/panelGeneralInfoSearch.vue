@@ -353,7 +353,7 @@ export default {
     changeBusinessPartner() {
       if (!isEmptyValue(this.currentRow)) {
         const listIdentifier = this.listFilter.filter(identifier => {
-          if (identifier.overwriteDefinition.identifierSequence > 0) {
+          if (identifier.identifierSequence > 0) {
             return identifier
           }
         })
