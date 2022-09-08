@@ -65,6 +65,7 @@
       border
       fit
       height="250"
+      size="mini"
       @current-change="handleCurrentChange"
       @row-dblclick="changeCustomer"
     >
@@ -97,15 +98,25 @@
       <el-col :span="24">
         <samp style="float: right; padding-right: 10px;">
           <el-button
+            :loading="isLoadedList"
+            type="success"
+            class="custom-button-create-bp"
+            icon="el-icon-refresh-right"
+            size="small"
+            @click="searchBPartnerList({});"
+          />
+          <el-button
             type="danger"
             class="custom-button-create-bp"
             icon="el-icon-close"
+            size="small"
             @click="closeListCustomer"
           />
           <el-button
             type="primary"
             class="custom-button-create-bp"
             icon="el-icon-check"
+            size="small"
             :disabled="isDisabled"
             @click="changeCustomer"
           />
@@ -163,15 +174,6 @@ export default {
         }
       }
     },
-    showsPopovers: {
-      type: Object,
-      default: () => {
-        return {
-          isShowCreate: false,
-          isShowList: false
-        }
-      }
-    },
     isDisabled: {
       type: Boolean,
       default: false
@@ -211,7 +213,7 @@ export default {
     },
     isReadyFromGetData() {
       const { isLoaded, isReload } = this.businessParners
-      return (!isLoaded || isReload) && this.showsPopovers.isShowList
+      return (!isLoaded || isReload) && this.showField
     },
     popoverListBusinessParnet() {
       return this.$store.getters.getPopoverListBusinessParnet
