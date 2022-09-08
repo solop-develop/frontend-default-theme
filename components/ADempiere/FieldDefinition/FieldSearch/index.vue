@@ -5,6 +5,7 @@
     :container-uuid="containerUuid"
     :container-manager="containerManager"
     :metadata="metadata"
+    :icon="iconComponentRender"
   />
 </template>
 
@@ -60,33 +61,49 @@ export default {
         case 'C_BPartner':
           fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/BusinessPartnerInfo')
           break
+        case 'C_Invoice':
         case 'M_Product':
+        case 'A_Asset':
+        case 'C_Order':
           fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/ProductInfoSearch')
           break
-        case 'C_Invoice':
-          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/InvoiceInfoSearch')
-          break
-        case 'A_Asset':
-          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/AssetInfoSearch')
-          break
-        case 'C_Order':
-          fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/OrderInfoSearch')
-          break
-        // case 'M_InOut':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/InOutPartnerInfo')
-        //   break
-        // case 'C_Payment':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/PaymentInfo')
-        //   break
-        // case 'C_CashLine':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/CashLineInfo')
-        //   break
-        // case 'S_ResourceAssigment':
-        //   fieldRender = () => import('@theme/components/ADempiere/FieldDefinition/FieldSearch/ResourceAssigmentInfo')
-        //   break
       }
 
       return fieldRender
+    },
+    iconComponentRender() {
+      let icon = {
+        type: 'svg',
+        class: 'search'
+      }
+      switch (this.metadata.reference.tableName) {
+        case 'C_Invoice':
+          icon = {
+            type: 'svg',
+            class: 'search'
+          }
+          break
+        case 'M_Product':
+          icon = {
+            type: 'svg',
+            class: 'shopping'
+          }
+          break
+        case 'A_Asset':
+          icon = {
+            type: 'i',
+            class: 'el-icon-office-building'
+          }
+          break
+        case 'C_Order':
+          icon = {
+            type: 'svg',
+            class: 'clipboard'
+          }
+          break
+      }
+
+      return icon
     }
   }
 }

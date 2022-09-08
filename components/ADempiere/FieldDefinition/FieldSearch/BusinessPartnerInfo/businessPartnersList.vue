@@ -209,7 +209,7 @@ export default {
     },
     uuidForm() {
       if (!isEmptyValue(this.metadata.containerUuid)) {
-        return BUSINESS_PARTNERS_LIST_FORM + '_' + this.metadata.containerUuid
+        return this.metadata.columnName + '_' + this.metadata.containerUuid
       }
       return BUSINESS_PARTNERS_LIST_FORM
     },
@@ -331,8 +331,8 @@ export default {
     },
     changeBusinessPartner() {
       if (!isEmptyValue(this.currentRow)) {
-        this.setValues(this.currentRow)
         this.closeList()
+        this.setValues(this.currentRow)
       }
     },
     closeList() {

@@ -62,7 +62,7 @@ export default {
       if (this.isEmptyValue(listIdentifier)) {
         return []
       }
-      const list = listIdentifier.filter(identifier => identifier.overwriteDefinition.identifierSequence > 0)
+      const list = listIdentifier.filter(identifier => identifier.identifierSequence > 0)
       return list
     }
   },
