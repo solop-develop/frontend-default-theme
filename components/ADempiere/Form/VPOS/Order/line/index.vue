@@ -316,11 +316,18 @@ export default {
           return uomItem.uom.uuid === this.uomValue
         })
         if (!isEmptyValue(this.uomSelected)) {
-          console.log(uomSelected.uom.starndard_precision)
+          // TODO: Remove it with fix on ADempiere (Box UOM)
+          if (uomSelected.uuid === '38b534ca-8e2b-11e9-bc85-0242ac140008') {
+            return undefined
+          }
           return uomSelected.uom.starndard_precision
         }
       }
       if (this.currentLine.uom && this.currentLine.uom.uom) {
+        // TODO: Remove it with fix on ADempiere (Box UOM)
+        if (this.currentLine.uom.uom.uuid === '38b534ca-8e2b-11e9-bc85-0242ac140008') {
+          return undefined
+        }
         return this.currentLine.uom.uom.starndard_precision
       }
       return undefined
