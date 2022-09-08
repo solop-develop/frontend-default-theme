@@ -22,6 +22,13 @@
       <b>{{ $t('form.pos.title') }}</b>
       <br>
       {{ $t('form.pos.optionsPoinSales.title') }}
+      <el-button
+        type="danger"
+        icon="el-icon-close"
+        style="position: absolute;right: 1%;top: 2%;"
+        @click="isShowedPOSOptions = !isShowedPOSOptions"
+      />
+      <hr>
     </div>
     <modal-dialog
       :parent-uuid="processPos"
@@ -641,6 +648,14 @@ export default {
   },
 
   computed: {
+    isShowedPOSOptions: {
+      get() {
+        return this.$store.getters.getIsShowPOSOptions
+      },
+      set(val) {
+        this.$store.commit('setShowPOSOptions', val)
+      }
+    },
     isComputedRender: {
       get() {
         return this.$store.getters[this.isOpenPanel.getters]

@@ -42,7 +42,7 @@
                 />
               </template>
             </el-col>
-            <el-col :span="6" :style="styleTab">
+            <el-col :span="isMobile ? 16 : 6" :style="styleTab">
               <business-partner
                 id="BusinessPartner"
                 :parent-metadata="{
@@ -211,7 +211,7 @@
             </el-table>
           </el-main>
 
-          <el-footer :class="classOrderFooter">
+          <el-footer v-if="!isMobile" :class="classOrderFooter">
             <div class="keypad">
               <el-row :gutter="24">
                 <el-button type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
@@ -369,7 +369,7 @@
                 </el-dropdown>
               </p>
             </div>
-            <span v-if="isMobile" style="float: right;padding-right: 1%;">
+            <!-- <span v-if="isMobile" style="float: right;padding-right: 1%;">
               <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
               <p class="total">
                 {{ $t('form.pos.order.date') }}:
@@ -389,7 +389,7 @@
                 <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
                   {{ numberOfLines }}
                 </b></p>
-            </span>
+            </span> -->
             <span style="float: right;">
               <div style="padding-left: 10px;padding-right: 10px;">
                 <p class="total">{{ $t('form.pos.order.seller') }}:<b style="float: right;">
@@ -411,7 +411,7 @@
                 <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total"> <b> {{ $t('form.pos.collect.convertedAmount') }}: </b> <b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}</b> </p>
               </div>
             </span>
-            <span v-if="!isMobile" style="float: right;padding-right: 3%;">
+            <span style="float: right;padding-right: 3%;">
               <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
               <p class="total">
                 {{ $t('form.pos.order.date') }}:
@@ -433,6 +433,81 @@
                 </b>
               </p>
             </span>
+          </el-footer>
+          <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important;">
+            <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
+              <div style="width: 100% !important;">
+                <el-row :gutter="24">
+                  <!-- <el-button type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
+                  <el-button type="info" icon="el-icon-bottom" :disabled="isDisabled" @click="arrowBottom" />
+                  <el-button v-show="isValidForDeleteLine(listOrderLine)" type="danger" icon="el-icon-delete" :disabled="isDisabled" @click="deleteOrderLine(currentOrderLine)" /> -->
+                  <el-button
+                    v-show="isValidToRelease"
+                    type="primary"
+                    @click="releaseSalesOrder()"
+                  >
+                    <i class="el-icon-document-checked" />
+                    {{ $t('form.pos.releaseOrder') }}
+                  </el-button>
+                  <el-button
+                    v-show="allowsCollectOrder"
+                    type="success"
+                    icon="el-icon-bank-card"
+                    @click="openCollectionPanel"
+                  >
+                    {{ labelButtonCollections }}
+                  </el-button>
+                  <document-status-tag
+                    v-if="!isEmptyValue(currentOrder.documentStatus.value)"
+                    :value="currentOrder.documentStatus.value"
+                    :displayed-value="currentOrder.documentStatus.name"
+                    style="font-size: 16px;margin-left: 2%;"
+                  />
+                </el-row>
+              </div>
+              <span>
+                <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
+                <!-- <p class="total">
+                  {{ $t('form.pos.order.date') }}:
+                  <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
+                    {{ orderDate }}
+                  </b>
+                </p> -->
+                <!-- <p v-if="!isEmptyValue(currentOrder.documentType)" class="total">{{ $t('form.pos.order.type') }}:<b class="order-info">{{ currentOrder.documentType.name }}</b></p>
+                <p class="total">
+                  {{ $t('form.pos.order.itemQuantity') }}
+                  <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
+                    {{ getItemQuantity }}
+                  </b>
+                </p>
+                <p class="total">
+                  {{ $t('form.pos.order.numberLines') }}
+                  <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
+                    {{ numberOfLines }}
+                  </b></p> -->
+              </span>
+              <span>
+                <!-- <div>
+                  <p class="total">{{ $t('form.pos.order.seller') }}:<b style="float: right;">
+                    {{ currentOrder.salesRepresentative.name }}
+                  </b></p>
+                  <p class="total"> {{ $t('form.pos.order.subTotal') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">{{ formatPrice(currentOrder.totalLines, pointOfSalesCurrency.iSOCode) }}</b></p>
+                  <p class="total"> {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.discountAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
+                  <p class="total"> {{ $t('form.pos.order.tax') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.taxAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
+                </div> -->
+                <div style="border: 1px solid rgb(54, 163, 247);">
+                  <p>
+                    <b>
+                      {{ $t('form.pos.order.total') }}:
+                    </b>
+                    <b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">
+                      {{ formatPrice(currentOrder.grandTotal, pointOfSalesCurrency.iSOCode) }}
+                    </b>
+                  </p>
+                  <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)"> <b> {{ $t('form.pos.collect.convertedAmount') }}: </b> <b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}</b> </p>
+                </div>
+              </span>
+            </el-scrollbar>
           </el-footer>
         </el-container>
       </el-main>
@@ -518,6 +593,7 @@ import ImageProduct from '@theme/components/ADempiere/Form/VPOS/Order/ImageProdu
 // src/themes/pos/components/ADempiere/Form/VPOS/Order/ImageProduct/index.vue
 import ProductInfo from '@theme/components/ADempiere/Form/VPOS/ProductInfo'
 import FastOrdesList from '@theme/components/ADempiere/Form/VPOS/OrderList/fastOrder'
+import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
 // utils and helper methods
 // Format of values ( Date, Price, Quantity )
@@ -538,7 +614,7 @@ export default {
 
   components: {
     BusinessPartner,
-    // DocumentStatusTag,
+    DocumentStatusTag,
     ProductInfo,
     FastOrdesList,
     fieldLine,
@@ -1363,5 +1439,9 @@ export default {
     margin-left: 12px;
     max-width: 75%;
     min-width: 60%;
+  }
+  .scroll-footer-order {
+    max-height: 350px;
+    overflow-x: hidden;
   }
 </style>

@@ -22,6 +22,7 @@
       <template slot="label">
         {{ $t('form.productInfo.codeProduct') }}
         <el-popover
+          v-if="!isMobile"
           v-model="showProductList"
           v-shortkey="keyShortcuts"
           placement="bottom-start"
@@ -150,6 +151,9 @@ export default {
   },
 
   computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    },
     isShowProductsPriceList: {
       get() {
         return this.$store.state['pointOfSales/listProductPrice'].productPrice.isShowPopoverField

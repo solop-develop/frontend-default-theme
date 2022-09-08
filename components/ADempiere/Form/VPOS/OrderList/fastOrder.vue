@@ -25,12 +25,13 @@
         </span>
       </template>
       <document-status-tag
-        v-if="!isEmptyValue(currentOrder.documentStatus.value)"
+        v-if="!isEmptyValue(currentOrder.documentStatus.value) && !isMobile"
         :value="currentOrder.documentStatus.value"
         :displayed-value="currentOrder.documentStatus.name"
         style="font-size: 12px;margin-right: 2%;"
       />
-      <el-button type="primary" plain @click="newOrder()">
+      <el-button v-if="isMobile" type="primary" icon="el-icon-document-add" plain @click="newOrder()" />
+      <el-button v-else type="primary" plain @click="newOrder()">
         {{ $t('form.pos.optionsPoinSales.salesOrder.newOrder') }}
       </el-button>
       <el-dropdown size="mini" trigger="click" @command="handleCommand">
@@ -352,6 +353,9 @@ export default {
     },
     getSearchOrder() {
       return this.$store.getters.getQuickSearchOrder
+    },
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
 
