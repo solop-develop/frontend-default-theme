@@ -267,7 +267,6 @@ export default defineComponent({
 .el-tabs--border-card > .el-tabs__content {
   padding: 15px;
   overflow: auto;
-  height: 90%;
 }
 .scroll-tab-panel-conten {
   max-height: 500px;

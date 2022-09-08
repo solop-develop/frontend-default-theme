@@ -48,14 +48,25 @@
         :is-navigation="true"
       />
       <template v-else>
-        <panel-definition
-          v-if="isMobile || isEmptyValue(tabAttributes.childTabs)"
-          key="panel-definition"
-          :parent-uuid="parentUuid"
-          :container-uuid="tabAttributes.uuid"
-          :container-manager="containerManager"
-          :group-tab="tabAttributes.tabGroup"
-        />
+        <span v-if="isMobile || isEmptyValue(tabAttributes.childTabs)">
+          <panel-definition
+            v-if="tabAttributes.isParentTab"
+            key="panel-definition"
+            :parent-uuid="parentUuid"
+            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :group-tab="tabAttributes.tabGroup"
+          />
+          <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;">
+            <panel-definition
+              key="panel-definition"
+              :parent-uuid="parentUuid"
+              :container-uuid="tabAttributes.uuid"
+              :container-manager="containerManager"
+              :group-tab="tabAttributes.tabGroup"
+            />
+          </el-scrollbar>
+        </span>
         <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;">
           <panel-definition
             key="panel-definition"

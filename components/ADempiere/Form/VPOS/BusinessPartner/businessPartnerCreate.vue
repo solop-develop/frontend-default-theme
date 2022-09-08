@@ -234,7 +234,7 @@ export default {
       if (commands.srcKey) {
         switch (commands.srcKey) {
           case 'enter':
-             this.createBusinessParter()
+            this.createBusinessParter()
             break
           case 'close':
             this.clearValues()
