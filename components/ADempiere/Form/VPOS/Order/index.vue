@@ -437,7 +437,7 @@
           <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important;">
             <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
               <div style="width: 100% !important;">
-                <el-row :gutter="24">
+                <el-row style="display: flex;">
                   <!-- <el-button type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
                   <el-button type="info" icon="el-icon-bottom" :disabled="isDisabled" @click="arrowBottom" />
                   <el-button v-show="isValidForDeleteLine(listOrderLine)" type="danger" icon="el-icon-delete" :disabled="isDisabled" @click="deleteOrderLine(currentOrderLine)" /> -->
@@ -463,12 +463,13 @@
                     :displayed-value="currentOrder.documentStatus.name"
                     style="font-size: 16px;margin-left: 2%;"
                   />
+                  <!-- <fast-ordes-list :show-new-order="true" style="margin-right: 2%;margin-left: 2%;font-size: 12px;" /> -->
                 </el-row>
               </div>
               <span>
                 <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
                 <!-- <p class="total">
-                  {{ $t('form.pos.order.date') }}:
+                  {{ $t('form.pos.order.date') }}: 
                   <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
                     {{ orderDate }}
                   </b>
