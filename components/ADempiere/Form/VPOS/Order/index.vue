@@ -99,6 +99,7 @@
                       />
                     </template>
                     <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
+                      <!-- TODO: Remove ternary operator with standard precission uom -->
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.quantityOrdered"
@@ -106,7 +107,7 @@
                         :autofocus="true"
                         controls-position="right"
                         style="width: 100%;"
-                        :precision="scope.row.uom.uom.starndard_precision"
+                        :precision="scope.row.uom.uom.code === 'BX' ? 0 : scope.row.uom.uom.starndard_precision"
                         @change="changeEdit(scope.row.quantityOrdered, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />
