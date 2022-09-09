@@ -102,6 +102,9 @@ export default {
     modifyPrice() {
       return this.$store.getters.posAttributes.currentPointOfSales.isModifyPrice
     },
+    modifyDiscount() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyDiscount
+    },
     adviserPin() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAisleSeller
     },
