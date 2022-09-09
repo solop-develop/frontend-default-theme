@@ -42,7 +42,7 @@
                 />
               </template>
             </el-col>
-            <el-col :span="isMobile ? 16 : 6" :style="styleTab">
+            <el-col :span="isMobile ? 12 : 6" :style="styleTab">
               <business-partner
                 id="BusinessPartner"
                 :parent-metadata="{
@@ -54,8 +54,8 @@
                 :is-disabled="isDisabled"
               />
             </el-col>
-            <el-col :span="6" :style="isShowedPOSKeyLayout ? 'padding: 0px; margin-top: 3.%;' : 'padding: 0px;'">
-              <fast-ordes-list style="margin-right: 2%;margin-left: 2%;font-size: 12px;" />
+            <el-col v-if="!isMobile" :span="6">
+              <fast-ordes-list style="margin-right: 2%;margin-left: 2%;font-size: 0px;" />
             </el-col>
           </el-row>
         </el-form>
@@ -83,7 +83,7 @@
                   :key="key"
                   :column-key="valueOrder.columnName"
                   :label="valueOrder.label"
-                  :width="!valueOrder.isNumeric ? valueOrder.size : valueOrder.size"
+                  :width="sizeTableColumn(valueOrder)"
                   :align="valueOrder.isNumeric ? 'right' : 'left'"
                 >
                   <template slot-scope="scope">
@@ -139,6 +139,7 @@
                 </el-table-column>
               </template>
               <el-table-column
+                v-if="!isMobile"
                 :label="$t('form.pos.tableProduct.options')"
                 width="165"
               >
@@ -437,65 +438,40 @@
           <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important;">
             <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
               <div style="width: 100% !important;">
-                <el-row style="display: flex;">
-                  <!-- <el-button type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
-                  <el-button type="info" icon="el-icon-bottom" :disabled="isDisabled" @click="arrowBottom" />
-                  <el-button v-show="isValidForDeleteLine(listOrderLine)" type="danger" icon="el-icon-delete" :disabled="isDisabled" @click="deleteOrderLine(currentOrderLine)" /> -->
-                  <el-button
-                    v-show="isValidToRelease"
-                    type="primary"
-                    @click="releaseSalesOrder()"
-                  >
-                    <i class="el-icon-document-checked" />
-                    {{ $t('form.pos.releaseOrder') }}
-                  </el-button>
-                  <el-button
-                    v-show="allowsCollectOrder"
-                    type="success"
-                    icon="el-icon-bank-card"
-                    @click="openCollectionPanel"
-                  >
-                    {{ labelButtonCollections }}
-                  </el-button>
-                  <document-status-tag
-                    v-if="!isEmptyValue(currentOrder.documentStatus.value)"
-                    :value="currentOrder.documentStatus.value"
-                    :displayed-value="currentOrder.documentStatus.name"
-                    style="font-size: 16px;margin-left: 2%;"
-                  />
-                  <!-- <fast-ordes-list :show-new-order="true" style="margin-right: 2%;margin-left: 2%;font-size: 12px;" /> -->
+                <el-row>
+                  <el-col :span="24" style="display: flex;">
+                    <el-button
+                      v-show="isValidToRelease"
+                      type="primary"
+                      style="margin-left: 2%;"
+                      @click="releaseSalesOrder()"
+                    >
+                      <i class="el-icon-document-checked" />
+                      {{ $t('form.pos.releaseOrder') }}
+                    </el-button>
+                    <!-- <fast-ordes-list :show-new-order="false" /> -->
+                    <el-button
+                      v-show="allowsCollectOrder"
+                      type="success"
+                      icon="el-icon-bank-card"
+                      @click="openCollectionPanel"
+                    >
+                      {{ labelButtonCollections }}
+                    </el-button>
+                    <document-status-tag
+                      v-if="!isEmptyValue(currentOrder.documentStatus.value)"
+                      :value="currentOrder.documentStatus.value"
+                      :displayed-value="currentOrder.documentStatus.name"
+                      style="font-size: 16px;margin-left: 1%;margin-right: 1%;"
+                    />
+                    <fast-ordes-list style="font-size: 0px;width: 100px!important;margin: 0px;display: inline-flex;margin-top: 1px;" />
+                  </el-col>
                 </el-row>
               </div>
               <span>
-                <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
-                <!-- <p class="total">
-                  {{ $t('form.pos.order.date') }}: 
-                  <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                    {{ orderDate }}
-                  </b>
-                </p> -->
-                <!-- <p v-if="!isEmptyValue(currentOrder.documentType)" class="total">{{ $t('form.pos.order.type') }}:<b class="order-info">{{ currentOrder.documentType.name }}</b></p>
-                <p class="total">
-                  {{ $t('form.pos.order.itemQuantity') }}
-                  <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                    {{ getItemQuantity }}
-                  </b>
-                </p>
-                <p class="total">
-                  {{ $t('form.pos.order.numberLines') }}
-                  <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                    {{ numberOfLines }}
-                  </b></p> -->
+                <p style="margin: 0px;">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
               </span>
               <span>
-                <!-- <div>
-                  <p class="total">{{ $t('form.pos.order.seller') }}:<b style="float: right;">
-                    {{ currentOrder.salesRepresentative.name }}
-                  </b></p>
-                  <p class="total"> {{ $t('form.pos.order.subTotal') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">{{ formatPrice(currentOrder.totalLines, pointOfSalesCurrency.iSOCode) }}</b></p>
-                  <p class="total"> {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.discountAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
-                  <p class="total"> {{ $t('form.pos.order.tax') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.taxAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
-                </div> -->
                 <div style="border: 1px solid rgb(54, 163, 247);">
                   <p>
                     <b>

@@ -26,7 +26,7 @@
       <el-table
         v-loading="isLoadingTable"
         :data="dataList"
-        height="550"
+        :height="'550'"
         style="width: 100%"
         border
         :empty-text="$t('form.byInvoice.emptyList')"
@@ -289,6 +289,9 @@ export default {
     },
     sortFieldsListOrder() {
       return this.fieldsList.find(field => field.columnName === 'C_BPartner_ID')
+    },
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     },
     dateOrderedFrom() {
       return this.fieldsList.find(field => {

@@ -17,113 +17,217 @@
 -->
 
 <template>
-  <el-form label-position="top" label-width="100px">
-    <el-form-item>
-      <template slot="label">
-        <span style="color: transparent;">
-          Option
-        </span>
-      </template>
-      <document-status-tag
-        v-if="!isEmptyValue(currentOrder.documentStatus.value) && !isMobile"
-        :value="currentOrder.documentStatus.value"
-        :displayed-value="currentOrder.documentStatus.name"
-        style="font-size: 12px;margin-right: 2%;"
-      />
-      <el-button v-if="isMobile" type="primary" icon="el-icon-document-add" plain @click="newOrder()" />
-      <el-button v-else type="primary" plain @click="newOrder()">
-        {{ $t('form.pos.optionsPoinSales.salesOrder.newOrder') }}
-      </el-button>
-      <el-dropdown size="mini" trigger="click" @command="handleCommand">
-        <el-button type="primary" size="small" style="padding: 10px;padding-left: 5px;">
-          <i class="el-icon-arrow-down el-icon--right" />
+  <span>
+    <el-form label-position="top" label-width="100px" :style="isMobile ? '' : 'margin-top: 5%;'">
+      <el-form-item style="margin-bottom: 0px;">
+        <document-status-tag
+          v-if="!isEmptyValue(currentOrder.documentStatus.value) && !isMobile"
+          :value="currentOrder.documentStatus.value"
+          :displayed-value="currentOrder.documentStatus.name"
+          style="font-size: 12px;margin-right: 2%;"
+        />
+        <el-button v-if="isMobile" type="primary" icon="el-icon-document-add" plain @click="newOrder()" />
+        <el-button v-else type="primary" plain @click="newOrder()">
+          {{ $t('form.pos.optionsPoinSales.salesOrder.newOrder') }}
         </el-button>
-        <el-dropdown-menu slot="dropdown">
-          <template v-for="(option, key) in quickOptions">
-            <el-dropdown-item v-show="option.isShow" :key="key" :command="option">
-              <el-popover
-                :key="key"
-                v-model="option.isVisible"
-                placement="right"
-                trigger="click"
-                width="1200"
-              >
-                <find-orders
-                  :data="option"
-                  :data-list="orderList"
-                  :is-loading-table="isloading"
-                  :params="option.params"
-                  :show-field="showToDeliveOrders"
-                >
-                  <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
-                    <el-form-item label="No. del Documento">
-                      <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
-                    </el-form-item>
-                    <el-form-item
-                      v-for="(field) in metadataList"
-                      :key="field.columnName"
-                    >
-                      <field-definition
-                        :metadata-field="{
-                          ...field,
-                          size: 6,
-                          name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
-                        }"
-                        :container-uuid="'Cash-Withdrawal'"
-                        :container-manager="{
-                          ...containerManager,
-                          getLookupList,
-                          isDisplayedField,
-                          isDisplayedDefault,
-                          generalInfoSearch,
-                          searchTableHeader,
-                          isMandatoryField,
-                          isReadOnlyField,
-                          changeFieldShowedFromUser
-                        }"
-                      />
-                    </el-form-item>
-                  </el-form>
-                </find-orders>
-                <custom-pagination
-                  :total="total"
-                  :current-page="currentPage"
-                  :handle-change-page="handleChangePage"
-                  layout="total, prev, pager, next"
-                  style="float: right;"
-                />
-                <el-button
-                  type="text"
-                  class="custom-button-create-bp"
-                />
-                <el-row :gutter="24">
-                  <el-col :span="24">
-                    <samp style="float: right; padding-right: 10px;">
-                      <el-button
-                        type="danger"
-                        class="custom-button-create-bp"
-                        icon="el-icon-close"
-                        @click="closeSearch(option)"
-                      />
-                      <el-button
-                        type="primary"
-                        class="custom-button-create-bp"
-                        icon="el-icon-check"
-                        @click="openOrder(option)"
-                      />
-                    </samp>
-                  </el-col>
-                </el-row>
-                <el-button slot="reference" type="text" style="color: #333" @click="option.isVisible = true">
+        <el-dropdown size="mini" trigger="click" @command="handleCommand">
+          <el-button type="primary" size="small" style="padding: 10px;padding-left: 5px;">
+            <i class="el-icon-arrow-down el-icon--right" />
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <template v-for="(option, key) in quickOptions">
+              <el-dropdown-item v-show="option.isShow" :key="key" :command="option">
+                <span v-if="isMobile">
                   {{ option.title }}
-                </el-button>
-              </el-popover>
-            </el-dropdown-item>
-          </template>
-        </el-dropdown-menu>
-      </el-dropdown>
-    </el-form-item>
-  </el-form>
+                </span>
+                <el-popover
+                  v-else
+                  :key="key"
+                  v-model="option.isVisible"
+                  placement="right"
+                  trigger="click"
+                  width="1200"
+                >
+                  <find-orders
+                    :data="option"
+                    :data-list="orderList"
+                    :is-loading-table="isloading"
+                    :params="option.params"
+                    :show-field="showToDeliveOrders"
+                  >
+                    <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
+                      <el-form-item label="No. del Documento">
+                        <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
+                      </el-form-item>
+                      <el-form-item
+                        v-for="(field) in metadataList"
+                        :key="field.columnName"
+                      >
+                        <field-definition
+                          :metadata-field="{
+                            ...field,
+                            name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
+                          }"
+                          :container-uuid="'Cash-Withdrawal'"
+                          :container-manager="{
+                            ...containerManager,
+                            getLookupList,
+                            isDisplayedField,
+                            isDisplayedDefault,
+                            generalInfoSearch,
+                            searchTableHeader,
+                            isMandatoryField,
+                            isReadOnlyField,
+                            changeFieldShowedFromUser
+                          }"
+                        />
+                      </el-form-item>
+                    </el-form>
+                  </find-orders>
+                  <custom-pagination
+                    :total="total"
+                    :current-page="currentPage"
+                    :handle-change-page="handleChangePage"
+                    layout="total, prev, pager, next"
+                    style="float: right;"
+                  />
+                  <el-button
+                    type="text"
+                    class="custom-button-create-bp"
+                  />
+                  <el-row :gutter="24">
+                    <el-col :span="24">
+                      <samp style="float: right; padding-right: 10px;">
+                        <el-button
+                          type="danger"
+                          class="custom-button-create-bp"
+                          icon="el-icon-close"
+                          @click="closeSearch(option)"
+                        />
+                        <el-button
+                          type="primary"
+                          class="custom-button-create-bp"
+                          icon="el-icon-check"
+                          @click="openOrder(option)"
+                        />
+                      </samp>
+                    </el-col>
+                  </el-row>
+                  <el-button slot="reference" type="text" style="color: #333" @click="option.isVisible = true">
+                    {{ option.title }}
+                  </el-button>
+                </el-popover>
+              </el-dropdown-item>
+            </template>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </el-form-item>
+    </el-form>
+    <el-drawer
+      :visible.sync="currentOptions.isVisible"
+      :with-header="false"
+      :append-to-body="true"
+      :modal-append-to-body="false"
+      size="100%"
+    >
+      <find-orders
+        :data="currentOptions"
+        :data-list="orderList"
+        :is-loading-table="isloading"
+        :params="currentOptions.params"
+        :show-field="showToDeliveOrders"
+      >
+        <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
+          <el-form-item label="No. del Documento">
+            <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
+          </el-form-item>
+          <el-form-item
+            v-for="(field) in metadataList"
+            :key="field.columnName"
+          >
+            <field-definition
+              :metadata-field="{
+                ...field,
+                size: 6,
+                name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
+              }"
+              :container-uuid="'Cash-Withdrawal'"
+              :container-manager="{
+                ...containerManager,
+                getLookupList,
+                isDisplayedField,
+                isDisplayedDefault,
+                generalInfoSearch,
+                searchTableHeader,
+                isMandatoryField,
+                isReadOnlyField,
+                changeFieldShowedFromUser
+              }"
+            />
+          </el-form-item>
+        </el-form>
+
+        <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
+          <el-form-item label="No. del Documento">
+            <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
+          </el-form-item>
+          <el-form-item
+            v-for="(field) in metadataList"
+            :key="field.columnName"
+          >
+            <field-definition
+              :metadata-field="{
+                ...field,
+                size: 6,
+                name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
+              }"
+              :container-uuid="'Cash-Withdrawal'"
+              :container-manager="{
+                ...containerManager,
+                getLookupList,
+                isDisplayedField,
+                isDisplayedDefault,
+                generalInfoSearch,
+                searchTableHeader,
+                isMandatoryField,
+                isReadOnlyField,
+                changeFieldShowedFromUser
+              }"
+            />
+          </el-form-item>
+        </el-form> -->
+      </find-orders>
+      <custom-pagination
+        :total="total"
+        :current-page="currentPage"
+        :handle-change-page="handleChangePage"
+        layout="total, prev, pager, next"
+        style="float: right;"
+      />
+      <el-button
+        type="text"
+        class="custom-button-create-bp"
+      />
+      <el-row :gutter="24">
+        <el-col :span="24">
+          <samp style="float: right; padding-right: 10px;">
+            <el-button
+              type="danger"
+              class="custom-button-create-bp"
+              icon="el-icon-close"
+              @click="closeSearch(currentOptions)"
+            />
+            <el-button
+              type="primary"
+              class="custom-button-create-bp"
+              icon="el-icon-check"
+              @click="openOrder(currentOptions)"
+            />
+          </samp>
+        </el-col>
+      </el-row>
+    </el-drawer>
+  </span>
 </template>
 
 <script>
@@ -356,6 +460,19 @@ export default {
     },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
+    },
+    currentDateOrderedFrom() {
+      // metadataList
+      const dateOrderedFrom = this.metadataList.find(field => field.columnName === 'DateOrderedFrom')
+      console.log(this.metadataList)
+      return {
+        ...dateOrderedFrom,
+        name: this.$t('form.pos.optionsPoinSales.generalOptions.dateOrder')
+      }
+    // },
+    // currentDateOrderedFrom() {
+    //   // metadataList
+    //   return this.metadataList.find(field => field.columnName === 'DateOrderedFrom')
     }
   },
 
