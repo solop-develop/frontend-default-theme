@@ -23,6 +23,7 @@
       <br>
       {{ $t('form.pos.optionsPoinSales.title') }}
       <el-button
+        v-if="isMobile"
         type="danger"
         icon="el-icon-close"
         style="position: absolute;right: 1%;top: 2%;"
@@ -648,6 +649,9 @@ export default {
   },
 
   computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    }
     isShowedPOSOptions: {
       get() {
         return this.$store.getters.getIsShowPOSOptions

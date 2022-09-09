@@ -464,6 +464,7 @@
                     :displayed-value="currentOrder.documentStatus.name"
                     style="font-size: 16px;margin-left: 2%;"
                   />
+                  <!-- <fast-ordes-list :show-new-order="true" style="margin-right: 2%;margin-left: 2%;font-size: 12px;" /> -->
                 </el-row>
               </div>
               <span>
