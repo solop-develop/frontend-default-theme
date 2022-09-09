@@ -99,6 +99,7 @@
                       />
                     </template>
                     <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
+                      <!-- TODO: Remove ternary operator with standard precission uom -->
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.quantityOrdered"
@@ -106,7 +107,7 @@
                         :autofocus="true"
                         controls-position="right"
                         style="width: 100%;"
-                        :precision="scope.row.uom.uom.starndard_precision"
+                        :precision="scope.row.uom.uom.code === 'BX' ? 0 : scope.row.uom.uom.starndard_precision"
                         @change="changeEdit(scope.row.quantityOrdered, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />
@@ -502,9 +503,10 @@
             id="pin"
             ref="pin"
             v-model="pin"
-            v-shortkey="visible ? {close: ['esc'], enter: ['enter']} : {}"
+            v-shortkey="visible ? { close: ['esc'], enter: ['enter'] } : {}"
             autofocus
-            type="password"
+            :type="isFirefox ? 'password' : 'text'"
+            class="input-as-password"
             :placeholder="$t('form.pos.tableProduct.pin')"
             :focus="true"
             autocomplete="off"
@@ -613,6 +615,7 @@ export default {
       attributePin: {},
       visible: false,
       isEditQtyOrdered: false,
+      isFirefox: typeof InstallTrigger !== 'undefined',
       isEditLine: {},
       fileColumnNameEdit: '',
       editPrice: 0,
@@ -1019,7 +1022,7 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      if (this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
+      if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
           columnName,

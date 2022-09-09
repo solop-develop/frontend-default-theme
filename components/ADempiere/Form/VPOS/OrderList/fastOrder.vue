@@ -457,22 +457,6 @@ export default {
     },
     getSearchOrder() {
       return this.$store.getters.getQuickSearchOrder
-    },
-    isMobile() {
-      return this.$store.state.app.device === 'mobile'
-    },
-    currentDateOrderedFrom() {
-      // metadataList
-      const dateOrderedFrom = this.metadataList.find(field => field.columnName === 'DateOrderedFrom')
-      console.log(this.metadataList)
-      return {
-        ...dateOrderedFrom,
-        name: this.$t('form.pos.optionsPoinSales.generalOptions.dateOrder')
-      }
-    // },
-    // currentDateOrderedFrom() {
-    //   // metadataList
-    //   return this.metadataList.find(field => field.columnName === 'DateOrderedFrom')
     }
   },
 
