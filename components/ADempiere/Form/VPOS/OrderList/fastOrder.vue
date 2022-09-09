@@ -55,7 +55,7 @@
                     :params="option.params"
                     :show-field="showToDeliveOrders"
                   >
-                    <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
+                    <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
                       <el-form-item label="No. del Documento">
                         <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
                       </el-form-item>
@@ -82,7 +82,7 @@
                           }"
                         />
                       </el-form-item>
-                    </el-form>
+                    </el-form> -->
                   </find-orders>
                   <custom-pagination
                     :total="total"
@@ -124,6 +124,7 @@
       </el-form-item>
     </el-form>
     <el-drawer
+      v-if="isMobile"
       :visible.sync="currentOptions.isVisible"
       :with-header="false"
       :append-to-body="true"
@@ -137,7 +138,50 @@
         :params="currentOptions.params"
         :show-field="showToDeliveOrders"
       >
-        <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
+        <!-- <template v-slot:header>
+          <el-form
+            label-position="top"
+            label-width="10px"
+            style="float: right; display: contents; line-height: 10px;"
+            :disabled="validateOpenAmount"
+            @submit.native.prevent="notSubmitForm"
+          >
+            <el-row id="fieldListCollection">
+              <el-col
+                v-for="field in metadataList"
+                :key="field.sequence"
+                :span="12"
+              >
+                <field-definition
+                  :metadata-field="{
+                    ...field,
+                    name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name,
+                    size: {
+                      xs: 24,
+                      sm: 24,
+                      md: 24,
+                      lg: 24,
+                      xl: 24
+                    }
+                  }"
+                  :container-uuid="'Collection'"
+                  :container-manager="{
+                    ...containerManager,
+                    getLookupList,
+                    isDisplayedField,
+                    isDisplayedDefault,
+                    generalInfoSearch,
+                    searchTableHeader,
+                    isMandatoryField,
+                    isReadOnlyField,
+                    changeFieldShowedFromUser
+                  }"
+                />
+              </el-col>
+            </el-row>
+          </el-form>
+        </template> -->
+        <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
           <el-form-item label="No. del Documento">
             <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
           </el-form-item>
@@ -165,7 +209,7 @@
               }"
             />
           </el-form-item>
-        </el-form>
+        </el-form> -->
 
         <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
           <el-form-item label="No. del Documento">
@@ -196,36 +240,81 @@
             />
           </el-form-item>
         </el-form> -->
+        <template v-slot:header>
+          <el-form
+            label-position="top"
+            label-width="10px"
+            style="float: right; display: contents; line-height: 10px;"
+            :disabled="validateOpenAmount"
+            @submit.native.prevent="notSubmitForm"
+          >
+            <el-row id="fieldListCollection">
+              <el-col
+                v-for="field in metadataList"
+                :key="field.sequence"
+                :span="12"
+              >
+                <field-definition
+                  :metadata-field="{
+                    ...field,
+                    name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name,
+                    size: {
+                      xs: 24,
+                      sm: 24,
+                      md: 24,
+                      lg: 24,
+                      xl: 24
+                    }
+                  }"
+                  :container-uuid="'Collection'"
+                  :container-manager="{
+                    ...containerManager,
+                    getLookupList,
+                    isDisplayedField,
+                    isDisplayedDefault,
+                    generalInfoSearch,
+                    searchTableHeader,
+                    isMandatoryField,
+                    isReadOnlyField,
+                    changeFieldShowedFromUser
+                  }"
+                />
+              </el-col>
+            </el-row>
+          </el-form>
+        </template>
+        <template v-slot:footer>
+          <custom-pagination
+            :total="total"
+            :current-page="currentPage"
+            :handle-change-page="handleChangePage"
+            layout="total, prev, pager, next"
+            style="float: right;"
+          />
+          <el-button
+            type="text"
+            class="custom-button-create-bp"
+          />
+          <el-row :gutter="24">
+            <el-col :span="24">
+              <samp style="float: right; padding-right: 10px;">
+                <el-button
+                  type="danger"
+                  class="custom-button-create-bp"
+                  icon="el-icon-close"
+                  @click="closeSearch(currentOptions)"
+                />
+                <el-button
+                  type="primary"
+                  class="custom-button-create-bp"
+                  icon="el-icon-check"
+                  @click="openOrder(currentOptions)"
+                />
+              </samp>
+            </el-col>
+          </el-row>
+        </template>
       </find-orders>
-      <custom-pagination
-        :total="total"
-        :current-page="currentPage"
-        :handle-change-page="handleChangePage"
-        layout="total, prev, pager, next"
-        style="float: right;"
-      />
-      <el-button
-        type="text"
-        class="custom-button-create-bp"
-      />
-      <el-row :gutter="24">
-        <el-col :span="24">
-          <samp style="float: right; padding-right: 10px;">
-            <el-button
-              type="danger"
-              class="custom-button-create-bp"
-              icon="el-icon-close"
-              @click="closeSearch(currentOptions)"
-            />
-            <el-button
-              type="primary"
-              class="custom-button-create-bp"
-              icon="el-icon-check"
-              @click="openOrder(currentOptions)"
-            />
-          </samp>
-        </el-col>
-      </el-row>
     </el-drawer>
   </span>
 </template>
