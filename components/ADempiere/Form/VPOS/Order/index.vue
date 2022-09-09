@@ -1031,13 +1031,25 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
         return
-      } else if (!this.modifyPrice && (columnName === 'PriceEntered' || columnName === 'Discount')) {
+      } else if (!this.modifyPrice && columnName === 'PriceEntered') {
         const attributePin = {
           containerUuid: 'line',
           columnName,
           value,
           type: 'updateOrder',
           requestedAccess: 'IsModifyPrice',
+          label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+        }
+        this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+        this.visible = true
+        return
+      } else if (!this.modifyDiscount && columnName === 'Discount') {
+        const attributePin = {
+          containerUuid: 'line',
+          columnName,
+          value,
+          type: 'updateOrder',
+          requestedAccess: 'IsAllowsModifyDiscount',
           label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })

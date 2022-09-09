@@ -334,6 +334,9 @@ export default {
         return value
       }
     },
+    modifyDiscount() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyDiscount
+    },
     currentLineOrder() {
       const line = this.$store.state['pointOfSales/orderLine/index'].line
       if (!this.isEmptyValue(line)) {
@@ -686,13 +689,13 @@ export default {
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discount) {
                   return
                 }
-                if (this.modifyPrice) {
+                if (this.modifyDiscount) {
                   this.updateOrderLine(mutation.payload)
                 } else {
                   const attributePin = {
                     ...mutation.payload,
                     type: 'updateOrder',
-                    requestedAccess: 'isAllowsApplyDiscount',
+                    requestedAccess: 'IsAllowsModifyDiscount',
                     label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })

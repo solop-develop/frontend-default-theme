@@ -57,13 +57,13 @@ export default {
           columnName: 'Discount',
           label: this.$t('form.pos.order.discount'),
           isNumeric: true,
-          size: '80px'
+          size: '100px'
         },
         discountTotal: {
           columnName: 'DiscountTotal',
           label: this.$t('form.pos.tableProduct.displayDiscountAmount'),
           isNumeric: true,
-          size: '150px'
+          size: '125px'
         },
         discounDisplayTaxIndicator: {
           columnName: 'taxIndicator',

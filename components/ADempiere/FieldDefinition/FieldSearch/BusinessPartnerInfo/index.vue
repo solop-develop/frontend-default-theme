@@ -97,7 +97,12 @@ export default {
   },
 
   methods: {
-    remoteSearch(searchValue) {
+    keyPressField() {
+      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
+        this.remoteSearch(this.displayedValue, true)
+      }
+    },
+    remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
         store.dispatch('getBusinessPartners', {
           containerUuid: this.metadata.containerUuid,
