@@ -100,7 +100,7 @@ export default {
 
   methods: {
     keyPressField() {
-      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {        // this.$refs['displayBPartner' + this.metadata.columnName].suggestionVisible = false
+      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
     },
