@@ -310,27 +310,17 @@ export default {
       const line = this.currentPointOfSales.currentOrder.lineOrder.find(a => a.uuid === this.currentLine.uuid)
       return line
     },
-    allowsModifyQuantity() {
-      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyQuantity
-    },
     precisionUom() {
       if (!isEmptyValue(this.uomValue) && this.currentLine.uom.uom !== this.uomValue) {
         const uomSelected = this.uomList.find(uomItem => {
           return uomItem.uom.uuid === this.uomValue
         })
         if (!isEmptyValue(this.uomSelected)) {
-          // TODO: Remove it with fix on ADempiere (Box UOM)
-          if (uomSelected.code === 'BX') {
-            return 0
-          }
+          console.log(uomSelected.uom.starndard_precision)
           return uomSelected.uom.starndard_precision
         }
       }
       if (this.currentLine.uom && this.currentLine.uom.uom) {
-        // TODO: Remove it with fix on ADempiere (Box UOM)
-        if (this.currentLine.uom.uom.code === 'BX') {
-          return 0
-        }
         return this.currentLine.uom.uom.starndard_precision
       }
       return undefined

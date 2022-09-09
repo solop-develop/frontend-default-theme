@@ -1533,6 +1533,9 @@ export default {
       }
     },
     changePos(posElement) {
+      if (this.isMobile) {
+        this.isShowedPOSOptions = false
+      }
       if (this.adviserPin) {
         this.validateOption(this.$t('form.pos.optionsPoinSales.generalOptions.changePos'))
         return

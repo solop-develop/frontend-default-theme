@@ -295,6 +295,24 @@ export default {
       }
     },
     displayLabel(row) {
+      if (this.isMobile) {
+        if (row.columnName === 'ConvertedAmount') {
+          return false
+        } else if (row.columnName === 'UOM') {
+          return false
+        } else if (row.columnName === 'Discount') {
+          return false
+        } else if (row.columnName === 'DiscountTotal') {
+          return false
+        } else if (row.columnName === 'taxIndicator') {
+          return false
+        } else if (row.columnName === 'DisplayTaxAmount') {
+          return false
+        } else if (row.columnName === 'GrandTotal') {
+          return true
+        }
+        return true
+      }
       if (row.columnName === 'ConvertedAmount') {
         return !this.isEmptyValue(this.currentPointOfSales.displayCurrency)
       } else if (row.columnName === 'Discount') {
@@ -309,6 +327,22 @@ export default {
         return true
       }
       return true
+    },
+    sizeTableColumn(table) {
+      if (this.isMobile) {
+        if (table.columnName === 'LineDescription') {
+          return table.size
+        } else if (table.columnName === 'CurrentPrice') {
+          return '100px'
+        } else if (table.columnName === 'QtyEntered') {
+          return '81px'
+        } else if (table.columnName === 'GrandTotal') {
+          return '120px'
+        }
+        return
+      }
+
+      return table.size
     },
     /**
      * Show the correct display format
@@ -337,14 +371,9 @@ export default {
           return this.formatPrice(row.price, currency)
         }
       } else if (columnName === 'QtyEntered') {
-        // TODO: Remove it with fix on ADempiere (Box UOM)
-        let precision = row.uom.uom.starndard_precision
-        if (row.uom.uom.code === 'BX') {
-          precision = 0
-        }
         return formatQuantity({
           value: row.quantityOrdered,
-          precision
+          precision: row.uom.uom.starndard_precision
         })
       } else if (columnName === 'Discount') {
         return formatQuantity({ value: row.discount }) + ' %'
@@ -395,14 +424,9 @@ export default {
         //   return row.priceList
         // }
       } else if (columnName === 'QtyEntered') {
-        // TODO: Remove it with fix on ADempiere (Box UOM)
-        let precision = row.uom.uom.starndard_precision
-        if (row.uom.uom.code === 'BX') {
-          precision = 0
-        }
         return formatQuantity({
           value: row.quantityOrdered,
-          precision
+          precision: row.uom.uom.starndard_precision
         })
       } else if (columnName === 'Discount') {
         return row.discount

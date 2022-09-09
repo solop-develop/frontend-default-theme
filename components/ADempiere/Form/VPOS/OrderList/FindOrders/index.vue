@@ -17,16 +17,15 @@
 -->
 
 <template>
-  <el-container>
+  <el-container style="height: 80vh;">
     <el-header style="height: 2%;">
       <p style="text-align: center;"> <b> {{ data.title }} </b></p>
-      <slot />
+      <slot name="header" />
     </el-header>
     <el-main>
       <el-table
         v-loading="isLoadingTable"
         :data="dataList"
-        height="550"
         style="width: 100%"
         border
         :empty-text="$t('form.byInvoice.emptyList')"
@@ -193,6 +192,9 @@
         </el-table-column>
       </el-table>
     </el-main>
+    <el-footer>
+      <slot name="footer" />
+    </el-footer>
   </el-container>
 </template>
 
@@ -289,6 +291,9 @@ export default {
     },
     sortFieldsListOrder() {
       return this.fieldsList.find(field => field.columnName === 'C_BPartner_ID')
+    },
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     },
     dateOrderedFrom() {
       return this.fieldsList.find(field => {

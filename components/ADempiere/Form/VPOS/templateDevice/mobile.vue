@@ -169,7 +169,7 @@ export default {
       })
     },
     handleClose() {
-      this.$store.commit('setShowPOSKeyLayout', val)
+      this.$store.commit('setShowPOSKeyLayout', false)
     },
     onDragKeyLayout(size) {
       const sizeWidthRight = size[1] / 10
