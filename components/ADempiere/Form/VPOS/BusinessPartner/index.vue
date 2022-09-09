@@ -757,11 +757,6 @@ export default {
       if (this.controlDisplayed !== displayValue) {
         this.controlDisplayed = this.customerValue + displayValue
       }
-      // if (!this.isEmptyValue(this.$refs.displayBPartner) && this.$refs.displayBPartner.$refs.input) {
-      //   this.$nextTick(() => {
-      //     this.$refs.displayBPartner.$refs.input.select()
-      //   })
-      // }
     },
     setOldDisplayedValue() {
       this.visibleSelectAddress = true

@@ -18,9 +18,8 @@
 
 <template>
   <el-autocomplete
-    :ref="'displayBPartner' + metadata.columnName"
+    ref="displayBPartner"
     v-model="displayedValue"
-    v-shortkey="{ enter: ['enter'] }"
     v-bind="commonsProperties"
     value-key="name"
     clearable
@@ -29,7 +28,6 @@
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
     :select-when-unmatched="false"
-    @shortkey.native="keyPressField"
     @select="handleSelect"
     @clear="clearValues"
     @focus="setNewDisplayedValue"
@@ -99,12 +97,7 @@ export default {
   },
 
   methods: {
-    keyPressField() {
-      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {        // this.$refs['displayBPartner' + this.metadata.columnName].suggestionVisible = false
-        this.remoteSearch(this.displayedValue, true)
-      }
-    },
-    remoteSearch(searchValue, isKeyEnterPress) {
+    remoteSearch(searchValue) {
       return new Promise(resolve => {
         store.dispatch('getBusinessPartners', {
           containerUuid: this.metadata.containerUuid,
@@ -114,9 +107,6 @@ export default {
           .then(responseRecords => {
             if (isEmptyValue(responseRecords)) {
               this.whitOutResultsMessage()
-            }
-            if (isKeyEnterPress) {
-              this.handleSelect(responseRecords[0])
             }
 
             resolve(responseRecords)

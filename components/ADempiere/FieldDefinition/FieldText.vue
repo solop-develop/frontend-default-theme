@@ -28,7 +28,6 @@
     :autofocus="metadata.inTable"
     :size="inputSize"
     show-word-limit
-    autocomplete="off"
     @change="preHandleChange"
     @blur="focusLost"
     @focus="focusGained"
@@ -68,7 +67,6 @@ export default {
 
   data() {
     return {
-      isFirefox: typeof InstallTrigger !== 'undefined',
       patternFileName: '[A-Za-zñÑ0-9-_]{1,}',
       patternFilePath: '[A-Za-zñÑ0-9-_/.]{1,}'
     }
@@ -95,10 +93,6 @@ export default {
       if (this.isEmptyRequired) {
         styleClass += ' field-empty-required '
       }
-      if (this.metadata.isEncrypted) {
-        styleClass += ' input-as-password '
-      }
-
       return styleClass
     },
     // Only used when input type='TextArea'
@@ -115,7 +109,7 @@ export default {
       if (this.metadata.displayType === TEXT.id) {
         typeInput = 'textarea'
       }
-      if (this.metadata.isEncrypted && this.isFirefox) {
+      if (this.metadata.isEncrypted) {
         typeInput = 'password'
       }
       return typeInput
