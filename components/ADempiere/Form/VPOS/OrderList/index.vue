@@ -239,24 +239,34 @@
       </el-table-column>
     </el-table>
 
-    <custom-pagination
-      :total="ordersList.recordCount"
-      :current-page="ordersList.pageNumber"
-      :handle-change-page="handleChangePage"
-    />
-    <el-row :gutter="24">
-      <el-col :span="24">
+    <el-row :gutter="24" class="orders-list-footer">
+      <el-col :span="18">
+        <custom-pagination
+          :total="ordersList.recordCount"
+          :current-page="ordersList.pageNumber"
+          :handle-change-page="handleChangePage"
+        />
+      </el-col>
+
+      <el-col :span="6">
         <samp style="float: right; padding-right: 10px;">
           <el-button
+            :loading="!ordersList.isLoaded || isLoadRecord"
+            type="success"
+            icon="el-icon-refresh-right"
+            size="small"
+            @click="loadOrdersList();"
+          />
+          <el-button
             type="danger"
-            class="custom-button-create-bp"
             icon="el-icon-close"
+            size="small"
             @click="clear"
           />
           <el-button
             type="primary"
-            class="custom-button-create-bp"
             icon="el-icon-check"
+            size="small"
             @click="selectionChangeOrder"
           />
         </samp>
@@ -476,21 +486,21 @@ export default {
           break
       }
     },
-    loadOrdersList() {
-      this.isLoadRecord = true
+    loadOrdersList(pageNumber = 0) {
       const point = this.$store.getters.posAttributes.currentPointOfSales.uuid
       if (!this.isEmptyValue(point)) {
+        this.isLoadRecord = true
         this.$store.dispatch('listOrdersFromServer', {
-          posUuid: point
+          posUuid: point,
+          pageNumber
         })
+          .finally(() => {
+            this.isLoadRecord = false
+          })
       }
     },
-    handleChangePage(newPage) {
-      this.$store.dispatch('setOrdersListPageNumber', newPage)
-      const point = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      this.$store.dispatch('listOrdersFromServer', {
-        posUuid: point
-      })
+    handleChangePage(pageNumber) {
+      this.loadOrdersList(pageNumber)
     },
     handleCurrentChange(row) {
       this.changeOrder = row
@@ -546,7 +556,6 @@ export default {
           clearTimeout(this.timeOut)
           this.isLoadRecord = true
           this.timeOut = setTimeout(() => {
-            this.$store.dispatch('setOrdersListPageNumber', 1)
             this.loadOrdersList()
           }, 2000)
         }
@@ -598,3 +607,12 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.orders-list-footer {
+  button {
+    padding: 4px 8px;
+    font-size: 24px;
+  }
+}
+</style>
