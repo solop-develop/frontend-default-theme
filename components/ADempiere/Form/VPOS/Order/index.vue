@@ -527,9 +527,10 @@
             id="pin"
             ref="pin"
             v-model="pin"
-            v-shortkey="visible ? {close: ['esc'], enter: ['enter']} : {}"
+            v-shortkey="visible ? { close: ['esc'], enter: ['enter'] } : {}"
             autofocus
-            type="password"
+            :type="isFirefox ? 'password' : 'text'"
+            class="input-as-password"
             :placeholder="$t('form.pos.tableProduct.pin')"
             :focus="true"
             autocomplete="off"
@@ -638,6 +639,7 @@ export default {
       attributePin: {},
       visible: false,
       isEditQtyOrdered: false,
+      isFirefox: typeof InstallTrigger !== 'undefined',
       isEditLine: {},
       fileColumnNameEdit: '',
       editPrice: 0,
