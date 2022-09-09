@@ -435,9 +435,9 @@
               </p>
             </span>
           </el-footer>
-          <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important;">
+          <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important; padding-top: 10px;">
             <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
-              <div style="width: 100% !important;">
+              <div style="width: 100% !important;padding-bottom: 10px;">
                 <el-row>
                   <el-col :span="24" style="display: flex;">
                     <el-button

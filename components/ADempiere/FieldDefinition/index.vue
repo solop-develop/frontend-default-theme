@@ -181,14 +181,6 @@ export default {
           ...DEFAULT_SIZE
         }
       }
-      console.log({
-        ...this.field.name,
-        xs: this.field.size.xs,
-        sm: this.field.size.sm,
-        md: this.field.size.md,
-        lg: this.field.size.lg,
-        xl: this.field.size.xl
-      })
       return {
         // ...this.field.size,
         xs: this.field.size.xs,
