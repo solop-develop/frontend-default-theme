@@ -134,7 +134,7 @@
 import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 
 // components and mixins
-import businessPartnerMixin from './mixinGeneralInfoSearch'
+import panelGeneralInfoSearch from './mixinGeneralInfoSearch'
 import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
@@ -159,7 +159,7 @@ export default {
   },
 
   mixins: [
-    businessPartnerMixin
+    panelGeneralInfoSearch
   ],
 
   props: {
@@ -193,7 +193,7 @@ export default {
 
   data() {
     return {
-      activeAccordion: 'query-criteria',
+      activeAccordion: '',
       metadataList: [],
       timeOutRecords: null,
       isLoadingRecords: false,
@@ -357,7 +357,8 @@ export default {
             return identifier
           }
         })
-        this.setValues(this.currentRow, listIdentifier)
+
+        this.setValues({ ...this.currentRow, id: this.metadata.columnName }, listIdentifier)
         this.closeList()
       }
     },
