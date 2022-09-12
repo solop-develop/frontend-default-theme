@@ -406,7 +406,7 @@ export default {
       if (isEmptyValue(recordSelected)) {
         recordSelected = this.blankValues
       }
-      recordSelected.id =this.metadata.columnName
+      recordSelected.id = this.metadata.columnName
       this.setValues(recordSelected)
 
       // prevent losing display value with focus
