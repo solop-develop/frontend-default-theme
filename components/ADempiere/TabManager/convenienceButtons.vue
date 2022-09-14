@@ -106,15 +106,19 @@
     >
       {{ $t('actionMenu.save') }}
     </el-button>
-    <span v-if="!getCurrentTab.isShowedTableRecords">
+    <span
+      v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid)"
+    >
       <el-dropdown
-        v-if="!isEmptyValue(additionalOptions)"
+        v-if="!isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
+        split-button
         @command="handleCommandActions"
       >
         <el-popover
           v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
           :value="showClickActions"
           placement="top"
+          class="alo"
           trigger="click"
         >
           <h3> {{ '¿Está seguro de que quiere cambiar el estado de documento?' }} </h3>
@@ -149,12 +153,11 @@
             plain
             :loading="isDisabledDocument"
             size="small"
+            style="padding: 0px;border: 0px;"
             :type="tagRender(additionalOptions.currentDocument)"
             @click="handleClickdActions(additionalOptions.currentDocument.value)"
           >
             {{ additionalOptions.currentDocument.name }}
-            <el-divider direction="vertical" />
-            <i class="el-icon-arrow-down el-icon--right" />
           </el-button>
         </el-popover>
         <el-dropdown-menu slot="dropdown">
@@ -304,22 +307,6 @@ export default defineComponent({
     const recordParentTab = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
     })
-
-    // const showACtions = computed(() => {
-    //   return visible.value || showClickActions.value
-    // })
-
-    // const showACtions = computed({
-    //   // getter
-    //   get() {
-    //     return visible.value || showClickActions.value
-    //   },
-    //   // setter
-    //   set(newValue) {
-    //     // Note: we are using destructuring assignment syntax here.
-    //     return newValue
-    //   }
-    // })
 
     const listOfRecordsToDeleted = computed(() => {
       if (!getCurrentTab.value.isShowedTableRecords) {
