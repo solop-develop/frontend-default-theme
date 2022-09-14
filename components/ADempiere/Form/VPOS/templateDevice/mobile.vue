@@ -38,9 +38,17 @@
               <el-button
                 :circle="true"
                 type="primary"
-                :icon="isShowedPOSOptions ? 'el-icon-arrow-left' : 'el-icon-arrow-right'"
-                :style="isShowedPOSOptions ? 'position: absolute;': 'position: absolute;left: 0.8%;'"
+                icon="el-icon-arrow-right"
+                style="position: absolute;"
                 @click="isShowedPOSOptions = !isShowedPOSOptions"
+              />
+              <el-button
+                id="buttonPanelLeftPos"
+                :circle="true"
+                type="primary"
+                icon="el-icon-arrow-left"
+                style="position: absolute;right: 0.8%;"
+                @click="isShowedPOSKeyLayout = !isShowedPOSKeyLayout"
               />
             </div>
           </el-container>
@@ -48,12 +56,25 @@
 
         <SplitArea :size="isShowedPOSOptions ? 80 : 99" :min-size="990">
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
-            <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: hidden">
+            <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: auto">
               <order
                 :metadata="metadata"
               />
             </SplitArea>
             <el-drawer
+              v-if="isShowedPOSKeyLayout"
+              title="Cobranza"
+              :visible.sync="isShowedPOSKeyLayout"
+              :with-header="false"
+              :before-close="handleClose"
+              size="100%"
+            >
+              <key-layout
+                key="layout-component"
+              />
+            </el-drawer>
+            <el-drawer
+              v-else
               title="Cobranza"
               :visible.sync="showCollection"
               :with-header="false"
