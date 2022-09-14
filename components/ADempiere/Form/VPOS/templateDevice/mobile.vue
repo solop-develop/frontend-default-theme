@@ -42,7 +42,7 @@
                 style="position: absolute;"
                 @click="isShowedPOSOptions = !isShowedPOSOptions"
               />
-               <el-button
+              <el-button
                 id="buttonPanelLeftPos"
                 :circle="true"
                 type="primary"

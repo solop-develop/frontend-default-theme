@@ -87,7 +87,7 @@
                   :align="valueOrder.isNumeric ? 'right' : 'left'"
                 >
                   <template slot-scope="scope">
-                    <template v-if="isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && (currentOrder.documentStatus.value !== 'CO')">
+                    <template v-if="isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
                       <el-input-number
                         ref="editField"
                         v-model="currentPriceTableEdit"
@@ -98,7 +98,7 @@
                         @shortkey.native="theActionEdit"
                       />
                     </template>
-                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && (currentOrder.documentStatus.value !== 'CO')">
+                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.quantityOrdered"
@@ -114,7 +114,7 @@
                     <template v-else-if="valueOrder.columnName === 'UOM'">
                       {{ isEmptyValue(scope.row.uom.uom.symbol) ? scope.row.uom.uom.name : scope.row.uom.uom.symbol }}
                     </template>
-                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && (currentOrder.documentStatus.value !== 'CO')">
+                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.discount"
@@ -370,27 +370,6 @@
                 </el-dropdown>
               </p>
             </div>
-            <!-- <span v-if="isMobile" style="float: right;padding-right: 1%;">
-              <p class="total">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
-              <p class="total">
-                {{ $t('form.pos.order.date') }}:
-                <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                  {{ orderDate }}
-                </b>
-              </p>
-              <p v-if="!isEmptyValue(currentOrder.documentType)" class="total">{{ $t('form.pos.order.type') }}:<b class="order-info">{{ currentOrder.documentType.name }}</b></p>
-              <p class="total">
-                {{ $t('form.pos.order.itemQuantity') }}
-                <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                  {{ getItemQuantity }}
-                </b>
-              </p>
-              <p class="total">
-                {{ $t('form.pos.order.numberLines') }}
-                <b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">
-                  {{ numberOfLines }}
-                </b></p>
-            </span> -->
             <span style="float: right;">
               <div style="padding-left: 10px;padding-right: 10px;">
                 <p class="total">{{ $t('form.pos.order.seller') }}:<b style="float: right;">
@@ -437,23 +416,45 @@
           </el-footer>
           <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important; padding-top: 10px;">
             <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
-              <el-button v-show="isValidForDeleteLine(listOrderLine) && (currentOrder.documentStatus.value !== 'CO')" type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
-              <el-button v-show="isValidForDeleteLine(listOrderLine) && (currentOrder.documentStatus.value !== 'CO')" type="info" icon="el-icon-bottom" :disabled="isDisabled" @click="arrowBottom" />
-              <el-button v-show="isValidForDeleteLine(listOrderLine) && (currentOrder.documentStatus.value !== 'CO') && !isEmptyValue(currentLineOrder)" type="danger" icon="el-icon-delete" :disabled="isDisabled" @click="deleteOrderLine(currentOrderLine)" />
+              <span
+                v-show="isValidForDeleteLine(listOrderLine) && isValidateDocumentType"
+              >
+                <el-button
+                  type="info"
+                  icon="el-icon-top"
+                  :disabled="isDisabled"
+                  @click="arrowTop"
+                />
+                <el-button
+                  type="info"
+                  icon="el-icon-bottom"
+                  :disabled="isDisabled"
+                  style="margin-left: 0.5%;"
+                  @click="arrowBottom"
+                />
+              </span>
+              <el-button
+                v-show="isValidForDeleteLine(listOrderLine) && isValidateDocumentType && !isEmptyValue(currentLineOrder)"
+                type="danger"
+                icon="el-icon-delete"
+                :disabled="isDisabled"
+                style="margin-left: 0.5%;"
+                @click="deleteOrderLine(currentOrderLine)"
+              />
               <el-button
                 v-show="isValidToRelease"
                 type="primary"
-                style="margin-left: 2%;"
+                style="margin-left: 0.5%;"
                 @click="releaseSalesOrder()"
               >
                 <i class="el-icon-document-checked" />
                 {{ $t('form.pos.releaseOrder') }}
               </el-button>
-              <!-- <fast-ordes-list :show-new-order="false" /> -->
               <el-button
                 v-show="allowsCollectOrder"
                 type="success"
                 icon="el-icon-bank-card"
+                style="margin-left: 0.5%;"
                 @click="openCollectionPanel"
               >
                 {{ labelButtonCollections }}
@@ -462,46 +463,15 @@
                 v-if="!isEmptyValue(currentOrder.documentStatus.value)"
                 :value="currentOrder.documentStatus.value"
                 :displayed-value="currentOrder.documentStatus.name"
-                style="font-size: 16px;margin-left: 1%;margin-right: 1%;"
+                style="font-size: 16px;margin-left: 0.5%;margin-right: 0.5%;"
               />
               <fast-ordes-list style="font-size: 0px;width: 100px!important;margin: 0px;display: inline-block;margin-top:01px;" />
-              <!-- {{ isValidForDeleteLine(listOrderLine) }} -->
-              <!-- <div style="width: 100% !important;padding-bottom: 10px;">
-                <el-row>
-                  <el-col :span="24" style="display: flex;">
-                    <el-button
-                      v-show="isValidToRelease"
-                      type="primary"
-                      style="margin-left: 2%;"
-                      @click="releaseSalesOrder()"
-                    >
-                      <i class="el-icon-document-checked" />
-                      {{ $t('form.pos.releaseOrder') }}
-                    </el-button>
-                    <el-button
-                      v-show="allowsCollectOrder"
-                      type="success"
-                      icon="el-icon-bank-card"
-                      @click="openCollectionPanel"
-                    >
-                      {{ labelButtonCollections }}
-                    </el-button>
-                    <document-status-tag
-                      v-if="!isEmptyValue(currentOrder.documentStatus.value)"
-                      :value="currentOrder.documentStatus.value"
-                      :displayed-value="currentOrder.documentStatus.name"
-                      style="font-size: 16px;margin-left: 1%;margin-right: 1%;"
-                    />
-                    <fast-ordes-list style="font-size: 0px;width: 100px!important;margin: 0px;display: inline-flex;margin-top: 1px;" />
-                  </el-col>
-                </el-row>
-              </div> -->
               <span>
                 <p style="margin: 0px;">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
               </span>
               <span>
                 <div style="border: 1px solid rgb(54, 163, 247);">
-                  <p>
+                  <p style="margin-top: 1%;">
                     <b>
                       {{ $t('form.pos.order.total') }}:
                     </b>
@@ -655,6 +625,9 @@ export default {
         return true
       }
       return false
+    },
+    isValidateDocumentType() {
+      return this.currentOrder.documentStatus.value !== 'CO'
     },
     fieldCampaign() {
       return this.fieldsList.find(field => field.columnName === 'C_Campaign_ID')
