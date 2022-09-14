@@ -87,7 +87,7 @@
                   :align="valueOrder.isNumeric ? 'right' : 'left'"
                 >
                   <template slot-scope="scope">
-                    <template v-if="isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
+                    <template v-if="isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && (currentOrder.documentStatus.value !== 'CO')">
                       <el-input-number
                         ref="editField"
                         v-model="currentPriceTableEdit"
@@ -98,7 +98,7 @@
                         @shortkey.native="theActionEdit"
                       />
                     </template>
-                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
+                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && (currentOrder.documentStatus.value !== 'CO')">
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.quantityOrdered"
@@ -114,7 +114,7 @@
                     <template v-else-if="valueOrder.columnName === 'UOM'">
                       {{ isEmptyValue(scope.row.uom.uom.symbol) ? scope.row.uom.uom.name : scope.row.uom.uom.symbol }}
                     </template>
-                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid">
+                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && (currentOrder.documentStatus.value !== 'CO')">
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.discount"
@@ -437,7 +437,36 @@
           </el-footer>
           <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important; padding-top: 10px;">
             <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
-              <div style="width: 100% !important;padding-bottom: 10px;">
+              <el-button v-show="isValidForDeleteLine(listOrderLine) && (currentOrder.documentStatus.value !== 'CO')" type="info" icon="el-icon-top" :disabled="isDisabled" @click="arrowTop" />
+              <el-button v-show="isValidForDeleteLine(listOrderLine) && (currentOrder.documentStatus.value !== 'CO')" type="info" icon="el-icon-bottom" :disabled="isDisabled" @click="arrowBottom" />
+              <el-button v-show="isValidForDeleteLine(listOrderLine) && (currentOrder.documentStatus.value !== 'CO') && !isEmptyValue(currentLineOrder)" type="danger" icon="el-icon-delete" :disabled="isDisabled" @click="deleteOrderLine(currentOrderLine)" />
+              <el-button
+                v-show="isValidToRelease"
+                type="primary"
+                style="margin-left: 2%;"
+                @click="releaseSalesOrder()"
+              >
+                <i class="el-icon-document-checked" />
+                {{ $t('form.pos.releaseOrder') }}
+              </el-button>
+              <!-- <fast-ordes-list :show-new-order="false" /> -->
+              <el-button
+                v-show="allowsCollectOrder"
+                type="success"
+                icon="el-icon-bank-card"
+                @click="openCollectionPanel"
+              >
+                {{ labelButtonCollections }}
+              </el-button>
+              <document-status-tag
+                v-if="!isEmptyValue(currentOrder.documentStatus.value)"
+                :value="currentOrder.documentStatus.value"
+                :displayed-value="currentOrder.documentStatus.name"
+                style="font-size: 16px;margin-left: 1%;margin-right: 1%;"
+              />
+              <fast-ordes-list style="font-size: 0px;width: 100px!important;margin: 0px;display: inline-block;margin-top:01px;" />
+              <!-- {{ isValidForDeleteLine(listOrderLine) }} -->
+              <!-- <div style="width: 100% !important;padding-bottom: 10px;">
                 <el-row>
                   <el-col :span="24" style="display: flex;">
                     <el-button
@@ -449,7 +478,6 @@
                       <i class="el-icon-document-checked" />
                       {{ $t('form.pos.releaseOrder') }}
                     </el-button>
-                    <!-- <fast-ordes-list :show-new-order="false" /> -->
                     <el-button
                       v-show="allowsCollectOrder"
                       type="success"
@@ -467,7 +495,7 @@
                     <fast-ordes-list style="font-size: 0px;width: 100px!important;margin: 0px;display: inline-flex;margin-top: 1px;" />
                   </el-col>
                 </el-row>
-              </div>
+              </div> -->
               <span>
                 <p style="margin: 0px;">{{ $t('form.pos.order.order') }}: <b class="order-info">{{ currentOrder.documentNo }}</b></p>
               </span>
@@ -952,9 +980,11 @@ export default {
     if (this.isNewOrder) {
       this.$refs.ProductValue[0].$refs.product.focus()
     }
+    if (!this.isEmptyValue(this.currentLineOrder)) {
+      this.$refs.linesTable.setCurrentRow(this.currentLineOrder)
+    }
     this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: false })
   },
-
   methods: {
     formatDate,
     formatDateToSend,

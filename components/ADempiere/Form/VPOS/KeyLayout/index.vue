@@ -30,9 +30,16 @@
         </el-row>
       </div>
       <el-button
+        v-if="isMobile"
+        type="danger"
+        icon="el-icon-close"
+        style="position: absolute;right: 1%;top: 2%;"
+        @click="isShowedPOSKeyLayout = !isShowedPOSKeyLayout"
+      />
+      <el-button
         icon="el-icon-s-home"
         size="small"
-        style="float: right"
+        :style="isMobile ? 'float: left' : 'float: right'"
         circle
         @click="handleCommand"
       />
@@ -128,6 +135,17 @@ export default {
     }
   },
   computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    },
+    isShowedPOSKeyLayout: {
+      get() {
+        return this.$store.getters.getShowPOSKeyLayout
+      },
+      set(val) {
+        this.$store.commit('setShowPOSKeyLayout', val)
+      }
+    },
     defaultImage() {
       return require('@/image/ADempiere/pos/no-image.jpg')
     },
@@ -166,9 +184,9 @@ export default {
       }
     },
     // TODO: Verify with panel collection
-    isShowedPOSKeyLayout() {
-      return this.$store.getters.getShowPOSKeyLayout
-    },
+    // isShowedPOSKeyLayout() {
+    //   return this.$store.getters.getShowPOSKeyLayout
+    // },
     isReadyFromGetData() {
       const { isLoaded, isReload } = this.getKeyLayout
       return (!isLoaded || isReload) && this.isShowedPOSKeyLayout
@@ -260,6 +278,7 @@ export default {
       })
         .then(productPrice => {
           this.product = productPrice.product
+          this.$store.commit('setShowPOSKeyLayout', false)
           this.createOrder({ withLine: true })
         })
         .catch(error => {

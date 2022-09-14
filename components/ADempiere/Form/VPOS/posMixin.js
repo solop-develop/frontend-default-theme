@@ -250,6 +250,11 @@ export default {
   beforeDestroy() {
     this.unsubscribe()
   },
+  mounted() {
+    if (!this.isEmptyValue(this.currentLineOrder)) {
+      this.$refs.linesTable.setCurrentRow(this.currentLineOrder)
+    }
+  },
   methods: {
     formatDate,
     formatPrice,
