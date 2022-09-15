@@ -70,24 +70,23 @@
       />
 
       <el-table-column
-        v-for="(heard, key) in labelTable"
+        v-for="(head, key) in labelTable"
         :key="key"
-        :label="heard.label"
+        :label="head.label"
         prop="value"
         header-align="center"
       >
-        <span v-if="heard.columnName === 'Value'" slot-scope="scope">
-          {{ scope.row.value }}
-        </span>
-        <span v-else-if="heard.columnName === 'TaxID'" slot-scope="scope">
-          {{ scope.row.taxId }}
-        </span>
-        <span v-else-if="heard.columnName === 'Name'" slot-scope="scope">
-          {{ scope.row.name }}
-        </span>
-        <span v-else-if="heard.columnName === 'Name2'" slot-scope="scope">
-          {{ scope.row.lastName }}
-        </span>
+        <template slot-scope="scope">
+          <!-- formatted displayed value -->
+          <cell-info
+            :parent-uuid="metadata.parentUuid"
+            :container-uuid="uuidForm"
+            :field-attributes="head"
+            :container-manager="containerManagerBPList"
+            :scope="scope"
+            :data-row="scope.row"
+          />
+        </template>
       </el-table-column>
     </el-table>
 
@@ -129,16 +128,15 @@
 </template>
 
 <script>
-
-import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-
 // constants
 import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import businessPartnerMixin from './mixinBusinessPartner'
+import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
+import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
 
 // utils and helper methods
@@ -153,6 +151,7 @@ export default {
   name: 'BusinessPartnersList',
 
   components: {
+    CellInfo,
     CustomPagination,
     FieldDefinition,
     IndexColumn
@@ -375,23 +374,27 @@ export default {
       })
     },
     searchBPartnerList(pageNumber = 0, isConvert = true) {
-      const values = this.$store.getters.getValuesView({
+      let parentUuid = this.metadata.parentUuid
+      if (isEmptyValue(parentUuid)) {
+        parentUuid = this.metadata.containerUuid
+      }
+
+      const filters = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
-        format: 'object'
+        format: 'array'
       })
 
-      let parsedValues = values
-      if (isConvert && !isEmptyValue(values)) {
-        parsedValues = this.convertValuesToSend(values)
-      }
       this.isLoadingRecords = true
-
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
-        this.$store.dispatch('getBusinessPartners', {
-          ...parsedValues,
+        this.containerManager.getSearchInfoList({
+          parentUuid,
           containerUuid: this.uuidForm,
+          contextColumnNames: this.metadata.reference.contextColumnNames,
+          tableName: this.metadata.reference.tableName,
+          uuid: this.metadata.uuid,
+          filters,
           pageNumber
         })
           .then(response => {
@@ -413,35 +416,6 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
-    },
-    /**
-     * ColumnName equals property to set into request's system-core
-     * TODO: Add keyServer and keyClient
-     * @param {object} values
-     * @returns {object}
-     */
-    convertValuesToSend(values) {
-      const valuesToSend = {}
-      Object.keys(values).forEach(key => {
-        const value = values[key]
-        if (isEmptyValue(value)) {
-          return
-        }
-        switch (key) {
-          // case 'TaxID':
-          //   valuesToSend['taxId'] = value
-          //   break
-          case 'Value':
-            valuesToSend['value'] = value
-            break
-          case 'Name':
-            valuesToSend['name'] = value
-            break
-        }
-      })
-
-      valuesToSend['posUuid'] = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      return valuesToSend
     }
   }
 }
