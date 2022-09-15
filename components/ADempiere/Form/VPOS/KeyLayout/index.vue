@@ -183,6 +183,7 @@ export default {
         description: undefined
       }
     },
+    //   return this.$store.getters.getShowPOSKeyLayout
     isReadyFromGetData() {
       const { isLoaded, isReload } = this.getKeyLayout
       return (!isLoaded || isReload) && this.isShowedPOSKeyLayout
