@@ -27,6 +27,7 @@
     <business-partners-list
       v-if="showedPopoverBusinessPartnerList"
       :show-popover="showedPopoverBusinessPartnerList"
+      :container-manager="containerManager"
       :metadata="parentMetadata"
     />
 
@@ -65,6 +66,10 @@ export default {
           elementName: 'C_BPartner_ID'
         }
       }
+    },
+    containerManager: {
+      type: Object,
+      required: true
     },
     isDisabled: {
       type: Boolean,

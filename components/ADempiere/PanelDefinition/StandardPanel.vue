@@ -84,7 +84,7 @@ import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.v
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 
 // utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { FOCUSABLE_FIELDS_LIST } from '@/utils/ADempiere/componentUtils'
 
 export default defineComponent({

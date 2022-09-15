@@ -48,13 +48,15 @@
     <button-business-partners-list
       slot="append"
       :parent-metadata="metadata"
+      :container-manager="containerManager"
       :is-disabled="isDisabled"
     />
   </el-autocomplete>
 </template>
 
 <script>
-import store from '@/store'
+// contants
+import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
@@ -79,6 +81,10 @@ export default {
   ],
 
   props: {
+    containerManager: {
+      type: Object,
+      required: true
+    },
     parentMetadata: {
       type: Object,
       default: () => {
@@ -104,10 +110,19 @@ export default {
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
-        store.dispatch('getBusinessPartners', {
+        let parentUuid = this.metadata.parentUuid
+        if (isEmptyValue(parentUuid)) {
+          parentUuid = this.metadata.containerUuid
+        }
+
+        this.containerManager.getSearchInfoList({
+          parentUuid,
           containerUuid: this.metadata.containerUuid,
-          pageNumber: 1,
-          searchValue
+          contextColumnNames: this.metadata.reference.contextColumnNames,
+          tableName: TABLE_NAME,
+          uuid: this.metadata.uuid,
+          searchValue,
+          pageNumber: 1
         })
           .then(responseRecords => {
             if (isEmptyValue(responseRecords)) {
