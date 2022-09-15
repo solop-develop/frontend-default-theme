@@ -27,7 +27,7 @@
     <el-collapse v-model="activeAccordion" accordion class="general-info-list-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
-          {{ title }} {{ 555 }}
+          {{ title }}
         </template>
 
         <el-form
@@ -162,15 +162,6 @@ export default {
   ],
 
   props: {
-    // containerManager: {
-    //   type: Object,
-    //   default: () => ({
-    //     actionPerformed: () => {},
-    //     getFieldsLit: () => {},
-    //     isReadOnlyColumn: ({ field, row }) => { return true },
-    //     setDefaultValues: () => {}
-    //   })
-    // },
     metadata: {
       type: Object,
       default: () => {
@@ -287,14 +278,6 @@ export default {
         this.getListGeneralInfoSearch()
       }
     }
-    // showPopover(value) {
-    //   if (value && isEmptyValue(this.metadataList)) {
-    //     clearTimeout(this.timeOutFields)
-    //     this.timeOutFields = setTimeout(() => {
-    //       // this.setFieldsList()
-    //     }, 500)
-    //   }
-    // }
   },
 
   created() {
@@ -311,13 +294,6 @@ export default {
         this.$refs.generalInfoTable.setCurrentRow(this.currentRow)
       }
     })
-
-    // if (this.showPopover) {
-    //   clearTimeout(this.timeOutFields)
-    //   this.timeOutFields = setTimeout(() => {
-    //     this.setFieldsList()
-    //   }, 500)
-    // }
   },
 
   beforeDestroy() {
@@ -418,7 +394,6 @@ export default {
           tableName: this.metadata.reference.tableName,
           columnName: this.metadata.columnName,
           uuid: this.metadata.uuid,
-          //
           contextColumnNames: this.metadata.reference.contextColumnNames,
           filters: values,
           pageNumber
@@ -428,7 +403,7 @@ export default {
               this.$message({
                 type: 'warning',
                 showClose: true,
-                message: this.$t('businessPartner.notFound')
+                message: this.metadata.name + this.$t('fieldFormSearch.notFound')
               })
             }
 

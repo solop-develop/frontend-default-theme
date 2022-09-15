@@ -38,11 +38,13 @@
       -->
     <template slot-scope="recordRow">
       <div class="header">
-        <b> {{ recordRow.item.name }} {{ recordRow.item.lastName }}</b>
+        <!-- <b> -->
+        {{ recordRow.item.Name }}
+        <!-- {{ recordRow.item.lastName }}</b> {{ alo(recordRow) }} -->
       </div>
-      <span class="info">
+      <!-- <span class="info">
         {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
-      </span>
+      </span> -->
     </template>
 
     <button-business-partners-list
@@ -107,6 +109,9 @@ export default {
       if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
+    },
+    alo(a) {
+      console.log({ a })
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
