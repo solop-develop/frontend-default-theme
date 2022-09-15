@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -27,7 +27,7 @@
     <el-collapse v-model="activeAccordion" accordion class="general-info-list-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
-          {{ title }}
+          {{ title }} {{ 555 }}
         </template>
 
         <el-form
@@ -199,6 +199,7 @@ export default {
       isLoadingRecords: false,
       timeOutFields: null,
       isLoadingFields: false,
+      cacheUpdateField: {},
       unsubscribe: () => {}
     }
   },
@@ -285,15 +286,15 @@ export default {
       if (isToLoad) {
         this.getListGeneralInfoSearch()
       }
-    },
-    showPopover(value) {
-      if (value && isEmptyValue(this.metadataList)) {
-        clearTimeout(this.timeOutFields)
-        this.timeOutFields = setTimeout(() => {
-          this.setFieldsList()
-        }, 500)
-      }
     }
+    // showPopover(value) {
+    //   if (value && isEmptyValue(this.metadataList)) {
+    //     clearTimeout(this.timeOutFields)
+    //     this.timeOutFields = setTimeout(() => {
+    //       // this.setFieldsList()
+    //     }, 500)
+    //   }
+    // }
   },
 
   created() {
@@ -311,12 +312,12 @@ export default {
       }
     })
 
-    if (this.showPopover) {
-      clearTimeout(this.timeOutFields)
-      this.timeOutFields = setTimeout(() => {
-        this.setFieldsList()
-      }, 500)
-    }
+    // if (this.showPopover) {
+    //   clearTimeout(this.timeOutFields)
+    //   this.timeOutFields = setTimeout(() => {
+    //     this.setFieldsList()
+    //   }, 500)
+    // }
   },
 
   beforeDestroy() {
@@ -360,7 +361,10 @@ export default {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          if (mutation.payload.containerUuid === this.uuidForm) {
+          if (!this.isEmptyValue(mutation.payload.columnName) &&
+            !this.isEmptyValue(mutation.payload.value) &&
+            mutation.payload.containerUuid === this.uuidForm
+          ) {
             this.getListGeneralInfoSearch()
           }
         }
@@ -368,6 +372,12 @@ export default {
     },
     setFieldsList() {
       this.isLoadingFields = true
+      const storedFieldsList = this.$store.getters.getTableHeader({ containerUuid: this.uuidForm })
+
+      if (!this.isEmptyValue(storedFieldsList)) {
+        this.isLoadingFields = false
+        return
+      }
       this.containerManager.searchTableHeader({
         containerUuid: this.uuidForm,
         tableName: this.metadata.reference.tableName

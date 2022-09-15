@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -36,7 +36,8 @@
       class="button-search"
       :disabled="isDisabled"
     >
-      <svg-icon icon-class="search" />
+      <i v-if="icon.type === 'i'" :class="icon.class" />
+      <svg-icon v-else :icon-class="icon.class" />
     </el-button>
   </el-popover>
 </template>
@@ -44,7 +45,7 @@
 <script>
 import store from '@/store'
 
-import PanelGeneralInfoSearch from './panelGeneralInfoSearch.vue'
+import PanelGeneralInfoSearch from './panel.vue'
 
 export default {
   name: 'GeneralInfoSearch',
@@ -66,6 +67,15 @@ export default {
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    icon: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'svg',
+          class: 'search'
+        }
+      }
     },
     containerManager: {
       type: Object,

@@ -1,7 +1,7 @@
 /**
  * ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  * Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
- * Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ * Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -33,8 +33,8 @@ export default {
     return {
       timeOutSearchRecords: null,
       searchText: '',
-      controlDisplayed: this.displayedValue,
-      unsubscribe: null
+      controlDisplayed: this.displayedValue
+      // unsubscribe: null
     }
   },
 
@@ -153,42 +153,42 @@ export default {
     }
   },
 
-  created() {
-    this.unsubscribe = this.subscribeChanges()
-  },
+  // created() {
+  //   this.unsubscribe = this.subscribeChanges()
+  // },
 
-  beforeDestroy() {
-    this.unsubscribe()
-  },
+  // beforeDestroy() {
+  //   this.unsubscribe()
+  // },
 
   methods: {
     clearValues() {
       this.setValues(this.blankValues)
     },
-    subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'updateValueOfField') {
-          if (mutation.payload.containerUuid === this.metadata.containerUuid) {
-            // add displayed value to persistence
-            if (mutation.payload.columnName === this.metadata.columnName) {
-              this.preHandleChange(mutation.payload.value)
+    // subscribeChanges() {
+    //   return this.$store.subscribe((mutation, state) => {Q
+    //     if (mutation.type === 'updateValueOfField') {
+    //       if (mutation.payload.containerUuid === this.metadata.containerUuid) {
+    //         // add displayed value to persistence
+    //         if (mutation.payload.columnName === this.metadata.columnName) {
+    //           this.preHandleChange(mutation.payload.value)
 
-              this.$store.dispatch('notifyFieldChange', {
-                containerUuid: this.metadata.containerUuid,
-                containerManager: this.containerManager,
-                field: this.metadata,
-                columnName: this.metadata.displayColumnName
-              })
-            }
+    //           this.$store.dispatch('notifyFieldChange', {
+    //             containerUuid: this.metadata.containerUuid,
+    //             containerManager: this.containerManager,
+    //             field: this.metadata,
+    //             columnName: this.metadata.displayColumnName
+    //           })
+    //         }
 
-            if (mutation.payload.columnName === this.metadata.displayColumnName) {
-              // set current displayed value to clean on focus
-              this.controlDisplayed = mutation.payload.value
-            }
-          }
-        }
-      })
-    },
+    //         if (mutation.payload.columnName === this.metadata.displayColumnName) {
+    //           // set current displayed value to clean on focus
+    //           this.controlDisplayed = mutation.payload.value
+    //         }
+    //       }
+    //     }
+    //   })
+    // },
     setNewDisplayedValue() {
       const displayValue = this.displayedValue
       if (!isSameValues(this.controlDisplayed, displayValue)) {
