@@ -40,11 +40,11 @@
       <div class="header">
         <!-- <b> -->
         {{ recordRow.item.Name }}
-        <!-- {{ recordRow.item.lastName }}</b> {{ alo(recordRow) }} -->
+        <!-- {{ recordRow.item.lastName }}</b> -->
       </div>
-      <!-- <span class="info">
-        {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
-      </span> -->
+      <span class="info">
+        {{ recordRow.item.Value }} {{ recordRow.item.TaxId }} {{ recordRow.item.Description }}
+      </span>
     </template>
 
     <button-business-partners-list
@@ -109,9 +109,6 @@ export default {
       if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
-    },
-    alo(a) {
-      console.log({ a })
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
