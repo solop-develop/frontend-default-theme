@@ -38,10 +38,12 @@
       -->
     <template slot-scope="recordRow">
       <div class="header">
-        <b> {{ recordRow.item.name }} {{ recordRow.item.lastName }}</b>
+        <!-- <b> -->
+        {{ recordRow.item.Name }}
+        <!-- {{ recordRow.item.lastName }}</b> -->
       </div>
       <span class="info">
-        {{ recordRow.item.value }} {{ recordRow.item.taxId }} {{ recordRow.item.description }}
+        {{ recordRow.item.Value }} {{ recordRow.item.TaxId }} {{ recordRow.item.Description }}
       </span>
     </template>
 

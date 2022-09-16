@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -50,6 +50,7 @@
       :parent-metadata="metadata"
       :is-disabled="isDisabled"
       :container-manager="containerManager"
+      :icon="icon"
     />
   </el-autocomplete>
 </template>
@@ -59,7 +60,7 @@
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
-import ButtonGeneralInfoSearch from './buttonGeneralInfoSearch.vue'
+import ButtonGeneralInfoSearch from './button.vue'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -82,6 +83,15 @@ export default {
       default: () => {
         return {
           containerUuid: ''
+        }
+      }
+    },
+    icon: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'svg',
+          class: 'search'
         }
       }
     },
