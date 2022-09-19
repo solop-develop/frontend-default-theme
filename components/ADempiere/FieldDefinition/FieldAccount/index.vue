@@ -23,7 +23,7 @@
     v-bind="commonsProperties"
     value-key="name"
     clearable
-    style="width: 100%;max-height: 60px;"
+    style="width: 100%;"
     popper-class="custom-field-bpartner-info"
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
@@ -34,50 +34,59 @@
     @blur="setOldDisplayedValue"
   >
     <!--
-    @keyup.enter.native="getRecord"
+    @keyup.enter.native="getBPartnerWithEnter"
       -->
     <template slot-scope="recordRow">
       <div class="header">
-        <b> {{ generateDisplayedValue(recordRow.item) }} </b>
+        <!-- <b> -->
+        {{ recordRow.item }}
+        <!-- {{ recordRow.item.lastName }}</b> -->
       </div>
-      <span class="info">
-        {{ generatedDescription(recordRow.item) }}
-      </span>
+      <!-- <span class="info">
+        {{ recordRow.item.Value }} {{ recordRow.item.TaxId }} {{ recordRow.item.Description }}
+      </span> -->
     </template>
 
-    <button-general-info-search
+    <button-account
       slot="append"
       :parent-metadata="metadata"
-      :is-disabled="isDisabled"
       :container-manager="containerManager"
-      :icon="icon"
+      :is-disabled="isDisabled"
     />
   </el-autocomplete>
 </template>
 
 <script>
+// contants
+import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
-import ButtonGeneralInfoSearch from './button.vue'
+import mixinFieldAccount from './mixinFieldAccount.js'
+import ButtonAccount from './button.vue'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
-  name: 'GeneralInfoSearch',
+  name: 'FieldAccount',
 
   components: {
-    ButtonGeneralInfoSearch
+    ButtonAccount
   },
 
   mixins: [
     fieldMixin,
-    fieldSearchMixin
+    fieldSearchMixin,
+    mixinFieldAccount
   ],
 
   props: {
+    containerManager: {
+      type: Object,
+      required: true
+    },
     parentMetadata: {
       type: Object,
       default: () => {
@@ -85,19 +94,6 @@ export default {
           containerUuid: ''
         }
       }
-    },
-    icon: {
-      type: Object,
-      default: () => {
-        return {
-          type: 'svg',
-          class: 'search'
-        }
-      }
-    },
-    containerManager: {
-      type: Object,
-      required: true
     }
   },
 
@@ -105,25 +101,29 @@ export default {
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid
-    },
-    recordsList() {
-      return this.$store.getters.getGeneralInfoRecordsList({
-        containerUuid: this.uuidForm
-      })
     }
   },
-
   methods: {
-    remoteSearch(searchValue) {
+    keyPressField() {
+      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
+        this.remoteSearch(this.displayedValue, true)
+      }
+    },
+    remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
-        this.containerManager.generalInfoSearch({
+        let parentUuid = this.metadata.parentUuid
+        if (isEmptyValue(parentUuid)) {
+          parentUuid = this.metadata.containerUuid
+        }
+
+        this.containerManager.getSearchInfoList({
+          parentUuid,
           containerUuid: this.metadata.containerUuid,
-          parentUuid: this.metadata.containerUuid,
-          pageNumber: 1,
           contextColumnNames: this.metadata.reference.contextColumnNames,
-          tableName: this.metadata.reference.tableName,
-          fieldUuid: this.metadata.uuid,
-          searchValue
+          tableName: TABLE_NAME,
+          uuid: this.metadata.uuid,
+          searchValue,
+          pageNumber: 1
         })
           .then(responseRecords => {
             if (isEmptyValue(responseRecords)) {
