@@ -181,10 +181,12 @@ export default {
       this.$store.dispatch('updateOrderLines', orderLine)
     },
     createOrderLine(orderUuid) {
+      const { quantity } = this.product
       const productUuid = this.product.uuid
       createOrderLine({
         orderUuid,
         productUuid,
+        quantity,
         priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
         warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
       })

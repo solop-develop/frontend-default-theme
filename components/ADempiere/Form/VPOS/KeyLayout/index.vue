@@ -244,7 +244,7 @@ export default {
       if (!this.isEmptyValue(keyValue.subKeyLayoutUuid)) {
         this.loadKeyLayout(keyValue.subKeyLayoutUuid)
       } else {
-        this.setProduct(keyValue.productValue)
+        this.setProduct(keyValue.productValue, keyValue)
       }
     },
     handleCommand(command) {
@@ -259,7 +259,8 @@ export default {
       }
       this.loadKeyLayout(keyLayoutUuid)
     },
-    setProduct(searchValue) {
+    setProduct(searchValue, keyValue) {
+      const { quantity } = keyValue
       if (this.withoutPOSTerminal()) {
         return
       }
@@ -267,6 +268,17 @@ export default {
       if (this.isEmptyValue(this.curretnPriceList)) {
         return
       }
+      const findProductLine = this.currentOrder.lineOrder.find(product => product.product.value === searchValue)
+
+      if (!this.isEmptyValue(findProductLine)) {
+        this.product = {
+          ...findProductLine.product,
+          quantity: findProductLine.quantity + quantity
+        }
+        this.createOrder({ withLine: true })
+        return
+      }
+
       findProduct({
         searchValue,
         posUuid: this.currentPointOfSales.uuid,
@@ -274,7 +286,10 @@ export default {
         warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
       })
         .then(productPrice => {
-          this.product = productPrice.product
+          this.product = {
+            ...productPrice.product,
+            quantity
+          }
           this.$store.commit('setShowPOSKeyLayout', false)
           this.createOrder({ withLine: true })
         })
