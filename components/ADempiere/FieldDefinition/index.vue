@@ -363,7 +363,7 @@ export default {
    */
   .field-standard {
     &:not(.in-table) {
-      max-height: 79px;
+      max-height: 60px;
     }
 
     .el-form-item__content {
