@@ -101,6 +101,22 @@ export default {
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid
+    },
+    displayedValue: {
+      get() {
+        const display = this.$store.getters.getValueOfField({
+          containerUuid: this.metadata.containerUuid,
+          columnName: this.metadata.displayColumnName
+        })
+        return display
+      },
+      set(value) {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.metadata.containerUuid,
+          columnName: this.metadata.displayColumnName,
+          value
+        })
+      }
     }
   },
   methods: {

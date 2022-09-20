@@ -79,20 +79,18 @@ export default {
 
       return displayedValue
     },
-    setValues({ id, uuid, value, name, lastName, description }) {
+    setValues(rowData) {
       const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const displayedValue = this.generateDisplayedValue({
-        value,
-        name,
-        lastName
-      })
+      const { [columnName]: id, UUID: uuid, IdentifierTable } = rowData
+
+      const displayedValue = this.generateDisplayedValue(rowData)
 
       // set ID value
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
         columnName,
-        value: id
+        value: this.isEmptyValue(id) ? rowData[IdentifierTable + '_ID'] : id
       })
       // set display column (name) value
       this.$store.commit('updateValueOfField', {

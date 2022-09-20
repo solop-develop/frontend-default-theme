@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -48,6 +48,13 @@
             />
           </el-row>
         </el-form>
+        <el-button
+          type="primary"
+          style="float: right;margin-top: 0.5%;margin-bottom: 0.5%;"
+          @click="save()"
+        >
+          <svg-icon icon-class="save-AD" />
+        </el-button>
       </el-collapse-item>
     </el-collapse>
 
@@ -94,7 +101,7 @@
     </el-table>
 
     <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="18">
+      <el-col :span="18" style="padding-left: 12px;padding-right: 12px;display: flex;">
         <custom-pagination
           :total="businessParnerData.recordCount"
           :current-page="pageNumber"
@@ -110,7 +117,7 @@
             :loading="isLoadingRecords"
             type="success"
             icon="el-icon-refresh-right"
-            @click="searchBPartnerList();"
+            @click="findListAccount();"
           />
 
           <el-button
@@ -138,7 +145,7 @@ import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import mixinFieldAccount from './mixinFieldAccount.js'
-import fieldSearchMixin from '../FieldSearch/mixinFieldSearch.js'
+// import fieldSearchMixin from '../FieldSearch/mixinFieldSearch.js'
 import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
@@ -163,8 +170,8 @@ export default {
   },
 
   mixins: [
-    mixinFieldAccount,
-    fieldSearchMixin
+    mixinFieldAccount
+    // fieldSearchMixin
   ],
 
   props: {
@@ -198,6 +205,7 @@ export default {
       metadataList: [],
       recordDataList: [],
       timeOutRecords: null,
+      timeOutUpdate: null,
       isLoadingRecords: false,
       timeOutFields: null,
       isLoadingFields: false,
@@ -310,11 +318,11 @@ export default {
   },
 
   watch: {
-    isReadyFromGetData(isToLoad) {
-      if (isToLoad) {
-        this.searchBPartnerList()
-      }
-    },
+    // isReadyFromGetData(isToLoad) {
+    //   if (isToLoad) {
+    //     this.findListAccount()
+    //   }
+    // },
     showPopover(value) {
       if (value && isEmptyValue(this.metadataList)) {
         clearTimeout(this.timeOutFields)
@@ -327,10 +335,6 @@ export default {
 
   created() {
     this.unsubscribe = this.subscribeChanges()
-
-    if (this.isReadyFromGetData) {
-      this.searchBPartnerList()
-    }
   },
 
   mounted() {
@@ -353,6 +357,28 @@ export default {
   },
 
   methods: {
+    save() {
+      const attributes = this.$store.getters.getValuesView({
+        containerUuid: this.uuidForm,
+        format: 'array'
+      })
+      const contextAttributesList = this.$store.getters.getValuesView({
+        containerUuid: this.uuidForm,
+        format: 'array'
+      }).filter(item => item.columnName === 'Account_ID' || item.columnName === 'AD_Org_ID')
+
+      this.$store.dispatch('saveAccountCombinations', {
+        attributes,
+        contextAttributes: contextAttributesList
+      })
+        .then(() => {})
+        .catch(error => {
+            console.warn(`Save Account Combinations - Error ${error.code}: ${error.message}.`)
+          })
+          .finally(() => {
+            this.findListAccount()
+          })
+    },
     handleCurrentChange(row) {
       this.currentRow = row
     },
@@ -363,7 +389,7 @@ export default {
            * TODO: When refreshing you are making 2 list requests, you can be the
            * observer that activates the second request
           */
-          this.searchBPartnerList()
+          this.findListAccount()
           break
 
         case 'close':
@@ -384,13 +410,16 @@ export default {
       })
     },
     setPage(pageNumber) {
-      this.searchBPartnerList(pageNumber)
+      this.findListAccount(pageNumber)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          if (mutation.payload.containerUuid === this.uuidForm) {
-            this.searchBPartnerList()
+          if (mutation.payload.containerUuid === this.uuidForm && !this.isEmptyValue(mutation.payload.value) && !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !mutation.payload.columnName.includes('_UUID')) {
+            clearTimeout(this.timeOutUpdate)
+            this.timeOutUpdate = setTimeout(() => {
+              this.findListAccount()
+            }, 1800)
           }
         }
       })
@@ -417,7 +446,7 @@ export default {
           })
       })
     },
-    searchBPartnerList(pageNumber = 0, isConvert = true) {
+    findListAccount(pageNumber = 0, isConvert = true) {
       let parentUuid = this.metadata.parentUuid
       if (isEmptyValue(parentUuid)) {
         parentUuid = this.metadata.containerUuid
@@ -431,6 +460,9 @@ export default {
         format: 'array'
       }).filter(item => item.columnName === 'Account_ID' || item.columnName === 'AD_Org_ID')
       this.isLoadingRecords = true
+      if (this.isEmptyValue(contextAttributesList) && contextAttributesList.length === 2) {
+        return
+      }
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server

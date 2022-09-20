@@ -48,7 +48,6 @@ export default [
     overwriteDefinition: {
       sequence: 30,
       size: 6,
-      isMandatory: true,
       isCustomField: true
     }
   },
