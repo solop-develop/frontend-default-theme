@@ -63,7 +63,7 @@
                     </span>
                     <span v-if="!isEmptyValue(events.textMessage)" style="color: #606266; font-weight: bold;">
                       <!-- <el-scrollbar wrap-class="scroll-child"> -->
-                        Mensaje <b>:</b> {{ events.textMessage }} <svg-icon icon-class="message" />
+                      Mensaje <b>:</b> {{ events.textMessage }} <svg-icon icon-class="message" />
                       <!-- </el-scrollbar> -->
                     </span>
                     <!-- {{ events.nodeName }} -->
@@ -143,7 +143,7 @@ export default defineComponent({
     containerUuid: {
       type: String,
       default: () => ''
-    },
+    }
   },
 
   setup(props, { root }) {
