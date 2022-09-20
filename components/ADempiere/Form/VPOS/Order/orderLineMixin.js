@@ -181,12 +181,10 @@ export default {
       this.$store.dispatch('updateOrderLines', orderLine)
     },
     createOrderLine(orderUuid) {
-      const { quantity } = this.product
       const productUuid = this.product.uuid
       createOrderLine({
         orderUuid,
         productUuid,
-        quantity,
         priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
         warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
       })
@@ -355,7 +353,8 @@ export default {
       const { columnName } = orderLine
       // const iSOCode = this.isEmptyValue(this.currentPointOfSales.displayCurrency) ? '' : this.currentPointOfSales.displayCurrency.iSOCode
       if (columnName === 'LineDescription') {
-        if (this.isEmptyValue(row.product.value)) return row.charge.name
+        if (this.isEmptyValue(row.product.name)) return row.description
+        if (this.isEmptyValue(row.product.value)) return row.charge.columnName
         return row.product.value + ' - ' + row.product.name
       }
       const currency = this.$store.getters.posAttributes.currentPointOfSales.priceList.currency.iSOCode
@@ -373,6 +372,11 @@ export default {
           return this.formatPrice(row.price, currency)
         }
       } else if (columnName === 'QtyEntered') {
+        if (this.isEmptyValue(row.uom.uom)) {
+          return formatQuantity({
+            value: row.quantityOrdered
+          })
+        }
         return formatQuantity({
           value: row.quantityOrdered,
           precision: row.uom.uom.starndard_precision

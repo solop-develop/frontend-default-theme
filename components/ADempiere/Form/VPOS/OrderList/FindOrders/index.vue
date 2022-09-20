@@ -18,7 +18,7 @@
 
 <template>
   <el-container style="height: 80vh;">
-    <el-header style="height: 2%;">
+    <el-header :style="isMobile ? 'height: 2%;' : 'height: 20%;'">
       <p style="text-align: center;"> <b> {{ data.title }} </b></p>
       <slot name="header" />
     </el-header>
