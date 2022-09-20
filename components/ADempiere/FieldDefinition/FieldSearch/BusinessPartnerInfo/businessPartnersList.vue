@@ -134,9 +134,9 @@ import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import businessPartnerMixin from './mixinBusinessPartner'
-import CellInfo from '@theme/components/ADempiere/DefaultTable/Components/CellInfo.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/Components/CustomPagination.vue'
-import IndexColumn from '@theme/components/ADempiere/DefaultTable/Components/IndexColumn.vue'
+import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
+import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
 // utils and helper methods

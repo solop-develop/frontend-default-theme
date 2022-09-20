@@ -104,7 +104,7 @@
 <script>
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/Components/CustomPagination.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
 

@@ -126,9 +126,9 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-import CellInfo from '@theme/components/ADempiere/DefaultTable/Components/CellInfo.vue'
-import ColumnsDisplayOption from '@theme/components/ADempiere/DefaultTable/Components/ColumnsDisplayOption'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/Components/CustomPagination.vue'
+import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 
@@ -136,7 +136,7 @@ import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
-  name: 'DefaultTable',
+  name: 'WindowsTable',
 
   components: {
     CellInfo,

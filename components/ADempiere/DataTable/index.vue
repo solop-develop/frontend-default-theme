@@ -90,14 +90,11 @@ export default defineComponent({
       let dataTableCompenent
       switch (type) {
         case 'window':
-          dataTableCompenent = () => import('@theme/components/ADempiere/DefaultTable/Windows/index.vue')
+          dataTableCompenent = () => import('@theme/components/ADempiere/DataTable/Windows')
           break
         case 'browser':
-          dataTableCompenent = () => import('@theme/components/ADempiere/DefaultTable/Browser/index.vue')
+          dataTableCompenent = () => import('@theme/components/ADempiere/DataTable/Browser')
           break
-        // default:
-        //   dataTableCompenent = () => import('@theme/components/ADempiere/DefaultTable/browser/index.vue')
-        //   break
       }
       return dataTableCompenent
     })
