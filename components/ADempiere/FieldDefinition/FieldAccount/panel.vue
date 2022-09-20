@@ -361,23 +361,37 @@ export default {
       const attributes = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
+      }).filter(item => !item.columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !item.columnName.includes('_UUID')).map(item => {
+        return {
+          value: item.value,
+          key: item.columnName
+        }
       })
       const contextAttributesList = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
-      }).filter(item => item.columnName === 'Account_ID' || item.columnName === 'AD_Org_ID')
-
+      }).filter(item => item.columnName === 'Account_ID' || item.columnName === 'AD_Org_ID').map(item => {
+        return {
+          value: item.value,
+          key: item.columnName
+        }
+      })
+      
+      const acctSchemaId = this.$store.getters.getValueOfField({
+        containerUuid: this.metadata.containerUuid,
+        columnName: 'C_AcctSchema_ID'
+      })
+      contextAttributesList.push({
+        key: 'C_AcctSchema_ID',
+        value: acctSchemaId
+      })
       this.$store.dispatch('saveAccountCombinations', {
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.uuidForm,
         attributes,
         contextAttributes: contextAttributesList
       })
-        .then(() => {})
-        .catch(error => {
-            console.warn(`Save Account Combinations - Error ${error.code}: ${error.message}.`)
-          })
-          .finally(() => {
-            this.findListAccount()
-          })
+      this.findListAccount()
     },
     handleCurrentChange(row) {
       this.currentRow = row
