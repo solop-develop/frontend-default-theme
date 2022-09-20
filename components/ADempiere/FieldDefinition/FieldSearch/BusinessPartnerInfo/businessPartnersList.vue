@@ -134,10 +134,10 @@ import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import businessPartnerMixin from './mixinBusinessPartner'
-import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import CellInfo from '@theme/components/ADempiere/DefaultTable/Components/CellInfo.vue'
+import CustomPagination from '@theme/components/ADempiere/DefaultTable/Components/CustomPagination.vue'
+import IndexColumn from '@theme/components/ADempiere/DefaultTable/Components/IndexColumn.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
