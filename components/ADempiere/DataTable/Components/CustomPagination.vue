@@ -18,29 +18,6 @@
 
 <template>
   <el-row class="custom-pagination-content" :gutter="20">
-    <!-- <el-col :span="16" style="float: left;">
-      <b
-        v-if="isNavigation"
-      >
-        <el-button
-          type="text"
-          plain
-          icon="el-icon-arrow-up"
-          style="color: black; font-size: x-large;border: 0px;"
-          :disabled="disabledPrevRecord"
-          @click="changePrevRecord"
-        />
-        <el-button
-          type="text"
-          plain
-          icon="el-icon-arrow-down"
-          style="color: black; font-size: x-large;border: 0px;"
-          :disabled="disabledNextRecord"
-          @click="changeNextRecord"
-        />
-      </b>
-    </el-col> -->
-
     <el-col :span="24" style="float: right;">
       <el-pagination
         small
@@ -52,7 +29,13 @@
         @current-change="handleChangePage"
       >
         <span v-if="isSelection" class="selections-number">
-          {{ $t('table.dataTable.selected') }}: {{ selection }} / <!-- show total records -->
+          <span style="position: absolute !important;left: 1px !important;">
+            {{ $t('table.dataTable.selected') }}: {{ selection }}
+          </span>
+          <span>
+            {{ $t('table.dataTable.recordsPage') }} {{ recordsPage }} {{ ' ' }} /
+          </span>
+          <!-- {{ $t('table.dataTable.selected') }}: {{ selection }} / show total records -->
         </span>
       </el-pagination>
     </el-col>
@@ -61,11 +44,8 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
-
-// import store from '@/store'
-
 // constants
-import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/tableUtils'
+import { ROWS_OF_RECORDS_BY_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -98,6 +78,10 @@ export default defineComponent({
       type: Number,
       default: ROWS_OF_RECORDS_BY_PAGE
     },
+    recordsPage: {
+      type: Number,
+      default: 1
+    },
     total: {
       type: Number,
       default: undefined
@@ -122,68 +106,17 @@ export default defineComponent({
       return true
     })
 
-    // const listRecord = computed(() => {
-    //   return store.getters.getTabRecordsList({
-    //     containerUuid: props.containerUuid
-    //   })
-    // })
-
-    // const recordUuid = computed(() => {
-    //   return store.getters.getUuidOfContainer(props.containerUuid)
-    // })
-
-    // const index = computed(() => {
-    //   return listRecord.value.findIndex(row => row.UUID === recordUuid.value)
-    // })
-
-    // const disabledPrevRecord = computed(() => {
-    //   return key.value <= 0
-    // })
-
-    // const disabledNextRecord = computed(() => {
-    //   return key.value === (maxRecord.value - 1)
-    // })
-
-    // const maxRecord = computed(() => {
-    //   return listRecord.value.length
-    // })
-
-    // const key = ref(index.value)
-
-    // function changeNextRecord(params) {
-    //   key.value = index.value + 1
-    //   props.containerManager.seekRecord({
-    //     parentUuid: props.parentUuid,
-    //     containerUuid: props.containerUuid,
-    //     row: listRecord.value[index.value + 1]
-    //   })
-    // }
-
-    // function changePrevRecord(params) {
-    //   key.value = index.value - 1
-    //   if (key.value <= 0) {
-    //     return
-    //   }
-    //   props.containerManager.seekRecord({
-    //     parentUuid: props.parentUuid,
-    //     containerUuid: props.containerUuid,
-    //     row: listRecord.value[index.value - 1]
-    //   })
-    // }
+    const rowPage = computed(() => {
+      return totalRowByPage({
+        pageSize: props.pageSize,
+        pageNumber: props.currentPage
+      })
+    })
 
     return {
-      // key,
       // Computed
-      // index,
-      // disabledPrevRecord,
-      // disabledNextRecord,
-      isSelection
-      // recordUuid,
-      // maxRecord,
-      // listRecord,
-      // Methods
-      // changeNextRecord,
-      // changePrevRecord
+      isSelection,
+      rowPage
     }
   }
 

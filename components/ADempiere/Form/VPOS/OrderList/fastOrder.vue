@@ -99,6 +99,7 @@
                     :handle-change-page="handleChangePage"
                     layout="total, prev, pager, next"
                     style="float: right;"
+                    :records-page="orderList.length"
                   />
                   <el-button
                     type="text"
@@ -297,6 +298,7 @@
             :total="total"
             :current-page="currentPage"
             :handle-change-page="handleChangePage"
+            :records-page="orderList.length"
             layout="total, prev, pager, next"
             style="float: right;"
           />

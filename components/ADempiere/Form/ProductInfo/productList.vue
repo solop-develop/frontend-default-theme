@@ -149,6 +149,7 @@
       :total="productPrice.recordCount"
       :current-page="productPrice.pageNumber"
       :handle-change-page="handleChangePage"
+      :records-page="listWithPrice.length"
     />
   </el-main>
 </template>

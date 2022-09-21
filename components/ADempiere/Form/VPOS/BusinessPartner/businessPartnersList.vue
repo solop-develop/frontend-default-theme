@@ -92,6 +92,7 @@
       :total="businessParners.recordCount"
       :current-page="1"
       :handle-change-page="handleChangePage"
+      :records-page="businessPartnersList.length"
     />
     <el-row :gutter="24">
       <el-col :span="24">

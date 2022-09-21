@@ -79,6 +79,7 @@
       :total="productPrice.recordCount"
       :current-page="productPrice.pageNumber"
       :handle-change-page="handleChangePage"
+      :records-page="listWithPrice.length"
     />
     <el-row :gutter="24">
       <el-col :span="24">

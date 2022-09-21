@@ -245,6 +245,7 @@
           :total="ordersList.recordCount"
           :current-page="ordersList.pageNumber"
           :handle-change-page="handleChangePage"
+          :records-page="sortTableOrderList.length"
         />
       </el-col>
 

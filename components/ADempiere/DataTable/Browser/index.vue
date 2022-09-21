@@ -113,6 +113,7 @@
       :total="recordsLength"
       :current-page="currentPage"
       :selection="selectionsLength"
+      :records-page="recordsWithFilter.length"
       :handle-change-page="handleChangePage"
       :is-navigation="isNavigation"
     />

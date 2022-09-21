@@ -47,6 +47,7 @@
           :current-page="currentPagePagination"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
+          :records-page="activityList.length"
         />
       </el-card>
     </el-header>

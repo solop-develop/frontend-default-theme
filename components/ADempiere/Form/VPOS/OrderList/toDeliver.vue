@@ -108,6 +108,7 @@
         :handle-change-page="handleChangePage"
         layout="total, prev, pager, next"
         style="float: right;"
+        :records-page="ordersInvoiced.length"
       />
     </el-footer>
     <el-row :gutter="24">
