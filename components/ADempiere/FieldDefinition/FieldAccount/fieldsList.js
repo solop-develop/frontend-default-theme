@@ -37,7 +37,8 @@ export default [
     overwriteDefinition: {
       sequence: 20,
       size: 6,
-      isCustomField: true
+      isCustomField: true,
+      isReadOnly: false
     }
   },
   // Organization
@@ -48,6 +49,7 @@ export default [
     overwriteDefinition: {
       sequence: 30,
       size: 6,
+      isMandatory: true,
       isCustomField: true
     }
   },

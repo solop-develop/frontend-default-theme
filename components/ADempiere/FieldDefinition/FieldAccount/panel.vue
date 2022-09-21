@@ -101,7 +101,7 @@
     </el-table>
 
     <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="18" style="padding-left: 12px;padding-right: 12px;display: flex;">
+      <el-col :span="20" style="padding-left: 12px">
         <custom-pagination
           :total="businessParnerData.recordCount"
           :current-page="pageNumber"
@@ -112,7 +112,7 @@
         />
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <samp style="float: right; padding-top: 4px;">
           <el-button
             :loading="isLoadingRecords"
@@ -315,6 +315,11 @@ export default {
           containerUuid: this.uuidForm
         })
       }
+    },
+    currentCombinations() {
+      return this.$store.getters.getCurrentAccountCombinations({
+        containerUuid: this.uuidForm
+      })
     }
   },
 
@@ -339,6 +344,19 @@ export default {
   },
 
   mounted() {
+    const display = this.$store.getters.getValueOfField({
+      containerUuid: this.metadata.containerUuid,
+      columnName: this.metadata.columnName
+    })
+    if (!this.isEmptyValue(display)) {
+      this.$store.dispatch('getAccountCombination', {
+        containerUuid: this.uuidForm,
+        id: display
+      })
+        .then(response => {
+          this.defaultValue(response)
+        })
+    }
     this.$nextTick(() => {
       if (this.$refs.accountCombinationsTable) {
         this.$refs.accountCombinationsTable.setCurrentRow(this.currentRow)
@@ -358,6 +376,30 @@ export default {
   },
 
   methods: {
+    defaultValue(row) {
+      const {
+        AD_Client_ID,
+        AD_Org_ID,
+        Account_ID,
+        Combination,
+      } = row.attributes
+      this.$store.commit('updateValuesOfContainer', {
+        containerUuid: this.uuidForm,
+        attributes: [{
+          columnName: 'AD_Org_ID',
+          value: AD_Org_ID
+        }, {
+          columnName: 'AD_Client_ID',
+          value: AD_Client_ID
+        }, {
+          columnName: 'Account_ID',
+          value: Account_ID
+        }, {
+          columnName: 'Combination',
+          value: Combination
+        }]
+      })
+    },
     save() {
       const attributes = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
