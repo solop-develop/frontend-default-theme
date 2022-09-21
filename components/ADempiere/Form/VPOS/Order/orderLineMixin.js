@@ -142,6 +142,9 @@ export default {
         return true
       }
       return this.currentPointOfSales.isDisplayIncludingTax
+    },
+    allowsModifyQuantity() {
+      return this.currentPointOfSales.isAllowsModifyQuantity
     }
   },
   methods: {
