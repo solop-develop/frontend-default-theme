@@ -215,6 +215,10 @@ export default defineComponent({
           valueToShow = convertBooleanToTranslationLang(cellValue.value)
           break
 
+        case 'FieldAccount':
+          valueToShow = row[displayColumnName]
+          break
+
         default:
           valueToShow = cellValue.value
           break
