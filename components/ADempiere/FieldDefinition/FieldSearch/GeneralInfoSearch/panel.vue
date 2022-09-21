@@ -70,7 +70,7 @@
       />
 
       <el-table-column
-        v-for="(fieldAttributes, key) in storedFieldsList"
+        v-for="(fieldAttributes, key) in fieldsListQueryCriteria"
         :key="key"
         :label="fieldAttributes.name"
         :prop="fieldAttributes.columnName"

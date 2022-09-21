@@ -46,7 +46,7 @@
     <p
       v-else-if="!isEmptyValue(displayedValue) && displayedValue.length >= 23"
       key="display-column"
-      style="max-height: 40px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;"
+      style="max-height: 40px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap; margin: 5px;"
     >
       <el-popover
         placement="top-start"
@@ -72,7 +72,7 @@
         v-if="(!isEmptyValue(displayedValue) && fieldAttributes.componentPath === OPERATORS_FIELD_TEXT_LONG.componentPath)"
         v-markdown="displayedValue"
       />
-      <p v-else key="only-value" :class="cellCssClass">
+      <p v-else key="only-value" :class="cellCssClass" style="margin: 5px;">
         {{ displayedValue }}
       </p>
     </span>
