@@ -18,7 +18,7 @@
 
 <template>
   <component
-    :is="renderWindowComponent"
+    :is="renderTableComponent"
     :parent-uuid="parentUuid"
     :container-uuid="containerUuid"
     :container-manager="containerManager"
@@ -85,7 +85,7 @@ export default defineComponent({
   },
 
   setup(props, { root, refs }) {
-    const renderWindowComponent = computed(() => {
+    const renderTableComponent = computed(() => {
       const { type } = root.$route.meta
       let dataTableCompenent
       switch (type) {
@@ -100,7 +100,7 @@ export default defineComponent({
     })
 
     return {
-      renderWindowComponent
+      renderTableComponent
     }
   }
 })

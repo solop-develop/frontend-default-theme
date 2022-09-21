@@ -146,11 +146,11 @@ import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 // components and mixins
 import mixinFieldAccount from './mixinFieldAccount.js'
 // import fieldSearchMixin from '../FieldSearch/mixinFieldSearch.js'
-import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
-
+import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
+// /opt/Development/workspace/epale/frontend-core/src/themes/default/components/ADempiere/DataTable/Components/CellInfo.vue
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
@@ -376,7 +376,7 @@ export default {
           key: item.columnName
         }
       })
-      
+
       const acctSchemaId = this.$store.getters.getValueOfField({
         containerUuid: this.metadata.containerUuid,
         columnName: 'C_AcctSchema_ID'
