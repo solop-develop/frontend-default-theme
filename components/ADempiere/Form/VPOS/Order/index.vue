@@ -106,7 +106,7 @@
                         :autofocus="true"
                         controls-position="right"
                         style="width: 100%;"
-                        :precision="scope.row.uom.uom.starndard_precision"
+                        :precision="isEmptyValue(scope.row.uom) ? 0 : (scope.row.uom.uom.code === 'BX' ? 0 : scope.row.uom.uom.starndard_precision)"
                         @change="changeEdit(scope.row.quantityOrdered, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />
@@ -1025,7 +1025,7 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      if (this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
+      if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
           columnName,

@@ -109,7 +109,6 @@
             style="float: right;margin-left: 10px;"
             type="success"
             icon="el-icon-plus"
-            :disabled="validPay"
             @click="addPayment()"
           />
           <el-button
