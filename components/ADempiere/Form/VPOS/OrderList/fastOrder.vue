@@ -55,34 +55,43 @@
                     :params="option.params"
                     :show-field="showToDeliveOrders"
                   >
-                    <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
-                      <el-form-item label="No. del Documento">
-                        <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
-                      </el-form-item>
-                      <el-form-item
-                        v-for="(field) in metadataList"
-                        :key="field.columnName"
-                      >
-                        <field-definition
-                          :metadata-field="{
-                            ...field,
-                            name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
-                          }"
-                          :container-uuid="'Cash-Withdrawal'"
-                          :container-manager="{
-                            ...containerManager,
-                            getLookupList,
-                            isDisplayedField,
-                            isDisplayedDefault,
-                            generalInfoSearch,
-                            searchTableHeader,
-                            isMandatoryField,
-                            isReadOnlyField,
-                            changeFieldShowedFromUser
-                          }"
-                        />
-                      </el-form-item>
-                    </el-form> -->
+                    <template v-slot:header>
+                      <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
+                        <el-form-item label="No. del Documento">
+                          <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
+                        </el-form-item>
+                        <el-form-item
+                          v-for="(field) in metadataList"
+                          :key="field.columnName"
+                        >
+                          <field-definition
+                            :metadata-field="{
+                              ...field,
+                              name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name,
+                              size: {
+                                xs: 24,
+                                sm: 24,
+                                md: 24,
+                                lg: 24,
+                                xl: 24
+                              }
+                            }"
+                            :container-uuid="'Cash-Withdrawal'"
+                            :container-manager="{
+                              ...containerManager,
+                              getLookupList,
+                              isDisplayedField,
+                              isDisplayedDefault,
+                              generalInfoSearch,
+                              searchTableHeader,
+                              isMandatoryField,
+                              isReadOnlyField,
+                              changeFieldShowedFromUser
+                            }"
+                          />
+                        </el-form-item>
+                      </el-form>
+                    </template>
                   </find-orders>
                   <custom-pagination
                     :total="total"

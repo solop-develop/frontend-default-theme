@@ -98,7 +98,6 @@
           :container-manager="containerManagerList"
           :handle-change-page="setPage"
           :selection="selection"
-          style="float: left !important;"
         />
       </el-col>
 
@@ -391,6 +390,7 @@ export default {
         // search on server
         this.containerManager.generalInfoSearch({
           containerUuid: this.uuidForm,
+          parentUuid: this.metadata.parentUuid,
           tableName: this.metadata.reference.tableName,
           columnName: this.metadata.columnName,
           uuid: this.metadata.uuid,
@@ -403,7 +403,7 @@ export default {
               this.$message({
                 type: 'warning',
                 showClose: true,
-                message: this.metadata.name + this.$t('fieldFormSearch.notFound')
+                message: this.metadata.name + this.$t('infoSearch.notFound')
               })
             }
 
