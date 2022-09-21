@@ -771,7 +771,7 @@ export default {
         isValidate: true
       })
       const paymentMethods = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
-      if (!this.isEmptyValue(paymentMethods) && paymentMethods.tender_type === 'X') {
+      if (!this.isEmptyValue(paymentMethods) && paymentMethods.payment_method.tender_type === 'X') {
         return false
       }
       if (this.isEmptyValue(fieldsEmpty)) {
