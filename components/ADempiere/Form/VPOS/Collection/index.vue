@@ -128,7 +128,7 @@
           <samp id="buttonCollection" style="float: right;padding-right: 10px;">
             <el-button type="danger" icon="el-icon-close" @click="exit" />
             <el-button type="info" icon="el-icon-minus" :disabled="isDisabled" @click="undoPatment" />
-            <el-button type="success" icon="el-icon-plus" :disabled="validPay || addPay || validateOpenAmount" @click="addCollectToList(paymentBox)" />
+            <el-button type="success" icon="el-icon-plus" @click="addCollectToList(paymentBox)" />
             <el-button type="primary" icon="el-icon-shopping-cart-full" @click="validateOrder(listPayments)" />
           </samp>
         </el-header>
