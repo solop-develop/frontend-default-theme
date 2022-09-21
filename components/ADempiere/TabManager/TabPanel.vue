@@ -89,8 +89,8 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-// import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
+// import CustomPagination from '@theme/components/ADempiere/DataTable/CustomPagination.vue'
+import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabOptions from './TabOptions.vue'

@@ -149,6 +149,7 @@
       :total="productPrice.recordCount"
       :current-page="productPrice.pageNumber"
       :handle-change-page="handleChangePage"
+      :records-page="listWithPrice.length"
     />
   </el-main>
 </template>
@@ -156,7 +157,7 @@
 <script>
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 
 // constants
 import fieldsListProductPrice from './fieldsList.js'

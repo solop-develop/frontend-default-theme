@@ -117,7 +117,7 @@ import language from '@/lang'
 
 // components and mixins
 // import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
-import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
+import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import TabPanel from './TabPanel.vue'
 import TabOptions from './TabOptions.vue'

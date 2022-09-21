@@ -97,6 +97,7 @@
           :current-page="pageNumber"
           :container-manager="containerManagerList"
           :handle-change-page="setPage"
+          :records-page="recordsList.length"
           :selection="selection"
         />
       </el-col>
@@ -136,10 +137,10 @@ import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import fieldSearchMixin from '../mixinFieldSearch'
-import CellInfo from '@theme/components/ADempiere/DefaultTable/CellInfo.vue'
+import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
-import IndexColumn from '@theme/components/ADempiere/DefaultTable/IndexColumn.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
+import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'

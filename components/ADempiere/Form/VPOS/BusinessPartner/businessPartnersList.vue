@@ -92,6 +92,7 @@
       :total="businessParners.recordCount"
       :current-page="1"
       :handle-change-page="handleChangePage"
+      :records-page="businessPartnersList.length"
     />
     <el-row :gutter="24">
       <el-col :span="24">
@@ -120,7 +121,7 @@
 import fieldsList from './fieldsListSearch.js'
 
 // components and mixins
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import BParterMixin from './mixinBusinessPartner.js'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 

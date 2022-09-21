@@ -45,7 +45,7 @@
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
 // components and mixins
-import DefaultTable from '@theme/components/ADempiere/DefaultTable/index.vue'
+import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 
 export default defineComponent({

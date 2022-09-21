@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -113,6 +113,7 @@
       :total="recordsLength"
       :current-page="currentPage"
       :selection="selectionsLength"
+      :records-page="recordsWithFilter.length"
       :handle-change-page="handleChangePage"
       :is-navigation="isNavigation"
     />
@@ -126,9 +127,9 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-import CellInfo from './CellInfo.vue'
-import ColumnsDisplayOption from './ColumnsDisplayOption'
-import CustomPagination from './CustomPagination.vue'
+import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 
@@ -136,7 +137,7 @@ import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
-  name: 'DefaultTable',
+  name: 'WindowsTable',
 
   components: {
     CellInfo,

@@ -47,6 +47,7 @@
           :current-page="currentPagePagination"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
+          :records-page="activityList.length"
         />
       </el-card>
     </el-header>
@@ -89,7 +90,7 @@
 <script>
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import CustomPagination from '@theme/components/ADempiere/DefaultTable/CustomPagination.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
 
 // constants
