@@ -107,7 +107,7 @@
           :current-page="pageNumber"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
-          :records-page="recordsWithFilter.length"
+          :records-page="recordDataList.length"
           :selection="selection"
         />
       </el-col>
