@@ -20,7 +20,6 @@
 export default [
   // Alias
   {
-    fieldUuid: '8cead820-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8cead820-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -31,42 +30,38 @@ export default [
   },
   // Combination
   {
-    fieldUuid: '8d54b3c6-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d54b3c6-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
       sequence: 20,
       size: 6,
-      isCustomField: true,
-      isReadOnly: false
+      isCustomField: true
     }
   },
   // Organization
   {
-    fieldUuid: '8d591c68-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d591c68-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
       sequence: 30,
       size: 6,
-      isMandatory: true,
+      // isMandatory: true,
       isCustomField: true
     }
   },
   // Account
   {
-    fieldUuid: '8d38be28-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d38be28-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
       sequence: 40,
       size: 6,
+      // isMandatory: true,
       isCustomField: true
     }
   },
   // Product
   {
-    fieldUuid: '8d568b24-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d568b24-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -77,7 +72,6 @@ export default [
   },
   // Business Partner
   {
-    fieldUuid: '8d5b78b4-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d5b78b4-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -88,7 +82,6 @@ export default [
   },
   // Project
   {
-    fieldUuid: '8d3a3a78-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d3a3a78-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -99,7 +92,6 @@ export default [
   },
   // Campaign
   {
-    fieldUuid: '8d3b505c-fb40-11e8-a479-7a0060f0aa01',
     uuid: '8d3b505c-fb40-11e8-a479-7a0060f0aa01',
     isFromDictionary: true,
     overwriteDefinition: {
