@@ -113,10 +113,8 @@ import { defineComponent, computed, watch, ref, onUnmounted } from '@vue/composi
 
 import router from '@/router'
 import store from '@/store'
-import language from '@/lang'
 
 // components and mixins
-// import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import TabPanel from './TabPanel.vue'
@@ -133,7 +131,6 @@ export default defineComponent({
   name: 'TabManager',
 
   components: {
-    // AuxiliaryPanel,
     DefaultTable,
     TabPanel,
     TabLabel,
@@ -219,20 +216,6 @@ export default defineComponent({
       return key > 0 && (isCreateNew.value || isEmptyValue(recordUuidTabParent.value))
     }
 
-    const listAction = computed(() => {
-      return {
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabsList[currentTab.value].uuid,
-        defaultActionName: language.t('actionMenu.createNewRecord'),
-        tableName: props.tabsList[currentTab.value].tableName,
-        getActionList: () => {
-          return store.getters.getStoredActionsMenu({
-            containerUuid: props.tabsList[currentTab.value].uuid
-          })
-        }
-      }
-    })
-
     function changeShowedRecords() {
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
@@ -264,33 +247,6 @@ export default defineComponent({
     const handleClick = (tabHTML) => {
       const { tabuuid, tabindex } = tabHTML.$attrs
 
-      const inf = store.getters.getContainerInfo
-      const infoTab = props.tabsList.find(row => row.uuid === tabuuid)
-      if (!isEmptyValue(inf)) {
-        if (!isEmptyValue(infoTab)) {
-          if (!isEmptyValue(inf.currentTab)) {
-            store.dispatch('changeTabAttribute', {
-              parentUuid: inf.currentTab.parentUuid,
-              containerUuid: inf.currentTab.containerUuid,
-              attributeName: 'isSelected',
-              attributeValue: false
-            })
-          }
-          const list = store.getters.getTabRecordsList({ containerUuid: infoTab.containerUuid })
-          const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(infoTab.containerUuid))
-          store.dispatch('panelInfo', {
-            currentTab: infoTab,
-            currentRecord
-          })
-          store.dispatch('changeTabAttribute', {
-            parentUuid: infoTab.parentUuid,
-            containerUuid: infoTab.containerUuid,
-            attributeName: 'isSelected',
-            attributeValue: true
-          })
-        }
-      }
-
       setTabNumber(tabindex)
 
       // set metadata tab
@@ -298,9 +254,48 @@ export default defineComponent({
         tabUuid.value = tabuuid
         setCurrentTab()
       }
+
+      const containerInfo = store.getters.getContainerInfo
+      if (!isEmptyValue(containerInfo)) {
+        const currentTabDefinition = props.tabsList.find(row => row.uuid === tabuuid)
+        if (!isEmptyValue(currentTabDefinition)) {
+          if (!isEmptyValue(currentTabDefinition.currentTab)) {
+            store.dispatch('changeTabAttribute', {
+              parentUuid: containerInfo.currentTab.parentUuid,
+              containerUuid: containerInfo.currentTab.containerUuid,
+              attributeName: 'isSelected',
+              attributeValue: false
+            })
+          }
+          const currentTabData = store.getters.getTabData({
+            containerUuid: tabuuid
+          })
+
+          const recordsListTab = currentTabData.recordsList
+          let currentRecord = {}
+          if (isEmptyValue(recordsListTab)) {
+            if (!currentTabData.isLoaded && !currentTabData.isLoading) {
+              // load records
+              getData()
+            }
+          } else {
+            currentRecord = recordsListTab.find(row => row.UUID === store.getters.getUuidOfContainer(currentTabDefinition.containerUuid))
+            store.dispatch('panelInfo', {
+              currentTab: currentTabDefinition,
+              currentRecord
+            })
+          }
+          store.dispatch('changeTabAttribute', {
+            parentUuid: currentTabDefinition.parentUuid,
+            containerUuid: currentTabDefinition.containerUuid,
+            attributeName: 'isSelected',
+            attributeValue: true
+          })
+        }
+      }
     }
 
-    const setTabNumber = (tabNumber = '0') => {
+    function setTabNumber(tabNumber = '0') {
       if (isEmptyValue(tabNumber)) {
         tabNumber = '0'
       }
@@ -340,7 +335,7 @@ export default defineComponent({
       })
     })
 
-    const getData = () => {
+    function getData() {
       const containerUuid = tabUuid.value
       const filters = []
       if (!isEmptyValue(root.$route.query) &&
@@ -451,7 +446,10 @@ export default defineComponent({
             containerUuid: props.tabsList[currentTab.value].uuid
           })
         } else {
-          getData()
+          // if there is no petition in progress
+          if (!tabData.value.isLoading) {
+            getData()
+          }
         }
       }
     })
@@ -500,10 +498,10 @@ export default defineComponent({
       isShowedTabs,
       showedTabsList,
       isMobile,
-      listAction,
       currentTabMetadata,
       recordUuidTabParent,
       isShowedTableRecords,
+      tabData,
       tabStyle,
       // methods
       handleClick,

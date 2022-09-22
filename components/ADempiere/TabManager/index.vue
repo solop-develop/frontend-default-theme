@@ -120,13 +120,10 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
-import language from '@/lang'
 
 // components and mixins
-// import AuxiliaryPanel from '@theme/components/ADempiere/AuxiliaryPanel/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-// import RecordNavigation from '@theme/components/ADempiere/RecordNavigation/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
@@ -142,11 +139,9 @@ export default defineComponent({
   name: 'TabManager',
 
   components: {
-    // AuxiliaryPanel,
     DefaultTable,
     PanelDefinition,
     TabPanel,
-    // RecordNavigation,
     PanelInfo,
     TabLabel,
     TabOptions
@@ -272,36 +267,50 @@ export default defineComponent({
       findRecordLogs(props.allTabsList[0])
       setTabNumber(tabindex)
 
-      const inf = store.getters.getContainerInfo
-      const infoTab = props.tabsList.find(row => row.uuid === tabuuid)
-      if (!isEmptyValue(inf)) {
-        if (!isEmptyValue(infoTab)) {
-          if (!isEmptyValue(inf.currentTab)) {
-            store.dispatch('changeTabAttribute', {
-              parentUuid: inf.currentTab.parentUuid,
-              containerUuid: inf.currentTab.containerUuid,
-              attributeName: 'isSelected',
-              attributeValue: false
-            })
-          }
-          const list = store.getters.getTabRecordsList({ containerUuid: infoTab.containerUuid })
-          const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(infoTab.containerUuid))
-          store.dispatch('panelInfo', {
-            currentTab: infoTab,
-            currentRecord
-          })
-          store.dispatch('changeTabAttribute', {
-            parentUuid: infoTab.parentUuid,
-            containerUuid: infoTab.containerUuid,
-            attributeName: 'isSelected',
-            attributeValue: true
-          })
-        }
-      }
       // set metadata tab
       if (tabUuid.value !== tabuuid) {
         tabUuid.value = tabuuid
         setCurrentTab()
+      }
+
+      const containerInfo = store.getters.getContainerInfo
+      if (!isEmptyValue(containerInfo)) {
+        const currentTabDefinition = props.tabsList.find(row => row.uuid === tabuuid)
+        if (!isEmptyValue(currentTabDefinition)) {
+          if (!isEmptyValue(containerInfo.currentTab)) {
+            store.dispatch('changeTabAttribute', {
+              parentUuid: containerInfo.currentTab.parentUuid,
+              containerUuid: containerInfo.currentTab.containerUuid,
+              attributeName: 'isSelected',
+              attributeValue: false
+            })
+          }
+          const currentTabData = store.getters.getTabData({
+            containerUuid: tabuuid
+          })
+
+          const recordsListTab = currentTabData.recordsList
+
+          let currentRecord = {}
+          if (isEmptyValue(recordsListTab)) {
+            if (!currentTabData.isLoaded && !currentTabData.isLoading) {
+              // load records
+              getData()
+            }
+          } else {
+            currentRecord = recordsListTab.find(row => row.UUID === store.getters.getUuidOfContainer(currentTabDefinition.containerUuid))
+            store.dispatch('panelInfo', {
+              currentTab: currentTabDefinition,
+              currentRecord
+            })
+          }
+          store.dispatch('changeTabAttribute', {
+            parentUuid: currentTabDefinition.parentUuid,
+            containerUuid: currentTabDefinition.containerUuid,
+            attributeName: 'isSelected',
+            attributeValue: true
+          })
+        }
       }
     }
 
@@ -410,20 +419,6 @@ export default defineComponent({
       })
     }
 
-    const listAction = computed(() => {
-      return {
-        parentUuid: props.parentUuid,
-        containerUuid: tabUuid.value,
-        defaultActionName: language.t('actionMenu.createNewRecord'),
-        tableName: props.tabsList[currentTab.value].tableName,
-        getActionList: () => {
-          return store.getters.getStoredActionsMenu({
-            containerUuid: tabUuid.value
-          })
-        }
-      }
-    })
-
     if (isReadyFromGetData.value) {
       getData()
     }
@@ -517,7 +512,6 @@ export default defineComponent({
       currentTabTableName,
       currentTabMetadata,
       tabStyle,
-      listAction,
       tabMetadata,
       showContainerInfo,
       // methods

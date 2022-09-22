@@ -100,8 +100,8 @@
       </el-table-column>
     </el-table>
 
-    <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="20" style="padding-left: 12px">
+    <el-row class="business-partners-footer">
+      <el-col :span="20">
         <custom-pagination
           :total="businessParnerData.recordCount"
           :current-page="pageNumber"
@@ -113,7 +113,7 @@
       </el-col>
 
       <el-col :span="4">
-        <samp style="float: right; padding-top: 4px;">
+        <samp style="float: right;">
           <el-button
             :loading="isLoadingRecords"
             type="success"

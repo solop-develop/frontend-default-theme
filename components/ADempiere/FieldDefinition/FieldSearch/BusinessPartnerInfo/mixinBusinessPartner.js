@@ -60,31 +60,32 @@ export default {
     clearValues() {
       this.setValues(this.blankValues)
     },
-    generateDisplayedValue({ value, name, lastName }) {
+    generateDisplayedValue({ Value, Name, LastName }) {
       let displayedValue
 
-      if (!isEmptyValue(value)) {
-        displayedValue = value
+      if (!isEmptyValue(Value)) {
+        displayedValue = Value
       }
-      if (!isEmptyValue(name)) {
+      if (!isEmptyValue(Name)) {
         if (!isEmptyValue(displayedValue)) {
-          displayedValue += ' - ' + name
+          displayedValue += ' - ' + Name
         } else {
-          displayedValue = name
+          displayedValue = Name
         }
       }
-      if (!isEmptyValue(lastName)) {
-        displayedValue += ' ' + lastName
+      if (!isEmptyValue(LastName)) {
+        displayedValue += ' ' + LastName
       }
 
       return displayedValue
     },
-    setValues({ id, uuid, value, name, lastName, description }) {
+    setValues(rowData) {
       const { parentUuid, containerUuid, columnName, elementName } = this.metadata
+      const { UUID, Value, Name, LastName } = rowData
       const displayedValue = this.generateDisplayedValue({
-        value,
-        name,
-        lastName
+        Value,
+        Name,
+        LastName
       })
 
       // set ID value
@@ -92,7 +93,7 @@ export default {
         parentUuid,
         containerUuid,
         columnName,
-        value: id
+        value: rowData[columnName]
       })
       // set display column (name) value
       this.$store.commit('updateValueOfField', {
@@ -107,7 +108,7 @@ export default {
         parentUuid,
         containerUuid,
         columnName: columnName + '_UUID',
-        value: uuid
+        value: UUID
       })
 
       // set on element name, used by columns views aliases
@@ -117,7 +118,7 @@ export default {
           parentUuid,
           containerUuid,
           columnName: elementName,
-          value: id
+          value: rowData[columnName]
         })
         // set display column (name) value
         this.$store.commit('updateValueOfField', {
@@ -132,9 +133,15 @@ export default {
           parentUuid,
           containerUuid,
           columnName: elementName + '_UUID',
-          value: uuid
+          value: UUID
         })
       }
+      this.$store.dispatch('notifyFieldChange', {
+        containerUuid: this.metadata.containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName: this.metadata.columnName
+      })
     }
   }
 }
