@@ -115,13 +115,7 @@ export default {
         recordSelected = this.blankValues
       }
       if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
-        const recordKeyPress = this.recordsList[0]
-        recordKeyPress.id = this.metadata.columnName
-        this.setValues(recordKeyPress)
-
-        // prevent losing display value with focus
-        this.controlDisplayed = this.generateDisplayedValue(recordKeyPress)
-        return
+        recordSelected = this.recordsList[0]
       }
       recordSelected.id = this.metadata.columnName
       this.setValues(recordSelected)
