@@ -27,7 +27,7 @@
     popper-class="custom-field-bpartner-info"
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
-    :select-when-unmatched="false"
+    :select-when-unmatched="true"
     @select="handleSelect"
     @clear="clearValues"
     @focus="setNewDisplayedValue"
@@ -109,6 +109,25 @@ export default {
       if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
+    },
+    handleSelect(recordSelected) {
+      if (isEmptyValue(recordSelected)) {
+        recordSelected = this.blankValues
+      }
+      if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
+        const recordKeyPress = this.recordsList[0]
+        recordKeyPress.id = this.metadata.columnName
+        this.setValues(recordKeyPress)
+
+        // prevent losing display value with focus
+        this.controlDisplayed = this.generateDisplayedValue(recordKeyPress)
+        return
+      }
+      recordSelected.id = this.metadata.columnName
+      this.setValues(recordSelected)
+
+      // prevent losing display value with focus
+      this.controlDisplayed = this.generateDisplayedValue(recordSelected)
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
