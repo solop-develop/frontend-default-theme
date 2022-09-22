@@ -494,7 +494,7 @@
         ref="dialog"
         :title="$t('form.pos.pinMessage.pin') + infowOverdrawnInvoice.label"
         class="order-dialog-pin"
-        width="40%"
+        width="50%"
         :visible.sync="visible"
         :append-to-body="true"
       >
