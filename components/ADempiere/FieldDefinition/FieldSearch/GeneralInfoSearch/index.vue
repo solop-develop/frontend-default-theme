@@ -27,7 +27,7 @@
     popper-class="custom-field-bpartner-info"
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
-    :select-when-unmatched="false"
+    :select-when-unmatched="true"
     @select="handleSelect"
     @clear="clearValues"
     @focus="setNewDisplayedValue"

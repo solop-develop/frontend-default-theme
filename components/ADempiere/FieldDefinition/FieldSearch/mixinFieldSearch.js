@@ -412,6 +412,9 @@ export default {
       if (isEmptyValue(recordSelected)) {
         recordSelected = this.blankValues
       }
+      if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
+        recordSelected = this.recordsList[0]
+      }
       recordSelected.id = this.metadata.columnName
       this.setValues(recordSelected)
 
