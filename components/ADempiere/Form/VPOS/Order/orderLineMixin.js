@@ -299,22 +299,16 @@ export default {
     },
     displayLabel(row) {
       if (this.isMobile) {
-        if (row.columnName === 'ConvertedAmount') {
-          return false
-        } else if (row.columnName === 'UOM') {
-          return false
-        } else if (row.columnName === 'Discount') {
-          return false
-        } else if (row.columnName === 'DiscountTotal') {
-          return false
-        } else if (row.columnName === 'taxIndicator') {
-          return false
-        } else if (row.columnName === 'DisplayTaxAmount') {
-          return false
+        if (row.columnName === 'LineDescription') {
+          return true
+        } else if (row.columnName === 'CurrentPrice') {
+          return true
+        } else if (row.columnName === 'QtyEntered') {
+          return true
         } else if (row.columnName === 'GrandTotal') {
           return true
         }
-        return true
+        return false
       }
       if (row.columnName === 'ConvertedAmount') {
         return !this.isEmptyValue(this.currentPointOfSales.displayCurrency)
@@ -338,9 +332,9 @@ export default {
         } else if (table.columnName === 'CurrentPrice') {
           return '100px'
         } else if (table.columnName === 'QtyEntered') {
-          return '81px'
+          return '100px'
         } else if (table.columnName === 'GrandTotal') {
-          return '120px'
+          return '81px'
         }
         return
       }
@@ -358,22 +352,21 @@ export default {
       if (columnName === 'LineDescription') {
         if (this.isEmptyValue(row.product.name)) return row.description
         if (this.isEmptyValue(row.product.value)) return row.charge.columnName
+        if (this.isMobile) {
+          return row.product.name
+        }
         return row.product.value + ' - ' + row.product.name
       }
       const currency = this.$store.getters.posAttributes.currentPointOfSales.priceList.currency.iSOCode
       if (columnName === 'CurrentPrice') {
-        if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-          return this.formatPrice(row.price, currency)
-        }
+        let price = row.price
         if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-          return this.formatPrice(row.priceWithTax, currency)
+          price = row.priceWithTax
         }
-        if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          return this.formatPrice(row.price, currency)
+        if (this.isMobile) {
+          return this.formatPrice(price)
         }
-        if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-          return this.formatPrice(row.price, currency)
-        }
+        return this.formatPrice(price, currency)
       } else if (columnName === 'QtyEntered') {
         if (this.isEmptyValue(row.uom.uom)) {
           return formatQuantity({
@@ -401,10 +394,14 @@ export default {
         }
         return Number.parseFloat(taxIndicator).toFixed(2) + ' %'
       } else if (columnName === 'GrandTotal') {
+        let price = row.totalAmountWithTax
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
-          return this.formatPrice(row.totalAmount, currency)
+          price = row.totalAmount
         }
-        return this.formatPrice(row.totalAmountWithTax, currency)
+        if (this.isMobile) {
+          return this.formatPrice(price)
+        }
+        return this.formatPrice(price, currency)
       } else if (columnName === 'ConvertedAmount') {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
           return this.formatPrice(row.price / this.totalAmountConverted, this.currentPointOfSales.displayCurrency.iso_code)
@@ -425,18 +422,6 @@ export default {
       }
       if (columnName === 'CurrentPrice') {
         return row.price
-        // if (this.currentPointOfSales.currentPriceList.isTaxIncluded || this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-        //   return row.price
-        // }
-        // if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
-        //   return row.priceWithTax
-        // }
-        // if (!this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-        //   return row.priceList
-        // }
-        // if (this.currentPointOfSales.isDisplayTaxAmount && this.currentPointOfSales.isDisplayDiscount) {
-        //   return row.priceList
-        // }
       } else if (columnName === 'QtyEntered') {
         if (this.isEmptyValue(row.uom.uom)) {
           return formatQuantity({

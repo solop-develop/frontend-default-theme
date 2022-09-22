@@ -75,7 +75,7 @@
               @current-change="handleCurrentLineChange"
               @shortkey.native="shortcutKeyMethod"
               @cell-click="editCell"
-              @click.native.prevent="focusProducto()"
+              @click.native.prevent="productFocus()"
             >
               <template v-for="(valueOrder, item, key) in orderLineDefinition">
                 <el-table-column
@@ -106,7 +106,7 @@
                         :autofocus="true"
                         controls-position="right"
                         style="width: 100%;"
-                        :precision="isEmptyValue(scope.row.uom) ? 0 : (scope.row.uom.uom.code === 'BX' ? 0 : scope.row.uom.uom.starndard_precision)"
+                        :precision="isEmptyValue(scope.row.uom) ? 0 : scope.row.uom.uom.starndard_precision"
                         @change="changeEdit(scope.row.quantityOrdered, valueOrder.columnName)"
                         @shortkey.native="theActionEdit"
                       />
@@ -1006,7 +1006,7 @@ export default {
           this.listCampaign = responseLookupItem.recordsList
         })
     },
-    focusProducto(value) {
+    productFocus(value) {
       this.$refs.ProductValue[0].$refs.product.focus()
     },
     editCell(row, column) {
@@ -1070,7 +1070,7 @@ export default {
         case 'enter':
           this.$refs.editField[0].select()
           this.exitEdit()
-          this.focusProducto()
+          this.productFocus()
           break
         case 'close':
           this.exitEdit()
