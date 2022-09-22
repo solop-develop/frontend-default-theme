@@ -446,7 +446,10 @@ export default defineComponent({
             containerUuid: props.tabsList[currentTab.value].uuid
           })
         } else {
-          getData()
+          // if there is no petition in progress
+          if (!tabData.value.isLoading) {
+            getData()
+          }
         }
       }
     })
