@@ -20,11 +20,11 @@
   <el-main
     v-shortkey="shortsKey"
     v-loading="isLoadingFields"
-    class="business-partners-list-container"
+    class="accouting-combintantions-list-container"
     style="padding-top: 0px"
     @shortkey.native="keyAction"
   >
-    <el-collapse v-model="activeAccordion" accordion class="business-partners-query-criteria">
+    <el-collapse v-model="activeAccordion" accordion class="accouting-combintantions-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
           {{ title }}
@@ -51,7 +51,7 @@
         <el-button
           type="primary"
           style="float: right;margin-top: 0.5%;margin-bottom: 0.5%;"
-          @click="save()"
+          @click="saveAccoutingCombination()"
         >
           <svg-icon icon-class="save-AD" />
         </el-button>
@@ -61,7 +61,7 @@
     <el-table
       ref="accountCombinationsTable"
       v-loading="isLoadingRecords"
-      class="business-partners-table"
+      class="accouting-combintantions-table"
       :data="recordDataList"
       highlight-current-row
       border
@@ -69,7 +69,7 @@
       :max-height="300"
       size="small"
       @current-change="handleCurrentChange"
-      @row-dblclick="changeBusinessPartner"
+      @row-dblclick="changeRecord"
     >
       <p slot="empty" style="width: 100%;">
         {{ $t('businessPartner.emptyBusinessPartner') }}
@@ -100,7 +100,7 @@
       </el-table-column>
     </el-table>
 
-    <el-row class="business-partners-footer">
+    <el-row class="accouting-combintantions-footer">
       <el-col :span="20">
         <custom-pagination
           :total="businessParnerData.recordCount"
@@ -113,7 +113,7 @@
       </el-col>
 
       <el-col :span="4">
-        <samp style="float: right;">
+        <samp style="float: right; padding-top: 4px;">
           <el-button
             :loading="isLoadingRecords"
             type="success"
@@ -130,7 +130,7 @@
           <el-button
             type="primary"
             icon="el-icon-check"
-            @click="changeBusinessPartner()"
+            @click="changeRecord()"
           />
         </samp>
       </el-col>
@@ -140,18 +140,17 @@
 
 <script>
 // constants
-import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
+import { ACCOUTING_COMBINATIONS_LIST_FORM, COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
 import fieldsList from './fieldsList'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
-import mixinFieldAccount from './mixinFieldAccount.js'
-// import fieldSearchMixin from '../FieldSearch/mixinFieldSearch.js'
+import mixinAccountingCombination from './mixinAccountingCombination.js'
 import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
-// /opt/Development/workspace/epale/frontend-core/src/themes/default/components/ADempiere/DataTable/Components/CellInfo.vue
+
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
@@ -161,7 +160,7 @@ import {
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form'
 
 export default {
-  name: 'PanelAccount',
+  name: 'TableQueryCriteria',
 
   components: {
     CellInfo,
@@ -171,8 +170,7 @@ export default {
   },
 
   mixins: [
-    mixinFieldAccount
-    // fieldSearchMixin
+    mixinAccountingCombination
   ],
 
   props: {
@@ -188,8 +186,8 @@ export default {
       type: Object,
       default: () => {
         return {
-          containerUuid: BUSINESS_PARTNERS_LIST_FORM,
-          columnName: 'C_BPartner_ID'
+          containerUuid: ACCOUTING_COMBINATIONS_LIST_FORM,
+          columnName: COLUMN_NAME
         }
       }
     },
@@ -226,7 +224,7 @@ export default {
       if (!isEmptyValue(this.metadata.containerUuid)) {
         return this.metadata.columnName + '_' + this.metadata.containerUuid
       }
-      return BUSINESS_PARTNERS_LIST_FORM
+      return ACCOUTING_COMBINATIONS_LIST_FORM
     },
     shortsKey() {
       return {
@@ -344,14 +342,15 @@ export default {
   },
 
   mounted() {
-    const display = this.$store.getters.getValueOfField({
+    const accoutingCombinationId = this.$store.getters.getValueOfField({
       containerUuid: this.metadata.containerUuid,
       columnName: this.metadata.columnName
     })
-    if (!this.isEmptyValue(display)) {
-      this.$store.dispatch('getAccountCombination', {
+    console.log(1, this.metadata.columnName, accoutingCombinationId, this.uuidForm)
+    if (!this.isEmptyValue(accoutingCombinationId)) {
+      this.$store.dispatch('getAccountingCombination', {
         containerUuid: this.uuidForm,
-        id: display
+        id: accoutingCombinationId
       })
         .then(response => {
           this.defaultValue(response)
@@ -377,11 +376,12 @@ export default {
 
   methods: {
     defaultValue(row) {
+      console.log(1, row)
       const {
         AD_Client_ID,
         AD_Org_ID,
         Account_ID,
-        Combination,
+        Combination
       } = row.attributes
       this.$store.commit('updateValuesOfContainer', {
         containerUuid: this.uuidForm,
@@ -400,7 +400,7 @@ export default {
         }]
       })
     },
-    save() {
+    saveAccoutingCombination() {
       const attributes = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
@@ -454,7 +454,7 @@ export default {
           break
       }
     },
-    changeBusinessPartner() {
+    changeRecord() {
       if (!isEmptyValue(this.currentRow)) {
         this.closeList()
         this.setValues(this.currentRow)
@@ -610,15 +610,15 @@ export default {
 </script>
 
 <style lang="scss">
-.business-partners-list-container {
-  .business-partners-query-criteria {
+.accouting-combintantions-list-container {
+  .accouting-combintantions-query-criteria {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
     }
   }
 
-  .business-partners-footer {
+  .accouting-combintantions-footer {
     button {
       padding: 4px 8px;
       font-size: 24px;
