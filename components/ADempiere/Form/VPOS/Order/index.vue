@@ -71,7 +71,7 @@
               border
               highlight-current-row
               fit
-              style="overflow: auto;"
+              :class="classOrderLine"
               @current-change="handleCurrentLineChange"
               @shortkey.native="shortcutKeyMethod"
               @cell-click="editCell"
@@ -657,6 +657,12 @@ export default {
         return 'footer-mobile'
       }
       return 'footer-table'
+    },
+    classOrderLine() {
+      if (this.isMobile) {
+        return 'table-mobile'
+      }
+      return 'table'
     },
     classButtomRight() {
       if (this.isMobile) {
@@ -1317,9 +1323,8 @@ export default {
   }
 
   /* Style of Table */
-  .el-table {
+  .table {
     position: relative;
-    overflow: hidden;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     -webkit-box-flex: 1;
@@ -1331,6 +1336,21 @@ export default {
     background-color: #FFFFFF;
     font-size: 14px;
     color: #606266;
+  }
+  .table-mobile {
+    position: relative;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    font-size: 12px;
+    color: #606266;
+    overflow: auto;
   }
   .el-card__header {
     padding: 0px 20px;

@@ -334,7 +334,7 @@ export default {
         } else if (table.columnName === 'QtyEntered') {
           return '100px'
         } else if (table.columnName === 'GrandTotal') {
-          return '81px'
+          return '90px'
         }
         return
       }
