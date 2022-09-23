@@ -24,7 +24,7 @@
   >
     <el-container style="background: white; height: 100%!important;">
       <el-header
-        height="15%"
+        height="100px"
         :style="isShowedPOSKeyLayout ? 'padding-right: 1%; padding-left: 1%;' : 'padding-right: 1%; padding-left: 1%;'"
       >
         <el-form label-position="top" label-width="500px" @submit.native.prevent="notSubmitForm">
@@ -60,9 +60,9 @@
           </el-row>
         </el-form>
       </el-header>
-      <el-main style="background: white; padding: 0px; height: 100% !important; overflow: hidden;z-index: 9">
+      <el-main style="background: white; padding: 0px; height: 100% !important; overflow: auto;z-index: 9">
         <el-container style="background: white; padding: 0px; height: 100% !important;">
-          <el-main style="padding-top: 0px; padding-right: 10px; padding-bottom: 0px; padding-left: 10px;">
+          <el-main style="padding-top: 0px; overflow: auto; padding-right: 10px; padding-bottom: 0px; padding-left: 10px;">
             <el-table
               id="linesOrder"
               ref="linesTable"
@@ -87,7 +87,7 @@
                   :align="valueOrder.isNumeric ? 'right' : 'left'"
                 >
                   <template slot-scope="scope">
-                    <template v-if="isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
+                    <template v-if="!isMobile && isEditQtyOrdered && fileColumnNameEdit === 'CurrentPrice' && valueOrder.columnName === 'CurrentPrice' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
                       <el-input-number
                         ref="editField"
                         v-model="currentPriceTableEdit"
@@ -98,7 +98,7 @@
                         @shortkey.native="theActionEdit"
                       />
                     </template>
-                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
+                    <template v-else-if="!isMobile && isEditQtyOrdered && fileColumnNameEdit === 'QtyEntered' && valueOrder.columnName === 'QtyEntered' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.quantityOrdered"
@@ -117,7 +117,7 @@
                         {{ isEmptyValue(scope.row.uom.uom.symbol) ? scope.row.uom.uom.name : scope.row.uom.uom.symbol }}
                       </span>
                     </template>
-                    <template v-else-if="isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
+                    <template v-else-if="!isMobile && isEditQtyOrdered && fileColumnNameEdit === 'Discount' && valueOrder.columnName === 'Discount' && !isEmptyValue(isEditLine.uuid) && isEditLine.uuid === scope.row.uuid && isValidateDocumentType">
                       <el-input-number
                         ref="editField"
                         v-model="scope.row.discount"
@@ -135,6 +135,18 @@
                         type="text"
                         icon="el-icon-document-copy"
                         @click="copyCode(scope.row)"
+                      />
+                      <el-button
+                        v-show="isMobile && valueOrder.columnName === 'CurrentPrice'"
+                        type="text"
+                        icon="el-icon-edit"
+                        @click="openEditModeMobile(scope.row)"
+                      />
+                      <el-button
+                        v-show="isMobile && valueOrder.columnName === 'QtyEntered'"
+                        type="text"
+                        icon="el-icon-edit"
+                        @click="openEditModeMobile(scope.row)"
                       />
                       {{ displayValue(scope.row, valueOrder) }}
                     </span>
@@ -544,6 +556,19 @@
         @click="isShowedPOSKeyLayout = !isShowedPOSKeyLayout"
       />
     </div>
+    <el-drawer
+      v-if="isMobile"
+      title="Editar Linea"
+      :visible.sync="isEditLineMobile"
+      direction="btt"
+      size="100%"
+    >
+      <edit-line-mobile
+        :data-line="lineRow"
+        :show-field="isEditLineMobile"
+        :current-line="currentLineOrder"
+      />
+    </el-drawer>
   </div>
   <div
     v-else
@@ -567,6 +592,7 @@ import orderLineMixin from './orderLineMixin.js'
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 import BusinessPartner from '@theme/components/ADempiere/Form/VPOS/BusinessPartner/index.vue'
 import fieldLine from '@theme/components/ADempiere/Form/VPOS/Order/line/index'
+import EditLineMobile from '@theme/components/ADempiere/Form/VPOS/Order/line/editLineMobile'
 import ImageProduct from '@theme/components/ADempiere/Form/VPOS/Order/ImageProduct/index'
 // src/themes/pos/components/ADempiere/Form/VPOS/Order/ImageProduct/index.vue
 import ProductInfo from '@theme/components/ADempiere/Form/VPOS/ProductInfo'
@@ -596,7 +622,8 @@ export default {
     ProductInfo,
     FastOrdesList,
     fieldLine,
-    ImageProduct
+    ImageProduct,
+    EditLineMobile
   },
 
   mixins: [
@@ -610,6 +637,8 @@ export default {
       fieldsList: fieldsListOrder,
       seeConversion: false,
       showFieldLine: false,
+      isEditLineMobile: false,
+      lineRow: {},
       pin: '',
       attributePin: {},
       visible: false,
@@ -974,6 +1003,10 @@ export default {
     formatQuantity,
     formatQuantityPanel,
     copyToClipboard,
+    openEditModeMobile(line) {
+      this.lineRow = line
+      this.isEditLineMobile = !this.isEditLineMobile
+    },
     releaseSalesOrder() {
       releaseOrder({
         posUuid: this.currentPointOfSales.uuid,
@@ -1336,6 +1369,7 @@ export default {
     background-color: #FFFFFF;
     font-size: 14px;
     color: #606266;
+    overflow: auto;
   }
   .table-mobile {
     position: relative;
