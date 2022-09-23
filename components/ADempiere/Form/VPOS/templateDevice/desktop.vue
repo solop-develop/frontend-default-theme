@@ -42,7 +42,7 @@
 
         <SplitArea :size="isShowedPOSOptions ? 80 : 99" :min-size="990">
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
-            <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: auto">
+            <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: hidden">
               <order
                 :metadata="metadata"
               />
