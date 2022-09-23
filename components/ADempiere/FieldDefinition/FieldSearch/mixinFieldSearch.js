@@ -20,7 +20,7 @@ import lang from '@/lang'
 import store from '@/store'
 
 // constants
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { DISPLAY_COLUMN_PREFIX, IDENTIFIER_COLUMN_SUFFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
@@ -32,6 +32,7 @@ export default {
   data() {
     return {
       timeOutSearchRecords: null,
+      isLoading: false,
       searchText: '',
       controlDisplayed: this.displayedValue
       // unsubscribe: null
@@ -41,6 +42,13 @@ export default {
   computed: {
     uuidForm() {
       return this.metadata.containerUuid
+    },
+    title() {
+      let title = this.metadata.name
+      if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
+        title += ` (${this.metadata.panelName})`
+      }
+      return title
     },
 
     blankValues() {
@@ -58,6 +66,24 @@ export default {
         containerUuid: this.uuidForm
       })
     },
+    // includes list lookups and default values
+    getStoredLookupsAndDefaultValues() {
+      const allOptions = this.$store.getters.getStoredLookupAll({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        contextColumnNames: this.metadata.reference.contextColumnNames,
+        contextColumnNamesByDefaultValue: this.metadata.contextColumnNames,
+        uuid: this.metadata.uuid,
+        id: this.metadata.id,
+        //
+        tableName: this.metadata.reference.tableName,
+        columnName: this.metadata.columnName,
+        value: this.value
+      })
+
+      return allOptions
+    },
+
     value: {
       get() {
         const { columnName, containerUuid, inTable } = this.metadata
@@ -118,11 +144,10 @@ export default {
     },
     displayedValue: {
       get() {
-        const display = store.getters.getValueOfField({
+        return store.getters.getValueOfField({
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.displayColumnName
         })
-        return display
       },
       set(value) {
         store.commit('updateValueOfField', {
@@ -132,6 +157,32 @@ export default {
         })
       }
     },
+    uuidValue: {
+      get() {
+        if (this.metadata.inTable) {
+          return undefined
+        }
+        return this.$store.getters.getValueOfFieldOnContainer({
+          parentUuid: this.metadata.parentUuid,
+          containerUuid: this.metadata.containerUuid,
+          // 'ColumnName'_UUID
+          columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+        })
+      },
+      set(value) {
+        if (this.metadata.inTable) {
+          return undefined
+        }
+        this.$store.commit('updateValueOfField', {
+          parentUuid: this.metadata.parentUuid,
+          containerUuid: this.metadata.containerUuid,
+          // 'ColumnName'_UUID
+          columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
+          value
+        })
+      }
+    },
+
     storedIdentifierColumns() {
       const listIdentifier = this.$store.getters.getIdentifier({
         containerUuid: this.uuidForm
@@ -208,6 +259,56 @@ export default {
       })
     },
 
+    /**
+     * Set displayed value from lookup list or default value
+     * @returns
+     */
+    setDisplayedValue() {
+      const value = this.value
+      // if empty clear all values
+      if (isEmptyValue(value)) {
+        this.displayedValue = undefined
+        this.uuidValue = undefined
+        return
+      }
+
+      // find local list value
+      const optionsList = this.getStoredLookupsAndDefaultValues
+      const option = optionsList.find(item => item.value === value)
+      if (option) {
+        if (!isEmptyValue(option.uuid)) {
+          this.uuidValue = option.uuid
+        }
+
+        if (!isEmptyValue(option.displayedValue)) {
+          this.displayedValue = option.displayedValue
+        }
+      }
+
+      // with displayed value
+      if (!isEmptyValue(this.displayedValue)) {
+        return
+      }
+
+      // request lookup
+      this.getValueOfLookup()
+    },
+    getValueOfLookup() {
+      this.isLoading = true
+      this.getDefaultValueFromServer()
+        .then(responseLookupItem => {
+          // with value response update local component list
+          if (!this.isEmptyValue(responseLookupItem)) {
+            this.value = responseLookupItem.value
+            this.displayedValue = responseLookupItem.displayedValue
+            this.uuidValue = responseLookupItem.uuid
+          }
+        })
+        .finally(() => {
+          this.isLoading = false
+        })
+    },
+
     localSearch(stringToMatch, callBack) {
       if (isEmptyValue(stringToMatch)) {
         // not show list
@@ -281,7 +382,7 @@ export default {
         parentUuid,
         containerUuid,
         columnName,
-        value: this.isEmptyValue(id) ? rowData[IdentifierTable + '_ID'] : id
+        value: this.isEmptyValue(id) ? rowData[IdentifierTable + IDENTIFIER_COLUMN_SUFFIX] : id
       })
       // set display column (name) value
       this.$store.commit('updateValueOfField', {
@@ -295,7 +396,7 @@ export default {
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
-        columnName: columnName + '_UUID',
+        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
         value: uuid
       })
 
@@ -320,7 +421,7 @@ export default {
         this.$store.commit('updateValueOfField', {
           parentUuid,
           containerUuid,
-          columnName: elementName + '_UUID',
+          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
           value: uuid
         })
       }

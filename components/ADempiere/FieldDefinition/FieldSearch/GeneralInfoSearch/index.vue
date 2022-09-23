@@ -113,9 +113,16 @@ export default {
     }
   },
 
+  beforeMount() {
+    if (this.metadata.displayed) {
+      this.setDisplayedValue()
+    }
+  },
+
   methods: {
     remoteSearch(searchValue) {
       return new Promise(resolve => {
+        this.isLoading = true
         this.containerManager.generalInfoSearch({
           containerUuid: this.metadata.containerUuid,
           parentUuid: this.metadata.containerUuid,
@@ -137,6 +144,9 @@ export default {
 
             this.whitOutResultsMessage()
             resolve([])
+          })
+          .finally(() => {
+            this.isLoading = false
           })
       })
     }
