@@ -391,7 +391,7 @@ export default {
       // Establish
       this.setContainerInformation()
       // get stored list values
-      const list = this.getStoredLookupList
+      const list = this.getStoredLookupAll
       // refresh local list component
       this.optionsList = list
       if (isShowList) {

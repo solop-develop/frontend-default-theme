@@ -104,6 +104,12 @@ export default {
     }
   },
 
+  beforeMount() {
+    if (this.metadata.displayed) {
+      this.setDisplayedValue()
+    }
+  },
+
   methods: {
     keyPressField() {
       if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
@@ -130,6 +136,7 @@ export default {
           parentUuid = this.metadata.containerUuid
         }
 
+        this.isLoading = true
         this.containerManager.getSearchInfoList({
           parentUuid,
           containerUuid: this.metadata.containerUuid,
@@ -151,6 +158,9 @@ export default {
 
             this.whitOutResultsMessage()
             resolve([])
+          })
+          .finally(() => {
+            this.isLoading = false
           })
       })
     }
