@@ -444,6 +444,17 @@ export default {
     },
     handleCurrentChange(row) {
       this.currentRow = row
+
+      const attibutesList = convertObjectToKeyValue({
+        object: row,
+        keyName: 'columnName',
+        valueName: 'value'
+      })
+
+      this.$store.commit('updateValuesOfContainer', {
+        containerUuid: this.uuidForm,
+        attributes: attibutesList
+      })
     },
     keyAction(event) {
       switch (event.srcKey) {
