@@ -119,7 +119,8 @@ export default {
         containerUuid: this.metadata.containerUuid,
         containerManager: this.containerManager,
         field: this.metadata,
-        columnName: this.metadata.columnName
+        columnName: this.metadata.columnName,
+        value: id
       })
     }
   }
