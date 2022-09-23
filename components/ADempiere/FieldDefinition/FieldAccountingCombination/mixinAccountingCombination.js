@@ -120,7 +120,7 @@ export default {
         containerManager: this.containerManager,
         field: this.metadata,
         columnName: this.metadata.columnName,
-        value: id
+        newValue: id
       })
     }
   }
