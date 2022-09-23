@@ -47,7 +47,7 @@
       </span> -->
     </template>
 
-    <button-account
+    <button-to-list
       slot="append"
       :parent-metadata="metadata"
       :container-manager="containerManager"
@@ -61,10 +61,10 @@
 import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 
 // components and mixins
+import ButtonToList from './buttonToList.vue'
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
-import mixinFieldAccount from './mixinFieldAccount.js'
-import ButtonAccount from './button.vue'
+import mixinAccountingCombination from './mixinAccountingCombination.js'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -73,13 +73,13 @@ export default {
   name: 'FieldAccount',
 
   components: {
-    ButtonAccount
+    ButtonToList
   },
 
   mixins: [
     fieldMixin,
     fieldSearchMixin,
-    mixinFieldAccount
+    mixinAccountingCombination
   ],
 
   props: {

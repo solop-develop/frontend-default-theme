@@ -18,13 +18,13 @@
 
 <template>
   <el-popover
-    ref="businessParnerListPopover"
+    ref="tableQueryCriteriaPopover"
     v-model="showedPopoverGeneralInfoPanel"
     placement="top"
     width="1200"
     trigger="click"
   >
-    <panel-account
+    <table-query-criteria
       v-if="showedPopoverGeneralInfoPanel"
       :show-popover="showedPopoverGeneralInfoPanel"
       :metadata="parentMetadata"
@@ -44,13 +44,13 @@
 <script>
 import store from '@/store'
 
-import PanelAccount from './panel.vue'
+import TableQueryCriteria from './tableQueryCriteria.vue'
 
 export default {
-  name: 'ButtonAccount',
+  name: 'ButtonToList',
 
   components: {
-    PanelAccount
+    TableQueryCriteria
   },
 
   props: {
@@ -91,7 +91,9 @@ export default {
     },
     showedPopoverGeneralInfoPanel: {
       get() {
-        return store.getters.getAccountCombinationsShow({ containerUuid: this.uuidForm })
+        return store.getters.getAccountCombinationsShow({
+          containerUuid: this.uuidForm
+        })
       },
       set(value) {
         store.commit('setAccountCombinationsShow', {
