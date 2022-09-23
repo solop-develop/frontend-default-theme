@@ -115,6 +115,13 @@ export default {
           value: uuid
         })
       }
+      this.$store.dispatch('notifyFieldChange', {
+        containerUuid: this.metadata.containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName: this.metadata.columnName,
+        newValue: id
+      })
     }
   }
 }
