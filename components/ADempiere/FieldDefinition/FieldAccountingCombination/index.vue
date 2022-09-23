@@ -18,13 +18,13 @@
 
 <template>
   <el-autocomplete
-    ref="displayBPartner"
+    :ref=" metadata.columnName"
     v-model="displayedValue"
     v-bind="commonsProperties"
     value-key="name"
     clearable
     style="width: 100%;"
-    popper-class="custom-field-bpartner-info"
+    popper-class="custom-field-accouting-combination"
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
     :select-when-unmatched="false"
@@ -70,7 +70,7 @@ import mixinAccountingCombination from './mixinAccountingCombination.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
-  name: 'FieldAccount',
+  name: 'FieldAccountingCombination',
 
   components: {
     ButtonToList
@@ -104,11 +104,10 @@ export default {
     },
     displayedValue: {
       get() {
-        const display = this.$store.getters.getValueOfField({
+        return this.$store.getters.getValueOfField({
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.displayColumnName
         })
-        return display
       },
       set(value) {
         this.$store.commit('updateValueOfField', {
@@ -119,9 +118,16 @@ export default {
       }
     }
   },
+
+  beforeMount() {
+    if (this.metadata.displayed) {
+      this.setDisplayedValue()
+    }
+  },
+
   methods: {
     keyPressField() {
-      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
+      if (!this.isEmptyValue(this.$refs[this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
     },
@@ -161,7 +167,7 @@ export default {
 </script>
 
 <style lang="scss">
-.custom-field-bpartner-info {
+.custom-field-accouting-combination {
   // button icon suffix
   .button-search {
     padding-left: 10px !important;
@@ -174,7 +180,7 @@ export default {
 }
 </style>
 <style lang="scss" scope>
-.custom-field-bpartner-info {
+.custom-field-accouting-combination {
   // items of lust
   li {
     line-height: normal;
