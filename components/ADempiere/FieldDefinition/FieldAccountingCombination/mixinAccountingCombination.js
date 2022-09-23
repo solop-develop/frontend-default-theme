@@ -17,13 +17,16 @@
  */
 
 // constants
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import {
+  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
+import { COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
-  name: 'mixinFieldAccount',
+  name: 'mixinAccountingCombination',
 
   props: {
     metadata: {
@@ -32,8 +35,8 @@ export default {
         return {
           parentUuid: undefined,
           containerUuid: undefined,
-          columnName: 'C_BPartner_ID',
-          elementName: 'C_BPartner_ID'
+          columnName: COLUMN_NAME,
+          elementName: COLUMN_NAME
         }
       }
     }
@@ -51,7 +54,7 @@ export default {
       }
     },
     recordsList() {
-      return this.$store.getters.getBusinessPartnerRecordsList({
+      return this.$store.getters.getAccountCombinationsRecordsList({
         containerUuid: this.uuidForm
       })
     }
@@ -60,37 +63,16 @@ export default {
     clearValues() {
       this.setValues(this.blankValues)
     },
-    generateDisplayedValue({ value, name, lastName }) {
-      let displayedValue
-
-      if (!isEmptyValue(value)) {
-        displayedValue = value
-      }
-      if (!isEmptyValue(name)) {
-        if (!isEmptyValue(displayedValue)) {
-          displayedValue += ' - ' + name
-        } else {
-          displayedValue = name
-        }
-      }
-      if (!isEmptyValue(lastName)) {
-        displayedValue += ' ' + lastName
-      }
-
-      return displayedValue
-    },
     setValues(rowData) {
       const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const { [columnName]: id, UUID: uuid, IdentifierTable } = rowData
-
-      const displayedValue = this.generateDisplayedValue(rowData)
+      const { C_ValidCombination_ID: id, UUID: uuid, Combination: displayedValue } = rowData
 
       // set ID value
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
         columnName,
-        value: this.isEmptyValue(id) ? rowData[IdentifierTable + '_ID'] : id
+        value: id
       })
       // set display column (name) value
       this.$store.commit('updateValueOfField', {
@@ -104,7 +86,7 @@ export default {
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
-        columnName: columnName + '_UUID',
+        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
         value: uuid
       })
 
@@ -129,7 +111,7 @@ export default {
         this.$store.commit('updateValueOfField', {
           parentUuid,
           containerUuid,
-          columnName: elementName + '_UUID',
+          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
           value: uuid
         })
       }

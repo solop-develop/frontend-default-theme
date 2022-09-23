@@ -44,12 +44,15 @@
                 parentUuid: metadata.parentUuid
               }"
               :container-uuid="'Business-Partner-List'"
-              :container-manager="containerManagerBPList"
+              :container-manager="containerManagerSearchList"
             />
           </el-row>
         </el-form>
+
         <el-button
           type="primary"
+          class="button-save"
+          plain
           style="float: right;margin-top: 0.5%;margin-bottom: 0.5%;"
           @click="saveAccoutingCombination()"
         >
@@ -62,17 +65,18 @@
       ref="accountCombinationsTable"
       v-loading="isLoadingRecords"
       class="accouting-combintantions-table"
-      :data="recordDataList"
+      :data="recordsList"
       highlight-current-row
       border
       fit
-      :max-height="300"
+      :height="200"
+      :max-height="400"
       size="small"
       @current-change="handleCurrentChange"
       @row-dblclick="changeRecord"
     >
       <p slot="empty" style="width: 100%;">
-        {{ $t('businessPartner.emptyBusinessPartner') }}
+        {{ $t('notifications.searchWithOutRecords') }}
       </p>
 
       <index-column
@@ -92,9 +96,9 @@
             :parent-uuid="metadata.parentUuid"
             :container-uuid="uuidForm"
             :field-attributes="head"
-            :container-manager="containerManagerBPList"
+            :container-manager="containerManagerSearchList"
             :scope="scope"
-            :data-row="scope.row.attributes"
+            :data-row="scope.row"
           />
         </template>
       </el-table-column>
@@ -103,11 +107,11 @@
     <el-row class="accouting-combintantions-footer">
       <el-col :span="20">
         <custom-pagination
-          :total="businessParnerData.recordCount"
+          :total="recordData.recordCount"
           :current-page="pageNumber"
-          :container-manager="containerManagerBPList"
+          :container-manager="containerManagerSearchList"
           :handle-change-page="setPage"
-          :records-page="recordDataList.length"
+          :records-page="recordsList.length"
           :selection="selection"
         />
       </el-col>
@@ -118,7 +122,7 @@
             :loading="isLoadingRecords"
             type="success"
             icon="el-icon-refresh-right"
-            @click="findListAccount();"
+            @click="searchRecordsList();"
           />
 
           <el-button
@@ -142,7 +146,7 @@
 // constants
 import { ACCOUTING_COMBINATIONS_LIST_FORM, COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
 import fieldsList from './fieldsList'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
 import mixinAccountingCombination from './mixinAccountingCombination.js'
@@ -153,6 +157,7 @@ import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexC
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
+import { convertObjectToKeyValue } from '@/utils/ADempiere/valueFormat'
 import {
   // createFieldFromDefinition,
   createFieldFromDictionary
@@ -202,7 +207,6 @@ export default {
       activeAccordion: 'query-criteria',
       fieldsList,
       metadataList: [],
-      recordDataList: [],
       timeOutRecords: null,
       timeOutUpdate: null,
       isLoadingRecords: false,
@@ -213,18 +217,18 @@ export default {
   },
 
   computed: {
-    title() {
-      let title = this.$t('form.pos.order.BusinessPartnerCreate.businessPartner')
-      if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
-        title += ` (${this.metadata.panelName})`
-      }
-      return title
-    },
     uuidForm() {
       if (!isEmptyValue(this.metadata.containerUuid)) {
         return this.metadata.columnName + '_' + this.metadata.containerUuid
       }
       return ACCOUTING_COMBINATIONS_LIST_FORM
+    },
+    title() {
+      let title = this.metadata.panelName
+      if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
+        title += ` (${this.metadata.name})`
+      }
+      return title
     },
     shortsKey() {
       return {
@@ -238,7 +242,7 @@ export default {
       }
       return 1
     },
-    containerManagerBPList() {
+    containerManagerSearchList() {
       return {
         ...this.containerManager,
         ...containerManagerForm,
@@ -289,16 +293,16 @@ export default {
         }
       })
     },
-    businessParnerData() {
-      return this.$store.getters.getBusinessPartnerData({
+    recordData() {
+      return this.$store.getters.getAccountCombinationsData({
         containerUuid: this.uuidForm
       })
     },
     pageNumber() {
-      return this.businessParnerData.pageNumber
+      return this.recordData.pageNumber
     },
     isReadyFromGetData() {
-      const { isLoaded } = this.businessParnerData
+      const { isLoaded } = this.recordData
       return !isLoaded && this.showPopover
     },
     currentRow: {
@@ -318,20 +322,54 @@ export default {
       return this.$store.getters.getCurrentAccountCombinations({
         containerUuid: this.uuidForm
       })
+    },
+
+    accoutingCombinationId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.metadata.containerUuid,
+        columnName: this.metadata.columnName
+      })
+    },
+
+    // context attributes values
+    acctSchemaId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'C_AcctSchema_ID'
+      })
+    },
+    organizationId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'AD_Org_ID'
+      })
+    },
+    accoutId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'Account_ID'
+      })
+    },
+    contextAttributesList() {
+      return [
+        { columnName: 'C_AcctSchema_ID', value: this.acctSchemaId },
+        { columnName: 'AD_Org_ID', value: this.organizationId },
+        { columnName: 'Account_ID', value: this.accoutId }
+      ]
     }
   },
 
   watch: {
     // isReadyFromGetData(isToLoad) {
     //   if (isToLoad) {
-    //     this.findListAccount()
+    //     this.searchRecordsList()
     //   }
     // },
     showPopover(value) {
       if (value && isEmptyValue(this.metadataList)) {
         clearTimeout(this.timeOutFields)
         this.timeOutFields = setTimeout(() => {
-          this.setFieldsList()
+          this.getFieldsList()
         }, 500)
       }
     }
@@ -342,15 +380,10 @@ export default {
   },
 
   mounted() {
-    const accoutingCombinationId = this.$store.getters.getValueOfField({
-      containerUuid: this.metadata.containerUuid,
-      columnName: this.metadata.columnName
-    })
-    console.log(1, this.metadata.columnName, accoutingCombinationId, this.uuidForm)
-    if (!this.isEmptyValue(accoutingCombinationId)) {
+    if (!this.isEmptyValue(this.accoutingCombinationId)) {
       this.$store.dispatch('getAccountingCombination', {
         containerUuid: this.uuidForm,
-        id: accoutingCombinationId
+        id: this.accoutingCombinationId
       })
         .then(response => {
           this.defaultValue(response)
@@ -365,7 +398,7 @@ export default {
     if (this.showPopover) {
       clearTimeout(this.timeOutFields)
       this.timeOutFields = setTimeout(() => {
-        this.setFieldsList()
+        this.getFieldsList()
       }, 500)
     }
   },
@@ -376,65 +409,38 @@ export default {
 
   methods: {
     defaultValue(row) {
-      console.log(1, row)
-      const {
-        AD_Client_ID,
-        AD_Org_ID,
-        Account_ID,
-        Combination
-      } = row.attributes
+      const attibutesList = convertObjectToKeyValue({
+        object: row.attributes,
+        keyName: 'columnName',
+        valueName: 'value'
+      })
+
       this.$store.commit('updateValuesOfContainer', {
         containerUuid: this.uuidForm,
-        attributes: [{
-          columnName: 'AD_Org_ID',
-          value: AD_Org_ID
-        }, {
-          columnName: 'AD_Client_ID',
-          value: AD_Client_ID
-        }, {
-          columnName: 'Account_ID',
-          value: Account_ID
-        }, {
-          columnName: 'Combination',
-          value: Combination
-        }]
+        attributes: attibutesList
       })
     },
     saveAccoutingCombination() {
       const attributes = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
-      }).filter(item => !item.columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !item.columnName.includes('_UUID')).map(item => {
-        return {
-          value: item.value,
-          key: item.columnName
-        }
-      })
-      const contextAttributesList = this.$store.getters.getValuesView({
-        containerUuid: this.uuidForm,
-        format: 'array'
-      }).filter(item => item.columnName === 'Account_ID' || item.columnName === 'AD_Org_ID').map(item => {
+      }).filter(item => {
+        return item.columnName !== 'Combination' &&
+          this.metadataList.find(itemDefinition => itemDefinition.columnName === item.columnName)
+      }).map(item => {
         return {
           value: item.value,
           key: item.columnName
         }
       })
 
-      const acctSchemaId = this.$store.getters.getValueOfField({
-        containerUuid: this.metadata.containerUuid,
-        columnName: 'C_AcctSchema_ID'
-      })
-      contextAttributesList.push({
-        key: 'C_AcctSchema_ID',
-        value: acctSchemaId
-      })
       this.$store.dispatch('saveAccountCombinations', {
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.uuidForm,
         attributes,
-        contextAttributes: contextAttributesList
+        contextAttributesList: this.contextAttributesList
       })
-      this.findListAccount()
+      this.searchRecordsList()
     },
     handleCurrentChange(row) {
       this.currentRow = row
@@ -446,7 +452,7 @@ export default {
            * TODO: When refreshing you are making 2 list requests, you can be the
            * observer that activates the second request
           */
-          this.findListAccount()
+          this.searchRecordsList()
           break
 
         case 'close':
@@ -456,8 +462,8 @@ export default {
     },
     changeRecord() {
       if (!isEmptyValue(this.currentRow)) {
-        this.closeList()
         this.setValues(this.currentRow)
+        this.closeList()
       }
     },
     closeList() {
@@ -467,21 +473,30 @@ export default {
       })
     },
     setPage(pageNumber) {
-      this.findListAccount(pageNumber)
+      this.searchRecordsList(pageNumber)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          if (mutation.payload.containerUuid === this.uuidForm && !this.isEmptyValue(mutation.payload.value) && !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !mutation.payload.columnName.includes('_UUID')) {
+          const { columnName } = mutation.payload
+          if (mutation.payload.containerUuid === this.uuidForm && !columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)) {
+            // not included in the query criteria filter
+            if (columnName === 'Alias') {
+              return
+            }
+            // mandatory values
+            if (this.isEmptyValue(mutation.payload.value) && ['AD_Org_ID', 'Account_ID'].includes(columnName)) {
+              return
+            }
             clearTimeout(this.timeOutUpdate)
             this.timeOutUpdate = setTimeout(() => {
-              this.findListAccount()
+              this.searchRecordsList()
             }, 1800)
           }
         }
       })
     },
-    setFieldsList() {
+    getFieldsList() {
       const list = []
       this.isLoadingFields = true
       this.fieldsList.forEach(element => {
@@ -503,7 +518,7 @@ export default {
           })
       })
     },
-    findListAccount(pageNumber = 0, isConvert = true) {
+    searchRecordsList(pageNumber = 0, isConvert = true) {
       let parentUuid = this.metadata.parentUuid
       if (isEmptyValue(parentUuid)) {
         parentUuid = this.metadata.containerUuid
@@ -511,34 +526,32 @@ export default {
       const filters = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
-      }).filter(item => !this.isEmptyValue(item.value) && !item.columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !item.columnName.includes('_UUID'))
-      const contextAttributesList = this.$store.getters.getValuesView({
-        containerUuid: this.uuidForm,
-        format: 'array'
-      }).filter(item => item.columnName === 'Account_ID' || item.columnName === 'AD_Org_ID')
-      this.isLoadingRecords = true
-      if (this.isEmptyValue(contextAttributesList) && contextAttributesList.length === 2) {
-        return
-      }
+      }).filter(item => {
+        return !this.isEmptyValue(item.value) &&
+          item.columnName !== 'Combination' &&
+          item.columnName !== 'Alias' &&
+          this.metadataList.find(itemDefinition => itemDefinition.columnName === item.columnName)
+          // !item.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+          // !ROW_KEY_ATTRIBUTES.includes(item.columnName) &&
+          // !item.columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)
+      })
+
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
         this.$store.dispatch('listAccountCombinations', {
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.uuidForm,
-          contextAttributesList,
-          contextColumnNames: [this.metadata.columnName],
-          uuid: this.metadata.uuid,
+          contextAttributesList: this.contextAttributesList,
           filters,
           pageNumber
         })
           .then(response => {
-            this.recordDataList = response
             if (isEmptyValue(response)) {
               this.$message({
                 type: 'warning',
                 showClose: true,
-                message: this.metadata.name + this.$t('infoSearch.notFound')
+                message: this.$t('notifications.searchWithOutRecords')
               })
             }
 
@@ -552,58 +565,6 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
-    },
-    setValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const { [columnName]: id, UUID: uuid, IdentifierTable } = rowData
-      // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value: this.isEmptyValue(id) ? rowData[IdentifierTable + '_ID'] : id
-      })
-      // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
-        value: rowData.Combination
-      })
-      // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + '_UUID',
-        value: uuid
-      })
-
-      // set on element name, used by columns views aliases
-      if (!isEmptyValue(elementName) && columnName !== elementName) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value: id
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: rowData.Combination
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + '_UUID',
-          value: uuid
-        })
-      }
     }
   }
 }
@@ -615,6 +576,13 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
+    }
+
+    .button-save {
+      padding: 2px 6px;
+      svg {
+        font-size: 30px !important;
+      }
     }
   }
 
