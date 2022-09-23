@@ -57,6 +57,32 @@ export default {
       return this.$store.getters.getAccountCombinationsRecordsList({
         containerUuid: this.uuidForm
       })
+    },
+    // context attributes values
+    acctSchemaId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'C_AcctSchema_ID'
+      })
+    },
+    organizationId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'AD_Org_ID'
+      })
+    },
+    accoutId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'Account_ID'
+      })
+    },
+    contextAttributesList() {
+      return [
+        { columnName: 'C_AcctSchema_ID', value: this.acctSchemaId },
+        { columnName: 'AD_Org_ID', value: this.organizationId },
+        { columnName: 'Account_ID', value: this.accoutId }
+      ]
     }
   },
   methods: {

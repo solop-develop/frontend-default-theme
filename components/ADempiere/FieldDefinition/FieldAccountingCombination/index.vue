@@ -17,43 +17,29 @@
 -->
 
 <template>
-  <el-autocomplete
-    :ref=" metadata.columnName"
-    v-model="displayedValue"
+  <el-input
+    v-model="value"
     v-bind="commonsProperties"
-    value-key="name"
-    clearable
-    style="width: 100%;"
-    popper-class="custom-field-accouting-combination"
-    :trigger-on-focus="false"
-    :fetch-suggestions="localSearch"
-    :select-when-unmatched="false"
-    @select="handleSelect"
-    @clear="clearValues"
+    type="text"
+    :autofocus="metadata.inTable"
+    show-word-limit
+    @change="handleSelect"
+    @blur="focusLost"
     @focus="setNewDisplayedValue"
-    @blur="setOldDisplayedValue"
+    @keydown.native="keyPressed"
+    @keyup.native="keyReleased"
+    @keyup.native.enter="actionKeyPerformed"
+    @submit="false"
   >
-    <!--
-    @keyup.enter.native="getBPartnerWithEnter"
-      -->
-    <template slot-scope="recordRow">
-      <div class="header">
-        <!-- <b> -->
-        {{ recordRow.item }}
-        <!-- {{ recordRow.item.lastName }}</b> -->
-      </div>
-      <!-- <span class="info">
-        {{ recordRow.item.Value }} {{ recordRow.item.TaxId }} {{ recordRow.item.Description }}
-      </span> -->
+    <template slot="append">
+      <button-to-list
+        slot="append"
+        :parent-metadata="metadata"
+        :container-manager="containerManager"
+        :is-disabled="isDisabled"
+      />
     </template>
-
-    <button-to-list
-      slot="append"
-      :parent-metadata="metadata"
-      :container-manager="containerManager"
-      :is-disabled="isDisabled"
-    />
-  </el-autocomplete>
+  </el-input>
 </template>
 
 <script>
@@ -102,7 +88,7 @@ export default {
     uuidForm() {
       return this.metadata.containerUuid
     },
-    displayedValue: {
+    value: {
       get() {
         return this.$store.getters.getValueOfField({
           containerUuid: this.metadata.containerUuid,
@@ -130,6 +116,36 @@ export default {
       if (!this.isEmptyValue(this.$refs[this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
+    },
+    handleSelect(value) {
+      this.$store.dispatch('getAccountingCombination', {
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.uuidForm,
+        // contextAttributesList: this.contextAttributesList,
+        value
+      })
+        .then(response => {
+          const { tableName, id, attributes } = response
+          const rowData = {
+            ...attributes,
+            tableName,
+            id
+          }
+          this.setValues(rowData)
+          if (isEmptyValue(response)) {
+            this.$message({
+              type: 'warning',
+              showClose: true,
+              message: this.$t('notifications.searchWithOutRecords')
+            })
+          }
+        })
+        .finally(() => {
+          this.isLoadingRecords = false
+        })
+    },
+    actionKeyPerformed(value) {
+      this.handleSelect(this.value)
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
