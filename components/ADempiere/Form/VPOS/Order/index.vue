@@ -667,9 +667,6 @@ export default {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
-    isShowedPOSKeyLaout() {
-      return this.$store.getters.getShowPOSKeyLayout
-    },
     currentPriceTableEdit: {
       get(value) {
         return this.currentValuePriceLine(this.currentLineOrder)
