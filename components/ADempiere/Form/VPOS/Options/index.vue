@@ -1173,7 +1173,7 @@ export default {
           this.optionPin(this.attributePin)
           this.$message({
             type: 'success',
-            message: 'Acción a realizar',
+            message: this.$t('pointOfSales.pin.validateSuccessfully'),
             showClose: true
           })
         })
@@ -1477,7 +1477,7 @@ export default {
     },
     addCount(discountAmount) {
       this.$message({
-        message: 'Acción a realizar',
+        message: this.$t('pointOfSales.pin.validateSuccessfully'),
         showClose: true
       })
       this.$store.dispatch('updateOrder', {
@@ -1502,7 +1502,7 @@ export default {
     },
     SalesDiscount(discountRateOff) {
       this.$message({
-        message: 'Acción a realizar',
+        message: this.$t('pointOfSales.pin.validateSuccessfully'),
         showClose: true
       })
       this.$store.dispatch('updateOrder', {

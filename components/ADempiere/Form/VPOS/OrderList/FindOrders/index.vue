@@ -62,7 +62,7 @@
           width="155"
         >
           <template slot="header" slot-scope="scope">
-            Fecha de Orden
+            {{ $t('pointOfSales.order.dateOfOrder') }}
             <el-button-group
               style="display: inline-grid;vertical-align: inherit;"
             >

@@ -132,7 +132,7 @@ export default {
     cashClose() {
       this.$store.commit('setShowCashSummaryMovements', false)
       this.$message({
-        message: 'Acción a realizar',
+        message: this.$t('pointOfSales.pin.validateSuccessfully'),
         showClose: true
       })
       cashClosing({
