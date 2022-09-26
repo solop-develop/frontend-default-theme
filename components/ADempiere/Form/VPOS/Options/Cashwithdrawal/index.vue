@@ -1065,7 +1065,7 @@ export default {
       })
       this.$store.commit(this.currentPanel.commit, false)
       this.$message({
-        message: 'Acción a realizar',
+        message: this.$t('pointOfSales.pin.validateSuccessfully'),
         showClose: true
       })
       cashWithdrawal({

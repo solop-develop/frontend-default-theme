@@ -1087,7 +1087,7 @@ export default {
           this.visiblePin = false
           this.$message({
             type: 'success',
-            message: 'Acción a realizar',
+            message: this.$t('pointOfSales.pin.validateSuccessfully'),
             showClose: true
           })
           if (!this.isEmptyValue(this.refundOptionVAlidate)) {
@@ -1624,7 +1624,7 @@ export default {
             .catch((error) => {
               this.$message({
                 type: 'info',
-                message: 'Error no se a podido conectar con la impresora' + error.message,
+                message: this.$t('pointOfSales.print.cloudNotConnectPirnter') + error.message,
                 showClose: true
               })
               this.$store.dispatch('reloadOrder', response.uuid)

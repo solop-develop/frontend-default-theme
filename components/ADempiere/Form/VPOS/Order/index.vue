@@ -280,7 +280,8 @@
                 >
                   <span>
                     <el-icon class="el-icon-document" />
-                    Tipo de Documento: <b style="cursor: pointer"> {{ currentDocumentType.name }} </b>
+                    {{ $t('pointOfSales.order.documentType') }}:
+                    <b style="cursor: pointer"> {{ currentDocumentType.name }} </b>
                   </span>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item
@@ -558,7 +559,7 @@
     </div>
     <el-drawer
       v-if="isMobile"
-      title="Editar Linea"
+      :title="$t('pointOfSales.orderLine.edit')"
       :visible.sync="isEditLineMobile"
       direction="btt"
       size="100%"

@@ -200,7 +200,7 @@ export default {
     },
     unassignSeller() {
       this.$message({
-        message: 'Acción a realizar',
+        message: this.$t('pointOfSales.pin.validateSuccessfully'),
         showClose: true
       })
       this.$store.commit('setShowUnassignSeller', false)
@@ -265,7 +265,7 @@ export default {
     },
     assignSeller() {
       this.$message({
-        message: 'Acción a realizar',
+        message: this.$t('pointOfSales.pin.validateSuccessfully'),
         showClose: true
       })
       this.$store.commit('setShowAssignSeller', false)

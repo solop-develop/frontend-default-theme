@@ -285,7 +285,7 @@ export default {
           this.pinAction(this.attributePin)
           this.$message({
             type: 'success',
-            message: 'Acción a realizar',
+            message: this.$t('pointOfSales.pin.validateSuccessfully'),
             showClose: true
           })
           if (!this.isEmptyValue(this.$refs) && !this.isEmptyValue(this.$refs.showFieldLine)) {

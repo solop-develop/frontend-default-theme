@@ -584,7 +584,7 @@ export default {
           this.stock = response.warehouse.uuid
           this.$message({
             type: 'success',
-            message: 'Acción a realizar',
+            message: this.$t('pointOfSales.orderLine.updateSuccess'),
             showClose: true
           })
         })
@@ -619,7 +619,7 @@ export default {
         .then(response => {
           this.$message({
             type: 'success',
-            message: 'Acción a realizar',
+            message: this.$t('pointOfSales.orderLine.updateSuccess'),
             showClose: true
           })
           this.$store.dispatch('currentLine', response)
