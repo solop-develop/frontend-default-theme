@@ -1064,10 +1064,7 @@ export default {
         format: 'object'
       })
       this.$store.commit(this.currentPanel.commit, false)
-      this.$message({
-        message: this.$t('pointOfSales.pin.validateSuccessfully'),
-        showClose: true
-      })
+
       cashWithdrawal({
         posUuid: this.currentPointOfSales.uuid,
         collectingAgentUuid: this.collectAgentUuid,

@@ -346,7 +346,7 @@
                     type="primary"
                     class="custom-button-create-bp"
                     icon="el-icon-check"
-                    @click="addCount(discountAmount)"
+                    @click="applyDiscount(discountAmount)"
                   />
                 </div>
                 <el-button
@@ -391,7 +391,7 @@
                     type="primary"
                     class="custom-button-create-bp"
                     icon="el-icon-check"
-                    @click="SalesDiscount(discountRateOff)"
+                    @click="salesDiscount(discountRateOff)"
                   />
                 </div>
                 <el-button
@@ -1053,7 +1053,7 @@ export default {
       if (this.showCount) {
         switch (event.srcKey) {
           case 'enter':
-            if (this.discountAmount > 1) this.addCount(this.discountAmount)
+            if (this.discountAmount > 1) this.applyDiscount(this.discountAmount)
             break
           case 'close':
             this.showCount = false
@@ -1070,7 +1070,7 @@ export default {
       if (this.showSalesDiscount) {
         switch (event.srcKey) {
           case 'enter':
-            if (this.discountAmount > 0) this.SalesDiscount(this.discountRateOff)
+            if (this.discountAmount > 0) this.salesDiscount(this.discountRateOff)
             break
           case 'close':
             this.showSalesDiscount = false
@@ -1475,11 +1475,7 @@ export default {
           })
         })
     },
-    addCount(discountAmount) {
-      this.$message({
-        message: this.$t('pointOfSales.pin.validateSuccessfully'),
-        showClose: true
-      })
+    applyDiscount(discountAmount) {
       this.$store.dispatch('updateOrder', {
         orderUuid: this.currentOrder.uuid,
         posUuid: this.currentPointOfSales.uuid,
@@ -1500,11 +1496,7 @@ export default {
         })
       this.showCount = false
     },
-    SalesDiscount(discountRateOff) {
-      this.$message({
-        message: this.$t('pointOfSales.pin.validateSuccessfully'),
-        showClose: true
-      })
+    salesDiscount(discountRateOff) {
       this.$store.dispatch('updateOrder', {
         orderUuid: this.currentOrder.uuid,
         posUuid: this.currentPointOfSales.uuid,
