@@ -77,7 +77,7 @@
                   type="text"
                   @click="openEditAddress(address)"
                 >
-                  Editar
+                  {{ $t('edit') }}
                 </el-button>
               </div>
               <el-scrollbar wrap-class="scroll-customer-description">
