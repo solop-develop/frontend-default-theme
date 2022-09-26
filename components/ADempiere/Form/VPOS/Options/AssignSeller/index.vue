@@ -199,11 +199,8 @@ export default {
       this.assignSeller()
     },
     unassignSeller() {
-      this.$message({
-        message: this.$t('pointOfSales.pin.validateSuccessfully'),
-        showClose: true
-      })
       this.$store.commit('setShowUnassignSeller', false)
+
       deallocate({
         posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
         salesRepresentativeUuid: this.salesRepresentative.uuid
@@ -264,11 +261,8 @@ export default {
       this.listAvailableSellers()
     },
     assignSeller() {
-      this.$message({
-        message: this.$t('pointOfSales.pin.validateSuccessfully'),
-        showClose: true
-      })
       this.$store.commit('setShowAssignSeller', false)
+
       allocateSeller({
         posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
         salesRepresentativeUuid: this.salesRepresentative.uuid
