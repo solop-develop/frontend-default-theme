@@ -32,7 +32,14 @@
               v-model="currentValuePriceField"
               disabled
             >
-              <el-button slot="append" type="success" @click="allowChangePrice" style="color: #FFFFFF;background-color: #13ce66;border-color: #13ce66;"> {{ $t('form.pos.order.BusinessPartnerCreate.address.edit') }} </el-button>
+              <el-button
+                slot="append"
+                type="success"
+                style="color: #FFFFFF;background-color: #13ce66;border-color: #13ce66;"
+                @click="allowChangePrice"
+              >
+                {{ $t('form.pos.order.BusinessPartnerCreate.address.edit') }}
+              </el-button>
             </el-input>
           </el-form-item>
           <!-- <el-form label-position="top" label-width="10px" @submit.native.prevent="notSubmitForm"> -->
@@ -63,12 +70,20 @@
             v-if="!allowsModifyQuantity && !isAllowChangeQty"
             :label="$t('form.pos.tableProduct.quantity')"
             style="padding-left: 3%;padding-right: 2%;"
-            >
+          >
             <el-input
               v-model="currentValueQtyField"
               disabled
             >
-              <el-button slot="append" type="success" round @click="allowChangeQty" style="color: #FFFFFF;background-color: #13ce66;border-color: #13ce66;"> {{ $t('form.pos.order.BusinessPartnerCreate.address.edit') }} </el-button>
+              <el-button
+                slot="append"
+                type="success"
+                round
+                style="color: #FFFFFF;background-color: #13ce66;border-color: #13ce66;"
+                @click="allowChangeQty"
+              >
+                {{ $t('form.pos.order.BusinessPartnerCreate.address.edit') }}
+              </el-button>
             </el-input>
           </el-form-item>
           <field-definition
@@ -102,7 +117,15 @@
               v-model="currentValueDiscuentField"
               disabled
             >
-              <el-button slot="append" type="success" round @click="allowChangePrice" style="color: #FFFFFF;background-color: #13ce66;border-color: #13ce66;"> {{ $t('form.pos.order.BusinessPartnerCreate.address.edit') }} </el-button>
+              <el-button
+                slot="append"
+                type="success"
+                round
+                style="color: #FFFFFF;background-color: #13ce66;border-color: #13ce66;"
+                @click="allowChangePrice"
+              >
+                {{ $t('form.pos.order.BusinessPartnerCreate.address.edit') }}
+              </el-button>
             </el-input>
           </el-form-item>
           <field-definition
@@ -268,10 +291,6 @@ export default {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyDiscount
     },
 
-    isModifyPrice() {
-      return this.$store.getters.posAttributes.currentPointOfSales.isModifyPrice
-    },
-
     allowsModifyQuantity() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyQuantity
     },
@@ -309,11 +328,7 @@ export default {
       return {}
     },
     isModifyPrice() {
-      const pos = this.$store.getters.posAttributes.currentPointOfSales
-      if (!this.isEmptyValue(pos.isModifyPrice)) {
-        return pos.isModifyPrice
-      }
-      return false
+      return this.$store.getters.posAttributes.currentPointOfSales.isModifyPrice
     },
     isPosRequiredPin() {
       const pos = this.$store.getters.posAttributes.currentPointOfSales
