@@ -373,9 +373,8 @@ export default {
             value: row.quantityOrdered
           })
         }
-        // TODO: Remove it with fix on ADempiere (Box UOM)
         let precision = row.uom.uom.starndard_precision
-        if (row.uom.uom.code === 'BX') {
+        if (isEmptyValue(precision)) {
           precision = 0
         }
         return formatQuantity({
@@ -428,9 +427,8 @@ export default {
             value: row.quantityOrdered
           })
         }
-        // TODO: Remove it with fix on ADempiere (Box UOM)
         let precision = row.uom.uom.starndard_precision
-        if (row.uom.uom.code === 'BX') {
+        if (isEmptyValue(precision)) {
           precision = 0
         }
         return formatQuantity({
