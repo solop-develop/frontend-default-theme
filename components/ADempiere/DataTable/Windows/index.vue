@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div :onLoad="adjustSize()" :onresize="setTableHeight()">
+  <div id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
         <el-input
@@ -345,7 +345,6 @@ export default defineComponent({
           }
         }
       }
-
       if (props.containerManager.panelMain() === 'mainBrowser') {
         return defaultSize.value
       }
@@ -631,6 +630,13 @@ export default defineComponent({
     })
 
     onBeforeMount(() => {
+      const main = document.getElementById('mainWindow')
+      if (
+        !isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)
+      ) {
+        heightSize.value = main.clientHeight
+      }
       loadSelect()
     })
 
@@ -702,6 +708,9 @@ export default defineComponent({
 <style lang="scss">
  div#mainWindow{
     width: 100%;
+}
+div#mainWindowDataTable{
+  width: 100%;
 }
 .el-table .el-table__cell {
   padding: 0px !important;
