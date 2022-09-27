@@ -1,18 +1,22 @@
-// ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-// Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-// Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+/**
+ * ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ * Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ * Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'MixinField',
@@ -64,14 +68,14 @@ export default {
         styleClass += ' field-empty-required '
       }
 
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
+      if (!isEmptyValue(this.metadata.cssClassName)) {
         styleClass = this.metadata.cssClassName
       }
 
       return styleClass
     },
     isEmptyRequired() {
-      return this.isEmptyValue(this.value) && this.metadata.required
+      return isEmptyValue(this.value) && this.metadata.required
     },
     storedDefaultValue() {
       return this.$store.getters.getStoredDefaultValue({
@@ -131,7 +135,7 @@ export default {
       }
     },
     currentTab() {
-      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+      if (isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
         return {}
       }
       return this.containerManager.getPanel({
@@ -152,13 +156,13 @@ export default {
       const tabPanel = this.$store.getters.getContainerInfo
       const fieldFocusColumnName = this.$store.getters.getFieldFocusColumnName
       if (
-        !this.isEmptyValue(fieldFocusColumnName) &&
-        !this.isEmptyValue(tabPanel) &&
+        !isEmptyValue(fieldFocusColumnName) &&
+        !isEmptyValue(tabPanel) &&
         fieldFocusColumnName &&
         this.metadata.columnName === fieldFocusColumnName &&
         tabPanel.currentTab.containerUuid === this.metadata.containerUuid &&
-        !this.isEmptyValue(this.$refs) &&
-        !this.isEmptyValue(this.$refs[fieldFocusColumnName]) &&
+        !isEmptyValue(this.$refs) &&
+        !isEmptyValue(this.$refs[fieldFocusColumnName]) &&
         tabPanel.id === this.currentTab.id
       ) {
         this.$refs[fieldFocusColumnName].focus()
@@ -168,7 +172,7 @@ export default {
   },
 
   created() {
-    if (this.metadata.isGetServerValue && this.isEmptyValue(this.value)) {
+    if (this.metadata.isGetServerValue && isEmptyValue(this.value)) {
       this.setDefaultValue()
 
       // change depends fields
@@ -181,8 +185,8 @@ export default {
     const tabPanel = this.$store.getters.getContainerInfo
     if (
       this.metadata.handleRequestFocus &&
-      !this.isEmptyValue(tabPanel) &&
-      !this.isEmptyValue(tabPanel.currentTab) &&
+      !isEmptyValue(tabPanel) &&
+      !isEmptyValue(tabPanel.currentTab) &&
       tabPanel.id === this.currentTab.id
     ) {
       this.requestFocus()
@@ -229,7 +233,7 @@ export default {
       let displayedValue
       const storedValues = this.storedDefaultValue
 
-      if (!this.isEmptyValue(storedValues)) {
+      if (!isEmptyValue(storedValues)) {
         // get from server
         const {
           value: valueOfStore,
@@ -279,8 +283,8 @@ export default {
 
       if (this.metadata.handleContentSelection) {
         // select all the content inside the text box
-        if (!this.isEmptyValue(value.target.selectionStart) &&
-          !this.isEmptyValue(value.target.selectionStart)) {
+        if (!isEmptyValue(value.target.selectionStart) &&
+          !isEmptyValue(value.target.selectionStart)) {
           value.target.selectionStart = 0
           value.target.selectionEnd = value.target.value.length
         }
@@ -409,7 +413,7 @@ export default {
       })
     },
     setContainerInformation() {
-      if (!this.isEmptyValue(this.currentTab)) {
+      if (!isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
