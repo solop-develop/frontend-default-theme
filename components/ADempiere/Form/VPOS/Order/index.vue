@@ -563,7 +563,15 @@
       :visible.sync="isEditLineMobile"
       direction="btt"
       size="100%"
+      :show-close="false"
     >
+      <el-button
+        v-if="isMobile"
+        type="danger"
+        icon="el-icon-close"
+        style="position: absolute;right: 1%;top: 2%;"
+        @click="isEditLineMobile = !isEditLineMobile"
+      />
       <edit-line-mobile
         :data-line="lineRow"
         :show-field="isEditLineMobile"
@@ -1098,6 +1106,29 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
         return
+      }
+      switch (columnName) {
+        case 'QtyEntered':
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.pinMessage.updateQtyEntered'),
+            showClose: true
+          })
+          break
+        case 'PriceEntered':
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.pinMessage.updatePriceEntered'),
+            showClose: true
+          })
+          break
+        case 'Discount':
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
+            showClose: true
+          })
+          break
       }
       const changeLine = { columnName, value }
       this.updateOrderLine(changeLine)
