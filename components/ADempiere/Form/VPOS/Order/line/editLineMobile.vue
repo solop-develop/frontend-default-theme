@@ -656,6 +656,11 @@ export default {
                   return
                 }
                 if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
+                  this.$message({
+                    type: 'success',
+                    message: this.$t('form.pos.pinMessage.updateQtyEntered'),
+                    showClose: true
+                  })
                   this.updateOrderLine(mutation.payload)
                 } else {
                   const attributePin = {
@@ -672,6 +677,11 @@ export default {
                   return
                 }
                 if (this.modifyPrice) {
+                  this.$message({
+                    type: 'success',
+                    message: this.$t('form.pos.pinMessage.updatePriceEntered'),
+                    showClose: true
+                  })
                   this.updateOrderLine(mutation.payload)
                 } else {
                   const attributePin = {
@@ -692,6 +702,11 @@ export default {
                   return
                 }
                 if (this.modifyDiscount) {
+                  this.$message({
+                    type: 'success',
+                    message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
+                    showClose: true
+                  })
                   this.updateOrderLine(mutation.payload)
                 } else {
                   const attributePin = {
