@@ -13,14 +13,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 import lang from '@/lang'
 import store from '@/store'
 
 // constants
-import { DISPLAY_COLUMN_PREFIX, IDENTIFIER_COLUMN_SUFFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
@@ -57,7 +57,11 @@ export default {
         [this.metadata.elementName]: undefined,
         id: undefined,
         uuid: undefined,
-        name: undefined
+        UUID: undefined,
+        name: undefined,
+        Name: undefined,
+        Value: undefined,
+        Description: undefined
       }
     },
     // implement to overwrite
@@ -132,7 +136,7 @@ export default {
           value
         })
         // update element column name
-        if (columnName !== this.metadata.elementName) {
+        if (!this.metadata.isSameColumnElement) {
           store.commit('updateValueOfField', {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
@@ -373,16 +377,21 @@ export default {
 
     setValues(rowData) {
       const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const { [columnName]: id, UUID: uuid, IdentifierTable } = rowData
+      const { UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
+
+      let value = rowData[columnName]
+      if (isEmptyValue(value) && !this.metadata.isSameColumnElement) {
+        value = rowData[elementName]
+      }
 
       // set ID value
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
         columnName,
-        value: this.isEmptyValue(id) ? rowData[IdentifierTable + IDENTIFIER_COLUMN_SUFFIX] : id
+        value
       })
       // set display column (name) value
       this.$store.commit('updateValueOfField', {
@@ -401,13 +410,13 @@ export default {
       })
 
       // set on element name, used by columns views aliases
-      if (!isEmptyValue(elementName) && columnName !== elementName) {
+      if (!this.metadata.isSameColumnElement) {
         // set ID value
         this.$store.commit('updateValueOfField', {
           parentUuid,
           containerUuid,
           columnName: elementName,
-          value: id
+          value
         })
         // set display column (name) value
         this.$store.commit('updateValueOfField', {
@@ -425,6 +434,7 @@ export default {
           value: uuid
         })
       }
+
       this.$store.dispatch('notifyFieldChange', {
         containerUuid: this.metadata.containerUuid,
         containerManager: this.containerManager,

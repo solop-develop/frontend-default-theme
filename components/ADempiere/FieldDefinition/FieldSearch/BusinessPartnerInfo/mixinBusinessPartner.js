@@ -13,11 +13,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-
-// constants
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -42,12 +39,18 @@ export default {
   computed: {
     blankValues() {
       return {
+        [this.metadata.columnName]: undefined,
+        [this.metadata.elementName]: undefined,
         id: undefined,
         uuid: undefined,
         value: undefined,
+        Value: undefined,
+        taxId: undefined,
+        TaxID: undefined,
         name: undefined,
+        Name: undefined,
         lastName: undefined,
-        description: undefined
+        LastName: undefined
       }
     },
     recordsList() {
@@ -57,9 +60,11 @@ export default {
     }
   },
   methods: {
-    clearValues() {
-      this.setValues(this.blankValues)
-    },
+    /**
+     * @overwrite
+     * Get custom displayed value
+     * @returns {string}
+     */
     generateDisplayedValue({ Value, Name, LastName }) {
       let displayedValue
 
@@ -78,70 +83,6 @@ export default {
       }
 
       return displayedValue
-    },
-    setValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const { UUID, Value, Name, LastName } = rowData
-      const displayedValue = this.generateDisplayedValue({
-        Value,
-        Name,
-        LastName
-      })
-
-      // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value: rowData[columnName]
-      })
-      // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
-        value: displayedValue
-      })
-      // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + '_UUID',
-        value: UUID
-      })
-
-      // set on element name, used by columns views aliases
-      if (!isEmptyValue(elementName) && columnName !== elementName) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value: rowData[columnName]
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: displayedValue
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + '_UUID',
-          value: UUID
-        })
-      }
-      this.$store.dispatch('notifyFieldChange', {
-        containerUuid: this.metadata.containerUuid,
-        containerManager: this.containerManager,
-        field: this.metadata,
-        columnName: this.metadata.columnName
-      })
     }
   }
 }

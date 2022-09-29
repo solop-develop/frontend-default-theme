@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 // constants
@@ -21,9 +21,6 @@ import {
   DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
 } from '@/utils/ADempiere/dictionaryUtils'
 import { COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
-
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'mixinAccountingCombination',
@@ -45,12 +42,9 @@ export default {
   computed: {
     blankValues() {
       return {
-        id: undefined,
-        uuid: undefined,
-        value: undefined,
-        name: undefined,
-        lastName: undefined,
-        description: undefined
+        C_ValidCombination_ID: undefined,
+        UUID: undefined,
+        Combination: undefined
       }
     },
     recordsList() {
@@ -85,13 +79,32 @@ export default {
       ]
     }
   },
+
   methods: {
     clearValues() {
       this.setValues(this.blankValues)
     },
+    /**
+     * @overwrite
+     * Get custom displayed value
+     * @returns {string}
+     */
+    generateDisplayedValue(recordRow) {
+      // generate with standard columns
+      const { Combination } = recordRow
+
+      return Combination
+    },
+    /**
+     * @overwrite
+     * Set custom row on fields values
+     * @returns {string}
+     */
     setValues(rowData) {
       const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const { C_ValidCombination_ID: id, UUID: uuid, Combination: displayedValue } = rowData
+      const { C_ValidCombination_ID: id, UUID: uuid } = rowData
+
+      const displayedValue = this.generateDisplayedValue(rowData)
 
       // set ID value
       this.$store.commit('updateValueOfField', {
@@ -117,7 +130,7 @@ export default {
       })
 
       // set on element name, used by columns views aliases
-      if (!isEmptyValue(elementName) && columnName !== elementName) {
+      if (!this.metadata.isSameColumnElement) {
         // set ID value
         this.$store.commit('updateValueOfField', {
           parentUuid,
@@ -141,6 +154,7 @@ export default {
           value: uuid
         })
       }
+
       this.$store.dispatch('notifyFieldChange', {
         containerUuid: this.metadata.containerUuid,
         containerManager: this.containerManager,

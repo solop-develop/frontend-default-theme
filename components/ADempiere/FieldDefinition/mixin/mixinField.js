@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -388,7 +388,7 @@ export default {
           columnName: this.metadata.columnName,
           value
         })
-        if (this.metadata.columnName !== this.metadata.elementName) {
+        if (!this.metadata.isSameColumnElement) {
           this.$store.dispatch('notifyActionPerformed', {
             containerUuid: this.metadata.containerUuid,
             columnName: this.metadata.elementName,
