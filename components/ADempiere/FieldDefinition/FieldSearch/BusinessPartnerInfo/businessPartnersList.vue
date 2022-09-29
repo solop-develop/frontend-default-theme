@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -135,6 +135,7 @@ import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import businessPartnerMixin from './mixinBusinessPartner'
+import fieldSearchMixin from '../mixinFieldSearch'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
@@ -159,6 +160,7 @@ export default {
   },
 
   mixins: [
+    fieldSearchMixin,
     businessPartnerMixin
   ],
 
@@ -331,8 +333,8 @@ export default {
     },
     changeBusinessPartner() {
       if (!isEmptyValue(this.currentRow)) {
-        this.closeList()
         this.setValues(this.currentRow)
+        this.closeList()
       }
     },
     closeList() {
