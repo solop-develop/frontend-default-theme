@@ -92,7 +92,7 @@
       >
         <template slot-scope="scope">
           <!-- formatted displayed value -->
-          <cell-info
+          <cell-display-info
             :parent-uuid="metadata.parentUuid"
             :container-uuid="uuidForm"
             :field-attributes="head"
@@ -150,7 +150,7 @@ import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } fr
 
 // components and mixins
 import mixinAccountingCombination from './mixinAccountingCombination.js'
-import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
@@ -168,7 +168,7 @@ export default {
   name: 'TableQueryCriteria',
 
   components: {
-    CellInfo,
+    CellDisplayInfo,
     CustomPagination,
     FieldDefinition,
     IndexColumn

@@ -92,7 +92,7 @@
         >
           <template slot-scope="scope">
             <!-- formatted displayed value -->
-            <cell-info
+            <cell-display-info
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
               :field-attributes="fieldAttributes"
@@ -127,11 +127,14 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
+
+// constants
+import { BUTTON } from '@/utils/ADempiere/references'
 
 // utils and helper methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
@@ -140,7 +143,7 @@ export default defineComponent({
   name: 'WindowsTable',
 
   components: {
-    CellInfo,
+    CellDisplayInfo,
     ColumnsDisplayOption,
     CustomPagination,
     FullScreenContainer
@@ -251,6 +254,7 @@ export default defineComponent({
       return props.header.filter(fieldItem => {
         return isDisplayed(fieldItem) &&
           // fieldItem.isShowedTableFromUser &&
+          fieldItem.displayType !== BUTTON.id &&
           tableColumnDataType(fieldItem, currentOption.value)
       })
     })

@@ -92,7 +92,7 @@
         >
           <template slot-scope="scope">
             <!-- formatted displayed value -->
-            <cell-info
+            <cell-edit-info
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
               :field-attributes="fieldAttributes"
@@ -127,7 +127,7 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
@@ -140,7 +140,7 @@ export default defineComponent({
   name: 'BrowserTable',
 
   components: {
-    CellInfo,
+    CellEditInfo,
     ColumnsDisplayOption,
     CustomPagination,
     FullScreenContainer

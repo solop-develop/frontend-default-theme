@@ -78,7 +78,7 @@
       >
         <template slot-scope="scope">
           <!-- formatted displayed value -->
-          <cell-info
+          <cell-display-info
             :parent-uuid="metadata.parentUuid"
             :container-uuid="uuidForm"
             :field-attributes="head"
@@ -135,7 +135,7 @@ import fieldsList from './fieldsListSearch'
 
 // components and mixins
 import businessPartnerMixin from './mixinBusinessPartner'
-import CellInfo from '@theme/components/ADempiere/DataTable/Components/CellInfo.vue'
+import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
@@ -152,7 +152,7 @@ export default {
   name: 'BusinessPartnersList',
 
   components: {
-    CellInfo,
+    CellDisplayInfo,
     CustomPagination,
     FieldDefinition,
     IndexColumn
