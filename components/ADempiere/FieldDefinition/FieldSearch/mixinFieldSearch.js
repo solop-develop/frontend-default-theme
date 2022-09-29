@@ -34,7 +34,8 @@ export default {
       timeOutSearchRecords: null,
       isLoading: false,
       searchText: '',
-      controlDisplayed: this.displayedValue
+      controlDisplayed: this.displayedValue,
+      isFindKeyPress: false
       // unsubscribe: null
     }
   },
@@ -193,7 +194,7 @@ export default {
       return listIdentifier
         .filter(field => {
           // return field.displayType === field.displayType === CHAR.id
-          return field.identifierSequence > 0
+          return field.identifierSequence > 0 && field.columnName === 'Description'
         })
         .sort((fieldA, fieldB) => {
           return fieldA.identifierSequence > fieldB.identifierSequence
@@ -509,10 +510,33 @@ export default {
       return displayedDescription
     },
 
-    handleSelect(recordSelected) {
+    handleSelect(recordSelected, findLocalList) {
       if (isEmptyValue(recordSelected)) {
         recordSelected = this.blankValues
       }
+      if (!this.isEmptyValue(recordSelected.value) && this.recordsList.length > 1) {
+        findLocalList = this.recordsList.find(row => {
+          return this.storedIdentifierColumns.some(columnName => {
+            const value = !this.isEmptyValue(row[columnName]) ? row[columnName].toString() : ''
+            const search = recordSelected.value
+            if (value) {
+              return value
+                .trim()
+                .toLowerCase()
+                .includes(
+                  search
+                    .trim()
+                    .toLowerCase()
+                )
+            }
+          })
+        })
+      }
+      if (!this.isEmptyValue(recordSelected.value) && this.$refs.displayGeneralInfoSearch.loading) {
+        this.isFindKeyPress = true
+        return
+      }
+
       if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
         recordSelected = this.recordsList[0]
       }

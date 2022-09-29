@@ -30,8 +30,6 @@
     :select-when-unmatched="true"
     @select="handleSelect"
     @clear="clearValues"
-    @focus="setNewDisplayedValue"
-    @blur="setOldDisplayedValue"
   >
     <!--
     @keyup.enter.native="getBPartnerWithEnter"
@@ -97,6 +95,12 @@ export default {
     }
   },
 
+  data() {
+    return {
+      isFindKeyPress: false
+    }
+  },
+
   computed: {
     // to recrods list overwrite
     uuidForm() {
@@ -104,6 +108,14 @@ export default {
     }
   },
 
+  watch: {
+    recordsList(value) {
+      const loading = this.$refs.displayBPartner
+      if (loading.loading && this.isFindKeyPress) {
+        this.handleSelect(this.displayedValue)
+      }
+    }
+  },
   beforeMount() {
     if (this.metadata.displayed) {
       this.setDisplayedValue()
@@ -116,16 +128,35 @@ export default {
         this.remoteSearch(this.displayedValue, true)
       }
     },
-    handleSelect(recordSelected) {
+    handleSelect(recordSelected, findLocalList) {
+      findLocalList = this.recordsList
       if (isEmptyValue(recordSelected)) {
         recordSelected = this.blankValues
       }
-      if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
-        recordSelected = this.recordsList[0]
+      // if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
+      //   recordSelected = this.recordsList[0]
+      // }
+      if (!this.isEmptyValue(this.recordsList) && !this.isEmptyValue(recordSelected.value)) {
+        findLocalList = this.recordsList.find(a => {
+          if (a.Name.includes(recordSelected.value) || a.Value.includes(recordSelected.value)) {
+            return a
+          }
+        })
+      }
+      // const findLocalList =
+      if (recordSelected && this.$refs.displayBPartner.loading) {
+        this.isFindKeyPress = true
+        // this.$store.commit('setBusinessPartnerData', {
+        //   containerUuid: this.uuidForm,
+        //   recordsList: [],
+        //   isLoaded: true
+        // })
+        return
       }
       recordSelected.id = this.metadata.columnName
       this.setValues(recordSelected)
 
+      // this.isFindKeyPress = false
       // prevent losing display value with focus
       this.controlDisplayed = this.generateDisplayedValue(recordSelected)
     },
@@ -147,6 +178,14 @@ export default {
           pageNumber: 1
         })
           .then(responseRecords => {
+            if (this.isFindKeyPress && !this.isEmptyValue(responseRecords)) {
+              // this.$refs.displayBPartner.suggestionVisible = false
+              this.$refs.displayBPartner.close()
+              const recordKeyPress = responseRecords[0]
+              recordKeyPress.id = this.metadata.columnName
+              this.setValues(recordKeyPress)
+            }
+            // this.isFindKeyPress = false
             if (isEmptyValue(responseRecords)) {
               this.whitOutResultsMessage()
             }
@@ -160,6 +199,7 @@ export default {
             resolve([])
           })
           .finally(() => {
+            this.isFindKeyPress = false
             this.isLoading = false
           })
       })

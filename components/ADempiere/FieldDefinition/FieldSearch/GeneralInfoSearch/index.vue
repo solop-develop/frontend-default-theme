@@ -18,7 +18,7 @@
 
 <template>
   <el-autocomplete
-    ref="displayBPartner"
+    ref="displayGeneralInfoSearch"
     v-model="displayedValue"
     v-bind="commonsProperties"
     value-key="name"
@@ -30,8 +30,6 @@
     :select-when-unmatched="true"
     @select="handleSelect"
     @clear="clearValues"
-    @focus="setNewDisplayedValue"
-    @blur="setOldDisplayedValue"
   >
     <!--
     @keyup.enter.native="getRecord"
@@ -113,6 +111,14 @@ export default {
     }
   },
 
+  // watch: {
+  //   recordsList(value) {
+  //     if (!this.isEmptyValue(value) && this.isFindKeyPress) {
+  //       this.handleSelect(this.displayedValue)
+  //     }
+  //   }
+  // },
+
   beforeMount() {
     if (this.metadata.displayed) {
       this.setDisplayedValue()
@@ -133,6 +139,12 @@ export default {
           searchValue
         })
           .then(responseRecords => {
+            if (this.isFindKeyPress && !this.isEmptyValue(responseRecords)) {
+              this.$refs.displayGeneralInfoSearch.close()
+              const recordKeyPress = responseRecords[0]
+              recordKeyPress.id = this.metadata.columnName
+              this.setValues(recordKeyPress)
+            }
             if (isEmptyValue(responseRecords)) {
               this.whitOutResultsMessage()
             }
@@ -147,6 +159,7 @@ export default {
           })
           .finally(() => {
             this.isLoading = false
+            this.isFindKeyPress = false
           })
       })
     }
