@@ -102,6 +102,7 @@
       size="small"
       type="primary"
       :loading="isSaveRecordLoading"
+      :disabled="isSaveRecordLoading"
       class="undo-changes-button"
       @click="saveChanges()"
     >
