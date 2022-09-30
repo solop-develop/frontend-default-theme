@@ -18,58 +18,72 @@ import language from '@/lang'
 export default [
   {
     label: language.t('accounting.organization'),
-    columnName: 'DisplayColumn_AD_Org_ID'
+    columnName: 'DisplayColumn_AD_Org_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.account'),
-    columnName: 'DisplayColumn_Account_ID'
+    columnName: 'DisplayColumn_Account_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.debitPosted'),
-    columnName: 'AmtAcctDr'
+    columnName: 'AmtAcctDr',
+    align: 'right'
   },
   {
     label: language.t('accounting.PostedCredit'),
-    columnName: 'AmtSourceCr'
+    columnName: 'AmtSourceCr',
+    align: 'right'
   },
   {
     label: language.t('accounting.product'),
-    columnName: 'DisplayColumn_M_Product_ID'
+    columnName: 'DisplayColumn_M_Product_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.businessPartner'),
-    columnName: 'DisplayColumn_C_BPartner_ID'
+    columnName: 'DisplayColumn_C_BPartner_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.Project'),
-    columnName: 'DisplayColumn_C_Project_ID'
+    columnName: 'DisplayColumn_C_Project_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.Campaign'),
-    columnName: 'DisplayColumn_C_Campaign_ID'
+    columnName: 'DisplayColumn_C_Campaign_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.accountingDate'),
-    columnName: 'DateAcct'
+    columnName: 'DateAcct',
+    align: 'center'
   },
   {
     label: language.t('accounting.period'),
-    columnName: 'DisplayColumn_C_Period_ID'
+    columnName: 'DisplayColumn_C_Period_ID',
+    align: 'right'
   },
   {
     label: language.t('accounting.um'),
-    columnName: 'DisplayColumn_C_UOM_ID'
+    columnName: 'DisplayColumn_C_UOM_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.quantity'),
-    columnName: 'Qty'
+    columnName: 'Qty',
+    align: 'right'
   },
   {
     label: language.t('accounting.table'),
-    columnName: 'DisplayColumn_AD_Table_ID'
+    columnName: 'DisplayColumn_AD_Table_ID',
+    align: 'center'
   },
   {
     label: language.t('accounting.recordId'),
-    columnName: 'Record_ID'
+    columnName: 'Record_ID',
+    align: 'right'
   }
 ]

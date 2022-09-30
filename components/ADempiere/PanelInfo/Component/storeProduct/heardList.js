@@ -19,17 +19,17 @@ export default [
   {
     label: language.t('accounting.organization'),
     columnName: 'DisplayColumn_AD_Org_ID',
-    align: 'left'
+    align: 'center'
   },
   {
     label: language.t('accounting.product'),
     columnName: 'DisplayColumn_M_Product_ID',
-    align: 'left'
+    align: 'center'
   },
   {
     label: language.t('listStoreProduct.warehouse'),
     columnName: 'DisplayColumn_M_Warehouse_ID',
-    align: 'left'
+    align: 'center'
   },
   {
     label: language.t('listStoreProduct.location'),
@@ -39,7 +39,7 @@ export default [
   {
     label: language.t('listStoreProduct.instanceAttributeSet'),
     columnName: 'DisplayColumn_M_AttributeSet_ID',
-    align: 'left'
+    align: 'center'
   },
   {
     label: language.t('listStoreProduct.quantityinStock'),
@@ -64,6 +64,6 @@ export default [
   {
     label: language.t('listStoreProduct.lastInventoryCountDate'),
     columnName: 'DateLastInventory',
-    align: 'left'
+    align: 'center'
   }
 ]

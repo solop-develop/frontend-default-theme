@@ -60,6 +60,7 @@
             v-for="(head, key) in heardList"
             :key="key"
             :label="head.label"
+            :align="head.align"
             min-width="170"
             header-align="center"
           >
