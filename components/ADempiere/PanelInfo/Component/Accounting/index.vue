@@ -38,6 +38,7 @@
         </el-form>
       </el-card>
     </el-header>
+
     <el-main>
       <el-card
         style="padding: 20px;"
@@ -68,11 +69,14 @@
             </template>
           </el-table-column>
         </el-table>
+
         <div style="margin-top: 10px;">
           <el-button
             type="primary"
             plain
             style="margin-right: 10px; !important"
+            :loading="isLoadingRePost"
+            :disabled="isLoadingRePost"
             @click="rePost"
           >
             {{ $t('accounting.rePosAccounting') }}
@@ -80,7 +84,6 @@
           <el-checkbox
             v-model="force"
           >
-            {{ 'Forzar' }}
             {{ $t('accounting.force') }}
           </el-checkbox>
         </div>
@@ -98,22 +101,24 @@ import store from '@/store'
 import fieldsList from './fieldsList'
 import heardList from './heardList'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import { containerManager } from '@/utils/ADempiere/dictionary/form/index.js'
+import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form/index.js'
+import { containerManager as containerManagerWindow } from '@/utils/ADempiere/dictionary/window'
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
-
-// utils and helper methods
 
 import {
   requestAccountingFacts,
   requestStartRePost
 } from '@/api/ADempiere/form/accouting.js'
+
+// utils and helper methods
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
-  name: 'Accounting',
+  name: 'AccountingFact',
 
   components: {
     FieldDefinition
@@ -152,10 +157,10 @@ export default defineComponent({
     const metadataList = ref([])
     const isLoadingDataTable = ref(false)
     const isLoadingFields = ref(false)
+    const isLoadingRePost = ref(false)
     const force = ref(false)
 
     // Computed
-
     const accoutingSchemaId = computed(() => {
       return store.getters.getValueOfField({
         containerUuid: props.containerUuid,
@@ -266,6 +271,7 @@ export default defineComponent({
     }
 
     function rePost() {
+      isLoadingRePost.value = true
       requestStartRePost({
         tableName: props.tableName,
         recordId: props.recordId,
@@ -273,18 +279,23 @@ export default defineComponent({
         isForce: force.value
       })
         .then(response => {
-          console.log({ response })
+          if (!isEmptyValue(response.errorMsg)) {
+            showMessage({
+              message: response.errorMsg,
+              type: 'error'
+            })
+          }
         })
         .catch(error => {
           console.warn(`LookupFactory: Get Start Re-Post Facts From Server (State) - Error ${error.code}: ${error.message}.`)
         })
         .finally(() => {
+          isLoadingRePost.value = false
           findAccountingFacts(filter.value)
         })
     }
 
     // Watch
-
     watch(filter, (newValue) => {
       findAccountingFacts(newValue)
     })
@@ -301,10 +312,13 @@ export default defineComponent({
       tableData,
       isLoadingFields,
       isLoadingDataTable,
+      isLoadingRePost,
       metadataList,
       force,
-      // import
-      containerManager,
+      containerManager: {
+        ...containerManagerForm,
+        getDefaultValue: containerManagerWindow.getDefaultValue
+      },
       heardList,
       // computed
       accoutingSchemaId,

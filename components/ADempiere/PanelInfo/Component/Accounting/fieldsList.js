@@ -22,7 +22,8 @@ export default [
     isFromDictionary: true,
     overwriteDefinition: {
       size: 8,
-      sequence: 0
+      sequence: 10,
+      defaultValue: '$C_AcctSchema_ID'
     }
   },
   // Posting Type
@@ -32,7 +33,7 @@ export default [
     isFromDictionary: true,
     overwriteDefinition: {
       size: 8,
-      sequence: 0,
+      sequence: 20,
       isMandatory: false
     }
   }
