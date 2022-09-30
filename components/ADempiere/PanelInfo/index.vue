@@ -145,7 +145,7 @@
             :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
           /> -->
         </el-tab-pane>
-        <el-tab-pane name="accountingInformation" style="height: 100% !important;">
+        <el-tab-pane v-if="isAccountingInfo" name="accountingInformation" style="height: 100% !important;">
           <span slot="label">
             <svg-icon icon-class="balance" style="font-size: 18px;" />
             {{ $t('window.containerInfo.accountingInformation.title') }}
