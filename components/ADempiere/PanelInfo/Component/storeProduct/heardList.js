@@ -22,68 +22,48 @@ export default [
     align: 'center'
   },
   {
-    label: language.t('accounting.account'),
-    columnName: 'DisplayColumn_Account_ID',
-    align: 'center'
-  },
-  {
-    label: language.t('accounting.debitPosted'),
-    columnName: 'AmtAcctDr',
-    align: 'right'
-  },
-  {
-    label: language.t('accounting.PostedCredit'),
-    columnName: 'AmtSourceCr',
-    align: 'right'
-  },
-  {
     label: language.t('accounting.product'),
     columnName: 'DisplayColumn_M_Product_ID',
     align: 'center'
   },
   {
-    label: language.t('accounting.businessPartner'),
-    columnName: 'DisplayColumn_C_BPartner_ID',
+    label: language.t('listStoreProduct.warehouse'),
+    columnName: 'DisplayColumn_M_Warehouse_ID',
     align: 'center'
   },
   {
-    label: language.t('accounting.Project'),
-    columnName: 'DisplayColumn_C_Project_ID',
-    align: 'center'
-  },
-  {
-    label: language.t('accounting.Campaign'),
-    columnName: 'DisplayColumn_C_Campaign_ID',
-    align: 'center'
-  },
-  {
-    label: language.t('accounting.accountingDate'),
-    columnName: 'DateAcct',
-    align: 'center'
-  },
-  {
-    label: language.t('accounting.period'),
-    columnName: 'DisplayColumn_C_Period_ID',
+    label: language.t('listStoreProduct.location'),
+    columnName: 'M_Locator_ID',
     align: 'right'
   },
   {
-    label: language.t('accounting.um'),
-    columnName: 'DisplayColumn_C_UOM_ID',
+    label: language.t('listStoreProduct.instanceAttributeSet'),
+    columnName: 'DisplayColumn_M_AttributeSet_ID',
     align: 'center'
   },
   {
-    label: language.t('accounting.quantity'),
-    columnName: 'Qty',
+    label: language.t('listStoreProduct.quantityinStock'),
+    columnName: 'QtyOnHand',
     align: 'right'
   },
   {
-    label: language.t('accounting.table'),
-    columnName: 'DisplayColumn_AD_Table_ID',
+    label: language.t('listStoreProduct.orderedQuantity'),
+    columnName: 'QtyOrdered',
+    align: 'right'
+  },
+  {
+    label: language.t('listStoreProduct.reservedQuantity'),
+    columnName: 'QtyReserved',
+    align: 'right'
+  },
+  {
+    label: language.t('listStoreProduct.quantityOnHand'),
+    columnName: 'QtyAvailable',
+    align: 'right'
+  },
+  {
+    label: language.t('listStoreProduct.lastInventoryCountDate'),
+    columnName: 'DateLastInventory',
     align: 'center'
-  },
-  {
-    label: language.t('accounting.recordId'),
-    columnName: 'Record_ID',
-    align: 'right'
   }
 ]

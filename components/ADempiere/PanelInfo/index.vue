@@ -159,6 +159,15 @@
             :record-uuid="$store.getters.getUuidOfContainer(currentTab.containerUuid)"
           />
         </el-tab-pane>
+        <el-tab-pane v-if="!isEmptyValue(storeProduct)" name="listProductStorage" style="height: 100% !important;">
+          <span slot="label">
+            <svg-icon icon-class="warehouse" style="font-size: 18px;" />
+            {{ $t('listStoreProduct.title') }}
+          </span>
+          <store-product
+            :list="recordsListStoreProduct"
+          />
+        </el-tab-pane>
       </el-tabs>
     </el-main>
   </el-container>
@@ -174,8 +183,13 @@ import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/system
 import Attachment from './Component/Attachment/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
 import Accounting from './Component/Accounting/index.vue'
+import StoreProduct from './Component/storeProduct/index.vue'
 import Chats from './Component/chats/index.vue'
 import workflowLogs from './Component/workflowLogs/index.vue'
+import {
+  listProductStorage
+} from '@/api/ADempiere/form/storeProduct.js'
+import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'ContainerInfo',
@@ -185,6 +199,7 @@ export default defineComponent({
     Attachment,
     Chats,
     Accounting,
+    StoreProduct,
     workflowLogs
   },
 
@@ -223,6 +238,7 @@ export default defineComponent({
     const currentTabLogs = ref('0')
     const tableName = ref('')
     const nameTab = ref('getRecordLogs')
+    const recordsListStoreProduct = ref([])
 
     // use getter to reactive properties
 
@@ -253,7 +269,15 @@ export default defineComponent({
       }
       return {}
     })
-
+    /**
+     * Store Product
+     */
+    const storeProduct = computed(() => {
+      return store.getters.getValueOfField({
+        containerUuid: currentTab.value.containerUuid,
+        columnName: 'M_Product_ID'
+      })
+    })
     /**
      * Current window
      */
@@ -336,6 +360,10 @@ export default defineComponent({
       if (tab.name === 'accountingInformation') {
         return
       }
+      if (tab.name === 'listProductStorage') {
+        findListStoreProduct()
+        return
+      }
       nameTab.value = tab.name
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,
@@ -343,6 +371,27 @@ export default defineComponent({
         recordId: currentRecordInfo.value[currentTab.value.tableName + '_ID'],
         recordUuid: currentRecordInfo.value.UUID
       })
+    }
+
+    function findListStoreProduct(params) {
+      console.log(store.getters.getUuidOfContainer(currentTab.containerUuid), currentRecordInfo.value.UUID)
+      listProductStorage({
+        tableName: currentTab.value.tableName,
+        recordId: currentRecordInfo.value[currentTab.value.tableName + '_ID'],
+        recordUuid: currentRecordInfo.value.UUID
+      })
+        .then(response => {
+          recordsListStoreProduct.value = response.recordsList.map(record => {
+            const { id, uuid, tableName, attributes } = record
+            return {
+              ...attributes,
+              DateLastInventory: formatDate({ value: attributes.DateLastInventory }),
+              id,
+              uuid,
+              tableName
+            }
+          })
+        })
     }
     const drawer = ref(false)
 
@@ -359,13 +408,16 @@ export default defineComponent({
       containerInfo,
       currentRecordInfo,
       currentTab,
+      storeProduct,
+      recordsListStoreProduct,
       // methods
       validate,
       showkey,
       findRecordLogs,
       handleClick,
       handleClickLogs,
-      openRecordLogs
+      openRecordLogs,
+      findListStoreProduct
     }
   }
 
