@@ -101,6 +101,8 @@
       plain
       size="small"
       type="primary"
+      :loading="isSaveRecordLoading"
+      :disabled="isSaveRecordLoading"
       class="undo-changes-button"
       @click="saveChanges()"
     >
@@ -300,6 +302,7 @@ export default defineComponent({
     const visible = ref(false)
     const showClickActions = ref(false)
     const selectDocActions = ref('')
+    const isSaveRecordLoading = ref(false)
 
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
@@ -588,6 +591,7 @@ export default defineComponent({
       }
 
       this.$store.dispatch('fieldListInfo', { info })
+      isSaveRecordLoading.value = true
 
       store.dispatch('flushPersistenceQueue', {
         parentUuid: props.parentUuid,
@@ -601,6 +605,9 @@ export default defineComponent({
             message: error.message,
             type: 'error'
           })
+        })
+        .finally(() => {
+          isSaveRecordLoading.value = false
         })
     }
 
@@ -737,6 +744,7 @@ export default defineComponent({
       visible,
       showClickActions,
       selectDocActions,
+      isSaveRecordLoading,
       // computed
       recordUuid,
       selectionsRecords,
