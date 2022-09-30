@@ -19,7 +19,7 @@
 <template>
   <el-container style="height: 100% !important;">
     <el-header
-      style="height: 13%;text-align: center;padding-top: 1%;"
+      style="height: 5%;text-align: center;padding-top: 1%;"
     >
       <el-descriptions :column="1">
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -31,7 +31,7 @@
             {{ currentTab.name }}
           </span>
         </el-descriptions-item>
-        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+        <!-- <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
           <template slot="label">
             <svg-icon icon-class="table" style="margin-right: 10px;" />
             {{ $t('window.containerInfo.log.tableName') }}
@@ -57,7 +57,7 @@
           <span style="color: #606266; font-weight: bold;">
             {{ currentRecordInfo.UUID }}
           </span>
-        </el-descriptions-item>
+        </el-descriptions-item> -->
       </el-descriptions>
     </el-header>
     <el-main style="padding:0px; height: 100% !important;">
@@ -74,6 +74,35 @@
             {{ $t('window.containerInfo.log.changeHistory') }}
           </span>
           <el-scrollbar class="scroll-panel-info">
+            <el-descriptions :column="1">
+              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+                <template slot="label">
+                  <svg-icon icon-class="table" style="margin-right: 10px;" />
+                  {{ $t('window.containerInfo.log.tableName') }}
+                </template>
+                <span style="color: #606266; font-weight: bold;">
+                  {{ currentTab.tableName }}
+                </span>
+              </el-descriptions-item>
+              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+                <template slot="label">
+                  <svg-icon icon-class="user" style="margin-right: 10px;" />
+                  {{ $t('window.containerInfo.log.recordID') }}
+                </template>
+                <span style="color: #606266; font-weight: bold;">
+                  {{ currentRecordInfo[currentTab.tableName + '_ID'] }}
+                </span>
+              </el-descriptions-item>
+              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+                <template slot="label">
+                  <svg-icon icon-class="user" style="margin-right: 10px;" />
+                  {{ $t('window.containerInfo.log.recordUUID') }}
+                </template>
+                <span style="color: #606266; font-weight: bold;">
+                  {{ currentRecordInfo.UUID }}
+                </span>
+              </el-descriptions-item>
+            </el-descriptions>
             <record-logs />
           </el-scrollbar>
         </el-tab-pane>
@@ -99,7 +128,11 @@
             :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
           />
         </el-tab-pane>
-        <el-tab-pane v-if="isWorkflowLog" name="searchWorkflowHistory" style="height: 100% !important;">
+        <el-tab-pane
+          v-if="isWorkflowLog"
+          name="searchWorkflowHistory"
+          style="height: 100% !important;"
+        >
           <span slot="label">
             <svg-icon icon-class="tree-table" />
             {{ 'Historico de WorkFlow' }}
@@ -111,6 +144,20 @@
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
           /> -->
+        </el-tab-pane>
+        <el-tab-pane name="accountingInformation" style="height: 100% !important;">
+          <span slot="label">
+            <svg-icon icon-class="balance" style="font-size: 18px;" />
+            {{ $t('window.containerInfo.accountingInformation.title') }}
+          </span>
+          <accounting
+            :container-manager="containerManager"
+            :container-uuid="currentTab.containerUuid + '_  AccountingInformation'"
+            :container-uuid-tab="currentTab.containerUuid"
+            :table-name="currentTab.tableName"
+            :record-id="currentRecordInfo[currentTab.tableName + '_ID']"
+            :record-uuid="$store.getters.getUuidOfContainer(currentTab.containerUuid)"
+          />
         </el-tab-pane>
       </el-tabs>
     </el-main>
@@ -126,6 +173,7 @@ import store from '@/store'
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 import Attachment from './Component/Attachment/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
+import Accounting from './Component/Accounting/index.vue'
 import Chats from './Component/chats/index.vue'
 import workflowLogs from './Component/workflowLogs/index.vue'
 
@@ -136,6 +184,7 @@ export default defineComponent({
     RecordLogs,
     Attachment,
     Chats,
+    Accounting,
     workflowLogs
   },
 
@@ -153,6 +202,14 @@ export default defineComponent({
       required: true
     },
     showContainerInfo: {
+      type: Boolean,
+      default: false
+    },
+    tabUuid: {
+      type: String,
+      default: ''
+    },
+    isAccountingInfo: {
       type: Boolean,
       default: false
     }
@@ -276,6 +333,9 @@ export default defineComponent({
       drawer.value = !drawer.value
     }
     const handleClick = (tab, event) => {
+      if (tab.name === 'accountingInformation') {
+        return
+      }
       nameTab.value = tab.name
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,

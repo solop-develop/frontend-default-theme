@@ -110,6 +110,8 @@
         :show-container-info="showContainerInfo"
         :container-manager="containerManager"
         :current-record="currentRecordLogs"
+        :tab-uuid="tabUuid"
+        :is-accounting-info="isAccountingInfo"
       />
     </el-drawer>
   </div>
@@ -176,6 +178,10 @@ export default defineComponent({
     additionalOptions: {
       type: Object,
       default: () => ({})
+    },
+    isAccountingInfo: {
+      type: Boolean,
+      default: false
     }
   },
 
