@@ -100,7 +100,7 @@ import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form/index.js'
-import { isEmptyValue } from '../../../utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat.js'
 // import { containerManager as containerManagerWindow } from '@/utils/ADempiere/dictionary/window'
 

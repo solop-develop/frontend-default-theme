@@ -78,6 +78,7 @@ export default {
           break
         case 'childIncome':
           form = import('@theme/components/ADempiere/Form/childIncome')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
