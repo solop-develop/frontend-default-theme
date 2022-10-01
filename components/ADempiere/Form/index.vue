@@ -76,6 +76,8 @@ export default {
         case 'WFPanel':
           form = import('@theme/components/ADempiere/Form/WFPanel')
           break
+        case 'childIncome':
+          form = import('@theme/components/ADempiere/Form/childIncome')
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
