@@ -24,13 +24,15 @@
 
 <script>
 export default {
-  name: 'FormPanel',
+  name: 'FormDefinition',
+
   props: {
     metadata: {
       type: Object,
       required: true
     }
   },
+
   computed: {
     // load the component that is indicated in the attributes of received property
     componentRender() {
@@ -76,8 +78,9 @@ export default {
         case 'WFPanel':
           form = import('@theme/components/ADempiere/Form/WFPanel')
           break
-        case 'childIncome':
-          form = import('@theme/components/ADempiere/Form/childIncome')
+        case 'TimeControl':
+        case 'org.spin.park.form.TimeControl':
+          form = import('@theme/components/ADempiere/Form/TimeControl')
           break
         default:
           form = import('@/views/ADempiere/Unsupported')

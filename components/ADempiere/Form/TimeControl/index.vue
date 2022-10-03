@@ -83,19 +83,25 @@
 
 <script>
 import { defineComponent, ref, computed } from '@vue/composition-api'
+
+import lang from '@/lang'
 import store from '@/store'
+
 // componets and mixins
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import heardList from './headerTable'
 import fieldsList from './fieldsList'
-// utils and helper methods
+
+// api request methods
 import {
   requestCreateResource,
   requestUpdateResource,
   requestDeleteResource,
   requestListResource
 } from '@/api/ADempiere/form/timeControl.js'
+
+// utils and helper methods
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -105,15 +111,15 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat.js
 // import { containerManager as containerManagerWindow } from '@/utils/ADempiere/dictionary/window'
 
 export default defineComponent({
-  name: 'ChildIncome',
-  components: {
-    TitleAndHelp,
-    FieldDefinition
-  },
-  setup(props, { root }) {
-    // Ref
+  name: 'TimeControl',
 
-    const area = ref('')
+  components: {
+    FieldDefinition,
+    TitleAndHelp
+  },
+
+  setup() {
+    // Ref
     const name = ref('')
     const description = ref('')
     const tableData = ref([])
@@ -130,12 +136,6 @@ export default defineComponent({
       return false
     })
 
-    const alo = store.getters.getValuesView({
-      containerUuid: 'ChildIncome',
-      format: 'array'
-    })
-    console.log({ alo })
-
     const recurringType = computed(() => {
       return store.getters.getValueOfField({
         containerUuid: 'ChildIncome',
@@ -149,7 +149,7 @@ export default defineComponent({
       })
     })
 
-    // Function
+    // Methods
 
     function addChild() {
       isLoadingCreate.value = true
@@ -194,8 +194,13 @@ export default defineComponent({
     }
 
     function updateCurrentRow(row) {
+      const { id, uuid, name, description } = row
+
       requestUpdateResource({
-        ...row
+        id,
+        uuid,
+        name,
+        description
       })
         .then(response => {
           console.log({ response })
@@ -213,11 +218,17 @@ export default defineComponent({
     }
 
     function deleteChild(row) {
+      const { id, uuid } = row
+
       requestDeleteResource({
-        ...row
+        id,
+        uuid
       })
         .then(response => {
-          console.log({ response })
+          showMessage({
+            message: lang.t('recordManager.deleteRecordSuccessful'),
+            type: 'success'
+          })
         })
         .catch(error => {
           showMessage({
@@ -266,16 +277,21 @@ export default defineComponent({
       requestListResource()
         .then(response => {
           const { records } = response
-          const alo = records.map(a => {
+          const recordsList = records.map(row => {
+            let dateTo = null
+            if (String(row.assign_date_to).length >= 10) {
+              dateTo = translateDateByLong(row.assign_date_to)
+            }
+
             return {
-              ...a,
-              resourceNameType: a.resource.name,
-              dateFrom: translateDateByLong(a.assign_date_from),
-              dateTo: translateDateByLong(a.assign_date_to),
+              ...row,
+              resourceNameType: row.resource.name,
+              dateFrom: translateDateByLong(row.assign_date_from),
+              dateTo,
               ...ROW_ATTRIBUTES
             }
           })
-          tableData.value = alo
+          tableData.value = recordsList
         }).catch(error => {
           showMessage({
             message: error,
@@ -293,24 +309,22 @@ export default defineComponent({
 
     return {
       // Ref
-      area,
       name,
       description,
       tableData,
       isLoadingFields,
       isLoadingCreate,
       metadataList,
-      // Computed
+      // computeds
       recurringType,
       recurringTypeUuid,
       isValidateAdd,
       // import
       heardList,
-      fieldsList,
       containerManager: {
         ...containerManagerForm
       },
-      // function
+      // methods
       addChild,
       deleteChild,
       editChild,
