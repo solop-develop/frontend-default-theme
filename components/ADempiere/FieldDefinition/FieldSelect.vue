@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -33,13 +33,6 @@
     @visible-change="getDataLookupList"
     @clear="clearLookup"
   >
-    <svg-icon
-      v-if="isSearchField"
-      slot="prefix"
-      icon-class="search"
-      style="margin-left: 5px; font-size: 16px;"
-    />
-
     <el-option
       v-for="(option, key) in optionsList"
       :key="key"
@@ -75,12 +68,6 @@ export default {
   ],
 
   computed: {
-    /**
-     * Lookup search type unsupported
-     */
-    isSearchField() {
-      return this.metadata.componentPath === 'FieldSearch'
-    },
     cssClassStyle() {
       let styleClass = ' custom-field-select '
       if (this.isSelectMultiple) {
@@ -388,26 +375,30 @@ export default {
      * @param {boolean} isShowList triggers when the pull-down menu appears or disappears
      */
     getDataLookupList(isShowList) {
-      // Establish
+      // establish
       this.setContainerInformation()
-      // get stored list values
-      const list = this.getStoredLookupAll
-      // refresh local list component
-      this.optionsList = list
+      // get stored list and refresh local component
+      this.optionsList = this.getStoredLookupAll
+
       if (isShowList) {
-        if (this.isEmptyValue(list) || this.isWithSearchValue ||
-          (list.length === 1 && this.blankValues.includes(list[0].value))) {
+        const listLookups = this.getStoredLookupList
+        if (isEmptyValue(listLookups) || this.isWithSearchValue) {
           this.loadListFromServer()
+        } else if (listLookups.length === 1) {
+          const firstOption = listLookups.at(0)
+          if (firstOption && this.blankValues.includes(firstOption.value)) {
+            this.loadListFromServer()
+          }
         }
       }
     },
     remoteSearch(searchQuery = '') {
-      clearTimeout(this.timeOut)
       const results = this.localSearch(searchQuery)
-      if ((this.isEmptyValue(results) && !this.isEmptyValue(searchQuery)) || this.isEmptyValue(searchQuery)) {
+      if (this.isEmptyValue(searchQuery) && (this.isEmptyValue(results) && !this.isEmptyValue(searchQuery))) {
+        clearTimeout(this.timeOut)
         this.timeOut = setTimeout(() => {
           this.loadListFromServer(searchQuery)
-        }, 600)
+        }, 500)
         return
       }
       // use this, if remote is enabled, local search not working
@@ -454,7 +445,8 @@ export default {
       this.$store.dispatch('deleteLookup', {
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
-        contextColumnNames: this.metadata.contextColumnNames,
+        contextColumnNames: this.metadata.reference.contextColumnNames,
+        contextColumnNamesByDefaultValue: this.metadata.contextColumnNames,
         uuid: this.metadata.uuid,
         //
         tableName: this.metadata.reference.tableName,
