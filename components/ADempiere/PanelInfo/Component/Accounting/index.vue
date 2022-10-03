@@ -32,7 +32,7 @@
             v-for="(field) in metadataList"
             :key="field.columnName"
             :metadata-field="field"
-            :container-uuid="containerUuid"
+            :container-uuid="uuidForm"
             :container-manager="containerManager"
           />
         </el-form>
@@ -114,6 +114,7 @@ import {
 } from '@/api/ADempiere/form/accouting.js'
 
 // utils and helper methods
+import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -134,10 +135,6 @@ export default defineComponent({
       type: String,
       default: () => ''
     },
-    containerUuidTab: {
-      type: String,
-      default: () => ''
-    },
     tableName: {
       type: String,
       default: () => ''
@@ -152,7 +149,8 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
+    const ACCOUTING_FACT_FORM = 'Accouting-Fact-Form'
     // Refs
     const tableData = ref([])
     const metadataList = ref([])
@@ -162,17 +160,34 @@ export default defineComponent({
     const force = ref(false)
 
     // Computed
-    const accoutingSchemaId = computed(() => {
-      return store.getters.getValueOfField({
-        containerUuid: props.containerUuid,
-        columnName: 'C_AcctSchema_ID'
-      })
+    const uuidForm = computed(() => {
+      return ACCOUTING_FACT_FORM + '_' + props.containerUuid
     })
 
-    const filter = computed(() => {
+    const accoutingSchemaId = computed({
+      set(value) {
+        store.commit('updateValueOfField', {
+          containerUuid: uuidForm.value,
+          columnName: 'C_AcctSchema_ID',
+          value: value
+        })
+      },
+      get() {
+        return store.getters.getValueOfField({
+          containerUuid: uuidForm.value,
+          columnName: 'C_AcctSchema_ID'
+        })
+      }
+    })
+
+    const accoutingFilters = computed(() => {
       return store.getters.getValuesView({
-        containerUuid: props.containerUuid,
+        containerUuid: uuidForm.value,
         format: 'array'
+      }).filter(attribute => {
+        return !isEmptyValue(attribute.value) &&
+          !(attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX) ||
+          attribute.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX))
       })
     })
 
@@ -190,7 +205,7 @@ export default defineComponent({
             list.push({
               ...responseField,
               isReadOnly: false,
-              containerUuid: props.containerUuid
+              containerUuid: uuidForm.value
             })
           }).catch(error => {
             console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
@@ -202,12 +217,20 @@ export default defineComponent({
       })
     }
 
-    function findAccountingFacts(params) {
+    function findAccountingFacts(filters) {
       if (isEmptyValue(accoutingSchemaId.value)) {
+        // showMessage({
+        //   message: lang.t('notifications.mandatoryFieldMissing') + 'C_AcctSchema_ID',
+        //   type: 'info'
+        // })
         return
       }
-      const accoutingSchemaUuid = params.find(schema => schema.columnName === 'C_AcctSchema_ID_UUID').value
-      const filters = params.filter(attribute => (attribute.columnName === 'PostingType' && !isEmptyValue(attribute.value)) || attribute.columnName === 'C_AcctSchema_ID')
+
+      const accoutingSchemaUuid = store.getters.getValueOfField({
+        containerUuid: uuidForm.value,
+        columnName: 'C_AcctSchema_ID_UUID'
+      })
+
       isLoadingDataTable.value = true
       requestAccountingFacts({
         accoutingSchemaId: accoutingSchemaId.value,
@@ -241,7 +264,7 @@ export default defineComponent({
     function clearData() {
       tableData.value = []
       store.commit('updateValuesOfContainer', {
-        containerUuid: props.containerUuid,
+        containerUuid: uuidForm.value,
         attributes: [
           {
             columnName: 'C_AcctSchema_ID',
@@ -292,12 +315,21 @@ export default defineComponent({
         })
         .finally(() => {
           isLoadingRePost.value = false
-          findAccountingFacts(filter.value)
+          findAccountingFacts(accoutingFilters.value)
         })
     }
 
+    if (isEmptyValue(accoutingSchemaId.value)) {
+      const globalAccoutingSchemaId = computed(() => {
+        return store.getters.getSessionContext({
+          columnName: '$C_AcctSchema_ID'
+        })
+      })
+      accoutingSchemaId.value = globalAccoutingSchemaId.value
+    }
+
     // Watch
-    watch(filter, (newValue) => {
+    watch(accoutingFilters, (newValue) => {
       findAccountingFacts(newValue)
     })
     watch(showContainerInfo, (newValue) => {
@@ -323,6 +355,7 @@ export default defineComponent({
       heardList,
       // computed
       accoutingSchemaId,
+      uuidForm,
       showContainerInfo,
       // methods
       setFieldsList,
@@ -334,9 +367,3 @@ export default defineComponent({
 
 })
 </script>
-
-<style>
-.scroll-attachment {
-    max-height: 80vh;
-}
-</style>

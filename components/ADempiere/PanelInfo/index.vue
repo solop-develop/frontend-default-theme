@@ -65,7 +65,6 @@
         v-model="nameTab"
         type="border-card"
         style="height: 100% !important;"
-        class="qlq"
         @tab-click="handleClick"
       >
         <el-tab-pane name="getRecordLogs">
@@ -152,8 +151,7 @@
           </span>
           <accounting
             :container-manager="containerManager"
-            :container-uuid="currentTab.containerUuid + '_  AccountingInformation'"
-            :container-uuid-tab="currentTab.containerUuid"
+            :container-uuid="currentTab.containerUuid"
             :table-name="currentTab.tableName"
             :record-id="currentRecordInfo[currentTab.tableName + '_ID']"
             :record-uuid="$store.getters.getUuidOfContainer(currentTab.containerUuid)"
