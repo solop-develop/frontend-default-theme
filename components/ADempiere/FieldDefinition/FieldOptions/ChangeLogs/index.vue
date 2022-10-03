@@ -26,6 +26,16 @@
     </div>
 
     <div>
+      <p v-if="!isEmptyValue(fieldDisplayColumName)">
+        <b>
+          {{ 'ID:' }} {{ fieldId }}
+        </b>
+      </p>
+      <p v-if="!isEmptyValue(fieldUuid) && !isEmptyValue(fieldDisplayColumName)">
+        <b>
+          {{ 'UUID:' }} {{ fieldUuid }}
+        </b>
+      </p>
       <el-table
         v-if="!isEmptyValue(fieldLogs)"
         :data="fieldLogs"
@@ -190,6 +200,27 @@ export default {
           logDate: this.formatDate(field.logDate, true, this.format),
           userName: field.userName
         }
+      })
+    },
+    fieldUuid() {
+      return this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.fieldAttributes.parentUuid,
+        containerUuid: this.fieldAttributes.containerUuid,
+        columnName: this.fieldAttributes.columnName + '_UUID'
+      })
+    },
+    fieldId() {
+      return this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.fieldAttributes.parentUuid,
+        containerUuid: this.fieldAttributes.containerUuid,
+        columnName: this.fieldAttributes.columnName
+      })
+    },
+    fieldDisplayColumName() {
+      return this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.fieldAttributes.parentUuid,
+        containerUuid: this.fieldAttributes.containerUuid,
+        columnName: this.fieldAttributes.displayColumnName
       })
     }
   },
