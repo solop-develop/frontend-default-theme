@@ -6,107 +6,74 @@
     <el-header>
       <div class="center" style="width: 100%">
         <title-and-help
-          :name="metadata.name"
-          :help="metadata.description"
+          :name="$t('timeControl.addResource')"
+          :help="$t('timeControl.addResource')"
         />
       </div>
     </el-header>
 
     <el-main>
-      <el-card class="box-card" style="padding-bottom: 20px;">
-        <el-form
-          label-position="top"
+      <el-table
+        v-loading="isLoadingRecords"
+        :data="tableData"
+        stripe
+        highlight-current-row
+        border
+        style="width: 100%;"
+        @row-click="handleRowClick"
+      >
+        <el-table-column
+          v-for="(head, key) in heardList"
+          :key="key"
+          :label="head.label"
+          :align="head.align"
+          :width="isMobile ? '110px' : head.size"
+          header-align="center"
         >
-          <el-row style="padding-bottom: 10px;">
-            <el-col
-              :span="sizeColumn"
-            >
-              <field-definition
-                v-for="(field) in metadataList"
-                :key="field.columnName"
-                :metadata-field="{
-                  ...field,
-                  size: 24
-                }"
-                :container-uuid="'ChildIncome'"
-                :container-manager="containerManager"
-                style="padding-top: 10px;"
-              />
-            </el-col>
-            <el-col :span="sizeColumn">
-              <el-form-item
-                :label="$t('timeControl.name')"
-                :rules="{
-                  required: true
-                }"
-                :style="cssStyleFrontName"
-              >
-                <el-input v-model="name" type="text" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="sizeColumn">
-              <el-form-item
-                :label="$t('timeControl.description')"
-                :style="cssStyleFront"
-              >
-                <el-input v-model="description" type="textarea" autosize />
-              </el-form-item>
-            </el-col>
-            <el-col :span="isMobile ? 24 : 3">
-              <el-form-item
-                :style="cssStyleButton"
-              >
-                <el-button
-                  type="primary"
-                  :loading="isLoadingCreate"
-                  :disabled="isValidateAdd"
-                  @click="addNewRecord()"
-                >
-                  {{ $t('timeControl.addChild') }}
-                </el-button>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-        <el-table
-          :data="tableData"
-          stripe
-          highlight-current-row
-          border
-          style="width: 100%;padding-right: 20px !important;"
-        >
-          <el-table-column
-            v-for="(head, key) in heardList"
-            :key="key"
-            :label="head.label"
-            :align="head.align"
-            :width="isMobile ? '110px' : head.size"
-            header-align="center"
-          >
-            <template slot-scope="scope">
-              <span v-if="scope.row.isEditRow && (head.columnName === 'name')">
-                <el-input ref="namePanelEdit" v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
-              </span>
-              <span v-else-if="scope.row.isEditRow && (head.columnName === 'description')">
-                <el-input v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
-              </span>
-              <span v-else>
-                {{ scope.row[head.columnName] }}
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            :label="$t('form.pos.tableProduct.options')"
-            :width="isMobile ? '175px' : 'auto'"
-          >
-            <template slot-scope="scope">
-              <el-button :disabled="scope.row.isConfirmed" type="success" :icon="scope.row.isEditRow ? 'el-icon-check' : 'el-icon-edit'" size="mini" @click="editChild(scope.row)" />
-              <el-button :disabled="scope.row.isConfirmed" type="danger" icon="el-icon-delete" size="mini" @click="deleteChild(scope.row)" />
-              <el-button :disabled="scope.row.isConfirmed" type="primary" icon="el-icon-check" size="mini" @click="confirmResiurce(scope.row)" />
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+          <template slot-scope="scope">
+            <span v-if="scope.row.isEditRow && (head.columnName === 'name')">
+              <el-input ref="namePanelEdit" v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
+            </span>
+            <span v-else-if="scope.row.isEditRow && (head.columnName === 'description')">
+              <el-input v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
+            </span>
+            <span v-else>
+              {{ scope.row[head.columnName] }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-row :gutter="24">
+        <el-col :span="20">
+          <custom-pagination
+            :total="recordCount"
+            :records-page="tableData.length"
+            :selection="selection"
+          />
+        </el-col>
+        <el-col :span="24">
+          <samp style="float: right; padding-right: 10px;">
+            <el-button
+              :loading="isLoadingRecords"
+              type="success"
+              icon="el-icon-refresh-right"
+              @click="listResource();"
+            />
+            <el-button
+              type="danger"
+              class="custom-button-create-bp"
+              icon="el-icon-close"
+              @click="closeShowList()"
+            />
+            <el-button
+              type="primary"
+              class="custom-button-create-bp"
+              icon="el-icon-check"
+              @click="addLine(currentResource)"
+            />
+          </samp>
+        </el-col>
+      </el-row>
     </el-main>
   </el-container>
 </template>
@@ -119,9 +86,9 @@ import store from '@/store'
 
 // componets and mixins
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import heardList from './headerTable'
-import fieldsList from './fieldsList'
 
 // api request methods
 import {
@@ -131,34 +98,31 @@ import {
   requestListResource,
   requestConfirmResourceAssignnment
 } from '@/api/ADempiere/form/timeControl.js'
+import {
+  createOrderLine
+  // updateOrderLine
+} from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
-import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
+// import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
-import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form/index.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat.js'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default defineComponent({
-  name: 'TimeControl',
+  name: 'TableTimeControl',
 
   // Components Used on the Panel
 
   components: {
     FieldDefinition,
-    TitleAndHelp
+    TitleAndHelp,
+    CustomPagination
   },
 
   // Components Used on the Panel
-
-  props: {
-    metadata: {
-      type: Object,
-      required: true
-    }
-  },
 
   setup() {
     /**
@@ -182,6 +146,10 @@ export default defineComponent({
     const isLoadingFields = ref(false)
     const isLoadingCreate = ref(false)
     const metadataList = ref([])
+    const currentResource = ref({})
+    const isLoadingRecords = ref(false)
+    // Pagination
+    const recordCount = ref(0)
 
     /**
      * Computed
@@ -247,15 +215,21 @@ export default defineComponent({
       return 'padding-top: 45px;'
     })
 
+    const selection = computed(() => {
+      if (isEmptyValue(currentResource.value)) {
+        return 0
+      }
+      return 1
+    })
+
     /**
      * Methods
      * addNewRecord - Add new record in time control table
      * @param {object} updateCurrentRow - Update record in time control table
      * @param {object} deleteChild - Delete record in time control table
      * @param {object} editChild - Update record in time control table
-     * setFieldsList - Load field list with createFieldFromDictionary
      * listResource - List Control Table
-     * @param {object} confirmResiurce - Change status of a record in the time control table
+     * @param {object} confirmResource - Change status of a record in the time control table
      */
 
     function addNewRecord() {
@@ -371,34 +345,14 @@ export default defineComponent({
       row.isEditRow = !row.isEditRow
     }
 
-    function setFieldsList() {
-      const list = []
-      fieldsList.forEach(element => {
-        createFieldFromDictionary(element)
-          .then(responseField => {
-            list.push({
-              ...responseField,
-              isReadOnly: false,
-              containerUuid: 'ChildIncome'
-            })
-          }).catch(error => {
-            showMessage({
-              message: error,
-              type: 'error'
-            })
-            console.warn(`createFieldFromDictionary: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
-          })
-          .finally(() => {
-            metadataList.value = list
-            isLoadingFields.value = true
-          })
-      })
-    }
-
     function listResource() {
-      requestListResource({})
+      isLoadingRecords.value = true
+      requestListResource({
+        isWaitingForOrdered: true
+      })
         .then(response => {
           const { records } = response
+          recordCount.value = recordCount
           const recordsList = records.map(row => {
             let dateTo = null
             if (String(row.assign_date_to).length >= 10) {
@@ -410,7 +364,7 @@ export default defineComponent({
             }
             return {
               ...row,
-              resourceNameType: row.resource.resource_type.name,
+              resourceNameType: row.resource.name,
               dateFrom: formatDate({
                 value: row.assign_date_from,
                 isTime: true,
@@ -423,16 +377,18 @@ export default defineComponent({
             }
           })
           tableData.value = recordsList
+          isLoadingRecords.value = false
         }).catch(error => {
           showMessage({
             message: error,
             type: 'error'
           })
+          isLoadingRecords.value = false
           console.warn(`requestListResource: List Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
     }
 
-    function confirmResiurce(row) {
+    function confirmResource(row) {
       const { id, uuid } = row
 
       requestConfirmResourceAssignnment({
@@ -456,19 +412,76 @@ export default defineComponent({
           listResource()
         })
     }
+    function handleRowClick(row) {
+      currentResource.value = row
+    }
 
-    if (!isLoadingFields.value) {
-      setFieldsList({})
+    function addLine(row, order) {
+      const { resourceAssignmentUuid = row.uuid } = row
+      const currentPointOfSales = store.getters.posAttributes.currentPointOfSales
+      if (isEmptyValue(currentPointOfSales.currentOrder.uuid)) {
+        createOrder(row)
+        return
+      }
+
+      createOrderLine({
+        posUuid: currentPointOfSales.uuid,
+        orderUuid: currentPointOfSales.currentOrder.uuid,
+        resourceAssignmentUuid
+      })
+        .then((response) => {
+          store.dispatch('reloadOrder', { orderUuid: store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
+          showMessage({
+            message: lang.t('timeControl.recordConfirmed'),
+            type: 'success'
+          })
+          closeShowList()
+        })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+          closeShowList()
+          console.warn(`create Order Line: Confirme Resource Server (State) - Error ${error.code}: ${error.message}.`)
+        })
+    }
+    function createOrder(resource) {
+      store.dispatch('createOrder', {
+        posUuid: store.getters.posAttributes.currentPointOfSales.uuid,
+        customerUuid: store.getters.posAttributes.currentPointOfSales.templateCustomer.uuid,
+        salesRepresentativeUuid: store.getters.posAttributes.currentPointOfSales.salesRepresentative.uuid
+      })
+        .then((response) => {
+          addLine(resource, response)
+          showMessage({
+            message: lang.t('timeControl.recordConfirmed'),
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+          console.warn(`create Order Line: Confirme Resource Server (State) - Error ${error.code}: ${error.message}.`)
+        })
+    }
+    function closeShowList(params) {
+      store.commit('showListResources', false)
     }
 
     // Get Record Control Table
-
+    // onMounted(() => {
+    //   listResource()
+    // })
     listResource()
 
     return {
       // Ref
       name,
       nameEdit,
+      isLoadingRecords,
       descriptionEdit,
       description,
       tableData,
@@ -476,6 +489,9 @@ export default defineComponent({
       isLoadingCreate,
       metadataList,
       timeOutFocus,
+      currentResource,
+      // Paginations
+      recordCount,
       // Computeds
       recurringType,
       recurringTypeUuid,
@@ -486,17 +502,19 @@ export default defineComponent({
       cssStyleFront,
       cssStyleFrontName,
       cssStyleButton,
+      selection,
       // import
       heardList,
-      containerManager: {
-        ...containerManagerForm
-      },
       // Methods
       addNewRecord,
       deleteChild,
       editChild,
       listResource,
-      confirmResiurce
+      confirmResource,
+      handleRowClick,
+      addLine,
+      closeShowList,
+      createOrder
     }
   }
 })

@@ -350,6 +350,7 @@ export default {
       const { columnName } = orderLine
       // const iSOCode = this.isEmptyValue(this.currentPointOfSales.displayCurrency) ? '' : this.currentPointOfSales.displayCurrency.iSOCode
       if (columnName === 'LineDescription') {
+        if (!this.isEmptyValue(row.resourceAssignment)) return row.product.name + ' - (' + row.resourceAssignment.name + ')'
         if (this.isEmptyValue(row.product.name)) return row.description
         if (this.isEmptyValue(row.product.value)) return row.charge.columnName
         if (this.isMobile) {

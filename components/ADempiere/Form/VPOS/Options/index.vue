@@ -83,6 +83,33 @@
             </el-card>
           </el-col>
 
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <el-popover
+                v-model="isShowResource"
+                placement="right"
+                trigger="click"
+                width="1200"
+              >
+                <table-time-control />
+                <p
+                  slot="reference"
+                  :style="blockOption"
+                >
+                  <el-button
+                    type="text"
+                    style="min-height: 50px;width: -webkit-fill-available;white-space: normal;"
+                    @click="openListResource()"
+                  >
+                    <svg-icon icon-class="list" />
+                    <br>
+                    {{ $t('timeControl.addResource') }}
+                  </el-button>
+                </p>
+              </el-popover>
+            </el-card>
+          </el-col>
+
           <!-- generateImmediateInvoice -->
 
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
@@ -584,6 +611,7 @@ import AssignSeller from './AssignSeller'
 import SalesDiscountOff from './SalesDiscountOff'
 import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
+import TableTimeControl from '@theme/components/ADempiere/Form/TimeControl/table.vue'
 
 // api request methods
 import {
@@ -615,7 +643,8 @@ export default {
     ModalDialog,
     SalesDiscountOff,
     DiscountOrder,
-    OrdersList
+    OrdersList,
+    TableTimeControl
   },
 
   mixins: [
@@ -644,7 +673,8 @@ export default {
       isLoadingReverse: false,
       showFieldListOrder: false,
       messageReverseSales: '',
-      showConfirmDelivery: false
+      showConfirmDelivery: false,
+      isShowResource: false
     }
   },
 
@@ -912,6 +942,17 @@ export default {
         this.$store.commit('showListOrders', value)
       }
     },
+    whatShowResource() {
+      return this.$store.getters.getIsShowResource
+    },
+    // isShowResource: {
+    //   get() {
+    //     return this.$store.getters.getIsShowResource
+    //   },
+    //   set(value) {
+    //     this.$store.commit('showListResources', value)
+    //   }
+    // },
     popoverConfirmDelivery: {
       get() {
         return this.$store.getters.getConfirmDelivery
@@ -942,6 +983,11 @@ export default {
   },
 
   watch: {
+    whatShowResource(value) {
+      if (!value) {
+        this.isShowResource = value
+      }
+    },
     visible(value) {
       if (value && !this.isEmptyValue(this.$refs)) {
         setTimeout(() => {
@@ -1149,6 +1195,9 @@ export default {
     },
     openListOrdes() {
       this.showFieldListOrder = true
+    },
+    openListResource() {
+      this.$store.commit('showListResources', true)
     },
     closePin() {
       this.visible = false
