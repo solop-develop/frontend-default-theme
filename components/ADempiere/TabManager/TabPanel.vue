@@ -57,23 +57,25 @@
             :container-manager="containerManager"
             :group-tab="tabAttributes.tabGroup"
           />
-          <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;">
+          <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
             <panel-definition
               key="panel-definition"
               :parent-uuid="parentUuid"
               :container-uuid="tabAttributes.uuid"
               :container-manager="containerManager"
               :group-tab="tabAttributes.tabGroup"
+              :style="overflowHeightScrooll"
             />
           </el-scrollbar>
         </span>
-        <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;">
+        <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
           <panel-definition
             key="panel-definition"
             :parent-uuid="parentUuid"
             :container-uuid="tabAttributes.uuid"
             :container-manager="containerManager"
             :group-tab="tabAttributes.tabGroup"
+            :style="overflowHeightScrooll"
           />
         </el-scrollbar>
       </template>
@@ -89,6 +91,7 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
+// max-height: 300px;
 // import CustomPagination from '@theme/components/ADempiere/DataTable/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
@@ -143,6 +146,18 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const overflowHeightScrooll = computed(() => {
+      if (props.tabAttributes.isParentTab) {
+        if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
+          return 'max-height: 650px;'
+        }
+        return 'max-height: 300px;'
+      }
+      if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsChildren) {
+        return 'max-height: 500px !important;'
+      }
+      return 'max-height: 300px !important;'
+    })
     const listAction = computed(() => {
       return {
         parentUuid: props.parentUuid,
@@ -271,6 +286,7 @@ export default defineComponent({
       tabData,
       isMobile,
       currentTab,
+      overflowHeightScrooll,
       // pagination
       currentPage,
       recordsLength,

@@ -17,6 +17,7 @@
 import { computed } from '@vue/composition-api'
 
 import store from '@/store'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default ({ parentUuid, containerUuid }) => {
   const storedWindow = computed(() => {
@@ -52,7 +53,15 @@ export default ({ parentUuid, containerUuid }) => {
     return 'fullscreen'
   })
 
-  function changeFullScreenParent() {
+  function changeFullScreenParent(value) {
+    if (!isEmptyValue(value)) {
+      store.commit('changeWindowAttribute', {
+        uuid: parentUuid,
+        attributeName: 'isFullScreenTabsParent',
+        attributeValue: value
+      })
+      return
+    }
     store.commit('changeWindowAttribute', {
       uuid: parentUuid,
       attributeName: 'isFullScreenTabsParent',
@@ -60,7 +69,15 @@ export default ({ parentUuid, containerUuid }) => {
     })
   }
 
-  function changeFullScreenChild() {
+  function changeFullScreenChild(value) {
+    if (!isEmptyValue(value)) {
+      store.commit('changeWindowAttribute', {
+        uuid: parentUuid,
+        attributeName: 'isFullScreenTabsChildren',
+        attributeValue: value
+      })
+      return
+    }
     store.commit('changeWindowAttribute', {
       uuid: parentUuid,
       attributeName: 'isFullScreenTabsChildren',
@@ -71,9 +88,11 @@ export default ({ parentUuid, containerUuid }) => {
   function changeFullScreen() {
     if (storedTab.value.isParentTab) {
       changeFullScreenParent()
+      changeFullScreenChild(false)
       return
     }
     changeFullScreenChild()
+    changeFullScreenParent(false)
   }
 
   return {
