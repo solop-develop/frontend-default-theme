@@ -38,6 +38,7 @@
           <el-card
             :shadow="shadowGroup"
             :body-style="{ padding: '5px' }"
+            :class="isActiveCurrentTab ? 'custom-panel-field' : ''"
           >
             <el-row v-if="!isMobile || isEmptyValue(panelMetadata.childTabs)">
               <template v-for="(fieldAttributes, subKey) in fieldsList">
@@ -121,6 +122,17 @@ export default defineComponent({
 
   setup(props, { root }) {
     const fieldIndex = ref()
+    const isActiveCurrentTab = computed(() => {
+      if (
+        !isEmptyValue(props.panelMetadata.name) &&
+        !isEmptyValue(store.getters.getContainerInfo) &&
+        !isEmptyValue(store.getters.getContainerInfo.currentTab.name) &&
+        (store.getters.getContainerInfo.currentTab.name === props.panelMetadata.name)
+      ) {
+        return true
+      }
+      return false
+    })
     const fieldsList = computed(() => {
       // order and assign groups
       if (!isEmptyValue(props.panelMetadata) && !isEmptyValue(props.panelMetadata.fieldsList)) {
@@ -253,6 +265,7 @@ export default defineComponent({
       fieldDefinitionRef,
       recordUuid,
       isMobile,
+      isActiveCurrentTab,
       // methodos
       setFocus
     }
@@ -277,5 +290,17 @@ export default defineComponent({
   max-height: 300px;
   min-height: 200px;
   overflow-x: hidden;
+}
+</style>
+
+<style scoped>
+.custom-panel-field {
+  margin: 1px;
+  cursor: pointer;
+  border: 1px solid #36a3f7;
+}
+.custom-panel-field:hover {
+  background: transparent !important;
+  border: 1px solid #36a3f7;
 }
 </style>

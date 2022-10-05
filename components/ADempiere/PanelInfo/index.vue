@@ -89,7 +89,7 @@
                   {{ $t('window.containerInfo.log.recordID') }}
                 </template>
                 <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordInfo[currentTab.tableName + '_ID'] }}
+                  {{ currentRecordId }}
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -98,7 +98,7 @@
                   {{ $t('window.containerInfo.log.recordUUID') }}
                 </template>
                 <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordInfo.UUID }}
+                  {{ currentRecordUuid }}
                 </span>
               </el-descriptions-item>
             </el-descriptions>
@@ -113,7 +113,7 @@
           <attachment
             :is-active-tab="'getAttachment' === nameTab"
             :table-name="allTabsList[0].tableName"
-            :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
+            :record-id="currentRecordId"
             :record-uuid="currentRecord.UUID"
           />
         </el-tab-pane>
@@ -124,7 +124,7 @@
           </span>
           <chats
             :table-name="allTabsList[0].tableName"
-            :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
+            :record-id="currentRecordId"
           />
         </el-tab-pane>
         <el-tab-pane
@@ -153,8 +153,8 @@
             :container-manager="containerManager"
             :container-uuid="currentTab.containerUuid"
             :table-name="currentTab.tableName"
-            :record-id="currentRecordInfo[currentTab.tableName + '_ID']"
-            :record-uuid="$store.getters.getUuidOfContainer(currentTab.containerUuid)"
+            :record-id="currentRecordId"
+            :record-uuid="recordUuid"
           />
         </el-tab-pane>
         <el-tab-pane v-if="!isEmptyValue(storeProduct)" name="listProductStorage" style="height: 100% !important;">
@@ -237,19 +237,28 @@ export default defineComponent({
     const tableName = ref('')
     const nameTab = ref('getRecordLogs')
     const recordsListStoreProduct = ref([])
+    const drawer = ref(false)
 
     // use getter to reactive properties
 
-    const openInfo = computed(() => {
-      return props.showContainerInfo
-    })
+    /**
+     * Computed
+     * isLoadLogs
+     * isWorkflowLog
+     * containerInfo
+     * currentRecordInfo
+     * currentTab
+     * storeProduct
+     * showPanelInfo
+     * currentRecordUuid
+     * currentRecordId
+     */
+
     const isLoadLogs = computed(() => {
       return store.state.utils.showRecordLogs
     })
 
-    /**
-     * Container Info
-     */
+    // Container Info
     const containerInfo = computed(() => {
       const inf = store.getters.getContainerInfo
       if (inf) {
@@ -258,27 +267,40 @@ export default defineComponent({
       return {}
     })
 
-    /**
-     * Current Tab
-     */
+    // Current Tab
     const currentTab = computed(() => {
       if (containerInfo.value.currentTab) {
         return containerInfo.value.currentTab
       }
       return {}
     })
-    /**
-     * Store Product
-     */
+
+    // Current Record UUID
+    const currentRecordUuid = computed(() => {
+      if (currentTab.value) {
+        return store.getters.getUuidOfContainer(currentTab.value.containerUuid)
+      }
+      return ''
+    })
+
+    // Current Record ID
+    const currentRecordId = computed(() => {
+      if (currentTab.value) {
+        return store.getters.getIdOfContainer({
+          containerUuid: currentTab.value.containerUuid,
+          tableName: currentTab.value.tableName
+        })
+      }
+      return ''
+    })
+    // Store Product
     const storeProduct = computed(() => {
       return store.getters.getValueOfField({
         containerUuid: currentTab.value.containerUuid,
         columnName: 'M_Product_ID'
       })
     })
-    /**
-     * Current window
-     */
+    // Current window
     const storedWindow = computed(() => {
       if (currentTab.value && currentTab.value.parentUuid) {
         return store.getters.getStoredWindow(currentTab.value.parentUuid)
@@ -293,9 +315,7 @@ export default defineComponent({
       return false
     })
 
-    /**
-     * Current Record
-     */
+    // Current Record
     const currentRecordInfo = computed(() => {
       if (containerInfo.value.currentRecord) {
         return containerInfo.value.currentRecord
@@ -303,10 +323,23 @@ export default defineComponent({
       return {}
     })
 
+    // Open Container the Info
+    const showPanelInfo = computed(() => {
+      return store.getters.getShowLogs
+    })
+
     /**
-     * Record
+     * Function Infomation Panel
+     * findRecordLogs @param {object} tab
+     * showkey  @param {number, number} key
+     * handleClickLogs @param {string} tabHTML
+     * validate @param {object} list
+     * handleClick @param {object} tab
+     * findListStoreProduct @param {object} params
      */
-    const findRecordLogs = (tab) => {
+
+    // Record
+    function findRecordLogs(tab) {
       tableName.value = root.$store.getters.getTableName(tab.parentUuid, tab.containerUuid)
       currentRecordLogs.value = root.$store.getters.getValuesView({
         parentUuid: tab.parentUuid,
@@ -314,27 +347,8 @@ export default defineComponent({
         format: 'object'
       })
     }
-
-    watch(isLoadLogs, (newValue, oldValue) => {
-      if (newValue) {
-        findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
-      }
-    })
-
-    watch(openInfo, (newValue, oldValue) => {
-      if (newValue && newValue !== oldValue && nameTab.value !== 'getRecordLogs') {
-        handleClick({
-          name: nameTab.value
-        })
-      }
-    })
-
-    findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
-
-    /**
-     * showkey
-     */
-    const showkey = (key, index) => {
+    // showkey
+    function showkey(key, index) {
       if (key === currentKey.value && index === typeAction.value) {
         currentKey.value = 1000
       } else {
@@ -342,19 +356,17 @@ export default defineComponent({
         typeAction.value = index
       }
     }
-    const handleClickLogs = (tabHTML) => {
+    function handleClickLogs(tabHTML) {
       findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
     }
-    const validate = (list) => {
+    function validate(list) {
       return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
     }
-    /**
-     * Listar Historico de cambios
-     */
-    const openRecordLogs = (a) => {
+    // List Change History
+    function openRecordLogs(a) {
       drawer.value = !drawer.value
     }
-    const handleClick = (tab, event) => {
+    function handleClick(tab, event) {
       if (tab.name === 'accountingInformation') {
         return
       }
@@ -366,17 +378,16 @@ export default defineComponent({
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,
         containerUuid: currentTab.value.containerUuid,
-        recordId: currentRecordInfo.value[currentTab.value.tableName + '_ID'],
-        recordUuid: currentRecordInfo.value.UUID
+        recordId: currentRecordId.value,
+        recordUuid: currentRecordUuid.value
       })
     }
 
     function findListStoreProduct(params) {
-      console.log(store.getters.getUuidOfContainer(currentTab.containerUuid), currentRecordInfo.value.UUID)
       listProductStorage({
         tableName: currentTab.value.tableName,
-        recordId: currentRecordInfo.value[currentTab.value.tableName + '_ID'],
-        recordUuid: currentRecordInfo.value.UUID
+        recordId: currentRecordId.value,
+        recordUuid: currentRecordUuid.value
       })
         .then(response => {
           recordsListStoreProduct.value = response.recordsList.map(record => {
@@ -391,23 +402,49 @@ export default defineComponent({
           })
         })
     }
-    const drawer = ref(false)
+
+    /**
+     * Watch
+     * Information Panel Observers
+     */
+
+    watch(isLoadLogs, (newValue, oldValue) => {
+      if (newValue) {
+        findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
+      }
+    })
+
+    watch(showPanelInfo, (newValue, oldValue) => {
+      if (newValue && newValue !== oldValue) {
+        handleClick({
+          name: nameTab.value
+        })
+      }
+    })
+
+    findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
 
     return {
-      currentTabLogs,
-      drawer,
-      nameTab,
+      // Ref
       currentRecordLogs,
+      listLogs,
       currentKey,
+      typeAction,
+      currentTabLogs,
+      tableName,
+      nameTab,
+      recordsListStoreProduct,
+      drawer,
+      // Computed
       isLoadLogs,
       isWorkflowLog,
-      listLogs,
-      tableName,
       containerInfo,
       currentRecordInfo,
       currentTab,
       storeProduct,
-      recordsListStoreProduct,
+      showPanelInfo,
+      currentRecordUuid,
+      currentRecordId,
       // methods
       validate,
       showkey,
