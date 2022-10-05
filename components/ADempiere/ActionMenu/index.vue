@@ -113,7 +113,8 @@ export default defineComponent({
 }
 
 .scroll-child {
-  max-height: 300px;
+  // max-height: 300px;
+  overflow-x: hidden;
 }
 .el-dropdown .el-button-group {
   display: inline-flex !important;

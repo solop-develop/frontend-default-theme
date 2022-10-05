@@ -91,7 +91,7 @@
           <!-- <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel"> -->
           <tab-panel
             v-else
-            key="tab-panel"
+            key="tab-panel-65465456"
             :parent-uuid="parentUuid"
             :container-manager="containerManager"
             :tabs-list="tabsList"
@@ -516,7 +516,7 @@ export default defineComponent({
 
 <style>
 .scroll-child {
-  max-height: 300px;
+  /* max-height: 300px; */
   overflow-x: hidden;
 }
 </style>
