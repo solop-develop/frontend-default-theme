@@ -19,36 +19,43 @@ export default [
   {
     label: language.t('timeControl.type'),
     columnName: 'resourceNameType',
-    align: 'resource'
+    align: 'resource',
+    size: 'auto'
   },
   {
     label: language.t('timeControl.name'),
     columnName: 'name',
-    align: 'center'
+    align: 'center',
+    size: 'auto'
   },
   {
     label: language.t('timeControl.description'),
     columnName: 'description',
-    align: 'center'
+    align: 'center',
+    size: 'auto'
   },
   {
     label: language.t('timeControl.input'),
     columnName: 'dateFrom',
-    align: 'center'
+    align: 'center',
+    size: 'auto'
   },
   {
     label: language.t('timeControl.output'),
     columnName: 'dateTo',
-    align: 'center'
+    align: 'center',
+    size: 'auto'
   },
   {
     label: language.t('timeControl.duration'),
-    columnName: 'date',
-    align: 'center'
+    columnName: 'quantity',
+    align: 'right',
+    size: 'auto'
   },
   {
     label: language.t('timeControl.processed'),
     columnName: 'is_confirmed',
-    align: 'center'
+    align: 'center',
+    size: '100px'
   }
 ]
