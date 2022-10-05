@@ -26,12 +26,12 @@
     </div>
 
     <div>
-      <p v-if="!isEmptyValue(fieldDisplayColumName)">
+      <p v-if="isShowSopportLookup">
         <b>
           {{ 'ID:' }} {{ fieldId }}
         </b>
       </p>
-      <p v-if="!isEmptyValue(fieldUuid) && !isEmptyValue(fieldDisplayColumName)">
+      <p v-if="!isEmptyValue(fieldUuid) && isShowSopportLookup">
         <b>
           {{ 'UUID:' }} {{ fieldUuid }}
         </b>
@@ -113,6 +113,7 @@ import language from '@/lang'
 import {
   formatDate
 } from '@/utils/ADempiere/valueFormat.js'
+import { isSupportLookup } from '@/utils/ADempiere/references'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
@@ -216,18 +217,15 @@ export default {
         columnName: this.fieldAttributes.columnName
       })
     },
-    fieldDisplayColumName() {
-      return this.$store.getters.getValueOfFieldOnContainer({
-        parentUuid: this.fieldAttributes.parentUuid,
-        containerUuid: this.fieldAttributes.containerUuid,
-        columnName: this.fieldAttributes.displayColumnName
-      })
+    isShowSopportLookup() {
+      return isSupportLookup(this.fieldAttributes.displayType)
     }
   },
 
   methods: {
     formatDate,
     translateDateByLong,
+    isSupportLookup,
     tableHeardClassName({ row, rowIndex }) {
       return 'defautl-heard'
     },
