@@ -46,7 +46,7 @@
       <el-row :gutter="24">
         <el-col :span="20">
           <custom-pagination
-            :total="recordCount"
+            :total="totalRecords"
             :records-page="tableData.length"
             :selection="selection"
           />
@@ -149,7 +149,7 @@ export default defineComponent({
     const currentResource = ref({})
     const isLoadingRecords = ref(false)
     // Pagination
-    const recordCount = ref(0)
+    const totalRecords = ref(0)
 
     /**
      * Computed
@@ -351,8 +351,8 @@ export default defineComponent({
         isWaitingForOrdered: true
       })
         .then(response => {
-          const { records } = response
-          recordCount.value = recordCount
+          const { records, recordCount } = response
+          totalRecords.value = recordCount
           const recordsList = records.map(row => {
             let dateTo = null
             if (String(row.assign_date_to).length >= 10) {
@@ -491,7 +491,7 @@ export default defineComponent({
       timeOutFocus,
       currentResource,
       // Paginations
-      recordCount,
+      totalRecords,
       // Computeds
       recurringType,
       recurringTypeUuid,

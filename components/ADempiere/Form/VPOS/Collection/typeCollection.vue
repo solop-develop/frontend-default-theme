@@ -85,7 +85,9 @@
         </template>
       </el-row>
     </el-main>
-    <el-divider v-if="!isRefundReference && !isEmptyValue(listRefund)" content-position="center" style="padding: 10px;"><h2> {{ $t('form.pos.collect.refund') }} / Otros </h2></el-divider>
+    <el-divider v-if="!isRefundReference && !isEmptyValue(listRefund)" content-position="center" style="padding: 10px;">
+      <h2> {{ $t('form.pos.collect.refund') }} / {{ $t('pointOfSales.collection.others') }} </h2>
+    </el-divider>
     <el-footer v-if="!isRefundReference && !isEmptyValue(listRefund)" style="height: 50%;padding: 0px;overflow: auto;">
       <el-row v-if="!isEmptyValue(listRefund)" :gutter="24">
         <template v-for="(value, key) in listRefund">
