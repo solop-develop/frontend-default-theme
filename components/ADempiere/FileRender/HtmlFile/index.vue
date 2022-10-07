@@ -46,7 +46,10 @@
             style="background: aliceblue !important;"
           >
             <template slot-scope="scope">
-              {{ scope.row[item] }} {{ item }}
+              <p :style="alignCell(scope.row[item])">
+                {{ dataCell(scope.row[item]) }}
+                <!-- {{ (scope.row[item] === 'N' ? 'Σ' : scope.row[item]) }} -->
+              </p>
             </template>
           </el-table-column>
         </el-table>
@@ -64,6 +67,7 @@ import DownloadFile from '@theme/components/ADempiere/FileRender/downloadFile.vu
 // utils and helper methods
 import { read, utils } from 'xlsx'
 import { buildBlobAndValues } from '@/utils/ADempiere/resource'
+import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default defineComponent({
   name: 'HTML-TXT-File',
@@ -147,11 +151,30 @@ export default defineComponent({
       return 'success-row'
     }
 
+    function alignCell(cell) {
+      console.log(cell, typeof cell)
+      if (typeof cell === 'number') {
+        return 'text-align: right;'
+      }
+      return 'text-align: center;'
+    }
+
+    function dataCell(row) {
+      if (row === 'Y' || row === 'N') {
+        return convertBooleanToTranslationLang(row)
+      } else if (typeof row === 'string' &&  row.includes('&#931')) {
+        return 'Σ'
+      }
+      return row
+    }
+
     generateReaderData()
 
     return {
       excelData,
-      rowClassName
+      rowClassName,
+      alignCell,
+      dataCell
     }
   }
 
@@ -160,7 +183,8 @@ export default defineComponent({
 
 <style lang="scss" scope>
 .el-table .success-row {
-  background: #f5f7fa !important;
+  color: white;
+  background: #1F9BDE !important;
 }
 .html-content {
   width: 100%;
