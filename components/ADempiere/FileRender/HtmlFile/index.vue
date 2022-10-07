@@ -25,20 +25,45 @@
 
     <el-container class="sub-content-html">
       <el-main style="padding: 0;">
-        <div
+        <!-- <div
           class="el-table--striped el-table--border el-table--scrollable-y el-table--scrollable-x"
           v-html="content"
-        />
+        /> -->
+        <el-table
+          :data="excelData.results"
+          border
+          highlight-current-row
+          stripe
+          :header-cell-class-name="rowClassName"
+          style="width: 100%;height: 85% !important;"
+          height="70vh"
+        >
+          <el-table-column
+            v-for="item of excelData.header"
+            :key="item"
+            :label="item"
+            min-width="150px"
+            style="background: aliceblue !important;"
+          >
+            <template slot-scope="scope">
+              {{ scope.row[item] }} {{ item }}
+            </template>
+          </el-table-column>
+        </el-table>
       </el-main>
     </el-container>
   </div>
 </template>
 
 <script>
-import { defineComponent } from '@vue/composition-api'
+import { defineComponent, ref } from '@vue/composition-api'
 
 // components and mixins
 import DownloadFile from '@theme/components/ADempiere/FileRender/downloadFile.vue'
+
+// utils and helper methods
+import { read, utils } from 'xlsx'
+import { buildBlobAndValues } from '@/utils/ADempiere/resource'
 
 export default defineComponent({
   name: 'HTML-TXT-File',
@@ -68,24 +93,87 @@ export default defineComponent({
       type: [Object, Array],
       required: true
     }
+  },
+  setup(props) {
+    const excelData = ref({})
+
+    function getHeaderRow(sheet) {
+      const headers = []
+      const range = utils.decode_range(sheet['!ref'])
+      let C
+      const R = range.s.r
+      /* start in the first row */
+      for (C = range.s.c; C <= range.e.c; ++C) { /* walk every column in the range */
+        const cell = sheet[utils.encode_cell({ c: C, r: R })]
+        /* find the cell in the first row */
+        let hdr = 'UNKNOWN ' + C // <-- replace with your desired default
+        if (cell && cell.t) {
+          hdr = utils.format_cell(cell)
+        }
+        headers.push(hdr)
+      }
+      return headers
+    }
+
+    function generateReaderData() {
+      const { blobFile, dataValues } = buildBlobAndValues({
+        mimeType: props.mimeType,
+        outputStream: props.stream
+      })
+
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const workbook = read(dataValues, {
+            type: 'array'
+          })
+          const firstSheetName = workbook.SheetNames[0]
+          const worksheet = workbook.Sheets[firstSheetName]
+          const header = getHeaderRow(worksheet)
+          const results = utils.sheet_to_json(worksheet)
+
+          // value to render
+          excelData.value = {
+            header,
+            results
+          }
+
+          resolve()
+        }
+        reader.readAsArrayBuffer(blobFile)
+      })
+    }
+    function rowClassName(params) {
+      return 'success-row'
+    }
+
+    generateReaderData()
+
+    return {
+      excelData,
+      rowClassName
+    }
   }
 
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scope>
+.el-table .success-row {
+  background: #f5f7fa !important;
+}
 .html-content {
   width: 100%;
-  height: inherit;
+  // height: inherit;
   padding-left: 10px;
   padding-right: 10px;
 
   .sub-content-html {
-    min-height: inherit;
-    height: inherit;
-    max-height: -webkit-max-content;
-    max-height: -moz-max-content;
-    max-height: max-content;
+    // min-height: inherit;
+    // height: inherit;
+    // max-height: -webkit-max-content;
+    // max-height: -moz-max-content;
+    // max-height: max-content;
     width: 100%;
     padding-bottom: 4%;
   }
