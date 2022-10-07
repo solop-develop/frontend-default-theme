@@ -364,7 +364,7 @@ export default defineComponent({
       reportAsView,
       reportAsPrintFormat,
       reportTypeFormat,
-      storedPanelReport,      
+      storedPanelReport,
       defaultParams,
       isShowSetupReport,
       containerManagerReportViwer,
