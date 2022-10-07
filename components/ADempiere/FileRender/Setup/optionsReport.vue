@@ -19,7 +19,7 @@
   <el-card class="box-card">
     <div slot="header" class="clearfix">
       <b>
-        Report Options
+        {{ $t('report.reportSettings') }}
       </b>
     </div>
     <div class="text item">
@@ -31,7 +31,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item
-              label="Formatos de Impresión"
+              :label="$t('report.reportSettings')"
               style="display: grid;"
             >
               <el-select
@@ -49,7 +49,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item
-              label="Vistas de Reporte"
+              :label="$t('report.reportViews')"
               style="display: grid;"
             >
               <el-select
@@ -67,7 +67,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item
-              label="Tipo de Reporte"
+              :label="$t('report.typeReport')"
               style="display: grid;"
             >
               <el-select

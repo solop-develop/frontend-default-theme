@@ -19,14 +19,14 @@
   <el-card class="box-card">
     <div slot="header" class="clearfix">
       <b>
-        Configuracion del Reporte
+        {{ $t('report.reportSettings') }}
       </b>
     </div>
     <el-collapse v-model="activeCollapse">
       <el-collapse-item name="1">
         <template slot="title">
           <b>
-            Preferencia
+            {{ $t('report.preference') }}
             <i class="el-icon-s-operation" />
           </b>
         </template>
@@ -40,7 +40,7 @@
               <el-row :gutter="20">
                 <el-col :span="8">
                   <el-form-item
-                    label="Formatos de Impresión"
+                    :label="$t('report.reportSettings')"
                     style="display: grid;"
                   >
                     <el-select
@@ -58,7 +58,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item
-                    label="Vistas de Reporte"
+                    :label="$t('report.reportViews')"
                     style="display: grid;"
                   >
                     <el-select
@@ -76,7 +76,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item
-                    label="Tipo de Reporte"
+                    :label="$t('report.typeReport')"
                     style="display: grid;"
                   >
                     <el-select
@@ -94,7 +94,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item
-                    label="Sumar"
+                    :label="$t('report.sum')"
                     style="display: grid;"
                   >
                     <el-switch v-model="value1" />
