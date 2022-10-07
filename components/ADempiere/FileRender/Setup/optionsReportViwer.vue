@@ -92,6 +92,14 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
+                <el-col :span="8">
+                  <el-form-item
+                    label="Sumar"
+                    style="display: grid;"
+                  >
+                    <el-switch v-model="value1" />
+                  </el-form-item>
+                </el-col>
               </el-row>
             </el-form>
           </div>
@@ -172,6 +180,7 @@ export default defineComponent({
     const reportAsPrintFormatValue = ref('')
     const reportTypeFormatValue = ref('')
     const activeCollapse = ref(['1', '2'])
+    const value1 = ref(true)
 
     /**
      * Computed
@@ -200,12 +209,23 @@ export default defineComponent({
       const options = store.getters.getStoredActionsMenu({
         containerUuid: props.containerUuid
       }).find(repoortOptions => repoortOptions.actionName === 'runReportAsPrintFormat')
+      console.log({
+        options
+      })
       if (isEmptyValue(options)) {
         return {
           childs: []
         }
       }
       return options
+    })
+
+    const tableName = computed(() => {
+      const currentPrintFormat = reportAsPrintFormat.value.childs.find(report => report.printFormatUuid === reportAsPrintFormatValue.value)
+      if (isEmptyValue(currentPrintFormat)) {
+        return ''
+      }
+      return currentPrintFormat.tableName
     })
 
     const reportTypeFormat = computed(() => {
@@ -299,7 +319,10 @@ export default defineComponent({
 
     function runReport() {
       store.dispatch('buildReport', {
-        containerUuid: props.containerUuid
+        containerUuid: props.containerUuid,
+        instanceUuid: root.$route.params.instanceUuid,
+        isSummary: value1.value,
+        tableName: tableName.value
       })
       store.commit('setShowPanelConfig', {
         containerUuid: props.containerUuid,
@@ -342,6 +365,18 @@ export default defineComponent({
       }
     })
 
+    watch(value1, (newValue) => {
+      if (newValue) {
+        store.commit('setReportGenerated', {
+          containerUuid: props.containerUuid,
+          printFormatUuid: reportAsPrintFormatValue.value,
+          reportType: reportTypeFormatValue.value,
+          reportViewUuid: reportAsPrintFormatValue.value,
+          isSummary: newValue
+        })
+      }
+    })
+
     /**
      * Run Methods As soon as I load the panel
      */
@@ -360,10 +395,12 @@ export default defineComponent({
       reportAsPrintFormatValue,
       reportTypeFormatValue,
       activeCollapse,
+      value1,
       // Components
       reportAsView,
       reportAsPrintFormat,
       reportTypeFormat,
+      tableName,
       storedPanelReport,
       defaultParams,
       isShowSetupReport,

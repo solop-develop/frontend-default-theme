@@ -231,7 +231,8 @@ export default defineComponent({
 
     function runReport() {
       store.dispatch('buildReport', {
-        containerUuid: props.containerUuid
+        containerUuid: props.containerUuid,
+        isSummary: true
       })
       store.commit('setShowPanelConfig', {
         containerUuid: props.containerUuid,
