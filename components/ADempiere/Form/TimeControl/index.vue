@@ -147,7 +147,7 @@
             :key="key"
             :label="head.label"
             :align="head.align"
-            :width="isMobile ? '110px' : head.size"
+            :width="isMobile ? '200px' : head.size"
             header-align="center"
           >
             <template slot-scope="scope">
@@ -165,6 +165,7 @@
           <el-table-column
             :label="$t('form.pos.tableProduct.options')"
             :width="isMobile ? '175px' : 'auto'"
+            fixed="right"
           >
             <template slot-scope="scope">
               <el-button :disabled="scope.row.isConfirmed" type="success" :icon="scope.row.isEditRow ? 'el-icon-check' : 'el-icon-edit'" size="mini" @click="editChild(scope.row)" />
@@ -598,7 +599,7 @@ export default defineComponent({
       })
         .then(response => {
           recordCount.value = response.recordCount
-          const { records, nextPageToken } = response
+          const { records } = response
           // if (!isEmptyValue(nextPageToken)) {
           //   pageNumber.value = nextPageToken.split('')[nextPageToken.length - 1]
           // }
