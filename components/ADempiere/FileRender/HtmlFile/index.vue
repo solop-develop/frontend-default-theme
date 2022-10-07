@@ -152,7 +152,6 @@ export default defineComponent({
     }
 
     function alignCell(cell) {
-      console.log(cell, typeof cell)
       if (typeof cell === 'number') {
         return 'text-align: right;'
       }
@@ -162,7 +161,7 @@ export default defineComponent({
     function dataCell(row) {
       if (row === 'Y' || row === 'N') {
         return convertBooleanToTranslationLang(row)
-      } else if (typeof row === 'string' &&  row.includes('&#931')) {
+      } else if (typeof row === 'string' && row.includes('&#931')) {
         return 'Σ'
       }
       return row
