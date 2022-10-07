@@ -21,17 +21,18 @@
             <el-col
               :span="sizeColumn"
             >
-              <field-definition
-                v-for="(field) in metadataList"
-                :key="field.columnName"
-                :metadata-field="{
-                  ...field,
-                  size: 24
-                }"
-                :container-uuid="'ChildIncome'"
-                :container-manager="containerManager"
-                style="padding-top: 10px;"
-              />
+              <span v-for="(field) in metadataList" :key="field.columnName">
+                <field-definition
+                  v-if="field.columnName === 'S_ResourceType_ID'"
+                  :metadata-field="{
+                    ...field,
+                    size: 24
+                  }"
+                  :container-uuid="'ChildIncome'"
+                  :container-manager="containerManager"
+                  style="padding-top: 10px;"
+                />
+              </span>
             </el-col>
             <el-col :span="sizeColumn">
               <el-form-item
@@ -68,9 +69,75 @@
             </el-col>
           </el-row>
         </el-form>
+        <el-collapse accordion>
+          <el-collapse-item title="Buscar Registro" name="1">
+            <el-form
+              label-position="top"
+            >
+              <el-row style="padding-bottom: 10px;">
+                <el-col
+                  :span="isMobile ? 24 : 7"
+                >
+                  <span v-for="(field) in metadataList" :key="field.columnName">
+                    <field-definition
+                      v-if="field.columnName === 'RecurringTypeSearch'"
+                      :metadata-field="{
+                        ...field,
+                        size: 24
+                      }"
+                      :container-uuid="'ChildIncome'"
+                      :container-manager="containerManager"
+                      style="padding-top: 10px;"
+                    />
+                  </span>
+                </el-col>
+                <el-col :span="isMobile ? 24 : 7">
+                  <el-form-item
+                    :label="$t('timeControl.name')"
+                    :style="cssStyleFrontName"
+                  >
+                    <el-input v-model="nameFind" type="text" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="isMobile ? 24 : 6">
+                  <el-form-item
+                    :label="$t('timeControl.description')"
+                    :style="cssStyleFront"
+                  >
+                    <el-input v-model="descriptionFind" type="textarea" autosize />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="isMobile ? 24 : 3">
+                  <el-form-item
+                    label="Sólo se Confirma"
+                    :style="cssStyleFront"
+                  >
+                    <el-switch
+                      v-model="isOnlyConfirmed"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="isMobile ? 24 : 1">
+                  <el-form-item
+                    :style="cssStyleButton"
+                  >
+                    <el-button
+                      type="primary"
+                      :loading="isLoadingRecords"
+                      icon="el-icon-search"
+                      @click="findList"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </el-collapse-item>
+        </el-collapse>
         <el-table
+          v-loading="isLoadingRecords"
           :data="tableData"
           stripe
+          height="550"
           highlight-current-row
           border
           style="width: 100%;padding-right: 20px !important;"
@@ -80,7 +147,7 @@
             :key="key"
             :label="head.label"
             :align="head.align"
-            :width="isMobile ? '110px' : head.size"
+            :width="isMobile ? '200px' : head.size"
             header-align="center"
           >
             <template slot-scope="scope">
@@ -98,6 +165,7 @@
           <el-table-column
             :label="$t('form.pos.tableProduct.options')"
             :width="isMobile ? '175px' : 'auto'"
+            fixed="right"
           >
             <template slot-scope="scope">
               <el-button :disabled="scope.row.isConfirmed" type="success" :icon="scope.row.isEditRow ? 'el-icon-check' : 'el-icon-edit'" size="mini" @click="editChild(scope.row)" />
@@ -106,6 +174,37 @@
             </template>
           </el-table-column>
         </el-table>
+        <el-row :gutter="24">
+          <el-col :span="20">
+            <custom-pagination
+              :total="recordCount"
+              :records-page="tableData.length"
+              :handle-change-page="setPage"
+            />
+          </el-col>
+          <!-- <el-col :span="24">
+            <samp style="float: right; padding-right: 10px;">
+              <el-button
+                :loading="isLoadingRecords"
+                type="success"
+                icon="el-icon-refresh-right"
+                @click="listResource();"
+              />
+              <el-button
+                type="danger"
+                class="custom-button-create-bp"
+                icon="el-icon-close"
+                @click="closeShowList()"
+              />
+              <el-button
+                type="primary"
+                class="custom-button-create-bp"
+                icon="el-icon-check"
+                @click="addLine(currentResource)"
+              />
+            </samp>
+          </el-col> -->
+        </el-row>
       </el-card>
     </el-main>
   </el-container>
@@ -122,6 +221,7 @@ import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import heardList from './headerTable'
 import fieldsList from './fieldsList'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 
 // api request methods
 import {
@@ -148,7 +248,8 @@ export default defineComponent({
 
   components: {
     FieldDefinition,
-    TitleAndHelp
+    TitleAndHelp,
+    CustomPagination
   },
 
   // Components Used on the Panel
@@ -173,15 +274,23 @@ export default defineComponent({
      * @param {boolean} isLoadingCreate - Button Load Flag when adding a new record to the timekeeping table
      * @param {array} metadataList - List of field metadata created with createFieldFromDictionary
      */
+
     const name = ref('')
+    const nameFind = ref('')
     const nameEdit = ref('')
     const timeOutFocus = ref(null)
     const descriptionEdit = ref('')
+    const descriptionFind = ref('')
     const description = ref('')
     const tableData = ref([])
     const isLoadingFields = ref(false)
     const isLoadingCreate = ref(false)
     const metadataList = ref([])
+    const isOnlyConfirmed = ref(false)
+    const isLoadingRecords = ref(false)
+    // Pagination
+    const recordCount = ref(0)
+    const pageNumber = ref(0)
 
     /**
      * Computed
@@ -395,10 +504,26 @@ export default defineComponent({
       })
     }
 
-    function listResource() {
-      requestListResource({})
+    function listResource(pageNumber) {
+      const token = store.state.token
+      let pageToken
+      if (!isEmptyValue(token) && pageNumber > 0) {
+        pageToken = token + '-' + pageNumber
+      }
+      requestListResource({
+        pageToken
+      })
         .then(response => {
           const { records } = response
+          recordCount.value = response.recordCount
+          // if (!isEmptyValue(nextPageToken)) {
+          //   // console.log(nextPageToken.split('')[nextPageToken.length - 1], typeof parseInt(nextPageToken.split('')[nextPageToken.length - 1]), parseInt(nextPageToken.split('')[nextPageToken.length - 1]))
+          //   pageNumber.value = 12
+          // }
+          // console.log(response, { nextPageToken }, isEmptyValue(response.nextPageToken), response.nextPageToken.length)
+
+          // pageNumber.value = isEmptyValue(response.nextPageToken) ? 0 : 0
+          isLoadingRecords.value = true
           const recordsList = records.map(row => {
             let dateTo = null
             if (String(row.assign_date_to).length >= 10) {
@@ -422,12 +547,14 @@ export default defineComponent({
               ...ROW_ATTRIBUTES
             }
           })
+          isLoadingRecords.value = false
           tableData.value = recordsList
         }).catch(error => {
           showMessage({
             message: error,
             type: 'error'
           })
+          isLoadingRecords.value = false
           console.warn(`requestListResource: List Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
     }
@@ -457,11 +584,69 @@ export default defineComponent({
         })
     }
 
+    function findList() {
+      const resourceTypeId = store.getters.getValueOfField({
+        containerUuid: 'ChildIncome',
+        columnName: 'RecurringTypeSearch'
+      })
+      isLoadingRecords.value = true
+      requestListResource({
+        resourceTypeId,
+        name: nameFind.value,
+        description: descriptionFind.value,
+        isOnlyConfirmed: isOnlyConfirmed.value
+      })
+        .then(response => {
+          recordCount.value = response.recordCount
+          const { records } = response
+          // if (!isEmptyValue(nextPageToken)) {
+          //   pageNumber.value = nextPageToken.split('')[nextPageToken.length - 1]
+          // }
+          // pageNumber.value = isEmptyValue(response.nextPageToken) ? '' : response.nextPageToken.split('')[response.nextPageToken.length - 1]
+          const recordsList = records.map(row => {
+            let dateTo = null
+            if (String(row.assign_date_to).length >= 10) {
+              dateTo = formatDate({
+                value: row.assign_date_to,
+                isTime: true,
+                format: 'HH:mm:SS'
+              })
+            }
+            return {
+              ...row,
+              resourceNameType: row.resource.resource_type.name,
+              dateFrom: formatDate({
+                value: row.assign_date_from,
+                isTime: true,
+                format: 'HH:mm:SS'
+              }),
+              dateTo,
+              is_confirmed: convertBooleanToTranslationLang(row.is_confirmed),
+              isConfirmed: row.is_confirmed,
+              ...ROW_ATTRIBUTES
+            }
+          })
+          tableData.value = recordsList
+          isLoadingRecords.value = false
+        }).catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+          isLoadingRecords.value = false
+          console.warn(`requestListResource: List Resource Server (State) - Error ${error.code}: ${error.message}.`)
+        })
+    }
+
     if (!isLoadingFields.value) {
       setFieldsList({})
     }
 
     // Get Record Control Table
+
+    function setPage(params) {
+      listResource(pageNumber.value)
+    }
 
     listResource()
 
@@ -476,6 +661,12 @@ export default defineComponent({
       isLoadingCreate,
       metadataList,
       timeOutFocus,
+      isOnlyConfirmed,
+      nameFind,
+      descriptionFind,
+      isLoadingRecords,
+      recordCount,
+      pageNumber,
       // Computeds
       recurringType,
       recurringTypeUuid,
@@ -496,7 +687,9 @@ export default defineComponent({
       deleteChild,
       editChild,
       listResource,
-      confirmResiurce
+      confirmResiurce,
+      findList,
+      setPage
     }
   }
 })

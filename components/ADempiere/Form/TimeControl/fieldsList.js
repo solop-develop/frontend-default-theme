@@ -13,7 +13,6 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import language from '@/lang'
 
 export default [
   // RecurringType
@@ -23,8 +22,26 @@ export default [
     isFromDictionary: true,
     overwriteDefinition: {
       size: 8,
+      sequence: 10
+      // name: language.t('timeControl.type')
+    }
+  },
+  // RecurringType
+  {
+    fieldUuid: '8cf19da4-fb40-11e8-a479-7a0060f0aa01',
+    uuid: '8cf19da4-fb40-11e8-a479-7a0060f0aa01',
+    elementColumnName: 'RecurringTypeSearch',
+    columnName: 'RecurringTypeSearch',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      size: 8,
+      isMandatory: false,
       sequence: 10,
-      name: language.t('timeControl.type')
+      columnId: 68511,
+      id: 5471,
+      columnName: 'RecurringTypeSearch',
+      elementColumnName: 'RecurringTypeSearch',
+      elementName: 'RecurringTypeSearch'
     }
   }
 ]
