@@ -507,7 +507,6 @@ export default defineComponent({
     function listResource(pageNumber) {
       const token = store.state.token
       let pageToken
-      console.log({ pageNumber })
       if (!isEmptyValue(token) && pageNumber > 0) {
         pageToken = token + '-' + pageNumber
       }
