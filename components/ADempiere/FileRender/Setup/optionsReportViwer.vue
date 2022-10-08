@@ -94,7 +94,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item
-                    :label="$t('report.sum')"
+                    :label="$t('report.summary')"
                     style="display: grid;"
                   >
                     <el-switch v-model="value1" />
@@ -148,6 +148,7 @@
 import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 import CollapseCriteria from '@theme/components/ADempiere/CollapseCriteria/index.vue'
 import store from '@/store'
+import router from '@/router'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -209,9 +210,6 @@ export default defineComponent({
       const options = store.getters.getStoredActionsMenu({
         containerUuid: props.containerUuid
       }).find(repoortOptions => repoortOptions.actionName === 'runReportAsPrintFormat')
-      console.log({
-        options
-      })
       if (isEmptyValue(options)) {
         return {
           childs: []
@@ -270,6 +268,10 @@ export default defineComponent({
       return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
     })
 
+    const findTagViwer = computed(() => {
+      return store.getters.visitedViews.find(tag => tag.instanceUuid === root.$route.params.instanceUuid)
+    })
+
     /**
      * Methods
      * @updatePrintFormat - @params {String} - Actualizar en el store el parametro Print Format
@@ -324,6 +326,16 @@ export default defineComponent({
         isSummary: value1.value,
         tableName: tableName.value
       })
+        .then(response => {
+          store.dispatch('tagsView/delCachedView', findTagViwer.value).then(() => {
+            const { fullPath } = findTagViwer.value
+            this.$nextTick(() => {
+              router.replace({
+                path: '/redirect' + fullPath
+              })
+            })
+          })
+        })
       store.commit('setShowPanelConfig', {
         containerUuid: props.containerUuid,
         value: false
@@ -406,6 +418,7 @@ export default defineComponent({
       isShowSetupReport,
       containerManagerReportViwer,
       componentRender,
+      findTagViwer,
       // methods
       updatePrintFormat,
       updateReportView,
