@@ -141,13 +141,14 @@
           highlight-current-row
           border
           style="width: 100%;padding-right: 20px !important;"
+          @row-click="handleRowClick"
         >
           <el-table-column
             v-for="(head, key) in heardList"
             :key="key"
             :label="head.label"
             :align="head.align"
-            :width="isMobile ? '200px' : head.size"
+            :width="isMobile ? '180px' : head.size"
             header-align="center"
           >
             <template slot-scope="scope">
@@ -164,7 +165,7 @@
           </el-table-column>
           <el-table-column
             :label="$t('form.pos.tableProduct.options')"
-            :width="isMobile ? '175px' : 'auto'"
+            width="195px"
             fixed="right"
           >
             <template slot-scope="scope">
@@ -175,10 +176,11 @@
           </el-table-column>
         </el-table>
         <el-row :gutter="24">
-          <el-col :span="20">
+          <el-col :span="24">
             <custom-pagination
               :total="recordCount"
               :records-page="tableData.length"
+              :selection="selection"
               :handle-change-page="setPage"
             />
           </el-col>
@@ -233,6 +235,7 @@ import {
 } from '@/api/ADempiere/form/timeControl.js'
 
 // utils and helper methods
+import { generatePageToken } from '@/utils/ADempiere/dataUtils'
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -291,6 +294,7 @@ export default defineComponent({
     // Pagination
     const recordCount = ref(0)
     const pageNumber = ref(0)
+    const currentResource = ref({})
 
     /**
      * Computed
@@ -354,6 +358,13 @@ export default defineComponent({
         return 'padding-top: 20px;padding-bottom: 10px;text-align: center;margin-bottom: 0px !important;'
       }
       return 'padding-top: 45px;'
+    })
+
+    const selection = computed(() => {
+      if (isEmptyValue(currentResource.value)) {
+        return 0
+      }
+      return 1
     })
 
     /**
@@ -505,24 +516,17 @@ export default defineComponent({
     }
 
     function listResource(pageNumber) {
-      const token = store.state.token
-      let pageToken
-      if (!isEmptyValue(token) && pageNumber > 0) {
-        pageToken = token + '-' + pageNumber
-      }
+      // const token = getToken()
+      // let pageToken
+      // if (!isEmptyValue(token) && pageNumber > 0) {
+      //   pageToken = token + '-' + pageNumber
+      // }
       requestListResource({
-        pageToken
+        pageToken: generatePageToken({ pageNumber })
       })
         .then(response => {
           const { records } = response
           recordCount.value = response.recordCount
-          // if (!isEmptyValue(nextPageToken)) {
-          //   // console.log(nextPageToken.split('')[nextPageToken.length - 1], typeof parseInt(nextPageToken.split('')[nextPageToken.length - 1]), parseInt(nextPageToken.split('')[nextPageToken.length - 1]))
-          //   pageNumber.value = 12
-          // }
-          // console.log(response, { nextPageToken }, isEmptyValue(response.nextPageToken), response.nextPageToken.length)
-
-          // pageNumber.value = isEmptyValue(response.nextPageToken) ? 0 : 0
           isLoadingRecords.value = true
           const recordsList = records.map(row => {
             let dateTo = null
@@ -637,6 +641,9 @@ export default defineComponent({
           console.warn(`requestListResource: List Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
     }
+    function handleRowClick(row) {
+      currentResource.value = row
+    }
 
     if (!isLoadingFields.value) {
       setFieldsList({})
@@ -645,7 +652,7 @@ export default defineComponent({
     // Get Record Control Table
 
     function setPage(params) {
-      listResource(pageNumber.value)
+      listResource(params)
     }
 
     listResource()
@@ -667,6 +674,7 @@ export default defineComponent({
       isLoadingRecords,
       recordCount,
       pageNumber,
+      currentResource,
       // Computeds
       recurringType,
       recurringTypeUuid,
@@ -677,6 +685,7 @@ export default defineComponent({
       cssStyleFront,
       cssStyleFrontName,
       cssStyleButton,
+      selection,
       // import
       heardList,
       containerManager: {
@@ -689,7 +698,8 @@ export default defineComponent({
       listResource,
       confirmResiurce,
       findList,
-      setPage
+      setPage,
+      handleRowClick
     }
   }
 })

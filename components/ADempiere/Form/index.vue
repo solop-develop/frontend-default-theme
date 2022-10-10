@@ -79,7 +79,7 @@ export default {
           form = import('@theme/components/ADempiere/Form/WFPanel')
           break
         case 'TimeControl':
-        case 'org.spin.park.form.TimeControl':
+        case 'org.spin.tcs.form.TimeControl':
           form = import('@theme/components/ADempiere/Form/TimeControl')
           break
         default:
