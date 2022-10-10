@@ -385,14 +385,12 @@ export default {
       } else if (columnName === 'Discount') {
         return formatQuantity({ value: row.discount }) + ' %'
       } else if (columnName === 'taxIndicator') {
-        let taxIndicator = row.taxIndicator
-        if (taxIndicator === 'EX') {
-          return row.taxRate.name
+        const rate = row.taxRate.rate
+        let taxIndicator = Number.parseFloat(rate).toFixed(2) + ' %'
+        if (rate <= 0) {
+          taxIndicator = row.taxRate.name
         }
-        if (isEmptyValue(taxIndicator)) {
-          taxIndicator = 0
-        }
-        return Number.parseFloat(taxIndicator).toFixed(2) + ' %'
+        return taxIndicator
       } else if (columnName === 'GrandTotal') {
         let price = row.totalAmountWithTax
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
