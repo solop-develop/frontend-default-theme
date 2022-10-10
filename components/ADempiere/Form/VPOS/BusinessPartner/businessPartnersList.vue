@@ -19,9 +19,10 @@
 <template>
   <el-main
     v-shortkey="popoverListBusinessParnet ? { close: ['esc'] } : {}"
+    class="pos-bpartner-list-container"
     @shortkey.native="actionList"
   >
-    <el-collapse v-model="activeAccordion" accordion>
+    <el-collapse v-model="activeAccordion" accordion class="pos-bpartner-list-query-criteria">
       <el-collapse-item name="query-criteria">
         <template slot="title">
           {{ $t('form.pos.order.BusinessPartnerCreate.businessPartner') }}
@@ -57,6 +58,7 @@
         </el-form>
       </el-collapse-item>
     </el-collapse>
+
     <el-table
       ref="businesPartnerTable"
       v-loading="isLoadedList"
@@ -65,6 +67,7 @@
       border
       fit
       height="250"
+      size="small"
       @current-change="handleCurrentChange"
       @row-dblclick="changeCustomer"
     >
@@ -88,25 +91,38 @@
         </span>
       </el-table-column>
     </el-table>
-    <custom-pagination
-      :total="businessParners.recordCount"
-      :current-page="1"
-      :handle-change-page="handleChangePage"
-      :records-page="businessPartnersList.length"
-    />
-    <el-row :gutter="24">
-      <el-col :span="24">
+
+    <el-row :gutter="24" class="pos-bpartner-list-footer">
+      <el-col :span="18">
+        <custom-pagination
+          :total="businessParners.recordCount"
+          :current-page="businessParners.pageNumber"
+          :handle-change-page="handleChangePage"
+          :records-page="businessPartnersList.length"
+        />
+      </el-col>
+
+      <el-col :span="6">
         <samp style="float: right; padding-right: 10px;">
           <el-button
+            :loading="isLoadedList"
+            type="success"
+            icon="el-icon-refresh-right"
+            size="small"
+            @click="searchBPartnerList({});"
+          />
+          <el-button
             type="danger"
-            class="custom-button-create-bp"
             icon="el-icon-close"
+            class="custom-button-create-bp"
+            size="small"
             @click="closeListCustomer"
           />
           <el-button
             type="primary"
-            class="custom-button-create-bp"
             icon="el-icon-check"
+            class="custom-button-create-bp"
+            size="small"
             :disabled="isDisabled"
             @click="changeCustomer"
           />
@@ -164,14 +180,9 @@ export default {
         }
       }
     },
-    showsPopovers: {
-      type: Object,
-      default: () => {
-        return {
-          isShowCreate: false,
-          isShowList: false
-        }
-      }
+    showsPopover: {
+      type: Boolean,
+      default: () => false
     },
     isDisabled: {
       type: Boolean,
@@ -212,7 +223,7 @@ export default {
     },
     isReadyFromGetData() {
       const { isLoaded, isReload } = this.businessParners
-      return (!isLoaded || isReload) && this.showsPopovers.isShowList
+      return (!isLoaded || isReload) && this.showsPopover
     },
     popoverListBusinessParnet() {
       return this.$store.getters.getPopoverListBusinessParnet
@@ -287,7 +298,10 @@ export default {
       this.$store.commit('changePopoverListBusinessPartner', false)
     },
     handleChangePage(newPage) {
-      this.$store.dispatch('setBPartnerPageNumber', newPage)
+      this.searchBPartnerList({
+        pageNumber: newPage
+      }, false)
+      // this.$store.dispatch('setBPartnerPageNumber', newPage)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
@@ -346,7 +360,23 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+.pos-bpartner-list-container {
+  .pos-bpartner-list-query-criteria {
+    // space between quey criteria and table
+    .el-collapse-item__content {
+      padding-bottom: 0px !important;
+    }
+
+  }
+  .pos-bpartner-list-footer {
+    button {
+      padding: 4px 8px;
+      font-size: 24px;
+    }
+  }
+}
+
 .el-table__empty-text {
   line-height: 60px;
   width: 100%;

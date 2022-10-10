@@ -82,6 +82,7 @@
               </el-button>
             </el-popover>
           </el-dropdown-item>
+
           <el-dropdown-item>
             <el-popover
               v-model="popoverListBusinessParnet"
@@ -91,7 +92,7 @@
             >
               <business-partners-list
                 :parent-metadata="parentMetadata"
-                :shows-popovers="showsPopovers"
+                :shows-popover="popoverListBusinessParnet"
                 :show-field="popoverListBusinessParnet"
                 :is-disabled="isDisabled"
               />
@@ -107,6 +108,7 @@
               </el-button>
             </el-popover>
           </el-dropdown-item>
+
           <el-dropdown-item>
             <el-popover
               v-model="showUpdate"
@@ -122,7 +124,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate || isTemplateCustomer"
               >
                 <i
                   class="el-icon-edit"
@@ -132,6 +134,7 @@
               </el-button>
             </el-popover>
           </el-dropdown-item>
+
           <el-dropdown-item v-show="!isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)">
             <el-popover
               v-model="showAddNewAddress"
@@ -151,7 +154,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled || !isAllowsBusinessPartnerCreate"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isTemplateCustomer"
               >
                 <i
                   class="el-icon-add-location"
@@ -161,6 +164,7 @@
               </el-button>
             </el-popover>
           </el-dropdown-item>
+
           <el-dropdown-item v-show="!isEmptyValue(listAddressCustomer)" style="padding-bottom: 10px;padding-top: 10px;">
             <el-dropdown trigger="click" @command="handleCommandAddress">
               <span class="el-dropdown-link" style="color: #46A6FF;padding-bottom: 10px;padding-top: 10px;">
@@ -258,6 +262,7 @@ export default {
     AddAddress
     // FieldListBusinessPartner
   },
+
   mixins: [
     BParterMixin
   ],
@@ -312,6 +317,9 @@ export default {
     },
     isAllowsBusinessPartnerCreate() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsCreateCustomer
+    },
+    isTemplateCustomer() {
+      return this.templateCustomer.uuid === this.orderCustomer.uuid
     },
     copyShippingAddress: {
       get() {
@@ -387,7 +395,9 @@ export default {
       if (this.isEmptyValue(templateCustomer)) {
         return {
           value: '',
-          name: ''
+          name: '',
+          id: undefined,
+          uuid: undefined
         }
       }
       return templateCustomer
