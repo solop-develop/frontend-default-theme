@@ -125,6 +125,7 @@ import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, wa
 
 import store from '@/store'
 import router from '@/router'
+import lang from '@/lang'
 
 // components and mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
@@ -251,6 +252,21 @@ export default defineComponent({
     })
 
     const headerList = computed(() => {
+      const showMinimalistView = store.getters.getTableOption
+      if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
+        return props.header.filter(fieldItem => {
+          const isDisplayedDefault = props.containerManager.isDisplayedDefault({
+            ...fieldItem,
+            isMandatory: props.containerManager.isMandatoryField(fieldItem)
+          })
+          return isDisplayed(fieldItem) &&
+            // fieldItem.isShowedTableFromUser &&
+            fieldItem.displayType !== BUTTON.id &&
+            tableColumnDataType(fieldItem, currentOption.value) &&
+            isDisplayedDefault &&
+            props.containerManager.isDisplayedField(fieldItem)
+        })
+      }
       return props.header.filter(fieldItem => {
         return isDisplayed(fieldItem) &&
           // fieldItem.isShowedTableFromUser &&
