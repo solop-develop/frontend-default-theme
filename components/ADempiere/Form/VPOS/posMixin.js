@@ -591,8 +591,7 @@ export default {
       if (this.withoutPOSTerminal()) {
         return
       }
-      const orderUuid = this.$route.query.action
-      if (this.isEmptyValue(orderUuid) || newOrder) {
+      if (newOrder || this.isEmptyValue(this.currentOrder.uuid)) {
         const posUuid = this.currentPointOfSales.uuid
         const bpartner = this.$store.getters.getValueOfField({
           containerUuid: this.$route.meta.uuid,
@@ -644,7 +643,7 @@ export default {
             }).catch(() => {})
           })
       } else {
-        this.createOrderLine(orderUuid)
+        this.createOrderLine(this.currentOrder.uuid)
       }
       this.$store.dispatch('changeFocusNewOrder', true)
     },

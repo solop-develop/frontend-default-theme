@@ -86,6 +86,7 @@
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
+                v-if="!isMobile"
                 v-model="isShowResource"
                 placement="right"
                 trigger="click"
@@ -107,6 +108,16 @@
                   </el-button>
                 </p>
               </el-popover>
+              <el-button
+                v-else
+                type="text"
+                style="min-height: 50px;width: -webkit-fill-available;white-space: normal;"
+                @click="openListResource(!isShowResource)"
+              >
+                <svg-icon icon-class="list" />
+                <br>
+                {{ $t('timeControl.addResource') }}
+              </el-button>
             </el-card>
           </el-col>
 
@@ -595,6 +606,17 @@
         :current-panel="isOpenPanel"
       />
     </el-dialog>
+    <el-drawer
+      v-if="isMobile"
+      :title="$t('timeControl.addResource')"
+      :visible.sync="whatShowResource"
+      :with-header="false"
+      :before-close="closeResource"
+      :modal-append-to-body="false"
+      size="100%"
+    >
+      <table-time-control />
+    </el-drawer>
   </div>
 </template>
 
@@ -1012,6 +1034,12 @@ export default {
   },
 
   methods: {
+    closeResource() {
+      this.$store.commit('showListResources', false)
+      if (this.isShowResource && this.isMobile) {
+        this.isShowResource = false
+      }
+    },
     clearField(containerUuid) {
       this.$store.commit('updateValuesOfContainer', {
         containerUuid,
@@ -1196,7 +1224,11 @@ export default {
     openListOrdes() {
       this.showFieldListOrder = true
     },
-    openListResource() {
+    openListResource(value) {
+      if (this.isMobile) {
+        this.isShowResource = value
+        this.$store.commit('showListResources', value)
+      }
       this.$store.commit('showListResources', true)
     },
     closePin() {

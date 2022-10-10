@@ -13,6 +13,70 @@
     </el-header>
 
     <el-main>
+      <el-collapse accordion>
+        <el-collapse-item title="Buscar Registro" name="1">
+          <el-form
+            label-position="top"
+          >
+            <el-row style="padding-bottom: 10px;">
+              <el-col
+                :span="isMobile ? 24 : 7"
+              >
+                <span v-for="(field) in metadataList" :key="field.columnName">
+                  <field-definition
+                    v-if="field.columnName === 'RecurringTypeSearch'"
+                    :metadata-field="{
+                      ...field,
+                      size: 24
+                    }"
+                    :container-uuid="'ChildIncome'"
+                    :container-manager="containerManager"
+                    style="padding-top: 10px;"
+                  />
+                </span>
+              </el-col>
+              <el-col :span="isMobile ? 24 : 7">
+                <el-form-item
+                  :label="$t('timeControl.name')"
+                  :style="cssStyleFrontName"
+                >
+                  <el-input v-model="nameFind" type="text" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="isMobile ? 24 : 6">
+                <el-form-item
+                  :label="$t('timeControl.description')"
+                  :style="cssStyleFront"
+                >
+                  <el-input v-model="descriptionFind" type="textarea" autosize />
+                </el-form-item>
+              </el-col>
+              <el-col :span="isMobile ? 24 : 3">
+                <el-form-item
+                  label="Sólo se Confirma"
+                  :style="cssStyleFront"
+                >
+                  <el-switch
+                    v-model="isOnlyConfirmed"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="isMobile ? 24 : 1">
+                <el-form-item
+                  :style="cssStyleButton"
+                >
+                  <el-button
+                    type="primary"
+                    :loading="isLoadingRecords"
+                    icon="el-icon-search"
+                    @click="findList"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-collapse-item>
+      </el-collapse>
       <el-table
         v-loading="isLoadingRecords"
         :data="tableData"
@@ -21,6 +85,7 @@
         border
         style="width: 100%;"
         @row-click="handleRowClick"
+        @row-dblclick="addLine(currentResource)"
       >
         <el-table-column
           v-for="(head, key) in heardList"
@@ -49,6 +114,7 @@
             :total="totalRecords"
             :records-page="tableData.length"
             :selection="selection"
+            :handle-change-page="setPage"
           />
         </el-col>
         <el-col :span="24">
@@ -83,13 +149,14 @@ import { defineComponent, ref, computed } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
-
+import router from '@/router'
 // componets and mixins
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import heardList from './headerTable'
-
+import fieldsList from './fieldsList'
+import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form/index.js'
 // api request methods
 import {
   requestCreateResource,
@@ -104,12 +171,13 @@ import {
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
-// import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
+import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat.js'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
+import { generatePageToken } from '@/utils/ADempiere/dataUtils'
 
 export default defineComponent({
   name: 'TableTimeControl',
@@ -150,6 +218,10 @@ export default defineComponent({
     const isLoadingRecords = ref(false)
     // Pagination
     const totalRecords = ref(0)
+    // Search
+    const nameFind = ref('')
+    const isOnlyConfirmed = ref(false)
+    const descriptionFind = ref('')
 
     /**
      * Computed
@@ -344,6 +416,29 @@ export default defineComponent({
       }
       row.isEditRow = !row.isEditRow
     }
+    function setFieldsList() {
+      const list = []
+      fieldsList.forEach(element => {
+        createFieldFromDictionary(element)
+          .then(responseField => {
+            list.push({
+              ...responseField,
+              isReadOnly: false,
+              containerUuid: 'ChildIncome'
+            })
+          }).catch(error => {
+            showMessage({
+              message: error,
+              type: 'error'
+            })
+            console.warn(`createFieldFromDictionary: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
+          })
+          .finally(() => {
+            metadataList.value = list
+            isLoadingFields.value = true
+          })
+      })
+    }
 
     function listResource() {
       isLoadingRecords.value = true
@@ -419,18 +514,18 @@ export default defineComponent({
     function addLine(row, order) {
       const { resourceAssignmentUuid = row.uuid } = row
       const currentPointOfSales = store.getters.posAttributes.currentPointOfSales
-      if (isEmptyValue(currentPointOfSales.currentOrder.uuid)) {
+      if (isEmptyValue(currentPointOfSales.currentOrder.uuid) || isEmptyValue(order)) {
         createOrder(row)
         return
       }
 
       createOrderLine({
         posUuid: currentPointOfSales.uuid,
-        orderUuid: currentPointOfSales.currentOrder.uuid,
+        orderUuid: order.uuid,
         resourceAssignmentUuid
       })
         .then((response) => {
-          store.dispatch('reloadOrder', { orderUuid: store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
+          store.dispatch('reloadOrder', { orderUuid: order.uuid })
           showMessage({
             message: lang.t('timeControl.recordConfirmed'),
             type: 'success'
@@ -453,11 +548,16 @@ export default defineComponent({
         salesRepresentativeUuid: store.getters.posAttributes.currentPointOfSales.salesRepresentative.uuid
       })
         .then((response) => {
-          addLine(resource, response)
-          showMessage({
-            message: lang.t('timeControl.recordConfirmed'),
-            type: 'success'
+          router.push({
+            params: {
+              ...router.app._route.params
+            },
+            query: {
+              ...router.app._route.query,
+              action: response.uuid
+            }
           })
+          addLine(resource, response)
         })
         .catch(error => {
           showMessage({
@@ -469,6 +569,80 @@ export default defineComponent({
     }
     function closeShowList(params) {
       store.commit('showListResources', false)
+      // router.push({
+      //   params: {
+      //     ...router.app._route.params
+      //   },
+      //   query: {
+      //     ...router.app._route.query,
+      //   }
+      // })
+      store.commit('setShowPOSOptions', false)
+    }
+
+    function findList(pageNumber) {
+      const resourceTypeId = store.getters.getValueOfField({
+        containerUuid: 'ChildIncome',
+        columnName: 'RecurringTypeSearch'
+      })
+      isLoadingRecords.value = true
+      requestListResource({
+        resourceTypeId,
+        name: nameFind.value,
+        description: descriptionFind.value,
+        isOnlyConfirmed: isOnlyConfirmed.value,
+        isWaitingForOrdered: true,
+        pageToken: generatePageToken({ pageNumber })
+      })
+        .then(response => {
+          // recordCount.value = response.recordCount
+          const { records, recordCount } = response
+          totalRecords.value = recordCount
+          // if (!isEmptyValue(nextPageToken)) {
+          //   pageNumber.value = nextPageToken.split('')[nextPageToken.length - 1]
+          // }
+          // pageNumber.value = isEmptyValue(response.nextPageToken) ? '' : response.nextPageToken.split('')[response.nextPageToken.length - 1]
+          const recordsList = records.map(row => {
+            let dateTo = null
+            if (String(row.assign_date_to).length >= 10) {
+              dateTo = formatDate({
+                value: row.assign_date_to,
+                isTime: true,
+                format: 'HH:mm:SS'
+              })
+            }
+            return {
+              ...row,
+              resourceNameType: row.resource.resource_type.name,
+              dateFrom: formatDate({
+                value: row.assign_date_from,
+                isTime: true,
+                format: 'HH:mm:SS'
+              }),
+              dateTo,
+              is_confirmed: convertBooleanToTranslationLang(row.is_confirmed),
+              isConfirmed: row.is_confirmed,
+              ...ROW_ATTRIBUTES
+            }
+          })
+          tableData.value = recordsList
+          isLoadingRecords.value = false
+        }).catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+          isLoadingRecords.value = false
+          console.warn(`requestListResource: List Resource Server (State) - Error ${error.code}: ${error.message}.`)
+        })
+    }
+
+    function setPage(params) {
+      listResource(params)
+    }
+
+    if (!isLoadingFields.value) {
+      setFieldsList({})
     }
 
     // Get Record Control Table
@@ -492,6 +666,9 @@ export default defineComponent({
       currentResource,
       // Paginations
       totalRecords,
+      nameFind,
+      descriptionFind,
+      isOnlyConfirmed,
       // Computeds
       recurringType,
       recurringTypeUuid,
@@ -505,6 +682,9 @@ export default defineComponent({
       selection,
       // import
       heardList,
+      containerManager: {
+        ...containerManagerForm
+      },
       // Methods
       addNewRecord,
       deleteChild,
@@ -514,7 +694,10 @@ export default defineComponent({
       handleRowClick,
       addLine,
       closeShowList,
-      createOrder
+      createOrder,
+      findList,
+      setFieldsList,
+      setPage
     }
   }
 })
