@@ -298,7 +298,10 @@ export default {
       this.$store.commit('changePopoverListBusinessPartner', false)
     },
     handleChangePage(newPage) {
-      this.$store.dispatch('setBPartnerPageNumber', newPage)
+      this.searchBPartnerList({
+        pageNumber: newPage
+      }, false)
+      // this.$store.dispatch('setBPartnerPageNumber', newPage)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
