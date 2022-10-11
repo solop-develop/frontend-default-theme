@@ -108,11 +108,9 @@
     >
       {{ $t('actionMenu.save') }}
     </el-button>
-    <span
-      v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid)"
-    >
+    <span>
       <el-dropdown
-        v-if="!isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
+        v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
         split-button
         @command="handleCommandActions"
       >
@@ -173,7 +171,7 @@
         </el-dropdown-menu>
       </el-dropdown>
       <el-popover
-        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+        v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
         v-model="visible"
         placement="top"
       >
@@ -208,7 +206,7 @@
         <el-button slot="reference" type="text" />
       </el-popover>
       <el-popover
-        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+        v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus) && tabAttributes.isParentTab"
         trigger="hover"
         width="900"
       >
@@ -233,10 +231,14 @@
         </el-descriptions>
         <el-button
           slot="reference"
+          plain
+          size="small"
           :type="tagRender({ value: currentDocStatus })"
-          circle
-          style="height: 67% !important;padding-bottom: 1.5%;"
-        />
+          class="undo-changes-button"
+          style="position: absolute;right: 6%;"
+        >
+          {{ displayDocStatus.name }}
+        </el-button>
       </el-popover>
     </span>
   </div>
