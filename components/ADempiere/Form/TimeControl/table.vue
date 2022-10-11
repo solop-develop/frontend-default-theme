@@ -1,20 +1,11 @@
 <template>
   <el-container
     key="child-income-loaded"
-    class="view-base child-income-view"
+    class="child-income-view"
   >
-    <el-header>
-      <div class="center" style="width: 100%">
-        <title-and-help
-          :name="$t('timeControl.addResource')"
-          :help="$t('timeControl.addResource')"
-        />
-      </div>
-    </el-header>
-
     <el-main>
       <el-collapse accordion>
-        <el-collapse-item title="Buscar Registro" name="1">
+        <el-collapse-item :title="$t('timeControl.addResource')" name="1">
           <el-form
             label-position="top"
           >
@@ -53,12 +44,19 @@
               </el-col>
               <el-col :span="isMobile ? 24 : 3">
                 <el-form-item
-                  label="Sólo se Confirma"
+                  label="Confirmado"
                   :style="cssStyleFront"
                 >
-                  <el-switch
-                    v-model="isOnlyConfirmed"
-                  />
+                  <el-select
+                    v-model="confirmedFind"
+                  >
+                    <el-option
+                      v-for="item in confirmedOptionsList"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="isMobile ? 24 : 1">
@@ -69,7 +67,7 @@
                     type="primary"
                     :loading="isLoadingRecords"
                     icon="el-icon-search"
-                    @click="findList"
+                    @click="listResourcesAssignment"
                   />
                 </el-form-item>
               </el-col>
@@ -123,7 +121,7 @@
               :loading="isLoadingRecords"
               type="success"
               icon="el-icon-refresh-right"
-              @click="listResource();"
+              @click="listResourcesAssignment();"
             />
             <el-button
               type="danger"
@@ -220,7 +218,21 @@ export default defineComponent({
     const totalRecords = ref(0)
     // Search
     const nameFind = ref('')
-    const isOnlyConfirmed = ref(false)
+    const confirmedFind = ref('Y')
+    const confirmedOptionsList = ref([
+      {
+        value: undefined,
+        label: ' '
+      },
+      {
+        value: 'Y',
+        label: lang.t('components.switchActiveText')
+      },
+      {
+        value: 'N',
+        label: lang.t('components.switchInactiveText')
+      }
+    ])
     const descriptionFind = ref('')
 
     /**
@@ -345,7 +357,7 @@ export default defineComponent({
           console.warn(`requestCreateResource: Add Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
         .finally(() => {
-          listResource()
+          listResourcesAssignment()
           isLoadingCreate.value = false
         })
     }
@@ -373,7 +385,7 @@ export default defineComponent({
           console.warn(`requestUpdateResource: Update Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
         .finally(() => {
-          listResource()
+          listResourcesAssignment()
         })
     }
 
@@ -398,7 +410,7 @@ export default defineComponent({
           console.warn(`requestDeleteResource: Delete Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
         .finally(() => {
-          listResource()
+          listResourcesAssignment()
         })
     }
 
@@ -440,49 +452,6 @@ export default defineComponent({
       })
     }
 
-    function listResource() {
-      isLoadingRecords.value = true
-      requestListResource({
-        isWaitingForOrdered: true
-      })
-        .then(response => {
-          const { records, recordCount } = response
-          totalRecords.value = recordCount
-          const recordsList = records.map(row => {
-            let dateTo = null
-            if (String(row.assign_date_to).length >= 10) {
-              dateTo = formatDate({
-                value: row.assign_date_to,
-                isTime: true,
-                format: 'HH:mm:SS'
-              })
-            }
-            return {
-              ...row,
-              resourceNameType: row.resource.name,
-              dateFrom: formatDate({
-                value: row.assign_date_from,
-                isTime: true,
-                format: 'HH:mm:SS'
-              }),
-              dateTo,
-              is_confirmed: convertBooleanToTranslationLang(row.is_confirmed),
-              isConfirmed: row.is_confirmed,
-              ...ROW_ATTRIBUTES
-            }
-          })
-          tableData.value = recordsList
-          isLoadingRecords.value = false
-        }).catch(error => {
-          showMessage({
-            message: error,
-            type: 'error'
-          })
-          isLoadingRecords.value = false
-          console.warn(`requestListResource: List Resource Server (State) - Error ${error.code}: ${error.message}.`)
-        })
-    }
-
     function confirmResource(row) {
       const { id, uuid } = row
 
@@ -504,7 +473,7 @@ export default defineComponent({
           console.warn(`requestConfirmResourceAssignnment: Confirme Resource Server (State) - Error ${error.code}: ${error.message}.`)
         })
         .finally(() => {
-          listResource()
+          listResourcesAssignment()
         })
     }
     function handleRowClick(row) {
@@ -580,7 +549,7 @@ export default defineComponent({
       store.commit('setShowPOSOptions', false)
     }
 
-    function findList(pageNumber) {
+    function listResourcesAssignment(pageNumber = 1) {
       const resourceTypeId = store.getters.getValueOfField({
         containerUuid: 'ChildIncome',
         columnName: 'RecurringTypeSearch'
@@ -590,7 +559,7 @@ export default defineComponent({
         resourceTypeId,
         name: nameFind.value,
         description: descriptionFind.value,
-        isOnlyConfirmed: isOnlyConfirmed.value,
+        confirmedFind: confirmedFind.value,
         isWaitingForOrdered: true,
         pageToken: generatePageToken({ pageNumber })
       })
@@ -637,8 +606,8 @@ export default defineComponent({
         })
     }
 
-    function setPage(params) {
-      listResource(params)
+    function setPage(pageName) {
+      listResourcesAssignment(pageName)
     }
 
     if (!isLoadingFields.value) {
@@ -646,10 +615,7 @@ export default defineComponent({
     }
 
     // Get Record Control Table
-    // onMounted(() => {
-    //   listResource()
-    // })
-    listResource()
+    listResourcesAssignment()
 
     return {
       // Ref
@@ -668,7 +634,8 @@ export default defineComponent({
       totalRecords,
       nameFind,
       descriptionFind,
-      isOnlyConfirmed,
+      confirmedFind,
+      confirmedOptionsList,
       // Computeds
       recurringType,
       recurringTypeUuid,
@@ -689,13 +656,12 @@ export default defineComponent({
       addNewRecord,
       deleteChild,
       editChild,
-      listResource,
       confirmResource,
       handleRowClick,
       addLine,
       closeShowList,
       createOrder,
-      findList,
+      listResourcesAssignment,
       setFieldsList,
       setPage
     }
