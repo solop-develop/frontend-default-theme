@@ -1,247 +1,229 @@
 <template>
-  <el-main class="form-time-control">
-    <el-card class="box-card" style="padding-bottom: 20px;">
-      <el-form
-        label-position="top"
-      >
-        <el-row style="padding-bottom: 10px;">
-          <el-col
-            :span="sizeColumn"
-          >
-            <span v-for="(field) in metadataList" :key="field.columnName">
-              <field-definition
-                v-if="field.columnName === 'S_ResourceType_ID'"
-                :metadata-field="{
-                  ...field,
-                  size: 24
+  <el-container
+    key="child-income-loaded"
+    class="view-base child-income-view"
+  >
+    <el-main class="form-time-control" :style="isMobile ? 'overflow: auto;' : ''">
+      <el-card class="box-card" style="padding-bottom: 20px;">
+        <el-form
+          label-position="top"
+        >
+          <el-row style="padding-bottom: 10px;">
+            <el-col
+              :span="sizeColumn"
+            >
+              <span v-for="(field) in metadataList" :key="field.columnName">
+                <field-definition
+                  v-if="field.columnName === 'S_ResourceType_ID'"
+                  :metadata-field="{
+                    ...field,
+                    size: 24
+                  }"
+                  :container-uuid="'ChildIncome'"
+                  :container-manager="containerManager"
+                />
+              </span>
+            </el-col>
+            <el-col :span="sizeColumn">
+              <el-form-item
+                :label="$t('timeControl.name')"
+                :rules="{
+                  required: true
                 }"
-                :container-uuid="'ChildIncome'"
-                :container-manager="containerManager"
-                style="padding-top: 10px;"
-              />
-            </span>
-          </el-col>
-          <el-col :span="sizeColumn">
-            <el-form-item
-              :label="$t('timeControl.name')"
-              :rules="{
-                required: true
-              }"
-              :style="cssStyleFrontName"
-            >
-              <el-input v-model="name" type="text" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="sizeColumn">
-            <el-form-item
-              :label="$t('timeControl.description')"
-              :style="cssStyleFront"
-            >
-              <el-input v-model="description" type="textarea" autosize />
-            </el-form-item>
-          </el-col>
-          <el-col :span="isMobile ? 24 : 3">
-            <el-form-item
-              :style="cssStyleButton"
-            >
-              <el-button
-                type="primary"
-                :loading="isLoadingCreate"
-                :disabled="isValidateAdd"
-                @click="addNewRecord()"
+                :style="cssStyleFrontName"
               >
-                {{ $t('timeControl.addChild') }}
-              </el-button>
-            </el-form-item>
+                <el-input v-model="name" type="text" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="sizeColumn">
+              <el-form-item
+                :label="$t('timeControl.description')"
+                :style="cssStyleFront"
+              >
+                <el-input v-model="description" type="textarea" autosize />
+              </el-form-item>
+            </el-col>
+            <el-col :span="isMobile ? 24 : 3">
+              <el-form-item
+                :style="cssStyleButton"
+              >
+                <el-button
+                  type="primary"
+                  :loading="isLoadingCreate"
+                  :disabled="isValidateAdd"
+                  @click="addNewRecord()"
+                >
+                  {{ $t('timeControl.addChild') }}
+                </el-button>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+
+        <el-collapse v-model="activeCollapse" accordion>
+          <el-collapse-item :title="$t('timeControl.searchRecords')" name="query-criteria">
+            <el-form
+              label-position="top"
+            >
+              <el-row style="padding-bottom: 10px;">
+                <el-col
+                  :span="isMobile ? 24 : 7"
+                >
+                  <span v-for="(field) in metadataList" :key="field.columnName">
+                    <field-definition
+                      v-if="field.columnName === 'RecurringTypeSearch'"
+                      :metadata-field="{
+                        ...field,
+                        size: 24
+                      }"
+                      :container-uuid="'ChildIncome'"
+                      :container-manager="containerManager"
+                    />
+                  </span>
+                </el-col>
+
+                <el-col :span="isMobile ? 24 : 7">
+                  <el-form-item
+                    :label="$t('timeControl.name')"
+                    :style="cssStyleFrontName"
+                  >
+                    <el-input v-model="nameFind" type="text" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="isMobile ? 24 : 6">
+                  <el-form-item
+                    :label="$t('timeControl.description')"
+                    :style="cssStyleFront"
+                  >
+                    <el-input v-model="descriptionFind" type="textarea" autosize />
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="isMobile ? 24 : 3">
+                  <el-form-item
+                    :label="$t('timeControl.confirmed')"
+                    :style="cssStyleFront"
+                  >
+                    <el-select
+                      v-model="confirmedFind"
+                      style="display: block;"
+                    >
+                      <el-option
+                        v-for="item in confirmedOptionsList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="isMobile ? 24 : 1">
+                  <el-form-item
+                    :style="cssStyleButton"
+                  >
+                    <el-button
+                      type="primary"
+                      :loading="isLoadingRecords"
+                      icon="el-icon-search"
+                      @click="listResource"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </el-collapse-item>
+        </el-collapse>
+
+        <el-table
+          v-loading="isLoadingRecords"
+          :data="tableData"
+          stripe
+          height="540"
+          highlight-current-row
+          border
+          style="width: 100%;padding-right: 20px !important;"
+          @row-click="handleRowClick"
+        >
+          <el-table-column
+            v-for="(head, key) in heardList"
+            :key="key"
+            :label="head.label"
+            :align="head.align"
+            :width="isMobile ? '180px' : head.size"
+            header-align="center"
+          >
+            <template slot-scope="scope">
+              <span v-if="scope.row.isEditRow && (head.columnName === 'name')">
+                <el-input ref="namePanelEdit" v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
+              </span>
+              <span v-else-if="scope.row.isEditRow && (head.columnName === 'description')">
+                <el-input v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
+              </span>
+              <span v-else>
+                {{ scope.row[head.columnName] }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('form.pos.tableProduct.options')"
+            width="195px"
+            fixed="right"
+          >
+            <template slot-scope="scope">
+              <el-button
+                :disabled="scope.row.isConfirmed"
+                type="success"
+                :icon="scope.row.isEditRow ? 'el-icon-check' : 'el-icon-edit'"
+                size="mini"
+                @click="editChild(scope.row)"
+              />
+              <el-button
+                :disabled="scope.row.isConfirmed"
+                type="danger"
+                icon="el-icon-delete"
+                size="mini"
+                @click="deleteChild(scope.row)"
+              />
+
+              <el-popover
+                placement="top"
+                width="200"
+              >
+                <p style="white-space: break-spaces; word-break: break-word;">
+                  {{ $t('timeControl.confirmProcessRecord') }}
+                </p>
+                <div style="text-align: right;margin: 0px;">
+                  <el-button type="primary" size="mini" @click="confirmResiurce(scope.row)">
+                    Ok
+                  </el-button>
+                </div>
+                <el-button
+                  slot="reference"
+                  :disabled="scope.row.isConfirmed"
+                  type="primary"
+                  icon="el-icon-check"
+                  size="mini"
+                  style="margin-left: 10px;"
+                />
+              </el-popover>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <el-row :gutter="24">
+          <el-col :span="24">
+            <custom-pagination
+              :total="recordCount"
+              :records-page="tableData.length"
+              :selection="selection"
+              :handle-change-page="setPage"
+            />
           </el-col>
         </el-row>
-      </el-form>
-
-      <el-collapse v-model="activeCollapse" accordion>
-        <el-collapse-item :title="$t('timeControl.searchRecords')" name="query-criteria">
-          <el-form
-            label-position="top"
-          >
-            <el-row style="padding-bottom: 10px;">
-              <el-col
-                :span="isMobile ? 24 : 7"
-              >
-                <span v-for="(field) in metadataList" :key="field.columnName">
-                  <field-definition
-                    v-if="field.columnName === 'RecurringTypeSearch'"
-                    :metadata-field="{
-                      ...field,
-                      size: 24
-                    }"
-                    :container-uuid="'ChildIncome'"
-                    :container-manager="containerManager"
-                    style="padding-top: 10px;"
-                  />
-                </span>
-              </el-col>
-
-              <el-col :span="isMobile ? 24 : 7">
-                <el-form-item
-                  :label="$t('timeControl.name')"
-                  :style="cssStyleFrontName"
-                >
-                  <el-input v-model="nameFind" type="text" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="isMobile ? 24 : 6">
-                <el-form-item
-                  :label="$t('timeControl.description')"
-                  :style="cssStyleFront"
-                >
-                  <el-input v-model="descriptionFind" type="textarea" autosize />
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="isMobile ? 24 : 3">
-                <el-form-item
-                  :label="$t('timeControl.confirmed')"
-                  :style="cssStyleFront"
-                >
-                  <el-select
-                    v-model="confirmedFind"
-                  >
-                    <el-option
-                      v-for="item in confirmedOptionsList"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="isMobile ? 24 : 1">
-                <el-form-item
-                  :style="cssStyleButton"
-                >
-                  <el-button
-                    type="primary"
-                    :loading="isLoadingRecords"
-                    icon="el-icon-search"
-                    @click="listResource"
-                  />
-                </el-form-item>
-              </el-col>
-            </el-row>
-          </el-form>
-        </el-collapse-item>
-      </el-collapse>
-
-      <el-table
-        v-loading="isLoadingRecords"
-        :data="tableData"
-        stripe
-        height="540"
-        highlight-current-row
-        border
-        style="width: 100%;padding-right: 20px !important;"
-        @row-click="handleRowClick"
-      >
-        <el-table-column
-          v-for="(head, key) in heardList"
-          :key="key"
-          :label="head.label"
-          :align="head.align"
-          :width="isMobile ? '180px' : head.size"
-          header-align="center"
-        >
-          <template slot-scope="scope">
-            <span v-if="scope.row.isEditRow && (head.columnName === 'name')">
-              <el-input ref="namePanelEdit" v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
-            </span>
-            <span v-else-if="scope.row.isEditRow && (head.columnName === 'description')">
-              <el-input v-model="scope.row[head.columnName]" :autofocus="true" type="text" />
-            </span>
-            <span v-else>
-              {{ scope.row[head.columnName] }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('form.pos.tableProduct.options')"
-          width="195px"
-          fixed="right"
-        >
-          <template slot-scope="scope">
-            <el-button
-              :disabled="scope.row.isConfirmed"
-              type="success"
-              :icon="scope.row.isEditRow ? 'el-icon-check' : 'el-icon-edit'"
-              size="mini"
-              @click="editChild(scope.row)"
-            />
-            <el-button
-              :disabled="scope.row.isConfirmed"
-              type="danger"
-              icon="el-icon-delete"
-              size="mini"
-              @click="deleteChild(scope.row)"
-            />
-
-            <el-popover
-              placement="top"
-              width="200"
-            >
-              <p style="white-space: break-spaces; word-break: break-word;">
-                {{ $t('timeControl.confirmProcessRecord') }}
-              </p>
-              <div style="text-align: right; margin: 0">
-                <el-button type="primary" size="mini" @click="confirmResiurce(scope.row)">
-                  Ok
-                </el-button>
-              </div>
-              <el-button
-                slot="reference"
-                style="padding: 10px;"
-                :disabled="scope.row.isConfirmed"
-                type="primary"
-                icon="el-icon-check"
-                size="mini"
-              />
-            </el-popover>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <el-row :gutter="24">
-        <el-col :span="24">
-          <custom-pagination
-            :total="recordCount"
-            :records-page="tableData.length"
-            :selection="selection"
-            :handle-change-page="setPage"
-          />
-        </el-col>
-        <!-- <el-col :span="24">
-          <samp style="float: right; padding-right: 10px;">
-            <el-button
-              :loading="isLoadingRecords"
-              type="success"
-              icon="el-icon-refresh-right"
-              @click="listResource();"
-            />
-            <el-button
-              type="danger"
-              class="custom-button-create-bp"
-              icon="el-icon-close"
-              @click="closeShowList()"
-            />
-            <el-button
-              type="primary"
-              class="custom-button-create-bp"
-              icon="el-icon-check"
-              @click="addLine(currentResource)"
-            />
-          </samp>
-        </el-col> -->
-      </el-row>
-    </el-card>
-  </el-main>
+      </el-card>
+    </el-main>
+  </el-container>
 </template>
 
 <script>
@@ -404,7 +386,7 @@ export default defineComponent({
       if (isMobile.value) {
         return 'padding-top: 20px;padding-bottom: 10px;text-align: center;margin-bottom: 0px !important;'
       }
-      return 'padding-top: 45px;'
+      return 'padding-top: 35px;'
     })
 
     const selection = computed(() => {
