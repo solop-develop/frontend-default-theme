@@ -132,6 +132,10 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
+    const currentRecordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
+    })
+
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -169,7 +173,8 @@ export default defineComponent({
       })
       isSelectionRow.sort()
       const recordUuid = store.getters.getUuidOfContainer(props.tabAttributes.uuid)
-      if (!isEmptyValue(tabData.value.currentRowSelect)) {
+      if (!isEmptyValue(tabData.value.currentRowSelect) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
+        console.log(1)
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
@@ -177,13 +182,15 @@ export default defineComponent({
         })
       }
       if (tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow) && isSelectionRow[isSelectionRow.length - 1].UUID !== recordUuid) {
+        console.log(2)
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
           row: isSelectionRow[isSelectionRow.length - 1]
         })
       }
-      if (!tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow)) {
+      if (!tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
+        console.log(3, isSelectionRow[isSelectionRow.length - 1].UUID, alo)
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
@@ -207,6 +214,7 @@ export default defineComponent({
       isShowedTableRecords,
       tableHeaders,
       label,
+      currentRecordUuid,
       // methods
       changeShowedRecords
     }
