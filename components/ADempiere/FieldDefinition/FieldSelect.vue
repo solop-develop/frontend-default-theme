@@ -58,6 +58,7 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
  *
  * TODO: String values add single quotation marks 'value'
  * TODO: No blanck option enabled if is mandatory field
+ * TODO: No includes default value into list on forms or field with dynamic validation (see default value City on location form)
  */
 export default {
   name: 'FieldSelect',
@@ -394,7 +395,8 @@ export default {
     },
     remoteSearch(searchQuery = '') {
       const results = this.localSearch(searchQuery)
-      if (this.isEmptyValue(searchQuery) && (this.isEmptyValue(results) && !this.isEmptyValue(searchQuery))) {
+      if (this.isEmptyValue(searchQuery) ||
+        (!this.isEmptyValue(searchQuery) && (this.isEmptyValue(results) || results.length < 3))) {
         clearTimeout(this.timeOut)
         this.timeOut = setTimeout(() => {
           this.loadListFromServer(searchQuery)
