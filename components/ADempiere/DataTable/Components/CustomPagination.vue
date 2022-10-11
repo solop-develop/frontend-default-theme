@@ -21,20 +21,23 @@
     <el-col :span="24" style="float: right;">
       <el-pagination
         small
-        layout="slot, total, prev, pager, next"
+        layout="slot, total, sizes, prev, pager, next"
         :current-page="currentPage"
-        :page-size="pageSize"
+        :page-sizes="NUMBER_RECORDS_PER_PAGE"
+        :page-size="currentPageSize"
         :total="total"
         style="float: right;"
+        @size-change="handleSizeChange"
         @current-change="handleChangePage"
       >
         <span v-if="isSelection" class="selections-number">
           <span style="position: absolute !important;left: 1px !important;">
             {{ $t('table.dataTable.selected') }}: {{ selection }}
           </span>
-          <span>
+          <!-- <span>
             {{ $t('table.dataTable.recordsPage') }} {{ recordsPage }} {{ ' ' }} /
-          </span>
+          </span> -->
+          <!-- {{ lisPageSize }} -->
           <!-- {{ $t('table.dataTable.selected') }}: {{ selection }} / show total records -->
         </span>
       </el-pagination>
@@ -44,8 +47,9 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+import store from '@/store'
 // constants
-import { ROWS_OF_RECORDS_BY_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
+import { ROWS_OF_RECORDS_BY_PAGE, NUMBER_RECORDS_PER_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -58,10 +62,10 @@ export default defineComponent({
     //   type: String,
     //   default: ''
     // },
-    // containerUuid: {
-    //   type: String,
-    //   default: ''
-    // },
+    containerUuid: {
+      type: String,
+      default: ''
+    },
     containerManager: {
       type: Object,
       required: false
@@ -90,6 +94,12 @@ export default defineComponent({
     //   type: Boolean,
     //   required: false
     // },
+    handleSizeChange: {
+      type: Function,
+      default: (pageSizeNumber) => {
+        console.info('implement change size page number method', pageSizeNumber)
+      }
+    },
     handleChangePage: {
       type: Function,
       default: (pageNumber) => {
@@ -113,10 +123,17 @@ export default defineComponent({
       })
     })
 
+    const currentPageSize = computed(() => {
+      return store.getters.getTabPageSize({ containerUuid: props.containerUuid })
+    })
+
     return {
       // Computed
       isSelection,
-      rowPage
+      rowPage,
+      currentPageSize,
+      // Import
+      NUMBER_RECORDS_PER_PAGE
     }
   }
 

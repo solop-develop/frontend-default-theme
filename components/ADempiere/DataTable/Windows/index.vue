@@ -115,6 +115,7 @@
       :selection="selectionsLength"
       :records-page="recordsWithFilter.length"
       :handle-change-page="handleChangePage"
+      :handle-size-change="handleChangeSizePage"
       :is-navigation="isNavigation"
     />
   </div>
@@ -501,6 +502,18 @@ export default defineComponent({
       }, () => {})
     }
 
+    /**
+     * custom method to handle change size page
+     */
+
+    function handleChangeSizePage(pageSize) {
+      props.containerManager.setSizePage({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        pageSize
+      })
+    }
+
     function handleChangeSearch(value) {
       clearTimeout(timeOutSearch.value)
       timeOutSearch.value = setTimeout(() => {
@@ -577,10 +590,14 @@ export default defineComponent({
     function toggleSelection(rows) {
       if (rows) {
         rows.forEach(row => {
-          refs.multipleTable.toggleRowSelection(row)
+          if (!isEmptyValue(refs.multipleTable)) {
+            refs.multipleTable.toggleRowSelection(row)
+          }
         })
       } else {
-        refs.multipleTable.clearSelection()
+        if (!isEmptyValue(refs.multipleTable)) {
+          refs.multipleTable.clearSelection()
+        }
       }
     }
     function tableRowClassName(params) {
@@ -714,6 +731,7 @@ export default defineComponent({
       handleChangeSearch,
       headerLabel,
       handleChangePage,
+      handleChangeSizePage,
       handleRowClick,
       handleRowDblClick,
       handleSelection,
