@@ -187,6 +187,7 @@
               />
 
               <el-popover
+                :ref="scope.row.id"
                 placement="top"
                 width="200"
               >
@@ -194,9 +195,13 @@
                   {{ $t('timeControl.confirmProcessRecord') }}
                 </p>
                 <div style="text-align: right;margin: 0px;">
-                  <el-button type="primary" size="mini" @click="confirmResiurce(scope.row)">
-                    Ok
-                  </el-button>
+                  <el-button
+                    type="danger"
+                    icon="el-icon-close"
+                    size="small"
+                    @click="closeList(scope.row.id)"
+                  />
+                  <el-button type="primary" size="mini" icon="el-icon-check" @click="confirmResiurce(scope.row)" />
                 </div>
                 <el-button
                   slot="reference"
@@ -546,7 +551,6 @@ export default defineComponent({
 
     function confirmResiurce(row) {
       const { id, uuid } = row
-
       requestConfirmResourceAssignnment({
         id,
         uuid
@@ -566,6 +570,9 @@ export default defineComponent({
         })
         .finally(() => {
           listResource()
+          this.$refs[id].doClose()
+          this.$refs[id ].doShow()
+          this.$refs[id].showPopper = false
         })
     }
 
@@ -639,6 +646,12 @@ export default defineComponent({
       listResource(pageNumber)
     }
 
+    function closeList(params) {
+      this.$refs[params].doClose()
+      this.$refs[params].doShow()
+      this.$refs[params].showPopper = false
+    }
+
     listResource()
 
     return {
@@ -685,7 +698,8 @@ export default defineComponent({
       listResource,
       confirmResiurce,
       setPage,
-      handleRowClick
+      handleRowClick,
+      closeList
     }
   }
 })

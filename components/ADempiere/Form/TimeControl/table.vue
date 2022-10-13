@@ -483,18 +483,18 @@ export default defineComponent({
     function addLine(row, order) {
       const { resourceAssignmentUuid = row.uuid } = row
       const currentPointOfSales = store.getters.posAttributes.currentPointOfSales
-      if (isEmptyValue(currentPointOfSales.currentOrder.uuid) || isEmptyValue(order)) {
+      if (isEmptyValue(currentPointOfSales.currentOrder.uuid)) {
         createOrder(row)
         return
       }
 
       createOrderLine({
         posUuid: currentPointOfSales.uuid,
-        orderUuid: order.uuid,
+        orderUuid: currentPointOfSales.currentOrder.uuid,
         resourceAssignmentUuid
       })
         .then((response) => {
-          store.dispatch('reloadOrder', { orderUuid: order.uuid })
+          store.dispatch('reloadOrder', { orderUuid: currentPointOfSales.currentOrder.uuid })
           showMessage({
             message: lang.t('timeControl.recordConfirmed'),
             type: 'success'
