@@ -194,9 +194,7 @@
                   {{ $t('timeControl.confirmProcessRecord') }}
                 </p>
                 <div style="text-align: right;margin: 0px;">
-                  <el-button type="primary" size="mini" @click="confirmResiurce(scope.row)">
-                    Ok
-                  </el-button>
+                  <el-button type="primary" size="mini" icon="el-icon-check" @click="confirmResiurce(scope.row)" />
                 </div>
                 <el-button
                   slot="reference"
