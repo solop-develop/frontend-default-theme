@@ -132,6 +132,10 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
+    const currentRecordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
+    })
+
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -169,7 +173,7 @@ export default defineComponent({
       })
       isSelectionRow.sort()
       const recordUuid = store.getters.getUuidOfContainer(props.tabAttributes.uuid)
-      if (!isEmptyValue(tabData.value.currentRowSelect)) {
+      if (!isEmptyValue(tabData.value.currentRowSelect) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
@@ -183,7 +187,7 @@ export default defineComponent({
           row: isSelectionRow[isSelectionRow.length - 1]
         })
       }
-      if (!tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow)) {
+      if (!tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
@@ -207,6 +211,7 @@ export default defineComponent({
       isShowedTableRecords,
       tableHeaders,
       label,
+      currentRecordUuid,
       // methods
       changeShowedRecords
     }

@@ -116,6 +116,7 @@
       :records-page="recordsWithFilter.length"
       :handle-change-page="handleChangePage"
       :is-navigation="isNavigation"
+      :handle-size-change="handleChangeSizePage"
     />
   </div>
 </template>
@@ -482,6 +483,14 @@ export default defineComponent({
       }, () => {})
     }
 
+    function handleChangeSizePage(pageSize) {
+      props.containerManager.setSizePage({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        pageSize
+      })
+    }
+
     function handleChangeSearch(value) {
       clearTimeout(timeOutSearch.value)
       timeOutSearch.value = setTimeout(() => {
@@ -693,7 +702,8 @@ export default defineComponent({
       handleSelection,
       handleSelectionAll,
       isDisplayed,
-      loadSelect
+      loadSelect,
+      handleChangeSizePage
     }
   }
 })
