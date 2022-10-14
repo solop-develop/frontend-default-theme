@@ -24,6 +24,8 @@
         :parent-uuid="parentUuid"
         :container-uuid="tabAttributes.uuid"
       />
+    </span>
+    <span style="display: grid;">
       <tab-options
         :parent-uuid="parentUuid"
         :container-manager="containerManager"
