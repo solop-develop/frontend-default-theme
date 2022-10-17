@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -17,9 +17,20 @@
 -->
 
 <template>
+  <location-address-form
+    v-if="metadata.pos"
+    key="point-of-sales"
+    class="location-form"
+    :values="localValues"
+    :parent-metadata="metadata"
+    :parent-uuid="parentUuid"
+    :container-uuid="containerUuid"
+    :container-manager="containerManager"
+  />
+
   <el-popover
-    v-if="!metadata.pos"
-    key="standard"
+    v-else
+    key="standard-location"
     ref="locationAddress"
     v-model="isShowedLocationForm"
     class="popover-location"
@@ -41,28 +52,22 @@
       slot="reference"
       class="button-location-show"
       type="text"
+      style="width: 100%;"
+      :disabled="isDisabled"
       @click="isShowedLocationForm = true"
     >
       <el-input
-        v-model="displayedValue"
+        v-model="displayedValueNotEdit"
         :class="cssClassStyle"
-        readonly
+        clearable
+        v-bind="commonsProperties"
+        style="width: 100%;"
+        @clear="clearValues"
       >
         <i slot="prefix" class="el-icon-location-information el-input__icon" />
       </el-input>
     </el-button>
   </el-popover>
-
-  <location-address-form
-    v-else
-    key="point-of-sales"
-    class="location-form"
-    :values="localValues"
-    :parent-metadata="metadata"
-    :parent-uuid="parentUuid"
-    :container-uuid="containerUuid"
-    :container-manager="containerManager"
-  />
 </template>
 
 <script>
@@ -113,6 +118,14 @@ export default {
       }
 
       return styleClass
+    },
+    displayedValueNotEdit: {
+      get() {
+        return this.displayedValue
+      },
+      set(value) {
+        // emty, dont edit
+      }
     },
     displayedValue: {
       get() {
@@ -207,6 +220,11 @@ export default {
         .finally(() => {
           this.isGettingLocation = false
         })
+    },
+    clearValues() {
+      // TODO: Clear values into form
+      this.value = undefined
+      this.displayedValue = undefined
     }
   }
 }
