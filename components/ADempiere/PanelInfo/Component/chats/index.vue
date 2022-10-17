@@ -18,30 +18,39 @@
 
 <template>
   <span>
-    <el-container>
+    <el-container style="height: 85vh;">
       <el-main style="overflow: auto;">
         <el-empty v-if="isEmptyValue(listChats)" style="height: 600px;" />
-        <el-scrollbar v-else class="scroll-chats">
-          <el-timeline>
-            <el-timeline-item
-              v-for="(chat, key) in listChats"
-              :key="key"
-              :timestamp="chat.logDate"
-              type="primary"
-              placement="top"
-              style="padding-top: 0px;padding-bottom: 0px;"
-            >
-              <el-card shadow="always" class="epale">
-                <div v-markdown="chat.characterData" style="padding-top: 0px;padding-bottom: 0px;" />
-              </el-card>
-            </el-timeline-item>
-          </el-timeline>
-        </el-scrollbar>
+        <!-- <el-scrollbar v-else class="scroll-chats"> -->
+        <el-timeline v-else>
+          <el-timeline-item
+            v-for="(chat, key) in listChats"
+            :key="key"
+            :timestamp="chat.logDate"
+            type="primary"
+            placement="top"
+            style="padding-top: 0px;padding-bottom: 0px;"
+          >
+            <el-card shadow="always" class="epale">
+              <div :id="'ChatViwer' + chat.id" />
+              <!-- {{ viwer(chat.characterData) }} -->
+              <!-- <div v-markdown="chat.characterData" style="padding-top: 0px;padding-bottom: 0px;" /> -->
+            </el-card>
+          </el-timeline-item>
+        </el-timeline>
+        <!-- </el-scrollbar> -->
       </el-main>
-      <el-footer height="10%">
+      <el-footer style="height: 200px !important;overflow: auto;">
         <div class="editor-container">
-          <markdown-editor v-model="message" height="200px" />
-          <el-button type="primary" icon="el-icon-check" circle style="float: right;margin-top: 2%;" @click="sendComment" />
+          <!-- <markdown-editor v-model="message" height="200px" /> -->
+          <div id="ChatEditor" />
+          <el-button
+            type="primary"
+            icon="el-icon-check"
+            circle
+            style="float: right;margin-top: 2%;"
+            @click="sendComment"
+          />
         </div>
       </el-footer>
     </el-container>
@@ -49,21 +58,23 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
-import MarkdownEditor from '@theme/components/MarkdownEditor'
-
+import { defineComponent, computed, ref, onMounted, watch } from '@vue/composition-api'
 import store from '@/store'
-
-// // components and mixins
-// import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
-// import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
-
-// // utils and helper methods
-// import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import lang from '@/lang'
+// import Editor
+import '@toast-ui/chart/dist/toastui-chart.css'
+import chart from '@toast-ui/editor-plugin-chart'
+import Editor from '@toast-ui/editor'
+import '@toast-ui/editor/dist/toastui-editor.css'
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'Chats',
-  components: { MarkdownEditor },
+  components: {
+    Editor
+  },
   props: {
     tableName: {
       type: String,
@@ -76,26 +87,82 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const message = ref('')
+    const ChatEditor = ref(null)
+    const ChatViwer = ref(null)
+
+    const chartOptions = {
+      minWidth: 100,
+      maxWidth: 600,
+      minHeight: 100,
+      maxHeight: 300
+    }
 
     const listChats = computed(() => {
       return store.getters.getChatEntries
     })
 
     function sendComment() {
+      if (isEmptyValue(ChatEditor.value.getMarkdown())) {
+        showMessage({
+          message: lang.t('window.containerInfo.emptyNote'),
+          type: 'warning'
+        })
+        return
+      }
       store.dispatch('createChatEntry', {
         tableName: props.tableName,
         recordId: props.recordId,
-        comment: message.value
+        comment: ChatEditor.value.getMarkdown()
       })
-        .then(response => {
-          message.value = ''
+        .then(() => {
+          cleatChatEditor('')
         })
     }
+
+    function cleatChatEditor(params) {
+      ChatEditor.value.setMarkdown(params)
+    }
+
+    function viwer(params, key) {
+      if (isEmptyValue(params)) {
+        return
+      }
+      params.forEach(element => {
+        const initialValue = element.characterData
+        ChatViwer.value = new Editor({
+          el: document.querySelector(`#ChatViwer${element.id}`),
+          viewer: true,
+          height: '200px',
+          initialValue,
+          plugins: [[chart, chartOptions]]
+        })
+      })
+    }
+    watch(listChats, (newValue, oldValue) => {
+      viwer(newValue)
+    })
+
+    onMounted(() => {
+      ChatEditor.value = new Editor({
+        el: document.querySelector('#ChatEditor'),
+        initialValue: message.value,
+        height: '200px',
+        initialEditType: 'markdown',
+        previewStyle: 'vertical',
+        plugins: [[chart, chartOptions]]
+      })
+      ChatEditor.value.getMarkdown()
+      viwer()
+    })
 
     return {
       message,
       listChats,
-      sendComment
+      sendComment,
+      ChatEditor,
+      cleatChatEditor,
+      ChatViwer,
+      viwer
     }
   }
 })
