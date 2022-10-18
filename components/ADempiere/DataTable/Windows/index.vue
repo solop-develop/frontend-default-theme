@@ -55,7 +55,7 @@
     <el-table
       id="multipleTable"
       ref="multipleTable"
-      v-loading="isLoadingDataTable"
+      v-loading="!getIsLoadedTabRecord"
       border
       :height="sizeViewTable"
       :row-key="keyColumn"
@@ -239,6 +239,12 @@ export default defineComponent({
           searchValue
         })
       }
+    })
+
+    const getIsLoadedTabRecord = computed(() => {
+      return store.getters.getIsLoadedTabRecord({
+        containerUuid: props.containerUuid
+      })
     })
 
     const currentOption = computed(() => {
@@ -650,6 +656,23 @@ export default defineComponent({
       }
     })
 
+    watch(getIsLoadedTabRecord, (newValue, oldValue) => {
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      const selectionsList = props.containerManager.getSelection({
+        containerUuid: props.containerUuid
+      })
+      if (selectionsList.length > 1) {
+        toggleSelection(selectionsList)
+        // return
+      }
+      if (newValue && !isEmptyValue(recordUuid)) {
+        const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+        if (!isEmptyValue(currentRow)) {
+          refs.multipleTable.toggleRowSelection(currentRow)
+        }
+      }
+    })
+
     onUpdated(() => {
       const main = document.getElementById('mainWindow')
       if (
@@ -723,6 +746,7 @@ export default defineComponent({
       isMobile,
       currentRowSelect,
       currentTabChildren,
+      getIsLoadedTabRecord,
       // methods
       filterRecord,
       setTableHeight,
