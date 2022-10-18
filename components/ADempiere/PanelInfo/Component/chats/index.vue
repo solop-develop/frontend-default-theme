@@ -129,10 +129,9 @@ export default defineComponent({
       }
       params.forEach(element => {
         const initialValue = element.characterData
-        ChatViwer.value = new Editor({
+        ChatViwer.value = new Editor.factory({
           el: document.querySelector(`#ChatViwer${element.id}`),
           viewer: true,
-          height: '200px',
           initialValue,
           plugins: [[chart, chartOptions]]
         })
