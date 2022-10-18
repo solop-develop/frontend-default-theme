@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -288,16 +288,24 @@ export default {
           const newSequence = getSequenceAsList(captureSequence)
           let newFieldsList = this.fieldsListLocation
             .map(item => {
-              if (newSequence.includes(item.sequenceFields)) {
+              if (!isEmptyValue(item.sequenceFields)) {
+                // is manage with capture sequence and displayed
+                if (newSequence.includes(item.sequenceFields)) {
+                  return {
+                    ...item,
+                    isDisplayed: true,
+                    index: newSequence.indexOf(item.sequenceFields)
+                  }
+                }
+                // is manage with capture sequence and not displayed
                 return {
                   ...item,
-                  isDisplayed: true,
-                  index: newSequence.indexOf(item.sequenceFields)
+                  isDisplayed: false
                 }
               }
+              // does not handle capture sequence, keeps the display of the definition in the field
               return {
-                ...item,
-                isDisplayed: false
+                ...item
               }
             })
             .filter(item => item.isDisplayed)

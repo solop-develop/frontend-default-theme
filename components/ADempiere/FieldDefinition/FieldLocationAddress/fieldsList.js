@@ -36,8 +36,7 @@ export default [
       defaultValue: '@#C_Country_ID@',
       size: 24,
       sequenceFields: 'CO',
-      index: 20,
-      isMandatory: true
+      index: 20
     }
   },
   {
@@ -47,8 +46,7 @@ export default [
       isCustomField: true,
       size: 24,
       sequenceFields: 'R',
-      index: 30,
-      isMandatory: false
+      index: 30
     }
   },
   // {
@@ -103,7 +101,6 @@ export default [
       isCustomField: true,
       size: 24,
       sequenceFields: 'A2',
-      isMandatory: false,
       index: 60
     }
   },
@@ -114,7 +111,6 @@ export default [
       isCustomField: true,
       size: 24,
       sequenceFields: 'A3',
-      isMandatory: false,
       index: 70
     }
   },
@@ -125,7 +121,6 @@ export default [
       isCustomField: true,
       size: 24,
       sequenceFields: 'A4',
-      isMandatory: false,
       index: 80
     }
   },
@@ -148,7 +143,7 @@ export default [
       sequenceFields: 'A',
       index: 100
     }
-  }
+  },
   // {
   //   elementColumnName: 'Name',
   //   isFromDictionary: true,
@@ -162,4 +157,34 @@ export default [
   //     isMandatory: true
   //   }
   // }
+  {
+    // columnName: 'Latitude',
+    uuid: '088e50fc-04cd-4e5e-93b4-318393fb3156',
+    overwriteDefinition: {
+      isCustomField: true,
+      size: 24,
+      precision: 0,
+      index: 110
+    }
+  },
+  {
+    // columnName: 'Longitude',
+    uuid: '9accac37-31c8-4840-8b85-13b62d5a6f34',
+    overwriteDefinition: {
+      isCustomField: true,
+      size: 24,
+      precision: 0,
+      index: 120
+    }
+  },
+  {
+    // columnName: 'Altitude',
+    uuid: '42a8bf0a-5315-4ab8-98c8-e49d0ad9d96a',
+    overwriteDefinition: {
+      isCustomField: true,
+      size: 24,
+      precision: 0,
+      index: 130
+    }
+  }
 ]
