@@ -58,7 +58,7 @@
           :container-uuid="tabAttributes.uuid"
         />
 
-        <span v-if="currentTabMetadata.isShowedTableRecords">
+        <!-- <span v-if="currentTabMetadata.isShowedTableRecords">
           <tab-options
             :parent-uuid="parentUuid"
             :container-manager="containerManager"
@@ -70,7 +70,7 @@
             :convenience-options="additionalOptions"
           />
           <br>
-        </span>
+        </span> -->
 
         <!-- Close table when clicking on group of fields -->
         <div

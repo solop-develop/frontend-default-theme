@@ -96,7 +96,7 @@ import {
 
 // utils and helper methods
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { getSequenceAsList } from '@/utils/ADempiere/location'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 /**
  * Location Address form to field

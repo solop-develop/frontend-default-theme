@@ -108,7 +108,9 @@
     >
       {{ $t('actionMenu.save') }}
     </el-button>
-    <span>
+    <span
+      v-if="tabAttributes.isParentTab && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions)"
+    >
       <el-dropdown
         v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
         split-button
@@ -235,7 +237,7 @@
           size="small"
           :type="tagRender({ value: currentDocStatus })"
           class="undo-changes-button"
-          style="position: absolute;right: 6%;"
+          :style="!getCurrentTab.isShowedTableRecords ? 'position: absolute;right: 8%;' : 'position: absolute;right: 6%;'"
         >
           {{ displayDocStatus.name }}
         </el-button>
@@ -491,7 +493,7 @@ export default defineComponent({
         })
       }
 
-      this.$store.dispatch('panelInfo', {
+      store.dispatch('panelInfo', {
         currentTab: props.tabAttributes,
         currentRecord: recordParentTab.value
       })
@@ -502,7 +504,7 @@ export default defineComponent({
         }),
         option: language.t('actionMenu.new')
       }
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
     }
 
     function refreshCurrentRecord() {
@@ -518,7 +520,7 @@ export default defineComponent({
         }),
         option: language.t('actionMenu.refresh')
       }
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
     }
 
     function focusConfirmDelete() {
@@ -544,7 +546,7 @@ export default defineComponent({
         fieldsList: props.tabAttributes.fieldsList,
         option: language.t('actionMenu.delete')
       }
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
       deleteRecord.deleteRecord({
         parentUuid: props.parentUuid,
         containerUuid,
@@ -554,7 +556,7 @@ export default defineComponent({
     }
 
     function undoChanges() {
-      // this.$store.dispatch('fieldListInfo', {
+      // store.dispatch('fieldListInfo', {
       //   fieldsList: props.tabAttributes.fieldsList,
       //   option: language.t('actionMenu.undo')
       // })
@@ -566,13 +568,12 @@ export default defineComponent({
         option: language.t('actionMenu.undo')
       }
 
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
       undoChange.undoChange({
         parentUuid: props.parentUuid,
         containerUuid
       })
     }
-
     function saveChanges() {
       const emptyMandatory = emptyMandatoryFields.value
 
@@ -592,7 +593,7 @@ export default defineComponent({
         option: language.t('actionMenu.save')
       }
 
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
       isSaveRecordLoading.value = true
 
       store.dispatch('flushPersistenceQueue', {
@@ -634,7 +635,7 @@ export default defineComponent({
         option: language.t('actionMenu.undo')
       }
 
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
       selectDocActions.value = params
       visible.value = true
     }
@@ -648,7 +649,7 @@ export default defineComponent({
         option: language.t('actionMenu.undo')
       }
 
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
       selectDocActions.value = docsAction
       showClickActions.value = true
     }
@@ -710,9 +711,6 @@ export default defineComponent({
         case 'RE':
           type = 'danger'
           break
-        default:
-          type = ''
-          break
       }
       return type
     }
@@ -733,11 +731,19 @@ export default defineComponent({
       store.dispatch('changeActionsDoc', {
         tableName: props.tabAttributes.tableName,
         uuid: recordUuid.value,
+        containerUuid,
         docAction: selectDocActions.value
       })
+        .then(response => {
+          refreshCurrentRecord()
+        })
+        .catch(error => {
+          console.warn(`Error Run Doc Action: ${error.message}. Code: ${error.code}.`)
+        })
+
       setTimeout(() => {
         refreshCurrentRecord()
-      }, 7000)
+      }, 700)
     }
 
     return {

@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -17,9 +17,19 @@
 -->
 
 <template>
+  <location-address-form
+    v-if="metadata.pos"
+    key="point-of-sales"
+    class="location-form"
+    :parent-metadata="metadata"
+    :parent-uuid="parentUuid"
+    :container-uuid="containerUuid"
+    :container-manager="containerManager"
+  />
+
   <el-popover
-    v-if="!metadata.pos"
-    key="standard"
+    v-else
+    key="standard-location"
     ref="locationAddress"
     v-model="isShowedLocationForm"
     class="popover-location"
@@ -30,52 +40,45 @@
     <location-address-form
       v-if="isShowedLocationForm"
       class="location-form"
-      :values="localValues"
-      :parent-metadata="metadata"
       :parent-uuid="parentUuid"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
+      :metadata="metadata"
     />
 
     <el-button
       slot="reference"
       class="button-location-show"
       type="text"
+      style="width: 100%;"
+      :disabled="isDisabled"
       @click="isShowedLocationForm = true"
     >
       <el-input
-        v-model="displayedValue"
+        v-model="displayedValueNotEdit"
         :class="cssClassStyle"
-        readonly
+        clearable
+        v-bind="commonsProperties"
+        style="width: 100%;"
+        @clear="clearValues"
       >
         <i slot="prefix" class="el-icon-location-information el-input__icon" />
       </el-input>
     </el-button>
   </el-popover>
-
-  <location-address-form
-    v-else
-    key="point-of-sales"
-    class="location-form"
-    :values="localValues"
-    :parent-metadata="metadata"
-    :parent-uuid="parentUuid"
-    :container-uuid="containerUuid"
-    :container-manager="containerManager"
-  />
 </template>
 
 <script>
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
-import mixinLocation from './mixinLocation.js'
+import mixinLocation from './mixinLocationAddress.js'
 import LocationAddressForm from './locationAddressForm.vue'
 
-// constants
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
-  name: 'FieldLocation',
+  name: 'FieldLocationAddress',
 
   components: {
     LocationAddressForm
@@ -104,7 +107,7 @@ export default {
   computed: {
     cssClassStyle() {
       let styleClass = ' custom-field-location '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
+      if (!isEmptyValue(this.metadata.cssClassName)) {
         styleClass += this.metadata.cssClassName
       }
 
@@ -114,6 +117,14 @@ export default {
 
       return styleClass
     },
+    displayedValueNotEdit: {
+      get() {
+        return this.displayedValue
+      },
+      set(value) {
+        // emty, dont edit
+      }
+    },
     displayedValue: {
       get() {
         /**
@@ -121,7 +132,7 @@ export default {
          * list response, to set value or empty value in fieldValue state when
          * change records with dataTable.
          */
-        if (this.isEmptyValue(this.value)) {
+        if (isEmptyValue(this.value)) {
           return undefined
         }
 
@@ -149,64 +160,26 @@ export default {
 
   watch: {
     value(newValue, oldValue) {
-      if (this.isEmptyValue(newValue)) {
+      if (isEmptyValue(newValue)) {
         this.displayedValue = undefined
       } else {
         if (newValue !== oldValue) {
           this.displayedValue = undefined
-          this.getLocation()
+          this.setDefaultValue()
         }
       }
     }
   },
 
-  mounted() {
-    if (!this.metadata.isAdvancedQuery) {
-      this.getLocation()
-    }
-  },
-
   methods: {
-    /**
-     * Request location entity
-     */
-    getLocation() {
-      if (this.isGettingLocation) {
-        return
-      }
+    clearValues() {
+      // TODO: Clear values into form
+      this.value = undefined
+      this.displayedValue = undefined
 
-      if (!this.isEmptyValue(this.displayedValue)) {
-        return
-      }
-
-      const value = this.value
-      if (this.isEmptyValue(value)) {
-        return
-      }
-
-      this.isGettingLocation = true
-      this.getLocationAddress({
-        id: value
+      this.$store.dispatch('clearValuesOnContainer', {
+        containerUuid: this.uuidForm
       })
-        .then(responseLocation => {
-          const { attributes } = responseLocation
-          this.localValues = attributes
-
-          // TODO: Get Display_ColumnName from server request
-          this.displayedValue = this.getDisplayedValue(attributes) || value
-
-          this.$store.commit('updateValuesOfContainer', {
-            // parentUuid,
-            containerUuid: LOCATION_ADDRESS_FORM,
-            attributes
-          })
-        })
-        .catch(error => {
-          console.warn(`Get Location Address Form, Field Location - Error ${error.code}: ${error.message}.`)
-        })
-        .finally(() => {
-          this.isGettingLocation = false
-        })
     }
   }
 }

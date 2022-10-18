@@ -26,13 +26,13 @@
       @shortkey.native="keyAction"
     >
       <el-row :gutter="0">
-        <template v-if="isLoaded">
-          <el-col v-for="(field) in fieldsListLocation" :key="field.columnName" :span="24">
+        <template v-if="!isLoadingFields">
+          <el-col v-for="(fieldAttributes) in metadataList" :key="fieldAttributes.columnName" :span="24">
             <field-definition
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
               :container-manager="containerManagerLocation"
-              :metadata-field="field"
+              :metadata-field="fieldAttributes"
             />
           </el-col>
         </template>
@@ -40,7 +40,7 @@
         <div
           v-else
           key="form-loading"
-          v-loading="!isLoaded"
+          v-loading="isLoadingFields"
           :element-loading-text="$t('notifications.loading')"
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(255, 255, 255, 0.8)"
@@ -48,10 +48,10 @@
           class="loading-panel"
         />
 
-        <el-col v-show="!parentMetadata.pos" :span="24" style="padding-left: 12px;padding-right: 12px;padding-top: 3%;padding-bottom: 3%;">
+        <el-col v-show="!metadata.pos" :span="24" style="padding-left: 12px;padding-right: 12px;padding-top: 3%;padding-bottom: 3%;">
           <samp style="float: right; padding-right: 10px;">
             <el-button
-              :disabled="!isLoaded"
+              :disabled="isLoadingFields"
               type="primary"
               class="custom-button-address-location"
               icon="el-icon-check"
@@ -74,13 +74,13 @@
 import store from '@/store'
 
 // components and mixins
-import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import mixinLocation from './mixinLocation.js'
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import mixinLocation from './mixinLocationAddress.js'
 
 // constants
 import FieldsList from './fieldsList.js'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { COLUMN_NAME, LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 // api request methods
 import {
@@ -89,8 +89,10 @@ import {
 } from '@/api/ADempiere/field/location.js'
 
 // utils and helper methods
+import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { getSequenceAsList } from '@/utils/ADempiere/location'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 /**
  * Location Address form to field
@@ -98,8 +100,11 @@ import { getSequenceAsList } from '@/utils/ADempiere/location'
 export default {
   name: 'LocationAdressFrom',
 
+  components: {
+    FieldDefinition
+  },
+
   mixins: [
-    formMixin,
     mixinLocation
   ],
 
@@ -108,6 +113,10 @@ export default {
       type: String,
       default: undefined
     },
+    containerUuid: {
+      type: String,
+      required: true
+    },
     metadata: {
       type: Object,
       default: () => {
@@ -115,25 +124,20 @@ export default {
           // TODO: Add container uuid parent
           uuid: LOCATION_ADDRESS_FORM,
           containerUuid: LOCATION_ADDRESS_FORM,
-          isSetDefaultValues: false
+          columnName: COLUMN_NAME
         }
       }
-    },
-    parentMetadata: {
-      type: Object,
-      default: () => {}
-    },
-    // TODO: Not working props
-    values: {
-      type: Object,
-      default: () => {}
     }
   },
 
   data() {
     return {
+      metadataList: [],
+      isLoadingFields: false,
       fieldsList: FieldsList,
-      isCustomForm: true
+      timeOutFields: null,
+      isCustomForm: true,
+      unsubscribe: () => {}
     }
   },
 
@@ -155,37 +159,37 @@ export default {
       if (!this.isEmptyValue(this.$store.getters.getFieldLocation)) {
         return this.$store.getters.getFieldLocation
       }
-
-      // return this.fieldsList
-
-      return this.getterPanel.fieldsList
+      return []
     },
     locationId() {
       return this.$store.getters.getValueOfField({
-        parentUuid: this.parentMetadata.parentUuid,
-        containerUuid: this.parentMetadata.containerUuid,
-        columnName: this.parentMetadata.columnName
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        columnName: this.metadata.columnName
       })
     }
   },
 
   created() {
     this.unsubscribe = this.subscribeChanges()
-
-    if (!this.isEmptyValue(this.values)) {
-      this.setValues({
-        values: this.values
-      })
-    }
   },
 
   mounted() {
-    if (this.parentMetadata.pos) {
+    if (this.metadata.pos) {
       this.fieldsList.forEach(element => {
-        element.containerUuid = this.parentMetadata.containerUuid
+        element.containerUuid = this.metadata.containerUuid
       })
     }
     this.getLocation()
+
+    clearTimeout(this.timeOutFields)
+    this.timeOutFields = setTimeout(() => {
+      this.getFieldsList()
+    }, 500)
+  },
+
+  beforeDestroy() {
+    this.unsubscribe()
   },
 
   methods: {
@@ -193,6 +197,59 @@ export default {
       if (event.srcKey === 'closeForm') {
         this.toggleShowedLocationForm()
       }
+    },
+
+    /**
+     * Set values into form
+     * TODO: Displayed value not wortking
+     */
+    setValues({ values }) {
+      // let cityName = values['DisplayColumn_C_City_ID']
+      // if (isEmptyValue(cityName)) {
+      //   cityName = values['City']
+      //   if (!isEmptyValue(values['C_City_ID']) && values['C_City_ID'] > 0) {
+      //     // get with default value
+      //     cityName = undefined
+      //   } else {
+      //     // set with empty id
+      //     // values['C_City_ID'] = -1
+      //   }
+      // }
+
+      // let regionName = values['DisplayColumn_C_Region_ID']
+      // if (isEmptyValue(regionName)) {
+      //   regionName = values['RegionName']
+      //   if (!isEmptyValue(values['C_Region_ID']) && values['C_Region_ID'] > 0) {
+      //     // get with default value
+      //     regionName = undefined
+      //   } else {
+      //     // set with empty id
+      //     // values['C_Region_ID'] = -1
+      //   }
+      // }
+
+      // let countryName = values['DisplayColumn_C_Region_ID']
+      // if (isEmptyValue(countryName)) {
+      //   if (!isEmptyValue(this.currentCountryDefinition)) {
+      //     countryName = this.currentCountryDefinition.name
+      //     values['C_Region_ID_UUID'] = this.currentCountryDefinition.uuid
+      //   }
+      // }
+
+      // set context values to form continer
+      this.$store.dispatch('updateValuesOfContainer', {
+        containerUuid: this.uuidForm,
+        attributes: {
+          // DisplayColumn_C_City_ID: cityName,
+          // DisplayColumn_C_Region_ID: regionName,
+          // DisplayColumn_C_Country_ID: countryName,
+          // undefined to force get value with default value
+          DisplayColumn_C_City_ID: undefined,
+          DisplayColumn_C_Region_ID: undefined,
+          DisplayColumn_C_Country_ID: undefined,
+          ...values
+        }
+      })
     },
     cancelChanges() {
       // TODO: Set old values
@@ -203,46 +260,14 @@ export default {
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
-        // when first load country field with value
-        if (
-          mutation.type === 'setLookupItem' &&
-          mutation.payload.containerUuid === this.metadata.containerUuid &&
-          mutation.payload.tableName === 'C_Country'
-        ) {
-          this.changeCaptureSequence(mutation.payload.value)
-        }
-
         // if changed country field
         if (
           mutation.type === 'updateValueOfField' &&
-          mutation.payload.containerUuid === this.metadata.containerUuid &&
+          mutation.payload.containerUuid === this.uuidForm &&
           mutation.payload.columnName === 'C_Country_ID'
         ) {
-          const withOutColumnNames = ['C_Country_ID', 'DisplayColumn_C_Country_ID', 'C_Location_ID']
           // Get country definition to sequence fields and displayed value
           this.changeCaptureSequence(mutation.payload.value)
-
-          // clear values
-          const values = []
-          FieldsList.forEach(item => {
-            if (!withOutColumnNames.includes(item.columnName)) {
-              values.push({
-                columnName: item.columnName,
-                value: undefined
-              })
-            }
-            if (!withOutColumnNames.includes(item.displayColumnName)) {
-              values.push({
-                columnName: item.displayColumnName,
-                value: undefined
-              })
-            }
-          })
-
-          this.setValues({
-            values,
-            withOutColumnNames
-          })
         }
       })
     },
@@ -256,25 +281,29 @@ export default {
         id: countryId
       })
         .then(responseCountry => {
+          const { captureSequence } = responseCountry
+
           // capture sequence by form fields
-          const newSequence = getSequenceAsList(responseCountry.captureSequence)
-          const newFieldsList = this.fieldsListLocation.map(item => {
-            if (newSequence.includes(item.sequenceFields)) {
+          const newSequence = getSequenceAsList(captureSequence)
+          let newFieldsList = this.fieldsListLocation
+            .map(item => {
+              if (newSequence.includes(item.sequenceFields)) {
+                return {
+                  ...item,
+                  isDisplayed: true,
+                  index: newSequence.indexOf(item.sequenceFields)
+                }
+              }
               return {
                 ...item,
-                isDisplayed: true,
-                index: newSequence.indexOf(item.sequenceFields)
+                isDisplayed: false
               }
-            }
-            return {
-              ...item,
-              isDisplayed: false
-            }
-          }).sort((itemA, itemB) => {
-            return itemA.index - itemB.index
-          })
-
-          this.$store.dispatch('changeSequence', newFieldsList)
+            })
+            .filter(item => item.isDisplayed)
+            .sort((itemA, itemB) => {
+              return itemA.index - itemB.index
+            })
+          this.metadataList = newFieldsList
         })
         .catch(error => {
           this.$message({
@@ -290,28 +319,65 @@ export default {
      * set context values to parent continer
      * @param {object} values
      */
-    setParentValues(values) {
-      const {
-        parentUuid,
-        containerUuid,
-        columnName, // 'C_Location_ID' by default
-        displayColumnName
-      } = this.parentMetadata
+    setParentValues(rowData) {
+      const { parentUuid, containerUuid, columnName, elementName, displayColumnName } = this.metadata
+      const { UUID: uuid } = rowData
 
+      const displayedValue = this.generateDisplayedValue(rowData)
+
+      let value = rowData[columnName]
+      if (isEmptyValue(value) && !this.metadata.isSameColumnElement) {
+        value = rowData[elementName]
+      }
+
+      // set ID value
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
         columnName,
-        value: values[columnName]
+        value: rowData[columnName]
       })
-
+      // set display column (name) value
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
         // DisplayColumn_'ColumnName'
         columnName: displayColumnName,
-        value: this.getDisplayedValue(values)
+        value: displayedValue
       })
+      // set UUID value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
+        value: uuid
+      })
+
+      // set on element name, used by columns views aliases
+      if (!this.metadata.isSameColumnElement) {
+        // set ID value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          columnName: elementName,
+          value
+        })
+        // set display column (name) value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          // DisplayColumn_'ColumnName'
+          columnName: DISPLAY_COLUMN_PREFIX + elementName,
+          value: displayedValue
+        })
+        // set UUID value
+        this.$store.commit('updateValueOfField', {
+          parentUuid,
+          containerUuid,
+          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
+          value: uuid
+        })
+      }
     },
 
     /**
@@ -406,7 +472,7 @@ export default {
               parentUuid,
               containerUuid,
               columnName // 'C_Location_ID' by default
-            } = this.parentMetadata
+            } = this.metadata
 
             const recordUuid = this.$store.getters.getValueOfField({
               parentUuid,
@@ -416,7 +482,7 @@ export default {
 
             this.containerManager.actionPerformed({
               containerUuid,
-              field: this.parentMetadata,
+              field: this.metadata,
               value: responseCreate[columnName],
               recordUuid
             })
@@ -446,6 +512,7 @@ export default {
           console.warn(`Error update Location Address: ${error.message}. Code: ${error.code}.`)
         })
     },
+
     /**
      * TODO: Manage with vuex module
      */
@@ -454,15 +521,9 @@ export default {
         return
       }
 
-      if (!this.isEmptyValue(this.values)) {
-        this.setValues({
-          values: this.values
-        })
-        return
-      }
-
       const id = this.locationId
-      if (this.isEmptyValue(id)) {
+      if (isEmptyValue(id)) {
+        this.clearValues()
         return
       }
 
@@ -471,11 +532,14 @@ export default {
         id
       })
         .then(responseLocation => {
-          const { values } = responseLocation
+          const { attributes } = responseLocation
 
           this.setValues({
-            values
+            values: attributes
           })
+
+          const countryId = attributes['C_Country_ID']
+          this.changeCaptureSequence(countryId)
         })
         .catch(error => {
           console.warn(`Get Location Address, Form Location - Error ${error.code}: ${error.message}.`)
@@ -483,6 +547,40 @@ export default {
         .finally(() => {
           this.isGettingLocation = false
         })
+    },
+    getFieldsList() {
+      this.isLoadingFields = true
+      const listOfFields = []
+
+      if (!isEmptyValue(this.fieldsListLocation)) {
+        this.metadataList = this.fieldsListLocation
+        this.changeCaptureSequence(this.countryId)
+        this.isLoadingFields = false
+        return
+      }
+
+      this.fieldsList.forEach(element => {
+        // get of server
+        createFieldFromDictionary(element)
+          .then(responseField => {
+            listOfFields.push({
+              ...responseField,
+              parentUuid: this.metadata.parentUuid,
+              containerUuid: this.uuidForm
+            })
+          }).catch(error => {
+            console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
+          })
+          .finally(() => {
+            if (listOfFields.length === this.fieldsList.length) {
+              this.$store.commit('setFieldsListLocation', listOfFields)
+
+              this.metadataList = listOfFields
+              this.changeCaptureSequence(this.countryId)
+              this.isLoadingFields = false
+            }
+          })
+      })
     }
   }
 }
