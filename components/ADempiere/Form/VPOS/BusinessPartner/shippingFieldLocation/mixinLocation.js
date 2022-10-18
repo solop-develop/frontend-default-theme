@@ -22,7 +22,7 @@ import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and helpers methods
-import { getSequenceAsList } from '@/utils/ADempiere/location'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
 import {
   getLookupList,
   isDisplayedField,

@@ -77,7 +77,7 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -153,6 +153,7 @@ export default defineComponent({
     })
 
     const sizeField = computed(() => {
+      // TODO: Add flag to max width
       if (field.value.containerUuid === LOCATION_ADDRESS_FORM) {
         return {
           // ...field.value.size,
