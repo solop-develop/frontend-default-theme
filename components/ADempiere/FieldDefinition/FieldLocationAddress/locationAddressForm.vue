@@ -83,6 +83,7 @@ import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } fr
 import { COLUMN_NAME, LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 // api request methods
+import { getLocationAddress } from '@/api/ADempiere/field/location.js'
 import {
   createLocationAddress,
   updateLocationAddress
@@ -281,7 +282,7 @@ export default {
         id: countryId
       })
         .then(responseCountry => {
-          const { captureSequence } = responseCountry
+          const { captureSequence, regionName } = responseCountry
 
           // capture sequence by form fields
           const newSequence = getSequenceAsList(captureSequence)
@@ -303,6 +304,21 @@ export default {
             .sort((itemA, itemB) => {
               return itemA.index - itemB.index
             })
+
+          // rename field title on region
+          if (captureSequence.includes('@R@') && !isEmptyValue(regionName)) {
+            newFieldsList = newFieldsList.map(field => {
+              if (field.sequenceFields === 'R') {
+                return {
+                  ...field,
+                  name: regionName
+                }
+              }
+              return field
+            })
+          }
+
+          // set new order of fields
           this.metadataList = newFieldsList
         })
         .catch(error => {
@@ -528,7 +544,7 @@ export default {
       }
 
       this.isGettingLocation = true
-      this.getLocationAddress({
+      getLocationAddress({
         id
       })
         .then(responseLocation => {
