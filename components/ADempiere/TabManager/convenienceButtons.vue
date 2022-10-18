@@ -112,7 +112,7 @@
       v-if="tabAttributes.isParentTab && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions)"
     >
       <el-dropdown
-        v-if="!isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
+        v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
         split-button
         @command="handleCommandActions"
       >
@@ -173,7 +173,7 @@
         </el-dropdown-menu>
       </el-dropdown>
       <el-popover
-        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+        v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
         v-model="visible"
         placement="top"
       >
@@ -208,7 +208,7 @@
         <el-button slot="reference" type="text" />
       </el-popover>
       <el-popover
-        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+        v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus) && tabAttributes.isParentTab"
         trigger="hover"
         width="900"
       >
