@@ -1,29 +1,29 @@
-// ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-// Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-// Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-// api request methods
-import { getLocationAddress } from '@/api/ADempiere/field/location.js'
+/**
+ * ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ * Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ * Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 // constants
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/constants/location.js'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils.js'
 
 // utils and helpers methods
-import { getSequenceAsList } from '@/utils/ADempiere/location'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
   name: 'MixinLocationField',
@@ -43,11 +43,27 @@ export default {
   },
 
   computed: {
+    uuidForm() {
+      if (!isEmptyValue(this.metadata.containerUuid)) {
+        return this.metadata.columnName + '_' + this.metadata.containerUuid
+      }
+      return LOCATION_ADDRESS_FORM
+    },
     countryId() {
       return this.$store.getters.getValueOfField({
-        containerUuid: LOCATION_ADDRESS_FORM,
+        containerUuid: this.uuidForm,
         columnName: 'C_Country_ID'
       })
+    },
+    blankValues() {
+      return {
+        [this.metadata.columnName]: undefined,
+        [this.metadata.elementName]: undefined,
+        id: undefined,
+        uuid: undefined,
+        UUID: undefined,
+        [this.metadata.displayColumnName]: undefined
+      }
     },
     currentCountryDefinition() {
       return this.$store.getters.getStoredCountryFromId({
@@ -83,7 +99,13 @@ export default {
   },
 
   methods: {
-    getLocationAddress,
+    clearValues() {
+      this.setValues({ values: this.blankValues })
+
+      this.$store.dispatch('clearValuesOnContainer', {
+        containerUuid: this.uuidForm
+      })
+    },
     setContainerInformation() {
       if (!this.isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
@@ -97,15 +119,24 @@ export default {
     },
     /**
      * Displayed sequence location
+     * TODO: Evaluate capture sequence by Germany "@A1@ @A2@ @A3@ @A4@ D-@P@ @R@ @C@ @CO@" with D- suffix in postal code
      * @param {object} entityValues
+     * @returns {string}
      */
-    getDisplayedValue(entityValues) {
+    generateDisplayedValue(entityValues) {
       let displayValue = ''
 
       if (this.isEmptyValue(entityValues)) {
         return displayValue
       }
 
+      // TODO: Add DisplayColumnName (primary key) in entities
+      const displayColumn = this.metadata.displayColumnName
+      if (!isEmptyValue(entityValues[displayColumn])) {
+        return entityValues[displayColumn]
+      }
+
+      // TODO: Change with current country display sequence
       let displaySequence = this.$store.getters.getDisplaySequence
       const country = this.currentCountryDefinition
       if (!this.isEmptyValue(country)) {
