@@ -48,20 +48,27 @@
           class="loading-panel"
         />
 
-        <el-col v-show="!metadata.pos" :span="24" style="padding-left: 12px;padding-right: 12px;padding-top: 3%;padding-bottom: 3%;">
-          <samp style="float: right; padding-right: 10px;">
+        <el-col v-show="!metadata.pos" :span="24" class="location-address-footer">
+          <samp style="float: right; padding-top: 4px;">
+            <el-button
+              :disabled="isLoadingFields"
+              type="info"
+              @click="openCoordinatesMap()"
+            >
+              <svg-icon icon-class="international" />
+            </el-button>
+
+            <el-button
+              type="danger"
+              icon="el-icon-close"
+              @click="cancelChanges"
+            />
+
             <el-button
               :disabled="isLoadingFields"
               type="primary"
-              class="custom-button-address-location"
               icon="el-icon-check"
               @click="sendValuesToServer"
-            />
-            <el-button
-              type="danger"
-              class="custom-button-address-location"
-              icon="el-icon-close"
-              @click="cancelChanges"
             />
           </samp>
         </el-col>
@@ -80,7 +87,7 @@ import mixinLocation from './mixinLocationAddress.js'
 // constants
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
-import { COLUMN_NAME, LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 // api request methods
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
@@ -92,7 +99,7 @@ import {
 // utils and helper methods
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { formatCoordinateByDecimal, getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 /**
@@ -168,6 +175,28 @@ export default {
         containerUuid: this.metadata.containerUuid,
         columnName: this.metadata.columnName
       })
+    },
+
+    latitude() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'Latitude'
+      })
+    },
+    longitude() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.uuidForm,
+        columnName: 'Longitude'
+      })
+    },
+    isEmptyCoordenates() {
+      if (isEmptyValue(this.latitude)) {
+        return true
+      }
+      if (isEmptyValue(this.longitude)) {
+        return true
+      }
+      return false
     }
   },
 
@@ -255,6 +284,29 @@ export default {
     cancelChanges() {
       // TODO: Set old values
       this.isShowedLocationForm = false
+    },
+    openCoordinatesMap() {
+      let baseUrlMap = URL_BASE_MAP
+      if (!this.isEmptyCoordenates) {
+        const latitude = formatCoordinateByDecimal(this.latitude)
+        const longitude = formatCoordinateByDecimal(this.longitude)
+        baseUrlMap += latitude + ',' + longitude
+      } else {
+        const values = this.$store.getters.getValuesView({
+          containerUuid: this.containerUuid,
+          format: 'Object'
+        })
+
+        baseUrlMap += this.generateDisplayedValue(values)
+        let countryName = values[DISPLAY_COLUMN_PREFIX + 'C_Country_ID']
+        if (isEmptyValue(countryName)) {
+          countryName = this.currentCountryDefinition.name
+        }
+        if (!isEmptyValue(countryName)) {
+          baseUrlMap += ', ' + countryName
+        }
+      }
+      window.open(baseUrlMap, '_blank')
     },
     sortSequence(itemA, itemB) {
       return itemA.index - itemB.index
@@ -445,7 +497,7 @@ export default {
 
     sendValuesToServer() {
       const emptyMandatoryFields = this.$store.getters.getFieldsListEmptyMandatory({
-        containerUuid: this.containerUuid,
+        containerUuid: this.uuidForm,
         formatReturn: 'name'
       })
 
@@ -461,7 +513,7 @@ export default {
       }
 
       const attributes = this.$store.getters.getValuesView({
-        containerUuid: this.containerUuid
+        containerUuid: this.uuidForm
       })
       const attributesToServer = this.getAttributesToServer(attributes)
 
@@ -478,7 +530,7 @@ export default {
         // set context values to form continer
         this.$store.dispatch('updateValuesOfContainer', {
           parentUuid: this.parentUuid,
-          containerUuid: this.containerUuid,
+          containerUuid: this.uuidForm,
           attributes
         })
 
@@ -615,11 +667,6 @@ export default {
     .el-form-item {
         margin-bottom: 0px !important;
     }
-
-    .custom-button-address-location {
-      float: right;
-      margin-right: 10px;
-    }
   }
 </style>
 <style lang="scss">
@@ -629,6 +676,16 @@ export default {
   }
   .el-form-item--small.el-form-item {
     margin-bottom: 5px !important;
+  }
+
+  .location-address-footer {
+    button {
+      padding: 4px 8px;
+
+      i, svg {
+        font-size: 20px !important;
+      }
+    }
   }
 }
 </style>
