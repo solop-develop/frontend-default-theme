@@ -47,6 +47,7 @@
           :current-page="currentPagePagination"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
+          :handle-size-change="handleChangeSizePage"
           :records-page="activityList.length"
         />
       </el-card>
@@ -198,7 +199,7 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('serverListActivity')
+    this.$store.dispatch('serverListActivity', {})
     if (!this.isEmptyValue(this.currentActivity)) {
       this.generateWorkflow(this.currentActivity)
     }
@@ -210,7 +211,10 @@ export default {
       // this.$refs.WorkflowActivity.setCurrentRow(activity)
     },
     setPage(pageNumber) {
-      this.$store.dispatch('serverListActivity', pageNumber)
+      this.$store.dispatch('serverListActivity', { pageNumber })
+    },
+    handleChangeSizePage(pageSize) {
+      this.$store.dispatch('serverListActivity', { pageSize })
     },
     handleCurrentChange(activity) {
       this.$store.dispatch('selectedActivity', activity)
