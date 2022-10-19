@@ -15,7 +15,7 @@
 -->
 <template>
   <el-container style="height: 100% !important;">
-    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 45% !important;' : 'height: 10%!important'">
+    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 50% !important;' : 'height: 10%!important'">
       <el-card :style="!collapse ? 'height: 100% !important;' : 'height: auto'">
         <div slot="header">
           <span> {{ $t('form.activity.title') }} </span>
@@ -102,7 +102,7 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowActivity',
-  components: {
+  components: { 
     CustomPagination,
     WorkflowDiagram
   },

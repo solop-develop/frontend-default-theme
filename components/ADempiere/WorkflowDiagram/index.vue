@@ -20,42 +20,41 @@
     style="height: 100% !important;"
     @shortkey.native="closeNodeInfo"
   >
-    <el-main style="overflow: hidden;">
-      <transition name="el-zoom-in-bottom">
-        <el-card v-show="showedInfo" :style="{ position: 'absolute', zIndex: '5', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }" class="box-card">
-          <div slot="header" class="clearfix">
-            <span>
-              {{ infoNode.description }}
-            </span>
+    <transition name="el-zoom-in-bottom">
+      <el-card v-show="showedInfo" :style="{ position: 'absolute', zIndex: '9999', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }" class="box-card">
+        <div slot="header" class="clearfix">
+          <span>
+            {{ infoNode.description }}
+          </span>
 
-            <el-button
-              style="float: right; padding: 3px 0"
-              type="text"
-              icon="el-icon-close"
-              @click="showedInfo = !showedInfo"
-            />
-          </div>
+          <el-button
+            style="float: right; padding: 3px 0"
+            type="text"
+            icon="el-icon-close"
+            @click="showedInfo = !showedInfo"
+          />
+        </div>
 
-          {{ infoNode.help }}
+        {{ infoNode.help }}
 
-          <div v-if="!isEmptyValue(nodeLogs)" class="text item" style="padding: 20px">
-            <el-timeline class="info">
-              <el-timeline-item
-                v-for="(logs, key) in nodeLogs"
-                :key="key"
-                :timestamp="translateDateByLong(logs.log_date)"
-                placement="top"
-              >
-                <el-card style="padding: 20px!important;">
-                  <b> {{ $t('login.userName') }} </b> {{ logs.user_name }} <br>
-                  {{ logs.text_message }}
-                </el-card>
-              </el-timeline-item>
-            </el-timeline>
-          </div>
-        </el-card>
-      </transition>
-
+        <div v-if="!isEmptyValue(nodeLogs)" class="text item" style="padding: 20px">
+          <el-timeline class="info">
+            <el-timeline-item
+              v-for="(logs, key) in nodeLogs"
+              :key="key"
+              :timestamp="translateDateByLong(logs.log_date)"
+              placement="top"
+            >
+              <el-card style="padding: 20px!important;">
+                <b> {{ $t('login.userName') }} </b> {{ logs.user_name }} <br>
+                {{ logs.text_message }}
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+      </el-card>
+    </transition>
+    <el-main style="overflow: auto;display: block;position: relative;height: 100%;">
       <vue-workflow-chart
         v-if="!isEmptyValue(nodeList)"
         id="Diagrama"
@@ -69,7 +68,7 @@
 </template>
 
 <script>
-import { ref } from '@vue/composition-api'
+import { ref, computed, watch } from '@vue/composition-api'
 
 // components and mixins
 import VueWorkflowChart from 'vue-workflow-chart'
@@ -132,10 +131,18 @@ export default {
       }
 
       const offsetTop = this.$el.getBoundingClientRect().top
-      const top = event.clientY - offsetTop + 500
+      const top = event.clientY - offsetTop + 450
       topContextualMenu.value = top
       showedInfo.value = true
     }
+
+    const watchNode = computed(() => {
+      return props.nodeList
+    })
+
+    watch(watchNode, (newValue, oldValue) => {
+      closeNodeInfo()
+    })
 
     return {
       showedInfo,
@@ -146,7 +153,8 @@ export default {
       // methods
       closeNodeInfo,
       onLabelClicked,
-      translateDateByLong
+      translateDateByLong,
+      watchNode
     }
   }
 }
