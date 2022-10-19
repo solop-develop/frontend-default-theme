@@ -374,15 +374,21 @@ export default defineComponent({
 
     const getData = () => {
       const containerUuid = tabUuid.value
-      let filters
+      let filters, filtersRecord
       const pageNumber = query.page
       if (query.filters) {
         filters = query.filters
+      } if (!isEmptyValue(query.action)) {
+        filtersRecord = {
+          key: 'UUID',
+          value: query.action
+        }
       }
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,
         filters,
+        filtersRecord,
         pageNumber
       }).then(responseData => {
         if (isCreateNew.value || isEmptyValue(responseData)) {
