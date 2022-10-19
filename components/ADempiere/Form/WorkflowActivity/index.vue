@@ -47,6 +47,7 @@
           :current-page="currentPagePagination"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
+          :handle-size-change="handleChangeSizePage"
           :records-page="activityList.length"
         />
       </el-card>
@@ -102,7 +103,7 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowActivity',
-  components: { 
+  components: {
     CustomPagination,
     WorkflowDiagram
   },
@@ -198,7 +199,7 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('serverListActivity')
+    this.$store.dispatch('serverListActivity', {})
     if (!this.isEmptyValue(this.currentActivity)) {
       this.generateWorkflow(this.currentActivity)
     }
@@ -206,16 +207,25 @@ export default {
   methods: {
     translateDateByLong,
     setCurrent(activity) {
+      if (this.isEmptyValue(activity)) {
+        return
+      }
       activity = this.activityList.find(activity => activity.node === this.currentActivity.node)
       // this.$refs.WorkflowActivity.setCurrentRow(activity)
     },
     setPage(pageNumber) {
-      this.$store.dispatch('serverListActivity', pageNumber)
+      this.$store.dispatch('serverListActivity', { pageNumber })
+    },
+    handleChangeSizePage(pageSize) {
+      this.$store.dispatch('serverListActivity', { pageSize })
     },
     handleCurrentChange(activity) {
       this.$store.dispatch('selectedActivity', activity)
     },
     generateWorkflow(activity) {
+      if (this.isEmptyValue(activity)) {
+        return
+      }
       // Highlight Current Node
       this.currentWorkflow = activity
       this.listProcessWorkflow = !this.isEmptyValue(this.currentWorkflow.workflow_process) ? this.currentWorkflow.workflow_process.workflow_events.reverse() : []
