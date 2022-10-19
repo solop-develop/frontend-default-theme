@@ -103,7 +103,7 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowActivity',
-  components: { 
+  components: {
     CustomPagination,
     WorkflowDiagram
   },
@@ -207,6 +207,9 @@ export default {
   methods: {
     translateDateByLong,
     setCurrent(activity) {
+      if (this.isEmptyValue(activity)) {
+        return
+      }
       activity = this.activityList.find(activity => activity.node === this.currentActivity.node)
       // this.$refs.WorkflowActivity.setCurrentRow(activity)
     },
@@ -220,6 +223,9 @@ export default {
       this.$store.dispatch('selectedActivity', activity)
     },
     generateWorkflow(activity) {
+      if (this.isEmptyValue(activity)) {
+        return
+      }
       // Highlight Current Node
       this.currentWorkflow = activity
       this.listProcessWorkflow = !this.isEmptyValue(this.currentWorkflow.workflow_process) ? this.currentWorkflow.workflow_process.workflow_events.reverse() : []
