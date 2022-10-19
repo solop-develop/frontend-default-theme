@@ -119,7 +119,8 @@ export default {
     },
     /**
      * Displayed sequence location
-     * TODO: Evaluate capture sequence by Germany "@A1@ @A2@ @A3@ @A4@ D-@P@ @R@ @C@ @CO@" with D- suffix in postal code
+     * TODO: Evaluate capture sequence or displayed sequence to generate value
+     * TODO: Test capture sequence Germany "@A1@ @A2@ @A3@ @A4@ D-@P@ @R@ @C@ @CO@" with D- suffix in postal code
      * @param {object} entityValues
      * @returns {string}
      */
@@ -203,7 +204,7 @@ export default {
 
           if (this.isEmptyValue(currrentValue)) {
             currrentValue = this.$store.getters.getValueOfField({
-              containerUuid: LOCATION_ADDRESS_FORM,
+              containerUuid: this.uuidForm,
               columnName: displayColumnName
             })
           }

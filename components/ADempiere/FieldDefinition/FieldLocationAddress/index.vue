@@ -35,7 +35,7 @@
     class="popover-location"
     placement="left-end"
     width="350"
-    trigger="manual"
+    trigger="click"
   >
     <location-address-form
       v-if="isShowedLocationForm"
@@ -52,7 +52,6 @@
       type="text"
       style="width: 100%;"
       :disabled="isDisabled"
-      @click="isShowedLocationForm = true"
     >
       <el-input
         v-model="displayedValueNotEdit"

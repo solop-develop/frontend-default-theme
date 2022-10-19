@@ -163,7 +163,7 @@ export default [
     overwriteDefinition: {
       isCustomField: true,
       size: 24,
-      precision: 0,
+      precision: 6,
       index: 110
     }
   },
@@ -173,7 +173,7 @@ export default [
     overwriteDefinition: {
       isCustomField: true,
       size: 24,
-      precision: 0,
+      precision: 6,
       index: 120
     }
   },
@@ -183,7 +183,7 @@ export default [
     overwriteDefinition: {
       isCustomField: true,
       size: 24,
-      precision: 0,
+      precision: 6,
       index: 130
     }
   }
