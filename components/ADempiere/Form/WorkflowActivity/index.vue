@@ -102,7 +102,7 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowActivity',
-  components: { 
+  components: {
     CustomPagination,
     WorkflowDiagram
   },
