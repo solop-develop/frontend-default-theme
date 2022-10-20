@@ -243,7 +243,7 @@ import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.v
 import heardList from './headerTable'
 import fieldsList from './fieldsList'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
-import { timeFormat } from '@/utils/ADempiere/formatValue/dateFormat'
+
 // api request methods
 import {
   requestCreateResource,
@@ -260,7 +260,7 @@ import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form/index.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-// import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat.js'
+import { timeFormat } from '@/utils/ADempiere/formatValue/dateFormat'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default defineComponent({
