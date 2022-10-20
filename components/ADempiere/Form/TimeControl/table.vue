@@ -173,7 +173,7 @@ import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat.js'
+import { timeFormat } from '@/utils/ADempiere/formatValue/dateFormat.js'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 import { generatePageToken } from '@/utils/ADempiere/dataUtils'
 
@@ -574,19 +574,15 @@ export default defineComponent({
           const recordsList = records.map(row => {
             let dateTo = null
             if (String(row.assign_date_to).length >= 10) {
-              dateTo = formatDate({
-                value: row.assign_date_to,
-                isTime: true,
-                format: 'HH:mm:SS'
+              dateTo = timeFormat({
+                value: row.assign_date_to
               })
             }
             return {
               ...row,
               resourceNameType: row.resource.resource_type.name,
-              dateFrom: formatDate({
-                value: row.assign_date_from,
-                isTime: true,
-                format: 'HH:mm:SS'
+              dateFrom: timeFormat({
+                value: row.assign_date_from
               }),
               dateTo,
               is_confirmed: convertBooleanToTranslationLang(row.is_confirmed),

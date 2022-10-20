@@ -260,7 +260,7 @@ import { ROW_ATTRIBUTES } from '@/utils/ADempiere/tableUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form/index.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat.js'
+import { timeFormat } from '@/utils/ADempiere/formatValue/dateFormat'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default defineComponent({
@@ -601,19 +601,15 @@ export default defineComponent({
           const recordsList = records.map(row => {
             let dateTo = null
             if (String(row.assign_date_to).length >= 10) {
-              dateTo = formatDate({
-                value: row.assign_date_to,
-                isTime: true,
-                format: 'hh:mm:SS a'
+              dateTo = timeFormat({
+                value: row.assign_date_to
               })
             }
             return {
               ...row,
               resourceNameType: row.resource.resource_type.name,
-              dateFrom: formatDate({
-                value: row.assign_date_from,
-                isTime: true,
-                format: 'hh:mm:SS a'
+              dateFrom: timeFormat({
+                value: row.assign_date_from
               }),
               dateTo,
               is_confirmed: convertBooleanToTranslationLang(row.is_confirmed),
