@@ -22,6 +22,7 @@
       <el-col :span="23">
         <el-input
           v-model="valueToSearch"
+          :placeholder="$t('components.searchRecord')"
           clearable
           size="mini"
           class="input-search"

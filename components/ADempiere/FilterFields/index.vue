@@ -17,55 +17,132 @@
 -->
 
 <template>
-  <el-form :class="cssClass" style="float: right;">
-    <el-form-item>
-      <template v-if="!isEmptyValue(groupField)" slot="label">
-        {{ groupField }}
-      </template>
+  <span>
+    <el-row v-if="!isMobile" :gutter="5">
+      <el-col :span="20">
+        <el-input
+          v-model="valueToSearch"
+          clearable
+          :placeholder="$t('components.searchRecord')"
+          size="mini"
+          class="input-search"
+          style="height: 30px;"
+          @input="handleChangeSearch"
+        >
+          <i
+            slot="prefix"
+            class="el-icon-search el-input__icon"
+          />
+        </el-input>
+      </el-col>
+      <el-col :span="4">
+        <el-form :class="cssClass" style="float: right;">
+          <el-form-item>
+            <template v-if="!isEmptyValue(groupField)" slot="label">
+              {{ groupField }}
+            </template>
 
-      <el-select
-        v-model="fieldsListShowed"
-        :filterable="!isMobile"
-        :placeholder="$t('components.filterableItems')"
-        multiple
-        collapse-tags
-        value-key="key"
-        :size="size"
-        :popper-append-to-body="true"
-        style="width: 250px;"
-      >
-        <el-option
-          v-for="(item, key) in fieldsListAvailable"
-          :key="key"
-          :label="item.name"
-          :value="item.columnName"
-        />
-      </el-select>
+            <el-select
+              v-model="fieldsListShowed"
+              :filterable="!isMobile"
+              :placeholder="$t('components.filterableItems')"
+              multiple
+              collapse-tags
+              value-key="key"
+              :size="size"
+              :popper-append-to-body="true"
+              style="width: 250px;"
+            >
+              <el-option
+                v-for="(item, key) in fieldsListAvailable"
+                :key="key"
+                :label="item.name"
+                :value="item.columnName"
+              />
+            </el-select>
 
-      <fields-display-option
-        :parent-uuid="parentUuid"
-        :container-uuid="containerUuid"
-        :available-fields="fieldsListAvailable"
-        :available-fields-with-value="fieldsListAvailableWithValue"
-        :showed-fields="fieldsListShowed"
-        :filter-manager="filterManager"
-      />
-    </el-form-item>
-  </el-form>
+            <fields-display-option
+              :parent-uuid="parentUuid"
+              :container-uuid="containerUuid"
+              :available-fields="fieldsListAvailable"
+              :available-fields-with-value="fieldsListAvailableWithValue"
+              :showed-fields="fieldsListShowed"
+              :filter-manager="filterManager"
+            />
+          </el-form-item>
+        </el-form>
+      </el-col>
+    </el-row>
+    <el-row v-else :gutter="20">
+      <!-- <el-col :span="24">
+        <el-input
+          v-model="valueToSearch"
+          clearable
+          size="mini"
+          class="input-search"
+          style="height: 30px;"
+        >
+          <i
+            slot="prefix"
+            class="el-icon-search el-input__icon"
+          />
+        </el-input>
+      </el-col> -->
+      <el-col :span="24">
+        <el-form :class="cssClass" style="float: right;">
+          <el-form-item>
+            <template v-if="!isEmptyValue(groupField)" slot="label">
+              {{ groupField }}
+            </template>
+
+            <el-select
+              v-model="fieldsListShowed"
+              :filterable="!isMobile"
+              :placeholder="$t('components.filterableItems')"
+              multiple
+              collapse-tags
+              value-key="key"
+              :size="size"
+              :popper-append-to-body="true"
+              style="width: 250px;"
+            >
+              <el-option
+                v-for="(item, key) in fieldsListAvailable"
+                :key="key"
+                :label="item.name"
+                :value="item.columnName"
+              />
+            </el-select>
+
+            <fields-display-option
+              :parent-uuid="parentUuid"
+              :container-uuid="containerUuid"
+              :available-fields="fieldsListAvailable"
+              :available-fields-with-value="fieldsListAvailableWithValue"
+              :showed-fields="fieldsListShowed"
+              :filter-manager="filterManager"
+            />
+          </el-form-item>
+        </el-form>
+      </el-col>
+    </el-row>
+  </span>
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
 // components and mixins
 import FieldsDisplayOption from './fieldsDisplayOptions.vue'
+import Search from '@theme/components/HeaderSearch'
 
 export default defineComponent({
   name: 'FilterFields',
 
   components: {
+    Search,
     FieldsDisplayOption
   },
 
@@ -122,7 +199,20 @@ export default defineComponent({
       : 'isShowedFromUser'
 
     const isMobile = computed(() => {
-      store.state.app.device === 'mobile'
+      return store.state.app.device === 'mobile'
+    })
+    const valueToSearch = computed({
+      get() {
+        return store.getters.getSearchValueTabRecordsList({
+          containerUuid: props.containerUuid
+        })
+      },
+      set(searchValue) {
+        store.commit('setSearchValueTabRecordsList', {
+          containerUuid: props.containerUuid,
+          searchValue
+        })
+      }
     })
 
     const fieldsListAvailable = computed(() => {
@@ -210,16 +300,48 @@ export default defineComponent({
       })
     }
 
+    const isLoadFilter = ref(false)
+    const timeOutSearch = ref(null)
+
+    function handleChangeSearch(value) {
+      clearTimeout(timeOutSearch.value)
+      timeOutSearch.value = setTimeout(() => {
+        // get records
+        filterRecord(value)
+      }, 1000)
+    }
+
+    function filterRecord(searchText) {
+      isLoadFilter.value = true
+
+      store.dispatch('getEntities', {
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        searchValue: searchText
+      })
+        .finally(() => {
+          isLoadFilter.value = false
+        })
+    }
+
     return {
+      // const
       cssClass,
+      // ref
+      isLoadFilter,
+      timeOutSearch,
       // computeds
       isMobile,
       size,
       fieldsListShowed,
       fieldsListAvailable,
       fieldsListAvailableWithValue,
+      valueToSearch,
+
       // methods
-      changeShowed
+      changeShowed,
+      handleChangeSearch,
+      filterRecord
     }
   }
 })
@@ -294,4 +416,22 @@ export default defineComponent({
   }
 }
 */
+/*
+  Enter and leave animations can use different
+  durations and timing functions.
+*/
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
 </style>

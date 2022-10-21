@@ -173,7 +173,7 @@ export default defineComponent({
       })
       isSelectionRow.sort()
       const recordUuid = store.getters.getUuidOfContainer(props.tabAttributes.uuid)
-      if (!isEmptyValue(tabData.value.currentRowSelect) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
+      if (!isEmptyValue(tabData.value.currentRowSelect) && !isEmptyValue(isSelectionRow) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
         props.containerManager.seekRecord({
           parentUuid: props.parentUuid,
           containerUuid: props.tabAttributes.uuid,
