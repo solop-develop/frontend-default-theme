@@ -28,6 +28,7 @@
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
     :select-when-unmatched="true"
+    :highlight-first-item="true"
     @select="handleSelect"
     @clear="clearValues"
     @focus="setNewDisplayedValue"
@@ -147,6 +148,10 @@ export default {
           })
           .finally(() => {
             this.isLoading = false
+            if (this.recordsList.length === 1) {
+              const recordSelected = this.recordsList.at()
+              this.handleSelect(recordSelected)
+            }
           })
       })
     }

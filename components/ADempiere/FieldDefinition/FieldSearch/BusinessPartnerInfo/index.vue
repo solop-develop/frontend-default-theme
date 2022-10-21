@@ -28,9 +28,11 @@
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
     :select-when-unmatched="true"
+    :highlight-first-item="true"
+    @keyup.native="enterKey"
     @select="handleSelect"
     @clear="clearValues"
-    @focus="setNewDisplayedValue"
+    @focus="searchFocus"
     @blur="setOldDisplayedValue"
   >
     <!--
@@ -111,19 +113,28 @@ export default {
   },
 
   methods: {
+    enterKey(event) {
+      // TODO: Implement key enter event.
+    },
+    searchFocus() {
+      // if (this.recordsList.length <= 1) {
+      //   this.$refs.displayBPartner.close()
+      // } else {
+      //   this.$refs.displayBPartner.getData()
+      // }
+      this.setNewDisplayedValue()
+    },
     keyPressField() {
       if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
     },
     handleSelect(recordSelected) {
-      if (isEmptyValue(recordSelected)) {
+      if (isEmptyValue(recordSelected) || isEmptyValue(recordSelected.UUID)) {
+        // set empty values
         recordSelected = this.blankValues
       }
-      if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
-        recordSelected = this.recordsList[0]
-      }
-      recordSelected.id = this.metadata.columnName
+
       this.setValues(recordSelected)
 
       // prevent losing display value with focus
@@ -161,6 +172,10 @@ export default {
           })
           .finally(() => {
             this.isLoading = false
+            if (isKeyEnterPress || this.recordsList.length === 1) {
+              const recordSelected = this.recordsList.at()
+              this.handleSelect(recordSelected)
+            }
           })
       })
     }

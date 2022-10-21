@@ -520,13 +520,11 @@ export default {
     },
 
     handleSelect(recordSelected) {
-      if (isEmptyValue(recordSelected)) {
+      if (isEmptyValue(recordSelected) || isEmptyValue(recordSelected.UUID)) {
+        // set empty values
         recordSelected = this.blankValues
       }
-      if (this.isEmptyValue(recordSelected.UUID) && this.recordsList.length === 1) {
-        recordSelected = this.recordsList[0]
-      }
-      recordSelected.id = this.metadata.columnName
+
       this.setValues(recordSelected)
 
       // prevent losing display value with focus
