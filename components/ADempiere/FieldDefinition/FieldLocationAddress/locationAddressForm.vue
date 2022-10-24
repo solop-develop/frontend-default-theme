@@ -58,7 +58,7 @@
                 <svg-icon icon-class="international" />
               </template>
               <template v-if="!isLoadingFields">
-                <el-col v-for="(fieldAttributes) in fieldCoordenada" :key="fieldAttributes.columnName" :span="24">
+                <el-col v-for="(fieldAttributes) in fieldCoordination" :key="fieldAttributes.columnName" :span="24">
                   <field-definition
                     :parent-uuid="parentUuid"
                     :container-uuid="containerUuid"
@@ -185,15 +185,15 @@ export default {
 
   computed: {
     fieldCoordination() {
-      return this.metadataList.filter(a => a.columnName === 'Latitude' ||
-        a.columnName === 'Longitude' ||
-        a.columnName === 'Altitude'
+      return this.metadataList.filter(fields => fields.columnName === 'Latitude' ||
+        fields.columnName === 'Longitude' ||
+        fields.columnName === 'Altitude'
       )
     },
     fieldDefaultLocation() {
-      return this.metadataList.filter(a => a.columnName !== 'Latitude' &&
-        a.columnName !== 'Longitude' &&
-        a.columnName !== 'Altitude'
+      return this.metadataList.filter(fields => fields.columnName !== 'Latitude' &&
+        fields.columnName !== 'Longitude' &&
+        fields.columnName !== 'Altitude'
       )
     },
     containerManagerLocation() {
