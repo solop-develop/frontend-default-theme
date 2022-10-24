@@ -27,7 +27,7 @@
     >
       <el-row :gutter="0">
         <template v-if="!isLoadingFields">
-          <el-col v-for="(fieldAttributes) in metadataList" :key="fieldAttributes.columnName" :span="24">
+          <el-col v-for="(fieldAttributes) in fieldDefaultLocation" :key="fieldAttributes.columnName" :span="24">
             <field-definition
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
@@ -47,6 +47,40 @@
           style="min-height: calc(50vh - 84px)"
           class="loading-panel"
         />
+
+        <el-col>
+          <el-collapse accordion>
+            <el-collapse-item name="1">
+              <template slot="title">
+                <b style="padding-right: 10px;">
+                  {{ $t('field.coordination') }}
+                </b>
+                <svg-icon icon-class="international" />
+              </template>
+              <template v-if="!isLoadingFields">
+                <el-col v-for="(fieldAttributes) in fieldCoordenada" :key="fieldAttributes.columnName" :span="24">
+                  <field-definition
+                    :parent-uuid="parentUuid"
+                    :container-uuid="containerUuid"
+                    :container-manager="containerManagerLocation"
+                    :metadata-field="fieldAttributes"
+                  />
+                </el-col>
+              </template>
+
+              <div
+                v-else
+                key="form-loading"
+                v-loading="isLoadingFields"
+                :element-loading-text="$t('notifications.loading')"
+                element-loading-spinner="el-icon-loading"
+                element-loading-background="rgba(255, 255, 255, 0.8)"
+                style="min-height: calc(50vh - 84px)"
+                class="loading-panel"
+              />
+            </el-collapse-item>
+          </el-collapse>
+        </el-col>
 
         <el-col v-show="!metadata.pos" :span="24" class="location-address-footer">
           <samp style="float: right; padding-top: 4px;">
@@ -150,6 +184,18 @@ export default {
   },
 
   computed: {
+    fieldCoordination() {
+      return this.metadataList.filter(a => a.columnName === 'Latitude' ||
+        a.columnName === 'Longitude' ||
+        a.columnName === 'Altitude'
+      )
+    },
+    fieldDefaultLocation() {
+      return this.metadataList.filter(a => a.columnName !== 'Latitude' &&
+        a.columnName !== 'Longitude' &&
+        a.columnName !== 'Altitude'
+      )
+    },
     containerManagerLocation() {
       return {
         ...this.containerManager,
