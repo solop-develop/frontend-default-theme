@@ -93,10 +93,18 @@
       </el-tab-pane>
     </el-tabs>
 
-    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 50%;">
-      <el-button type="primary" size="mini" circle @click="openRecordLogs">
+    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;">
+      <el-button type="primary" size="mini" circle @click="openRecordLogs('getRecordLogs')">
         <svg-icon icon-class="tree-table" />
       </el-button>
+      <el-button v-show="showAttachmentAvailable" type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('getAttachment')">
+        <i class="el-icon-paperclip" />
+      </el-button>
+      <el-badge v-show="showChatAvailable" is-dot class="item">
+        <el-button type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs($t('window.containerInfo.notes'))">
+          <svg-icon icon-class="message" />
+        </el-button>
+      </el-badge>
     </div>
 
     <el-drawer
@@ -112,6 +120,7 @@
         :current-record="currentRecordLogs"
         :tab-uuid="tabUuid"
         :is-accounting-info="isAccountingInfo"
+        :is-default-panel="openPanelInfo"
       />
     </el-drawer>
   </div>
@@ -135,6 +144,12 @@ import TabOptions from './TabOptions.vue'
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // utils and helper methods
+import {
+  requestListEntityChats
+} from '@/api/ADempiere/window'
+import {
+  getAttachment
+} from '@/api/ADempiere/user-interface/resources.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -193,6 +208,8 @@ export default defineComponent({
 
     const tabUuid = ref(props.tabsList[tabNo].uuid)
 
+    const openPanelInfo = ref('')
+
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })
@@ -221,6 +238,10 @@ export default defineComponent({
 
     const currentRecordLogs = ref({})
     const drawer = ref(false)
+
+    const showChatAvailable = ref(false)
+
+    const showAttachmentAvailable = ref(false)
 
     // use getter to reactive properties
     const currentTabMetadata = computed(() => {
@@ -263,6 +284,24 @@ export default defineComponent({
         return panel.fieldsList
       }
       return []
+    })
+
+    // Current Record UUID
+    const currentRecordUuid = computed(() => {
+      if (currentTabMetadata.value) {
+        return store.getters.getUuidOfContainer(currentTabMetadata.value.uuid)
+      }
+      return ''
+    })
+    // Current Record ID
+    const currentRecordId = computed(() => {
+      if (currentTabMetadata.value) {
+        return store.getters.getIdOfContainer({
+          containerUuid: currentTabMetadata.value.containerUuid,
+          tableName: currentTabTableName.value
+        })
+      }
+      return ''
     })
 
     /**
@@ -456,14 +495,58 @@ export default defineComponent({
       }
     })
 
+    watch(currentRecordUuid, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+        chatAvailable()
+        attachmentAvailable()
+      }
+    })
+
     /**
-     * Listar Historico de cambios
+     * List Change History
      */
-    const openRecordLogs = () => {
+    const openRecordLogs = (options) => {
+      if (typeof options === 'string') openPanelInfo.value = options
       store.dispatch('showLogs', {
         show: !showContainerInfo.value
       })
       // store.commit('setShowRecordLogs', newValue)
+    }
+
+    /**
+     * Chat Available
+     */
+    const chatAvailable = () => {
+      requestListEntityChats({
+        tableName: currentTabTableName.value,
+        recordId: currentRecordId.value,
+        recordUuid: currentRecordUuid.value
+      })
+        .then(responseList => {
+          const { entityChatsList } = responseList
+          showChatAvailable.value = !isEmptyValue(entityChatsList)
+        })
+        .catch(error => {
+          console.warn(`Error getting List Chat: ${error.message}. Code: ${error.code}.`)
+        })
+    }
+
+    /**
+     * Attachment Available
+     */
+    const attachmentAvailable = () => {
+      getAttachment({
+        tableName: currentTabTableName.value,
+        recordId: currentRecordId.value,
+        recordUuid: currentRecordUuid.value
+      })
+        .then(response => {
+          const { resourceReferencesList } = response
+          showAttachmentAvailable.value = !isEmptyValue(resourceReferencesList)
+        })
+        .catch(error => {
+          console.warn(`Error getting List Attachment: ${error.message}. Code: ${error.code}.`)
+        })
     }
 
     /**
@@ -508,6 +591,8 @@ export default defineComponent({
     findRecordLogs(props.allTabsList[0])
 
     setTabNumber(currentTab.value)
+    chatAvailable()
+    attachmentAvailable()
 
     return {
       tabUuid,
@@ -516,6 +601,9 @@ export default defineComponent({
       recordsList,
       drawer,
       currentRecordLogs,
+      openPanelInfo,
+      showChatAvailable,
+      showAttachmentAvailable,
       // computed
       isMobile,
       isDrawerWidth,
@@ -526,13 +614,17 @@ export default defineComponent({
       tabStyle,
       tabMetadata,
       showContainerInfo,
+      currentRecordUuid,
+      currentRecordId,
       // methods
       handleClick,
       changeShowedRecords,
       findRecordLogs,
       openRecordLogs,
       isDisabledTab,
-      selectTab
+      selectTab,
+      chatAvailable,
+      attachmentAvailable
     }
   }
 
