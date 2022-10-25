@@ -388,7 +388,7 @@ export default defineComponent({
       }
       if (tab.name === language.t('window.containerInfo.attachment.label')) tab.name = 'getAttachment'
       if (tab.name === language.t('window.containerInfo.notes')) tab.name = 'listChats'
-      
+
       nameTab.value = tab.name
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,
