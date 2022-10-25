@@ -40,7 +40,7 @@
             :body-style="{ padding: '5px' }"
             :class="isActiveCurrentTab ? 'custom-panel-field' : ''"
           >
-            <el-row v-if="!isMobile || isEmptyValue(panelMetadata.childTabs)">
+            <el-row v-if="!isMobile || isEmptyValue(panelMetadata.childTabs)" style="padding-bottom: 15px;padding-top: 15px;">
               <template v-for="(fieldAttributes, subKey) in fieldsList">
                 <field-definition
                   ref="fieldDefinitionRef"
@@ -54,7 +54,7 @@
               </template>
             </el-row>
             <!-- <el-scrollbar v-else :wrap-class="panelMetadata.isParentTab ? 'scroll-tab-panel-conten' : 'scroll-tab-child-panel-conten'" :style="styleScrollPanelTab"> -->
-            <el-row v-else>
+            <el-row v-else style="padding-bottom: 15px;padding-top: 15px;">
               <template v-for="(fieldAttributes, subKey) in fieldsList">
                 <field-definition
                   ref="fieldDefinitionRef"
