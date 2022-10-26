@@ -22,61 +22,17 @@
     v-bind="commonsProperties"
     @clear="clearValues"
   />
-  <!-- <el-popover
-    key="standard-location"
-    ref="locationAddress"
-    v-model="isShowedLocationForm"
-    placement="left-end"
-    width="455"
-    trigger="click"
-    style="padding: 0px !important"
-  >
-    <product-attribute-form
-      v-if="isShowedLocationForm"
-      :parent-uuid="parentUuid"
-      :container-uuid="containerUuid"
-      :container-manager="containerManager"
-      :metadata="metadata"
-    />
-
-    <el-button
-      slot="reference"
-      type="text"
-      style="width: 100%;"
-      :disabled="isDisabled"
-    >
-      <el-input
-        v-model="displayedValueNotEdit"
-        v-bind="commonsProperties"
-        @clear="clearValues"
-      >
-        <template slot="append">
-          <i class="el-icon-delete" />
-        </template>
-      </el-input>
-    </el-button>
-  </el-popover> -->
 </template>
 
 <script>
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
-import mixinLocation from './mixinLocationAddress.js'
-// import ProductAttributeForm from './ProductAttributeForm.vue'
-
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
-  name: 'FieldLocationAddress',
-
-  // components: {
-  //   ProductAttributeForm
-  // },
+  name: 'FieldProductAttribute',
 
   mixins: [
-    fieldMixin,
-    mixinLocation
+    fieldMixin
   ],
 
   props: {
@@ -95,18 +51,6 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-location '
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
-    },
     displayedValueNotEdit: {
       get() {
         console.log(this.displayedValue)
@@ -118,29 +62,6 @@ export default {
     },
     displayedValue: {
       get() {
-        /**
-         * TODO: Add DisplayColumnName (to locator's and location's fields) in entities
-         * list response, to set value or empty value in fieldValue state when
-         * change records with dataTable.
-         */
-        if (isEmptyValue(this.value)) {
-          return undefined
-        }
-
-        const alo = this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
-        })
-        const qlq = this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.columnName
-        })
-        console.log({ alo, qlq }, 'M_AttributeSetInstance_ID', this.metadata.columnName, this.metadata.displayColumnName)
-
         return this.$store.getters.getValueOfFieldOnContainer({
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.metadata.containerUuid,
@@ -149,7 +70,6 @@ export default {
         })
       },
       set(value) {
-        console.log({ value })
         this.$store.commit('updateValueOfField', {
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.metadata.containerUuid,
@@ -161,22 +81,6 @@ export default {
     },
     popoverPlacement() {
       return this.metadata.popoverPlacement || 'top'
-    }
-  },
-
-  watch: {
-    value(newValue, oldValue) {
-      console.log({ newValue })
-      // this.displayedValue = newValue
-      // this.setDefaultValue()
-      // if (isEmptyValue(newValue)) {
-      //   this.displayedValue = undefined
-      // } else {
-      //   if (newValue !== oldValue) {
-      //     this.displayedValue = undefined
-      //     // this.setDefaultValue()
-      //   }
-      // }
     }
   },
 
@@ -193,15 +97,3 @@ export default {
   }
 }
 </script>
-
-// <style lang="scss">
-// /**
-//  * span tag as button and label text
-//  */
-// .button-location-show {
-//   padding-top: 0px !important;
-// }
-// .popover-attribute {
-//   padding: 0px !important
-// }
-// </style>
