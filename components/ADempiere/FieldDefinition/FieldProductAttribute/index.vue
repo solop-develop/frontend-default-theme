@@ -19,7 +19,7 @@
 <template>
   <el-input
     v-model="displayedValueNotEdit"
-    v-bind="commonsProperties"
+    v-bind="properties"
     @clear="clearValues"
   />
 </template>
@@ -53,11 +53,16 @@ export default {
   computed: {
     displayedValueNotEdit: {
       get() {
-        console.log(this.displayedValue)
         return this.displayedValue
       },
       set(value) {
         // emty, dont edit
+      }
+    },
+    properties() {
+      return {
+        ...this.commonsProperties,
+        disabled: true
       }
     },
     displayedValue: {
