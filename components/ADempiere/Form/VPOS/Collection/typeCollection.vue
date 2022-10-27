@@ -41,24 +41,20 @@
                           isEmptyValue(value.payment_method) ? value.paymentMethod.name : value.payment_method.name
                         }}
                       </span>
-                    </div>
-                    <div class="bottom clearfix" style="margin-top: 0px !important!">
-                      <el-button
-                        type="text"
-                        class="button"
-                        style="color: rgb(50, 54, 58); font-size: 13px; text-align: left; float: unset; padding-top: 5px;"
+                      <span
+                        style="color: rgb(50, 54, 58); font-size: 13px; text-align: left; float: unset; padding-top: 5px; font-weight: bold;"
                       >
                         {{ value.documentNo }}
-                      </el-button>
+                      </span>
 
-                      <el-button
+                      <span
                         v-if="!isEmptyValue(value.paymentDate)"
-                        type="text"
-                        class="button"
                         style="color: rgb(50, 54, 58); font-size: 13px; text-align: left; float: unset; padding-top: 5px;"
                       >
                         {{ formatDate(value.paymentDate) }}
-                      </el-button>
+                      </span>
+                    </div>
+                    <div class="bottom clearfix" style="margin-top: 0px !important!">
                       <div
                         slot="header"
                         class="clearfix"
@@ -85,6 +81,7 @@
         </template>
       </el-row>
     </el-main>
+
     <el-divider v-if="!isRefundReference && !isEmptyValue(listRefund)" content-position="center" style="padding: 10px;">
       <h2> {{ $t('form.pos.collect.refund') }} / {{ $t('pointOfSales.collection.others') }} </h2>
     </el-divider>
