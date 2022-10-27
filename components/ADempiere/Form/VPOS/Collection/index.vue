@@ -132,6 +132,7 @@
             <el-button type="primary" icon="el-icon-shopping-cart-full" @click="validateOrder(listPayments)" />
           </samp>
         </el-header>
+
         <!-- Panel where they show the payments registered from the collection container -->
         <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px;">
           <type-collection
@@ -1019,7 +1020,13 @@ export default {
         containerUuid,
         format: 'object'
       })
-      const params = { referenceNo: values.DocumentNo, description: values.Description, paymentDate: values.DateTrx }
+      const params = {
+        // referenceNo: values.DocumentNo,
+        referenceNo,
+        description: values.Description,
+        paymentDate: values.DateTrx
+      }
+
       const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
       if (this.currentAvailablePaymentMethods.is_payment_reference) {

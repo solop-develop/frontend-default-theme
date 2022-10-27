@@ -285,8 +285,8 @@
                   </span>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item
-                      v-for="item in listDocumentTypes"
-                      :key="item.uuid"
+                      v-for="(item, index) in listDocumentTypes"
+                      :key="index"
                       :command="item"
                       :disabled="isDisabled"
                     >
@@ -976,7 +976,7 @@ export default {
 
   mounted() {
     setTimeout(() => {
-      if (!this.isEmptyValue(this.fieldCampaign.reference) && this.isEmptyValue(this.listCampaign)) {
+      if ((this.fieldCampaign && !this.isEmptyValue(this.fieldCampaign.reference)) && this.isEmptyValue(this.listCampaign)) {
         this.getListCampaign(this.fieldCampaign.reference)
       }
     }, 500)
