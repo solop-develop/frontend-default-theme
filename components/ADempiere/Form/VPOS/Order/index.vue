@@ -159,54 +159,9 @@
                 width="165"
               >
                 <template slot-scope="scope">
-                  <el-popover
-                    v-if="!isEmptyValue(listOrderLine)"
-                    popper-class="el-popper-info"
-                    placement="right-start"
-                    trigger="click"
-                    width="300"
-                  >
-                    {{ (isEmptyValue(scope.row.product.value) ? $t('form.productInfo.chargerInformation') : $t('form.productInfo.productInformation')) }}
-                    <el-form
-                      :ref="scope.row.id"
-                      v-model="showOpenImage"
-                      label-position="top"
-                      style="float: right;display: contents;line-height: 30px;"
-                      @submit.native.prevent="notSubmitForm"
-                    >
-                      <el-row style="margin: 10px!important;">
-                        <el-col :span="5">
-                          <div>
-                            <image-product
-                              :show="showOpenImage"
-                              :metadata-line="scope.row"
-                            />
-                          </div>
-                        </el-col>
-                        <el-col :span="11">
-                          <span v-if="!isEmptyValue(scope.row.product.value)"> {{ $t('form.productInfo.code') }}: <b>{{ scope.row.product.value }}</b><br> </span>
-                          {{ $t('form.productInfo.name') }}: <b>{{ (isEmptyValue(scope.row.product.name) ? scope.row.charge.name : scope.row.product.name) }}</b><br>
-                          {{ $t('form.productInfo.description') }}: <b>{{ (isEmptyValue(scope.row.product.description) ? scope.row.charge.description : scope.row.product.description) }}</b><br>
-                          {{ $t('form.productInfo.UM') }}: <b>{{ scope.row.product.uomName }}</b><br>
-                        </el-col>
-                        <el-col :span="8">
-                          <div style="float: right; text-align: end;">
-                            {{ $t('form.productInfo.price') }}:
-                            <b>{{ formatPrice(scope.row.priceList, pointOfSalesCurrency.iSOCode) }}</b>
-                            <br>
-                            <b>{{ scope.row.taxRate.name }}</b>
-                            <br>
-                            {{ $t('form.productInfo.grandTotal') }}:
-                            <b>{{ formatPrice(scope.row.totalAmountWithTax, pointOfSalesCurrency.iSOCode) }}</b>
-                            <br>
-                            {{ $t('form.pos.tableProduct.quantity') }}:
-                            <b>{{ formatQuantity(scope.row.quantityOrdered) }}</b>
-                          </div>
-                        </el-col>
-                      </el-row>
-                    </el-form>
-                    <el-button slot="reference" type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
-                  </el-popover>
+                  <info-order-line
+                    :record-row="scope.row"
+                  />
                   <el-popover
                     ref="showFieldLine"
                     placement="right"
@@ -627,7 +582,7 @@ import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 import BusinessPartner from '@theme/components/ADempiere/Form/VPOS/BusinessPartner/index.vue'
 import fieldLine from '@theme/components/ADempiere/Form/VPOS/Order/line/index'
 import EditLineMobile from '@theme/components/ADempiere/Form/VPOS/Order/line/editLineMobile'
-import ImageProduct from '@theme/components/ADempiere/Form/VPOS/Order/ImageProduct/index'
+import InfoOrderLine from '@theme/components/ADempiere/Form/VPOS/Order/line/infoOrderLine/index.vue'
 // src/themes/pos/components/ADempiere/Form/VPOS/Order/ImageProduct/index.vue
 import ProductInfo from '@theme/components/ADempiere/Form/VPOS/ProductInfo'
 import FastOrdesList from '@theme/components/ADempiere/Form/VPOS/OrderList/fastOrder'
@@ -641,8 +596,10 @@ import {
   formatPrice,
   formatQuantity
 } from '@/utils/ADempiere/valueFormat.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 import { formatQuantity as formatQuantityPanel } from '@/utils/ADempiere/formatValue/numberFormat.js'
+
 // api request methods
 import { requestLookupList } from '@/api/ADempiere/window.js'
 import { releaseOrder, availableSellers } from '@/api/ADempiere/form/point-of-sales.js'
@@ -654,7 +611,7 @@ export default {
     BusinessPartner,
     DocumentStatusTag,
     EditLineMobile,
-    ImageProduct,
+    InfoOrderLine,
     ProductInfo,
     FastOrdesList,
     fieldLine
@@ -681,8 +638,6 @@ export default {
       isEditLine: {},
       fileColumnNameEdit: '',
       editPrice: 0,
-      showInfo: false,
-      showOpenImage: false,
       currentSeller: 'Sin vendedor seleccionado',
       listCampaign: []
     }
