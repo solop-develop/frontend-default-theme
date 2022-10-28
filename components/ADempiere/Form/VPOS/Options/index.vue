@@ -92,7 +92,9 @@
                 trigger="click"
                 width="1200"
               >
-                <table-time-control />
+                <table-time-control
+                  v-if="isShowResource"
+                />
                 <p
                   slot="reference"
                   :style="blockOption"
