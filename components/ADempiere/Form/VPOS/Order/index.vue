@@ -165,10 +165,11 @@
                     placement="right-start"
                     trigger="click"
                     width="300"
-                    :hide="closeInfo"
                   >
                     {{ (isEmptyValue(scope.row.product.value) ? $t('form.productInfo.chargerInformation') : $t('form.productInfo.productInformation')) }}
                     <el-form
+                      :ref="scope.row.id"
+                      v-model="showOpenImage"
                       label-position="top"
                       style="float: right;display: contents;line-height: 30px;"
                       @submit.native.prevent="notSubmitForm"
@@ -177,7 +178,7 @@
                         <el-col :span="5">
                           <div>
                             <image-product
-                              :show="showInfo"
+                              :show="showOpenImage"
                               :metadata-line="scope.row"
                             />
                           </div>
@@ -333,6 +334,30 @@
                       :key="item.uuid"
                       :command="item"
                       :disabled="isDisabled"
+                    >
+                      {{ item.name }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+                <br>
+                <el-dropdown
+                  v-if="!isEmptyValue(listSeller)"
+                  trigger="click"
+                  class="info-pos"
+                  @command="changeSeller"
+                >
+                  <span>
+                    <i class="el-icon-guide" />
+                    {{ 'Vendedor' }}:
+                    <b style="cursor: pointer">
+                      {{ currentSeller }}
+                    </b>
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item
+                      v-for="item in listSeller"
+                      :key="item.uuid"
+                      :command="item"
                     >
                       {{ item.name }}
                     </el-dropdown-item>
@@ -620,7 +645,7 @@ import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 import { formatQuantity as formatQuantityPanel } from '@/utils/ADempiere/formatValue/numberFormat.js'
 // api request methods
 import { requestLookupList } from '@/api/ADempiere/window.js'
-import { releaseOrder } from '@/api/ADempiere/form/point-of-sales.js'
+import { releaseOrder, availableSellers } from '@/api/ADempiere/form/point-of-sales.js'
 
 export default {
   name: 'Order',
@@ -648,6 +673,7 @@ export default {
       showFieldLine: false,
       isEditLineMobile: false,
       lineRow: {},
+      listSeller: [],
       pin: '',
       attributePin: {},
       visible: false,
@@ -656,6 +682,8 @@ export default {
       fileColumnNameEdit: '',
       editPrice: 0,
       showInfo: false,
+      showOpenImage: false,
+      currentSeller: 'Sin vendedor seleccionado',
       listCampaign: []
     }
   },
@@ -1000,6 +1028,7 @@ export default {
     if (!this.isEmptyValue(this.currentLineOrder)) {
       this.$refs.linesTable.setCurrentRow(this.currentLineOrder)
     }
+    this.listAvailableSellers()
     this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: false })
   },
   methods: {
@@ -1009,6 +1038,23 @@ export default {
     formatQuantity,
     formatQuantityPanel,
     copyToClipboard,
+    listAvailableSellers() {
+      availableSellers({
+        posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+        isOnlyAllocated: false
+      })
+        .then(response => {
+          this.listSeller = response.records
+        })
+        .catch(error => {
+          this.$message({
+            message: error.message,
+            isShowClose: true,
+            type: 'error'
+          })
+          console.warn(`Error: ${error.message}. Code: ${error.code}.`)
+        })
+    },
     openEditModeMobile(line) {
       this.lineRow = line
       this.isEditLineMobile = !this.isEditLineMobile
@@ -1208,6 +1254,15 @@ export default {
         this.clearOrder()
       }
     },
+    changeSeller(val) {
+      this.$store.dispatch('updateOrder', {
+        orderUuid: this.currentOrder.uuid,
+        posUuid: this.currentPointOfSales.uuid,
+        sellerUuid: val.uuid
+        
+      })
+      this.currentSeller = val.name
+    },
     changeCampaign(item) {
       this.$store.dispatch('updateOrder', {
         orderUuid: this.currentOrder.uuid,
@@ -1305,6 +1360,7 @@ export default {
     showInfoLine(line) {
       this.$store.commit('setLine', line)
       this.showInfo = true
+      this.showOpenImage = !this.showOpenImage
     },
     closeInfo(line) {
       this.showInfo = false
