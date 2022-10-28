@@ -13,18 +13,19 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
-  <div>
-    <el-skeleton :loading="loading" animated>
-      <template slot="template">
-        <el-skeleton-item
-          style="width: 140px; height: 140px;"
-          variant="image"
-        />
-      </template>
-      <template>
-        <el-card :body-style="{ padding: '0px', marginBottom: '1px' }">
-          <el-carousel trigger="click" height="150px">
+  <el-skeleton :loading="isLoading" animated>
+    <template slot="template">
+      <el-skeleton-item
+        style="width: 140px; height: 140px;"
+        variant="image"
+      />
+    </template>
+    <template>
+      <el-card :body-style="{ padding: '0px', marginBottom: '1px' }">
+        <el-carousel trigger="click" height="150px">
+          <template v-if="listImage.length">
             <el-carousel-item v-for="item in listImage.length" :key="item">
               <el-image
                 :src="getImageFromSource(listImage[item - 1])"
@@ -43,11 +44,19 @@
                 </div>
               </el-image>
             </el-carousel-item>
-          </el-carousel>
-        </el-card>
-      </template>
-    </el-skeleton>
-  </div>
+          </template>
+
+          <el-carousel-item v-else>
+            <el-image
+              :src="imageNotAvailable"
+              class="image"
+              style="width: 140px; height: 140px;"
+            />
+          </el-carousel-item>
+        </el-carousel>
+      </el-card>
+    </template>
+  </el-skeleton>
 </template>
 
 <script>
@@ -56,6 +65,7 @@ import { getImagePath } from '@/utils/ADempiere/resource.js'
 
 export default {
   name: 'ImageProduct',
+
   props: {
     stepReference: {
       type: String,
@@ -78,16 +88,20 @@ export default {
       default: () => {}
     }
   },
+
   data() {
     return {
-      loading: true,
-      listImage: [],
-      currentDate: '2021-06-01'
+      isLoading: true,
+      listImage: []
     }
   },
+
   computed: {
     product() {
       return this.$store.state['pointOfSales/orderLine/index'].line.product
+    },
+    imageNotAvailable() {
+      return require('@/image/ADempiere/no-image.png')
     }
   },
   watch: {
@@ -100,25 +114,31 @@ export default {
       }
     },
     product(value) {
-      if (this.show && !this.isEmptyValue(this.metadataLine) && this.metadataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid) {
+      if (value && !this.isEmptyValue(this.metadataLine) && this.metadataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid) {
         this.getListImageProduct(this.metadataLine)
       }
     }
   },
+
   methods: {
     getListImageProduct(line) {
+      this.isLoading = true
+      this.listImage = []
       getAttachment({
         tableName: 'M_Product',
         recordId: line.product.id,
         recordUuid: line.product.uuid
       })
         .then(response => {
-          if (!this.isEmptyValue(response.resource_references_list)) {
-            this.loading = false
-            this.listImage = response.resource_references_list
+          if (!this.isEmptyValue(response.resourceReferencesList)) {
+            this.listImage = response.resourceReferencesList
           }
         })
+        .finally(() => {
+          this.isLoading = false
+        })
     },
+
     getImageFromSource(file) {
       const image = getImagePath({
         file: file.file_name,

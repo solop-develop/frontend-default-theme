@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-main
     v-shortkey="shortsKey"
@@ -229,8 +230,11 @@
 </template>
 
 <script>
+// components and mixins
+import ImageProduct from '@theme/components/ADempiere/Form/VPOS/Order/line/infoOrderLine/imageProduct.vue'
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
+
+// api request methods
 import {
   createShipmentLine,
   createShipment,
@@ -238,7 +242,9 @@ import {
   shipments,
   processShipment
 } from '@/api/ADempiere/form/point-of-sales.js'
-import ImageProduct from '@theme/components/ADempiere/Form/VPOS/Order/ImageProduct/index'
+
+// utils and helper methods
+import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
 
 export default {
   name: 'ConfirmDelivery',
