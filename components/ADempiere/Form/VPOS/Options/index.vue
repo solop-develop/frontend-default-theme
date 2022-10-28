@@ -999,11 +999,11 @@ export default {
   },
 
   watch: {
-    whatShowResource(value) {
-      if (!value) {
-        this.isShowResource = value
-      }
-    },
+    // whatShowResource(value) {
+    //   if (!value) {
+    //     this.isShowResource = value
+    //   }
+    // },
     visible(value) {
       if (value && !this.isEmptyValue(this.$refs)) {
         setTimeout(() => {

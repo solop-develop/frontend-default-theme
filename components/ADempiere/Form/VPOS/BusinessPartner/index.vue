@@ -35,6 +35,7 @@
             >
               <el-scrollbar wrap-class="scroll-child">
                 <business-partner-create
+                  v-if="popoverCreateBusinessPartner"
                   :parent-metadata="parentMetadata"
                   :show-field="popoverCreateBusinessPartner"
                   :is-visible-address="isVisibleAddress"
@@ -85,15 +86,16 @@
 
           <el-dropdown-item>
             <el-popover
-              v-model="popoverListBusinessParnet"
+              v-model="popoverListBusinessPartner"
               placement="left-start"
               width="900"
               trigger="click"
             >
               <business-partners-list
+                v-if="popoverListBusinessPartner"
                 :parent-metadata="parentMetadata"
-                :shows-popover="popoverListBusinessParnet"
-                :show-field="popoverListBusinessParnet"
+                :shows-popover="popoverListBusinessPartner"
+                :show-field="popoverListBusinessPartner"
                 :is-disabled="isDisabled"
               />
               <el-button
@@ -118,6 +120,7 @@
               style="padding: 0px; margin: 0px"
             >
               <business-partner-update
+                v-if="showUpdate"
                 :shows-popovers="showUpdate"
                 :current-address-select="selectAddress.first_name"
               />
@@ -443,7 +446,7 @@ export default {
         this.$store.commit('popoverCreateBusinessPartner', value)
       }
     },
-    popoverListBusinessParnet: {
+    popoverListBusinessPartner: {
       get() {
         return this.$store.getters.getBusinessPartnerPopoverList
       },
@@ -485,7 +488,7 @@ export default {
   },
 
   watch: {
-    popoverListBusinessParnet(value) {
+    popoverListBusinessPartner(value) {
       if (!value) {
         this.$store.commit('updateValuesOfContainer', {
           containerUuid: 'Business-Partner-List',
