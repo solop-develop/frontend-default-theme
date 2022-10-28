@@ -250,9 +250,12 @@ export default {
           // quantity = currentLine.quantity
           break
       }
-      updateOrderLine(
-        updateLine
-      )
+
+      const posUuid = this.currentPointOfSales.uuid
+      updateOrderLine({
+        ...updateLine,
+        posUuid
+      })
         .then(response => {
           this.$store.commit('pin', false)
           this.$store.dispatch('currentLine', response)
