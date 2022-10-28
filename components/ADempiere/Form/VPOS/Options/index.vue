@@ -122,7 +122,6 @@
           </el-col>
 
           <!-- generateImmediateInvoice -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -137,7 +136,6 @@
           </el-col>
 
           <!-- completePreparedOrder -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -152,7 +150,6 @@
           </el-col>
 
           <!-- cancelSaleTransaction -->
-
           <el-col v-if="allowsReturnOrder" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
@@ -222,8 +219,8 @@
             <el-card shadow="hover" style="height: 100px">
               <el-button
                 type="text"
-                :disabled="isEmptyValue(currentOrder.uuid) || !isAllowsPrintDocument"
-                :class="isEmptyValue(currentOrder.uuid) ? 'is-disabled-option-card' : 'is-enable-option-card'"
+                :disabled="isEmptyValue(currentOrder.uuid) || !isAllowsPrintDocument || isLoadingPrintTicket"
+                :loading="isLoadingPrintTicket"
                 style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
                 @click="printTicket()"
               >
@@ -239,10 +236,10 @@
             <el-card shadow="hover" style="height: 100px">
               <el-button
                 type="text"
-                :disabled="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument"
-                :class="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument ? 'is-disabled-option-card' : 'is-enable-option-card'"
+                :disabled="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument || isLoadingPrintPreview"
+                :loading="isLoadingPrintPreview"
                 style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
-                @click="printTicketPreviwer()"
+                @click="printPreview()"
               >
                 <i class="el-icon-printer" />
                 <br><br>
@@ -252,7 +249,6 @@
           </el-col>
 
           <!-- createNewReturnOrder -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -267,7 +263,6 @@
           </el-col>
 
           <!-- copyOrder -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -282,7 +277,6 @@
           </el-col>
 
           <!-- cancelOrder -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -298,7 +292,6 @@
           </el-col>
 
           <!-- confirmDelivery -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
@@ -327,7 +320,6 @@
           </el-col>
 
           <!-- confirmDelivery -->
-
           <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
@@ -357,7 +349,6 @@
           </el-col>
 
           <!-- applyDiscountOnOrder -->
-
           <el-col v-if="isAllowsApplyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
@@ -402,7 +393,6 @@
           </el-col>
 
           <!-- salesDiscountOff -->
-
           <el-col v-if="isAllowsApplyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover">
               <el-popover
@@ -693,6 +683,8 @@ export default {
       showSalesDiscount: false,
       visibleReverse: false,
       isLoadingReverse: false,
+      isLoadingPrintPreview: false,
+      isLoadingPrintTicket: false,
       showFieldListOrder: false,
       messageReverseSales: '',
       showConfirmDelivery: false,
@@ -1301,7 +1293,7 @@ export default {
           this.printTicket()
           break
         case this.$t('form.pos.optionsPoinSales.salesOrder.preview'):
-          this.printTicketPreviwer()
+          this.printPreview()
           break
         case this.$t('form.pos.optionsPoinSales.salesOrder.copyOrder'):
           this.copyOrder()
@@ -1338,9 +1330,11 @@ export default {
           break
       }
     },
-    printTicketPreviwer() {
+    printPreview() {
       const orderUuid = this.currentOrder.uuid
       const posUuid = this.currentPointOfSales.uuid
+
+      this.isLoadingPrintPreview = true
       this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
         .then(response => {
           const { processLog } = response
@@ -1392,11 +1386,22 @@ export default {
             showClose: true
           })
         })
+        .finally(() => {
+          this.isLoadingPrintPreview = false
+        })
     },
     printTicket() {
       const orderUuid = this.currentOrder.uuid
       const posUuid = this.currentPointOfSales.uuid
-      this.$store.dispatch('printTicket', { posUuid, orderUuid })
+
+      this.isLoadingPrintTicket = true
+      this.$store.dispatch('printTicket', {
+        posUuid,
+        orderUuid
+      })
+        .finally(() => {
+          this.isLoadingPrintTicket = false
+        })
     },
     generateImmediateInvoice() {
       // TODO: Add BPartner
