@@ -994,8 +994,12 @@ export default {
     formatQuantityPanel,
     copyToClipboard,
     listAvailableSellers() {
+      const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
+      if (isEmptyValue(posUuid)) {
+        return
+      }
       availableSellers({
-        posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+        posUuid,
         isOnlyAllocated: false
       })
         .then(response => {
@@ -1214,7 +1218,6 @@ export default {
         orderUuid: this.currentOrder.uuid,
         posUuid: this.currentPointOfSales.uuid,
         sellerUuid: val.uuid
-        
       })
       this.currentSeller = val.name
     },
@@ -1311,14 +1314,6 @@ export default {
         this.$refs.linesTable.setCurrentRow(this.listOrderLine[this.currentTable])
         this.currentOrderLine = this.listOrderLine[this.currentTable]
       }
-    },
-    showInfoLine(line) {
-      this.$store.commit('setLine', line)
-      this.showInfo = true
-      this.showOpenImage = !this.showOpenImage
-    },
-    closeInfo(line) {
-      this.showInfo = false
     },
     showEditLine(line) {
       this.$store.commit('setLine', line)
