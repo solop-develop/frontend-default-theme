@@ -114,7 +114,7 @@ export default {
       }
     },
     product(value) {
-      if (value && !this.isEmptyValue(this.metadataLine) && this.metadataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid) {
+      if (this.show && !this.isEmptyValue(this.metadataLine) && this.metadataLine.uuid === this.$store.state['pointOfSales/orderLine/index'].line.uuid) {
         this.getListImageProduct(this.metadataLine)
       }
     }
