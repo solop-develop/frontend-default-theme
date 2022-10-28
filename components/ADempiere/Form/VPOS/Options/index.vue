@@ -221,7 +221,6 @@
                 type="text"
                 :disabled="isEmptyValue(currentOrder.uuid) || !isAllowsPrintDocument || isLoadingPrintTicket"
                 :loading="isLoadingPrintTicket"
-                :class="isEmptyValue(currentOrder.uuid) ? 'is-disabled-option-card' : 'is-enable-option-card'"
                 style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
                 @click="printTicket()"
               >
@@ -239,7 +238,6 @@
                 type="text"
                 :disabled="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument || isLoadingPrintPreview"
                 :loading="isLoadingPrintPreview"
-                :class="isEmptyValue(currentOrder.uuid) || !IsAllowsPreviewDocument ? 'is-disabled-option-card' : 'is-enable-option-card'"
                 style="overflow: hidden; text-overflow: ellipsis; white-space: normal;"
                 @click="printPreview()"
               >
