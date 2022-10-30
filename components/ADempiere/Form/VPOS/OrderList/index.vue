@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-main
     v-shortkey="shortsKey"
@@ -23,7 +24,7 @@
     <el-collapse v-model="activeAccordion" accordion>
       <el-collapse-item name="query-criteria">
         <template slot="title">
-          Ver Histórico de Órdenes
+          {{ $t('pointOfSales.order.showHistoryOrdersList') }}
         </template>
         <el-form
           v-if="!isEmptyValue(sortFieldsListOrder)"
@@ -188,7 +189,7 @@
         width="155"
       >
         <template slot="header">
-          Fecha de Orden
+          {{ $t('pointOfSales.order.dateOfOrder') }}
           <el-button-group
             style="display: inline-grid;vertical-align: inherit;"
           >
@@ -207,7 +208,7 @@
           </el-button-group>
         </template>
         <template slot-scope="scope">
-          {{ formatDate(scope.row.dateOrdered) }}
+          {{ formatDate({ value: scope.row.dateOrdered }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -234,7 +235,7 @@
           </el-button-group>
         </template>
         <template slot-scope="scope">
-          {{ formatPrice(scope.row.grandTotal, scope.row.priceList.currency.iso_code) }}
+          {{ formatPrice({ value: scope.row.grandTotal, currency: scope.row.priceList.currency.iso_code }) }}
         </template>
       </el-table-column>
     </el-table>
@@ -304,10 +305,8 @@ import {
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
-import {
-  formatDate,
-  formatQuantity
-} from '@/utils/ADempiere/valueFormat.js'
+import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
+import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 
 export default {
   name: 'OrdersList',
@@ -434,7 +433,7 @@ export default {
 
   methods: {
     formatDate,
-    formatQuantity,
+    formatPrice,
     getLookupList,
     isDisplayedField,
     generalInfoSearch,
