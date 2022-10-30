@@ -22,6 +22,7 @@
       <p style="text-align: center;"> <b> {{ data.title }} </b></p>
       <slot name="header" />
     </el-header>
+
     <el-main>
       <el-table
         v-loading="isLoadingTable"
@@ -34,6 +35,10 @@
         @current-change="handleCurrentChange"
         @row-dblclick="selectionChangeOrder"
       >
+        <index-column
+          :page-number="pageNumber"
+        />
+
         <el-table-column
           prop="documentNo"
           width="155"
@@ -58,6 +63,7 @@
             </el-button-group>
           </template>
         </el-table-column>
+
         <el-table-column
           width="155"
         >
@@ -81,7 +87,7 @@
             </el-button-group>
           </template>
           <template slot-scope="scope">
-            {{ formatDate(scope.row.dateOrdered) }}
+            {{ formatDate({ value: scope.row.dateOrdered }) }}
           </template>
         </el-table-column>
 
@@ -134,6 +140,7 @@
             </el-button-group>
           </template>
         </el-table-column>
+
         <el-table-column
           width="100"
         >
@@ -163,6 +170,7 @@
             />
           </template>
         </el-table-column>
+
         <el-table-column
           align="right"
           width="150"
@@ -187,11 +195,12 @@
             </el-button-group>
           </template>
           <template slot-scope="scope">
-            {{ formatPrice(scope.row.grandTotal, scope.row.priceList.currency.iso_code) }}
+            {{ formatPrice({ value: scope.row.grandTotal, currency: scope.row.priceList.currency.iso_code }) }}
           </template>
         </el-table-column>
       </el-table>
     </el-main>
+
     <el-footer>
       <slot name="footer" />
     </el-footer>
@@ -199,20 +208,26 @@
 </template>
 
 <script>
-// utils and helper methods
-import {
-  formatDate,
-  formatPrice
-} from '@/utils/ADempiere/valueFormat.js'
-import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
+// components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
+import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
+
+// api request methods
 import { holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
+
+// utils and helper methods
+import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
+import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
+import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'FindOrders',
+
   components: {
-    DocumentStatusTag
+    DocumentStatusTag,
+    IndexColumn
   },
+
   props: {
     metadata: {
       type: Object,
@@ -233,6 +248,10 @@ export default {
       default: () => {
         return {}
       }
+    },
+    pageNumber: {
+      type: Number,
+      default: 1
     },
     dataList: {
       type: Array,
@@ -294,13 +313,6 @@ export default {
     },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
-    },
-    dateOrderedFrom() {
-      return this.fieldsList.find(field => {
-        if (field.columnName === 'DateOrdered') {
-          return field
-        }
-      })
     }
   },
 
@@ -339,9 +351,6 @@ export default {
         }
         return 0
       })
-    },
-    handleChangePage(newPage) {
-      this.tokenPage = this.tokenPage + '-' + newPage
     },
     handleCurrentChange(row) {
       // close popover
@@ -386,13 +395,6 @@ export default {
           })
       }
       this.clear()
-    },
-    orderPrpcess(row) {
-      const parametersList = [{
-        columnName: 'C_Order_ID',
-        value: row.id
-      }]
-      this.$store.dispatch('addParametersProcessPos', parametersList)
     },
     clear() {
       this.$store.commit('setShowsearchToDeliveOrders', false)

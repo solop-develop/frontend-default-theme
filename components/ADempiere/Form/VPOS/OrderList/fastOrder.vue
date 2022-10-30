@@ -51,9 +51,10 @@
                   <find-orders
                     :data="option"
                     :data-list="orderList"
-                    :is-loading-table="isloading"
+                    :is-loading-table="isLoading"
                     :params="option.params"
                     :show-field="showToDeliveOrders"
+                    :page-number="currentPage"
                   >
                     <template v-slot:header>
                       <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
@@ -93,21 +94,28 @@
                       </el-form>
                     </template>
                   </find-orders>
-                  <custom-pagination
-                    :total="total"
-                    :current-page="currentPage"
-                    :handle-change-page="handleChangePage"
-                    layout="total, prev, pager, next"
-                    style="float: right;"
-                    :records-page="orderList.length"
-                  />
-                  <el-button
-                    type="text"
-                    class="custom-button-create-bp"
-                  />
-                  <el-row :gutter="24">
-                    <el-col :span="24">
+
+                  <el-row :gutter="24" class="orders-list-footer">
+                    <el-col :span="18">
+                      <custom-pagination
+                        :total="total"
+                        :current-page="currentPage"
+                        :handle-change-page="handleChangePage"
+                        layout="total, prev, pager, next"
+                        style="float: right;"
+                        :records-page="orderList.length"
+                      />
+                    </el-col>
+
+                    <el-col :span="6">
                       <samp style="float: right; padding-right: 10px;">
+                        <el-button
+                          :loading="isLoading"
+                          type="success"
+                          icon="el-icon-refresh-right"
+                          size="small"
+                          @click="listOrdersInvoiced();"
+                        />
                         <el-button
                           type="danger"
                           class="custom-button-create-bp"
@@ -133,6 +141,7 @@
         </el-dropdown>
       </el-form-item>
     </el-form>
+
     <el-drawer
       v-if="isMobile"
       :visible.sync="currentOptions.isVisible"
@@ -144,112 +153,11 @@
       <find-orders
         :data="currentOptions"
         :data-list="orderList"
-        :is-loading-table="isloading"
+        :is-loading-table="isLoading"
         :params="currentOptions.params"
         :show-field="showToDeliveOrders"
+        :page-number="currentPage"
       >
-        <!-- <template v-slot:header>
-          <el-form
-            label-position="top"
-            label-width="10px"
-            style="float: right; display: contents; line-height: 10px;"
-            :disabled="validateOpenAmount"
-            @submit.native.prevent="notSubmitForm"
-          >
-            <el-row id="fieldListCollection">
-              <el-col
-                v-for="field in metadataList"
-                :key="field.sequence"
-                :span="12"
-              >
-                <field-definition
-                  :metadata-field="{
-                    ...field,
-                    name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name,
-                    size: {
-                      xs: 24,
-                      sm: 24,
-                      md: 24,
-                      lg: 24,
-                      xl: 24
-                    }
-                  }"
-                  :container-uuid="'Collection'"
-                  :container-manager="{
-                    ...containerManager,
-                    getLookupList,
-                    isDisplayedField,
-                    isDisplayedDefault,
-                    generalInfoSearch,
-                    searchTableHeader,
-                    isMandatoryField,
-                    isReadOnlyField,
-                    changeFieldShowedFromUser
-                  }"
-                />
-              </el-col>
-            </el-row>
-          </el-form>
-        </template> -->
-        <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="No. del Documento">
-            <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
-          </el-form-item>
-          <el-form-item
-            v-for="(field) in metadataList"
-            :key="field.columnName"
-          >
-            <field-definition
-              :metadata-field="{
-                ...field,
-                size: 6,
-                name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
-              }"
-              :container-uuid="'Cash-Withdrawal'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-          </el-form-item>
-        </el-form> -->
-
-        <!-- <el-form label-position="top" :inline="true" class="demo-form-inline" @submit.native.prevent="notSubmitForm">
-          <el-form-item label="No. del Documento">
-            <el-input v-model="input" placeholder="Please input" @change="listOrdersInvoiced" />
-          </el-form-item>
-          <el-form-item
-            v-for="(field) in metadataList"
-            :key="field.columnName"
-          >
-            <field-definition
-              :metadata-field="{
-                ...field,
-                size: 6,
-                name: field.columnName === 'DateOrderedFrom' ? $t('form.pos.optionsPoinSales.generalOptions.dateOrder') : field.name
-              }"
-              :container-uuid="'Cash-Withdrawal'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-          </el-form-item>
-        </el-form> -->
         <template v-slot:header>
           <el-form
             label-position="top"
@@ -293,22 +201,29 @@
             </el-row>
           </el-form>
         </template>
+
         <template v-slot:footer>
-          <custom-pagination
-            :total="total"
-            :current-page="currentPage"
-            :handle-change-page="handleChangePage"
-            :records-page="orderList.length"
-            layout="total, prev, pager, next"
-            style="float: right;"
-          />
-          <el-button
-            type="text"
-            class="custom-button-create-bp"
-          />
-          <el-row :gutter="24">
-            <el-col :span="24">
+          <el-row :gutter="24" class="orders-list-footer">
+            <el-col :span="18">
+              <custom-pagination
+                :total="total"
+                :current-page="currentPage"
+                :handle-change-page="handleChangePage"
+                layout="total, prev, pager, next"
+                style="float: right;"
+                :records-page="orderList.length"
+              />
+            </el-col>
+
+            <el-col :span="6">
               <samp style="float: right; padding-right: 10px;">
+                <el-button
+                  :loading="isLoading"
+                  type="success"
+                  icon="el-icon-refresh-right"
+                  size="small"
+                  @click="listOrdersInvoiced();"
+                />
                 <el-button
                   type="danger"
                   class="custom-button-create-bp"
@@ -336,16 +251,21 @@ import fieldsListOrders from './fieldsListOrders.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // components and mixins
-import FindOrders from './FindOrders'
-import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import FindOrders from './FindOrders'
 
 // api request methods
-import { createShipment, shipments, holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
+import { holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   listOrders
 } from '@/api/ADempiere/form/point-of-sales.js'
+
+// ultils and helper methods
+import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
+import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat.js'
+import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 import {
   getLookupList,
   isDisplayedField,
@@ -357,22 +277,16 @@ import {
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
 
-// ultils and helper methods
-import {
-  createFieldFromDictionary
-} from '@/utils/ADempiere/lookupFactory'
-import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat.js'
-import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
-
 export default {
-  name: 'AisleVendorList',
+  name: 'FastOrder',
 
   components: {
     CustomPagination,
-    FindOrders,
     DocumentStatusTag,
-    FieldDefinition
+    FieldDefinition,
+    FindOrders
   },
+
   props: {
     metadata: {
       type: Object,
@@ -406,18 +320,13 @@ export default {
       currentPage: 1,
       tokenPage: '',
       input: '',
-      valueVisible: false,
       isCustomForm: true,
       timeOut: null,
       changeOrder: {},
-      isloading: true,
+      isLoading: true,
       ordersInvoiced: [],
-      ordersComplete: [],
-      searchCriteria: {},
       currentOptions: {},
-      orderList: [],
-      openPopover: false,
-      isStatus: ''
+      orderList: []
     }
   },
 
@@ -476,22 +385,6 @@ export default {
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
-    highlightRow() {
-      if (!this.isEmptyValue(this.selectOrder)) {
-        return true
-      }
-      return false
-    },
-    selectOrder() {
-      const action = this.$route.query.action
-      if (!this.isEmptyValue(this.ordersInvoiced)) {
-        const order = this.ordersInvoiced.find(item => item.uuid === action)
-        if (!this.isEmptyValue(order)) {
-          return order
-        }
-      }
-      return null
-    },
     sortFieldsListOrder() {
       return this.fieldsList.find(field => field.columnName === 'C_BPartner_ID')
     },
@@ -504,16 +397,6 @@ export default {
     },
     allowsCreateOrder() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsCreateOrder
-    },
-    showConfirmDelivery: {
-      get() {
-        return this.$store.getters.showConfirmDelivery
-      },
-      set(value) {
-        if (!this.isEmptyValue(this.currentOrder.uuid)) {
-          this.$store.commit('setShowFastConfirmDelivery', value)
-        }
-      }
     },
     showToDeliveOrders: {
       get() {
@@ -560,19 +443,6 @@ export default {
     },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
-    },
-    currentDateOrderedFrom() {
-      // metadataList
-      const dateOrderedFrom = this.metadataList.find(field => field.columnName === 'DateOrderedFrom')
-      console.log(this.metadataList)
-      return {
-        ...dateOrderedFrom,
-        name: this.$t('form.pos.optionsPoinSales.generalOptions.dateOrder')
-      }
-    // },
-    // currentDateOrderedFrom() {
-    //   // metadataList
-    //   return this.metadataList.find(field => field.columnName === 'DateOrderedFrom')
     }
   },
 
@@ -585,8 +455,6 @@ export default {
   },
 
   methods: {
-    extractPagingToken,
-    createFieldFromDictionary,
     getLookupList,
     isDisplayedField,
     isDisplayedDefault,
@@ -662,82 +530,9 @@ export default {
       }
       this.closeSearch(command)
     },
-    validaTypeDocument(type) {
-      this.isStatus = type
-    },
-    openDelivery() {
-      if (!this.isProcessed) {
-        return
-      }
-      createShipment({
-        posUuid: this.currentPointOfSales.uuid,
-        orderUuid: this.currentOrder.uuid,
-        salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid
-      })
-        .then(shipment => {
-          this.$store.commit('setShipment', shipment)
-          shipments({ shipmentUuid: shipment.uuid })
-            .then(response => {
-              this.$store.commit('setDeliveryList', response.records)
-            })
-        })
-        .catch(error => {
-          this.$message({
-            type: 'error',
-            message: error.message,
-            duration: 1500,
-            showClose: true
-          })
-        })
-    },
     handleChangePage(newPage) {
       this.tokenPage = this.tokenPage + '-' + newPage
       this.listOrdersInvoiced(this.currentOptions)
-    },
-    handleCurrentChange(row) {
-      // close popover
-      this.$store.commit('showListOrders', false)
-      this.changeOrder = row
-      // this.selectionChangeOrder()
-    },
-    selectionChangeOrder() {
-      const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      const currentOrder = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
-      if (!this.isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
-        this.$store.state['pointOfSales/point/index'].conversionsList = []
-        this.$store.dispatch('currentOrder', this.changeOrder)
-        this.$store.dispatch('deleteAllCollectBox')
-        this.$router.push({
-          params: {
-            ...this.$route.params
-          },
-          query: {
-            ...this.$route.query,
-            action: this.changeOrder.uuid
-          }
-        }, () => {})
-        const orderUuid = this.$route.query.action
-        this.$store.dispatch('listPayments', { posUuid, orderUuid })
-      }
-      if (this.changeOrder.documentStatus.value === 'DR') {
-        holdOrder({
-          posUuid: this.currentPointOfSales.uuid,
-          salesRepresentativeUuid: this.$store.getters['user/getUserUuid'],
-          orderUuid: this.changeOrder.uuid
-        })
-          .then(response => {
-            this.$message.success(this.$t('form.pos.generalNotifications.selectedOrder') + response.documentNo)
-          })
-          .catch(error => {
-            this.$message({
-              message: error.message,
-              isShowClose: true,
-              type: 'error'
-            })
-            console.warn(`Error Hold Order ${error.message}. Code: ${error.code}.`)
-          })
-      }
-      this.clear()
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
@@ -757,13 +552,6 @@ export default {
           }
         }
       })
-    },
-    orderPrpcess(row) {
-      const parametersList = [{
-        columnName: 'C_Order_ID',
-        value: row.id
-      }]
-      this.$store.dispatch('addParametersProcessPos', parametersList)
     },
     setFieldsList() {
       const fieldsList = [
@@ -787,7 +575,7 @@ export default {
       })
       // Product Code
       fieldsList.forEach(element => {
-        this.createFieldFromDictionary(element)
+        createFieldFromDictionary(element)
           .then(response => {
             newfieldsList.push({
               ...response,
@@ -799,13 +587,8 @@ export default {
       })
       this.metadataList = newfieldsList
     },
-    sortDate(listDate) {
-      return listDate.sort((elementA, elementB) => {
-        return new Date().setTime(new Date(elementB.dateOrdered).getTime()) - new Date().setTime(new Date(elementA.dateOrdered).getTime())
-      })
-    },
     listOrdersInvoiced(option) {
-      this.isloading = true
+      this.isLoading = true
 
       /*
       // send multiple request with close list orders
@@ -830,36 +613,18 @@ export default {
         values
       )
         .then(response => {
-          this.isloading = false
           this.orderList = response.ordersList
-          this.tokenPage = this.extractPagingToken(response.nextPageToken)
+          this.tokenPage = extractPagingToken(response.nextPageToken)
           this.total = response.recordCount
           // this.ordersInvoiced = response.ordersList
         })
         .catch(error => {
           this.orderList = []
-          this.isloading = false
           console.warn(`listOrdersFromServer: ${error.message}. Code: ${error.code}.`)
         })
-    },
-    clear() {
-      this.openPopover = false
-      this.input = ''
-      this.$store.commit('updateValueOfField', {
-        containerUuid: 'Aisle-Vendor-List',
-        columnName: 'C_BPartner_ID',
-        value: undefined
-      })
-      this.$store.commit('updateValueOfField', {
-        containerUuid: 'Aisle-Vendor-List',
-        columnName: 'DisplayColumn_C_BPartner_ID',
-        value: undefined
-      })
-      this.$store.commit('updateValueOfField', {
-        containerUuid: 'Aisle-Vendor-List',
-        columnName: 'C_BPartner_ID_UUID',
-        value: undefined
-      })
+        .finally(() => {
+          this.isLoading = false
+        })
     },
     newOrder() {
       if (!this.allowsCreateOrder) {
