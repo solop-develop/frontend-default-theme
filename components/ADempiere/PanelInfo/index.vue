@@ -59,6 +59,7 @@
           </span>
         </el-descriptions-item> -->
       </el-descriptions>
+      {{ nameTab }}
     </el-header>
     <el-main style="padding:0px; height: 100% !important;">
       <el-tabs
@@ -175,19 +176,22 @@
 import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import store from '@/store'
-
-// components and mixins
+import language from '@/lang'
+// Constants
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
+// Components
 import Attachment from './Component/Attachment/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
 import Accounting from './Component/Accounting/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import Chats from './Component/chats/index.vue'
 import workflowLogs from './Component/workflowLogs/index.vue'
+// Utils and Helper Methods
 import {
   listProductStorage
 } from '@/api/ADempiere/form/storeProduct.js'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'ContainerInfo',
@@ -225,6 +229,10 @@ export default defineComponent({
     isAccountingInfo: {
       type: Boolean,
       default: false
+    },
+    isDefaultPanel: {
+      type: String,
+      default: ''
     }
   },
 
@@ -238,6 +246,10 @@ export default defineComponent({
     const nameTab = ref('getRecordLogs')
     const recordsListStoreProduct = ref([])
     const drawer = ref(false)
+
+    if (!isEmptyValue(props.isDefaultPanel)) {
+      nameTab.value = props.isDefaultPanel
+    }
 
     // use getter to reactive properties
 
@@ -374,6 +386,9 @@ export default defineComponent({
         findListStoreProduct()
         return
       }
+      if (tab.name === language.t('window.containerInfo.attachment.label')) tab.name = 'getAttachment'
+      if (tab.name === language.t('window.containerInfo.notes')) tab.name = 'listChats'
+
       nameTab.value = tab.name
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,
@@ -417,7 +432,7 @@ export default defineComponent({
     watch(showPanelInfo, (newValue, oldValue) => {
       if (newValue && newValue !== oldValue) {
         handleClick({
-          name: nameTab.value
+          name: props.isDefaultPanel
         })
       }
     })
