@@ -84,11 +84,13 @@
                 <el-button
                   type="danger"
                   icon="el-icon-close"
+                  @click="close"
                 />
 
                 <el-button
                   type="primary"
                   icon="el-icon-check"
+                  @click="close"
                 />
               </samp>
             </el-col>
@@ -186,6 +188,9 @@ export default {
         .catch(error => {
           console.warn(error)
         })
+    },
+    close() {
+      this.$store.commit('setShowProductAttribute', false)
     },
     setAttribute() {
       const productId = this.$store.getters.getValueOfField({
