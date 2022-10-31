@@ -17,19 +17,55 @@
 -->
 
 <template>
-  <el-input
-    v-model="displayedValueNotEdit"
-    v-bind="properties"
-    @clear="clearValues"
-  />
+  <el-popover
+    key="product-attribute"
+    ref="ProductAttribute"
+    v-model="isShowProductAttribute"
+    class="product-attribute"
+    placement="left-end"
+    width="500"
+    trigger="click"
+  >
+    <panel-product-attribute
+      v-if="isShowProductAttribute"
+      class="product-attribute-form"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
+      :container-manager="containerManager"
+      :metadata="metadata"
+    />
+
+    <el-button
+      slot="reference"
+      class="button-product-attribute-show"
+      type="text"
+      style="width: 100%;"
+      :disabled="isDisabled"
+    >
+      <el-input
+        v-model="displayedValueNotEdit"
+        v-bind="properties"
+        @clear="clearValues"
+      >
+        <el-button slot="append">
+          <svg-icon icon-class="setAttribute" />
+        </el-button>
+      </el-input>
+    </el-button>
+  </el-popover>
 </template>
 
 <script>
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import panelProductAttribute from './panelProductAttribute'
 
 export default {
   name: 'FieldProductAttribute',
+
+  components: {
+    panelProductAttribute
+  },
 
   mixins: [
     fieldMixin
@@ -50,7 +86,27 @@ export default {
     }
   },
 
+  data() {
+    return {
+      metadataList: [],
+      isLoadingFields: false,
+      // isShowProductAttribute: false,
+      // fieldsList: FieldsList,
+      timeOutFields: null,
+      isCustomForm: true,
+      unsubscribe: () => {}
+    }
+  },
+
   computed: {
+    isShowProductAttribute: {
+      get() {
+        return this.$store.getters.getShowProductAttribute
+      },
+      set(value) {
+        this.$store.commit('setShowProductAttribute', value)
+      }
+    },
     displayedValueNotEdit: {
       get() {
         return this.displayedValue
