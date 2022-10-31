@@ -33,6 +33,7 @@
             :filter-manager="containerManager.changeFieldShowedFromUser"
             :showed-manager="containerManager.isDisplayedField"
             :fields-to-hidden="containerManager.getFieldsToHidden"
+            :is-filter-records="isFilterRecords"
           />
 
           <el-card
@@ -115,6 +116,10 @@ export default defineComponent({
     },
     // TODO: Manage with store and container manager
     isShowFilter: {
+      type: Boolean,
+      default: true
+    },
+    isFilterRecords: {
       type: Boolean,
       default: true
     }

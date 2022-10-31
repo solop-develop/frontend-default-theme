@@ -24,6 +24,7 @@
     :container-manager="containerManagerPanel"
     :panel-metadata="panelMetadata"
     :is-show-filter="isShowFilter"
+    :is-filter-records="isFilterRecords"
   />
 </template>
 
@@ -47,6 +48,10 @@ export default defineComponent({
       required: true
     },
     isShowFilter: {
+      type: Boolean,
+      default: true
+    },
+    isFilterRecords: {
       type: Boolean,
       default: true
     }

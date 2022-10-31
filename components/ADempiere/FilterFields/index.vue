@@ -18,15 +18,14 @@
 
 <template>
   <span>
-    <el-row v-if="!isMobile" :gutter="5">
+    <el-row v-if="!isMobile && SearchRecordTypeSale" :gutter="5">
       <el-col :span="20">
         <el-input
           v-model="valueToSearch"
           clearable
           :placeholder="$t('components.searchRecord')"
-          size="mini"
+          size="small"
           class="input-search"
-          style="height: 30px;"
           @input="handleChangeSearch"
         >
           <i
@@ -74,20 +73,6 @@
       </el-col>
     </el-row>
     <el-row v-else :gutter="20">
-      <!-- <el-col :span="24">
-        <el-input
-          v-model="valueToSearch"
-          clearable
-          size="mini"
-          class="input-search"
-          style="height: 30px;"
-        >
-          <i
-            slot="prefix"
-            class="el-icon-search el-input__icon"
-          />
-        </el-input>
-      </el-col> -->
       <el-col :span="24">
         <el-form :class="cssClass" style="float: right;">
           <el-form-item>
@@ -182,10 +167,14 @@ export default defineComponent({
     inTable: {
       type: Boolean,
       default: false
+    },
+    isFilterRecords: {
+      type: Boolean,
+      default: true
     }
   },
 
-  setup(props) {
+  setup(props, { root }) {
     const size = props.inTable
       ? 'mini'
       : 'small'
@@ -265,6 +254,10 @@ export default defineComponent({
       }
     })
 
+    const SearchRecordTypeSale = computed(() => {
+      return root.$route.meta.type === 'window' && props.isFilterRecords
+    })
+
     const changeShowed = (selectedValues) => {
       if (props.inTable) {
         return changeShowedTable(selectedValues)
@@ -337,7 +330,7 @@ export default defineComponent({
       fieldsListAvailable,
       fieldsListAvailableWithValue,
       valueToSearch,
-
+      SearchRecordTypeSale,
       // methods
       changeShowed,
       handleChangeSearch,

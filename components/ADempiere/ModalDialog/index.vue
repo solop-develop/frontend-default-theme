@@ -29,6 +29,7 @@
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
           :container-manager="containerManagerModalDialog"
+          :is-filter-records="false"
         />
       </span>
       <loading-view
@@ -123,7 +124,6 @@ export default defineComponent({
       return storedModalDialog.value.title
     })
     const componentRender = computed(() => {
-      // return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
       return storedModalDialog.value.componentPath
     })
 
