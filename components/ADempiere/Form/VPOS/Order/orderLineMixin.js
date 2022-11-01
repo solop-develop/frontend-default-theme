@@ -212,7 +212,7 @@ export default {
       }
     },
     updateOrderLine(line) {
-      this.isloadedUpdateLine = true
+      this.$store.dispatch('changeLoadedLine', true)
       // const line.columnName = line.value
       let updateLine
       const currentLine = this.$store.state['pointOfSales/orderLine/index'].line
@@ -262,13 +262,14 @@ export default {
         posUuid
       })
         .then(response => {
+          this.$store.dispatch('changeLoadedLine', false)
           const {
             containerUuid,
             columnName
           } = line
           this.$store.commit('pin', false)
           this.$store.dispatch('currentLine', response)
-          this.fillOrderLine(response)
+          // this.fillOrderLine(response)
           this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
           this.$store.commit('updateValueOfField', {
             containerUuid,
@@ -294,6 +295,9 @@ export default {
             message: error.message,
             showClose: true
           })
+        })
+        .finally(() => {
+          this.$store.dispatch('changeLoadedLine', false)
         })
     },
 

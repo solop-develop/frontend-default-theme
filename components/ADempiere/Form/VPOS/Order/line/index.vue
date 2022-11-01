@@ -658,16 +658,13 @@ export default {
                 if (mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.quantity) {
                   return
                 }
-                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line) && !this.isloadedUpdateLine) {
+                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line) && !this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
                   this.$message({
                     type: 'success',
                     message: this.$t('form.pos.pinMessage.updateQtyEntered'),
                     showClose: true
                   })
-                  clearTimeout(this.timeOutUpdate)
-                  this.timeOutUpdate = setTimeout(() => {
-                    this.updateOrderLine(mutation.payload)
-                  }, 1500)
+                  this.updateOrderLine(mutation.payload)
                 } else {
                   const attributePin = {
                     ...mutation.payload,
@@ -682,7 +679,7 @@ export default {
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.price) {
                   return
                 }
-                if (this.modifyPrice) {
+                if (this.modifyPrice && !this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
                   this.updateOrderLine(mutation.payload)
                   this.$message({
                     type: 'success',
@@ -707,7 +704,7 @@ export default {
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
-                if (this.modifyDiscount) {
+                if (this.modifyDiscount && !this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
                   this.updateOrderLine(mutation.payload)
                   // this.$message({
                   //   type: 'success',
