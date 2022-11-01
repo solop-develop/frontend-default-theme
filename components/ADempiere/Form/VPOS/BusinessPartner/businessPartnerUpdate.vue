@@ -303,6 +303,9 @@ export default {
       this.getCustomer()
     }
   },
+  created() {
+    this.getCustomer()
+  },
   methods: {
     getLookupList,
     isDisplayedField,
@@ -387,6 +390,15 @@ export default {
         .then(response => {
           this.$store.dispatch('changeShowUpdateCustomer', false)
         })
+        .catch(error => {
+          console.error(error.message)
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
+        this.$store.dispatch('changeShowUpdateCustomer', false)
     },
     getCustomer() {
       this.$store.dispatch('changeCopyShippingAddress', false)
@@ -405,6 +417,9 @@ export default {
           this.loadAddresses(this.billing, 'Billing-Address')
           this.loadDataCustomer(response, this.containerUuid)
           this.currentCustomer = response
+          this.loading = false
+        })
+        .finally(() => {
           this.loading = false
         })
     },
