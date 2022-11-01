@@ -23,7 +23,7 @@
     @command="changeSalesRepresentative"
   >
     <span style="font-size: 16px;">
-      <i class="el-icon-guide" />
+      <i class="el-icon-s-custom" />
       {{ $t('form.pos.order.seller') }}:
       <b style="cursor: pointer">
         {{ currentSalesRepresentative.name }}
@@ -117,6 +117,9 @@ export default defineComponent({
         listAvailableSellers()
       }
     })
+    if (isEmptyValue(salesRepresentativeList.value) || !isEmptyValue(salesRepresentativeList.value) && salesRepresentativeList.value.length <= 1) {
+      listAvailableSellers()
+    }
 
     return {
       currentSalesRepresentative,
