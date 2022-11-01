@@ -227,7 +227,8 @@ export default {
             quantity: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
             warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
-            columnName: 'quantity'
+            columnName: 'quantity',
+            message: this.$t('form.pos.pinMessage.updateQtyEntered')
           }
           break
         case 'PriceEntered':
@@ -236,7 +237,8 @@ export default {
             price: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
             warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
-            columnName: 'price'
+            columnName: 'price',
+            message: this.$t('form.pos.pinMessage.updatePriceEntered')
           }
           // price = line.value
           // quantity = currentLine.quantity
@@ -248,7 +250,8 @@ export default {
             discountRate: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
             warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
-            columnName: 'discount'
+            columnName: 'discount',
+            message: this.$t('form.pos.pinMessage.updateDiscountEntered')
           }
           // discountRate = line.value
           // price = this.fieldShowValue(currentLine, { columnName: 'CurrentPrice' }),
@@ -276,6 +279,11 @@ export default {
             columnName,
             value: response[updateLine.columnName]
           })
+          this.$message({
+            type: 'success',
+            message: updateLine.message,
+            showClose: true
+          })
           // this.isloadedUpdateLine = false
         })
         .catch(error => {
@@ -288,7 +296,7 @@ export default {
           this.$store.commit('updateValueOfField', {
             containerUuid,
             columnName,
-            value: currentLine[updateLine.columnName]
+            value: updateLine[updateLine.columnName]
           })
           this.$message({
             type: 'error',
