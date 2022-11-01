@@ -102,6 +102,7 @@ export default {
         quantityOrdered: 0,
         uuid: ''
       },
+      isloadedUpdateLine: false,
       totalAmountConvertedLine: {}
     }
   },
@@ -211,6 +212,7 @@ export default {
       }
     },
     updateOrderLine(line) {
+      this.isloadedUpdateLine = true
       // const line.columnName = line.value
       let updateLine
       const currentLine = this.$store.state['pointOfSales/orderLine/index'].line
@@ -224,7 +226,8 @@ export default {
             orderLineUuid: currentLine.uuid,
             quantity: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
-            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
+            columnName: 'quantity'
           }
           break
         case 'PriceEntered':
@@ -232,7 +235,8 @@ export default {
             orderLineUuid: currentLine.uuid,
             price: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
-            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
+            columnName: 'price'
           }
           // price = line.value
           // quantity = currentLine.quantity
@@ -243,7 +247,8 @@ export default {
             orderLineUuid: currentLine.uuid,
             discountRate: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
-            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid
+            warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
+            columnName: 'discount'
           }
           // discountRate = line.value
           // price = this.fieldShowValue(currentLine, { columnName: 'CurrentPrice' }),
@@ -257,13 +262,33 @@ export default {
         posUuid
       })
         .then(response => {
+          const {
+            containerUuid,
+            columnName
+          } = line
           this.$store.commit('pin', false)
           this.$store.dispatch('currentLine', response)
           this.fillOrderLine(response)
           this.$store.dispatch('reloadOrder', { orderUuid: this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid })
+          this.$store.commit('updateValueOfField', {
+            containerUuid,
+            columnName,
+            value: response[updateLine.columnName]
+          })
+          // this.isloadedUpdateLine = false
         })
         .catch(error => {
+          // this.isloadedUpdateLine = false
+          const {
+            containerUuid,
+            columnName
+          } = line
           console.error(error.message)
+          this.$store.commit('updateValueOfField', {
+            containerUuid,
+            columnName,
+            value: currentLine[updateLine.columnName]
+          })
           this.$message({
             type: 'error',
             message: error.message,

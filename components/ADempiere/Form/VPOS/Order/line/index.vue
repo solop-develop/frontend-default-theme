@@ -292,6 +292,8 @@ export default {
       uomValueRate: '',
       uomList: [],
       baseUom: 0,
+      timeOutUpdate: null,
+      // isloadedUpdateLine: false,
       unsubscribe: () => {}
     }
   },
@@ -656,13 +658,16 @@ export default {
                 if (mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.quantity) {
                   return
                 }
-                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
+                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line) && !this.isloadedUpdateLine) {
                   this.$message({
                     type: 'success',
                     message: this.$t('form.pos.pinMessage.updateQtyEntered'),
                     showClose: true
                   })
-                  this.updateOrderLine(mutation.payload)
+                  clearTimeout(this.timeOutUpdate)
+                  this.timeOutUpdate = setTimeout(() => {
+                    this.updateOrderLine(mutation.payload)
+                  }, 1500)
                 } else {
                   const attributePin = {
                     ...mutation.payload,
@@ -699,16 +704,16 @@ export default {
                 //   row: this.currentLineOrder,
                 //   columnName: 'Discount'
                 // })
-                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discount) {
+                if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
                 if (this.modifyDiscount) {
                   this.updateOrderLine(mutation.payload)
-                  this.$message({
-                    type: 'success',
-                    message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-                    showClose: true
-                  })
+                  // this.$message({
+                  //   type: 'success',
+                  //   message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
+                  //   showClose: true
+                  // })
                 } else {
                   const attributePin = {
                     ...mutation.payload,
