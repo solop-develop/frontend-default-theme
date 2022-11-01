@@ -295,30 +295,7 @@
                   </el-dropdown-menu>
                 </el-dropdown>
                 <br>
-                <el-dropdown
-                  v-if="!isEmptyValue(listSeller)"
-                  trigger="click"
-                  class="info-pos"
-                  @command="changeSeller"
-                >
-                  <span>
-                    <i class="el-icon-guide" />
-                    {{ 'Vendedor' }}:
-                    <b style="cursor: pointer">
-                      {{ currentSeller }}
-                    </b>
-                  </span>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item
-                      v-for="item in listSeller"
-                      :key="item.uuid"
-                      :command="item"
-                    >
-                      {{ item.name }}
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-                <br>
+
                 <el-dropdown
                   v-if="!isEmptyValue(listCampaign)"
                   trigger="click"
@@ -368,9 +345,11 @@
             </div>
             <span style="float: right;">
               <div style="padding-left: 10px;padding-right: 10px;">
-                <p class="total">{{ $t('form.pos.order.seller') }}:<b style="float: right;">
-                  {{ currentOrder.salesRepresentative.name }}
-                </b></p>
+                <sales-representative
+                  :sales-order="currentOrder"
+                  :point-of-sales="currentPointOfSales"
+                />
+
                 <p class="total"> {{ $t('form.pos.order.subTotal') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">{{ formatPrice(currentOrder.totalLines, pointOfSalesCurrency.iSOCode) }}</b></p>
                 <p class="total"> {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.discountAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
                 <p class="total"> {{ $t('form.pos.order.tax') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.taxAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
@@ -587,6 +566,7 @@ import InfoOrderLine from '@theme/components/ADempiere/Form/VPOS/Order/line/info
 import ProductInfo from '@theme/components/ADempiere/Form/VPOS/ProductInfo'
 import FastOrdesList from '@theme/components/ADempiere/Form/VPOS/OrderList/fastOrder'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
+import SalesRepresentative from '@theme/components/ADempiere/Form/VPOS/Order/SalesRepresentative.vue'
 
 // utils and helper methods
 // Format of values ( Date, Price, Quantity )
@@ -596,13 +576,12 @@ import {
   formatPrice,
   formatQuantity
 } from '@/utils/ADempiere/valueFormat.js'
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 import { formatQuantity as formatQuantityPanel } from '@/utils/ADempiere/formatValue/numberFormat.js'
 
 // api request methods
 import { requestLookupList } from '@/api/ADempiere/window.js'
-import { releaseOrder, availableSellers } from '@/api/ADempiere/form/point-of-sales.js'
+import { releaseOrder } from '@/api/ADempiere/form/point-of-sales.js'
 
 export default {
   name: 'Order',
@@ -614,7 +593,8 @@ export default {
     InfoOrderLine,
     ProductInfo,
     FastOrdesList,
-    fieldLine
+    fieldLine,
+    SalesRepresentative
   },
 
   mixins: [
@@ -630,7 +610,6 @@ export default {
       showFieldLine: false,
       isEditLineMobile: false,
       lineRow: {},
-      listSeller: [],
       pin: '',
       attributePin: {},
       visible: false,
@@ -638,7 +617,6 @@ export default {
       isEditLine: {},
       fileColumnNameEdit: '',
       editPrice: 0,
-      currentSeller: 'Sin vendedor seleccionado',
       listCampaign: []
     }
   },
@@ -983,7 +961,7 @@ export default {
     if (!this.isEmptyValue(this.currentLineOrder)) {
       this.$refs.linesTable.setCurrentRow(this.currentLineOrder)
     }
-    this.listAvailableSellers()
+
     this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: false })
   },
   methods: {
@@ -993,27 +971,6 @@ export default {
     formatQuantity,
     formatQuantityPanel,
     copyToClipboard,
-    listAvailableSellers() {
-      const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      if (isEmptyValue(posUuid)) {
-        return
-      }
-      availableSellers({
-        posUuid,
-        isOnlyAllocated: false
-      })
-        .then(response => {
-          this.listSeller = response.records
-        })
-        .catch(error => {
-          this.$message({
-            message: error.message,
-            isShowClose: true,
-            type: 'error'
-          })
-          console.warn(`Error: ${error.message}. Code: ${error.code}.`)
-        })
-    },
     openEditModeMobile(line) {
       this.lineRow = line
       this.isEditLineMobile = !this.isEditLineMobile
@@ -1212,14 +1169,6 @@ export default {
         this.$store.commit('customer', {})
         this.clearOrder()
       }
-    },
-    changeSeller(val) {
-      this.$store.dispatch('updateOrder', {
-        orderUuid: this.currentOrder.uuid,
-        posUuid: this.currentPointOfSales.uuid,
-        sellerUuid: val.uuid
-      })
-      this.currentSeller = val.name
     },
     changeCampaign(item) {
       this.$store.dispatch('updateOrder', {
