@@ -24,11 +24,14 @@
     :container-manager="containerManagerPanel"
     :panel-metadata="panelMetadata"
     :is-show-filter="isShowFilter"
+    :is-filter-records="isFilterRecords"
+    :is-advanced-query="isAdvancedQuery"
   />
 </template>
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+import store from '@/store'
 
 export default defineComponent({
   name: 'PanelDefinition',
@@ -49,6 +52,14 @@ export default defineComponent({
     isShowFilter: {
       type: Boolean,
       default: true
+    },
+    isFilterRecords: {
+      type: Boolean,
+      default: true
+    },
+    isAdvancedQuery: {
+      type: Boolean,
+      default: false
     }
   },
 

@@ -21,7 +21,11 @@
       {{ $t('operators.compareSearch') }}:
     </span>
     <br>
-
+    {{ fieldAttributes.operator }} <hr>
+    {{ fieldAttributes.oldOperator }} <hr>
+    {{ fieldAttributes.name }} <hr>
+    {{ fieldAttributes.columnName }} <hr>
+    {{ fieldAttributes.containerUuid }}
     <el-select
       v-model="currentOperator"
       @change="changeOperator"
@@ -54,6 +58,10 @@ export default defineComponent({
     fieldAttributes: {
       type: Object,
       required: true
+    },
+    containerManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 
@@ -61,22 +69,57 @@ export default defineComponent({
     const { parentUuid, containerUuid, columnName } = props.fieldAttributes
 
     const operatorsList = ref(props.fieldAttributes.operatorsList)
-
     const currentOperator = computed({
       get() {
+        const ppp = store.getters.getFieldFromColumnName({
+          containerUuid,
+          parentUuid,
+          columnName
+        })
         const { operator } = store.getters.getFieldFromColumnName({
           containerUuid,
+          parentUuid,
           columnName
+        })
+
+        console.log({
+          ppp,
+          containerUuid,
+          parentUuid,
+          columnName,
+          aaa: store.getters.getValuesView({
+            parentUuid,
+            format: 'object'
+          }),
+          bbb: store.getters.getValueOfField({
+            parentUuid,
+            columnName
+          }),
+          getters: store.getters,
+          operator
         })
 
         return operator
       },
       set(newValue) {
-        store.dispatch('changeFieldAttribure', {
+        console.log({
+          newValue,
           containerUuid,
           columnName,
           attributeName: 'operator',
           attributeValue: newValue
+        })
+        store.commit('updateValueOfField', {
+          containerUuid,
+          columnName,
+          value: newValue
+        })
+        store.dispatch('changeFieldAttribure', {
+          containerUuid,
+          columnName,
+          attributeName: 'operator',
+          attributeValue: newValue,
+          field: props.fieldAttributes
         })
       }
     })
@@ -94,11 +137,13 @@ export default defineComponent({
      * @param {mixed} value, main value in component
      */
     const handleChange = (value) => {
+      console.log({ value })
       store.dispatch('notifyFieldChange', {
         containerUuid,
         field: props.fieldAttributes,
         columnName,
-        newValue: value
+        newValue: value,
+        containerManager: props.containerManager
       })
     }
 

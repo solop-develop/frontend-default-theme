@@ -206,7 +206,7 @@ export default {
       return {
         ...this.field,
         inTable: this.inTable,
-        isAdvancedQuery: this.isAdvancedQuery,
+        isAdvancedQuery: this.field.isAdvancedQuery,
         // DOM properties
         required: this.isMandatoryField,
         readonly: this.isReadOnlyField,
@@ -242,6 +242,9 @@ export default {
      * Idicate if field is read only
      */
     isReadOnlyField() {
+      if (this.field.isAdvancedQuery) {
+        return false
+      }
       if (this.inTable) {
         // table manage with isReadOnlyColumn method
         // if rendered the component is editable
@@ -266,7 +269,7 @@ export default {
     },
 
     isSelectCreated() {
-      return this.isAdvancedQuery &&
+      return this.field.isAdvancedQuery &&
         OPERATORS_MULTIPLE_VALUES.includes(this.field.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
     },

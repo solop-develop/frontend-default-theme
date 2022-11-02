@@ -398,7 +398,7 @@ export default {
             showClose: true
           })
         })
-        this.$store.dispatch('changeShowUpdateCustomer', false)
+      this.$store.dispatch('changeShowUpdateCustomer', false)
     },
     getCustomer() {
       this.$store.dispatch('changeCopyShippingAddress', false)

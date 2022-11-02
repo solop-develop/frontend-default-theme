@@ -33,6 +33,12 @@
             class="el-icon-search el-input__icon"
           />
         </el-input>
+        <search-fields
+          :parent-uuid="parentUuid"
+          :container-uuid="containerUuid"
+          :container-manager="containerManager"
+          style="float: right;"
+        />
       </el-col>
       <el-col
         :span="1"
@@ -135,7 +141,7 @@ import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Componen
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
-
+import searchFields from '@theme/components/ADempiere/searchRecordField'
 // constants
 import { BUTTON } from '@/utils/ADempiere/references'
 
@@ -149,7 +155,8 @@ export default defineComponent({
     CellDisplayInfo,
     ColumnsDisplayOption,
     CustomPagination,
-    FullScreenContainer
+    FullScreenContainer,
+    searchFields
   },
 
   props: {
