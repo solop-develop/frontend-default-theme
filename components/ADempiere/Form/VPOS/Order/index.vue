@@ -1069,29 +1069,29 @@ export default {
         this.visible = true
         return
       }
-      // switch (columnName) {
-      //   case 'QtyEntered':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updateQtyEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      //   case 'PriceEntered':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updatePriceEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      //   case 'Discount':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      // }
+      switch (columnName) {
+        case 'QtyEntered':
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.pinMessage.updateQtyEntered'),
+            showClose: true
+          })
+          break
+        case 'PriceEntered':
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.pinMessage.updatePriceEntered'),
+            showClose: true
+          })
+          break
+        case 'Discount':
+          this.$message({
+            type: 'success',
+            message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
+            showClose: true
+          })
+          break
+      }
       const changeLine = { columnName, value }
       this.updateOrderLine(changeLine)
     },
