@@ -156,6 +156,8 @@ import {
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
+import { requestLookupList } from '@/api/ADempiere/window.js'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default {
   name: 'BusinessPartnerUpdate',
@@ -216,7 +218,9 @@ export default {
         id: '',
         uuid: '',
         name: ''
-      }
+      },
+      listRefType: [],
+      columnNameRefType: 'PersonType'
     }
   },
   computed: {
@@ -301,10 +305,8 @@ export default {
   watch: {
     showCustomer(value) {
       this.getCustomer()
+      if (this.isEmptyValue(this.listRefType) && !this.isEmptyValue(this.fieldsList)) this.getListRefType()
     }
-  },
-  created() {
-    this.getCustomer()
   },
   methods: {
     getLookupList,
@@ -316,6 +318,7 @@ export default {
     isReadOnlyField,
     changeFieldShowedFromUser,
     requestGetCountryDefinition,
+    isEmptyValue,
     handleClose() {
       this.$store.commit('setShowAddNewAddress', false)
     },
@@ -389,6 +392,11 @@ export default {
       updateCustomer(values)
         .then(response => {
           this.$store.dispatch('changeShowUpdateCustomer', false)
+          this.$message({
+            type: 'success',
+            message: this.$t('recordManager.updatedRecord'),
+            showClose: true
+          })
         })
         .catch(error => {
           console.error(error.message)
@@ -398,7 +406,7 @@ export default {
             showClose: true
           })
         })
-        this.$store.dispatch('changeShowUpdateCustomer', false)
+      this.$store.dispatch('changeShowUpdateCustomer', false)
     },
     getCustomer() {
       this.$store.dispatch('changeCopyShippingAddress', false)
@@ -502,6 +510,10 @@ export default {
       return value
     },
     loadDataCustomer(customer, containerUuid) {
+      const { additionalAttributes } = customer
+      let currentRefType
+      if (!this.isEmptyValue(additionalAttributes)) currentRefType = { ValueColumn: additionalAttributes.PersonType, DisplayColumn: additionalAttributes.PersonType }
+      if (!this.isEmptyValue(this.listRefType)) currentRefType = this.listRefType.find(ref => !this.isEmptyValue(additionalAttributes) && ref.ValueColumn === additionalAttributes.PersonType)
       this.$store.commit('updateValuesOfContainer', {
         containerUuid,
         attributes: [{
@@ -524,13 +536,16 @@ export default {
           value: customer.value
         }, {
           columnName: 'PersonType_ID',
-          value: this.isEmptyValue(customer.additionalAttributes) ? '' : customer.additionalAttributes.PersonType
+          value: this.isEmptyValue(currentRefType) ? '' : currentRefType.ValueColumn
         }, {
           columnName: 'PersonType',
-          value: this.isEmptyValue(customer.additionalAttributes) ? '' : customer.additionalAttributes.PersonType
+          value: this.isEmptyValue(currentRefType) ? '' : currentRefType.ValueColumn
+        }, {
+          columnName: 'DisplayColumn_PersonType',
+          value: this.isEmptyValue(currentRefType) ? '' : currentRefType.DisplayColumn
         }, {
           columnName: 'IsTaxpayer',
-          value: this.isEmptyValue(customer.additionalAttributes) ? false : customer.additionalAttributes.IsTaxpayer
+          value: this.isEmptyValue(additionalAttributes) ? false : additionalAttributes.IsTaxpayer
         }]
       })
     },
@@ -651,6 +666,23 @@ export default {
       //   columnName: 'C_Country_ID',
       //   value: address.country_id
       // })
+    },
+    getListRefType() {
+      const { reference } = this.fieldsList.find(field => field.columnName === this.columnNameRefType)
+      if (this.isEmptyValue(reference)) return
+      const { uuid, tableName } = reference
+      requestLookupList({
+        tableName,
+        columnName: this.columnNameRefType,
+        referenceUuid: uuid
+      })
+        .then(responseLookupItem => {
+          const { recordsList } = responseLookupItem
+          if (this.isEmptyValue(recordsList)) return
+          this.listRefType = recordsList.map(list => {
+            return list.values
+          })
+        })
     }
   }
 }
