@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -29,6 +29,9 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'PanelDefinition',
@@ -57,18 +60,6 @@ export default defineComponent({
       return props.containerManager
     })
 
-    // if (root.$route.query.action === 'create-new') {
-    //   containerManagerPanel.value.setDefaultValues({
-    //     parentUuid: props.parentUuid,
-    //     containerUuid: props.containerUuid
-    //   })
-    // }
-
-    const componentRender = computed(() => {
-      const panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
-      return panelComponent
-    })
-
     /**
      * Get the panel object with all its attributes as well as
      * the fields it contains
@@ -78,6 +69,23 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
       }) || {}
+    })
+
+    // if (root.$route.query.action === 'create-new') {
+    //   containerManagerPanel.value.setDefaultValues({
+    //     parentUuid: props.parentUuid,
+    //     containerUuid: props.containerUuid
+    //   })
+    // }
+
+    const componentRender = computed(() => {
+      let panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
+
+      if (!isEmptyValue(panelMetadata.value) && panelMetadata.value.isSortTab) {
+        panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')
+      }
+
+      return panelComponent
     })
 
     return {

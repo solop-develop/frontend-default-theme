@@ -13,15 +13,17 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-dialog
-    title="modal-dialog"
+    class="modal-dialog"
     :visible="isShowed"
     @close="closeDialog"
   >
     <span slot="title">
       {{ title }}
     </span>
+
     <span class="content-modal-dialog">
       <span v-if="isLoaded">
         <component
@@ -36,6 +38,7 @@
         key="form-loading"
       />
     </span>
+
     <span slot="footer" class="dialog-footer">
       <el-button
         type="danger"
@@ -63,9 +66,11 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
   name: 'ModalDialog',
+
   components: {
     LoadingView
   },
+
   props: {
     parentUuid: {
       type: String,
@@ -91,6 +96,7 @@ export default defineComponent({
       }
     }
   },
+
   setup(props) {
     const isLoaded = ref(false)
 
@@ -116,14 +122,17 @@ export default defineComponent({
     const isShowed = computed(() => {
       return store.getters.getShowedModalDialog({
         containerUuid: props.containerUuid
-      }) || false
+      })
     })
 
     const title = computed(() => {
+      if (isEmptyValue(storedModalDialog.value)) {
+        return ''
+      }
       return storedModalDialog.value.title
     })
+
     const componentRender = computed(() => {
-      // return () => import('@theme/components/ADempiere/PanelDefinition/index.vue')
       return storedModalDialog.value.componentPath
     })
 
@@ -155,12 +164,14 @@ export default defineComponent({
       closeDialog()
       // call custom function to cancel
       storedModalDialog.value.cancelMethod()
+      props.cancelAction()
     }
 
     const doneButton = () => {
       closeDialog()
       // call custom function to done
       storedModalDialog.value.doneMethod()
+      props.confirmAction()
     }
     if (isShowed.effect && isShowed.value) {
       loadModal()
