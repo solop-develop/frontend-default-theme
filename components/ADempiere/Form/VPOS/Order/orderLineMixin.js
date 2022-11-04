@@ -250,7 +250,7 @@ export default {
             discountRate: line.value,
             priceListUuid: this.currentPointOfSales.currentPriceList.uuid,
             warehouseUuid: this.currentPointOfSales.currentWarehouse.uuid,
-            columnName: 'discount',
+            columnName: 'discountRate',
             message: this.$t('form.pos.pinMessage.updateDiscountEntered')
           }
           // discountRate = line.value

@@ -697,20 +697,15 @@ export default {
                 }
                 break
               case 'Discount':
-                // discount = this.fieldShowValue({
-                //   row: this.currentLineOrder,
-                //   columnName: 'Discount'
-                // })
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
-                if (this.modifyDiscount && !this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
+                if (this.modifyDiscount &&
+                  this.currentPointOfSales.maximumLineDiscountAllowed <= mutation.payload.value &&
+                  this.currentPointOfSales.maximumLineDiscountAllowed === 0 &&
+                  !this.$store.state['pointOfSales/orderLine/index'].isloadedLine
+                ) {
                   this.updateOrderLine(mutation.payload)
-                  // this.$message({
-                  //   type: 'success',
-                  //   message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-                  //   showClose: true
-                  // })
                 } else {
                   const attributePin = {
                     ...mutation.payload,
@@ -728,45 +723,6 @@ export default {
           this.columnNameVisible = mutation.payload.columnName
           // this.$store.dispatch('changePopoverOverdrawnInvoice', { visible: true })
         }
-        // if (mutation.type === 'updateValueOfField' && (mutation.payload.columnName === 'PriceEntered' || mutation.payload.columnName === 'Discount' || mutation.payload.columnName === 'QtyEntered')) {
-        //   const values = this.$store.getters.getValuesView({
-        //     containerUuid: mutation.payload.containerUuid,
-        //     format: 'array'
-        //   })
-        //   const { currentPrice, quantityOrdered, discount } = this.convertValuesToSend(values)
-
-        //   if (!this.isEmptyValue(currentPrice) && this.defaultData.currentPrice !== currentPrice) {
-        //     this.fillOrderLineQuantities({
-        //       currentPrice,
-        //       quantityOrdered,
-        //       discount
-        //     })
-        //     this.updateOrderLine({
-        //       columnName: mutation.payload.columnName,
-        //       value: mutation.payload.value
-        //     })
-        //   } else if (!this.isEmptyValue(discount) && this.defaultData.discount !== discount) {
-        //     this.fillOrderLineQuantities({
-        //       currentPrice,
-        //       quantityOrdered,
-        //       discount
-        //     })
-        //     this.updateOrderLine({
-        //       columnName: mutation.payload.columnName,
-        //       value: mutation.payload.value
-        //     })
-        //   } else if (!this.isEmptyValue(quantityOrdered) && this.defaultData.quantityOrdered !== quantityOrdered) {
-        //     this.fillOrderLineQuantities({
-        //       currentPrice,
-        //       quantityOrdered,
-        //       discount
-        //     })
-        //     this.updateOrderLine({
-        //       columnName: mutation.payload.columnName,
-        //       value: mutation.payload.value
-        //     })
-        //   }
-        // }
       })
     }
   }
