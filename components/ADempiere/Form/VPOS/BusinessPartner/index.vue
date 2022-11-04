@@ -120,7 +120,6 @@
               style="padding: 0px; margin: 0px"
             >
               <business-partner-update
-                v-if="showUpdate"
                 :shows-popovers="showUpdate"
                 :current-address-select="selectAddress.first_name"
               />
