@@ -1056,7 +1056,12 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
         return
-      } else if (!this.modifyDiscount && columnName === 'Discount') {
+      } else if (
+        !this.currentPointOfSales.isAllowsModifyDiscount &&
+        columnName === 'Discount' ||
+        value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+        this.currentPointOfSales.maximumLineDiscountAllowed > 0
+      ) {
         const attributePin = {
           containerUuid: 'line',
           columnName,
