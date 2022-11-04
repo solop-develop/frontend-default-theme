@@ -127,7 +127,7 @@
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate || isTemplateCustomer"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate || isTemplateCustomer || !isAllowsModifyCustomer"
               >
                 <i
                   class="el-icon-edit"
@@ -481,10 +481,10 @@ export default {
     },
     updatedCustomerValue() {
       return this.$store.getters.posAttributes.currentPointOfSales.currentOrder.businessPartner.value
+    },
+    isAllowsModifyCustomer() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyCustomer
     }
-    // copyShippingAddress() {
-    //   return this.$store.getters.getCopyShippingAddress
-    // }
   },
 
   watch: {

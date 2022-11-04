@@ -638,11 +638,11 @@ export default {
       return this.$store.state.app.device === 'mobile'
     },
     currentPriceTableEdit: {
-      get(value) {
-        return this.currentValuePriceLine(this.currentLineOrder)
+      get() {
+        return this.fieldShowValue({ row: this.currentLineOrder, columnName: 'CurrentPrice' })
       },
       set(value) {
-        if (value !== this.currentValuePriceLine(this.currentLineOrder)) {
+        if (value !== this.fieldShowValue({ row: this.currentLineOrder, columnName: 'CurrentPrice' })) {
           this.changeEdit(value, 'PriceEntered')
         }
         return value

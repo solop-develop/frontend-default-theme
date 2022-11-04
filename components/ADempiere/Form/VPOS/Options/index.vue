@@ -43,7 +43,7 @@
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
-                @click="!allowsCreateOrder ? validateOption($t('form.pos.pinMessage.newOrder'), 'IsAllowsCreateOrder') : newOrder()"
+                @click="true ? validateOption($t('form.pos.pinMessage.newOrder'), 'IsAllowsCreateOrder') : newOrder()"
               >
                 <i class="el-icon-news" />
                 <br>
@@ -351,7 +351,7 @@
           </el-col>
 
           <!-- applyDiscountOnOrder -->
-          <el-col v-if="isAllowsApplyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="isAllowsModifyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
                 v-model="showCount"
@@ -574,6 +574,8 @@
           <el-button
             type="primary"
             icon="el-icon-check"
+            :loading="isLoadingPin"
+            :disabled="isLoadingPin"
             @click="openPin(pin)"
           />
         </span>
@@ -690,7 +692,8 @@ export default {
       showFieldListOrder: false,
       messageReverseSales: '',
       showConfirmDelivery: false,
-      isShowResource: false
+      isShowResource: false,
+      isLoadingPin: false
     }
   },
 
@@ -995,6 +998,9 @@ export default {
         return true
       }
       return false
+    },
+    isAllowsModifyDiscount() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyDiscount
     }
   },
 
@@ -1234,12 +1240,17 @@ export default {
       this.$refs.pin.focus()
     },
     openPin(pin) {
+      if (this.isLoadingPin) return
+      const { value } = this.attributePin
+      this.isLoadingPin = true
       this.focusPin()
-      const { requestedAccess } = this.$store.getters.getOverdrawnInvoice.attributePin
+      const attributePin = this.isEmptyValue(this.$store.getters.getOverdrawnInvoice.attributePin) ? this.attributePin : this.$store.getters.getOverdrawnInvoice.attributePin
+      const { requestedAccess } = attributePin
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
         pin,
-        requestedAccess
+        requestedAccess,
+        requestedAmount: value
       })
         .then(response => {
           this.validatePin = true
@@ -1264,14 +1275,16 @@ export default {
         .finally(() => {
           this.pin = ''
           this.visible = false
+          this.isLoadingPin = false
         })
     },
-    validateOption(name, requestedAccess) {
+    validateOption(name, requestedAccess, value) {
       this.visible = true
       this.attributePin = {
         type: 'updateOrder',
         label: name,
-        requestedAccess
+        requestedAccess,
+        value
       }
     },
     optionPin(action) {
@@ -1329,6 +1342,12 @@ export default {
           break
         case this.$t('form.pos.optionsPoinSales.cashManagement.transfer'):
           this.transfer()
+          break
+        case this.$t('form.pos.applyDiscountOnOrder'):
+          this.applyDiscount(action.value, true)
+          break
+        case this.$t('form.pos.salesDiscountOff'):
+          this.salesDiscount(action.value, true)
           break
       }
     },
@@ -1563,7 +1582,12 @@ export default {
           })
         })
     },
-    applyDiscount(discountAmount) {
+    applyDiscount(discountAmount, isValidatePin = false) {
+      if (discountAmount > this.currentPointOfSales.maximumLineDiscountAllowed && !isValidatePin || !this.isAllowsModifyDiscount) {
+        this.validateOption(this.$t('form.pos.applyDiscountOnOrder'), 'applyDiscount', discountAmount)
+        return
+      }
+      // maximum_discount_allowed
       this.$store.dispatch('updateOrder', {
         orderUuid: this.currentOrder.uuid,
         posUuid: this.currentPointOfSales.uuid,
@@ -1582,9 +1606,21 @@ export default {
             value: ''
           })
         })
+        .catch(error => {
+          console.warn(error)
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
       this.showCount = false
     },
-    salesDiscount(discountRateOff) {
+    salesDiscount(discountRateOff, isValidatePin = false) {
+      if (discountRateOff > this.currentPointOfSales.maximumDiscountAllowed && !isValidatePin || !this.isAllowsApplyDiscount) {
+        this.validateOption(this.$t('form.pos.applyDiscountOnOrder'), 'applyDiscount', discountRateOff)
+        return
+      }
       this.$store.dispatch('updateOrder', {
         orderUuid: this.currentOrder.uuid,
         posUuid: this.currentPointOfSales.uuid,
@@ -1599,6 +1635,14 @@ export default {
               message: 'ok'
             })
           }, 2000)
+        })
+        .catch(error => {
+          console.warn(error)
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
         })
       this.$store.commit('updateValueOfField', {
         containerUuid: 'Sales-Discount-Off',
