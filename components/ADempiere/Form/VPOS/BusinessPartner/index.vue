@@ -127,6 +127,7 @@
               <el-button
                 slot="reference"
                 type="text"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate || isTemplateCustomer || !isAllowsModifyCustomer"
               >
                 <i
                   class="el-icon-edit"
@@ -360,7 +361,7 @@ export default {
       get() {
         if (this.isEmptyValue(this.oldValueCustomer) && !this.isEmptyValue(this.newCustomer) && !this.editBusinessPartner &&
           this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
-          return 4 + this.newCustomer.value + ' - ' + this.newCustomer.name
+          return this.newCustomer.value + ' - ' + this.newCustomer.name
         }
         // if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
         //   if (!this.isEmptyValue(this.oldValueCustomer)) {
