@@ -404,7 +404,7 @@ export default {
           })
           this.$store.dispatch('reloadOrder', { orderUuid: currentOrder.uuid })
           customer({
-            searchValue: currentOrder.businessPartner.value
+            searchValue: values.value
           })
             .then(response => {
               this.$store.commit('updateValueOfField', {
