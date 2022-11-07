@@ -24,13 +24,14 @@
     </template>
     <template>
       <el-card :body-style="{ padding: '0px', marginBottom: '1px' }">
-        <el-carousel trigger="click" height="150px">
-          <template v-if="listImage.length">
+        <el-carousel v-if="listImage.length > 1" trigger="click" height="150px">
+          <template>
             <el-carousel-item v-for="item in listImage.length" :key="item">
               <el-image
                 :src="getImageFromSource(listImage[item - 1])"
                 class="image"
-                style="width: 140px; height: 140px;"
+                :preview-src-list="listImageProduct"
+                style="width: 140px;height: 140px;display: contents;"
               >
                 <div slot="error" class="image-slot">
                   <el-skeleton :loading="true" animated>
@@ -45,15 +46,32 @@
               </el-image>
             </el-carousel-item>
           </template>
-
-          <el-carousel-item v-else>
-            <el-image
-              :src="imageNotAvailable"
-              class="image"
-              style="width: 140px; height: 140px;"
-            />
-          </el-carousel-item>
         </el-carousel>
+        <template v-else-if="listImage.length === 1">
+          <el-image
+            :src="getImageFromSource(listImage[0])"
+            class="image"
+            :preview-src-list="listImageProduct"
+            style="width: 140px;height: 140px;display: contents;"
+          >
+            <div slot="error" class="image-slot">
+              <el-skeleton :loading="true" animated>
+                <template slot="template">
+                  <el-skeleton-item
+                    variant="image"
+                    style="width: auto; height: 140px;"
+                  />
+                </template>
+              </el-skeleton>
+            </div>
+          </el-image>
+        </template>
+        <el-image
+          v-else
+          :src="imageNotAvailable"
+          class="image"
+          style="width: 140px;height: 140px;display: contents;"
+        />
       </el-card>
     </template>
   </el-skeleton>
@@ -101,7 +119,11 @@ export default {
       return this.$store.state['pointOfSales/orderLine/index'].line.product
     },
     imageNotAvailable() {
-      return require('@/image/ADempiere/no-image.png')
+      return require('@/image/ADempiere/priceChecking/no-image.jpg')
+    },
+    listImageProduct() {
+      if (this.isEmptyValue(this.listImage)) return []
+      return this.listImage.map(product => this.getImageFromSource(product))
     }
   },
   watch: {
