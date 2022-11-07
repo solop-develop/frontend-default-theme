@@ -37,12 +37,14 @@
           <div
             v-for="(element, index) in availableList"
             :key="index"
+            :disabled="isDifferentClientRecord"
             :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
           >
             <b>#{{ element[sortColumnName] }}</b>
             {{ element.DisplayColumn }}
 
             <i
+              :disabled="isDifferentClientRecord"
               class="el-icon-circle-plus-outline sort-add-item-icon"
               @click="addAtItem({ element, oldIndex: index })"
             />
@@ -71,12 +73,14 @@
           <div
             v-for="(element, index) in sequenceList"
             :key="index"
+            :disabled="isDifferentClientRecord"
             :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
           >
             <b>#{{ element[sortColumnName] }}</b>
             {{ element.DisplayColumn }}
 
             <i
+              :disabled="isDifferentClientRecord"
               class="el-icon-circle-close sort-remove-item-icon"
               @click="removeAtItem({ element, oldIndex: index })"
             />
@@ -94,6 +98,9 @@ import store from '@/store'
 
 // components and mixins
 import draggable from 'vuedraggable'
+
+// constants
+import { CLIENT } from '@/utils/ADempiere/constants/systemColumns'
 
 /**
  * Order or sequence panel based on the functionality of the `org.compiere.grid.VSortTab`
@@ -197,9 +204,22 @@ export default defineComponent({
       }
     })
 
+    const isDifferentClientRecord = computed(() => {
+      // client id value of record
+      const clientIdRecord = store.getters.getValueOfField({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        columnName: CLIENT
+      })
+      // evaluate client id context with record
+      const sessionClientId = store.getters.getSessionContextClientId
+
+      return clientIdRecord !== sessionClientId
+    })
+
     const dragOptions = computed(() => {
       return {
-        disabled: false
+        disabled: isDifferentClientRecord.value
       }
     })
 
@@ -393,6 +413,10 @@ export default defineComponent({
      * @param {number} oldIndex: the index of the element before remove
      */
     function addAtItem({ element, oldIndex }) {
+      if (isDifferentClientRecord.value) {
+        // is another customer does not change
+        return
+      }
       const newIndex = sequenceList.value.length
       addItem({
         element,
@@ -406,6 +430,10 @@ export default defineComponent({
      * @param {number} oldIndex: the index of the element before remove
      */
     function removeAtItem({ element, oldIndex }) {
+      if (isDifferentClientRecord.value) {
+        // is another customer does not change
+        return
+      }
       deleteItem({
         element,
         oldIndex
@@ -437,6 +465,7 @@ export default defineComponent({
       dragOptions,
       panelMetadata,
       includedColumnName,
+      isDifferentClientRecord,
       sortColumnName,
       sequenceList,
       availableList,
@@ -547,6 +576,12 @@ export default defineComponent({
           font-weight: bold;
         }
       }
+    }
+
+    .board-item[disabled=disabled],
+    .sort-remove-item-icon[disabled=disabled],
+    .sort-add-item-icon[disabled=disabled] {
+      cursor: not-allowed;
     }
   }
 }
