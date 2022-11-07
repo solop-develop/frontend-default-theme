@@ -151,12 +151,14 @@ export default defineComponent({
 
     const recordsList = computed({
       get() {
-        return store.getters.getTabSequenceRecordsList({
+        const list = store.getters.getTabSequenceRecordsList({
           parentUuid: props.parentUuid,
           containerUuid: props.containerUuid,
           tabUuid: panelMetadata.value.uuid,
           contextColumnNames: panelMetadata.value.contextColumnNames
         })
+
+        return generateOrder(list)
       },
       set(newList) {
         store.commit('setTabSequence', {
@@ -180,11 +182,9 @@ export default defineComponent({
 
     const sequenceList = computed({
       get() {
-        const list = recordsList.value.filter(item => {
+        return recordsList.value.filter(item => {
           return item[includedColumnName.value]
         })
-
-        return generateOrder(list)
       },
       set(value) {
       }
@@ -239,7 +239,7 @@ export default defineComponent({
      * @param {number} oldIndex: the old index of the moved element
      * @param {object} element: the moved element
      */
-    function movedItem({ element, newIndex, oldIndex }) {
+    function movedItem({ element, oldIndex, newIndex }) {
       const includedColumn = includedColumnName.value
       const orderColumn = sortColumnName.value
 
@@ -249,6 +249,7 @@ export default defineComponent({
           itemSequence[orderColumn] = 0
           return itemSequence
         }
+
         if (newIndex > oldIndex) {
           // moved to down
           if (itemSequence.UUID === element.UUID) {
@@ -438,7 +439,8 @@ export default defineComponent({
         padding-top: 5px;
 
         &:hover {
-          color: greenyellow;
+          color: #67c23a;
+          font-weight: bold;
         }
       }
     }
@@ -455,6 +457,7 @@ export default defineComponent({
 
         &:hover {
           color: red;
+          font-weight: bold;
         }
       }
     }
