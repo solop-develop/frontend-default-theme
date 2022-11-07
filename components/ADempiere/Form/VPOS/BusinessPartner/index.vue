@@ -373,6 +373,9 @@ export default {
         //     return 1 + this.orderCustomerData + this.displayAddress(this.selectAddress.first_name)
         //   }
         // }
+        if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
+          return this.templateCustomerData + this.displayAddress(this.selectAddress.first_name)
+        }
 
         const display = this.$store.getters.getValueOfField({
           containerUuid: this.parentMetadata.containerUuid,
