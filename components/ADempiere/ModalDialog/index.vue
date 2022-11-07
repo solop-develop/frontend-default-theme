@@ -48,6 +48,7 @@
       <el-button
         type="primary"
         icon="el-icon-check"
+        :disabled="isDisabledDone"
         @click="doneButton"
       />
     </span>
@@ -136,6 +137,15 @@ export default defineComponent({
       return storedModalDialog.value.componentPath
     })
 
+    const isDisabledDone = computed(() => {
+      if (storedModalDialog.value.isDisabledDone) {
+        return Boolean(
+          storedModalDialog.value.isDisabledDone()
+        )
+      }
+      return false
+    })
+
     watch(isShowed, (newValue, oldValue) => {
       if (newValue !== oldValue && newValue) {
         loadModal()
@@ -182,6 +192,7 @@ export default defineComponent({
       containerManagerModalDialog,
       storedModalDialog,
       componentRender,
+      isDisabledDone,
       isLoaded,
       isShowed,
       title,

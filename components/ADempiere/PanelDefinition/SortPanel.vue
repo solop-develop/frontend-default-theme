@@ -24,7 +24,7 @@
     >
       <div class="board-column">
         <div class="board-column-header">
-          {{ this.$t('sequence.available') }} ({{ availableList.length }})
+          {{ this.$t('components.sequenceSort.available') }} ({{ availableList.length }})
         </div>
 
         <draggable
@@ -37,7 +37,7 @@
           <div
             v-for="(element, index) in availableList"
             :key="index"
-            class="board-item"
+            :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
           >
             <b>#{{ element[sortColumnName] }}</b>
             {{ element.DisplayColumn }}
@@ -57,7 +57,7 @@
     >
       <div class="board-column">
         <div class="board-column-header">
-          {{ this.$t('sequence.sequence') }} ({{ sequenceList.length }})
+          {{ this.$t('components.sequenceSort.sequence') }} ({{ sequenceList.length }})
         </div>
 
         <draggable
@@ -71,7 +71,7 @@
           <div
             v-for="(element, index) in sequenceList"
             :key="index"
-            class="board-item"
+            :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
           >
             <b>#{{ element[sortColumnName] }}</b>
             {{ element.DisplayColumn }}
@@ -100,8 +100,6 @@ import draggable from 'vuedraggable'
  * @see https://github.com/adempiere/adempiere/blob/develop/client/src/org/adempiere/controller/SortTabController.java
  * @see https://github.com/adempiere/adempiere/blob/develop/client/src/org/compiere/grid/VSortTab.java
  * TODO: Add change tracker to enable save button
- * TODO: Add change observer to show disable button
- * TODO: Highlight rows with changes
  * TODO: Add discartAtElementChange event to discard only current row
  * TODO: Implement search in local list and disable drag-and-drop
  */
@@ -170,6 +168,15 @@ export default defineComponent({
       }
     })
 
+    const oldRecordsList = computed(() => {
+      return store.getters.getTabSequenceOldRecordsList({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        tabUuid: panelMetadata.value.uuid,
+        contextColumnNames: panelMetadata.value.contextColumnNames
+      })
+    })
+
     const availableList = computed({
       get() {
         return recordsList.value.filter(item => {
@@ -202,6 +209,33 @@ export default defineComponent({
       })
     }
 
+    function getOldRow(uuid) {
+      const oldRow = oldRecordsList.value.find(oldSequenceItem => {
+        return oldSequenceItem.UUID === uuid
+      })
+      return {
+        ...oldRow
+      }
+    }
+
+    function isChanged({ oldRow, newRow }) {
+      const oldYesNo = oldRow[includedColumnName.value]
+      const newYesNo = newRow[includedColumnName.value]
+      // included column is changed
+      if (oldYesNo !== newYesNo) {
+        return true
+      }
+
+      const oldSequence = oldRow[sortColumnName.value]
+      const newSequence = newRow[sortColumnName.value]
+      // sequence is changed
+      if (oldSequence !== newSequence) {
+        return true
+      }
+
+      return false
+    }
+
     /**
      * @param {number} newIndex: the index of the added element
      * @param {object} element: the added element
@@ -219,10 +253,20 @@ export default defineComponent({
 
       const dataSequence = recordsList.value.map(itemSequence => {
         if (itemSequence.UUID === element.UUID) {
+          const oldRow = getOldRow(itemSequence.UUID)
+          element.isEditRow = isChanged({
+            oldRow,
+            newRow: element
+          })
           return element
         }
         if (newSequence <= itemSequence[orderColumn]) {
           itemSequence[orderColumn] = itemSequence[orderColumn] + 10
+          const oldRow = getOldRow(itemSequence.UUID)
+          itemSequence.isEditRow = isChanged({
+            newRow: itemSequence,
+            oldRow
+          })
         }
         return itemSequence
       })
@@ -254,19 +298,39 @@ export default defineComponent({
           // moved to down
           if (itemSequence.UUID === element.UUID) {
             itemSequence[orderColumn] = (newIndex + 1) * 10
+            const oldRow = getOldRow(itemSequence.UUID)
+            itemSequence.isEditRow = isChanged({
+              newRow: itemSequence,
+              oldRow
+            })
             return itemSequence
           }
           if (indexEnabledSequence >= oldIndex && indexEnabledSequence < newIndex) {
             itemSequence[orderColumn] = (indexEnabledSequence + 1) * 10
+            const oldRow = getOldRow(itemSequence.UUID)
+            itemSequence.isEditRow = isChanged({
+              newRow: itemSequence,
+              oldRow
+            })
           }
         } else {
           // moved to up
           if (itemSequence.UUID === element.UUID) {
             itemSequence[orderColumn] = (newIndex + 1) * 10
+            const oldRow = getOldRow(itemSequence.UUID)
+            itemSequence.isEditRow = isChanged({
+              newRow: itemSequence,
+              oldRow
+            })
             return itemSequence
           }
           if (indexEnabledSequence < oldIndex && indexEnabledSequence >= newIndex) {
             itemSequence[orderColumn] += 10
+            const oldRow = getOldRow(itemSequence.UUID)
+            itemSequence.isEditRow = isChanged({
+              newRow: itemSequence,
+              oldRow
+            })
           }
         }
         indexEnabledSequence++
@@ -295,11 +359,24 @@ export default defineComponent({
         if (itemSequence.UUID === element.UUID) {
           itemSequence[includedColumn] = false // !itemSequence[includedColumn]
           itemSequence[orderColumn] = 0
+          const oldRow = getOldRow(itemSequence.UUID)
+          itemSequence.isEditRow = isChanged({
+            newRow: itemSequence,
+            oldRow
+          })
           return itemSequence
         }
+
         if (itemSequence[orderColumn] > oldSequence && itemSequence[orderColumn] > 0) {
           itemSequence[orderColumn] = itemSequence[orderColumn] - 10
+
+          const oldRow = getOldRow(itemSequence.UUID)
+          itemSequence.isEditRow = isChanged({
+            newRow: itemSequence,
+            oldRow
+          })
         }
+
         return itemSequence
       })
 
@@ -401,6 +478,8 @@ export default defineComponent({
       justify-content: flex-start;
       flex-direction: column;
       align-items: center;
+      padding-left: 5px;
+      padding-right: 5px;
 
       .board-item {
         cursor: pointer;
@@ -413,6 +492,14 @@ export default defineComponent({
         padding: 0px 10px;
         box-sizing: border-box;
         box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.2);
+
+        font-size: 1.2em;
+
+        &.board-item-edit {
+          -webkit-box-shadow: 0px 0px 6px 0px rgba(21,255,0,1);
+          -moz-box-shadow: 0px 0px 6px 0px rgba(21,255,0,1);
+          box-shadow: 0px 0px 6px 0px rgba(21,255,0,1);
+        }
       }
     }
   }
