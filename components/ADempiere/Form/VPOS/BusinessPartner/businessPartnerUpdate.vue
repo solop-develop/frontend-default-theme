@@ -194,7 +194,11 @@ export default {
     currentAddressSelect: {
       type: String,
       default: ''
-    }
+    },
+    mainContainerUuid: {
+      type: String,
+      requiere: true
+    },
   },
   data() {
     return {
@@ -391,12 +395,27 @@ export default {
       values.posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
       updateCustomer(values)
         .then(response => {
+          const currentOrder = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
           this.$store.dispatch('changeShowUpdateCustomer', false)
           this.$message({
             type: 'success',
             message: this.$t('recordManager.updatedRecord'),
             showClose: true
           })
+          this.$store.dispatch('reloadOrder', { orderUuid: currentOrder.uuid })
+          customer({
+            searchValue: currentOrder.businessPartner.value
+          })
+            .then(response => {
+              this.$store.commit('updateValueOfField', {
+                containerUuid: this.mainContainerUuid,
+                columnName: 'DisplayColumn_C_BPartner_ID',
+                value: response.value + ' - ' + response.name
+              })
+            })
+            .finally(() => {
+              this.loading = false
+            })
         })
         .catch(error => {
           console.error(error.message)
