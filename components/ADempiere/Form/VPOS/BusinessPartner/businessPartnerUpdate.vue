@@ -197,7 +197,6 @@ export default {
     },
     mainContainerUuid: {
       type: String,
-      default: '',
       required: true
     }
   },
