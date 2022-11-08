@@ -197,8 +197,8 @@ export default {
     },
     mainContainerUuid: {
       type: String,
-      requiere: true
-    },
+      required: true
+    }
   },
   data() {
     return {

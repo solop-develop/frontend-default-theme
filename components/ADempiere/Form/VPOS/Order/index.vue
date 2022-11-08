@@ -1171,7 +1171,7 @@ export default {
     changePos(pointOfSales) {
       if (!this.isEmptyValue(this.currentPointOfSales.id) && this.currentPointOfSales.id !== pointOfSales.id) {
         this.$store.dispatch('setCurrentPOS', pointOfSales)
-        this.$store.commit('customer', {})
+        this.$store.commit('customer', pointOfSales.templateCustomer)
         this.clearOrder()
       }
     },
