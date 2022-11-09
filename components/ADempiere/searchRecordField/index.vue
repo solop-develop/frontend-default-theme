@@ -13,11 +13,11 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <span style="float: right;display: flex;margin-top: 2px;width: 100%;">
+  <span style="float: right;display: flex;margin-top: 2px;width: 100%; padding-right: 5px;">
     <el-input
       v-model="valueToSearch"
       clearable
@@ -25,63 +25,70 @@
       size="small"
       class="input-search"
       @input="handleChangeSearch"
-    />
-    <el-popover
-      v-model="isPanel"
-      placement="bottom"
-      width="800"
-      trigger="click"
-      class="option-search-record"
     >
-      <el-row :gutter="0">
-        <el-col :span="24">
-          <el-row style="padding-bottom: 15px;padding-top: 15px;">
-            <panel-definition
-              :parent-uuid="parentUuid + IS_ADVANCE_QUERY"
-              :container-uuid="containerUuid + IS_ADVANCE_QUERY"
-              :container-manager="containerManager"
-              :is-filter-records="false"
-              :is-advanced-query="true"
-            />
-          </el-row>
-        </el-col>
-        <el-col :span="24" class="location-address-footer">
-          <samp style="float: right; padding-top: 4px;">
-            <el-button
-              type="danger"
-              icon="el-icon-close"
-              @click="isPanel = false"
-            />
-
-            <el-button
-              type="primary"
-              icon="el-icon-check"
-              @click="searchRecord"
-            />
-          </samp>
-        </el-col>
-      </el-row>
-      <el-tag
-        slot="reference"
-        type="info"
-        style="display: block;height: 32px;padding-top: 3px;"
+      <el-popover
+        slot="append"
+        v-model="isPanel"
+        placement="bottom"
+        width="800"
+        trigger="click"
+        class="option-search-record"
       >
-        <svg-icon icon-class="manageSearch" style="font-size: 16px;" />
-      </el-tag>
-    </el-popover>
+        <el-row :gutter="0">
+          <el-col :span="24">
+            <el-row style="padding-bottom: 15px;padding-top: 15px;">
+              <panel-definition
+                :parent-uuid="parentUuid + IS_ADVANCE_QUERY"
+                :container-uuid="containerUuid + IS_ADVANCE_QUERY"
+                :container-manager="containerManagerAdvancedQuery"
+                :is-filter-records="false"
+                :is-advanced-query="true"
+              />
+            </el-row>
+          </el-col>
+
+          <el-col :span="24" class="location-address-footer">
+            <samp style="float: right; padding-top: 4px;">
+              <el-button
+                type="danger"
+                icon="el-icon-close"
+                @click="isPanel = false"
+              />
+
+              <el-button
+                type="primary"
+                icon="el-icon-check"
+                @click="searchRecord"
+              />
+            </samp>
+          </el-col>
+        </el-row>
+
+        <el-button
+          slot="reference"
+          class="button-search-record"
+        >
+          <svg-icon icon-class="manageSearch" />
+        </el-button>
+      </el-popover>
+    </el-input>
   </span>
 </template>
 
 <script>
 import { defineComponent, ref, computed } from '@vue/composition-api'
+
 import store from '@/store'
-// Components
+
+// components
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-// Const
+
+// constants
 import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX, IS_ADVANCE_QUERY } from '@/utils/ADempiere/dictionaryUtils'
-import {
-  isEmptyValue
-} from '@/utils/ADempiere/valueUtils.js'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+
 export default defineComponent({
   name: 'SearchRecordField',
 
@@ -112,7 +119,6 @@ export default defineComponent({
     /**
      * Refs
      */
-
     const isLoadFilter = ref(false)
     const timeOutSearch = ref(null)
     const isPanel = ref(false)
@@ -120,12 +126,12 @@ export default defineComponent({
     /**
      * Computed
      */
-
+    // value of search
     const valueToSearch = computed({
       get() {
         return store.getters.getSearchValueTabRecordsList({
           containerUuid: props.containerUuid
-        })
+        }) || ''
       },
       set(searchValue) {
         store.commit('setSearchValueTabRecordsList', {
@@ -135,10 +141,19 @@ export default defineComponent({
       }
     })
 
+    const containerManagerAdvancedQuery = computed(() => {
+      return {
+        ...props.containerManager,
+        isDisplayedDefault({ isSelectionColumn }) {
+          // add is showed from user
+          return isSelectionColumn
+        }
+      }
+    })
+
     /**
      * Methods
      */
-
     function handleChangeSearch(value) {
       clearTimeout(timeOutSearch.value)
       timeOutSearch.value = setTimeout(() => {
@@ -183,6 +198,7 @@ export default defineComponent({
       // Const
       IS_ADVANCE_QUERY,
       // Computeds
+      containerManagerAdvancedQuery,
       valueToSearch,
       // Methods
       searchRecord,
@@ -192,13 +208,22 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang="scss">
-  .input-search {
-    line-height: 28px;
-    display: contents;
+<style lang="scss">
+.input-search {
+  line-height: 28px;
+  display: contents;
+
+  .el-input-group__append {
+    height: 32px !important;
   }
-  .icon-search-record {
-    font-size: 20px;
-    display: contents;
+  
+  .button-search-record {
+    padding-left: 6px !important;
+    padding-right: 0px !important;
+
+    i, svg {
+      font-size: 28px !important;
+    }
   }
+}
 </style>
