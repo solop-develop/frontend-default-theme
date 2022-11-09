@@ -66,7 +66,6 @@ import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.v
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 // import FilterFields from '@theme/components/ADempiere/FilterFields'
 import store from '@/store'
-import field from '../../../../../store/modules/ADempiere/field'
 
 export default defineComponent({
   name: 'PanelSearchCriteria',
@@ -152,29 +151,13 @@ export default defineComponent({
     }
 
     function searchRecord(params) {
-      const alo = store.getters.getValuesView({
-        containerUuid: props.containerUuid + '_ADVANCE_QUERY',
-        format: 'array'
-      })
-      const qlq = store.getters.getValuesView({
-        containerUuid: props.containerUuid + '_ADVANCE_QUERY',
-        format: 'object'
-      })
-      const pp = store.getters.getValuesView({
+      const filters = store.getters.getValuesView({
         containerUuid: props.containerUuid + '_ADVANCE_QUERY'
       })
-      const a = props.containerManager.getPanel({
+      store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-      const lol = a.fieldsList.find(field => field.columnName === 'EntityType')
-      const qweq = props.fieldsList.find(field => field.columnName === 'EntityType')
-      console.log({
-        alo,
-        qweq,
-        pp,
-        qlq,
-        lol
+        containerUuid: props.containerUuid,
+        filters
       })
     }
 

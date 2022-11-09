@@ -21,14 +21,8 @@
       {{ $t('operators.compareSearch') }}:
     </span>
     <br>
-    {{ fieldAttributes.operator }} <hr>
-    {{ fieldAttributes.oldOperator }} <hr>
-    {{ fieldAttributes.name }} <hr>
-    {{ fieldAttributes.columnName }} <hr>
-    {{ fieldAttributes.containerUuid }}
     <el-select
       v-model="currentOperator"
-      @change="changeOperator"
     >
       <el-option
         v-for="(itemOperator, key) in operatorsList"
@@ -45,12 +39,6 @@ import { computed, defineComponent, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
-// constants
-import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
-
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere'
-
 export default defineComponent({
   name: 'OperatorComparisonField',
 
@@ -66,49 +54,14 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { parentUuid, containerUuid, columnName } = props.fieldAttributes
+    const { containerUuid, columnName } = props.fieldAttributes
 
     const operatorsList = ref(props.fieldAttributes.operatorsList)
     const currentOperator = computed({
       get() {
-        const ppp = store.getters.getFieldFromColumnName({
-          containerUuid,
-          parentUuid,
-          columnName
-        })
-        const { operator } = store.getters.getFieldFromColumnName({
-          containerUuid,
-          parentUuid,
-          columnName
-        })
-
-        console.log({
-          ppp,
-          containerUuid,
-          parentUuid,
-          columnName,
-          aaa: store.getters.getValuesView({
-            parentUuid,
-            format: 'object'
-          }),
-          bbb: store.getters.getValueOfField({
-            parentUuid,
-            columnName
-          }),
-          getters: store.getters,
-          operator
-        })
-
-        return operator
+        return props.fieldAttributes.operator
       },
       set(newValue) {
-        console.log({
-          newValue,
-          containerUuid,
-          columnName,
-          attributeName: 'operator',
-          attributeValue: newValue
-        })
         store.commit('updateValueOfField', {
           containerUuid,
           columnName,
@@ -124,43 +77,9 @@ export default defineComponent({
       }
     })
 
-    const fieldValue = computed(() => {
-      // main panel values
-      return store.getters.getValueOfFieldOnContainer({
-        parentUuid,
-        containerUuid,
-        columnName
-      })
-    })
-
-    /**
-     * @param {mixed} value, main value in component
-     */
-    const handleChange = (value) => {
-      console.log({ value })
-      store.dispatch('notifyFieldChange', {
-        containerUuid,
-        field: props.fieldAttributes,
-        columnName,
-        newValue: value,
-        containerManager: props.containerManager
-      })
-    }
-
-    /**
-     * @param {string} operatorValue
-     */
-    const changeOperator = (operatorValue) => {
-      const value = fieldValue.value
-      if (!isEmptyValue(value) || OPERATORS_MULTIPLE_VALUES.includes(operatorValue)) {
-        handleChange(value)
-      }
-    }
-
     return {
       currentOperator,
-      operatorsList,
-      changeOperator
+      operatorsList
     }
   }
 })

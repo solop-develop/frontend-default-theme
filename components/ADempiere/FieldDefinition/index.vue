@@ -218,9 +218,14 @@ export default {
     },
 
     isDisplayedField() {
-      if (this.inTable) {
-        return true
+      // is Advanced Query
+      if (this.field.isAdvancedQuery) {
+        // show only the fields that are marked as select column
+        if (this.field.isSelectionColumn) return this.field.isSelectionColumn
+        // return false
       }
+      // is in Table
+      if (this.inTable) return this.inTable
       // validate with container manager
       if (this.containerManager.isDisplayedField(this.field)) {
         const isDisplayedDefault = this.containerManager.isDisplayedDefault({

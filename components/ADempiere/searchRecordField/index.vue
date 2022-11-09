@@ -33,13 +33,34 @@
       trigger="click"
       class="option-search-record"
     >
-      <panel-search-criteria
-        :parent-uuid="parentUuid"
-        :container-uuid="containerUuid"
-        :fields-list="fieldsList"
-        :is-show-panel="isPanel"
-        :container-manager="containerManager"
-      />
+      <el-row :gutter="0">
+        <el-col :span="24">
+          <el-row style="padding-bottom: 15px;padding-top: 15px;">
+            <panel-definition
+              :parent-uuid="parentUuid + IS_ADVANCE_QUERY"
+              :container-uuid="containerUuid + IS_ADVANCE_QUERY"
+              :container-manager="containerManager"
+              :is-filter-records="false"
+              :is-advanced-query="true"
+            />
+          </el-row>
+        </el-col>
+        <el-col :span="24" class="location-address-footer">
+          <samp style="float: right; padding-top: 4px;">
+            <el-button
+              type="danger"
+              icon="el-icon-close"
+              @click="isPanel = false"
+            />
+
+            <el-button
+              type="primary"
+              icon="el-icon-check"
+              @click="searchRecord"
+            />
+          </samp>
+        </el-col>
+      </el-row>
       <el-tag
         slot="reference"
         type="info"
@@ -52,16 +73,20 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from '@vue/composition-api'
-import panelSearchCriteria from './panelSearchCriteria'
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 import store from '@/store'
-
+// Components
+import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+// Const
+import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX, IS_ADVANCE_QUERY } from '@/utils/ADempiere/dictionaryUtils'
+import {
+  isEmptyValue
+} from '@/utils/ADempiere/valueUtils.js'
 export default defineComponent({
   name: 'SearchRecordField',
 
   components: {
-    panelSearchCriteria
+    PanelDefinition
   },
 
   props: {
@@ -135,44 +160,33 @@ export default defineComponent({
         })
     }
 
-    watch(isPanel, (newValue, oldValue) => {
-      if (newValue) {
-        const getPanel = props.containerManager.getPanel({
-          parentUuid: props.parentUuid + '_ADVANCE_QUERY',
-          containerUuid: props.containerUuid + '_ADVANCE_QUERY'
-        })
-        if (isEmptyValue(getPanel)) {
-          const tab = props.containerManager.getPanel({
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid
-          })
-          const fieldsListAdvance = isEmptyValue(props.fieldsList) ? getPanel.fieldsList : props.fieldsList
-          store.dispatch('addPanel', {
-            containerUuid: tab.containerUuid + '_ADVANCE_QUERY',
-            isCustomForm: false,
-            uuid: tab.uuid,
-            panelType: tab.panelType,
-            fieldsList: props.fieldsList.map(field => {
-              return {
-                ...field,
-                parentUuid: field.parentUuid + '_ADVANCE_QUERY',
-                containerUuid: field.containerUuid + '_ADVANCE_QUERY',
-                isAdvancedQuery: true
-              }
-            })
-          })
-        }
+    function searchRecord(params) {
+      let filters = store.getters.getValuesView({
+        containerUuid: props.containerUuid + IS_ADVANCE_QUERY
+      })
+      if (!isEmptyValue(filters)) {
+        filters = filters.filter(attribute => !isEmptyValue(attribute.value) && !attribute.columnName.includes(DISPLAY_COLUMN_PREFIX) && !attribute.columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX))
       }
-    })
+      console.log({ filters })
+      store.dispatch('getEntities', {
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        filters
+      })
+      isPanel.value = false
+    }
 
     return {
       // Refs
       isLoadFilter,
       timeOutSearch,
       isPanel,
+      // Const
+      IS_ADVANCE_QUERY,
       // Computeds
       valueToSearch,
       // Methods
+      searchRecord,
       handleChangeSearch
     }
   }

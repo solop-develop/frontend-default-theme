@@ -20,7 +20,7 @@
   <div id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
-        <el-input
+        <!-- <el-input
           v-model="valueToSearch"
           :placeholder="$t('components.searchRecord')"
           clearable
@@ -32,7 +32,7 @@
             slot="prefix"
             class="el-icon-search el-input__icon"
           />
-        </el-input>
+        </el-input> -->
         <search-fields
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
