@@ -29,7 +29,7 @@
     <el-popover
       v-model="isPanel"
       placement="bottom"
-      width="500"
+      width="800"
       trigger="click"
       class="option-search-record"
     >
@@ -167,7 +167,6 @@ export default defineComponent({
       if (!isEmptyValue(filters)) {
         filters = filters.filter(attribute => !isEmptyValue(attribute.value) && !attribute.columnName.includes(DISPLAY_COLUMN_PREFIX) && !attribute.columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX))
       }
-      console.log({ filters })
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
