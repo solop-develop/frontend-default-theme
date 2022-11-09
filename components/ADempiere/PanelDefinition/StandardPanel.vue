@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -42,7 +42,7 @@
             :body-style="{ padding: '5px' }"
             :class="isActiveCurrentTab ? 'custom-panel-field' : ''"
           >
-            <el-row v-if="!isMobile || isEmptyValue(panelMetadata.childTabs)" style="padding-bottom: 15px;padding-top: 15px;">
+            <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <template v-for="(fieldAttributes, subKey) in fieldsList">
                 <field-definition
                   ref="fieldDefinitionRef"
@@ -55,21 +55,6 @@
                 />
               </template>
             </el-row>
-            <!-- <el-scrollbar v-else :wrap-class="panelMetadata.isParentTab ? 'scroll-tab-panel-conten' : 'scroll-tab-child-panel-conten'" :style="styleScrollPanelTab"> -->
-            <el-row v-else style="padding-bottom: 15px;padding-top: 15px;">
-              <template v-for="(fieldAttributes, subKey) in fieldsList">
-                <field-definition
-                  ref="fieldDefinitionRef"
-                  :key="subKey"
-                  :parent-uuid="parentUuid"
-                  :container-uuid="containerUuid"
-                  :container-manager="containerManager"
-                  :field-metadata="fieldAttributes"
-                  :metadata-field="fieldAttributes"
-                />
-              </template>
-            </el-row>
-            <!-- </el-scrollbar> -->
           </el-card>
         </div>
       </div>

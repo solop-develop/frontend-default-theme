@@ -120,14 +120,14 @@
               style="padding: 0px; margin: 0px"
             >
               <business-partner-update
-                v-if="showUpdate"
                 :shows-popovers="showUpdate"
                 :current-address-select="selectAddress.first_name"
+                :main-container-uuid="parentMetadata.containerUuid"
               />
               <el-button
                 slot="reference"
                 type="text"
-                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate || isTemplateCustomer"
+                :disabled="isDisabled || !isAllowsBusinessPartnerCreate || isDisabledUpdate || isTemplateCustomer || !isAllowsModifyCustomer"
               >
                 <i
                   class="el-icon-edit"
@@ -207,8 +207,6 @@
       @clear="setBusinessPartner(blankBPartner, false)"
       @keyup.enter.native="getBPartnerWithEnter"
       @select="handleSelect"
-      @focus="setNewDisplayedValue"
-      @blur="setOldDisplayedValue"
     >
       <template
         slot="prefix"
@@ -365,15 +363,18 @@ export default {
           this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
           return this.newCustomer.value + ' - ' + this.newCustomer.name
         }
-        if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
-          if (!this.isEmptyValue(this.oldValueCustomer)) {
-            return this.oldValueCustomerData + this.displayAddress(this.selectAddress.first_name)
-          }
-          if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
-            return this.templateCustomerData + this.displayAddress(this.selectAddress.first_name)
-          } else {
-            return this.orderCustomerData + this.displayAddress(this.selectAddress.first_name)
-          }
+        // if (!this.isEmptyValue(this.$refs.displayBPartner) && !this.$refs.displayBPartner.$refs.input.focused) {
+        //   if (!this.isEmptyValue(this.oldValueCustomer)) {
+        //     return 3 + this.oldValueCustomerData + this.displayAddress(this.selectAddress.first_name)
+        //   }
+        //   if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
+        //     return 2 + this.templateCustomerData + this.displayAddress(this.selectAddress.first_name)
+        //   } else {
+        //     return 1 + this.orderCustomerData + this.displayAddress(this.selectAddress.first_name)
+        //   }
+        // }
+        if (this.isEmptyValue(this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid)) {
+          return this.templateCustomerData + this.displayAddress(this.selectAddress.first_name)
         }
 
         const display = this.$store.getters.getValueOfField({
@@ -481,10 +482,10 @@ export default {
     },
     updatedCustomerValue() {
       return this.$store.getters.posAttributes.currentPointOfSales.currentOrder.businessPartner.value
+    },
+    isAllowsModifyCustomer() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyCustomer
     }
-    // copyShippingAddress() {
-    //   return this.$store.getters.getCopyShippingAddress
-    // }
   },
 
   watch: {

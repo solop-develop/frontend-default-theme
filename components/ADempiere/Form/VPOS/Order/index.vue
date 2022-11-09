@@ -638,11 +638,11 @@ export default {
       return this.$store.state.app.device === 'mobile'
     },
     currentPriceTableEdit: {
-      get(value) {
-        return this.currentValuePriceLine(this.currentLineOrder)
+      get() {
+        return this.fieldShowValue({ row: this.currentLineOrder, columnName: 'CurrentPrice' })
       },
       set(value) {
-        if (value !== this.currentValuePriceLine(this.currentLineOrder)) {
+        if (value !== this.fieldShowValue({ row: this.currentLineOrder, columnName: 'CurrentPrice' })) {
           this.changeEdit(value, 'PriceEntered')
         }
         return value
@@ -1056,7 +1056,12 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
         return
-      } else if (!this.modifyDiscount && columnName === 'Discount') {
+      } else if (
+        !this.currentPointOfSales.isAllowsModifyDiscount &&
+        columnName === 'Discount' ||
+        value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+        this.currentPointOfSales.maximumLineDiscountAllowed > 0
+      ) {
         const attributePin = {
           containerUuid: 'line',
           columnName,
@@ -1166,7 +1171,7 @@ export default {
     changePos(pointOfSales) {
       if (!this.isEmptyValue(this.currentPointOfSales.id) && this.currentPointOfSales.id !== pointOfSales.id) {
         this.$store.dispatch('setCurrentPOS', pointOfSales)
-        this.$store.commit('customer', {})
+        this.$store.commit('customer', pointOfSales.templateCustomer)
         this.clearOrder()
       }
     },

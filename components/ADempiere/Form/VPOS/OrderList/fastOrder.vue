@@ -339,8 +339,16 @@ export default {
         {
           title: this.$t('form.byInvoice.label'),
           params: {
+            isWaitingForInvoice: true
+          },
+          isVisible: false,
+          isShow: true
+        },
+        {
+          title: this.$t('form.byInvoice.aisleSales'),
+          params: {
             isOnlyAisleSeller: true,
-            isWaitingForInvoice: false
+            isWaitingForInvoice: true
           },
           isVisible: false,
           isShow: true

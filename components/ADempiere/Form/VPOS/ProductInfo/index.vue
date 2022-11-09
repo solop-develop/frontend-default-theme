@@ -59,6 +59,7 @@
         @focus="searchFocus"
         @shortkey.native="shortcutKeyMethod"
         @select="handleSelect"
+        @clear="clearProductPriceList"
       >
         <template slot="prefix">
           <svg-icon
@@ -356,6 +357,12 @@ export default {
             }
           }, 2000)
         }
+      })
+    },
+    clearProductPriceList() {
+      this.$store.commit('setListProductPrice', {
+        isLoaded: true,
+        productPricesList: []
       })
     }
   }
