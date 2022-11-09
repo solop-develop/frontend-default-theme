@@ -21,10 +21,8 @@
       {{ $t('operators.compareSearch') }}:
     </span>
     <br>
-
     <el-select
       v-model="currentOperator"
-      @change="changeOperator"
     >
       <el-option
         v-for="(itemOperator, key) in operatorsList"
@@ -41,12 +39,6 @@ import { computed, defineComponent, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
-// constants
-import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
-
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere'
-
 export default defineComponent({
   name: 'OperatorComparisonField',
 
@@ -54,68 +46,40 @@ export default defineComponent({
     fieldAttributes: {
       type: Object,
       required: true
+    },
+    containerManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 
   setup(props) {
-    const { parentUuid, containerUuid, columnName } = props.fieldAttributes
+    const { containerUuid, columnName } = props.fieldAttributes
 
     const operatorsList = ref(props.fieldAttributes.operatorsList)
-
     const currentOperator = computed({
       get() {
-        const { operator } = store.getters.getFieldFromColumnName({
-          containerUuid,
-          columnName
-        })
-
-        return operator
+        return props.fieldAttributes.operator
       },
       set(newValue) {
+        store.commit('updateValueOfField', {
+          containerUuid,
+          columnName,
+          value: newValue
+        })
         store.dispatch('changeFieldAttribure', {
           containerUuid,
           columnName,
           attributeName: 'operator',
-          attributeValue: newValue
+          attributeValue: newValue,
+          field: props.fieldAttributes
         })
       }
     })
 
-    const fieldValue = computed(() => {
-      // main panel values
-      return store.getters.getValueOfFieldOnContainer({
-        parentUuid,
-        containerUuid,
-        columnName
-      })
-    })
-
-    /**
-     * @param {mixed} value, main value in component
-     */
-    const handleChange = (value) => {
-      store.dispatch('notifyFieldChange', {
-        containerUuid,
-        field: props.fieldAttributes,
-        columnName,
-        newValue: value
-      })
-    }
-
-    /**
-     * @param {string} operatorValue
-     */
-    const changeOperator = (operatorValue) => {
-      const value = fieldValue.value
-      if (!isEmptyValue(value) || OPERATORS_MULTIPLE_VALUES.includes(operatorValue)) {
-        handleChange(value)
-      }
-    }
-
     return {
       currentOperator,
-      operatorsList,
-      changeOperator
+      operatorsList
     }
   }
 })

@@ -31,6 +31,7 @@
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
           :container-manager="containerManagerModalDialog"
+          :is-filter-records="false"
         />
       </span>
       <loading-view

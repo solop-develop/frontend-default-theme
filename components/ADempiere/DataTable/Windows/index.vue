@@ -13,26 +13,19 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <div id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
-        <el-input
-          v-model="valueToSearch"
-          :placeholder="$t('components.searchRecord')"
-          clearable
-          size="mini"
-          class="input-search"
-          @input="handleChangeSearch"
-        >
-          <i
-            slot="prefix"
-            class="el-icon-search el-input__icon"
-          />
-        </el-input>
+        <search-record-fields
+          :parent-uuid="parentUuid"
+          :container-uuid="containerUuid"
+          :container-manager="containerManager"
+          style="float: right;"
+        />
       </el-col>
       <el-col
         :span="1"
@@ -135,6 +128,7 @@ import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Componen
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
+import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
 
 // constants
 import { BUTTON } from '@/utils/ADempiere/references'
@@ -149,7 +143,8 @@ export default defineComponent({
     CellDisplayInfo,
     ColumnsDisplayOption,
     CustomPagination,
-    FullScreenContainer
+    FullScreenContainer,
+    SearchRecordFields
   },
 
   props: {
@@ -208,7 +203,6 @@ export default defineComponent({
 
     const heightTable = ref()
     const timeOut = ref(() => {})
-    const timeOutSearch = ref(() => {})
     const panelMain = document.getElementById('mainWindow')
     const heightSize = ref()
     const currentRowSelect = ref({})
@@ -219,27 +213,6 @@ export default defineComponent({
         })
       }
       return !isEmptyValue(props.dataTable)
-    })
-
-    // value of search
-    const valueToSearch = computed({
-      get() {
-        if (!props.isShowSearch) {
-          return ''
-        }
-        return store.getters.getSearchValueTabRecordsList({
-          containerUuid: props.containerUuid
-        })
-      },
-      set(searchValue) {
-        if (!props.isShowSearch) {
-          return ''
-        }
-        store.commit('setSearchValueTabRecordsList', {
-          containerUuid: props.containerUuid,
-          searchValue
-        })
-      }
     })
 
     const getIsLoadedTabRecord = computed(() => {
@@ -521,14 +494,6 @@ export default defineComponent({
       })
     }
 
-    function handleChangeSearch(value) {
-      clearTimeout(timeOutSearch.value)
-      timeOutSearch.value = setTimeout(() => {
-        // get records
-        filterRecord(value)
-      }, 1000)
-    }
-
     // get table data
     const recordsWithFilter = computed(() => {
       if (props.containerManager && props.containerManager.getRecordsList) {
@@ -555,22 +520,6 @@ export default defineComponent({
       }
       return {}
     })
-
-    const isLoadFilter = ref(false)
-
-    function filterRecord(searchText) {
-      isLoadFilter.value = true
-
-      store.dispatch('getEntities', {
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        searchValue: searchText
-      })
-        .finally(() => {
-          clearTimeout(timeOut.value)
-          isLoadFilter.value = false
-        })
-    }
 
     function handleSelection(selections, rowSelected) {
       let index = 0
@@ -725,9 +674,6 @@ export default defineComponent({
     return {
       // data
       timeOut,
-      timeOutSearch,
-      valueToSearch,
-      isLoadFilter,
       heightTable,
       heightSize,
       // computeds
@@ -749,11 +695,9 @@ export default defineComponent({
       currentTabChildren,
       getIsLoadedTabRecord,
       // methods
-      filterRecord,
       setTableHeight,
       adjustSize,
       tableRowClassName,
-      handleChangeSearch,
       headerLabel,
       handleChangePage,
       handleChangeSizePage,

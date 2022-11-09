@@ -33,6 +33,8 @@
             :filter-manager="containerManager.changeFieldShowedFromUser"
             :showed-manager="containerManager.isDisplayedField"
             :fields-to-hidden="containerManager.getFieldsToHidden"
+            :is-filter-records="isFilterRecords"
+            :container-manager="containerManager"
           />
 
           <el-card
@@ -102,6 +104,14 @@ export default defineComponent({
     isShowFilter: {
       type: Boolean,
       default: true
+    },
+    isFilterRecords: {
+      type: Boolean,
+      default: true
+    },
+    isAdvancedQuery: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -119,7 +129,6 @@ export default defineComponent({
       return false
     })
     const fieldsList = computed(() => {
-      // order and assign groups
       if (!isEmptyValue(props.panelMetadata) && !isEmptyValue(props.panelMetadata.fieldsList)) {
         setFocus(props.panelMetadata.fieldsList)
         return props.panelMetadata.fieldsList

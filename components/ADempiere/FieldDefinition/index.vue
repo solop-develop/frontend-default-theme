@@ -206,7 +206,7 @@ export default {
       return {
         ...this.field,
         inTable: this.inTable,
-        isAdvancedQuery: this.isAdvancedQuery,
+        isAdvancedQuery: this.field.isAdvancedQuery,
         // DOM properties
         required: this.isMandatoryField,
         readonly: this.isReadOnlyField,
@@ -218,9 +218,14 @@ export default {
     },
 
     isDisplayedField() {
-      if (this.inTable) {
-        return true
+      // is Advanced Query
+      if (this.field.isAdvancedQuery) {
+        // show only the fields that are marked as select column
+        if (this.field.isSelectionColumn) return this.field.isSelectionColumn
+        // return false
       }
+      // is in Table
+      if (this.inTable) return this.inTable
       // validate with container manager
       if (this.containerManager.isDisplayedField(this.field)) {
         const isDisplayedDefault = this.containerManager.isDisplayedDefault({
@@ -242,6 +247,9 @@ export default {
      * Idicate if field is read only
      */
     isReadOnlyField() {
+      if (this.field.isAdvancedQuery) {
+        return false
+      }
       if (this.inTable) {
         // table manage with isReadOnlyColumn method
         // if rendered the component is editable
@@ -266,7 +274,7 @@ export default {
     },
 
     isSelectCreated() {
-      return this.isAdvancedQuery &&
+      return this.field.isAdvancedQuery &&
         OPERATORS_MULTIPLE_VALUES.includes(this.field.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
     },
