@@ -216,7 +216,7 @@ export default defineComponent({
   .el-input-group__append {
     height: 32px !important;
   }
-  
+
   .button-search-record {
     padding-left: 6px !important;
     padding-right: 0px !important;
