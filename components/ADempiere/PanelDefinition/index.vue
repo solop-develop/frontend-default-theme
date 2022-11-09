@@ -31,7 +31,7 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
-import store from '@/store'
+// import store from '@/store'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
