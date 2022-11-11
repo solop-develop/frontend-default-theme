@@ -412,6 +412,11 @@ export default {
         columnName: this.metadata.columnName
       })
     },
+
+    handleClearValue() {
+      this.value = undefined
+    },
+
     setContainerInformation() {
       if (!isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
