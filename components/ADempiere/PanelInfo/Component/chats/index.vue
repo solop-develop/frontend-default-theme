@@ -129,7 +129,7 @@ export default defineComponent({
       }
       params.forEach(element => {
         const initialValue = element.characterData
-        ChatViwer.value = new Editor.factory({
+        ChatViwer.value = new Editor.Factory({
           el: document.querySelector(`#ChatViwer${element.id}`),
           viewer: true,
           initialValue,

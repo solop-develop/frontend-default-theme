@@ -25,60 +25,33 @@
         <el-form
           v-shortkey="{ closeForm: ['esc'] }"
           size="small"
-          class="location-address"
         >
           <el-row v-if="!isEmptyValue(panelAttribute)" :gutter="0">
-            <!-- <template v-if="!isLoadingFields">
-              <el-col v-for="(fieldAttributes) in fieldDefaultLocation" :key="fieldAttributes.columnName" :span="24">
-                <field-definition
-                  :parent-uuid="parentUuid"
-                  :container-uuid="containerUuid"
-                  :container-manager="containerManagerLocation"
-                  :metadata-field="fieldAttributes"
-                />
-              </el-col>
-            </template>
-            <div
-              v-else
-              key="form-loading"
-              v-loading="isLoadingFields"
-              :element-loading-text="$t('notifications.loading')"
-              element-loading-spinner="el-icon-loading"
-              element-loading-background="rgba(255, 255, 255, 0.8)"
-              style="min-height: calc(50vh - 84px)"
-              class="loading-panel"
-            /> -->
-            <!-- <el-form :label-position="'left'"> -->
             <el-col v-for="attribute in panelAttribute" :key="attribute.id" :span="24">
               <el-form-item :label="attribute.name">
                 <el-input
                   v-if="attribute.value_type === 'S'"
-                  v-model="value"
-                  disabled
+                  v-model="attribute.value"
                 />
                 <el-input-number
                   v-else-if="attribute.value_type === 'N'"
-                  v-model="value"
+                  v-model="attribute.value"
                   controls-position="right"
-                  disabled
                 />
                 <el-select
                   v-else-if="attribute.value_type === 'L'"
-                  v-model="value"
+                  v-model="attribute.value"
                   style="display: flex;"
-                  disabled
                 >
                   <el-option
                     v-for="item in attribute.product_attribute_values"
                     :key="item.id"
                     :label="item.name"
-                    :value="item.value"
+                    :value="item.id"
                   />
                 </el-select>
               </el-form-item>
             </el-col>
-            <!-- </el-form> -->
-
             <el-col v-show="!metadata.pos" :span="24" class="location-address-footer">
               <samp style="float: right; padding-top: 4px;">
                 <el-button
@@ -90,7 +63,7 @@
                 <el-button
                   type="primary"
                   icon="el-icon-check"
-                  @click="close"
+                  @click="save(panelAttribute)"
                 />
               </samp>
             </el-col>
@@ -121,14 +94,17 @@
 </template>
 
 <script>
-// import store from '@/store'
 // Components
 import ListTable from './listTable'
 // Api
 import {
   listProductAttributesSetInstances,
-  getProductAttribute
+  getProductAttribute,
+  getProductAttributeSetInstace,
+  createProductAttributeSetInstance
 } from '@/api/ADempiere/form/productAttribute'
+import { isEmptyValue } from '@/utils/ADempiere'
+import { UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 export default {
   name: 'PanelProductAttribute',
@@ -151,6 +127,10 @@ export default {
     metadata: {
       type: Object,
       required: true
+    },
+    show: {
+      type: Boolean,
+      required: true
     }
   },
   data() {
@@ -163,23 +143,48 @@ export default {
       timeOutFields: null,
       isCustomForm: true,
       panelAttribute: [],
+      listSetInstace: [],
       unsubscribe: () => {}
     }
   },
-  created() {
-    this.setAttribute()
+  computed: {
+    attributeSetInstanceID() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: this.metadata.columnName
+      })
+    },
+    productId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: 'M_Product_ID'
+      })
+    },
+    isShowProductAttribute() {
+      return this.$store.getters.getShowProductAttribute
+    }
+  },
+  watch: {
+    isShowProductAttribute(value) {
+      if (value) {
+        if (!this.isEmptyValue(this.productId) && !this.isEmptyValue(this.attributeSetInstanceID) && this.attributeSetInstanceID > 0) {
+          this.findProductAttributeSetInstace({
+            productId: this.productId,
+            id: this.attributeSetInstanceID
+          })
+        } else {
+          this.setAttribute()
+        }
+      }
+    }
   },
   methods: {
     optionsAttribute(option) {
       this[option.name]()
     },
     listProductAttribute() {
-      const productId = this.$store.getters.getValueOfField({
-        containerUuid: this.containerUuid,
-        columnName: 'M_Product_ID'
-      })
       listProductAttributesSetInstances({
-        productId
+        productId: this.productId
       })
         .then(response => {
           const { records } = response
@@ -192,17 +197,138 @@ export default {
     close() {
       this.$store.commit('setShowProductAttribute', false)
     },
+    save() {
+      let value, listAttributes, selectAttributes
+      const filterAttribute = this.panelAttribute.filter(attribute => !isEmptyValue(attribute.value))
+      const attributes = filterAttribute.map(productAttributes => {
+        const { uuid, value_type, id } = productAttributes
+        switch (value_type) {
+          case 'L':
+            value = productAttributes.value
+            listAttributes = this.panelAttribute.find(a => a.id === id)
+            if (this.isEmptyValue(listAttributes)) value = productAttributes.value
+            selectAttributes = listAttributes.product_attribute_values.find(a => a.name === value || a.id === value)
+            if (!this.isEmptyValue(selectAttributes)) {
+              value = selectAttributes.id
+            } else {
+              value = productAttributes.value
+            }
+            break
+          default:
+            value = productAttributes.value
+            break
+        }
+        return {
+          value,
+          key: uuid
+        }
+      })
+      const addTableName = attributes.find(attribute => attribute.key === 'tableName')
+      if (this.isEmptyValue(addTableName)) attributes.push({ value: this.metadata.tabTableName, key: 'tableName' })
+      createProductAttributeSetInstance({
+        attributes,
+        productId: this.productId
+      })
+        .then(response => {
+          this.findProductAttributeSetInstace({
+            productId: this.productId,
+            id: response.id
+          })
+          this.close()
+          this.setValue(response)
+        })
+        .catch(error => {
+          this.close()
+          console.warn(error)
+        })
+    },
+
+    findValueAttribute(attribute, list, value) {
+      if (this.isEmptyValue(list)) return value
+      const findAttribute = list.find(b => b.product_attribute_uuid === attribute.uuid)
+      if (this.isEmptyValue(findAttribute)) return value
+      value = findAttribute.value
+      return value
+    },
+
     setAttribute() {
       const productId = this.$store.getters.getValueOfField({
         containerUuid: this.containerUuid,
         columnName: 'M_Product_ID'
       })
+      let id
       getProductAttribute({
-        productId
+        productId,
+        productAttributeSetInstanceId: id
       })
         .then(response => {
           const { productAttributes } = response
-          this.panelAttribute = productAttributes
+          id = response.id
+          this.panelAttribute = productAttributes.map(attribute => {
+            let value
+            return {
+              ...attribute,
+              value
+            }
+          })
+        })
+        .catch(error => {
+          console.warn(error)
+        })
+    },
+    setValue(productAttributeSetInstance) {
+      const { parentUuid, containerUuid, columnName, displayColumnName } = this.metadata
+      const { id, uuid, description } = productAttributeSetInstance
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName,
+        value: id
+      })
+      // set display column (name) value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName: displayColumnName,
+        value: description
+      })
+      // set UUID value
+      this.$store.commit('updateValueOfField', {
+        parentUuid,
+        containerUuid,
+        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
+        value: uuid
+      })
+      this.$store.dispatch('notifyFieldChange', {
+        containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName
+      })
+    },
+    findProductAttributeSetInstace({ productId, id, productAttributeSetId }) {
+      getProductAttributeSetInstace({
+        productId,
+        id,
+        productAttributeSetId
+      })
+        .then(responseSetInstance => {
+          const { productAttributeInstances, productAttributeSet } = responseSetInstance
+
+          this.panelAttribute = productAttributeSet.product_attributes.map(attribute => {
+            let value
+            return {
+              ...attribute,
+              value
+              // value: this.findValueAttribute(attribute, this.listSetInstace)
+            }
+          })
+          this.panelAttribute = this.panelAttribute.map(a => {
+            return {
+              ...a,
+              value: this.findValueAttribute(a, productAttributeInstances)
+            }
+          })
         })
         .catch(error => {
           console.warn(error)
