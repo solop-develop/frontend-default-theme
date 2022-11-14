@@ -1615,6 +1615,7 @@ export default {
       })
         .then(response => {
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
+          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
             .then(() => {
               this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
                 .then(() => {
