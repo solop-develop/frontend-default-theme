@@ -238,7 +238,7 @@ export default defineComponent({
     })
 
     const currentOption = computed(() => {
-      return store.getters.getTableOption
+      return store.getters.getTableOption(props.containerUuid)
     })
 
     const keyColumn = computed(() => {

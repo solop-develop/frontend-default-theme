@@ -103,7 +103,11 @@ export default defineComponent({
     }
 
     const handleCommand = (command) => {
-      root.$store.dispatch(command.dispatch, command.value)
+      root.$store.dispatch(command.dispatch, {
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        tableOption: command.value
+      })
     }
 
     return {
