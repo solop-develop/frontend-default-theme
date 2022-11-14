@@ -198,16 +198,16 @@ export default {
       this.$store.commit('setShowProductAttribute', false)
     },
     save() {
-      let value
+      let value, listAttributes, selectAttributes
       const filterAttribute = this.panelAttribute.filter(attribute => !isEmptyValue(attribute.value))
       const attributes = filterAttribute.map(productAttributes => {
         const { uuid, value_type, id } = productAttributes
         switch (value_type) {
           case 'L':
             value = productAttributes.value
-            const listAttributes = this.panelAttribute.find(a => a.id === id)
+            listAttributes = this.panelAttribute.find(a => a.id === id)
             if (this.isEmptyValue(listAttributes)) value = productAttributes.value
-            const selectAttributes = listAttributes.product_attribute_values.find(a => a.name === value || a.id === value)
+            selectAttributes = listAttributes.product_attribute_values.find(a => a.name === value || a.id === value)
             if (!this.isEmptyValue(selectAttributes)) {
               value = selectAttributes.id
             } else {
@@ -243,8 +243,7 @@ export default {
         })
     },
 
-    findValueAttribute(attribute, list) {
-      let value
+    findValueAttribute(attribute, list, value) {
       if (this.isEmptyValue(list)) return value
       const findAttribute = list.find(b => b.product_attribute_uuid === attribute.uuid)
       if (this.isEmptyValue(findAttribute)) return value
@@ -307,7 +306,7 @@ export default {
         columnName
       })
     },
-    findProductAttributeSetInstace({ productId, id, productAttributeSetId}) {
+    findProductAttributeSetInstace({ productId, id, productAttributeSetId }) {
       getProductAttributeSetInstace({
         productId,
         id,
