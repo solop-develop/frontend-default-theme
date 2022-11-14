@@ -27,12 +27,12 @@
     trigger="click"
   >
     <panel-product-attribute
-      v-if="isShowProductAttribute"
       class="product-attribute-form"
       :parent-uuid="parentUuid"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
       :metadata="metadata"
+      :show="isShowProductAttribute"
     />
 
     <el-button
@@ -90,8 +90,6 @@ export default {
     return {
       metadataList: [],
       isLoadingFields: false,
-      // isShowProductAttribute: false,
-      // fieldsList: FieldsList,
       timeOutFields: null,
       isCustomForm: true,
       unsubscribe: () => {}
@@ -104,6 +102,16 @@ export default {
         return this.$store.getters.getShowProductAttribute
       },
       set(value) {
+        if (value && this.isEmptyValue(this.attributeSet) && this.metadata.tabTableName === 'M_Product') {
+          this.$message({
+            message: this.$t('field.emptyFieldAttribute'),
+            type: 'info',
+            showClose: value
+          })
+          this.$store.commit('setShowProductAttribute', !value)
+          this.$refs.ProductAttribute.showPopper = !value
+          return
+        }
         this.$store.commit('setShowProductAttribute', value)
       }
     },
@@ -142,6 +150,13 @@ export default {
     },
     popoverPlacement() {
       return this.metadata.popoverPlacement || 'top'
+    },
+    attributeSet() {
+      return this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        columnName: 'M_AttributeSet_ID'
+      })
     }
   },
 

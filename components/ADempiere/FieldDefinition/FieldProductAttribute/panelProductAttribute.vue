@@ -25,30 +25,8 @@
         <el-form
           v-shortkey="{ closeForm: ['esc'] }"
           size="small"
-          class="location-address"
         >
           <el-row v-if="!isEmptyValue(panelAttribute)" :gutter="0">
-            <!-- <template v-if="!isLoadingFields">
-              <el-col v-for="(fieldAttributes) in fieldDefaultLocation" :key="fieldAttributes.columnName" :span="24">
-                <field-definition
-                  :parent-uuid="parentUuid"
-                  :container-uuid="containerUuid"
-                  :container-manager="containerManagerLocation"
-                  :metadata-field="fieldAttributes"
-                />
-              </el-col>
-            </template>
-            <div
-              v-else
-              key="form-loading"
-              v-loading="isLoadingFields"
-              :element-loading-text="$t('notifications.loading')"
-              element-loading-spinner="el-icon-loading"
-              element-loading-background="rgba(255, 255, 255, 0.8)"
-              style="min-height: calc(50vh - 84px)"
-              class="loading-panel"
-            /> -->
-            <!-- <el-form :label-position="'left'"> -->
             <el-col v-for="attribute in panelAttribute" :key="attribute.id" :span="24">
               <el-form-item :label="attribute.name">
                 <el-input
@@ -74,8 +52,6 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <!-- </el-form> -->
-
             <el-col v-show="!metadata.pos" :span="24" class="location-address-footer">
               <samp style="float: right; padding-top: 4px;">
                 <el-button
@@ -118,7 +94,6 @@
 </template>
 
 <script>
-// import store from '@/store'
 // Components
 import ListTable from './listTable'
 // Api
@@ -129,7 +104,7 @@ import {
   createProductAttributeSetInstance
 } from '@/api/ADempiere/form/productAttribute'
 import { isEmptyValue } from '@/utils/ADempiere'
-import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 export default {
   name: 'PanelProductAttribute',
@@ -152,6 +127,10 @@ export default {
     metadata: {
       type: Object,
       required: true
+    },
+    show: {
+      type: Boolean,
+      required: true
     }
   },
   data() {
@@ -168,20 +147,44 @@ export default {
       unsubscribe: () => {}
     }
   },
-  created() {
-    this.setAttribute()
+  computed: {
+    attributeSetInstanceID() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: this.metadata.columnName
+      })
+    },
+    productId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: 'M_Product_ID'
+      })
+    },
+    isShowProductAttribute() {
+      return this.$store.getters.getShowProductAttribute
+    }
+  },
+  watch: {
+    isShowProductAttribute(value) {
+      if (value) {
+        if (!this.isEmptyValue(this.productId) && !this.isEmptyValue(this.attributeSetInstanceID) && this.attributeSetInstanceID > 0) {
+          this.findProductAttributeSetInstace({
+            productId: this.productId,
+            id: this.attributeSetInstanceID
+          })
+        } else {
+          this.setAttribute()
+        }
+      }
+    }
   },
   methods: {
     optionsAttribute(option) {
       this[option.name]()
     },
     listProductAttribute() {
-      const productId = this.$store.getters.getValueOfField({
-        containerUuid: this.containerUuid,
-        columnName: 'M_Product_ID'
-      })
       listProductAttributesSetInstances({
-        productId
+        productId: this.productId
       })
         .then(response => {
           const { records } = response
@@ -195,29 +198,42 @@ export default {
       this.$store.commit('setShowProductAttribute', false)
     },
     save() {
-      const productId = this.$store.getters.getValueOfField({
-        containerUuid: this.containerUuid,
-        columnName: 'M_Product_ID'
-      })
-      const id = this.$store.getters.getValueOfField({
-        containerUuid: this.containerUuid,
-        columnName: 'M_AttributeSetInstance_ID'
-      })
+      let value
       const filterAttribute = this.panelAttribute.filter(attribute => !isEmptyValue(attribute.value))
       const attributes = filterAttribute.map(productAttributes => {
-        const { value, uuid } = productAttributes
+        const { uuid, value_type, id } = productAttributes
+        switch (value_type) {
+          case 'L':
+            value = productAttributes.value
+            const listAttributes = this.panelAttribute.find(a => a.id === id)
+            if (this.isEmptyValue(listAttributes)) value = productAttributes.value
+            const selectAttributes = listAttributes.product_attribute_values.find(a => a.name === value || a.id === value)
+            if (!this.isEmptyValue(selectAttributes)) {
+              value = selectAttributes.id
+            } else {
+              value = productAttributes.value
+            }
+            break
+          default:
+            value = productAttributes.value
+            break
+        }
         return {
           value,
           key: uuid
         }
       })
+      const addTableName = attributes.find(attribute => attribute.key === 'tableName')
+      if (this.isEmptyValue(addTableName)) attributes.push({ value: this.metadata.tabTableName, key: 'tableName' })
       createProductAttributeSetInstance({
-        id,
         attributes,
-        productId
+        productId: this.productId
       })
         .then(response => {
-          console.log({ response }, 65656516)
+          this.findProductAttributeSetInstace({
+            productId: this.productId,
+            id: response.id
+          })
           this.close()
           this.setValue(response)
         })
@@ -231,14 +247,8 @@ export default {
       let value
       if (this.isEmptyValue(list)) return value
       const findAttribute = list.find(b => b.product_attribute_uuid === attribute.uuid)
-      switch (attribute.value_type) {
-        case 'L':
-          value = findAttribute.product_attribute_id
-          break
-        default:
-          value = findAttribute.value
-          break
-      }
+      if (this.isEmptyValue(findAttribute)) return value
+      value = findAttribute.value
       return value
     },
 
@@ -256,28 +266,10 @@ export default {
           const { productAttributes } = response
           id = response.id
           this.panelAttribute = productAttributes.map(attribute => {
-            // console.log(attribute, this.listSetInstace, 1212)
             let value
             return {
               ...attribute,
               value
-              // value: this.findValueAttribute(attribute, this.listSetInstace)
-            }
-          })
-        })
-        .catch(error => {
-          console.warn(error)
-        })
-      getProductAttributeSetInstace({
-        productId,
-        id
-      })
-        .then(responseSetInstance => {
-          const { productAttributeInstances } = responseSetInstance
-          this.panelAttribute = this.panelAttribute.map(a => {
-            return {
-              ...a,
-              value: this.findValueAttribute(a, productAttributeInstances)
             }
           })
         })
@@ -286,17 +278,8 @@ export default {
         })
     },
     setValue(productAttributeSetInstance) {
-      const columnName = 'M_AttributeSetInstance_ID'
-      const containerUuid = this.containerUuid
-      const parentUuid = this.parentUuid
+      const { parentUuid, containerUuid, columnName, displayColumnName } = this.metadata
       const { id, uuid, description } = productAttributeSetInstance
-      console.log({
-        parentUuid,
-        containerUuid,
-        columnName,
-        value: id,
-        productAttributeSetInstance
-      })
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
@@ -307,8 +290,7 @@ export default {
       this.$store.commit('updateValueOfField', {
         parentUuid,
         containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
+        columnName: displayColumnName,
         value: description
       })
       // set UUID value
@@ -324,6 +306,34 @@ export default {
         field: this.metadata,
         columnName
       })
+    },
+    findProductAttributeSetInstace({ productId, id, productAttributeSetId}) {
+      getProductAttributeSetInstace({
+        productId,
+        id,
+        productAttributeSetId
+      })
+        .then(responseSetInstance => {
+          const { productAttributeInstances, productAttributeSet } = responseSetInstance
+
+          this.panelAttribute = productAttributeSet.product_attributes.map(attribute => {
+            let value
+            return {
+              ...attribute,
+              value
+              // value: this.findValueAttribute(attribute, this.listSetInstace)
+            }
+          })
+          this.panelAttribute = this.panelAttribute.map(a => {
+            return {
+              ...a,
+              value: this.findValueAttribute(a, productAttributeInstances)
+            }
+          })
+        })
+        .catch(error => {
+          console.warn(error)
+        })
     }
   }
 }
