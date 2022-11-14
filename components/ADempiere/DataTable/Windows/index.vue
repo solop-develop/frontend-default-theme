@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
+  <div v-if="!isChangeOptions" id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
         <search-record-fields
@@ -113,6 +113,10 @@
       :is-navigation="isNavigation"
     />
   </div>
+  <loading-view
+    v-else
+    key="process-loading"
+  />
 </template>
 
 <script>
@@ -129,6 +133,7 @@ import CustomPagination from '@theme/components/ADempiere/DataTable/Components/C
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // constants
 import { BUTTON } from '@/utils/ADempiere/references'
@@ -144,7 +149,8 @@ export default defineComponent({
     ColumnsDisplayOption,
     CustomPagination,
     FullScreenContainer,
-    SearchRecordFields
+    SearchRecordFields,
+    LoadingView
   },
 
   props: {
@@ -203,6 +209,7 @@ export default defineComponent({
 
     const heightTable = ref()
     const timeOut = ref(() => {})
+    const isChangeOptions = ref(false)
     const panelMain = document.getElementById('mainWindow')
     const heightSize = ref()
     const currentRowSelect = ref({})
@@ -222,7 +229,7 @@ export default defineComponent({
     })
 
     const currentOption = computed(() => {
-      return store.getters.getTableOption
+      return store.getters.getTableOption(props.containerUuid)
     })
 
     const keyColumn = computed(() => {
@@ -233,7 +240,7 @@ export default defineComponent({
     })
 
     const headerList = computed(() => {
-      const showMinimalistView = store.getters.getTableOption
+      const showMinimalistView = store.getters.getTableOption(props.containerUuid)
       if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
         return props.header.filter(fieldItem => {
           const isDisplayedDefault = props.containerManager.isDisplayedDefault({
@@ -617,10 +624,17 @@ export default defineComponent({
       }
       if (newValue && !isEmptyValue(recordUuid)) {
         const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-        if (!isEmptyValue(currentRow)) {
+        if (!isEmptyValue(currentRow) & !isEmptyValue(refs.multipleTable)) {
           refs.multipleTable.toggleRowSelection(currentRow)
         }
       }
+    })
+
+    watch(currentOption, (newValue, oldValue) => {
+      isChangeOptions.value = true
+      setTimeout(() => {
+        isChangeOptions.value = false
+      }, 500)
     })
 
     onUpdated(() => {
@@ -674,6 +688,7 @@ export default defineComponent({
     return {
       // data
       timeOut,
+      isChangeOptions,
       heightTable,
       heightSize,
       // computeds
