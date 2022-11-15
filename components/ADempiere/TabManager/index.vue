@@ -37,7 +37,7 @@
       v-model="currentTab"
       class="el-tabs-container"
       type="border-card"
-      style="width:100%;height: 100%"
+      style="width:100%;height: 100%;"
       @tab-click="handleClick"
     >
       <el-tab-pane

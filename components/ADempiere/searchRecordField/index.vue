@@ -30,10 +30,15 @@
         slot="append"
         v-model="isPanel"
         placement="bottom"
-        width="800"
+        :width="isMobile ? 'auto' : '800'"
         trigger="click"
         class="option-search-record"
       >
+        <title-and-help
+          style="margin: 0 !important;"
+          :name="$t('tagsView.advancedQuery')"
+          :help="$t('tagsView.advancedQuery')"
+        />
         <el-row :gutter="0">
           <el-col :span="24">
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
@@ -82,7 +87,7 @@ import store from '@/store'
 
 // components
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-
+import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp/index.vue'
 // constants
 import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX, IS_ADVANCE_QUERY } from '@/utils/ADempiere/dictionaryUtils'
 
@@ -93,6 +98,7 @@ export default defineComponent({
   name: 'SearchRecordField',
 
   components: {
+    TitleAndHelp,
     PanelDefinition
   },
 
@@ -151,6 +157,10 @@ export default defineComponent({
       }
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     /**
      * Methods
      */
@@ -200,6 +210,7 @@ export default defineComponent({
       // Computeds
       containerManagerAdvancedQuery,
       valueToSearch,
+      isMobile,
       // Methods
       searchRecord,
       handleChangeSearch

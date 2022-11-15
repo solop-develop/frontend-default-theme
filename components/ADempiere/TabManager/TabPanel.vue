@@ -59,16 +59,17 @@
             :container-manager="containerManager"
             :group-tab="tabAttributes.tabGroup"
           />
-          <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
-            <panel-definition
-              key="panel-definition"
-              :parent-uuid="parentUuid"
-              :container-uuid="tabAttributes.uuid"
-              :container-manager="containerManager"
-              :group-tab="tabAttributes.tabGroup"
-              :style="overflowHeightScrooll"
-            />
-          </el-scrollbar>
+          <!-- <el-scrollbar v-else wrap-class="scroll-child"> -->
+          <panel-definition
+            v-else
+            key="panel-definition"
+            :parent-uuid="parentUuid"
+            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :group-tab="tabAttributes.tabGroup"
+            :style="overflowHeightScrooll"
+          />
+          <!-- </el-scrollbar> -->
         </span>
         <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
           <panel-definition
