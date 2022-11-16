@@ -58,23 +58,30 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref, onMounted, watch } from '@vue/composition-api'
+import {
+  defineComponent, computed, ref, onMounted, watch, nextTick
+} from '@vue/composition-api'
+
 import store from '@/store'
 import lang from '@/lang'
-// import Editor
+
+// components and mixins
 import '@toast-ui/chart/dist/toastui-chart.css'
 import chart from '@toast-ui/editor-plugin-chart'
 import Editor from '@toast-ui/editor'
 import '@toast-ui/editor/dist/toastui-editor.css'
+
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'Chats',
+
   components: {
     Editor
   },
+
   props: {
     tableName: {
       type: String,
@@ -85,10 +92,11 @@ export default defineComponent({
       required: false
     }
   },
-  setup(props, { root }) {
+
+  setup(props) {
     const message = ref('')
-    const ChatEditor = ref(null)
-    const ChatViwer = ref(null)
+    const chatEditor = ref(null)
+    const chatViwer = ref(null)
 
     const chartOptions = {
       minWidth: 100,
@@ -102,7 +110,7 @@ export default defineComponent({
     })
 
     function sendComment() {
-      if (isEmptyValue(ChatEditor.value.getMarkdown())) {
+      if (isEmptyValue(chatEditor.value.getMarkdown())) {
         showMessage({
           message: lang.t('window.containerInfo.emptyNote'),
           type: 'warning'
@@ -112,7 +120,7 @@ export default defineComponent({
       store.dispatch('createChatEntry', {
         tableName: props.tableName,
         recordId: props.recordId,
-        comment: ChatEditor.value.getMarkdown()
+        comment: chatEditor.value.getMarkdown()
       })
         .then(() => {
           cleatChatEditor('')
@@ -120,7 +128,7 @@ export default defineComponent({
     }
 
     function cleatChatEditor(params) {
-      ChatEditor.value.setMarkdown(params)
+      chatEditor.value.setMarkdown(params)
     }
 
     function viwer(params, key) {
@@ -129,11 +137,13 @@ export default defineComponent({
       }
       params.forEach(element => {
         const initialValue = element.characterData
-        ChatViwer.value = new Editor.Factory({
-          el: document.querySelector(`#ChatViwer${element.id}`),
-          viewer: true,
-          initialValue,
-          plugins: [[chart, chartOptions]]
+        nextTick(() => {
+          chatViwer.value = new Editor.factory({
+            el: document.querySelector(`#ChatViwer${element.id}`),
+            viewer: true,
+            initialValue,
+            plugins: [[chart, chartOptions]]
+          })
         })
       })
     }
@@ -142,7 +152,7 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      ChatEditor.value = new Editor({
+      chatEditor.value = new Editor({
         el: document.querySelector('#ChatEditor'),
         initialValue: message.value,
         height: '200px',
@@ -150,7 +160,7 @@ export default defineComponent({
         previewStyle: 'vertical',
         plugins: [[chart, chartOptions]]
       })
-      ChatEditor.value.getMarkdown()
+      chatEditor.value.getMarkdown()
       viwer()
     })
 
@@ -158,9 +168,9 @@ export default defineComponent({
       message,
       listChats,
       sendComment,
-      ChatEditor,
+      chatEditor,
       cleatChatEditor,
-      ChatViwer,
+      chatViwer,
       viwer
     }
   }
@@ -189,7 +199,6 @@ export default defineComponent({
     height: 100%;
 }
 </style>
-
 <style scoped>
 .scroll-chats {
   width: 100%;
