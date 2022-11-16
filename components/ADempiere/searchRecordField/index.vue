@@ -43,7 +43,7 @@
           <el-col :span="24">
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <panel-definition
-                :parent-uuid="parentUuid + IS_ADVANCE_QUERY"
+                :parent-uuid="parentUuid"
                 :container-uuid="containerUuid + IS_ADVANCE_QUERY"
                 :container-manager="containerManagerAdvancedQuery"
                 :is-filter-records="false"
@@ -81,8 +81,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
-
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 import store from '@/store'
 
 // components
@@ -123,15 +122,15 @@ export default defineComponent({
 
   setup(props) {
     /**
-     * Refs
-     */
+    * Refs
+    */
     const isLoadFilter = ref(false)
     const timeOutSearch = ref(null)
     const isPanel = ref(false)
 
     /**
-     * Computed
-     */
+    * Computed
+    */
     // value of search
     const valueToSearch = computed({
       get() {
@@ -161,9 +160,16 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
+    const panelIsAdvanceuery = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid + IS_ADVANCE_QUERY
+      )
+    })
+
     /**
-     * Methods
-     */
+    * Methods
+    */
     function handleChangeSearch(value) {
       clearTimeout(timeOutSearch.value)
       timeOutSearch.value = setTimeout(() => {
@@ -200,6 +206,18 @@ export default defineComponent({
       isPanel.value = false
     }
 
+    watch(isPanel, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue) && newValue) {
+        if (isEmptyValue(panelIsAdvanceuery.value)) {
+          store.dispatch('setTabAdvanceuery', {
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid,
+            isAdvancedQuery: IS_ADVANCE_QUERY
+          })
+        }
+      }
+    })
+
     return {
       // Refs
       isLoadFilter,
@@ -211,6 +229,7 @@ export default defineComponent({
       containerManagerAdvancedQuery,
       valueToSearch,
       isMobile,
+      panelIsAdvanceuery,
       // Methods
       searchRecord,
       handleChangeSearch
