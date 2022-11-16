@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div class="field-definition">
+  <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'">
     <component
       :is="componentRender"
       v-if="inTable"

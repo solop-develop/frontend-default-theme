@@ -30,15 +30,10 @@
         @size-change="handleSizeChange"
         @current-change="handleChangePage"
       >
-        <span v-if="isSelection" class="selections-number">
-          <span style="position: absolute !important;left: 1px !important;">
+        <span class="selections-number">
+          <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
             {{ $t('table.dataTable.selected') }}: {{ selection }}
           </span>
-          <!-- <span>
-            {{ $t('table.dataTable.recordsPage') }} {{ recordsPage }} {{ ' ' }} /
-          </span> -->
-          <!-- {{ lisPageSize }} -->
-          <!-- {{ $t('table.dataTable.selected') }}: {{ selection }} / show total records -->
         </span>
       </el-pagination>
     </el-col>
@@ -116,6 +111,10 @@ export default defineComponent({
       return true
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const rowPage = computed(() => {
       return totalRowByPage({
         pageSize: props.pageSize,
@@ -132,6 +131,7 @@ export default defineComponent({
       isSelection,
       rowPage,
       currentPageSize,
+      isMobile,
       // Import
       NUMBER_RECORDS_PER_PAGE
     }
@@ -150,5 +150,16 @@ export default defineComponent({
     font-weight: normal;
     color: #606266;
   }
+}
+</style>
+<style scoped>
+.is-pagination-content-panel {
+  position: absolute !important;
+  left: 1px !important;
+}
+.is-pagination-content-panel-mobile {
+  position: absolute !important;
+  top: 100% !important;
+  left: 1px !important;
 }
 </style>
