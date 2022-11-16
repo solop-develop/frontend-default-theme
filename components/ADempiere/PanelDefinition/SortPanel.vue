@@ -106,9 +106,9 @@ import { CLIENT } from '@/utils/ADempiere/constants/systemColumns'
  * Order or sequence panel based on the functionality of the `org.compiere.grid.VSortTab`
  * @see https://github.com/adempiere/adempiere/blob/develop/client/src/org/adempiere/controller/SortTabController.java
  * @see https://github.com/adempiere/adempiere/blob/develop/client/src/org/compiere/grid/VSortTab.java
- * TODO: Add change tracker to enable save button
  * TODO: Add discartAtElementChange event to discard only current row
  * TODO: Implement search in local list and disable drag-and-drop
+ * TODO: Implement read-only, either by role or record access, by adding an attribute flag on the entity, see org.adempiere.util.ListElement class.
  */
 export default defineComponent({
   name: 'SortPanel',
