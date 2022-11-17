@@ -98,10 +98,6 @@
       class="upload-demo"
       name="avatar"
       action="#"
-      :on-change="handleChange"
-      :on-progress="qlq"
-      :on-error="alo"
-      :on-success="chao"
       :auto-upload="false"
     >
       <el-button slot="trigger" size="small" type="primary">Selecciona un archivo</el-button>
@@ -111,6 +107,7 @@
 </template>
 
 <script>
+import lang from '@/lang'
 import { defineComponent, computed, ref } from '@vue/composition-api'
 import {
   buildImageFromArrayBuffer,
@@ -121,6 +118,7 @@ import {
 import request from '@/utils/request'
 import axios from 'axios'
 import store from '@/store'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'Attachment',
@@ -286,12 +284,20 @@ export default defineComponent({
         data: formData
       })
         .then(resData => {
+          showMessage({
+            message: lang.t('window.containerInfo.attachment.success'),
+            type: 'success'
+          })
           refs.upload.submit()
           refs.upload.clearFiles()
           refs.upload.uploadFiles = []
         })
         .catch(err => {
-          console.log({ err })
+          console.warn({ err })
+          showMessage({
+            message: lang.t('window.containerInfo.attachment.error'),
+            type: 'error'
+          })
         })
     }
 
