@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <span>
+  <!-- <span>
     <el-card v-if="!isEmptyValue(newImage)" shadow="always">
       <div slot="header" class="clearfix">
         <span>{{ $t('window.containerInfo.attachment.newFiles') }}</span>
@@ -42,65 +42,89 @@
     <div v-if="!Attachment">
       <el-empty />
     </div>
+    <form id="form" enctype="multipart/form-data">
+      <el-upload
+        ref="upload"
+        name="avatar"
+        action="#"
+        list-type="picture-card"
+        :auto-upload="true"
+        :file-list="listImageAll"
+        :before-upload="beforeAvatarUpload"
+      >
+        <i slot="default" class="el-icon-plus" />
+        <div slot="file" slot-scope="{file}">
+          <el-image
+            v-if="file.type !=='application/pdf'"
+            style="width: 100%; height: 250px"
+            :src="file.url"
+            :preview-src-list="listImage"
+          />
+
+          <img v-else :src="file.url" alt="" class="el-upload-list__item-thumbnail">
+          <span v-if="file.type ==='application/pdf'" class="el-upload-list__item-actions">
+            <span
+              class="el-upload-list__item-preview"
+              @click="handlePictureCardPreview(file)"
+            >
+              <i class="el-icon-zoom-in" />
+            </span>
+            <span
+              v-if="!disabled"
+              class="el-upload-list__item-delete"
+              @click="handleDownload(file)"
+            >
+              <i class="el-icon-download" />
+            </span>
+            <span
+              v-if="!disabled"
+              class="el-upload-list__item-delete"
+              @click="handleRemove(file)"
+            >
+              <i class="el-icon-delete" />
+            </span>
+          </span>
+        </div>
+      </el-upload>
+      <el-dialog :visible.sync="dialogVisible">
+        <img width="100%" :src="dialogImageUrl" alt="">
+      </el-dialog>
+    </form>
+    <hr>
+  </span> -->
+  <form id="form" enctype="multipart/form-data">
     <el-upload
       ref="upload"
+      class="upload-demo"
+      name="avatar"
       action="#"
-      list-type="picture-card"
-      :auto-upload="true"
-      :file-list="listImageAll"
-      :before-upload="beforeAvatarUpload"
+      :on-change="handleChange"
+      :on-progress="qlq"
+      :on-error="alo"
+      :on-success="chao"
+      :auto-upload="false"
     >
-      <i slot="default" class="el-icon-plus" />
-      <div slot="file" slot-scope="{file}">
-        <el-image
-          v-if="file.type !=='application/pdf'"
-          style="width: 100%; height: 250px"
-          :src="file.url"
-          :preview-src-list="listImage"
-        />
-
-        <img v-else :src="file.url" alt="" class="el-upload-list__item-thumbnail">
-        <span v-if="file.type ==='application/pdf'" class="el-upload-list__item-actions">
-          <span
-            class="el-upload-list__item-preview"
-            @click="handlePictureCardPreview(file)"
-          >
-            <i class="el-icon-zoom-in" />
-          </span>
-          <span
-            v-if="!disabled"
-            class="el-upload-list__item-delete"
-            @click="handleDownload(file)"
-          >
-            <i class="el-icon-download" />
-          </span>
-          <span
-            v-if="!disabled"
-            class="el-upload-list__item-delete"
-            @click="handleRemove(file)"
-          >
-            <i class="el-icon-delete" />
-          </span>
-        </span>
-      </div>
+      <el-button slot="trigger" size="small" type="primary">Selecciona un archivo</el-button>
+      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">Cargar al servidor</el-button>
     </el-upload>
-    <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="dialogImageUrl" alt="">
-    </el-dialog>
-    <hr>
-  </span>
+  </form>
 </template>
 
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
-import { buildImageFromArrayBuffer, buildLinkHref } from '@/utils/ADempiere/resource.js'
-import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
+import {
+  buildImageFromArrayBuffer,
+  buildLinkHref
+} from '@/utils/ADempiere/resource.js'
+// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
+// import ImageCropper from '@theme/components/ImageCropper'
+import request from '@/utils/request'
 import axios from 'axios'
 import store from '@/store'
 
 export default defineComponent({
   name: 'Attachment',
-
+  // components: { ImageCropper },
   props: {
     parentUuid: {
       type: String,
@@ -127,7 +151,7 @@ export default defineComponent({
       default: false
     }
   },
-  setup(props, { root }) {
+  setup(props, { root, refs }) {
     const dialogImageUrl = ref('')
 
     const dialogVisible = ref(false)
@@ -212,15 +236,29 @@ export default defineComponent({
       return urlImage.data.result.data
     }
 
-    const submitUpload = () => {
-      uploadAttachment({
-        tableName: props.tableName,
-        recordId: props.recordId,
-        recordUuid: props.recordUuid,
-        list: listImageAll.value
-      })
-    }
+    // const submitUpload = () => {
+    //   const fmData = new FormData()
+    //   fmData.append(
+    //     listImageAll.value[0],
+    //     data2blob(listImageAll.value[0].url, mime),
+    //     listImageAll.value[0].type
+    //   )
+    //   console.log({
+    //     tableName: props.tableName,
+    //     recordId: props.recordId,
+    //     recordUuid: props.recordUuid,
+    //     list: listImageAll.value,
+    //     fmData
+    //   })
+    //   uploadAttachment({
+    //     tableName: props.tableName,
+    //     recordId: props.recordId,
+    //     recordUuid: props.recordUuid,
+    //     list: listImageAll.value
+    //   })
+    // }
     const beforeAvatarUpload = (file) => {
+      console.log({ file })
       listImageAll.value.push({
         name: file.name,
         type: file.type,
@@ -231,7 +269,34 @@ export default defineComponent({
       newImage.value.push(URL.createObjectURL(file))
     }
 
+    const upload = ref()
+
+    const handleExceed = (files) => {
+      upload.value.clearFiles()
+      const file = files[0]
+      upload.value.handleStart(file)
+    }
+
+    const submitUpload = () => {
+      const form = document.getElementById('form')
+      const formData = new FormData(form)
+      request({
+        url: 'http://0.0.0.:8085/api/adempiere/user-interface/component/attachment/save-attachment',
+        method: 'post',
+        data: formData
+      })
+        .then(resData => {
+          refs.upload.submit()
+          refs.upload.clearFiles()
+          refs.upload.uploadFiles = []
+        })
+        .catch(err => {
+          console.log({ err })
+        })
+    }
+
     return {
+      upload,
       dialogImageUrl,
       dialogVisible,
       disabled,
@@ -252,6 +317,8 @@ export default defineComponent({
       submitUpload,
       beforeAvatarUpload,
       converFile,
+      // submitUploadEpal,
+      handleExceed,
       // isEmptyValue,
       converImage,
       handleRemove,
