@@ -138,6 +138,7 @@ export default defineComponent({
       params.forEach(element => {
         const initialValue = element.characterData
         nextTick(() => {
+          // eslint-disable-next-line
           chatViwer.value = new Editor.factory({
             el: document.querySelector(`#ChatViwer${element.id}`),
             viewer: true,

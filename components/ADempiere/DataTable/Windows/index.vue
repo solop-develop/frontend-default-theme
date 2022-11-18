@@ -497,7 +497,8 @@ export default defineComponent({
       props.containerManager.setSizePage({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
-        pageSize
+        pageSize,
+        pageNumber: 1
       })
     }
 
