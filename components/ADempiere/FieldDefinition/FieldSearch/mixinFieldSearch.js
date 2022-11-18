@@ -24,7 +24,7 @@ import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } fr
 
 // utils and helper methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
-import { trimPercentage } from '@/utils/ADempiere/valueFormat'
+import { formatField, trimPercentage } from '@/utils/ADempiere/valueFormat'
 
 export default {
   name: 'MixinFieldSearch',
@@ -202,9 +202,6 @@ export default {
         .sort((fieldA, fieldB) => {
           return fieldA.identifierSequence > fieldB.identifierSequence
         })
-        .map(field => {
-          return field.columnName
-        })
     }
   },
 
@@ -335,8 +332,15 @@ export default {
           //   }
           // }
           // find on identifier columns
-          for (const columnName of this.storedIdentifierColumns) {
-            const valueToCompare = String(row[columnName]).toLowerCase()
+          for (const field of this.storedIdentifierColumns) {
+            const { columnName, displayColumnName, displayType } = field
+
+            const currentValue = formatField({
+              value: row[columnName],
+              displayedValue: row[displayColumnName],
+              displayType
+            })
+            const valueToCompare = String(currentValue).toLowerCase()
 
             if (valueToCompare.includes(parsedValue)) {
               return true
@@ -451,12 +455,20 @@ export default {
       }
 
       // generate with identifier columns
-      this.storedIdentifierColumns.forEach(columnName => {
-        const currentValue = row[columnName]
+      this.storedIdentifierColumns.forEach(field => {
+        const { columnName, displayColumnName, displayType } = field
+
+        const currentValue = formatField({
+          value: row[columnName],
+          displayedValue: row[displayColumnName],
+          displayType
+        })
+
         if (isEmptyValue(currentValue)) {
           // omit empty value
           return
         }
+
         if (isEmptyValue(displayedValue)) {
           // set first value
           displayedValue = currentValue
@@ -500,15 +512,18 @@ export default {
     },
 
     generatedDescription(recordRow) {
+      const identifierColumnName = this.storedIdentifierColumns.map(field => {
+        return field.columnName
+      })
       let displayedDescription
 
       const description = recordRow['Description']
-      if (!isEmptyValue(description) && !this.storedIdentifierColumns.includes('Description')) {
+      if (!isEmptyValue(description) && !identifierColumnName.includes('Description')) {
         displayedDescription = description
       }
 
       const help = recordRow['Help']
-      if (!isEmptyValue(help) && !this.storedIdentifierColumns.includes('Help')) {
+      if (!isEmptyValue(help) && !identifierColumnName.includes('Help')) {
         if (!isEmptyValue(displayedDescription)) {
           displayedDescription += ' - ' + help
         } else {

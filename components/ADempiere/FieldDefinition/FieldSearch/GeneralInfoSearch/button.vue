@@ -112,6 +112,11 @@ export default {
 
   i, svg {
     font-size: 20px !important;
+
+    // M_InOut icon
+    &.el-icon-truck {
+      font-size: 26px !important;
+    }
   }
 }
 </style>
