@@ -436,7 +436,10 @@ import {
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
-// import typeRefund from './typeRefund/index.vue'
+import {
+  buildLinkHref
+} from '@/utils/ADempiere/resource.js'
+import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 
 export default {
   name: 'OverdrawnInvoice',
@@ -1633,7 +1636,7 @@ export default {
               this.$store.dispatch('reloadOrder', response.uuid)
             })
           if (this.IsAllowsPreviewDocument) {
-            this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+            this.printPreview(posUuid, orderUuid)
           }
           this.$message({
             type: 'success',
@@ -1655,6 +1658,59 @@ export default {
           // })
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
+        })
+    },
+    printPreview(posUuid, orderUuid) {
+      this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+        .then(response => {
+          const { processLog } = response
+          if (!this.isEmptyValue(processLog)) {
+            const link = buildLinkHref({
+              fileName: processLog.output.file_name,
+              outputStream: processLog.output.output_stream,
+              mimeType: processLog.output.mime_type
+            })
+            this.$store.commit('setReportOutput', {
+              download: link.download,
+              format: processLog.output.report_type,
+              fileName: processLog.output.file_name,
+              link,
+              content: processLog.output.output,
+              mimeType: processLog.output.mime_type,
+              name: processLog.output.name,
+              output: processLog.output,
+              outputStream: processLog.output.output_stream,
+              outputStream_asB64: processLog.output.output_stream_asB64,
+              outputStream_asU8: processLog.output.output_stream_asU8,
+              reportType: processLog.output.report_type,
+              reportUuid: processLog.uuid,
+              reportViewUuid: processLog.uuid,
+              tableName: 'C_Order',
+              url: link.href,
+              uuid: processLog.uuid,
+              instanceUuid: processLog.instance_uuid
+            })
+            this.$router.push({
+              name: REPORT_VIEWER_NAME,
+              params: {
+                processId: 110,
+                reportUuid: processLog.uuid,
+                tableName: 'C_Order',
+                menuParentUuid: '',
+                instanceUuid: processLog.instance_uuid,
+                fileName: processLog.output.name,
+                name: processLog.output.name,
+                mimeType: processLog.output.mime_type
+              }
+            }, () => {})
+          }
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
         })
     },
     findRefundCurrencyConversion(currency) {
