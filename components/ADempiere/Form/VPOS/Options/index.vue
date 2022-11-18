@@ -1462,7 +1462,7 @@ export default {
             message: this.$t('notifications.completed'),
             showClose: true
           })
-          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+          if (this.IsAllowsPreviewDocument) this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
         })
         .catch(error => {
           this.$message({

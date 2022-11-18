@@ -69,6 +69,9 @@ export default {
     }
   },
   computed: {
+    IsAllowsPreviewDocument() {
+      return this.currentPointOfSales.isAllowsPreviewDocument
+    },
     allowsCreateOrder() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsCreateOrder
     },
@@ -448,7 +451,7 @@ export default {
       })
         .then(response => {
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
-          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+          if (this.IsAllowsPreviewDocument) this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
           this.clearOrder()
           this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
           this.$store.dispatch('listPayments', { posUuid: this.currentPointOfSales.uuid, orderUuid: this.currentOrder.uuid })

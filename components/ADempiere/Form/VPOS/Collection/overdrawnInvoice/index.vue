@@ -505,6 +505,9 @@ export default {
     }
   },
   computed: {
+    IsAllowsPreviewDocument() {
+      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsPreviewDocument
+    },
     validateOverdrawnInvoice() {
       if (this.option === 1) {
         return this.isEmptyValue(this.listRefund)
@@ -1615,7 +1618,6 @@ export default {
       })
         .then(response => {
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
-          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
             .then(() => {
               this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
                 .then(() => {
@@ -1630,6 +1632,9 @@ export default {
               })
               this.$store.dispatch('reloadOrder', response.uuid)
             })
+          if (this.IsAllowsPreviewDocument) {
+            this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+          }
           this.$message({
             type: 'success',
             message: this.$t('notifications.completed'),
