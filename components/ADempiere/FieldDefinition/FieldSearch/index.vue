@@ -95,10 +95,46 @@ export default {
         class: 'search'
       }
       switch (this.metadata.reference.tableName) {
+        case 'A_Asset':
+          icon = {
+            type: 'i',
+            class: 'el-icon-office-building'
+          }
+          break
+        // case 'C_BPartner':
+        //   icon = {
+        //     type: 'i',
+        //     class: 'el-icon-user-solid'
+        //   }
+        //   break
         case 'C_Invoice':
           icon = {
+            type: 'i',
+            class: 'el-icon-s-order'
+          }
+          break
+        case 'C_CashLine':
+          icon = {
             type: 'svg',
-            class: 'search'
+            class: 'el-icon-coin'
+          }
+          break
+        case 'C_Order':
+          icon = {
+            type: 'svg',
+            class: 'clipboard'
+          }
+          break
+        case 'C_Payment':
+          icon = {
+            type: 'i',
+            class: 'el-icon-money'
+          }
+          break
+        case 'M_InOut':
+          icon = {
+            type: 'i',
+            class: 'el-icon-truck'
           }
           break
         case 'M_Product':
@@ -107,16 +143,10 @@ export default {
             class: 'shopping'
           }
           break
-        case 'A_Asset':
+        case 'S_ResourceAssigment':
           icon = {
             type: 'i',
-            class: 'el-icon-office-building'
-          }
-          break
-        case 'C_Order':
-          icon = {
-            type: 'svg',
-            class: 'clipboard'
+            class: 'el-icon-data-analysis'
           }
           break
       }
