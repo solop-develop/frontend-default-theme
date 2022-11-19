@@ -17,75 +17,90 @@
 -->
 
 <template>
-  <div class="board">
-    <div
-      class="kanban todo"
-      header-text="Todo"
-    >
-      <div class="board-column">
-        <div class="board-column-header">
-          {{ this.$t('components.sequenceSort.available') }} ({{ availableList.length }})
-        </div>
-
-        <draggable
-          v-model="availableList"
-          :group="group"
-          v-bind="dragOptions"
-          class="board-column-content"
-          style="max-height: 450px; overflow: auto;"
-        >
-          <div
-            v-for="(element, index) in availableList"
-            :key="index"
-            :disabled="isDifferentClientRecord"
-            :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
-          >
-            <b>#{{ element[sortColumnName] }}</b>
-            {{ element.DisplayColumn }}
-
-            <i
-              :disabled="isDifferentClientRecord"
-              class="el-icon-circle-plus-outline sort-add-item-icon"
-              @click="addAtItem({ element, oldIndex: index })"
-            />
-          </div>
-        </draggable>
-      </div>
+  <div class="sort-panel-container">
+    <div class="sort-panel-header">
+      <el-input
+        v-model="searchValue"
+        :placeholder="$t('components.sequenceSort.disableWithSearch')"
+        clearable
+      >
+        <svg-icon
+          slot="append"
+          icon-class="search"
+        />
+      </el-input>
     </div>
 
-    <div
-      class="kanban working"
-      header-text="Working"
-    >
-      <div class="board-column">
-        <div class="board-column-header">
-          {{ this.$t('components.sequenceSort.sequence') }} ({{ sequenceList.length }})
-        </div>
-
-        <draggable
-          v-model="sequenceList"
-          :group="group"
-          v-bind="dragOptions"
-          class="board-column-content"
-          style="max-height: 450px; overflow: auto;"
-          @change="handleChange"
-        >
-          <div
-            v-for="(element, index) in sequenceList"
-            :key="index"
-            :disabled="isDifferentClientRecord"
-            :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
-          >
-            <b>#{{ element[sortColumnName] }}</b>
-            {{ element.DisplayColumn }}
-
-            <i
-              :disabled="isDifferentClientRecord"
-              class="el-icon-circle-close sort-remove-item-icon"
-              @click="removeAtItem({ element, oldIndex: index })"
-            />
+    <div class="board">
+      <div
+        class="kanban todo"
+        header-text="Todo"
+      >
+        <div class="board-column">
+          <div class="board-column-header">
+            {{ this.$t('components.sequenceSort.available') }} ({{ availableListShowed.length }})
           </div>
-        </draggable>
+
+          <draggable
+            v-model="availableListShowed"
+            :group="group"
+            v-bind="dragOptions"
+            class="board-column-content"
+            style="max-height: 450px; overflow: auto;"
+          >
+            <div
+              v-for="(element, index) in availableListShowed"
+              :key="index"
+              :disabled="isDifferentClientRecord"
+              :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
+            >
+              <b>#{{ element[sortColumnName] }}</b>
+              {{ element.DisplayColumn }}
+
+              <i
+                :disabled="isDifferentClientRecord"
+                class="el-icon-circle-plus-outline sort-add-item-icon"
+                @click="addAtItem({ element, oldIndex: index })"
+              />
+            </div>
+          </draggable>
+        </div>
+      </div>
+
+      <div
+        class="kanban working"
+        header-text="Working"
+      >
+        <div class="board-column">
+          <div class="board-column-header">
+            {{ this.$t('components.sequenceSort.sequence') }} ({{ sequenceListShowed.length }})
+          </div>
+
+          <draggable
+            v-model="sequenceListShowed"
+            :group="group"
+            v-bind="dragOptions"
+            class="board-column-content"
+            style="max-height: 450px; overflow: auto;"
+            @change="handleChange"
+          >
+            <div
+              v-for="(element, index) in sequenceListShowed"
+              :key="index"
+              :disabled="isDifferentClientRecord"
+              :class="{ 'board-item': true, 'board-item-edit': element.isEditRow }"
+            >
+              <b>#{{ element[sortColumnName] }}</b>
+              {{ element.DisplayColumn }}
+
+              <i
+                :disabled="isDifferentClientRecord"
+                class="el-icon-circle-close sort-remove-item-icon"
+                @click="removeAtItem({ element, oldIndex: index })"
+              />
+            </div>
+          </draggable>
+        </div>
       </div>
     </div>
   </div>
@@ -102,13 +117,14 @@ import draggable from 'vuedraggable'
 // constants
 import { CLIENT } from '@/utils/ADempiere/constants/systemColumns'
 
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+
 /**
  * Order or sequence panel based on the functionality of the `org.compiere.grid.VSortTab`
  * @see https://github.com/adempiere/adempiere/blob/develop/client/src/org/adempiere/controller/SortTabController.java
  * @see https://github.com/adempiere/adempiere/blob/develop/client/src/org/compiere/grid/VSortTab.java
  * TODO: Add discartAtElementChange event to discard only current row
- * TODO: Implement search in local list and disable drag-and-drop
- * TODO: Implement read-only, either by role or record access, by adding an attribute flag on the entity, see org.adempiere.util.ListElement class.
  */
 export default defineComponent({
   name: 'SortPanel',
@@ -134,6 +150,7 @@ export default defineComponent({
 
   setup(props) {
     const group = ref('sequence')
+    const searchValue = ref('')
 
     /**
      * Get the panel object with all its attributes as well as
@@ -194,10 +211,38 @@ export default defineComponent({
       }
     })
 
+    const availableListShowed = computed({
+      get() {
+        if (isEmptyValue(searchValue.value)) {
+          return availableList.value
+        }
+        return availableList.value.filter(item => {
+          return item.DisplayColumn.includes(searchValue.value)
+        })
+      },
+      set(value) {
+      }
+    })
+
     const sequenceList = computed({
       get() {
         return recordsList.value.filter(item => {
           return item[includedColumnName.value]
+        })
+      },
+      set(value) {
+      }
+    })
+
+    const sequenceListShowed = computed({
+      get() {
+        if (isEmptyValue(searchValue.value)) {
+          return sequenceList.value
+        }
+        return sequenceList.value.filter(item => {
+          return item.DisplayColumn.toUpperCase().includes(
+            searchValue.value.toUpperCase()
+          )
         })
       },
       set(value) {
@@ -219,7 +264,7 @@ export default defineComponent({
 
     const dragOptions = computed(() => {
       return {
-        disabled: isDifferentClientRecord.value
+        disabled: !isEmptyValue(searchValue.value) || isDifferentClientRecord.value
       }
     })
 
@@ -260,7 +305,7 @@ export default defineComponent({
      * @param {number} newIndex: the index of the added element
      * @param {object} element: the added element
      */
-    function addItem({ element, newIndex }) {
+    function insertItem({ element, newIndex }) {
       const includedColumn = includedColumnName.value
       const orderColumn = sortColumnName.value
 
@@ -296,6 +341,23 @@ export default defineComponent({
         sortSequence = generateOrder(dataSequence)
       }
       recordsList.value = sortSequence
+    }
+
+    /**
+     * Add current element on sequence working
+     * @param {object} element: the removed element
+     * @param {number} oldIndex: the index of the element before remove
+     */
+    function addAtItem({ element, oldIndex }) {
+      if (isDifferentClientRecord.value) {
+        // is another customer does not change
+        return
+      }
+      const newIndex = sequenceList.value.length
+      insertItem({
+        element,
+        newIndex
+      })
     }
 
     /**
@@ -408,23 +470,6 @@ export default defineComponent({
     }
 
     /**
-     * Add current element on sequence working
-     * @param {object} element: the removed element
-     * @param {number} oldIndex: the index of the element before remove
-     */
-    function addAtItem({ element, oldIndex }) {
-      if (isDifferentClientRecord.value) {
-        // is another customer does not change
-        return
-      }
-      const newIndex = sequenceList.value.length
-      addItem({
-        element,
-        newIndex
-      })
-    }
-
-    /**
      * Remove current element
      * @param {object} element: the removed element
      * @param {number} oldIndex: the index of the element before remove
@@ -445,10 +490,11 @@ export default defineComponent({
      * @link https://github.com/SortableJS/Vue.Draggable#events
      */
     function handleChange(value) {
-      const action = Object.keys(value)[0] // get property
+      const actionsList = Object.keys(value)
+      const action = actionsList.at() // get property
       switch (action) {
         case 'added':
-          addItem(value[action])
+          insertItem(value[action])
           break
         case 'moved':
           movedItem(value[action])
@@ -466,9 +512,12 @@ export default defineComponent({
       panelMetadata,
       includedColumnName,
       isDifferentClientRecord,
+      searchValue,
       sortColumnName,
       sequenceList,
+      sequenceListShowed,
       availableList,
+      availableListShowed,
       // methods
       handleChange,
       addAtItem,
@@ -534,54 +583,74 @@ export default defineComponent({
   }
 </style>
 <style lang="scss">
-.board {
-  width: 100%;
+.sort-panel-container {
   display: flex;
-  justify-content: space-around;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
 
-  .kanban {
-    width: 45%;
+  .sort-panel-header {
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 10px;
 
-    &.todo {
-      .board-column-header {
-        background: #f9944a;
-      }
+    .el-input-group__append, .el-input-group__prepend {
+      padding: 0px 10px !important;
+    }
+    i, svg {
+      font-size: 20px !important;
+    }
+  }
 
-      .sort-add-item-icon {
-        float: right;
-        font-size: 20px;
-        padding-top: 5px;
+  .board {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: flex-start;
 
-        &:hover {
-          color: #67c23a;
-          font-weight: bold;
+    .kanban {
+      width: 45%;
+
+      &.todo {
+        .board-column-header {
+          background: #f9944a;
+        }
+
+        .sort-add-item-icon {
+          float: right;
+          font-size: 20px;
+          padding-top: 5px;
+
+          &:hover {
+            color: #67c23a;
+            font-weight: bold;
+          }
         }
       }
-    }
 
-    &.working {
-      .board-column-header {
-        background: #4A9FF9;
-      }
+      &.working {
+        .board-column-header {
+          background: #4A9FF9;
+        }
 
-      .sort-remove-item-icon {
-        float: right;
-        font-size: 20px;
-        padding-top: 5px;
+        .sort-remove-item-icon {
+          float: right;
+          font-size: 20px;
+          padding-top: 5px;
 
-        &:hover {
-          color: red;
-          font-weight: bold;
+          &:hover {
+            color: red;
+            font-weight: bold;
+          }
         }
       }
-    }
 
-    .board-item[disabled=disabled],
-    .sort-remove-item-icon[disabled=disabled],
-    .sort-add-item-icon[disabled=disabled] {
-      cursor: not-allowed;
+      .board-item[disabled=disabled],
+      .sort-remove-item-icon[disabled=disabled],
+      .sort-add-item-icon[disabled=disabled] {
+        cursor: not-allowed;
+      }
     }
   }
 }

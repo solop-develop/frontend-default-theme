@@ -29,7 +29,7 @@
 
 <script>
 // utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 /**
  * This component emulates the behavior of the search field, contemplating:
