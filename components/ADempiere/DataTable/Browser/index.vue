@@ -471,7 +471,8 @@ export default defineComponent({
       props.containerManager.setPage({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
-        pageNumber
+        pageNumber,
+        pageSize: store.getters.getBrowserPageSize({ containerUuid: props.containerUuid })
       })
       const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
       const query = isEmptyValue(props.parentUuid) ? { ...root.$route.query, page: pageNumber } : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
@@ -487,7 +488,8 @@ export default defineComponent({
       props.containerManager.setSizePage({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
-        pageSize
+        pageSize,
+        pageNumber: 1
       })
     }
 

@@ -477,6 +477,7 @@ export default defineComponent({
       props.containerManager.setPage({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
+        pageSize: store.getters.getTabPageSize({ containerUuid: props.containerUuid }),
         pageNumber
       })
       const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
@@ -497,7 +498,8 @@ export default defineComponent({
       props.containerManager.setSizePage({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
-        pageSize
+        pageSize,
+        pageNumber: 1
       })
     }
 
