@@ -15,10 +15,9 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
-
 <template>
-  <!-- <span>
-    <el-card v-if="!isEmptyValue(newImage)" shadow="always">
+  <span>
+    <!-- <el-card v-if="!isEmptyValue(newImage)" shadow="always">
       <div slot="header" class="clearfix">
         <span>{{ $t('window.containerInfo.attachment.newFiles') }}</span>
         <el-button
@@ -38,91 +37,95 @@
         fit="fill"
         :preview-src-list="newImage"
       />
-    </el-card>
+    </el-card> -->
     <div v-if="!Attachment">
       <el-empty />
     </div>
-    <form id="form" enctype="multipart/form-data">
-      <el-upload
-        ref="upload"
-        name="avatar"
-        action="#"
-        list-type="picture-card"
-        :auto-upload="true"
-        :file-list="listImageAll"
-        :before-upload="beforeAvatarUpload"
-      >
-        <i slot="default" class="el-icon-plus" />
-        <div slot="file" slot-scope="{file}">
-          <el-image
-            v-if="file.type !=='application/pdf'"
-            style="width: 100%; height: 250px"
-            :src="file.url"
-            :preview-src-list="listImage"
-          />
-
-          <img v-else :src="file.url" alt="" class="el-upload-list__item-thumbnail">
-          <span v-if="file.type ==='application/pdf'" class="el-upload-list__item-actions">
-            <span
-              class="el-upload-list__item-preview"
-              @click="handlePictureCardPreview(file)"
-            >
-              <i class="el-icon-zoom-in" />
-            </span>
-            <span
-              v-if="!disabled"
-              class="el-upload-list__item-delete"
-              @click="handleDownload(file)"
-            >
-              <i class="el-icon-download" />
-            </span>
-            <span
-              v-if="!disabled"
-              class="el-upload-list__item-delete"
-              @click="handleRemove(file)"
-            >
-              <i class="el-icon-delete" />
-            </span>
-          </span>
-        </div>
-      </el-upload>
-      <el-dialog :visible.sync="dialogVisible">
-        <img width="100%" :src="dialogImageUrl" alt="">
-      </el-dialog>
-    </form>
-    <hr>
-  </span> -->
-  <form id="form" enctype="multipart/form-data">
     <el-upload
       ref="upload"
-      class="upload-demo"
-      name="avatar"
       action="#"
-      :auto-upload="false"
+      list-type="picture-card"
+      :auto-upload="true"
+      :file-list="Attachment"
+      :before-upload="beforeAvatarUpload"
     >
-      <el-button slot="trigger" size="small" type="primary">Selecciona un archivo</el-button>
-      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">Cargar al servidor</el-button>
+      <i slot="default" class="el-icon-plus" />
+      <div slot="file" slot-scope="{file}">
+        <el-image
+          v-if="file.content_type.includes('image')"
+          style="width: 100%; height: 250px"
+          :src="file.image"
+          :preview-src-list="listImage"
+        />
+
+        <img :src="file.image" alt="" class="el-upload-list__item-thumbnail">
+        <span class="el-upload-list__item-actions">
+          <span
+            v-show="file.content_type.includes('image')"
+            class="el-upload-list__item-preview"
+            @click="handlePictureCardPreview(file)"
+          >
+            <i class="el-icon-zoom-in" />
+          </span>
+          <span
+            v-if="!disabled"
+            class="el-upload-list__item-delete"
+            @click="handleDownload(file)"
+          >
+            <i class="el-icon-download" />
+          </span>
+          <span
+            v-if="!disabled"
+            class="el-upload-list__item-delete"
+            @click="handleRemove(file)"
+          >
+            <i class="el-icon-delete" />
+          </span>
+        </span>
+      </div>
     </el-upload>
-  </form>
+    <br>
+    <span>
+      <form id="form" enctype="multipart/form-data">
+        <el-upload
+          ref="upload"
+          class="upload-demo"
+          name="avatar"
+          action="#"
+          :auto-upload="false"
+        >
+          <el-button slot="trigger" size="small" type="primary">Selecciona un archivo</el-button>
+          <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">Cargar al servidor</el-button>
+        </el-upload>
+      </form>
+    </span>
+    <el-dialog
+      :visible.sync="dialogVisible"
+      :append-to-body="true"
+      :show-close="false"
+    >
+      <img width="100%" :src="dialogImageUrl" alt="">
+    </el-dialog>
+  </span>
 </template>
 
 <script>
-import lang from '@/lang'
 import { defineComponent, computed, ref } from '@vue/composition-api'
 import {
-  buildImageFromArrayBuffer,
-  buildLinkHref
+  buildImageFromArrayBuffer
+  // buildLinkHref
 } from '@/utils/ADempiere/resource.js'
 // import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
-// import ImageCropper from '@theme/components/ImageCropper'
+import { getImagePath } from '@/utils/ADempiere/resource.js'
+// import { buildBlobAndValues } from '@/utils/ADempiere/resource'
 import request from '@/utils/request'
 import axios from 'axios'
-import store from '@/store'
 import { showMessage } from '@/utils/ADempiere/notification'
+import lang from '@/lang'
+import store from '@/store'
 
 export default defineComponent({
   name: 'Attachment',
-  // components: { ImageCropper },
   props: {
     parentUuid: {
       type: String,
@@ -150,18 +153,22 @@ export default defineComponent({
     }
   },
   setup(props, { root, refs }) {
+    /**
+     * Refs
+     */
     const dialogImageUrl = ref('')
-
     const dialogVisible = ref(false)
-
     const disabled = ref(false)
     const organizationBackground = ref('')
     const organizationImagePath = ref('')
     const currentImageOfProduct = ref('')
     const pdfAttachment = ref([])
     const newImage = ref([])
-    const newListImage = ref([])
     const imageAttachment = ref([])
+    const fileList = ref([])
+    /**
+     * Computed
+     */
     const listImageAll = computed(() => {
       if (imageAttachment.value) {
         return imageAttachment.value.concat(pdfAttachment.value)
@@ -170,17 +177,21 @@ export default defineComponent({
     })
     const listImage = computed(() => {
       if (listImageAll) {
-        return listImageAll.value.map(image => image.url)
+        return listImageAll.value.map(image => image.image)
       }
       return []
     })
     const Attachment = computed(() => {
       if (store.getters.getAttachment) {
         const cafe = store.getters.getAttachment.map(element => {
-          if (element.content_type !== 'application/pdf') {
+          // return {
+          //   ...element,
+          //   image: 'data:image/png;base64,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'
+          // }
+          if (element.content_type.includes('image')) {
             return {
               ...element,
-              image: converImage(element)
+              image: getImageFromSource(element)
             }
           }
           return {
@@ -192,89 +203,69 @@ export default defineComponent({
       }
       return store.getters.getAttachment
     })
-
-    const fileList = ref([])
-
+    /**
+     * Methods
+     */
     const handleRemove = (file) => {
       console.log(file)
     }
     const handlePictureCardPreview = (file) => {
-      dialogImageUrl.value = file.url
+      dialogImageUrl.value = file.image
       dialogVisible.value = true
     }
     const handleDownload = async(file) => {
-      const urlImage = await axios.get(file.qlq)
-      const link = buildLinkHref({
-        fileName: 'epae',
-        outputStream: urlImage.data.result.data,
-        type: file.type
-      })
-      link.click()
+      const urlImage = await axios.get(file.url.uri)
+        .then(response => {
+          const { data } = response
+          const blob = new Blob([Uint8Array.from(data.result.data)], {
+            type: 'application/pdf'
+          })
+          const link = document.createElement('a')
+          link.href = window.URL.createObjectURL(blob)
+          link.download = file.file_name
+          link.click()
+        })
+      return urlImage
     }
 
     const converFile = (image) => {
-      pdfAttachment.value.push({
-        ...image,
-        qlq: image.url.uri,
-        type: image.content_type,
-        uuid: image.resource_uuid,
-        url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAolBMVEXp6eD////MS0zZ18rq7OPKPkDiw7zMSErPXFvLRkfLREXp6eHk49nKPD7OUlP03d3YfH399fXekZLotLTJNzny1NTkqKjr8ej46Ojm2dHn3tbYk4/jysPk0cnesavZmZXbpJ/TdXPgurTQZmXVg4DOWFjXjor99/fQY2LgvbfUgX7boZzRbWzdrKbhnp7rwMDrv7/s9evvy8vHLC3gmZr34+MLT3S6AAALDUlEQVR4nO2d63qqOhCGKTsxkgrVaktF1FqPtdh2da3e/61tIAE5EzGE4MP3Z68qIO/OJJmZDEG5K9IeKI0I7Atv6yIpRV82xOdqUHhf3AjNxgDvB/9xQyy6UGOAHiE3xILr7Jsl/O++dsLmeiEh5NSKMhPyQZSakIuhFhDeN0/IA1FyQg6IshNe3xelJ7waUX7Caw21BYRXIraB8DrEVhBehdgOwmuGm5YQXoHYFsLqiK0hrNwX20NYFbFFhBUNtU2E1VqxVYSVENtFWMVQW0ZYoRVFEwLAkhzJJ7wcUSghMJWpPWdALCC8GFEgIVBOq62KtaNSylhEeGlfFEcIbANqSFVV3C9FLCS8EFEYIZgiD88TXl1HeJmhCiM0D5oaCM5KEEsIL0IURQjeoHoWfC9GLCO8BFEY4RpFCFG/+OhSwgsQBRGCObFRhAmiXjxnlBOyDzeiCBe+kaKtTUjh6VpCZkRBhObMbzy4+LP0/4GXVxOyGqoowqPmN6ECLN0n3BUuoTMRMiIKJcQzkw452oYDIRuiUELYAwrYYW6ETH1RFOHGJ5y6hH5H5GKlbIiixlJ/pIGWEhByGGkYDVUU4QkGbehbKYfZghVRFKENg37o+Pa64EVYiiiKcBrOEf6Ur9vcCMsQhfmlfd8vtYDtz4e6VXj0RYQlw40oQnPjDzCbPzvimRYffRlhMaLg6Am+Gr5/uuZKWIgoLAK2SHxIWlDblEX5g8tUUI8qMMaPBIj4g3PBFZCAELxGgnxv2uB7dQkIAzMlbTi9RUIy1dMkxoDvtZWCOVEg4SJsRG3Fu8BaCkLFMsKEKe+BRhJCk072NQw0khACOyBUp5wvLQmhYtKcKepzf85BEkLwpqsMaagqkoRQAWSswcubJQw9t+LYqYJkIRxM6Gwxu835MLr+xNtrk4TwPCHisgXESyUJIc1k1OF6y0EYrLD5hEO+PVESwlMkfipJtl0qSQhX5zZUNecGCS2D+GykM5bkhC+UFITgHZLYkDQlMnhGwXIQ7ugyMA0xuE77UhAq1CmdmkeCCFkq3BglAyFN56ODCWhOSlvfFiGtVcCvQDFpYhG+crNTKQiJkZJCGurcIG6ejQSEYE4Lajwm0KN2WlrCxyoJCE1aR0Nc7sAH10+c7FQCQkCCX0idtQHNLOqc7LR5QppnCyv2wLtOx1M+12+eMDTSwCrDSZFPzqZ5QoUYKT5HFEEGvKzUlE2NE5JSjFhZKXVTVaRaHBCbJ5wljFTxxlPIL45qnpCGvTFPFPRprSkHF7xpQjpyom0MBUxpYqqkQIpFTROaQ7+1kotq4Yoivjql0TShlTO9gw2v0aZhQpqCyvJC16QratsB+Q64Mk3g/4ftITA5CMkKfkZmBlg0a4MdxSW7t+a908dsszmujpvZR2/KzNgsIZgTj83IWI8JogwVHxe71cGAEGKMNU8YQ+Qsyp8Ck4AwiH0zC5/NBR1QNYi16EMn9MM+W6qjWUIaR6QX792OZvU+jCRWnFFjQmyUkK44kdg3Qmda9sdK1XEhoIt4YPmRRglNJzUZunjTxdFw7bIEz5P+xvLQaYOEYEqWRcOaWdc27eUBwnSv84W9/uh+hdyOST7YSU5IExba0R9ngDmwZ4aOs+k8Y36151PLGgysaW+nkTMlJ6TjjO4VsZtKb9eHKTwN6zCwV2TYJp38TeLUyd6GwUNrB/eO5zMjiefaoo5Xr7blBCtvCJ8IojlVyRjM4pc32YakSgi/Wq/bpHG6Pc0YnubESzuGi4v60XJ9mcGCAKoaS+FGc4SBz4Ic10OJNZ77t9t2ihk4ZmCph4MNdlZrRI9nMtImCYe0gyXwdGP3bsVda7fbhQehcKBFbGUbjRGCqa4m5bbedmkraacazPswdbTOtpDaGOGfHU7i4cPSNrNjBgBmSR+ANcPREKFpfcSHFqwflvOisM+0HT3CiEof3G+U0LRmatTqNKjtsowzJgB6zoQOuQiqLA5bU4TAmuGIhbrW6bwpJsMNuy7rx8F1AjTVOTEGh00QAmup4Wjz9ZdzFjxysuvazefzAfMJinBCAE5GbI8I5+2i21VYN+o5SyyhafdjszuyL7zdChJJCKzNJDaC1lDznJZAQvPNSEyBJQ9T8pEwQqBs9ERsJKQJhRGC+TZswAAU8i4HzpQgQvMtDI80PAyaUMjW7mIIzXP9KFzbS9qaQppQDOEZUIOvYEofiuVelZ8tEYTmIgiUoDM1zaBalveDhjkSQEgL8zwPdOk6JD3yF/wQ9CYXAYT3WxoQ4HcXakD+Qoao3SXrJzSXNB+DvGUGuhbDlq7motoJybYXQVaF1pZwLMwrVf2EtGJU8xfkqY2qbMtGXFQ/4YquvngDC+eCLibVTkhbzfD+HVQAo77AF9XUT0iYHDPygBrPQvVS1U9Ill+MATDfaTIXFu8ExVn190OyCqqt7k8wLK4QKXFjKaQmigweFYfsqn/GtxILE0I7oSKCMPbknQv4LvjNgiI87/P6H/VNhUpE9HRGxIYt/N2QQiJgsIQYIQ3DjdhBxpeYLAaYz9ZbZyl4jCESlIkCRHUQlKnpCtr61RF2hPKrI+wI5VdH2BHKr46wI5RfHWFHKL86wo5QfnWE2QJtUiVCu9ce2ZUIDR22RbpRibCf+widdEL9jrAjlF0dYUcovzrCjlB+dYQdofyqkxBHXXycsd8FikcBuGA/k9zQoXQLlBoJ8ec4os/HtR7fWEBF6+gB4+fPjYNyNv4wnsc5csoQayTUfxMnjcb92NNr2jB13f3Dp6Gn7xkZua+HeyzbpqdOwof0eT/RJxAzCP1jHJi8OjJGbSG82w/PVXw5hHd3X9vkZgQtInRv6fwCsjzCu9EmvqOE3IT7z2dX46+QdxjcU0D45R0x/v6J/h/5nGQRvjyn5JTdSf2Eo78Ye/PGZPtDTw5qhgPCx4l/gD6ZrL7DtnqOld1Swqe/qdmi9EYEEAatgSaf5OQfPUEYGpqmo+fgJx4jiCFhejuUUgkkdD/5JmfTN5ClCT0nYP2S/o3WEKItmdaoBWYReo8J03n0IXJiWwjVyZP/0a9eQKgiRDvj8Pzwd2sIIellL2oRoYo35PNzI7aHEP8jH5GHvfIIVUjnDee8U9uNEeJH8sU43KitPYRkvhiRv3IJUZ+MSL/tI4Rj/6OXorHUP5XMGHv6wGmLCCdkIvgqHEu9U8mYG3bE1hBq6xhSPiFt6/CbXK+tzO0WTah/+Z/s1XyfJk74L0G4f/iNa5zep65BQjRJDJEFhNQ7/UwQpvQjBWFgWSptmH24C0hpG7aDcE/iuPFTcG4qPmS3UjkJk0rH+BmE3/FvAsLRU1wPz+VDjQx5mvzZYpicLf7qcUkxlsb0HR3f8wknNEZct2LGDzV6+mfE7jDfa6Pp0ZHRCsLR8NHVZrhObWSdS6ityBdt8Uu9TBQmW40nQHKjJzodtjC2YCWkeYxh++JDNkLNIZ+PwmH31gh1mlgd3yohXtEfMcIfuS1CHHho32ecmyKEfTrb789NeDOECGlw8i9YC41lwttOCJEn1egPx2EMMY7CtJ1w9EIUjZBigK0nzNBn9grpzRA+JV8TcFuE+5/VJHn1INiQjBA+jTz95t6VNhzF9fL78P24zag2UY0X/wCGpIVIQtUgKj8ikFdFlfOqIP8yxa/waoBQJZNA6RGhqgCU30RXudcRSq+OMEeHFhEeKhEeGVKxkggfKxG+V3AuGpL+XonwbtWWRgxzIpcSjpws50o6abqTW7dZQnh397Wq5EQJlbH6KmT4H1bSWVRkok+LAAAAAElFTkSuQmCC'
-      })
-      return
+      let urlImage
+      switch (image.content_type) {
+        case 'application/pdf':
+          urlImage = require('@/image/ADempiere/attachment/pdf.png')
+          break
+        case 'application/x-javascript':
+          urlImage = require('@/image/ADempiere/attachment/javascript.png')
+          break
+        case 'application/octet-stream':
+          urlImage = octetStream(image)
+          break
+        default:
+          urlImage
+          break
+      }
+      return urlImage
     }
     const converImage = async(image) => {
       const urlImage = await axios.get(image.url.uri)
-      imageAttachment.value.push({
-        name: 'file',
-        type: image.content_type,
-        url: buildImageFromArrayBuffer({
-          arrayBuffer: urlImage.data.result.data
+        .then(response => {
+          return {
+            name: 'file',
+            type: image.content_type,
+            url: buildImageFromArrayBuffer({
+              arrayBuffer: response.data.result.data
+            })
+          }
         })
-      })
-      return urlImage.data.result.data
+        .catch(() => {
+          return {
+            name: '',
+            type: image.content_type,
+            url: ''
+          }
+        })
+      return urlImage
     }
-
-    // const submitUpload = () => {
-    //   const fmData = new FormData()
-    //   fmData.append(
-    //     listImageAll.value[0],
-    //     data2blob(listImageAll.value[0].url, mime),
-    //     listImageAll.value[0].type
-    //   )
-    //   console.log({
-    //     tableName: props.tableName,
-    //     recordId: props.recordId,
-    //     recordUuid: props.recordUuid,
-    //     list: listImageAll.value,
-    //     fmData
-    //   })
-    //   uploadAttachment({
-    //     tableName: props.tableName,
-    //     recordId: props.recordId,
-    //     recordUuid: props.recordUuid,
-    //     list: listImageAll.value
-    //   })
-    // }
-    const beforeAvatarUpload = (file) => {
-      console.log({ file })
-      listImageAll.value.push({
-        name: file.name,
-        type: file.type,
-        status: 'newImage',
-        uuid: file.uid,
-        url: URL.createObjectURL(file)
-      })
-      newImage.value.push(URL.createObjectURL(file))
-    }
-
-    const upload = ref()
-
-    const handleExceed = (files) => {
-      upload.value.clearFiles()
-      const file = files[0]
-      upload.value.handleStart(file)
-    }
-
     const submitUpload = () => {
       const form = document.getElementById('form')
       const formData = new FormData(form)
@@ -300,14 +291,40 @@ export default defineComponent({
           })
         })
     }
-
+    const beforeAvatarUpload = (file) => {
+      listImageAll.value.push({
+        name: file.name,
+        type: file.type,
+        status: 'newImage',
+        uuid: file.uid,
+        url: URL.createObjectURL(file)
+      })
+      newImage.value.push(URL.createObjectURL(file))
+    }
+    const getImageFromSource = (file) => {
+      const image = getImagePath({
+        file: file.file_name,
+        width: 300,
+        height: 300
+      })
+      return image.uri
+    }
+    const octetStream = (file) => {
+      let urlImage
+      if (file.file_name.includes('.xlsx')) {
+        urlImage = require('@/image/ADempiere/attachment/xlsx.png')
+      } else if (file.file_name.includes('.rar')) {
+        urlImage = require('@/image/ADempiere/attachment/rar.png')
+      } else if (file.file_name.includes('.sql')) {
+        urlImage = require('@/image/ADempiere/attachment/sql.png')
+      }
+      return urlImage
+    }
     return {
-      upload,
       dialogImageUrl,
       dialogVisible,
       disabled,
       newImage,
-      newListImage,
       fileList,
       imageAttachment,
       pdfAttachment,
@@ -323,13 +340,14 @@ export default defineComponent({
       submitUpload,
       beforeAvatarUpload,
       converFile,
-      // submitUploadEpal,
-      handleExceed,
       // isEmptyValue,
       converImage,
       handleRemove,
       handlePictureCardPreview,
-      handleDownload
+      handleDownload,
+      // image
+      getImageFromSource,
+      octetStream
     }
   }
 })
@@ -349,6 +367,20 @@ export default defineComponent({
     cursor: pointer;
     line-height: 146px;
     vertical-align: top;
+    width: 100%;
+}
+.el-upload--picture-card {
+    background-color: #fbfdff;
+    border: 1px dashed #c0ccda;
+    border-radius: 6px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 148px;
+    height: 148px;
+    cursor: pointer;
+    line-height: 146px;
+    vertical-align: top;
+    display: none;
     width: 100%;
 }
 </style>

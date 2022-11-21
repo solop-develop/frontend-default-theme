@@ -106,10 +106,15 @@ export default defineComponent({
     }
 
     function generateReaderData() {
+      console.log({
+        mimeType: props.mimeType,
+        outputStream: props.stream
+      })
       const { blobFile, dataValues } = buildBlobAndValues({
         mimeType: props.mimeType,
         outputStream: props.stream
       })
+      console.log({ blobFile, dataValues })
 
       return new Promise((resolve) => {
         const reader = new FileReader()
