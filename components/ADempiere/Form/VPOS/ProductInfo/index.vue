@@ -261,9 +261,8 @@ export default {
           return false
         })
         // Remote search
-        if (this.isEmptyValue(results) && String(stringToMatch.length > 2)) {
+        if (Boolean(stringToMatch.length > 3)) {
           (this.timeOut)
-
           this.timeOut = setTimeout(() => {
             this.$store.dispatch('listProductPriceFromServer', {
               pageNumber: 1,
@@ -279,8 +278,9 @@ export default {
                     showClose: true
                   })
                 }
-                if (this.isEmptyValue(this.sendProduct) || recordsList.length <= 1) {
+                if (this.isEmptyValue(this.sendProduct) || recordsList.length === 1) {
                   this.$refs.product.activated = false
+                  // this.handleSelect(recordsList[0])
                   clearTimeout(this.timeOutProduct)
                 }
                 this.KeyPerformed = true
@@ -308,10 +308,11 @@ export default {
         // TODO: Verify with 'value' or 'searchValue' attribute
         value: valueProduct
       })
-
+      this.sendProduct = ''
       if (this.allowsCreateOrder) {
         this.findProduct(valueProduct)
       } else {
+        this.sendProduct = ''
         const attributePin = {
           columnName: 'ProductValue',
           value: valueProduct,
@@ -349,13 +350,13 @@ export default {
             if (this.listWithPrice.length === 1 && this.KeyPerformed && !this.isEmptyValue(this.sendProduct)) {
               const productSelected = this.listWithPrice.at()
               this.$message({
-                message: 'Producto Agregado: ' + productSelected.product.name,
+                message: this.$t('form.productInfo.codeProduct.addProduct') + productSelected.product.name,
                 type: 'success',
                 showClose: true
               })
               this.handleSelect(productSelected)
             }
-          }, 2000)
+          }, 3000)
         }
       })
     },
