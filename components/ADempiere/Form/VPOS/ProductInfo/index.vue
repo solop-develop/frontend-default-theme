@@ -262,6 +262,9 @@ export default {
         })
         // Remote search
         if (stringToMatch.length > 3) {
+          results = []
+        }
+        if (this.isEmptyValue(results) && stringToMatch.length > 3) {
           (this.timeOut)
           this.timeOut = setTimeout(() => {
             this.$store.dispatch('listProductPriceFromServer', {
@@ -350,7 +353,7 @@ export default {
             if (this.listWithPrice.length === 1 && this.KeyPerformed && !this.isEmptyValue(this.sendProduct)) {
               const productSelected = this.listWithPrice.at()
               this.$message({
-                message: this.$t('form.productInfo.codeProduct.addProduct') + productSelected.product.name,
+                message: this.$t('form.productInfo.addProduct') + productSelected.product.name,
                 type: 'success',
                 showClose: true
               })
