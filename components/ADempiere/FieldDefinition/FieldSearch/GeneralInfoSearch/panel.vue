@@ -238,7 +238,7 @@ export default {
       })
     },
     fieldsListQueryCriteria() {
-      return this.$store.getters.getTableHeader({
+      return this.$store.getters.getQueryFieldsList({
         containerUuid: this.uuidForm
       })
     },
