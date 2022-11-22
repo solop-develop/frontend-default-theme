@@ -261,7 +261,7 @@ export default {
           return false
         })
         // Remote search
-        if (Boolean(stringToMatch.length > 3)) {
+        if (stringToMatch.length > 3) {
           (this.timeOut)
           this.timeOut = setTimeout(() => {
             this.$store.dispatch('listProductPriceFromServer', {
