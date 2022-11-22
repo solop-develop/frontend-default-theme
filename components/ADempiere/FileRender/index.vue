@@ -60,10 +60,6 @@ export default defineComponent({
   },
 
   setup(props) {
-    console.log({
-      src: props.src,
-      mimeType: props.mimeType
-    })
     const componentRender = computed(() => {
       let viewer
       switch (props.format) {
