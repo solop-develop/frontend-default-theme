@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <span>
     <!-- <el-card v-if="!isEmptyValue(newImage)" shadow="always">
@@ -135,29 +136,34 @@
 
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
-import {
-  buildImageFromArrayBuffer
-  // buildLinkHref
-} from '@/utils/ADempiere/resource.js'
-// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
-import { getImagePath } from '@/utils/ADempiere/resource.js'
-// import { buildBlobAndValues } from '@/utils/ADempiere/resource'
-import request from '@/utils/request'
-import axios from 'axios'
-import { showMessage } from '@/utils/ADempiere/notification'
+
 import lang from '@/lang'
 import store from '@/store'
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import axios from 'axios'
+
+// components and mixins
 import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
+// api request methods
+import request from '@/utils/request'
+// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
+
+// utils and helper methods
+import { buildImageFromArrayBuffer } from '@/utils/ADempiere/resource.js'
+import { getImagePath } from '@/utils/ADempiere/resource.js'
+import { showMessage } from '@/utils/ADempiere/notification'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
   name: 'Attachment',
+
   components: {
-    LoadingView,
-    FileRender
+    FileRender,
+    LoadingView
   },
+
   props: {
     parentUuid: {
       type: String,
@@ -184,6 +190,7 @@ export default defineComponent({
       default: false
     }
   },
+
   setup(props, { root, refs }) {
     /**
      * Refs
@@ -368,6 +375,7 @@ export default defineComponent({
       }
       return urlImage
     }
+
     return {
       dialogImageUrl,
       dialogFileUrl,
@@ -414,7 +422,6 @@ export default defineComponent({
     height: 150px;
   }
 </style>
-
 <style>
 .scroll-attachment {
     max-height: 80vh;
