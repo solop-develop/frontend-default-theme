@@ -227,6 +227,8 @@ export default {
         ...containerManagerForm,
         actionPerformed: () => {},
         getFieldsLit: () => {},
+        isDisplayedField: () => { return true },
+        isDisplayedDefault: () => { return true },
         isReadOnlyColumn: ({ field, row }) => { return true },
         setDefaultValues: () => {},
         setPage: this.setPage
