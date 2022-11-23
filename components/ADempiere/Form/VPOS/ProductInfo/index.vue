@@ -248,23 +248,23 @@ export default {
       this.$refs.product.activated = true
       let results = this.listWithPrice
       if (!this.isEmptyValue(stringToMatch)) {
-        const parsedValue = stringToMatch.toLowerCase().trim()
+        // const parsedValue = stringToMatch.toLowerCase().trim()
 
-        results = results.filter(rowProduct => {
-          const productAttributes = rowProduct.product
-          for (const columnProductPrice in productAttributes) {
-            const valueToCompare = String(productAttributes[columnProductPrice]).toLowerCase()
-            if (valueToCompare.includes(parsedValue)) {
-              return true
-            }
-          }
-          return false
-        })
-        // Remote search
+        // results = results.filter(rowProduct => {
+        //   const productAttributes = rowProduct.product
+        //   for (const columnProductPrice in productAttributes) {
+        //     const valueToCompare = String(productAttributes[columnProductPrice]).toLowerCase()
+        //     if (valueToCompare.includes(parsedValue)) {
+        //       return true
+        //     }
+        //   }
+        //   return false
+        // })
+        // // Remote search
         if (stringToMatch.length > 2) {
           results = []
         }
-        if (this.isEmptyValue(results) && stringToMatch.length > 2) {
+        if (stringToMatch.length > 2) {
           (this.timeOut)
           this.timeOut = setTimeout(() => {
             this.$store.dispatch('listProductPriceFromServer', {
