@@ -373,7 +373,7 @@ export default {
       return false
     },
     selectOrder() {
-      const action = this.$route.query.action
+      const action = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
       if (!this.isEmptyValue(this.ordersList.ordersList)) {
         const order = this.ordersList.ordersList.find(item => item.uuid === action)
         if (!this.isEmptyValue(order)) {
@@ -521,7 +521,7 @@ export default {
             action: this.changeOrder.uuid
           }
         }, () => {})
-        const orderUuid = this.$route.query.action
+        const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
         this.$store.dispatch('listPayments', { posUuid, orderUuid })
       }
       if (this.changeOrder.documentStatus.value === 'DR') {
