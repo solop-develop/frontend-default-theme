@@ -129,7 +129,7 @@
             <el-button type="danger" icon="el-icon-close" @click="exit" />
             <el-button type="info" icon="el-icon-minus" :disabled="isDisabled" @click="undoPatment" />
             <el-button type="success" icon="el-icon-plus" @click="addCollectToList(paymentBox)" />
-            <el-button type="primary" icon="el-icon-shopping-cart-full" @click="validateOrder(listPayments)" />
+            <el-button type="primary" icon="el-icon-shopping-cart-full" :disabled="isLoadProcessOrder" :loading="isLoadProcessOrder" @click="validateOrder(listPayments)" />
           </samp>
         </el-header>
 
@@ -314,6 +314,7 @@ export default {
       defaultLabel: '',
       fieldsList: fieldsListCollection,
       sendToServer: false,
+      isLoadProcessOrder: false,
       value: '',
       amontSend: 0,
       currentFieldCurrency: '',
@@ -1082,7 +1083,7 @@ export default {
     },
     updateServer(listPaymentsLocal) {
       const posUuid = this.currentPointOfSales.uuid
-      const orderUuid = this.$route.query.action
+      const orderUuid = this.currentOrder.uuid
       this.$store.dispatch('uploadOrdersToServer', { listPaymentsLocal, posUuid, orderUuid })
     },
     addCollect() {
@@ -1265,8 +1266,9 @@ export default {
       }
     },
     completePreparedOrder(payment) {
+      this.isLoadProcessOrder = true
       const posUuid = this.currentPointOfSales.uuid
-      const orderUuid = this.$route.query.action
+      const orderUuid = this.currentOrder.uuid
       this.$store.dispatch('updateOrderPos', true)
       this.$store.dispatch('updatePaymentPos', true)
       this.$message({
@@ -1284,20 +1286,36 @@ export default {
       })
         .then(response => {
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
-          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
-            .then(() => {
-              this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-                .then(() => {
-                  this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
+            .then((responseCreate) => {
+              this.loadProcess()
+              this.$store.dispatch('createOrder', {
+                posUuid,
+                customerUuid: this.currentPointOfSales.templateCustomer.uuid,
+                salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
+                priceListUuid: this.currentPointOfSales.priceList.uuid,
+                warehouseUuid: this.currentPointOfSales.warehouse.uuid
+              })
+                .then(response => {
+                  this.$store.commit('setOrder', response)
+                  this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
+                  this.isLoadProcessOrder = false
+                  this.loadProcess()
                 })
+              // this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
+              // this.isLoadProcessOrder = false
             })
+          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+            // .then(() => {
+            //   this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
+            // })
             .catch((error) => {
               this.$message({
                 type: 'info',
                 message: 'Error no se a podido conectar con la impresora' + error.message,
                 showClose: true
               })
-              this.$store.dispatch('reloadOrder', response.uuid)
+              this.loadProcess()
+              // this.$store.dispatch('reloadOrder', response.uuid)
             })
           // this.$store.dispatch('reloadOrder', response.uuid)
           this.$message({
@@ -1307,6 +1325,7 @@ export default {
           })
         })
         .catch(error => {
+          this.isLoadProcessOrder = false
           this.$message({
             type: 'error',
             message: error.message,
@@ -1317,6 +1336,7 @@ export default {
           this.$store.dispatch('listOrdersFromServer', {
             posUuid: this.currentPointOfSales.uuid
           })
+          this.loadProcess()
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
         })
@@ -1434,6 +1454,9 @@ export default {
           }
         ]
       })
+    },
+    loadProcess() {
+      if (this.$store.getters.getShowCollectionPos) this.$store.commit('setShowPOSCollection', !this.$store.getters.getShowCollectionPos)
     }
   }
 }

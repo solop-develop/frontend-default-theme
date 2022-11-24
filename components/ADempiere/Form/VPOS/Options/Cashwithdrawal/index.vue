@@ -804,7 +804,7 @@ export default {
     },
     updateServer(listPaymentsLocal) {
       const posUuid = this.currentPointOfSales.uuid
-      const orderUuid = this.$route.query.action
+      const orderUuid = this.currentPointOfSales.currentOrder.uuid
       this.$store.dispatch('uploadOrdersToServer', { listPaymentsLocal, posUuid, orderUuid })
     },
     exit() {
