@@ -43,7 +43,7 @@
       height="450"
       highlight-current-row
       @row-click="selectProduct"
-      @row-dblclick="addSelectProduc"
+      @row-dblclick="addSelectProduct"
       @shortkey.native="keyAction"
     >
       <el-table-column
@@ -282,7 +282,7 @@ export default {
     selectProduct(row) {
       this.currentProduct = row
     },
-    addSelectProduc(row) {
+    addSelectProduct(row) {
       this.findProduct(row.product.value)
       this.close()
       this.$store.commit('showListProductPrice', {
