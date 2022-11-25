@@ -46,9 +46,17 @@
       @shortkey.native="keyAction"
     >
       <el-table-column
-        prop="product.value"
         :label="$t('form.productInfo.code')"
-      />
+      >
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            icon="el-icon-document-copy"
+            @click="copyCode(scope.row)"
+          />
+          {{ scope.row.product.value }}
+        </template>
+      </el-table-column>
       <el-table-column
         prop="product.name"
         :label="$t('form.productInfo.name')"
@@ -108,6 +116,7 @@ import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 
 export default {
   name: 'ProductList',
@@ -192,6 +201,7 @@ export default {
   },
   methods: {
     formatPrice,
+    copyToClipboard,
     localTableSearch(listWithPrice) {
       let filtersProduct = []
       if (!this.isEmptyValue(this.searchValue) && this.isSearchProduct) {
@@ -311,6 +321,12 @@ export default {
           showClose: true
         })
       }
+    },
+    copyCode(value) {
+      copyToClipboard({
+        text: value.product.value,
+        isShowMessage: true
+      })
     }
   }
 }
