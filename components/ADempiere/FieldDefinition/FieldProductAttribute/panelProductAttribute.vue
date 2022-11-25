@@ -305,6 +305,12 @@ export default {
         field: this.metadata,
         columnName
       })
+      this.$store.dispatch('flushPersistenceQueue', {
+        parentUuid,
+        containerUuid,
+        tableName: this.metadata.tabTableName,
+        recordUuid: this.$store.getters.getUuidOfContainer(containerUuid)
+      })
     },
     findProductAttributeSetInstace({ productId, id, productAttributeSetId }) {
       getProductAttributeSetInstace({
