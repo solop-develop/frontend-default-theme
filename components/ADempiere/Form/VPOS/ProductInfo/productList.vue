@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-main
     v-shortkey="shortsKey"
@@ -28,10 +29,11 @@
       @shortkey.native="keyAction"
       @submit.native.prevent="notSubmitForm"
     >
-      <el-form-item label="Código Producto">
+      <el-form-item label="$t('form.productInfo.codeProduct')">
         <el-input v-model="input" :placeholder="$t('quickAccess.searchWithEnter')" @input="searchProduct" />
       </el-form-item>
     </el-form>
+
     <el-table
       ref="listProducto"
       v-shortkey="shortsKey"
@@ -43,12 +45,21 @@
       height="450"
       highlight-current-row
       @row-click="selectProduct"
+      @row-dblclick="addSelectProduct"
       @shortkey.native="keyAction"
     >
       <el-table-column
-        prop="product.value"
         :label="$t('form.productInfo.code')"
-      />
+      >
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            icon="el-icon-document-copy"
+            @click="copyCode(scope.row)"
+          />
+          {{ scope.row.product.value }}
+        </template>
+      </el-table-column>
       <el-table-column
         prop="product.name"
         :label="$t('form.productInfo.name')"
@@ -75,12 +86,14 @@
         </template>
       </el-table-column>
     </el-table>
+
     <custom-pagination
       :total="productPrice.recordCount"
       :current-page="productPrice.pageNumber"
       :handle-change-page="handleChangePage"
       :records-page="listWithPrice.length"
     />
+
     <el-row :gutter="24">
       <el-col :span="24">
         <samp style="float: right; padding-right: 10px;">
@@ -106,17 +119,25 @@
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
+import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
+
+// utils and helper methods
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 
 export default {
   name: 'ProductList',
+
   components: {
     CustomPagination
   },
+
   mixins: [
-    formMixin
+    formMixin,
+    posMixin
   ],
+
   props: {
     metadata: {
       type: Object,
@@ -136,6 +157,7 @@ export default {
       default: 'isShowPopoverField'
     }
   },
+
   data() {
     return {
       defaultMaxPagination: 50,
@@ -148,6 +170,7 @@ export default {
       timeOut: null
     }
   },
+
   computed: {
     isShowProductsPriceList() {
       return this.$store.state['pointOfSales/listProductPrice'].productPrice[this.attribute]
@@ -155,11 +178,11 @@ export default {
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
-    productPrice() {
+    productListPrice() {
       return this.$store.getters.getProductPrice
     },
     listWithPrice() {
-      const { productPricesList } = this.productPrice
+      const { productPricesList } = this.productListPrice
       if (!this.isEmptyValue(productPricesList)) {
         return productPricesList
       }
@@ -172,7 +195,7 @@ export default {
       }
     },
     isReadyFromGetData() {
-      const { isLoaded, isReload } = this.productPrice
+      const { isLoaded, isReload } = this.productListPrice
       return (!isLoaded || isReload) // && this.isShowProductsPriceList
     },
     searchValue() {
@@ -182,6 +205,7 @@ export default {
       })
     }
   },
+
   created() {
     this.$store.commit('setListProductPrice', {
       isLoaded: false
@@ -190,6 +214,7 @@ export default {
       this.validatePos(this.currentPointOfSales)
     }, 3000)
   },
+
   methods: {
     formatPrice,
     localTableSearch(listWithPrice) {
@@ -261,6 +286,14 @@ export default {
     selectProduct(row) {
       this.currentProduct = row
     },
+    addSelectProduct(row) {
+      this.findProduct(row.product.value)
+      this.close()
+      // this.$store.commit('showListProductPrice', {
+      //   attribute: this.popoverName,
+      //   isShowed: false
+      // })
+    },
     close() {
       this.$store.commit('setShowProductList', false)
     },
@@ -268,13 +301,7 @@ export default {
       if (!this.isSelectable) {
         return
       }
-      // TODO: Change this dispatch for set values with local methods, to delete subscripton
-      this.$store.dispatch('notifyActionKeyPerformed', {
-        containerUuid: 'POS',
-        columnName: 'ProductValue',
-        // TODO: Verify with 'value' or 'searchValue' attribute
-        value: this.currentProduct.product.name
-      })
+      this.findProduct(this.currentProduct.product.value)
 
       // close popover of list product price
       this.close()
@@ -311,6 +338,12 @@ export default {
           showClose: true
         })
       }
+    },
+    copyCode(row) {
+      copyToClipboard({
+        text: row.product.value,
+        isShowMessage: true
+      })
     }
   }
 }
