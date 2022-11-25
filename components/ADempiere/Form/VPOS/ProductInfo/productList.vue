@@ -114,18 +114,23 @@
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
+
+// utils and helper methods
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 
 export default {
   name: 'ProductList',
+
   components: {
     CustomPagination
   },
+
   mixins: [
     formMixin
   ],
+
   props: {
     metadata: {
       type: Object,
@@ -145,6 +150,7 @@ export default {
       default: 'isShowPopoverField'
     }
   },
+
   data() {
     return {
       defaultMaxPagination: 50,
@@ -157,6 +163,7 @@ export default {
       timeOut: null
     }
   },
+
   computed: {
     isShowProductsPriceList() {
       return this.$store.state['pointOfSales/listProductPrice'].productPrice[this.attribute]
@@ -191,6 +198,7 @@ export default {
       })
     }
   },
+
   created() {
     this.$store.commit('setListProductPrice', {
       isLoaded: false
@@ -199,6 +207,7 @@ export default {
       this.validatePos(this.currentPointOfSales)
     }, 3000)
   },
+
   methods: {
     formatPrice,
     copyToClipboard,
