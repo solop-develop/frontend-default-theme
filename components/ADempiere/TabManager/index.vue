@@ -387,6 +387,8 @@ export default defineComponent({
 
     const query = root.$route.query
 
+    const routerParams = root.$route.params
+
     // get records list
     const recordsList = computed(() => {
       return tabData.value.recordsList
@@ -423,6 +425,13 @@ export default defineComponent({
           value: query.action
         }
       }
+      if (
+        // typeof query.filters !== 'object' &&
+        !isEmptyValue(routerParams)
+      ) {
+        filters = routerParams.filters
+      }
+
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid,
