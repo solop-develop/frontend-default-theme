@@ -217,7 +217,6 @@ export default {
 
   methods: {
     formatPrice,
-    copyToClipboard,
     localTableSearch(listWithPrice) {
       let filtersProduct = []
       if (!this.isEmptyValue(this.searchValue) && this.isSearchProduct) {
@@ -340,9 +339,9 @@ export default {
         })
       }
     },
-    copyCode(value) {
+    copyCode(row) {
       copyToClipboard({
-        text: value.product.value,
+        text: row.product.value,
         isShowMessage: true
       })
     }
