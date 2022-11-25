@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,7 @@
 
 <template>
   <span>
-    <el-card v-if="!isEmptyValue(newImage)" shadow="always">
+    <!-- <el-card v-if="!isEmptyValue(newImage)" shadow="always">
       <div slot="header" class="clearfix">
         <span>{{ $t('window.containerInfo.attachment.newFiles') }}</span>
         <el-button
@@ -38,7 +38,7 @@
         fit="fill"
         :preview-src-list="newImage"
       />
-    </el-card>
+    </el-card> -->
     <div v-if="!Attachment">
       <el-empty />
     </div>
@@ -47,20 +47,25 @@
       action="#"
       list-type="picture-card"
       :auto-upload="true"
-      :file-list="listImageAll"
+      :file-list="Attachment"
       :before-upload="beforeAvatarUpload"
     >
       <i slot="default" class="el-icon-plus" />
       <div slot="file" slot-scope="{file}">
         <el-image
-          v-if="file.type !=='application/pdf'"
-          style="width: 100%; height: 250px"
-          :src="file.url"
-          :preview-src-list="listImage"
-        />
-
-        <img v-else :src="file.url" alt="" class="el-upload-list__item-thumbnail">
-        <span v-if="file.type ==='application/pdf'" class="el-upload-list__item-actions">
+          class="image-card-attachment"
+          :src="file.image"
+          fit="contain"
+        >
+          <div slot="error" class="image-slot-error">
+            <h1 class="image-slot-error">
+              <b>
+                {{ getExtensionFromFile(file.file_name) }}
+              </b>
+            </h1>
+          </div>
+        </el-image>
+        <span class="el-upload-list__item-actions">
           <span
             class="el-upload-list__item-preview"
             @click="handlePictureCardPreview(file)"
@@ -84,22 +89,80 @@
         </span>
       </div>
     </el-upload>
-    <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="dialogImageUrl" alt="">
+    <br>
+    <span>
+      <form id="form" enctype="multipart/form-data">
+        <el-upload
+          ref="upload"
+          class="upload-demo"
+          name="avatar"
+          action="#"
+          :auto-upload="false"
+        >
+          <el-button slot="trigger" size="small" type="primary">
+            {{ $t('window.containerInfo.attachment.selectFile') }}
+          </el-button>
+          <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">
+            {{ $t('window.containerInfo.attachment.uploadFile') }}
+          </el-button>
+        </el-upload>
+      </form>
+    </span>
+    <el-dialog
+      v-if="!isEmptyValue(dialogImageUrl.content_type)"
+      :visible.sync="dialogVisible"
+      :title="dialogImageUrl.file_name"
+      :append-to-body="true"
+      :show-close="true"
+    >
+      <span v-if="!isLoadeDialogFileUrl">
+        <img v-if="dialogImageUrl.content_type.includes('image')" width="100%" :src="dialogImageUrl.src" alt="">
+        <file-render
+          v-else
+          :format="'pdf'"
+          :content="dialogImageUrl.src"
+          :src="dialogImageUrl.src"
+          :mime-type="dialogImageUrl.content_type"
+          :name="dialogImageUrl.file_name"
+        />
+      </span>
+      <loading-view
+        v-else
+        key="attachment-loading"
+      />
     </el-dialog>
-    <hr>
   </span>
 </template>
 
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
-import { buildImageFromArrayBuffer, buildLinkHref } from '@/utils/ADempiere/resource.js'
-import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
-import axios from 'axios'
+
+import lang from '@/lang'
 import store from '@/store'
+import axios from 'axios'
+
+// components and mixins
+import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
+// api request methods
+import request from '@/utils/request'
+// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
+
+// utils and helper methods
+import { buildImageFromArrayBuffer } from '@/utils/ADempiere/resource.js'
+import { getImagePath } from '@/utils/ADempiere/resource.js'
+import { showMessage } from '@/utils/ADempiere/notification'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
   name: 'Attachment',
+
+  components: {
+    FileRender,
+    LoadingView
+  },
 
   props: {
     parentUuid: {
@@ -127,19 +190,26 @@ export default defineComponent({
       default: false
     }
   },
-  setup(props, { root }) {
+
+  setup(props, { root, refs }) {
+    /**
+     * Refs
+     */
     const dialogImageUrl = ref('')
-
+    const dialogFileUrl = ref('')
+    const isLoadeDialogFileUrl = ref(false)
     const dialogVisible = ref(false)
-
     const disabled = ref(false)
     const organizationBackground = ref('')
     const organizationImagePath = ref('')
     const currentImageOfProduct = ref('')
     const pdfAttachment = ref([])
     const newImage = ref([])
-    const newListImage = ref([])
     const imageAttachment = ref([])
+    const fileList = ref([])
+    /**
+     * Computed
+     */
     const listImageAll = computed(() => {
       if (imageAttachment.value) {
         return imageAttachment.value.concat(pdfAttachment.value)
@@ -148,17 +218,17 @@ export default defineComponent({
     })
     const listImage = computed(() => {
       if (listImageAll) {
-        return listImageAll.value.map(image => image.url)
+        return listImageAll.value.map(image => image.image)
       }
       return []
     })
     const Attachment = computed(() => {
       if (store.getters.getAttachment) {
         const cafe = store.getters.getAttachment.map(element => {
-          if (element.content_type !== 'application/pdf') {
+          if (element.content_type.includes('image')) {
             return {
               ...element,
-              image: converImage(element)
+              image: getImageFromSource(element)
             }
           }
           return {
@@ -170,55 +240,111 @@ export default defineComponent({
       }
       return store.getters.getAttachment
     })
-
-    const fileList = ref([])
-
+    /**
+     * Methods
+     */
     const handleRemove = (file) => {
       console.log(file)
     }
     const handlePictureCardPreview = (file) => {
-      dialogImageUrl.value = file.url
+      // if (file.content_type.includes('application/pdf')) {
+      isLoadeDialogFileUrl.value = true
+      dialogImageUrl.value = handleDownload(file, false)
       dialogVisible.value = true
+      //   return
+      // }
+      // dialogImageUrl.value = file
+      // dialogVisible.value = true
     }
-    const handleDownload = async(file) => {
-      const urlImage = await axios.get(file.qlq)
-      const link = buildLinkHref({
-        fileName: 'epae',
-        outputStream: urlImage.data.result.data,
-        type: file.type
-      })
-      link.click()
+    const handleDownload = async(file, isDownload = true) => {
+      if (isEmptyValue(file.url)) return
+      let link
+      const urlImage = await axios.get(file.url.uri)
+        .then(response => {
+          const { data } = response
+          const blob = new Blob([Uint8Array.from(data.result.data)], {
+            type: 'application/pdf'
+          })
+          link = document.createElement('a')
+          link.href = window.URL.createObjectURL(blob)
+          link.download = file.file_name
+          if (isDownload) {
+            link.click()
+          }
+          dialogImageUrl.value = {
+            ...file,
+            src: link.href
+          }
+          isLoadeDialogFileUrl.value = false
+        })
+      return {
+        urlImage,
+        link
+      }
     }
 
     const converFile = (image) => {
-      pdfAttachment.value.push({
-        ...image,
-        qlq: image.url.uri,
-        type: image.content_type,
-        uuid: image.resource_uuid,
-        url: 'data:image/png;base64,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'
-      })
-      return
+      let urlImage
+      switch (image.content_type) {
+        case 'application/pdf':
+          urlImage = require('@/image/ADempiere/attachment/pdf.png')
+          break
+        case 'application/x-javascript':
+          urlImage = require('@/image/ADempiere/attachment/javascript.png')
+          break
+        case 'application/octet-stream':
+          urlImage = octetStream(image)
+          break
+        default:
+          urlImage
+          break
+      }
+      return urlImage
     }
     const converImage = async(image) => {
       const urlImage = await axios.get(image.url.uri)
-      imageAttachment.value.push({
-        name: 'file',
-        type: image.content_type,
-        url: buildImageFromArrayBuffer({
-          arrayBuffer: urlImage.data.result.data
+        .then(response => {
+          return {
+            name: 'file',
+            type: image.content_type,
+            url: buildImageFromArrayBuffer({
+              arrayBuffer: response.data.result.data
+            })
+          }
         })
-      })
-      return urlImage.data.result.data
+        .catch(() => {
+          return {
+            name: '',
+            type: image.content_type,
+            url: ''
+          }
+        })
+      return urlImage
     }
-
     const submitUpload = () => {
-      uploadAttachment({
-        tableName: props.tableName,
-        recordId: props.recordId,
-        recordUuid: props.recordUuid,
-        list: listImageAll.value
+      const form = document.getElementById('form')
+      const formData = new FormData(form)
+      request({
+        url: 'http://0.0.0.:8085/api/adempiere/user-interface/component/attachment/save-attachment',
+        method: 'post',
+        data: formData
       })
+        .then(resData => {
+          showMessage({
+            message: lang.t('window.containerInfo.attachment.success'),
+            type: 'success'
+          })
+          refs.upload.submit()
+          refs.upload.clearFiles()
+          refs.upload.uploadFiles = []
+        })
+        .catch(err => {
+          console.warn({ err })
+          showMessage({
+            message: lang.t('window.containerInfo.attachment.error'),
+            type: 'error'
+          })
+        })
     }
     const beforeAvatarUpload = (file) => {
       listImageAll.value.push({
@@ -230,13 +356,33 @@ export default defineComponent({
       })
       newImage.value.push(URL.createObjectURL(file))
     }
+    const getImageFromSource = (file) => {
+      const image = getImagePath({
+        file: file.file_name,
+        width: 900,
+        height: 500
+      })
+      return image.uri
+    }
+    const octetStream = (file) => {
+      let urlImage
+      if (file.file_name.includes('.xlsx')) {
+        urlImage = require('@/image/ADempiere/attachment/xlsx.png')
+      } else if (file.file_name.includes('.rar')) {
+        urlImage = require('@/image/ADempiere/attachment/rar.png')
+      } else if (file.file_name.includes('.sql')) {
+        urlImage = require('@/image/ADempiere/attachment/sql.png')
+      }
+      return urlImage
+    }
 
     return {
       dialogImageUrl,
+      dialogFileUrl,
+      isLoadeDialogFileUrl,
       dialogVisible,
       disabled,
       newImage,
-      newListImage,
       fileList,
       imageAttachment,
       pdfAttachment,
@@ -256,11 +402,26 @@ export default defineComponent({
       converImage,
       handleRemove,
       handlePictureCardPreview,
-      handleDownload
+      handleDownload,
+      // image
+      getImageFromSource,
+      octetStream,
+      getExtensionFromFile
     }
   }
 })
 </script>
+
+<style scoped>
+  .image-slot-error {
+    text-align: center;
+    padding-top: 20%;
+  }
+  .image-card-attachment {
+    width: 100%;
+    height: 150px;
+  }
+</style>
 <style>
 .scroll-attachment {
     max-height: 80vh;
@@ -276,6 +437,20 @@ export default defineComponent({
     cursor: pointer;
     line-height: 146px;
     vertical-align: top;
+    width: 100%;
+}
+.el-upload--picture-card {
+    background-color: #fbfdff;
+    border: 1px dashed #c0ccda;
+    border-radius: 6px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 148px;
+    height: 148px;
+    cursor: pointer;
+    line-height: 146px;
+    vertical-align: top;
+    display: none;
     width: 100%;
 }
 </style>

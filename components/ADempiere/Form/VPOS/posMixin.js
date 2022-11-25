@@ -242,11 +242,11 @@ export default {
         }
       }
     },
-    updateOrderProcessPos(value) {
-      if (!value && !this.isEmptyValue(this.$route.query)) {
-        this.reloadOrder(true)
-      }
-    },
+    // updateOrderProcessPos(value) {
+    //   if (!value && !this.isEmptyValue(this.$route.query)) {
+    //     this.reloadOrder(true)
+    //   }
+    // },
     showOverdrawnInvoice(value) {
       this.visible = value
     }
@@ -361,7 +361,7 @@ export default {
               columnName: 'C_DocTypeTarget_ID_UUID'
             })
             this.$store.dispatch('updateOrder', {
-              orderUuid: this.$route.query.action,
+              orderUuid: this.currentOrder.uuid,
               posUuid: this.currentPointOfSales.uuid,
               priceListUuid: this.currentPointOfSales.priceList.uuid,
               warehouseUuid: this.currentPointOfSales.warehouse.uuid,
@@ -563,7 +563,7 @@ export default {
       })
       if (!this.isEmptyValue(update.value) && update.value !== this.currentOrder.businessPartner.uuid && !this.isEmptyValue(this.currentPointOfSales)) {
         this.$store.dispatch('updateOrder', {
-          orderUuid: this.$route.query.action,
+          orderUuid: this.currentOrder.uuid,
           posUuid: this.currentPointOfSales.uuid,
           customerUuid: update.value,
           priceListUuid: this.$store.getters.currentPriceList.uuid,
@@ -850,7 +850,7 @@ export default {
                 this.visible = true
               } else if (!this.isEmptyValue(documentTypeUuid) && !this.isEmptyValue(this.currentOrder.documentType.uuid)) {
                 this.$store.dispatch('updateOrder', {
-                  orderUuid: this.$route.query.action,
+                  orderUuid: this.currentOrder.uuid,
                   posUuid: this.currentPointOfSales.uuid,
                   priceListUuid: this.$store.getters.currentPriceList.uuid,
                   warehouseUuid: this.currentPointOfSales.warehouse.uuid,

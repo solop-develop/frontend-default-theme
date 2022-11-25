@@ -942,7 +942,7 @@ export default {
       }
     }, 500)
     if (!this.isEmptyValue(this.$route.query.action)) {
-      this.$store.dispatch('reloadOrder', { orderUuid: this.$route.query.action })
+      this.$store.dispatch('reloadOrder', { orderUuid: this.currentOrder.uuid })
     }
     if (this.isEmptyValue(this.$route.query.action) && !this.isEmptyValue(this.currentOrder.uuid)) {
       this.$router.push({
@@ -1128,7 +1128,7 @@ export default {
     },
     openCollectionPanel() {
       this.$store.commit('setShowPOSCollection', true)
-      const orderUuid = this.$route.query.action
+      const orderUuid = this.currentOrder.uuid
       this.$store.dispatch('listPayments', { posUuid: this.currentPointOfSales.uuid, orderUuid })
       this.$store.commit('setShowPOSOptions', false)
       if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {

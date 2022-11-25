@@ -282,6 +282,9 @@ export default defineComponent({
         uuid: window.uuid,
         query: {
           filters
+        },
+        params: {
+          filters
         }
       })
     }

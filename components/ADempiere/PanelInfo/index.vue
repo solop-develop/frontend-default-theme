@@ -31,35 +31,7 @@
             {{ currentTab.name }}
           </span>
         </el-descriptions-item>
-        <!-- <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-          <template slot="label">
-            <svg-icon icon-class="table" style="margin-right: 10px;" />
-            {{ $t('window.containerInfo.log.tableName') }}
-          </template>
-          <span style="color: #606266; font-weight: bold;">
-            {{ currentTab.tableName }}
-          </span>
-        </el-descriptions-item>
-        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-          <template slot="label">
-            <svg-icon icon-class="user" style="margin-right: 10px;" />
-            {{ $t('window.containerInfo.log.recordID') }}
-          </template>
-          <span style="color: #606266; font-weight: bold;">
-            {{ currentRecordInfo[currentTab.tableName + '_ID'] }}
-          </span>
-        </el-descriptions-item>
-        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-          <template slot="label">
-            <svg-icon icon-class="user" style="margin-right: 10px;" />
-            {{ $t('window.containerInfo.log.recordUUID') }}
-          </template>
-          <span style="color: #606266; font-weight: bold;">
-            {{ currentRecordInfo.UUID }}
-          </span>
-        </el-descriptions-item> -->
       </el-descriptions>
-      {{ nameTab }}
     </el-header>
     <el-main style="padding:0px; height: 100% !important;">
       <el-tabs
