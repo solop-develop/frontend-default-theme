@@ -1352,11 +1352,14 @@ export default {
       }
     },
     printPreview() {
-      const orderUuid = this.currentOrder.uuid
       const posUuid = this.currentPointOfSales.uuid
+      const orderUuid = this.currentOrder.uuid
 
       this.isLoadingPrintPreview = true
-      this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+      this.$store.dispatch('printTicketPreviwer', {
+        posUuid,
+        orderUuid
+      })
         .then(response => {
           const { processLog } = response
           if (!this.isEmptyValue(processLog)) {
