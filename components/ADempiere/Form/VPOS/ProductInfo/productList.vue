@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +19,7 @@
 <template>
   <el-main
     v-shortkey="shortsKey"
-    style="padding-top: 0px;"
+    class="product-list-content"
     @shortkey.native="keyAction"
   >
     <el-form
@@ -29,15 +29,20 @@
       @shortkey.native="keyAction"
       @submit.native.prevent="notSubmitForm"
     >
-      <el-form-item label="$t('form.productInfo.codeProduct')">
-        <el-input v-model="input" :placeholder="$t('quickAccess.searchWithEnter')" @input="searchProduct" />
+      <el-form-item :label="$t('form.productInfo.codeProduct')">
+        <el-input
+          v-model="searchValue"
+          :placeholder="$t('quickAccess.searchWithEnter')"
+          clearable
+          @input="searchProduct"
+        />
       </el-form-item>
     </el-form>
 
     <el-table
       ref="listProducto"
       v-shortkey="shortsKey"
-      v-loading="isLoadedServer"
+      v-loading="isLoadingRecords"
       :data="localTableSearch(listWithPrice)"
       :empty-text="$t('quickAccess.searchWithEnter')"
       border
@@ -74,7 +79,7 @@
         align="right"
       >
         <template slot-scope="scope">
-          {{ formatPrice(scope.row.priceStandard, scope.row.currency.iSOCode) }}
+          {{ formatPrice({ value: scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -82,30 +87,36 @@
         align="right"
       >
         <template slot-scope="scope">
-          {{ formatPrice(scope.row.schemaPriceStandard, scope.row.schemaCurrency.iSOCode) }}
+          {{ formatPrice({ value: scope.row.schemaPriceStandard, currency: scope.row.schemaCurrency.iSOCode }) }}
         </template>
       </el-table-column>
     </el-table>
 
-    <custom-pagination
-      :total="productPrice.recordCount"
-      :current-page="productPrice.pageNumber"
-      :handle-change-page="handleChangePage"
-      :records-page="listWithPrice.length"
-    />
+    <el-row :gutter="24" class="products-list-footer">
+      <el-col :span="18">
+        <custom-pagination
+          :total="productPrice.recordCount"
+          :current-page="productPrice.pageNumber"
+          :handle-change-page="handleChangePage"
+          :records-page="listWithPrice.length"
+        />
+      </el-col>
 
-    <el-row :gutter="24">
-      <el-col :span="24">
+      <el-col :span="6">
         <samp style="float: right; padding-right: 10px;">
           <el-button
+            :loading="isLoadingRecords"
+            type="success"
+            icon="el-icon-refresh-right"
+            @click="loadProductsPricesList"
+          />
+          <el-button
             type="danger"
-            class="custom-button-create-bp"
             icon="el-icon-close"
             @click="close"
           />
           <el-button
             type="primary"
-            class="custom-button-create-bp"
             icon="el-icon-check"
             @click="addProductFromList"
           />
@@ -123,7 +134,7 @@ import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 
 // utils and helper methods
 // import fieldsListProductPrice from './fieldsList.js'
-import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 
 export default {
@@ -160,13 +171,11 @@ export default {
 
   data() {
     return {
-      defaultMaxPagination: 50,
       // fieldsList: fieldsListProductPrice,
-      isLoadedServer: false,
+      isLoadingRecords: false,
       isCustomForm: true,
       currentProduct: {},
       isSearchProduct: false,
-      input: '',
       timeOut: null
     }
   },
@@ -180,6 +189,14 @@ export default {
     },
     productListPrice() {
       return this.$store.getters.getProductPrice
+    },
+    showProductList: {
+      get() {
+        return this.$store.getters.getShowProductList
+      },
+      set(value) {
+        this.$store.commit('setShowProductList', value)
+      }
     },
     listWithPrice() {
       const { productPricesList } = this.productListPrice
@@ -198,11 +215,33 @@ export default {
       const { isLoaded, isReload } = this.productListPrice
       return (!isLoaded || isReload) // && this.isShowProductsPriceList
     },
-    searchValue() {
-      return this.$store.getters.getValueOfField({
-        containerUuid: this.metadata.containerUuid,
-        columnName: 'ProductValue'
-      })
+    searchValue: {
+      set(value) {
+        this.$store.commit('updateValueOfField', {
+          containerUuid: this.metadata.containerUuid,
+          columnName: 'ProductValue',
+          value
+        })
+
+        // refresh search
+        if (this.isEmptyValue(value)) {
+          this.loadProductsPricesList()
+        }
+      },
+      get() {
+        return this.$store.getters.getValueOfField({
+          containerUuid: this.metadata.containerUuid,
+          columnName: 'ProductValue'
+        })
+      }
+    }
+  },
+
+  watch: {
+    showProductList(newValue, oldValue) {
+      if (newValue && !this.isLoadingRecords && this.isEmptyValue(this.listWithPrice)) {
+        this.loadProductsPricesList()
+      }
     }
   },
 
@@ -225,11 +264,12 @@ export default {
           this.isSearchProduct = true
           return filtersProduct
         }
-        this.isLoadedServer = true
+
         if (this.isSearchProduct) {
+          this.isLoadingRecords = true
           this.timeOut = setTimeout(() => {
             this.$store.dispatch('listProductPriceFromServer', {
-              containerUuid: 'Products-Price-List',
+              containerUuid: this.metadata.containerUuid,
               pageNumber: 1,
               searchValue: this.searchValue
             })
@@ -243,12 +283,13 @@ export default {
                     showClose: true
                   })
                   this.isSearchProduct = false
-                  this.isLoadedServer = false
                   return recordsList
                 }
                 this.isSearchProduct = false
-                this.isLoadedServer = false
                 return recordsList
+              })
+              .finally(() => {
+                this.isLoadingRecords = false
               })
           }, 2000)
         }
@@ -266,22 +307,23 @@ export default {
           break
 
         case 'closeProductList':
-          this.$store.commit('showListProductPrice', {
-            attribute: this.popoverName,
-            isShowed: false
-          })
+          this.close()
           break
       }
     },
     loadProductsPricesList() {
+      this.isLoadingRecords = true
       this.$store.dispatch('listProductPriceFromServer', {})
+        .finally(() => {
+          this.isLoadingRecords = false
+        })
     },
     /**
      * @param {number} newPage
      */
     handleChangePage(newPage) {
       this.$store.dispatch('setProductPicePageNumber', newPage)
-      this.$store.dispatch('listProductPriceFromServer', {})
+      this.loadProductsPricesList()
     },
     selectProduct(row) {
       this.currentProduct = row
@@ -289,13 +331,13 @@ export default {
     addSelectProduct(row) {
       this.findProduct(row.product.value)
       this.close()
+    },
+    close() {
       // this.$store.commit('showListProductPrice', {
       //   attribute: this.popoverName,
       //   isShowed: false
       // })
-    },
-    close() {
-      this.$store.commit('setShowProductList', false)
+      this.showProductList = false
     },
     addProductFromList() {
       if (!this.isSelectable) {
@@ -315,7 +357,7 @@ export default {
       this.timeOut = setTimeout(() => {
         this.isSearchProduct = true
         this.$store.commit('updateValueOfField', {
-          containerUuid: 'Products-Price-List',
+          containerUuid: this.metadata.containerUuid,
           columnName: 'ProductValue',
           value: value
         })
@@ -348,3 +390,23 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.product-list-content {
+  padding-top: 0px;
+
+  /**
+   * Reduce the spacing between the form element and its label
+   */
+  .el-form-item__label {
+    padding-bottom: 0px;
+  }
+
+  .products-list-footer {
+    button {
+      padding: 4px 8px;
+      font-size: 24px;
+    }
+  }
+}
+</style>
