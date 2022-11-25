@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -30,9 +30,16 @@
           width="1250"
           @shortkey.native="close"
         >
-          <el-button icon="el-icon-close" type="text" style="float: right;padding: 1% 1% 0px 0px;font-size: 20px;" @click="close" />
+          <el-button
+            icon="el-icon-close"
+            type="text"
+            style="float: right;padding: 1% 1% 0px 0px;font-size: 20px;"
+            @click="close"
+          />
           <br>
+
           <product-info-list />
+
           <el-button
             slot="reference"
             type="text"
@@ -81,9 +88,9 @@
             </div>
             <div style="width: 30%;float: right;margin: 0px">
               <p style="overflow: hidden;text-overflow: ellipsis;text-align: end;margin: 0px">
-                {{ formatPrice(props.item.priceStandard, props.item.currency.iSOCode) }}
+                {{ formatPrice({ value: props.item.priceStandard, currency: props.item.currency.iSOCode }) }}
                 <br>
-                {{ formatQuantity(props.item.quantityAvailable) }}
+                {{ formatQuantity({ value: props.item.quantityAvailable }) }}
               </p>
             </div>
           </div>
@@ -98,15 +105,15 @@
 import ProductInfoList from './productList'
 
 // components and mixins
+import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 // import fieldMixin from '@theme/components/ADempiere/Field/mixin/mixinField.js'
 
 // utils and helper methods
 import {
   formatPrice,
   formatQuantity
-} from '@/utils/ADempiere/valueFormat.js'
+} from '@/utils/ADempiere/formatValue/numberFormat'
 
-import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 /**
  * This component is made to be the prototype of the Product Info search field
  */
@@ -118,7 +125,7 @@ export default {
   },
 
   mixins: [
-  //   fieldMixin,
+    // fieldMixin,
     posMixin
   ],
 
