@@ -700,10 +700,13 @@ export default {
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
-                if (this.modifyDiscount &&
-                  this.currentPointOfSales.maximumLineDiscountAllowed <= mutation.payload.value &&
-                  this.currentPointOfSales.maximumLineDiscountAllowed === 0 &&
-                  !this.$store.state['pointOfSales/orderLine/index'].isloadedLine
+                if (this.currentPointOfSales.maximumLineDiscountAllowed === 0) {
+                  this.updateOrderLine(mutation.payload)
+                } else if (
+                  this.modifyDiscount &&
+                  mutation.payload.value <= this.currentPointOfSales.maximumLineDiscountAllowed
+                  // (this.currentPointOfSales.maximumLineDiscountAllowed > 0) &&
+                  // (!this.$store.state['pointOfSales/orderLine/index'].isloadedLine)
                 ) {
                   this.updateOrderLine(mutation.payload)
                 } else {
