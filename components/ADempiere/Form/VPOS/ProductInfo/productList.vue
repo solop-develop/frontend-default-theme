@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-main
     v-shortkey="shortsKey"
@@ -28,10 +29,11 @@
       @shortkey.native="keyAction"
       @submit.native.prevent="notSubmitForm"
     >
-      <el-form-item label="Código Producto">
+      <el-form-item label="$t('form.productInfo.codeProduct')">
         <el-input v-model="input" :placeholder="$t('quickAccess.searchWithEnter')" @input="searchProduct" />
       </el-form-item>
     </el-form>
+
     <el-table
       ref="listProducto"
       v-shortkey="shortsKey"
@@ -84,12 +86,14 @@
         </template>
       </el-table-column>
     </el-table>
+
     <custom-pagination
       :total="productPrice.recordCount"
       :current-page="productPrice.pageNumber"
       :handle-change-page="handleChangePage"
       :records-page="listWithPrice.length"
     />
+
     <el-row :gutter="24">
       <el-col :span="24">
         <samp style="float: right; padding-right: 10px;">
@@ -116,6 +120,7 @@
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
+
 // utils and helper methods
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
