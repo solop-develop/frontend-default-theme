@@ -1457,12 +1457,14 @@ export default {
         .then(response => {
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
           this.$store.dispatch('reloadOrder', response.uuid)
+            .then(() => {
+              if (this.IsAllowsPreviewDocument) this.printPreview()
+            })
           this.$message({
             type: 'success',
             message: this.$t('notifications.completed'),
             showClose: true
           })
-          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
         })
         .catch(error => {
           this.$message({
