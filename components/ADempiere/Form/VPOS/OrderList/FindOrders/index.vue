@@ -357,12 +357,49 @@ export default {
       this.$store.commit('setQuickSearchOrder', row)
     },
     selectionChangeOrder(row) {
-      this.changeOrder = row
+      this.$store.commit('setQuickSearchOrder', row)
+      // this.changeOrder = row
+      // const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
+      // const currentOrder = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
+      // if (!this.isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
+      //   this.$store.state['pointOfSales/point/index'].conversionsList = []
+      //   this.$store.dispatch('currentOrder', this.changeOrder)
+      //   this.$store.dispatch('deleteAllCollectBox')
+      //   this.$router.push({
+      //     params: {
+      //       ...this.$route.params
+      //     },
+      //     query: {
+      //       ...this.$route.query,
+      //       action: this.changeOrder.uuid
+      //     }
+      //   }, () => {})
+      //   const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
+      //   this.$store.dispatch('listPayments', { posUuid, orderUuid })
+      // }
+      // if (this.changeOrder.documentStatus.value === 'DR') {
+      //   holdOrder({
+      //     posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+      //     salesRepresentativeUuid: this.$store.getters['user/getUserUuid'],
+      //     orderUuid: this.changeOrder.uuid
+      //   })
+      //     .then(response => {
+      //       this.$message.success(this.$t('form.pos.generalNotifications.selectedOrder') + response.documentNo)
+      //     })
+      //     .catch(error => {
+      //       this.$message({
+      //         message: error.message,
+      //         isShowClose: true,
+      //         type: 'error'
+      //       })
+      //       console.warn(`Error Hold Order ${error.message}. Code: ${error.code}.`)
+      //     })
+      // }
       const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
       const currentOrder = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
-      if (!this.isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
+      if (!this.isEmptyValue(this.$store.getters.getQuickSearchOrder) && this.$store.getters.getQuickSearchOrder.documentNo !== currentOrder.documentNo) {
         this.$store.state['pointOfSales/point/index'].conversionsList = []
-        this.$store.dispatch('currentOrder', this.changeOrder)
+        this.$store.dispatch('currentOrder', this.$store.getters.getQuickSearchOrder)
         this.$store.dispatch('deleteAllCollectBox')
         this.$router.push({
           params: {
@@ -370,17 +407,17 @@ export default {
           },
           query: {
             ...this.$route.query,
-            action: this.changeOrder.uuid
+            action: this.$store.getters.getQuickSearchOrder.uuid
           }
         }, () => {})
-        const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
+        const orderUuid = this.$store.getters.getQuickSearchOrder.uuid
         this.$store.dispatch('listPayments', { posUuid, orderUuid })
       }
-      if (this.changeOrder.documentStatus.value === 'DR') {
+      if (this.$store.getters.getQuickSearchOrder.documentStatus.value === 'DR') {
         holdOrder({
-          posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+          posUuid: this.currentPointOfSales.uuid,
           salesRepresentativeUuid: this.$store.getters['user/getUserUuid'],
-          orderUuid: this.changeOrder.uuid
+          orderUuid: this.$store.getters.getQuickSearchOrder.uuid
         })
           .then(response => {
             this.$message.success(this.$t('form.pos.generalNotifications.selectedOrder') + response.documentNo)
