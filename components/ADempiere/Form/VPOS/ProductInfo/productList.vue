@@ -43,6 +43,7 @@
       height="450"
       highlight-current-row
       @row-click="selectProduct"
+      @row-dblclick="addSelectProduc"
       @shortkey.native="keyAction"
     >
       <el-table-column
@@ -114,7 +115,7 @@
 // components and mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
-
+import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 // utils and helper methods
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
@@ -128,7 +129,8 @@ export default {
   },
 
   mixins: [
-    formMixin
+    formMixin,
+    posMixin
   ],
 
   props: {
@@ -171,11 +173,11 @@ export default {
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
-    productPrice() {
+    productListPrice() {
       return this.$store.getters.getProductPrice
     },
     listWithPrice() {
-      const { productPricesList } = this.productPrice
+      const { productPricesList } = this.productListPrice
       if (!this.isEmptyValue(productPricesList)) {
         return productPricesList
       }
@@ -188,7 +190,7 @@ export default {
       }
     },
     isReadyFromGetData() {
-      const { isLoaded, isReload } = this.productPrice
+      const { isLoaded, isReload } = this.productListPrice
       return (!isLoaded || isReload) // && this.isShowProductsPriceList
     },
     searchValue() {
@@ -280,6 +282,14 @@ export default {
     selectProduct(row) {
       this.currentProduct = row
     },
+    addSelectProduc(row) {
+      this.findProduct(row.product.value)
+      this.close()
+      this.$store.commit('showListProductPrice', {
+        attribute: this.popoverName,
+        isShowed: false
+      })
+    },
     close() {
       this.$store.commit('setShowProductList', false)
     },
@@ -287,13 +297,7 @@ export default {
       if (!this.isSelectable) {
         return
       }
-      // TODO: Change this dispatch for set values with local methods, to delete subscripton
-      this.$store.dispatch('notifyActionKeyPerformed', {
-        containerUuid: 'POS',
-        columnName: 'ProductValue',
-        // TODO: Verify with 'value' or 'searchValue' attribute
-        value: this.currentProduct.product.name
-      })
+      this.findProduct(this.currentProduct.product.value)
 
       // close popover of list product price
       this.close()
