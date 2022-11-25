@@ -289,10 +289,10 @@ export default {
     addSelectProduct(row) {
       this.findProduct(row.product.value)
       this.close()
-      this.$store.commit('showListProductPrice', {
-        attribute: this.popoverName,
-        isShowed: false
-      })
+      // this.$store.commit('showListProductPrice', {
+      //   attribute: this.popoverName,
+      //   isShowed: false
+      // })
     },
     close() {
       this.$store.commit('setShowProductList', false)
