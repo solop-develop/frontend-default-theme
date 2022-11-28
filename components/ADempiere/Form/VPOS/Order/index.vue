@@ -942,7 +942,7 @@ export default {
       }
     }, 500)
     if (!this.isEmptyValue(this.$route.query.action)) {
-      this.$store.dispatch('reloadOrder', { orderUuid: this.currentOrder.uuid })
+      this.$store.dispatch('reloadOrder', { orderUuid: this.$route.query.action  })
     }
     if (this.isEmptyValue(this.$route.query.action) && !this.isEmptyValue(this.currentOrder.uuid)) {
       this.$router.push({

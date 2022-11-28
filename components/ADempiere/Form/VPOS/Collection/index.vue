@@ -744,11 +744,12 @@ export default {
   watch: {
     dateConvertions(value) {
       const currencyFromUuid = this.currentPointOfSales.priceList.currency.uuid
-      const currencyToUuid = this.selectCurrentFieldCurrency.uuid
-      if (!isEmptyValue(this.currentPointOfSales.conversionTypeUuid) &&
-        !isEmptyValue(currencyFromUuid) && !isEmptyValue(currencyToUuid) &&
+      const currencyToUuid = this.isEmptyValue(this.selectCurrentFieldCurrency.uuid) ? '' : this.selectCurrentFieldCurrency.uuid
+      if (!this.isEmptyValue(this.currentPointOfSales.conversionTypeUuid) &&
+        !this.isEmptyValue(currencyFromUuid) && !this.isEmptyValue(currencyToUuid) &&
         !isSameValues(currencyFromUuid, currencyToUuid) &&
-        !isEmptyValue(value) && this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered) !== value) {
+        !this.isEmptyValue(currencyToUuid) &&
+        !this.isEmptyValue(value) && this.formatDateToSend(this.currentPointOfSales.currentOrder.dateOrdered) !== value) {
         this.$store.dispatch('searchConversion', {
           conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
           currencyFromUuid,
