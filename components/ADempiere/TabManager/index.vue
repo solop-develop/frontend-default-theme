@@ -476,10 +476,22 @@ export default defineComponent({
           containerUuid,
           row
         })
+        const recordId = currentRecordId.value
+        router.push({
+          name: root.$route.name,
+          query: {
+            ...root.$route.query,
+            recordId
+          },
+          params: {
+            ...root.$route.params,
+            filter: {},
+            recordId
+          }
+        }, () => {})
       })
     }
-
-    if (isReadyFromGetData.value) {
+    if (isReadyFromGetData.value || (!isReadyFromGetData.value && !isEmptyValue(root.$route.params.filters))) {
       getData()
     }
     watch(currentRecordLogs, (newValue, oldValue) => {
