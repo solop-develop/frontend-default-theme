@@ -415,7 +415,7 @@ export default {
       }
       if (this.$store.getters.getQuickSearchOrder.documentStatus.value === 'DR') {
         holdOrder({
-          posUuid: this.currentPointOfSales.uuid,
+          posUuid,
           salesRepresentativeUuid: this.$store.getters['user/getUserUuid'],
           orderUuid: this.$store.getters.getQuickSearchOrder.uuid
         })
