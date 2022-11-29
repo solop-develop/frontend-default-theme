@@ -136,10 +136,13 @@ import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // constants
-import { BUTTON } from '@/utils/ADempiere/references'
+import { BUTTON, DATE } from '@/utils/ADempiere/references'
 
 // utils and helper methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
+import {
+  isDocumentStatus
+} from '@/utils/ADempiere/constants/systemColumns'
 
 export default defineComponent({
   name: 'WindowsTable',
@@ -412,8 +415,12 @@ export default defineComponent({
     /**
      * isDisplayedDefaultTable
      */
-    function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, parsedDefaultValue, name }) {
-      if (displayType === 15) {
+    function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, columnName, elementColumnName, name }) {
+      const documentStatus = isDocumentStatus({
+        columnName,
+        elementColumnName
+      })
+      if (displayType === DATE.id || documentStatus) {
         return true
       }
       if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
