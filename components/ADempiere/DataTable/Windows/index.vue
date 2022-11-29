@@ -243,7 +243,7 @@ export default defineComponent({
       const showMinimalistView = store.getters.getTableOption(props.containerUuid)
       if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
         return props.header.filter(fieldItem => {
-          const isDisplayedDefault = props.containerManager.isDisplayedDefault({
+          const isDisplayedDefault = isDisplayedDefaultTable({
             ...fieldItem,
             isMandatory: props.containerManager.isMandatoryField(fieldItem)
           })
@@ -407,6 +407,19 @@ export default defineComponent({
           row
         })
       }
+    }
+
+    /**
+     * isDisplayedDefaultTable
+     */
+    function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, parsedDefaultValue, name }) {
+      if (displayType === 15) {
+        return true
+      }
+      if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
+        return true
+      }
+      return false
     }
 
     /**
@@ -723,7 +736,8 @@ export default defineComponent({
       handleSelection,
       handleSelectionAll,
       isDisplayed,
-      loadSelect
+      loadSelect,
+      isDisplayedDefaultTable
     }
   }
 })

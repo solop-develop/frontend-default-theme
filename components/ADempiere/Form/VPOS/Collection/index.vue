@@ -244,7 +244,7 @@ import typeCollection from '@theme/components/ADempiere/Form/VPOS/Collection/typ
 import overdrawnInvoice from './overdrawnInvoice'
 
 // utils and helper methods
-import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
+import { isSameValues } from '@/utils/ADempiere/valueUtils'
 import { formatPrice as formatPrice2 } from '@/utils/ADempiere/formatValue/numberFormat'
 import { formatPrice, formatDateToSend } from '@/utils/ADempiere/valueFormat.js'
 import { clientDateTime } from '@/utils/ADempiere/formatValue/dateFormat'
