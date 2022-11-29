@@ -17,36 +17,44 @@
 -->
 
 <template>
-  <el-select
-    v-model="value"
-    v-bind="commonsProperties"
-    :filterable="true"
-    :loading="isLoading"
-    value-key="value"
-    clearable
-    :multiple="isSelectMultiple"
-    :allow-create="metadata.isSelectCreated"
-    :collapse-tags="!isSelectMultiple"
-    remote
-    :remote-method="remoteSearch"
-    @change="preHandleChange"
-    @visible-change="getDataLookupList"
-    @clear="clearLookup"
-  >
-    <el-option
-      v-for="(option, key) in optionsList"
-      :key="key"
-      :value="option.value"
-      :label="option.displayedValue"
+  <span style="display: flex;">
+    <el-select
+      v-model="value"
+      v-bind="commonsProperties"
+      :filterable="true"
+      :loading="isLoading"
+      value-key="value"
+      clearable
+      :multiple="isSelectMultiple"
+      :allow-create="metadata.isSelectCreated"
+      :collapse-tags="!isSelectMultiple"
+      remote
+      :remote-method="remoteSearch"
+      @change="preHandleChange"
+      @visible-change="getDataLookupList"
+      @clear="clearLookup"
+    >
+      <el-option
+        v-for="(option, key) in optionsList"
+        :key="key"
+        :value="option.value"
+        :label="option.displayedValue"
+      />
+    </el-select>
+    <operator
+      v-if="metadata.isAdvancedQuery"
+      :field-attributes="metadata"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
     />
-  </el-select>
+  </span>
 </template>
 
 <script>
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
-
+import Operator from '@theme/components/ADempiere/searchRecordField/operator.vue'
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
@@ -63,6 +71,9 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 export default {
   name: 'FieldSelect',
 
+  components: {
+    Operator
+  },
   mixins: [
     fieldMixin,
     selectMixin

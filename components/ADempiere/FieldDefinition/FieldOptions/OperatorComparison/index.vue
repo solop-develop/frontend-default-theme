@@ -64,8 +64,7 @@ export default defineComponent({
       set(newValue) {
         store.commit('updateValueOfField', {
           containerUuid,
-          columnName,
-          value: newValue
+          columnName
         })
         store.dispatch('changeFieldAttribure', {
           containerUuid,

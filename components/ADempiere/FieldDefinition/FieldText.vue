@@ -17,37 +17,49 @@
 -->
 
 <template>
-  <el-input
-    v-model="value"
-    v-bind="commonsProperties"
-    :pattern="pattern"
-    :rows="rows"
-    :type="typeTextBox"
-    :maxlength="maxLength"
-    :show-password="Boolean(metadata.isEncrypted)"
-    :autofocus="metadata.inTable"
-    :size="inputSize"
-    show-word-limit
-    @change="preHandleChange"
-    @blur="focusLost"
-    @focus="focusGained"
-    @keydown.native="keyPressed"
-    @keyup.native="keyReleased"
-    @keyup.native.enter="actionKeyPerformed"
-    @submit="false"
-  />
+  <span style="display: flex;">
+    <el-input
+      v-model="value"
+      v-bind="commonsProperties"
+      :pattern="pattern"
+      :rows="rows"
+      :type="typeTextBox"
+      :maxlength="maxLength"
+      :show-password="Boolean(metadata.isEncrypted)"
+      :autofocus="metadata.inTable"
+      :size="inputSize"
+      show-word-limit
+      @change="preHandleChange"
+      @blur="focusLost"
+      @focus="focusGained"
+      @keydown.native="keyPressed"
+      @keyup.native="keyReleased"
+      @keyup.native.enter="actionKeyPerformed"
+      @submit="false"
+    />
+    <operator
+      v-if="metadata.isAdvancedQuery"
+      :field-attributes="metadata"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
+    />
+  </span>
 </template>
 
 <script>
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldMixinText from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldText.js'
-
+import Operator from '@theme/components/ADempiere/searchRecordField/operator.vue'
 // constants
 import { TEXT } from '@/utils/ADempiere/references'
 
 export default {
   name: 'FieldText',
+
+  components: {
+    Operator
+  },
 
   mixins: [
     fieldMixin,

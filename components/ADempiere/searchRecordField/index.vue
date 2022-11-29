@@ -30,7 +30,7 @@
         slot="append"
         v-model="isPanel"
         placement="bottom"
-        :width="isMobile ? 'auto' : '800'"
+        :width="isMobile ? 'auto' : '1200'"
         trigger="click"
         class="option-search-record"
       >
@@ -198,10 +198,21 @@ export default defineComponent({
       if (!isEmptyValue(filters)) {
         filters = filters.filter(attribute => !isEmptyValue(attribute.value) && !attribute.columnName.includes(DISPLAY_COLUMN_PREFIX) && !attribute.columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX))
       }
+      const { fieldsList } = props.containerManager.getPanel({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid + IS_ADVANCE_QUERY
+      })
+      const filtersWithOperators = filters.map(epale => {
+        const operator = fieldsList.find(a => a.columnName === epale.columnName)
+        return {
+          ...epale,
+          operator: operator.operator
+        }
+      })
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
-        filters
+        filters: filtersWithOperators
       })
       isPanel.value = false
     }
