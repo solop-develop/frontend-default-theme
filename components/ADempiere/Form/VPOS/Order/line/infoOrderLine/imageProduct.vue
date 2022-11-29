@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import { getAttachment } from '@/api/ADempiere/user-interface/resources.js'
+import { getAttachment } from '@/api/ADempiere/user-interface/component/resource'
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 
 export default {

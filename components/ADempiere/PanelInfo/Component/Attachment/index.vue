@@ -18,30 +18,10 @@
 
 <template>
   <span>
-    <!-- <el-card v-if="!isEmptyValue(newImage)" shadow="always">
-      <div slot="header" class="clearfix">
-        <span>{{ $t('window.containerInfo.attachment.newFiles') }}</span>
-        <el-button
-          style="float: right; padding: 3px 0"
-          type="text"
-          icon="el-icon-upload2"
-          @click="submitUpload"
-        >
-          {{ $t('window.containerInfo.attachment.uploadFiles') }}
-        </el-button>
-      </div>
-      <el-image
-        v-for="(file, key) in newImage"
-        :key="key"
-        style="width: 150px;height: 150px;margin-left: 1%;margin-right: 1%;"
-        :src="file"
-        fit="fill"
-        :preview-src-list="newImage"
-      />
-    </el-card> -->
     <div v-if="!Attachment">
       <el-empty />
     </div>
+
     <el-upload
       ref="upload"
       action="#"
@@ -90,24 +70,11 @@
       </div>
     </el-upload>
     <br>
+
     <span>
-      <form id="form" enctype="multipart/form-data">
-        <el-upload
-          ref="upload"
-          class="upload-demo"
-          name="avatar"
-          action="#"
-          :auto-upload="false"
-        >
-          <el-button slot="trigger" size="small" type="primary">
-            {{ $t('window.containerInfo.attachment.selectFile') }}
-          </el-button>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">
-            {{ $t('window.containerInfo.attachment.uploadFile') }}
-          </el-button>
-        </el-upload>
-      </form>
+      <upload-resource />
     </span>
+
     <el-dialog
       v-if="!isEmptyValue(dialogImageUrl.content_type)"
       :visible.sync="dialogVisible"
@@ -137,22 +104,17 @@
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import lang from '@/lang'
 import store from '@/store'
 import axios from 'axios'
 
 // components and mixins
 import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
-
-// api request methods
-import request from '@/utils/request'
-// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
+import UploadResource from '@theme/components/ADempiere/PanelInfo/Component/Attachment/uploadResource.vue'
 
 // utils and helper methods
 import { buildImageFromArrayBuffer } from '@/utils/ADempiere/resource.js'
 import { getImagePath } from '@/utils/ADempiere/resource.js'
-import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
 
@@ -161,7 +123,8 @@ export default defineComponent({
 
   components: {
     FileRender,
-    LoadingView
+    LoadingView,
+    UploadResource
   },
 
   props: {
@@ -191,7 +154,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root, refs }) {
+  setup() {
     /**
      * Refs
      */
@@ -301,7 +264,7 @@ export default defineComponent({
       }
       return urlImage
     }
-    const converImage = async(image) => {
+    const convertImage = async(image) => {
       const urlImage = await axios.get(image.url.uri)
         .then(response => {
           return {
@@ -321,31 +284,7 @@ export default defineComponent({
         })
       return urlImage
     }
-    const submitUpload = () => {
-      const form = document.getElementById('form')
-      const formData = new FormData(form)
-      request({
-        url: 'http://0.0.0.:8085/api/adempiere/user-interface/component/attachment/save-attachment',
-        method: 'post',
-        data: formData
-      })
-        .then(resData => {
-          showMessage({
-            message: lang.t('window.containerInfo.attachment.success'),
-            type: 'success'
-          })
-          refs.upload.submit()
-          refs.upload.clearFiles()
-          refs.upload.uploadFiles = []
-        })
-        .catch(err => {
-          console.warn({ err })
-          showMessage({
-            message: lang.t('window.containerInfo.attachment.error'),
-            type: 'error'
-          })
-        })
-    }
+
     const beforeAvatarUpload = (file) => {
       listImageAll.value.push({
         name: file.name,
@@ -394,12 +333,10 @@ export default defineComponent({
       listImageAll,
       Attachment,
       // methods
-      // submitUpload,
-      submitUpload,
       beforeAvatarUpload,
       converFile,
       // isEmptyValue,
-      converImage,
+      convertImage,
       handleRemove,
       handlePictureCardPreview,
       handleDownload,
@@ -424,33 +361,33 @@ export default defineComponent({
 </style>
 <style>
 .scroll-attachment {
-    max-height: 80vh;
+  max-height: 80vh;
 }
 .el-upload--picture-card {
-    background-color: #fbfdff;
-    border: 1px dashed #c0ccda;
-    border-radius: 6px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 148px;
-    height: 148px;
-    cursor: pointer;
-    line-height: 146px;
-    vertical-align: top;
-    width: 100%;
+  background-color: #fbfdff;
+  border: 1px dashed #c0ccda;
+  border-radius: 6px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 148px;
+  height: 148px;
+  cursor: pointer;
+  line-height: 146px;
+  vertical-align: top;
+  width: 100%;
 }
 .el-upload--picture-card {
-    background-color: #fbfdff;
-    border: 1px dashed #c0ccda;
-    border-radius: 6px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 148px;
-    height: 148px;
-    cursor: pointer;
-    line-height: 146px;
-    vertical-align: top;
-    display: none;
-    width: 100%;
+  background-color: #fbfdff;
+  border: 1px dashed #c0ccda;
+  border-radius: 6px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 148px;
+  height: 148px;
+  cursor: pointer;
+  line-height: 146px;
+  vertical-align: top;
+  display: none;
+  width: 100%;
 }
 </style>

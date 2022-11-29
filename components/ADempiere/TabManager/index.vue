@@ -149,7 +149,7 @@ import {
 } from '@/api/ADempiere/window'
 import {
   getAttachment
-} from '@/api/ADempiere/user-interface/resources.js'
+} from '@/api/ADempiere/user-interface/component/resource'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
