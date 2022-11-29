@@ -423,6 +423,9 @@ export default defineComponent({
       if (displayType === DATE.id || documentStatus) {
         return true
       }
+      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DocumentNo', 'DateTrx', 'M_Product_ID', 'QtyEntered'].includes(columnName)) {
+        return true
+      }
       if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
         return true
       }
