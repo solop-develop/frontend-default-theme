@@ -45,7 +45,6 @@
         />
       </el-col>
     </el-row>
-
     <el-table
       id="multipleTable"
       ref="multipleTable"
@@ -74,29 +73,30 @@
         min-width="50"
       />
 
-      <template v-for="(fieldAttributes, key) in headerList">
-        <el-table-column
-          :key="key"
-          :label="headerLabel(fieldAttributes)"
-          :column-key="fieldAttributes.columnName"
-          :prop="fieldAttributes.columnName"
-          sortable
-          min-width="210"
-          :fixed="fieldAttributes.isFixedTableColumn"
-        >
-          <template slot-scope="scope">
-            <!-- formatted displayed value -->
-            <cell-display-info
-              :parent-uuid="parentUuid"
-              :container-uuid="containerUuid"
-              :field-attributes="fieldAttributes"
-              :container-manager="containerManager"
-              :scope="scope"
-              :data-row="scope.row"
-            />
-          </template>
-        </el-table-column>
-      </template>
+      <!-- <template v-for="(fieldAttributes, key) in headerList"> -->
+      <el-table-column
+        v-for="(fieldAttributes, key) in headerList"
+        :key="key"
+        :label="headerLabel(fieldAttributes)"
+        :column-key="fieldAttributes.columnName"
+        :prop="fieldAttributes.columnName"
+        sortable
+        min-width="210"
+        :fixed="fieldAttributes.isFixedTableColumn"
+      >
+        <template slot-scope="scope">
+          <!-- formatted displayed value -->
+          <cell-display-info
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+            :field-attributes="fieldAttributes"
+            :container-manager="containerManager"
+            :scope="scope"
+            :data-row="scope.row"
+          />
+        </template>
+      </el-table-column>
+      <!-- </template> -->
     </el-table>
 
     <!-- pagination table, set custom or use default change page method -->
@@ -416,6 +416,9 @@ export default defineComponent({
      * isDisplayedDefaultTable
      */
     function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, columnName, elementColumnName, name }) {
+      if (columnName === 'C_PaymentTerm_ID') {
+        return false
+      }
       const documentStatus = isDocumentStatus({
         columnName,
         elementColumnName
@@ -423,7 +426,7 @@ export default defineComponent({
       if (displayType === DATE.id || documentStatus) {
         return true
       }
-      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DocumentNo', 'DateTrx', 'M_Product_ID', 'QtyEntered'].includes(columnName)) {
+      if (['DocumentNo'].includes(columnName)) {
         return true
       }
       if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
