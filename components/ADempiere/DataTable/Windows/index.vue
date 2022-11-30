@@ -136,10 +136,13 @@ import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // constants
-import { BUTTON } from '@/utils/ADempiere/references'
+import { BUTTON, DATE } from '@/utils/ADempiere/references'
 
 // utils and helper methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
+import {
+  isDocumentStatus
+} from '@/utils/ADempiere/constants/systemColumns'
 
 export default defineComponent({
   name: 'WindowsTable',
@@ -243,7 +246,7 @@ export default defineComponent({
       const showMinimalistView = store.getters.getTableOption(props.containerUuid)
       if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
         return props.header.filter(fieldItem => {
-          const isDisplayedDefault = props.containerManager.isDisplayedDefault({
+          const isDisplayedDefault = isDisplayedDefaultTable({
             ...fieldItem,
             isMandatory: props.containerManager.isMandatoryField(fieldItem)
           })
@@ -407,6 +410,26 @@ export default defineComponent({
           row
         })
       }
+    }
+
+    /**
+     * isDisplayedDefaultTable
+     */
+    function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, columnName, elementColumnName, name }) {
+      const documentStatus = isDocumentStatus({
+        columnName,
+        elementColumnName
+      })
+      if (displayType === DATE.id || documentStatus) {
+        return true
+      }
+      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DocumentNo', 'DateTrx', 'M_Product_ID', 'QtyEntered'].includes(columnName)) {
+        return true
+      }
+      if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
+        return true
+      }
+      return false
     }
 
     /**
@@ -723,7 +746,8 @@ export default defineComponent({
       handleSelection,
       handleSelectionAll,
       isDisplayed,
-      loadSelect
+      loadSelect,
+      isDisplayedDefaultTable
     }
   }
 })
