@@ -136,13 +136,10 @@ import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // constants
-import { BUTTON, DATE } from '@/utils/ADempiere/references'
+import { BUTTON } from '@/utils/ADempiere/references'
 
 // utils and helper methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
-import {
-  isDocumentStatus
-} from '@/utils/ADempiere/constants/systemColumns'
 
 export default defineComponent({
   name: 'WindowsTable',
@@ -419,14 +416,14 @@ export default defineComponent({
       if (columnName === 'C_PaymentTerm_ID') {
         return false
       }
-      const documentStatus = isDocumentStatus({
-        columnName,
-        elementColumnName
-      })
-      if (displayType === DATE.id || documentStatus) {
-        return true
-      }
-      if (['DocumentNo'].includes(columnName)) {
+      // const documentStatus = isDocumentStatus({
+      //   columnName,
+      //   elementColumnName
+      // })
+      // // if (displayType === DATE.id || documentStatus) {
+      // //   return true
+      // // }
+      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DateTrx', 'M_Product_ID', 'QtyEntered', 'DocumentNo', 'DocStatus'].includes(columnName)) {
         return true
       }
       if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
