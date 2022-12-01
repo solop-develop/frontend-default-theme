@@ -81,9 +81,9 @@
         <el-tab-pane name="listReference">
           <span slot="label">
             <i class="el-icon-zoom-in" />
-            {{ 'Documentos Relacionados' }}
+            {{ $t('window.containerInfo.referenceRecords') }}
           </span>
-          <reference
+          <reference-records
             :table-name="currentTab.tableName"
             :parent-uuid="currentTab.parentUuid"
             :record-uuid="currentRecordUuid"
@@ -169,7 +169,7 @@ import RecordLogs from './Component/RecordLogs/index.vue'
 import Accounting from './Component/Accounting/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import Chats from './Component/chats/index.vue'
-import Reference from './Component/Reference/index.vue'
+import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import workflowLogs from './Component/workflowLogs/index.vue'
 // Utils and Helper Methods
 import {
@@ -188,7 +188,7 @@ export default defineComponent({
     Accounting,
     StoreProduct,
     workflowLogs,
-    Reference
+    ReferenceRecords
   },
 
   props: {

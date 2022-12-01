@@ -64,7 +64,7 @@ import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import Filters from '@/utils/ADempiere/filters.js'
 
 export default defineComponent({
-  name: 'Reference',
+  name: 'ReferenceRecords',
 
   components: {
     DocumentStatusTag
