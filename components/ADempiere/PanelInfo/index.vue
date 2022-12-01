@@ -19,7 +19,7 @@
 <template>
   <el-container style="height: 100% !important;">
     <el-header
-      style="height: 15%;text-align: center;padding-top: 1%;"
+      style="height: 5%;text-align: center;padding-top: 1%;"
     >
       <el-descriptions :column="1">
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -29,10 +29,6 @@
           </template>
           <span style="color: #606266; font-weight: bold;">
             {{ currentTab.name }}
-          </span>
-          <hr>
-          <span style="color: #606266; font-weight: bold;">
-            {{ currentTab.uuid }}
           </span>
         </el-descriptions-item>
       </el-descriptions>
@@ -384,6 +380,9 @@ export default defineComponent({
       }
       if (tab.name === 'listReference') {
         tab.name = 'listReference'
+      }
+      if (isEmptyValue(props.containerManager[tab.name])) {
+        return
       }
 
       nameTab.value = tab.name

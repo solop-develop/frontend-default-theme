@@ -123,11 +123,10 @@ export default defineComponent({
     })
 
     function openReference(referenceElement) {
-      console.log({ referenceElement })
       if (!isEmptyValue(referenceElement.windowUuid)) {
         const pairsValues = Filters.newInstance()
           .setFiltersWithSQL(referenceElement.whereClause)
-          .getAsArray().filter(attribute => !isEmptyValue(attribute.value) && !isEmptyValue(attribute.columnName))
+          .getAsArray()
         zoomIn({
           uuid: referenceElement.windowUuid,
           params: {
@@ -135,6 +134,7 @@ export default defineComponent({
             containerUuid: props.tabUuid
           }
         })
+        store.commit('setShowLogs', false)
       }
     }
     isEmptyValue
