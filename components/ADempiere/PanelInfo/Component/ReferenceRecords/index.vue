@@ -23,7 +23,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         :column="1"
         :border="true"
       >
-        <!-- <el-descriptions-item label="Username" label-class-name="my-label" content-class-name="my-content">kooriookami</el-descriptions-item> -->
         <el-descriptions-item
           v-for="(reference, key) in getterReferences.referencesList"
           :key="key"
@@ -39,10 +38,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           </el-button>
         </el-descriptions-item>
       </el-descriptions>
-      <!-- <div v-for="o in 4" :key="o" class="text item">
-        {{'List item ' + o }}
-      </div> -->
     </el-card>
+
     <div v-else>
       <el-empty />
     </div>
@@ -55,8 +52,10 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 
 // components and mixins
-import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
+
+// constants
+import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -91,15 +90,15 @@ export default defineComponent({
 
   setup(props, { root }) {
     const currentRecordLogs = ref({ name: 'nada' })
-    // const listLogs = ref({})
     const currentKey = ref(0)
     const typeAction = ref(0)
     const currentTabLogs = ref('0')
 
-    // // use getter to reactive properties
+    // use getter to reactive properties
     const listLogs = computed(() => {
       return store.getters.getRecordLogs
     })
+
     /**
      * showkey
      */
@@ -111,9 +110,11 @@ export default defineComponent({
         typeAction.value = index
       }
     }
+
     const validate = (list) => {
       return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
     }
+
     const getterReferences = computed(() => {
       return store.getters.getStoredReferences({
         windowUuid: props.parentUuid,
@@ -137,7 +138,6 @@ export default defineComponent({
         store.commit('setShowLogs', false)
       }
     }
-    isEmptyValue
 
     return {
       currentTabLogs,
@@ -153,7 +153,6 @@ export default defineComponent({
       openReference
     }
   }
-
 })
 </script>
 
