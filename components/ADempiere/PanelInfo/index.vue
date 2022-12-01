@@ -78,6 +78,17 @@
             <record-logs />
           </el-scrollbar>
         </el-tab-pane>
+        <el-tab-pane name="listReference">
+          <span slot="label">
+            <i class="el-icon-zoom-in" />
+            {{ 'Documentos Relacionados' }}
+          </span>
+          <reference
+            :table-name="currentTab.tableName"
+            :parent-uuid="currentTab.parentUuid"
+            :record-uuid="currentRecordUuid"
+          />
+        </el-tab-pane>
         <el-tab-pane name="getAttachment">
           <span slot="label">
             <i class="el-icon-paperclip" />
@@ -157,6 +168,7 @@ import RecordLogs from './Component/RecordLogs/index.vue'
 import Accounting from './Component/Accounting/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import Chats from './Component/chats/index.vue'
+import Reference from './Component/Reference/index.vue'
 import workflowLogs from './Component/workflowLogs/index.vue'
 // Utils and Helper Methods
 import {
@@ -174,7 +186,8 @@ export default defineComponent({
     Chats,
     Accounting,
     StoreProduct,
-    workflowLogs
+    workflowLogs,
+    Reference
   },
 
   props: {
@@ -364,11 +377,15 @@ export default defineComponent({
       if (tab.name === language.t('window.containerInfo.notes')) {
         tab.name = 'listChats'
       }
+      if (tab.name === 'listReference') {
+        tab.name = 'listReference'
+      }
 
       nameTab.value = tab.name
       props.containerManager[tab.name]({
         tableName: currentTab.value.tableName,
         containerUuid: currentTab.value.containerUuid,
+        parentUuid: currentTab.value.parentUuid,
         recordId: currentRecordId.value,
         recordUuid: currentRecordUuid.value
       })
