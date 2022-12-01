@@ -78,6 +78,7 @@
             <record-logs />
           </el-scrollbar>
         </el-tab-pane>
+
         <el-tab-pane name="listReference">
           <span slot="label">
             <i class="el-icon-zoom-in" />
@@ -90,6 +91,7 @@
             :tab-uuid="currentTab.uuid"
           />
         </el-tab-pane>
+
         <el-tab-pane name="getAttachment">
           <span slot="label">
             <i class="el-icon-paperclip" />
@@ -102,6 +104,7 @@
             :record-uuid="currentRecord.UUID"
           />
         </el-tab-pane>
+
         <el-tab-pane name="listChats" style="height: 100% !important;">
           <span slot="label">
             <svg-icon icon-class="message" />
@@ -112,6 +115,7 @@
             :record-id="currentRecordId"
           />
         </el-tab-pane>
+
         <el-tab-pane
           v-if="isWorkflowLog"
           name="searchWorkflowHistory"
@@ -129,6 +133,7 @@
             :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
           /> -->
         </el-tab-pane>
+
         <el-tab-pane v-if="isAccountingInfo" name="accountingInformation" style="height: 100% !important;">
           <span slot="label">
             <svg-icon icon-class="balance" style="font-size: 18px;" />
@@ -142,6 +147,7 @@
             :record-uuid="recordUuid"
           />
         </el-tab-pane>
+
         <el-tab-pane v-if="!isEmptyValue(storeProduct)" name="listProductStorage" style="height: 100% !important;">
           <span slot="label">
             <svg-icon icon-class="warehouse" style="font-size: 18px;" />
@@ -161,17 +167,20 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import store from '@/store'
 import language from '@/lang'
+
 // Constants
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
-// Components
+
+// Components and Mixins
 import Attachment from './Component/Attachment/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
 import Accounting from './Component/Accounting/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import Chats from './Component/chats/index.vue'
 import ReferenceRecords from './Component/ReferenceRecords/index.vue'
-import workflowLogs from './Component/workflowLogs/index.vue'
-// Utils and Helper Methods
+import WorkflowLogs from './Component/workflowLogs/index.vue'
+
+// utils and Helper Methods
 import {
   listProductStorage
 } from '@/api/ADempiere/form/storeProduct.js'
@@ -187,7 +196,7 @@ export default defineComponent({
     Chats,
     Accounting,
     StoreProduct,
-    workflowLogs,
+    WorkflowLogs,
     ReferenceRecords
   },
 
@@ -291,6 +300,7 @@ export default defineComponent({
       }
       return ''
     })
+
     // Store Product
     const storeProduct = computed(() => {
       return store.getters.getValueOfField({
@@ -298,6 +308,7 @@ export default defineComponent({
         columnName: 'M_Product_ID'
       })
     })
+
     // Current window
     const storedWindow = computed(() => {
       if (currentTab.value && currentTab.value.parentUuid) {
@@ -345,6 +356,7 @@ export default defineComponent({
         format: 'object'
       })
     }
+
     // showkey
     function showkey(key, index) {
       if (key === currentKey.value && index === typeAction.value) {
@@ -354,16 +366,20 @@ export default defineComponent({
         typeAction.value = index
       }
     }
+
     function handleClickLogs(tabHTML) {
       findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
     }
+
     function validate(list) {
       return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
     }
+
     // List Change History
     function openRecordLogs(a) {
       drawer.value = !drawer.value
     }
+
     function handleClick(tab, event) {
       if (tab.name === 'accountingInformation') {
         return
