@@ -100,8 +100,11 @@
       <el-button v-show="showAttachmentAvailable" type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('getAttachment')">
         <i class="el-icon-paperclip" />
       </el-button>
+      <el-button v-show="showReference" type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('listReference')">
+        <i class="el-icon-zoom-in" />
+      </el-button>
       <el-badge v-show="showChatAvailable" is-dot class="item">
-        <el-button type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs($t('window.containerInfo.notes'))">
+        <el-button type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('listChats')">
           <svg-icon icon-class="message" />
         </el-button>
       </el-badge>
@@ -237,11 +240,14 @@ export default defineComponent({
     // Panel Info
 
     const currentRecordLogs = ref({})
+
     const drawer = ref(false)
 
     const showChatAvailable = ref(false)
 
     const showAttachmentAvailable = ref(false)
+
+    const showReference = ref(false)
 
     // use getter to reactive properties
     const currentTabMetadata = computed(() => {
@@ -426,14 +432,14 @@ export default defineComponent({
         }
       }
       if (
-        // typeof query.filters !== 'object' &&
-        !isEmptyValue(routerParams)
+        !isEmptyValue(routerParams.filters)
       ) {
         filters = routerParams.filters
       }
 
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
+        tabUuid: routerParams.containerUuid,
         containerUuid,
         filters,
         filtersRecord,
@@ -520,6 +526,7 @@ export default defineComponent({
       if (newValue !== oldValue && !isEmptyValue(newValue)) {
         chatAvailable()
         attachmentAvailable()
+        getReferences()
       }
     })
 
@@ -532,6 +539,23 @@ export default defineComponent({
         show: !showContainerInfo.value
       })
       // store.commit('setShowRecordLogs', newValue)
+    }
+
+    /**
+     * Reference
+     */
+
+    const getReferences = () => {
+      store.dispatch('getReferencesFromServer', {
+        tableName: currentTabTableName.value,
+        recordUuid: currentRecordUuid.value,
+        parentUuid: props.parentUuid
+      })
+        .then(responseReferences => {
+          const { referencesList } = responseReferences
+          showReference.value = !isEmptyValue(referencesList)
+        })
+        .catch(() => {})
     }
 
     /**
@@ -625,6 +649,7 @@ export default defineComponent({
       openPanelInfo,
       showChatAvailable,
       showAttachmentAvailable,
+      showReference,
       // computed
       isMobile,
       isDrawerWidth,
@@ -645,7 +670,8 @@ export default defineComponent({
       isDisabledTab,
       selectTab,
       chatAvailable,
-      attachmentAvailable
+      attachmentAvailable,
+      getReferences
     }
   }
 
