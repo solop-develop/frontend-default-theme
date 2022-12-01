@@ -432,14 +432,14 @@ export default defineComponent({
         }
       }
       if (
-        // typeof query.filters !== 'object' &&
-        !isEmptyValue(routerParams)
+        !isEmptyValue(routerParams.filters)
       ) {
         filters = routerParams.filters
       }
 
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
+        tabUuid: routerParams.containerUuid,
         containerUuid,
         filters,
         filtersRecord,

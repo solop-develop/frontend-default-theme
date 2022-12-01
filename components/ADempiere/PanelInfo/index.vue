@@ -19,7 +19,7 @@
 <template>
   <el-container style="height: 100% !important;">
     <el-header
-      style="height: 5%;text-align: center;padding-top: 1%;"
+      style="height: 15%;text-align: center;padding-top: 1%;"
     >
       <el-descriptions :column="1">
         <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -29,6 +29,10 @@
           </template>
           <span style="color: #606266; font-weight: bold;">
             {{ currentTab.name }}
+          </span>
+          <hr>
+          <span style="color: #606266; font-weight: bold;">
+            {{ currentTab.uuid }}
           </span>
         </el-descriptions-item>
       </el-descriptions>
@@ -87,6 +91,7 @@
             :table-name="currentTab.tableName"
             :parent-uuid="currentTab.parentUuid"
             :record-uuid="currentRecordUuid"
+            :tab-uuid="currentTab.uuid"
           />
         </el-tab-pane>
         <el-tab-pane name="getAttachment">

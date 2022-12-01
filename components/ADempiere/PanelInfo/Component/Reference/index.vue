@@ -82,6 +82,10 @@ export default defineComponent({
     tableName: {
       type: String,
       default: () => ''
+    },
+    tabUuid: {
+      type: String,
+      default: () => ''
     }
   },
 
@@ -126,11 +130,9 @@ export default defineComponent({
           .getAsArray().filter(attribute => !isEmptyValue(attribute.value) && !isEmptyValue(attribute.columnName))
         zoomIn({
           uuid: referenceElement.windowUuid,
-          query: {
-            action: 'zoomIn'
-          },
           params: {
-            filters: pairsValues
+            filters: pairsValues,
+            containerUuid: props.tabUuid
           }
         })
       }
