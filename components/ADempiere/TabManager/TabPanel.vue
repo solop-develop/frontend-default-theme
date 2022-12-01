@@ -94,8 +94,6 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
-// max-height: 300px;
-// import CustomPagination from '@theme/components/ADempiere/DataTable/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
@@ -161,6 +159,7 @@ export default defineComponent({
       }
       return 'max-height: 300px !important;'
     })
+
     const listAction = computed(() => {
       return {
         parentUuid: props.parentUuid,

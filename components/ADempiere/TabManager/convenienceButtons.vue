@@ -96,6 +96,7 @@
         {{ $t('actionMenu.delete') }}
       </el-button>
     </el-popover>
+
     <el-button
       v-show="isSaveRecord"
       plain
@@ -108,6 +109,7 @@
     >
       {{ $t('actionMenu.save') }}
     </el-button>
+
     <span
       v-if="tabAttributes.isParentTab && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions)"
     >
@@ -172,6 +174,7 @@
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
+
       <el-popover
         v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
         v-model="visible"
@@ -207,6 +210,7 @@
         </div>
         <el-button slot="reference" type="text" />
       </el-popover>
+
       <el-popover
         v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus) && tabAttributes.isParentTab"
         trigger="hover"
@@ -574,6 +578,7 @@ export default defineComponent({
         containerUuid
       })
     }
+
     function saveChanges() {
       const emptyMandatory = emptyMandatoryFields.value
 
@@ -602,6 +607,19 @@ export default defineComponent({
         tableName: props.tabAttributes.tableName,
         recordUuid: recordUuid.value
       })
+        .then(response => {
+          // refresh parent tab on document window
+          if (!props.tabAttributes.isParentTab) {
+            const { windowType } = store.getters.getStoredWindow(props.parentUuid)
+            if (['SO', 'PO', 'T'].includes(windowType)) {
+              const { firstTabUuid } = props.tabAttributes
+              refreshRecord.refreshRecord({
+                parentUuid: props.parentUuid,
+                containerUuid: firstTabUuid
+              })
+            }
+          }
+        })
         .catch(error => {
           console.error('Error saving record', error.message)
           showMessage({
