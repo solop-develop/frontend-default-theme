@@ -43,7 +43,6 @@
     </div>
 
     <div style="float: right; padding-left: 1%; display: inline-flex;">
-
       <action-menu
         :parent-uuid="parentUuid"
         :container-uuid="currentTabUuid"

@@ -104,6 +104,20 @@ export default {
             picker.$emit('pick', [start_date, end_date])
           }
         }, {
+          text: this.$t('components.date.currentWeek'),
+          onClick(picker) {
+            const start_date = new Date()
+            start_date.setHours(0, 0, 0, 0)
+            const end_date = new Date()
+            const date = null
+            const currenDate = date ? new Date(date) : new Date()
+            const first = currenDate.getDate() - currenDate.getDay('monday')
+            const last = first
+            start_date.setDate(last)
+            end_date.setDate(first + 6)
+            picker.$emit('pick', [start_date, end_date])
+          }
+        }, {
           text: this.$t('components.date.LastMonth'),
           onClick(picker) {
             const date = new Date()
