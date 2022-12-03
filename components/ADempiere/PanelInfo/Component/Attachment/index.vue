@@ -13,12 +13,12 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <span>
-    <div v-if="!Attachment">
+    <div v-if="isEmptyValue(attachmentList)">
       <el-empty />
     </div>
 
@@ -27,7 +27,7 @@
       action="#"
       list-type="picture-card"
       :auto-upload="true"
-      :file-list="Attachment"
+      :file-list="attachmentList"
       :before-upload="beforeAvatarUpload"
     >
       <i slot="default" class="el-icon-plus" />
@@ -40,11 +40,12 @@
           <div slot="error" class="image-slot-error">
             <h1 class="image-slot-error">
               <b>
-                {{ getExtensionFromFile(file.file_name) }}
+                .{{ getExtensionFromFile(file.file_name) }}
               </b>
             </h1>
           </div>
         </el-image>
+
         <span class="el-upload-list__item-actions">
           <span
             class="el-upload-list__item-preview"
@@ -107,13 +108,15 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 import axios from 'axios'
 
+// API Request Methods
+import { deleteResourceReference } from '@/api/ADempiere/user-interface/component/resource'
+
 // components and mixins
 import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import UploadResource from '@theme/components/ADempiere/PanelInfo/Component/Attachment/uploadResource.vue'
 
-// utils and helper methods
-import { buildImageFromArrayBuffer } from '@/utils/ADempiere/resource.js'
+// Utils and Helper Methods
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
@@ -159,17 +162,12 @@ export default defineComponent({
      * Refs
      */
     const dialogImageUrl = ref('')
-    const dialogFileUrl = ref('')
     const isLoadeDialogFileUrl = ref(false)
     const dialogVisible = ref(false)
     const disabled = ref(false)
-    const organizationBackground = ref('')
-    const organizationImagePath = ref('')
-    const currentImageOfProduct = ref('')
     const pdfAttachment = ref([])
-    const newImage = ref([])
     const imageAttachment = ref([])
-    const fileList = ref([])
+
     /**
      * Computed
      */
@@ -179,15 +177,17 @@ export default defineComponent({
       }
       return []
     })
-    const listImage = computed(() => {
-      if (listImageAll) {
-        return listImageAll.value.map(image => image.image)
-      }
-      return []
-    })
-    const Attachment = computed(() => {
-      if (store.getters.getAttachment) {
-        const cafe = store.getters.getAttachment.map(element => {
+
+    const attachmentList = computed({
+      set(value) {
+        store.commit('setListAttachment', value)
+      },
+      get() {
+        const storedResourcesList = store.getters.getListAttachment
+        if (isEmptyValue(storedResourcesList)) {
+          return []
+        }
+        return storedResourcesList.map(element => {
           if (element.content_type.includes('image')) {
             return {
               ...element,
@@ -199,16 +199,25 @@ export default defineComponent({
             image: converFile(element)
           }
         })
-        return cafe
       }
-      return store.getters.getAttachment
     })
+
     /**
      * Methods
      */
     const handleRemove = (file) => {
-      console.log(file)
+      deleteResourceReference({
+        resourceUuid: file.resource_uuid,
+        resourceName: file.file_name
+      }).then(() => {
+        const resourceReferencesList = attachmentList.value.filter(resourceReference => {
+          return resourceReference.resource_uuid !== file.resource_uuid ||
+            resourceReference.file_name !== file.file_name
+        })
+        attachmentList.value = resourceReferencesList
+      })
     }
+
     const handlePictureCardPreview = (file) => {
       // if (file.content_type.includes('application/pdf')) {
       isLoadeDialogFileUrl.value = true
@@ -264,26 +273,6 @@ export default defineComponent({
       }
       return urlImage
     }
-    const convertImage = async(image) => {
-      const urlImage = await axios.get(image.url.uri)
-        .then(response => {
-          return {
-            name: 'file',
-            type: image.content_type,
-            url: buildImageFromArrayBuffer({
-              arrayBuffer: response.data.result.data
-            })
-          }
-        })
-        .catch(() => {
-          return {
-            name: '',
-            type: image.content_type,
-            url: ''
-          }
-        })
-      return urlImage
-    }
 
     const beforeAvatarUpload = (file) => {
       listImageAll.value.push({
@@ -293,7 +282,6 @@ export default defineComponent({
         uuid: file.uid,
         url: URL.createObjectURL(file)
       })
-      newImage.value.push(URL.createObjectURL(file))
     }
     const getImageFromSource = (file) => {
       const image = getImagePath({
@@ -317,26 +305,17 @@ export default defineComponent({
 
     return {
       dialogImageUrl,
-      dialogFileUrl,
       isLoadeDialogFileUrl,
       dialogVisible,
       disabled,
-      newImage,
-      fileList,
       imageAttachment,
       pdfAttachment,
-      organizationBackground,
-      currentImageOfProduct,
-      organizationImagePath,
       // computed
-      listImage,
       listImageAll,
-      Attachment,
+      attachmentList,
       // methods
       beforeAvatarUpload,
       converFile,
-      // isEmptyValue,
-      convertImage,
       handleRemove,
       handlePictureCardPreview,
       handleDownload,

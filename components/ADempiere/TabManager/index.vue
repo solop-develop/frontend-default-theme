@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -135,7 +135,7 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 import router from '@/router'
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
@@ -143,16 +143,14 @@ import PanelInfo from '../PanelInfo/index.vue'
 import TabPanel from './TabPanel.vue'
 import TabOptions from './TabOptions.vue'
 
-// constants
+// Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
-// utils and helper methods
-import {
-  requestListEntityChats
-} from '@/api/ADempiere/window'
-import {
-  getAttachment
-} from '@/api/ADempiere/user-interface/component/resource'
+// API Request Methods
+import { requestListEntityChats } from '@/api/ADempiere/window'
+import { requestAttachment } from '@/api/ADempiere/user-interface/component/resource'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -580,7 +578,7 @@ export default defineComponent({
      * Attachment Available
      */
     const attachmentAvailable = () => {
-      getAttachment({
+      requestAttachment({
         tableName: currentTabTableName.value,
         recordId: currentRecordId.value,
         recordUuid: currentRecordUuid.value
