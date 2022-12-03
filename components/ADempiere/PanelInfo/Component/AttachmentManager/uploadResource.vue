@@ -41,11 +41,11 @@ import { defineComponent } from '@vue/composition-api'
 
 import lang from '@/lang'
 
-// api request methods
+// API Request Methods
 import request from '@/utils/request'
 // import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({

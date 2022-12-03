@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -44,6 +44,7 @@
         <div class="editor-container">
           <!-- <markdown-editor v-model="message" height="200px" /> -->
           <div id="ChatEditor" />
+
           <el-button
             type="primary"
             icon="el-icon-check"
@@ -62,21 +63,21 @@ import {
   defineComponent, computed, ref, onMounted, watch, nextTick
 } from '@vue/composition-api'
 
-import store from '@/store'
 import lang from '@/lang'
+import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import '@toast-ui/chart/dist/toastui-chart.css'
 import chart from '@toast-ui/editor-plugin-chart'
 import Editor from '@toast-ui/editor'
 import '@toast-ui/editor/dist/toastui-editor.css'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
-  name: 'Chats',
+  name: 'RecordNotes',
 
   components: {
     Editor

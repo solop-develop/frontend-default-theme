@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -33,6 +33,7 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-header>
+
     <el-main style="padding:0px; height: 100% !important;">
       <el-tabs
         v-model="nameTab"
@@ -92,25 +93,25 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="getAttachment">
+        <el-tab-pane name="recordAttachmentTab">
           <span slot="label">
             <i class="el-icon-paperclip" />
             {{ $t('window.containerInfo.attachment.label') }}
           </span>
-          <attachment
-            :is-active-tab="'getAttachment' === nameTab"
+          <attachment-manager
+            :is-active-tab="'recordAttachmentTab' === nameTab"
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
             :record-uuid="currentRecord.UUID"
           />
         </el-tab-pane>
 
-        <el-tab-pane name="listChats" style="height: 100% !important;">
+        <el-tab-pane name="recordNotesTab" style="height: 100% !important;">
           <span slot="label">
             <svg-icon icon-class="message" />
             {{ $t('window.containerInfo.notes') }}
           </span>
-          <chats
+          <record-notes
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
           />
@@ -128,10 +129,6 @@
           <workflow-logs
             :container-uuid="currentTab.containerUuid"
           />
-          <!-- <chats
-            :table-name="allTabsList[0].tableName"
-            :record-id="currentRecord[allTabsList[0].tableName + '_ID']"
-          /> -->
         </el-tab-pane>
 
         <el-tab-pane v-if="isAccountingInfo" name="accountingInformation" style="height: 100% !important;">
@@ -165,25 +162,25 @@
 <script>
 import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
-import store from '@/store'
 import language from '@/lang'
+import store from '@/store'
 
 // Constants
 import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // Components and Mixins
-import Attachment from './Component/Attachment/index.vue'
-import RecordLogs from './Component/RecordLogs/index.vue'
 import Accounting from './Component/Accounting/index.vue'
-import StoreProduct from './Component/storeProduct/index.vue'
-import Chats from './Component/chats/index.vue'
+import AttachmentManager from './Component/AttachmentManager/index.vue'
+import RecordLogs from './Component/RecordLogs/index.vue'
+import RecordNotes from './Component/RecordNotes/index.vue'
 import ReferenceRecords from './Component/ReferenceRecords/index.vue'
+import StoreProduct from './Component/storeProduct/index.vue'
 import WorkflowLogs from './Component/workflowLogs/index.vue'
 
-// utils and Helper Methods
-import {
-  listProductStorage
-} from '@/api/ADempiere/form/storeProduct.js'
+// API Request Methods
+import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
+
+// Utils and Helper Methods
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { isEmptyValue } from '@/utils/ADempiere'
 
@@ -191,13 +188,13 @@ export default defineComponent({
   name: 'ContainerInfo',
 
   components: {
-    RecordLogs,
-    Attachment,
-    Chats,
     Accounting,
+    AttachmentManager,
+    RecordLogs,
+    RecordNotes,
+    ReferenceRecords,
     StoreProduct,
-    WorkflowLogs,
-    ReferenceRecords
+    WorkflowLogs
   },
 
   props: {
@@ -389,10 +386,10 @@ export default defineComponent({
         return
       }
       if (tab.name === language.t('window.containerInfo.attachment.label')) {
-        tab.name = 'getAttachment'
+        tab.name = 'recordAttachmentTab'
       }
       if (tab.name === language.t('window.containerInfo.notes')) {
-        tab.name = 'listChats'
+        tab.name = 'recordNotesTab'
       }
       if (tab.name === 'listReference') {
         tab.name = 'listReference'

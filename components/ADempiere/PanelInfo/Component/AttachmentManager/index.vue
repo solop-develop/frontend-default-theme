@@ -105,16 +105,16 @@
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import store from '@/store'
 import axios from 'axios'
+import store from '@/store'
 
 // API Request Methods
 import { deleteResourceReference } from '@/api/ADempiere/user-interface/component/resource'
 
-// components and mixins
+// Components and Mixins
 import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
-import UploadResource from '@theme/components/ADempiere/PanelInfo/Component/Attachment/uploadResource.vue'
+import UploadResource from './uploadResource.vue'
 
 // Utils and Helper Methods
 import { getImagePath } from '@/utils/ADempiere/resource.js'
@@ -122,7 +122,7 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
-  name: 'Attachment',
+  name: 'AttachmentManager',
 
   components: {
     FileRender,
