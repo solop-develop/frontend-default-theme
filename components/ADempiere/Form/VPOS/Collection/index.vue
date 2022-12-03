@@ -1306,10 +1306,13 @@ export default {
                   this.isLoadProcessOrder = false
                   this.loadProcess()
                 })
+              if (this.currentPointOfSales.isAllowsPreviewDocument) {
+                this.printPreview(posUuid, orderUuid)
+              }
               // this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
               // this.isLoadProcessOrder = false
             })
-          this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
+            // this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
             // .then(() => {
             //   this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
             // })
@@ -1322,9 +1325,6 @@ export default {
               this.loadProcess()
               // this.$store.dispatch('reloadOrder', response.uuid)
             })
-          if (this.currentPointOfSales.isAllowsPreviewDocument) {
-            this.printPreview(posUuid, orderUuid)
-          }
           // this.$store.dispatch('reloadOrder', response.uuid)
           this.$message({
             type: 'success',

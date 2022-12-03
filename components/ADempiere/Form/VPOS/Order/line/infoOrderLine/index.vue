@@ -46,13 +46,16 @@
           <span v-if="!isEmptyValue(recordRow.product.value)">{{ $t('form.productInfo.code') }}: <b>{{ recordRow.product.value }}</b><br> </span>
           {{ $t('form.productInfo.name') }}: <b>{{ (isEmptyValue(recordRow.product.name) ? recordRow.charge.name : recordRow.product.name) }}</b><br>
           {{ $t('form.productInfo.description') }}: <b>{{ (isEmptyValue(recordRow.product.description) ? recordRow.charge.description : recordRow.product.description) }}</b><br>
-          {{ $t('form.productInfo.UM') }}: <b>{{ recordRow.product.uomName }}</b><br>
+          {{ $t('form.productInfo.UM') }}: <b>{{ recordRow.uom.product_uom.name }}</b><br>
         </el-col>
 
         <el-col :span="8">
           <div style="float: right; text-align: end;">
+            {{ $t('form.pos.tableProduct.basePrice') }}:
+            <b>{{ formatPrice({ value: recordRow.priceBase, currency: pointOfSalesCurrency.iSOCode }) }}</b>
+            <br>
             {{ $t('form.productInfo.price') }}:
-            <b>{{ formatPrice({ value: recordRow.priceList, currency: pointOfSalesCurrency.iSOCode }) }}</b>
+            <b>{{ formatPrice({ value: recordRow.priceActual, currency: pointOfSalesCurrency.iSOCode }) }}</b>
             <br>
             <b>{{ recordRow.taxRate.name }}</b>
             <br>
@@ -61,6 +64,9 @@
             <br>
             {{ $t('form.pos.tableProduct.quantity') }}:
             <b>{{ formatQuantity({ value: recordRow.quantityOrdered }) }}</b>
+            <br>
+            {{ $t('form.pos.tableProduct.baseQuantity') }}:
+            <b>{{ formatQuantity({ value: recordRow.quantityOrderedLine }) }}</b>
           </div>
         </el-col>
       </el-row>

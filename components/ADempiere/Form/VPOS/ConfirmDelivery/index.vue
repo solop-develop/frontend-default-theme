@@ -240,11 +240,16 @@ import {
   createShipment,
   deleteShipment,
   shipments,
-  processShipment
+  processShipment,
+  printShipmentPreviwer
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
 import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
+import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
+import {
+  buildLinkHref
+} from '@/utils/ADempiere/resource.js'
 
 export default {
   name: 'ConfirmDelivery',
@@ -571,6 +576,7 @@ export default {
             duration: 1500,
             showClose: true
           })
+          this.previwerShipment(response)
           return response
         })
         .catch(error => {
@@ -587,6 +593,64 @@ export default {
           this.isLoadedConfirm = false
           this.$store.commit('setShowPOSOptions', false)
           this.$store.commit('setConfirmDelivery', false)
+        })
+    },
+    previwerShipment(shipment) {
+      printShipmentPreviwer({
+        posUuid: this.currentPointOfSales.uuid,
+        shipmentUuid: shipment.uuid,
+        reportType: 'application/pdf'
+      })
+        .then(response => {
+          const { processLog } = response
+          if (!this.isEmptyValue(processLog)) {
+            const link = buildLinkHref({
+              fileName: processLog.output.file_name,
+              outputStream: processLog.output.output_stream,
+              mimeType: processLog.output.mime_type
+            })
+            this.$store.commit('setReportOutput', {
+              download: link.download,
+              format: processLog.output.report_type,
+              fileName: processLog.output.file_name,
+              link,
+              content: processLog.output.output,
+              mimeType: processLog.output.mime_type,
+              name: processLog.output.name,
+              output: processLog.output,
+              outputStream: processLog.output.output_stream,
+              outputStream_asB64: processLog.output.output_stream_asB64,
+              outputStream_asU8: processLog.output.output_stream_asU8,
+              reportType: processLog.output.report_type,
+              reportUuid: processLog.uuid,
+              reportViewUuid: processLog.uuid,
+              tableName: 'C_Order',
+              url: link.href,
+              uuid: processLog.uuid,
+              instanceUuid: processLog.instance_uuid
+            })
+            this.$router.push({
+              name: REPORT_VIEWER_NAME,
+              params: {
+                processId: 110,
+                reportUuid: processLog.uuid,
+                tableName: 'C_Order',
+                menuParentUuid: '',
+                instanceUuid: processLog.instance_uuid,
+                fileName: processLog.output.name,
+                name: processLog.output.name,
+                mimeType: processLog.output.mime_type
+              }
+            }, () => {})
+          }
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            duration: 1500,
+            showClose: true
+          })
         })
     },
     closeInfo(line) {

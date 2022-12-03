@@ -941,20 +941,20 @@ export default {
         this.getListCampaign(this.fieldCampaign.reference)
       }
     }, 500)
-    if (!this.isEmptyValue(this.$route.query.action)) {
+    if (!this.isEmptyValue(this.$route.query.action) && this.isEmptyValue(this.currentOrder.uuid)) {
       this.$store.dispatch('reloadOrder', { orderUuid: this.$route.query.action })
     }
-    if (this.isEmptyValue(this.$route.query.action) && !this.isEmptyValue(this.currentOrder.uuid)) {
-      this.$router.push({
-        params: {
-          ...this.$route.params
-        },
-        query: {
-          ...this.$route.query,
-          action: this.currentOrder.uuid
-        }
-      })
-    }
+    // if (this.isEmptyValue(this.$route.query.action) && !this.isEmptyValue(this.currentOrder.uuid)) {
+    //   this.$router.push({
+    //     params: {
+    //       ...this.$route.params
+    //     },
+    //     query: {
+    //       ...this.$route.query,
+    //       action: this.currentOrder.uuid
+    //     }
+    //   })
+    // }
     if (this.isNewOrder) {
       this.$refs.ProductValue[0].$refs.product.focus()
     }
