@@ -95,7 +95,7 @@ import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import LoadingView from '@theme/components/ADempiere/LoadingView'
 
 // api request methods
-import { requestImage } from '@/api/ADempiere/common/resource.js'
+import { requestImage } from '@/api/ADempiere/user-interface/component/resource.js'
 
 // utils and helper methods
 import { formatPercent, formatPrice } from '@/utils/ADempiere/valueFormat.js'

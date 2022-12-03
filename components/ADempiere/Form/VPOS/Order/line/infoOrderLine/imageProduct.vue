@@ -11,7 +11,7 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -22,6 +22,7 @@
         variant="image"
       />
     </template>
+
     <template>
       <el-card :body-style="{ padding: '0px', marginBottom: '1px' }">
         <el-carousel v-if="listImage.length > 1" trigger="click" height="150px">
@@ -47,6 +48,7 @@
             </el-carousel-item>
           </template>
         </el-carousel>
+
         <template v-else-if="listImage.length === 1">
           <el-image
             :src="getImageFromSource(listImage[0])"
@@ -66,6 +68,7 @@
             </div>
           </el-image>
         </template>
+
         <el-image
           v-else
           :src="imageNotAvailable"
@@ -78,7 +81,10 @@
 </template>
 
 <script>
-import { getAttachment } from '@/api/ADempiere/user-interface/resources.js'
+// API Request Methods
+import { requestAttachment } from '@/api/ADempiere/user-interface/component/resource'
+
+// Utils and Helper Methods
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 
 export default {
@@ -146,7 +152,8 @@ export default {
     getListImageProduct(line) {
       this.isLoading = true
       this.listImage = []
-      getAttachment({
+
+      requestAttachment({
         tableName: 'M_Product',
         recordId: line.product.id,
         recordUuid: line.product.uuid

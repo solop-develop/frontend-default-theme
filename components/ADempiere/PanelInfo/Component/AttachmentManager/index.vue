@@ -13,41 +13,21 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <span>
-    <!-- <el-card v-if="!isEmptyValue(newImage)" shadow="always">
-      <div slot="header" class="clearfix">
-        <span>{{ $t('window.containerInfo.attachment.newFiles') }}</span>
-        <el-button
-          style="float: right; padding: 3px 0"
-          type="text"
-          icon="el-icon-upload2"
-          @click="submitUpload"
-        >
-          {{ $t('window.containerInfo.attachment.uploadFiles') }}
-        </el-button>
-      </div>
-      <el-image
-        v-for="(file, key) in newImage"
-        :key="key"
-        style="width: 150px;height: 150px;margin-left: 1%;margin-right: 1%;"
-        :src="file"
-        fit="fill"
-        :preview-src-list="newImage"
-      />
-    </el-card> -->
-    <div v-if="!Attachment">
+    <div v-if="isEmptyValue(attachmentList)">
       <el-empty />
     </div>
+
     <el-upload
       ref="upload"
       action="#"
       list-type="picture-card"
       :auto-upload="true"
-      :file-list="Attachment"
+      :file-list="attachmentList"
       :before-upload="beforeAvatarUpload"
     >
       <i slot="default" class="el-icon-plus" />
@@ -60,11 +40,12 @@
           <div slot="error" class="image-slot-error">
             <h1 class="image-slot-error">
               <b>
-                {{ getExtensionFromFile(file.file_name) }}
+                .{{ getExtensionFromFile(file.file_name) }}
               </b>
             </h1>
           </div>
         </el-image>
+
         <span class="el-upload-list__item-actions">
           <span
             class="el-upload-list__item-preview"
@@ -90,24 +71,11 @@
       </div>
     </el-upload>
     <br>
+
     <span>
-      <form id="form" enctype="multipart/form-data">
-        <el-upload
-          ref="upload"
-          class="upload-demo"
-          name="avatar"
-          action="#"
-          :auto-upload="false"
-        >
-          <el-button slot="trigger" size="small" type="primary">
-            {{ $t('window.containerInfo.attachment.selectFile') }}
-          </el-button>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">
-            {{ $t('window.containerInfo.attachment.uploadFile') }}
-          </el-button>
-        </el-upload>
-      </form>
+      <upload-resource />
     </span>
+
     <el-dialog
       v-if="!isEmptyValue(dialogImageUrl.content_type)"
       :visible.sync="dialogVisible"
@@ -137,31 +105,29 @@
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import lang from '@/lang'
-import store from '@/store'
 import axios from 'axios'
+import store from '@/store'
 
-// components and mixins
+// API Request Methods
+import { deleteResourceReference } from '@/api/ADempiere/user-interface/component/resource'
+
+// Components and Mixins
 import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import UploadResource from './uploadResource.vue'
 
-// api request methods
-import request from '@/utils/request'
-// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
-
-// utils and helper methods
-import { buildImageFromArrayBuffer } from '@/utils/ADempiere/resource.js'
+// Utils and Helper Methods
 import { getImagePath } from '@/utils/ADempiere/resource.js'
-import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
-  name: 'Attachment',
+  name: 'AttachmentManager',
 
   components: {
     FileRender,
-    LoadingView
+    LoadingView,
+    UploadResource
   },
 
   props: {
@@ -191,22 +157,17 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root, refs }) {
+  setup() {
     /**
      * Refs
      */
     const dialogImageUrl = ref('')
-    const dialogFileUrl = ref('')
     const isLoadeDialogFileUrl = ref(false)
     const dialogVisible = ref(false)
     const disabled = ref(false)
-    const organizationBackground = ref('')
-    const organizationImagePath = ref('')
-    const currentImageOfProduct = ref('')
     const pdfAttachment = ref([])
-    const newImage = ref([])
     const imageAttachment = ref([])
-    const fileList = ref([])
+
     /**
      * Computed
      */
@@ -216,15 +177,17 @@ export default defineComponent({
       }
       return []
     })
-    const listImage = computed(() => {
-      if (listImageAll) {
-        return listImageAll.value.map(image => image.image)
-      }
-      return []
-    })
-    const Attachment = computed(() => {
-      if (store.getters.getAttachment) {
-        const cafe = store.getters.getAttachment.map(element => {
+
+    const attachmentList = computed({
+      set(value) {
+        store.commit('setListAttachment', value)
+      },
+      get() {
+        const storedResourcesList = store.getters.getListAttachment
+        if (isEmptyValue(storedResourcesList)) {
+          return []
+        }
+        return storedResourcesList.map(element => {
           if (element.content_type.includes('image')) {
             return {
               ...element,
@@ -236,16 +199,25 @@ export default defineComponent({
             image: converFile(element)
           }
         })
-        return cafe
       }
-      return store.getters.getAttachment
     })
+
     /**
      * Methods
      */
     const handleRemove = (file) => {
-      console.log(file)
+      deleteResourceReference({
+        resourceUuid: file.resource_uuid,
+        resourceName: file.file_name
+      }).then(() => {
+        const resourceReferencesList = attachmentList.value.filter(resourceReference => {
+          return resourceReference.resource_uuid !== file.resource_uuid ||
+            resourceReference.file_name !== file.file_name
+        })
+        attachmentList.value = resourceReferencesList
+      })
     }
+
     const handlePictureCardPreview = (file) => {
       // if (file.content_type.includes('application/pdf')) {
       isLoadeDialogFileUrl.value = true
@@ -301,51 +273,7 @@ export default defineComponent({
       }
       return urlImage
     }
-    const converImage = async(image) => {
-      const urlImage = await axios.get(image.url.uri)
-        .then(response => {
-          return {
-            name: 'file',
-            type: image.content_type,
-            url: buildImageFromArrayBuffer({
-              arrayBuffer: response.data.result.data
-            })
-          }
-        })
-        .catch(() => {
-          return {
-            name: '',
-            type: image.content_type,
-            url: ''
-          }
-        })
-      return urlImage
-    }
-    const submitUpload = () => {
-      const form = document.getElementById('form')
-      const formData = new FormData(form)
-      request({
-        url: 'http://0.0.0.:8085/api/adempiere/user-interface/component/attachment/save-attachment',
-        method: 'post',
-        data: formData
-      })
-        .then(resData => {
-          showMessage({
-            message: lang.t('window.containerInfo.attachment.success'),
-            type: 'success'
-          })
-          refs.upload.submit()
-          refs.upload.clearFiles()
-          refs.upload.uploadFiles = []
-        })
-        .catch(err => {
-          console.warn({ err })
-          showMessage({
-            message: lang.t('window.containerInfo.attachment.error'),
-            type: 'error'
-          })
-        })
-    }
+
     const beforeAvatarUpload = (file) => {
       listImageAll.value.push({
         name: file.name,
@@ -354,7 +282,6 @@ export default defineComponent({
         uuid: file.uid,
         url: URL.createObjectURL(file)
       })
-      newImage.value.push(URL.createObjectURL(file))
     }
     const getImageFromSource = (file) => {
       const image = getImagePath({
@@ -378,28 +305,17 @@ export default defineComponent({
 
     return {
       dialogImageUrl,
-      dialogFileUrl,
       isLoadeDialogFileUrl,
       dialogVisible,
       disabled,
-      newImage,
-      fileList,
       imageAttachment,
       pdfAttachment,
-      organizationBackground,
-      currentImageOfProduct,
-      organizationImagePath,
       // computed
-      listImage,
       listImageAll,
-      Attachment,
+      attachmentList,
       // methods
-      // submitUpload,
-      submitUpload,
       beforeAvatarUpload,
       converFile,
-      // isEmptyValue,
-      converImage,
       handleRemove,
       handlePictureCardPreview,
       handleDownload,
@@ -424,33 +340,33 @@ export default defineComponent({
 </style>
 <style>
 .scroll-attachment {
-    max-height: 80vh;
+  max-height: 80vh;
 }
 .el-upload--picture-card {
-    background-color: #fbfdff;
-    border: 1px dashed #c0ccda;
-    border-radius: 6px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 148px;
-    height: 148px;
-    cursor: pointer;
-    line-height: 146px;
-    vertical-align: top;
-    width: 100%;
+  background-color: #fbfdff;
+  border: 1px dashed #c0ccda;
+  border-radius: 6px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 148px;
+  height: 148px;
+  cursor: pointer;
+  line-height: 146px;
+  vertical-align: top;
+  width: 100%;
 }
 .el-upload--picture-card {
-    background-color: #fbfdff;
-    border: 1px dashed #c0ccda;
-    border-radius: 6px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 148px;
-    height: 148px;
-    cursor: pointer;
-    line-height: 146px;
-    vertical-align: top;
-    display: none;
-    width: 100%;
+  background-color: #fbfdff;
+  border: 1px dashed #c0ccda;
+  border-radius: 6px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 148px;
+  height: 148px;
+  cursor: pointer;
+  line-height: 146px;
+  vertical-align: top;
+  display: none;
+  width: 100%;
 }
 </style>
