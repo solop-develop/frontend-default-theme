@@ -23,6 +23,7 @@
         :parent-uuid="parentUuid"
         :container-manager="containerManager"
         :current-tab-uuid="currentTabUuid"
+        :container-uuid="tabAttributes.uuid"
         :tabs-list="tabsList"
         :tab-attributes="tabAttributes"
         :references-manager="referencesManager"
@@ -87,6 +88,7 @@
       </div>
     </el-main>
     <el-footer :height="styleFooterPanel">
+      <!-- pagination table, set custom or use default change page method -->
       <custom-pagination
         :container-manager="containerManager"
         :parent-uuid="parentUuid"
@@ -97,6 +99,8 @@
         :records-page="recordsWithFilter.length"
         :handle-change-page="handleChangePage"
         :handle-size-change="handleChangeSizePage"
+        :change-previous-record="changePreviousRecord"
+        :change-next-record="changeNextRecord"
       />
     </el-footer>
   </el-container>
@@ -356,9 +360,11 @@ export default defineComponent({
     })
 
     const selectionsLength = computed(() => {
-      return props.containerManager.getSelection({
+      const selection = props.containerManager.getSelection({
         containerUuid: props.tabAttributes.uuid
-      }).length
+      })
+      if (root.isEmptyValue(selection)) return 0
+      return selection.length
     })
 
     const isWithChildsTab = computed(() => {
@@ -405,6 +411,64 @@ export default defineComponent({
       })
     }
 
+    /**
+     * changePreviousRecord
+     */
+
+    function changePreviousRecord(recordPrevious) {
+      const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: false,
+        parentUuid: props.parentUuid,
+        containerUuid: props.currentTabUuid,
+      })
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'currentRowSelect',
+        attributeNameControl: undefined,
+        parentUuid: props.parentUuid,
+        containerUuid: props.currentTabUuid,
+        row: recordsWithFilter.value[posicionIndex - 1]
+      })
+
+      props.containerManager.seekRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.currentTabUuid,
+        row: recordsWithFilter.value[posicionIndex - 1]
+      })
+    }
+
+    /**
+     * changePreviousRecord
+     */
+
+    function changeNextRecord(recordNext) {
+      const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: false,
+        parentUuid: props.parentUuid,
+        containerUuid: props.currentTabUuid,
+      })
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'currentRowSelect',
+        attributeNameControl: undefined,
+        parentUuid: props.parentUuid,
+        containerUuid: props.currentTabUuid,
+        row: recordsWithFilter.value[posicionIndex + 1]
+      })
+
+      props.containerManager.seekRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.currentTabUuid,
+        row: recordsWithFilter.value[posicionIndex + 1]
+      })
+    }
+
     return {
       // computeds
       listAction,
@@ -426,7 +490,9 @@ export default defineComponent({
       // methods
       handleChangePage,
       handleChangeSizePage,
-      changeShowedRecords
+      changeShowedRecords,
+      changePreviousRecord,
+      changeNextRecord
     }
   }
 
