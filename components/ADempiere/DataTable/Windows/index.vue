@@ -18,7 +18,7 @@
 
 <template>
   <div v-if="!isChangeOptions" id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
-    <el-row v-if="isShowSearch">
+    <!-- <el-row v-if="isShowSearch">
       <el-col :span="23">
         <search-record-fields
           :parent-uuid="parentUuid"
@@ -44,7 +44,7 @@
           :container-uuid="containerUuid"
         />
       </el-col>
-    </el-row>
+    </el-row> -->
     <el-table
       id="multipleTable"
       ref="multipleTable"
@@ -100,7 +100,7 @@
     </el-table>
 
     <!-- pagination table, set custom or use default change page method -->
-    <custom-pagination
+    <!-- <custom-pagination
       :container-manager="containerManager"
       :parent-uuid="parentUuid"
       :container-uuid="containerUuid"
@@ -111,7 +111,7 @@
       :handle-change-page="handleChangePage"
       :handle-size-change="handleChangeSizePage"
       :is-navigation="isNavigation"
-    />
+    /> -->
   </div>
   <loading-view
     v-else
