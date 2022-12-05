@@ -37,12 +37,14 @@
                 type="text"
                 icon="el-icon-arrow-down"
                 :disabled="disablePreviousRecord"
+                style="font-size: 20px;"
                 @click="changeNextRecord()"
               />
               <el-button
                 type="text"
                 icon="el-icon-arrow-up"
                 :disabled="disableNextRecord"
+                style="font-size: 20px;"
                 @click="changePreviousRecord()"
               />
             </span>
