@@ -73,8 +73,12 @@
         </span> -->
 
         <!-- Close table when clicking on group of fields -->
-        <div
+        <!-- <div
           v-if="isShowedTabs"
+          @click="selectTab(tabsList[parseInt(currentTab)])"
+        > -->
+        <div
+          :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 95% !important;'"
           @click="selectTab(tabsList[parseInt(currentTab)])"
         >
           <tab-panel
@@ -88,8 +92,10 @@
             :actions-manager="actionsManager"
             :references-manager="referencesManager"
             :convenience-options="additionalOptions"
+            :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 95% !important;'"
           />
         </div>
+        <!-- </div> -->
       </el-tab-pane>
     </el-tabs>
 
@@ -230,7 +236,7 @@ export default defineComponent({
         }
       }
       return {
-        height: '100% !important',
+        height: '95% !important',
         overflow: 'auto'
       }
     })
@@ -267,6 +273,10 @@ export default defineComponent({
 
     const isCreateNew = computed(() => {
       return Boolean(root.$route.query.action === 'create-new')
+    })
+
+    const isWithChildsTab = computed(() => {
+      return store.getters.getStoredWindow(props.parentUuid).tabsListChild
     })
 
     function isDisabledTab(key) {
@@ -660,6 +670,7 @@ export default defineComponent({
       showContainerInfo,
       currentRecordUuid,
       currentRecordId,
+      isWithChildsTab,
       // methods
       handleClick,
       changeShowedRecords,

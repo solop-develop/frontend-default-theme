@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <span style="float: right;display: flex;margin-top: 2px;width: 100%; padding-right: 5px;">
+  <span :style="styleIconSvg">
     <el-input
       v-model="valueToSearch"
       clearable
@@ -146,6 +146,20 @@ export default defineComponent({
       }
     })
 
+    const isShowedTableRecords = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      ).isShowedTableRecords
+    })
+
+    const styleIconSvg = computed(() => {
+      if (isShowedTableRecords.value) {
+        return 'float: right;display: flex;margin-top: 2px;width: 100%;'
+      }
+      return 'float: right;display: flex;margin-top: 2px;width: 100%; padding-right: 5px;'
+    })
+
     const containerManagerAdvancedQuery = computed(() => {
       return {
         ...props.containerManager,
@@ -230,6 +244,7 @@ export default defineComponent({
       valueToSearch,
       isMobile,
       panelIsAdvanceuery,
+      styleIconSvg,
       // Methods
       searchRecord,
       handleChangeSearch

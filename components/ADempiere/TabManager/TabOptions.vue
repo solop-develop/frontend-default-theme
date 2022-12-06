@@ -17,8 +17,44 @@
 -->
 
 <template>
-  <span class="tab-options-main">
-    <div style="height: 93%;margin-right: 0%;padding-right: 10px; float: left; display: inline-flex;">
+  <div>
+    <el-button
+      plain
+      size="small"
+      type="text"
+      @click="changeShowedRecords"
+    >
+      <span style="padding: 10px;">
+        <svg-icon icon-class="table" />
+        <b v-show="!isMobile">
+          {{ label }}
+        </b>
+      </span>
+    </el-button>
+    <convenience-buttons
+      :parent-uuid="parentUuid"
+      :container-uuid="currentTabUuid"
+      :container-manager="containerManager"
+      :tab-attributes="tabAttributes"
+      :additional-options="adicionalesOptions"
+      style="display: contents;"
+    />
+    <full-screen-container
+      style="float: right;"
+      :parent-uuid="parentUuid"
+      :container-uuid="currentTabUuid"
+    />
+    <action-menu
+      :parent-uuid="parentUuid"
+      :container-uuid="currentTabUuid"
+      :container-manager="containerManager"
+      :actions-manager="listAction"
+      :references-manager="referencesManager"
+      style="float: right;"
+    />
+  </div>
+  <!-- <div class="tab-options-main">
+    <div style="margin-right: 0%;padding-right: 10px; float: left; display: flex;">
       <el-button
         plain
         size="small"
@@ -43,6 +79,19 @@
     </div>
 
     <div style="float: right; padding-left: 1%; display: inline-flex;">
+      <el-button
+        plain
+        size="small"
+        type="text"
+        @click="changeShowedRecords"
+      >
+        <span style="padding: 10px;">
+          <svg-icon icon-class="table" />
+          <b v-show="!isMobile">
+            {{ label }}
+          </b>
+        </span>
+      </el-button>
       <action-menu
         :parent-uuid="parentUuid"
         :container-uuid="currentTabUuid"
@@ -51,7 +100,7 @@
         :references-manager="referencesManager"
       />
     </div>
-  </span>
+  </div> -->
 </template>
 
 <script>
@@ -63,6 +112,7 @@ import store from '@/store'
 // components and mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons.vue'
+import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -72,7 +122,8 @@ export default defineComponent({
 
   components: {
     ActionMenu,
-    ConvenienceButtons
+    ConvenienceButtons,
+    FullScreenContainer
   },
 
   props: {

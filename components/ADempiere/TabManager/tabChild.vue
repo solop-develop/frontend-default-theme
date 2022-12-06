@@ -41,8 +41,25 @@
         :parent-uuid="parentUuid"
         :container-uuid="tabAttributes.uuid"
       />
-
       <div
+        style="height: 100% !important;"
+        @click="selectTab(tabsList[parseInt(currentTab)])"
+      >
+        <tab-panel
+          key="tab-panel-65465456"
+          :parent-uuid="parentUuid"
+          :container-manager="containerManager"
+          :tabs-list="tabsList"
+          :all-tabs-list="allTabsList"
+          :current-tab-uuid="tabUuid"
+          :tab-attributes="tabAttributes"
+          :actions-manager="actionsManager"
+          :references-manager="referencesManager"
+          :is-child-tab="true"
+          style="height: 100% !important;"
+        />
+      </div>
+      <!-- <div
         v-if="isShowedTableRecords && !isMobile"
       >
         <tab-options
@@ -62,7 +79,6 @@
         style="height: 100% !important;"
         @click="selectTab(tabsList[parseInt(currentTab)])"
       >
-        <!-- records in table to multi records -->
         <div v-if="isMobile">
           <tab-panel
             key="tab-panel"
@@ -88,7 +104,7 @@
             :panel-metadata="tabAttributes"
             :is-navigation="true"
           />
-          <!-- <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel"> -->
+          <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
           <tab-panel
             v-else
             key="tab-panel-65465456"
@@ -101,9 +117,9 @@
             :actions-manager="actionsManager"
             :references-manager="referencesManager"
           />
-          <!-- </el-scrollbar> -->
+          </el-scrollbar>
         </div>
-      </div>
+      </div> -->
     </el-tab-pane>
   </el-tabs>
 </template>

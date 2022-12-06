@@ -811,6 +811,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .convenience-buttons-main {
+  display: contents;
   .delete-record-container {
     padding-left: 9px;
     padding-right: 9px;

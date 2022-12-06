@@ -17,7 +17,90 @@
 -->
 
 <template>
-  <div>
+  <el-container style="height: 100%;">
+    <el-header :height="styleHeadPanel">
+      <tab-options
+        :parent-uuid="parentUuid"
+        :container-manager="containerManager"
+        :current-tab-uuid="currentTabUuid"
+        :tabs-list="tabsList"
+        :tab-attributes="tabAttributes"
+        :references-manager="referencesManager"
+        :adicionales-options="convenienceOptions"
+        :is-child-tab="isChildTab"
+      />
+      <filter-fields
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :fields-list="containerManager.getFieldsList({ parentUuid, containerUuid: tabAttributes.uuid })"
+        :filter-manager="containerManager.changeFieldShowedFromUser"
+        :showed-manager="containerManager.isDisplayedField"
+        :fields-to-hidden="containerManager.getFieldsToHidden"
+        :is-filter-records="true"
+        :is-showed-table-records="isShowedTableRecords"
+        :container-manager="containerManager"
+      />
+    </el-header>
+    <el-main>
+      <div style="width: 100%;">
+        <default-table
+          v-if="isShowedTableRecords"
+          key="default-table"
+          :parent-uuid="parentUuid"
+          :container-uuid="tabAttributes.uuid"
+          :container-manager="containerManager"
+          :header="tableHeaders"
+          :data-table="recordsList"
+          :panel-metadata="tabAttributes"
+          :is-navigation="true"
+        />
+        <template v-else>
+          <!-- <span v-if="isMobile || isEmptyValue(tabAttributes.childTabs)"> -->
+          <!-- <panel-definition
+            v-if="tabAttributes.isParentTab"
+            key="panel-definition"
+            :parent-uuid="parentUuid"
+            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :group-tab="tabAttributes.tabGroup"
+          /> -->
+          <panel-definition
+            key="panel-definition"
+            :parent-uuid="parentUuid"
+            :container-uuid="tabAttributes.uuid"
+            :container-manager="containerManager"
+            :group-tab="tabAttributes.tabGroup"
+            :style="overflowHeightScrooll"
+          />
+          <!-- </span> -->
+          <!-- <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
+            <panel-definition
+              key="panel-definition"
+              :parent-uuid="parentUuid"
+              :container-uuid="tabAttributes.uuid"
+              :container-manager="containerManager"
+              :group-tab="tabAttributes.tabGroup"
+              :style="overflowHeightScrooll"
+            />
+          </el-scrollbar> -->
+        </template>
+      </div>
+    </el-main>
+    <el-footer :height="styleFooterPanel">
+      <custom-pagination
+        :container-manager="containerManager"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :total="recordsLength"
+        :current-page="currentPage"
+        :selection="selectionsLength"
+        :records-page="recordsWithFilter.length"
+        :handle-change-page="handleChangePage"
+        :handle-size-change="handleChangeSizePage"
+      />
+    </el-footer>
+  </el-container>
+  <!-- <div>
     <span v-if="!isShowedTableRecords">
       <full-screen-container
         style="float: right;"
@@ -59,7 +142,6 @@
             :container-manager="containerManager"
             :group-tab="tabAttributes.tabGroup"
           />
-          <!-- <el-scrollbar v-else wrap-class="scroll-child"> -->
           <panel-definition
             v-else
             key="panel-definition"
@@ -69,7 +151,6 @@
             :group-tab="tabAttributes.tabGroup"
             :style="overflowHeightScrooll"
           />
-          <!-- </el-scrollbar> -->
         </span>
         <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
           <panel-definition
@@ -83,7 +164,7 @@
         </el-scrollbar>
       </template>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script>
@@ -94,20 +175,23 @@ import store from '@/store'
 import router from '@/router'
 
 // components and mixins
+import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import TabOptions from './TabOptions.vue'
 
 export default defineComponent({
   name: 'TabPanel',
 
   components: {
-    // CustomPagination,
+    CustomPagination,
     DefaultTable,
     FullScreenContainer,
     PanelDefinition,
-    TabOptions
+    TabOptions,
+    FilterFields
   },
 
   props: {
@@ -143,6 +227,10 @@ export default defineComponent({
     convenienceOptions: {
       type: Object,
       default: () => ({})
+    },
+    isChildTab: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -196,6 +284,17 @@ export default defineComponent({
       )
     })
 
+    const styleHeadPanel = computed(() => {
+      if (root.isEmptyValue(isWithChildsTab.value)) return '10%!important'
+      return '21%!important'
+    })
+
+    const styleFooterPanel = computed(() => {
+      if (root.isEmptyValue(isWithChildsTab.value)) return '5%!important'
+      if (props.isChildTab) return '20% !important'
+      return '10% !important'
+    })
+
     // const inf = store.getters.getContainerInfo
 
     const list = store.getters.getTabRecordsList({ containerUuid: currentTab.value.containerUuid })
@@ -247,10 +346,23 @@ export default defineComponent({
       return 0
     })
 
+    const recordsWithFilter = computed(() => {
+      if (props.containerManager && props.containerManager.getRecordsList) {
+        return props.containerManager.getRecordsList({
+          containerUuid: props.tabAttributes.uuid
+        })
+      }
+      return []
+    })
+
     const selectionsLength = computed(() => {
       return props.containerManager.getSelection({
         containerUuid: props.tabAttributes.uuid
       }).length
+    })
+
+    const isWithChildsTab = computed(() => {
+      return store.getters.getStoredWindow(props.parentUuid).tabsListChild
     })
 
     function changeShowedRecords() {
@@ -267,6 +379,7 @@ export default defineComponent({
       props.containerManager.setPage({
         parentUuid: props.parentUuid,
         containerUuid: props.tabAttributes.uuid,
+        pageSize: store.getters.getTabPageSize({ containerUuid: props.tabAttributes.uuid }),
         pageNumber
       })
       router.push({
@@ -279,6 +392,19 @@ export default defineComponent({
       }, () => {})
     }
 
+    /**
+     * custom method to handle change size page
+     */
+
+    function handleChangeSizePage(pageSize) {
+      props.containerManager.setSizePage({
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabAttributes.uuid,
+        pageSize,
+        pageNumber: 1
+      })
+    }
+
     return {
       // computeds
       listAction,
@@ -289,12 +415,17 @@ export default defineComponent({
       isMobile,
       currentTab,
       overflowHeightScrooll,
+      isWithChildsTab,
       // pagination
+      styleHeadPanel,
+      styleFooterPanel,
       currentPage,
       recordsLength,
       selectionsLength,
+      recordsWithFilter,
       // methods
       handleChangePage,
+      handleChangeSizePage,
       changeShowedRecords
     }
   }

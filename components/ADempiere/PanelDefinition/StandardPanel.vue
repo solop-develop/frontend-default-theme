@@ -25,7 +25,7 @@
     >
       <div class="cards-not-group">
         <div class="card">
-          <filter-fields
+          <!-- <filter-fields
             v-if="isShowFilter"
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
@@ -35,7 +35,7 @@
             :fields-to-hidden="containerManager.getFieldsToHidden"
             :is-filter-records="isFilterRecords"
             :container-manager="containerManager"
-          />
+          /> -->
 
           <el-card
             :shadow="shadowGroup"

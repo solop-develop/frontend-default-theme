@@ -19,7 +19,7 @@
 <template>
   <span>
     <el-row v-if="!isMobile && SearchRecordTypeSale" :gutter="5">
-      <el-col :span="24" style="display: flex;">
+      <el-col :span="24" :style="styleBarOptions">
         <search-fields
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
@@ -27,7 +27,7 @@
           :container-manager="containerManager"
           style="float: right;"
         />
-        <el-form :class="cssClass" style="float: right;">
+        <el-form v-if="!isShowedTableRecords" :class="cssClass" style="float: right;">
           <el-form-item>
             <template v-if="!isEmptyValue(groupField)" slot="label">
               {{ groupField }}
@@ -169,6 +169,10 @@ export default defineComponent({
     containerManager: {
       type: Object,
       required: false
+    },
+    isShowedTableRecords: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -191,6 +195,11 @@ export default defineComponent({
 
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
+    })
+
+    const styleBarOptions = computed(() => {
+      if (props.isShowedTableRecords) return 'display: flex;width: 100% !important;'
+      return 'display: flex;width: 99% !important;'
     })
     const valueToSearch = computed({
       get() {
@@ -329,6 +338,7 @@ export default defineComponent({
       fieldsListAvailableWithValue,
       valueToSearch,
       SearchRecordTypeSale,
+      styleBarOptions,
       // methods
       changeShowed,
       handleChangeSearch,

@@ -32,6 +32,8 @@
       >
         <span class="selections-number">
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
+            <el-button type="text" icon="el-icon-arrow-down" />
+            <el-button type="text" icon="el-icon-arrow-up" />
             {{ $t('table.dataTable.selected') }}: {{ selection }}
           </span>
         </span>
@@ -144,7 +146,7 @@ export default defineComponent({
 .custom-pagination-content {
   margin-left: 0px !important;
   margin-right: 0px !important;
-  margin-top: 1% !important;
+  // margin-top: 1% !important;
   .selections-number {
     margin-right: 10px;
     font-weight: normal;
