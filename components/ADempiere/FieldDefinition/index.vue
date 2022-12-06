@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -349,7 +349,7 @@ export default {
   /**
    * Separation between elements (item) of the form
    */
-  .from-text-long {
+  .field-text-long {
     max-height: 300px;
     min-height: 250px;
   }
@@ -360,10 +360,6 @@ export default {
     margin-bottom: 12px !important;
     margin-left: 10px;
     margin-right: 10px;
-  }
-  .field-text-long {
-    max-height: 300px;
-    min-height: 250px;
   }
 
   /**

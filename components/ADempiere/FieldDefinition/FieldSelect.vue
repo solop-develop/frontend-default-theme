@@ -323,25 +323,24 @@ export default {
       if (!isEmptyValue(option.uuid)) {
         this.uuidValue = option.uuid
       }
-
       if (!isEmptyValue(option.displayedValue)) {
         this.displayedValue = option.displayedValue
         return
       }
 
-      // add to list if no exist
-      const displayedValue = this.displayedValue
-      if (!isEmptyValue(displayedValue)) {
-        // verify if exists to add (in table)
-        this.optionsList.push({
-          value,
-          uuid: option.uuid,
-          displayedValue
-        })
-        return
-      }
+      // add to list if no exist (with callouts)
+      // const displayedValue = this.displayedValue
+      // if (!isEmptyValue(displayedValue)) {
+      //   // verify if exists to add (in table)
+      //   this.optionsList.push({
+      //     value,
+      //     uuid: option.uuid,
+      //     displayedValue
+      //   })
+      //   return
+      // }
 
-      // request lookup
+      // request displayed value
       this.getValueOfLookup()
     },
     getValueOfLookup() {
@@ -350,6 +349,8 @@ export default {
       }
       this.isLoading = true
 
+      this.displayedValue = undefined
+      this.uuidValue = undefined
       this.getDefaultValueFromServer()
         .then(responseLookupItem => {
           // with value response update local component list
