@@ -154,10 +154,11 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // API Request Methods
 import { requestListEntityChats } from '@/api/ADempiere/window'
-import { requestAttachment } from '@/api/ADempiere/user-interface/component/resource'
+import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'TabManager',
@@ -315,7 +316,7 @@ export default defineComponent({
           tableName: currentTabTableName.value
         })
       }
-      return ''
+      return 0
     })
 
     /**
@@ -588,17 +589,26 @@ export default defineComponent({
      * Attachment Available
      */
     const attachmentAvailable = () => {
-      requestAttachment({
+      showAttachmentAvailable.value = false
+      if (isEmptyValue(currentTabTableName.value) ||
+        (isEmptyValue(currentRecordUuid.value) &&
+        (isEmptyValue(currentRecordId.value) || currentRecordId.value <= 0))) {
+        return
+      }
+      requestExistsAttachment({
         tableName: currentTabTableName.value,
         recordId: currentRecordId.value,
         recordUuid: currentRecordUuid.value
       })
         .then(response => {
-          const { resourceReferencesList } = response
-          showAttachmentAvailable.value = !isEmptyValue(resourceReferencesList)
+          showAttachmentAvailable.value = Boolean(response)
         })
         .catch(error => {
-          console.warn(`Error getting List Attachment: ${error.message}. Code: ${error.code}.`)
+          console.warn(`Error getting Count Attachment: ${error.message}. Code: ${error.code}.`)
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
         })
     }
 
