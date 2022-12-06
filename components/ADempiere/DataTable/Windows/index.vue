@@ -100,6 +100,18 @@
     </el-table>
 
     <!-- pagination table, set custom or use default change page method -->
+    <!-- <custom-pagination
+      :container-manager="containerManager"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
+      :total="recordsLength"
+      :current-page="currentPage"
+      :selection="selectionsLength"
+      :records-page="recordsWithFilter.length"
+      :handle-change-page="handleChangePage"
+      :handle-size-change="handleChangeSizePage"
+      :is-navigation="isNavigation"
+    /> -->
   </div>
   <loading-view
     v-else

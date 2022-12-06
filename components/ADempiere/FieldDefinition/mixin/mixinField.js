@@ -84,7 +84,8 @@ export default {
         contextColumnNames: this.metadata.contextColumnNames,
         //
         uuid: this.metadata.uuid,
-        id: this.metadata.id
+        id: this.metadata.id,
+        value: this.value
       })
     },
     value: {

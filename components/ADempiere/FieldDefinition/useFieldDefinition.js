@@ -76,17 +76,6 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
     }
   })
 
-  const storedDefaultValue = computed(() => {
-    return store.getters.getStoredDefaultValue({
-      parentUuid: fieldMetadata.parentUuid,
-      containerUuid: fieldMetadata.containerUuid,
-      contextColumnNames: fieldMetadata.contextColumnNames,
-      //
-      uuid: fieldMetadata.uuid,
-      id: fieldMetadata.id
-    })
-  })
-
   const value = computed({
     get() {
       const { columnName, containerUuid, inTable } = fieldMetadata
@@ -133,6 +122,18 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
         value
       })
     }
+  })
+
+  const storedDefaultValue = computed(() => {
+    return store.getters.getStoredDefaultValue({
+      parentUuid: fieldMetadata.parentUuid,
+      containerUuid: fieldMetadata.containerUuid,
+      contextColumnNames: fieldMetadata.contextColumnNames,
+      //
+      uuid: fieldMetadata.uuid,
+      id: fieldMetadata.id,
+      value: value.value
+    })
   })
 
   const displayedValue = computed({
