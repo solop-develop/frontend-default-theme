@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -30,8 +30,9 @@
         <el-card shadow="hover" class="clearfix" style="padding: 2%">
           <div>
             <span style="color: #606266; font-weight: bold;">
-              Actualizado Por <b>:</b> {{ entityLogs.userName }} <i class="el-icon-user-solid" />
+              {{ $t('window.containerInfo.log.updatedBy') }} <b>: </b>{{ entityLogs.userName }} <i class="el-icon-user-solid" />
             </span>
+
             <el-link
               type="primary"
               style="float: right;"
@@ -40,40 +41,61 @@
               {{ $t('window.containerInfo.changeDetail') }}
             </el-link>
           </div>
+
           <el-collapse-transition>
             <div v-show="(currentKey === keys)">
-              <span v-for="(list, index) in entityLogs.changeLogsList" :key="index">
-                <p v-if="validate(list)">
-                  <b> {{ list.displayColumnName }} :</b>
+              <span v-for="(changeLog, index) in entityLogs.changeLogsList" :key="index">
+                <p v-if="isDocument(changeLog)">
+                  <b>{{ changeLog.displayColumnName }} :</b>
                   <strike>
                     <document-status-tag
-                      :value="list.oldValue"
-                      :displayed-value="list.oldDisplayValue"
+                      :value="changeLog.oldValue"
+                      :displayed-value="changeLog.oldDisplayValue"
                     />
                   </strike>
                   <document-status-tag
-                    :value="list.newValue"
-                    :displayed-value="list.newDisplayValue"
+                    :value="changeLog.newValue"
+                    :displayed-value="changeLog.newDisplayValue"
                   />
                 </p>
+
                 <el-descriptions v-else class="margin-top" :column="1">
-                  <el-descriptions-item label="Nombre" label-style="{ color: #606266; font-weight: bold; }">
-                    <span style="color: #606266; font-weight: bold;"> {{ list.displayColumnName }} </span>
+                  <el-descriptions-item
+                    :label="$t('window.containerInfo.log.field')"
+                    label-style="{ color: #606266; font-weight: bold; }"
+                  >
+                    <span style="color: #606266; font-weight: bold;">
+                      {{ changeLog.displayColumnName }}
+                    </span>
                   </el-descriptions-item>
-                  <el-descriptions-item label="Nuevo Valor" label-style="{ color: #606266; font-weight: bold; }">
+
+                  <el-descriptions-item
+                    :label="$t('window.containerInfo.log.newValue')"
+                    label-style="{ color: #606266; font-weight: bold; }"
+                  >
                     <el-link type="success">
-                      {{ list.newDisplayValue }}
+                      {{ changeLog.newDisplayValue }}
                     </el-link>
                   </el-descriptions-item>
-                  <el-descriptions-item label="Valor Antiguo" label-style="{ color: #606266; font-weight: bold; }">
+
+                  <el-descriptions-item
+                    :label="$t('window.containerInfo.log.oldValue')"
+                    label-style="{ color: #606266; font-weight: bold; }"
+                  >
                     <strike>
                       <el-link type="danger">
-                        {{ list.oldDisplayValue }}
+                        {{ changeLog.oldDisplayValue }}
                       </el-link>
                     </strike>
                   </el-descriptions-item>
-                  <el-descriptions-item label="Columna" label-style="{ color: #606266; font-weight: bold; }">
-                    <span style="color: #606266; font-weight: bold;"> {{ list.columnName }} </span>
+
+                  <el-descriptions-item
+                    :label="$t('window.containerInfo.log.column')"
+                    label-style="{ color: #606266; font-weight: bold; }"
+                  >
+                    <span style="color: #606266; font-weight: bold;">
+                      {{ changeLog.columnName }}
+                    </span>
                   </el-descriptions-item>
                 </el-descriptions>
               </span>
@@ -82,6 +104,7 @@
         </el-card>
       </el-timeline-item>
     </el-timeline>
+
     <div v-else>
       <el-empty />
     </div>
@@ -93,12 +116,11 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
-// components and mixins
-import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
+// Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+// Utils and Helper Methods
+import { isDocumentStatus } from '@/utils/ADempiere/constants/systemColumns'
 
 export default defineComponent({
   name: 'RecordLogs',
@@ -107,16 +129,8 @@ export default defineComponent({
     DocumentStatusTag
   },
 
-  props: {
-    allTabsList: {
-      type: Array,
-      default: () => []
-    }
-  },
-
-  setup(props, { root }) {
-    const currentRecordLogs = ref({ name: 'nada' })
-    // const listLogs = ref({})
+  setup() {
+    const currentRecordLogs = ref({ name: '' })
     const currentKey = ref(0)
     const typeAction = ref(0)
     const currentTabLogs = ref('0')
@@ -125,6 +139,7 @@ export default defineComponent({
     const listLogs = computed(() => {
       return store.getters.getRecordLogs
     })
+
     /**
      * showkey
      */
@@ -136,10 +151,9 @@ export default defineComponent({
         typeAction.value = index
       }
     }
-    const validate = (list) => {
-      return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
+    const isDocument = (changeLog) => {
+      return isDocumentStatus({ columnName: changeLog.columnName })
     }
-    isEmptyValue
 
     return {
       currentTabLogs,
@@ -148,7 +162,7 @@ export default defineComponent({
       currentKey,
       listLogs,
       // methods
-      validate,
+      isDocument,
       showkey
     }
   }
