@@ -288,15 +288,23 @@ export default defineComponent({
       )
     })
 
+    const storedWindow = computed(() => {
+      return store.getters.getStoredWindow(props.parentUuid)
+    })
+
     const styleHeadPanel = computed(() => {
       if (root.isEmptyValue(isWithChildsTab.value)) return '10%!important'
+      if (storedWindow.value.isFullScreenTabsParent) return '15% !important'
+      if (props.isChildTab && storedWindow.value.isFullScreenTabsChildren) return '15% !important'
       return '21%!important'
     })
 
     const styleFooterPanel = computed(() => {
       if (root.isEmptyValue(isWithChildsTab.value)) return '5%!important'
+      if (props.isChildTab && storedWindow.value.isFullScreenTabsChildren) return '10% !important'
       if (props.isChildTab) return '20% !important'
-      return '10% !important'
+      if (storedWindow.value.isFullScreenTabsParent) return '10% !important'
+      return '15% !important'
     })
 
     // const inf = store.getters.getContainerInfo
@@ -423,7 +431,7 @@ export default defineComponent({
         attributeNameControl: undefined,
         attributeValue: false,
         parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid,
+        containerUuid: props.currentTabUuid
       })
       store.dispatch('changeTabAttribute', {
         attributeName: 'currentRowSelect',
@@ -452,7 +460,7 @@ export default defineComponent({
         attributeNameControl: undefined,
         attributeValue: false,
         parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid,
+        containerUuid: props.currentTabUuid
       })
       store.dispatch('changeTabAttribute', {
         attributeName: 'currentRowSelect',
@@ -487,6 +495,7 @@ export default defineComponent({
       recordsLength,
       selectionsLength,
       recordsWithFilter,
+      storedWindow,
       // methods
       handleChangePage,
       handleChangeSizePage,

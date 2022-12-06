@@ -78,7 +78,7 @@
           @click="selectTab(tabsList[parseInt(currentTab)])"
         > -->
         <div
-          :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 95% !important;'"
+          :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 100% !important;'"
           @click="selectTab(tabsList[parseInt(currentTab)])"
         >
           <tab-panel
@@ -92,7 +92,7 @@
             :actions-manager="actionsManager"
             :references-manager="referencesManager"
             :convenience-options="additionalOptions"
-            :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 95% !important;'"
+            :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 100% !important;'"
           />
         </div>
         <!-- </div> -->
@@ -236,7 +236,7 @@ export default defineComponent({
         }
       }
       return {
-        height: '95% !important',
+        height: '100% !important',
         overflow: 'auto'
       }
     })
