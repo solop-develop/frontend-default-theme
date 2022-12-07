@@ -26,6 +26,7 @@
     :is-show-filter="isShowFilter"
     :is-filter-records="isFilterRecords"
     :is-advanced-query="isAdvancedQuery"
+    :is-tab-panel="isTabPanel"
   />
 </template>
 
@@ -61,6 +62,10 @@ export default defineComponent({
       default: true
     },
     isAdvancedQuery: {
+      type: Boolean,
+      default: false
+    },
+    isTabPanel: {
       type: Boolean,
       default: false
     }

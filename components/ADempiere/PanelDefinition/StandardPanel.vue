@@ -25,8 +25,8 @@
     >
       <div class="cards-not-group">
         <div class="card">
-          <!-- <filter-fields
-            v-if="isShowFilter"
+          <filter-fields
+            v-if="isTabPanel && isShowFilter"
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
             :fields-list="fieldsList"
@@ -35,7 +35,7 @@
             :fields-to-hidden="containerManager.getFieldsToHidden"
             :is-filter-records="isFilterRecords"
             :container-manager="containerManager"
-          /> -->
+          />
 
           <el-card
             :shadow="shadowGroup"
@@ -110,6 +110,10 @@ export default defineComponent({
       default: true
     },
     isAdvancedQuery: {
+      type: Boolean,
+      default: false
+    },
+    isTabPanel: {
       type: Boolean,
       default: false
     }
