@@ -40,6 +40,7 @@
           :container-manager="containerManager"
           :is-filter-records="false"
           :is-advanced-query="true"
+          :is-tab-panel="true"
         />
       </el-row>
     </el-col>
