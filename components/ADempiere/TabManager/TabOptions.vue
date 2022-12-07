@@ -220,32 +220,6 @@ export default defineComponent({
     })
 
     function changeShowedRecords() {
-      // const isSelectionRow = props.containerManager.getSelection({
-      //   containerUuid: props.tabAttributes.uuid
-      // })
-      // isSelectionRow.sort()
-      // const recordUuid = store.getters.getUuidOfContainer(props.tabAttributes.uuid)
-      // if (!isEmptyValue(tabData.value.currentRowSelect) && !isEmptyValue(isSelectionRow) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
-      //   props.containerManager.seekRecord({
-      //     parentUuid: props.parentUuid,
-      //     containerUuid: props.tabAttributes.uuid,
-      //     row: tabData.value.currentRowSelect
-      //   })
-      // }
-      // if (tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow) && isSelectionRow[isSelectionRow.length - 1].UUID !== recordUuid) {
-      //   props.containerManager.seekRecord({
-      //     parentUuid: props.parentUuid,
-      //     containerUuid: props.tabAttributes.uuid,
-      //     row: isSelectionRow[isSelectionRow.length - 1]
-      //   })
-      // }
-      // if (!tabData.value.isShowedTableRecords && !isEmptyValue(isSelectionRow) && currentRecordUuid.value !== isSelectionRow[isSelectionRow.length - 1].UUID) {
-      //   props.containerManager.seekRecord({
-      //     parentUuid: props.parentUuid,
-      //     containerUuid: props.tabAttributes.uuid,
-      //     row: isSelectionRow[isSelectionRow.length - 1]
-      //   })
-      // }
       const row = store.getters.getTabCurrentRow({ containerUuid: props.currentTabUuid })
       store.dispatch('changeTabAttribute', {
         attributeName: 'currentRowSelect',
