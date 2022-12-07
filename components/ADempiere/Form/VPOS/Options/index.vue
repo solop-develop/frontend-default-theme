@@ -1497,6 +1497,10 @@ export default {
           const posUuid = this.currentPointOfSales.uuid
           const orderUuid = response.uuid
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
+          this.$store.dispatch('reloadOrder', response.uuid)
+            .then(() => {
+              if (this.IsAllowsPreviewDocument) this.printPreview()
+            })
           this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
           this.clearOrder()
         })
