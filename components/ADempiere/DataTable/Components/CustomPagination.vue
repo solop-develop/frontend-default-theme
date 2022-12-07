@@ -32,9 +32,25 @@
       >
         <span class="selections-number">
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
-            <el-button type="text" icon="el-icon-arrow-down" />
-            <el-button type="text" icon="el-icon-arrow-up" />
-            {{ $t('table.dataTable.selected') }}: {{ selection }}
+            <span v-show="(!isShowedTableRecords && isChangeRecord)">
+              <el-button
+                type="text"
+                icon="el-icon-arrow-down"
+                :disabled="disablePreviousRecord"
+                style="font-size: 20px;"
+                @click="changeNextRecord()"
+              />
+              <el-button
+                type="text"
+                icon="el-icon-arrow-up"
+                :disabled="disableNextRecord"
+                style="font-size: 20px;"
+                @click="changePreviousRecord()"
+              />
+            </span>
+            <span v-show="isShowedTableRecords">
+              {{ $t('table.dataTable.selected') }}: {{ selection }}
+            </span>
           </span>
         </span>
       </el-pagination>
@@ -55,10 +71,10 @@ export default defineComponent({
   name: 'CustomPagination',
 
   props: {
-    // parentUuid: {
-    //   type: String,
-    //   default: ''
-    // },
+    parentUuid: {
+      type: String,
+      default: ''
+    },
     containerUuid: {
       type: String,
       default: ''
@@ -87,10 +103,10 @@ export default defineComponent({
       type: Number,
       default: undefined
     },
-    // isNavigation: {
-    //   type: Boolean,
-    //   required: false
-    // },
+    isChangeRecord: {
+      type: Boolean,
+      required: false
+    },
     handleSizeChange: {
       type: Function,
       default: (pageSizeNumber) => {
@@ -101,6 +117,18 @@ export default defineComponent({
       type: Function,
       default: (pageNumber) => {
         console.info('implement change page number method', pageNumber)
+      }
+    },
+    changeNextRecord: {
+      type: Function,
+      default: (recordNext) => {
+        console.info('implement method Change to Next Record', recordNext)
+      }
+    },
+    changePreviousRecord: {
+      type: Function,
+      default: (recordPrevious) => {
+        console.info('implement method Change to Previous Record ', recordPrevious)
       }
     }
   },
@@ -128,12 +156,47 @@ export default defineComponent({
       return store.getters.getTabPageSize({ containerUuid: props.containerUuid })
     })
 
+    const isShowedTableRecords = computed(() => {
+      return store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      ).isShowedTableRecords
+    })
+
+    const disableNextRecord = computed(() => {
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      if (posicionIndex > 0) return false
+      return true
+    })
+
+    const disablePreviousRecord = computed(() => {
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      const maxRecord = recordsWithFilter.value.length - 1
+      if (posicionIndex < maxRecord) return false
+      return true
+    })
+
+    const recordsWithFilter = computed(() => {
+      if (props.containerManager && props.containerManager.getRecordsList) {
+        return props.containerManager.getRecordsList({
+          containerUuid: props.containerUuid
+        })
+      }
+      return []
+    })
+
     return {
       // Computed
       isSelection,
       rowPage,
       currentPageSize,
       isMobile,
+      isShowedTableRecords,
+      disableNextRecord,
+      recordsWithFilter,
+      disablePreviousRecord,
       // Import
       NUMBER_RECORDS_PER_PAGE
     }

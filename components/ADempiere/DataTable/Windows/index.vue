@@ -129,7 +129,6 @@ import lang from '@/lang'
 // components and mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
-import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
@@ -147,7 +146,6 @@ export default defineComponent({
   components: {
     CellDisplayInfo,
     ColumnsDisplayOption,
-    CustomPagination,
     FullScreenContainer,
     SearchRecordFields,
     LoadingView
