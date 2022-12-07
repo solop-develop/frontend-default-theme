@@ -101,6 +101,7 @@
         :handle-size-change="handleChangeSizePage"
         :change-previous-record="changePreviousRecord"
         :change-next-record="changeNextRecord"
+        :is-change-record="true"
       />
     </el-footer>
   </el-container>

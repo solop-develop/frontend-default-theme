@@ -32,7 +32,7 @@
       >
         <span class="selections-number">
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
-            <span v-show="!isShowedTableRecords">
+            <span v-show="(!isShowedTableRecords && isChangeRecord)">
               <el-button
                 type="text"
                 icon="el-icon-arrow-down"
@@ -103,10 +103,10 @@ export default defineComponent({
       type: Number,
       default: undefined
     },
-    // isNavigation: {
-    //   type: Boolean,
-    //   required: false
-    // },
+    isChangeRecord: {
+      type: Boolean,
+      required: false
+    },
     handleSizeChange: {
       type: Function,
       default: (pageSizeNumber) => {
