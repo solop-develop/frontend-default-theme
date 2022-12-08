@@ -17,33 +17,42 @@
 -->
 
 <template>
-  <form id="form" enctype="multipart/form-data">
+  <form
+    enctype="multipart/form-data"
+    @submit.prevent="notSubmitForm"
+  >
     <el-upload
       ref="upload"
+      :action="endPointUploadResource"
       class="upload-demo"
-      name="avatar"
-      action="#"
-      :auto-upload="false"
+      name="file"
+      :file-list="filesList"
+      :data="additionalData"
+      :multiple="false"
+      :before-upload="isValidUploadHandler"
+      :on-success="loadedSucess"
     >
       <el-button slot="trigger" size="small" type="primary">
+        <i class="el-icon-upload" />
         {{ $t('window.containerInfo.attachment.selectFile') }}
-      </el-button>
-
-      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">
-        {{ $t('window.containerInfo.attachment.uploadFile') }}
       </el-button>
     </el-upload>
   </form>
 </template>
 
 <script>
-import { defineComponent } from '@vue/composition-api'
+import { defineComponent, ref } from '@vue/composition-api'
 
 import lang from '@/lang'
 
+// Constants
+import { config } from '@/utils/ADempiere/config'
+
 // API Request Methods
-import request from '@/utils/request'
-// import { uploadAttachment } from '@/api/ADempiere/user-interface/resources.js'
+import {
+  // requestUploadAttachment,
+  setResourceReference
+} from '@/api/ADempiere/user-interface/component/resource'
 
 // Utils and Helper Methods
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -51,36 +60,66 @@ import { showMessage } from '@/utils/ADempiere/notification'
 export default defineComponent({
   name: 'UploadResource',
 
-  setup(props, { refs }) {
-    const submitUpload = () => {
-      const form = document.getElementById('form')
-      const formData = new FormData(form)
+  props: {
+    tableName: {
+      type: String,
+      required: true
+    },
+    recordId: {
+      type: Number,
+      default: 0
+    },
+    recordUuid: {
+      type: String,
+      default: ''
+    }
+  },
 
-      request({
-        url: 'http://0.0.0.:8085/api/adempiere/user-interface/component/resource/save-attachment',
-        method: 'post',
-        data: formData
-      })
-        .then(resData => {
+  setup(props) {
+    const endPointUploadResource = config.adempiere.api.url + 'user-interface/component/resource/save-attachment'
+
+    const upload = ref(null)
+    const filesList = ref([])
+    const additionalData = ref({})
+
+    function isValidUploadHandler(file) {
+      return new Promise((resolve, reject) => {
+        setResourceReference({
+          tableName: props.tableName,
+          recordId: props.recordId,
+          recordUuid: props.recordUuid,
+          fileName: file.name,
+          fileSize: file.size
+        }).then(response => {
+          additionalData.value = {
+            resource_uuid: response.resource_uuid,
+            file_name: response.file_name
+          }
+          // filesList.value.push(file)
+          resolve(true)
+        }).catch(error => {
           showMessage({
-            message: lang.t('window.containerInfo.attachment.success'),
-            type: 'success'
-          })
-          refs.upload.submit()
-          refs.upload.clearFiles()
-          refs.upload.uploadFiles = []
-        })
-        .catch(err => {
-          console.warn({ err })
-          showMessage({
-            message: lang.t('window.containerInfo.attachment.error'),
+            message: error.message || lang.t('window.containerInfo.attachment.error'),
             type: 'error'
           })
+          reject(false)
+        }).finally(() => {
+          // upload.value.uploadFiles = filesList.value
         })
+      })
+    }
+
+    function loadedSucess(response, file, fileList) {
+      additionalData.value = {}
     }
 
     return {
-      submitUpload
+      additionalData,
+      endPointUploadResource,
+      filesList,
+      upload,
+      isValidUploadHandler,
+      loadedSucess
     }
   }
 })
