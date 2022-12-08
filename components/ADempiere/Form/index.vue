@@ -82,6 +82,10 @@ export default {
         case 'org.spin.tcs.form.TimeControl':
           form = import('@theme/components/ADempiere/Form/TimeControl')
           break
+        case 'VPayPrint':
+        case 'org.compiere.apps.form.VPayPrint':
+          form = import('@theme/components/ADempiere/Form/VPayPrint')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
