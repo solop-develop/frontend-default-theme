@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -42,6 +42,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             </el-select>
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-form-item
             :label="$t('VPayPrint.bankAccount')"
@@ -49,6 +50,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             {{ currentBankAccount }}
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-form-item
             :label="$t('VPayPrint.currentBalance')"
@@ -56,6 +58,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             {{ currentBalance }}
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-form-item
             :label="$t('VPayPrint.paymentRule')"
@@ -72,6 +75,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             </el-select>
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-form-item
             :label="$t('VPayPrint.currency')"
@@ -79,6 +83,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             {{ currency }}
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-form-item
             :label="$t('VPayPrint.documentNo')"
@@ -90,6 +95,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             />
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-form-item
             :label="$t('VPayPrint.numberPayments')"
@@ -97,6 +103,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             {{ numberPayments }}
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
           <el-button
             type="primary"
@@ -113,18 +120,13 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import {
-  defineComponent,
-  ref
-} from '@vue/composition-api'
-// constants
+import { defineComponent, ref } from '@vue/composition-api'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
-// components and mixins
 
-// api request methods
+// API Request Methods
 import {
   listPaymentSelection,
   paymentSelection
@@ -132,6 +134,7 @@ import {
 
 export default defineComponent({
   name: 'VPayPrint',
+
   props: {
     metadata: {
       type: Object,
@@ -145,7 +148,6 @@ export default defineComponent({
     /**
      * Refs
      */
-
     const currentPaymentSelection = ref('')
     const listPayment = ref([])
     const currentBankAccount = ref('')
@@ -159,14 +161,18 @@ export default defineComponent({
     /**
      * Methods
      */
-
     function findListPaymentSelection(isFind) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listPaymentSelection()
     }
 
     function setPaymentSelection(payment) {
-      if (isEmptyValue(payment)) return
+      if (isEmptyValue(payment)) {
+        return
+      }
+
       const { id, uuid } = payment
       paymentSelection({
         id,
@@ -186,7 +192,6 @@ export default defineComponent({
     /**
      * watch
      */
-
     return {
       // Refs
       currentPaymentSelection,
