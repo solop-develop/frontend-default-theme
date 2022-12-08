@@ -100,17 +100,45 @@
     </el-tabs>
 
     <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;">
-      <el-button type="primary" size="mini" circle @click="openRecordLogs('getRecordLogs')">
+      <el-button
+        type="primary"
+        size="mini"
+        circle
+        @click="openRecordLogs('getRecordLogs')"
+      >
         <svg-icon icon-class="tree-table" />
       </el-button>
-      <el-button v-show="showAttachmentAvailable" type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('getAttachment')">
+
+      <el-button
+        v-show="showAttachmentAvailable"
+        type="primary"
+        size="mini"
+        circle
+        style="margin: 0px"
+        @click="openRecordLogs('recordAttachmentTab')"
+      >
         <i class="el-icon-paperclip" />
       </el-button>
-      <el-button v-show="showReference" type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('listReference')">
+
+      <el-button
+        v-show="showReference"
+        type="primary"
+        size="mini"
+        circle
+        style="margin: 0px"
+        @click="openRecordLogs('listReference')"
+      >
         <i class="el-icon-zoom-in" />
       </el-button>
+
       <el-badge v-show="showChatAvailable" is-dot class="item">
-        <el-button type="primary" size="mini" circle style="margin: 0px" @click="openRecordLogs('listChats')">
+        <el-button
+          type="primary"
+          size="mini"
+          circle
+          style="margin: 0px"
+          @click="openRecordLogs('listChats')"
+        >
           <svg-icon icon-class="message" />
         </el-button>
       </el-badge>
@@ -118,10 +146,19 @@
 
     <el-drawer
       :visible.sync="showContainerInfo"
-      :with-header="false"
+      :with-header="true"
       :before-close="openRecordLogs"
       :size="isDrawerWidth"
+      class="drawer-panel-info"
     >
+      <span slot="title">
+        <svg-icon icon-class="tab" style="margin-right: 10px;" />
+        {{ $t('window.containerInfo.log.tab') }}
+        <span style="color: #606266; font-weight: bold;">
+          {{ currentTabMetadata.name }}
+        </span>
+      </span>
+
       <panel-info
         :all-tabs-list="allTabsList"
         :show-container-info="showContainerInfo"
@@ -129,7 +166,7 @@
         :current-record="currentRecordLogs"
         :tab-uuid="tabUuid"
         :is-accounting-info="isAccountingInfo"
-        :is-default-panel="openPanelInfo"
+        :default-opened-tab="openPanelInfo"
       />
     </el-drawer>
   </div>
@@ -543,11 +580,12 @@ export default defineComponent({
      * List Change History
      */
     const openRecordLogs = (options) => {
-      if (typeof options === 'string') openPanelInfo.value = options
+      if (typeof options === 'string') {
+        openPanelInfo.value = options
+      }
       store.dispatch('showLogs', {
         show: !showContainerInfo.value
       })
-      // store.commit('setShowRecordLogs', newValue)
     }
 
     /**
@@ -696,3 +734,12 @@ export default defineComponent({
 
 })
 </script>
+
+<style lang="scss">
+.drawer-panel-info {
+  header.el-drawer__header {
+    margin-bottom: 10px !important;
+    padding-top: 10px !important;
+  }
+}
+</style>

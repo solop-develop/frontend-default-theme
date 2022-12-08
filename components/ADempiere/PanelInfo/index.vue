@@ -18,22 +18,6 @@
 
 <template>
   <el-container style="height: 100% !important;">
-    <el-header
-      style="height: 5%;text-align: center;padding-top: 1%;"
-    >
-      <el-descriptions :column="1">
-        <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-          <template slot="label">
-            <svg-icon icon-class="tab" style="margin-right: 10px;" />
-            {{ $t('window.containerInfo.log.tab') }}
-          </template>
-          <span style="color: #606266; font-weight: bold;">
-            {{ currentTab.name }}
-          </span>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-header>
-
     <el-main style="padding:0px; height: 100% !important;">
       <el-tabs
         v-model="nameTab"
@@ -102,7 +86,7 @@
             :is-active-tab="'recordAttachmentTab' === nameTab"
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
-            :record-uuid="currentRecord.UUID"
+            :record-uuid="currentRecordUuid"
           />
         </el-tab-pane>
 
@@ -124,7 +108,7 @@
         >
           <span slot="label">
             <svg-icon icon-class="tree-table" />
-            {{ 'Historico de WorkFlow' }}
+            {{ $t('window.containerInfo.workflowLog') }}
           </span>
           <workflow-logs
             :container-uuid="currentTab.containerUuid"
@@ -164,9 +148,6 @@ import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import language from '@/lang'
 import store from '@/store'
-
-// Constants
-import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // Components and Mixins
 import Accounting from './Component/Accounting/index.vue'
@@ -222,25 +203,23 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isDefaultPanel: {
+    defaultOpenedTab: {
       type: String,
-      default: ''
+      default: 'getRecordLogs'
     }
   },
 
   setup(props, { root }) {
-    const currentRecordLogs = ref({ name: 'nada' })
-    const listLogs = ref({})
+    const currentRecordLogs = ref({ name: '' })
     const currentKey = ref(0)
     const typeAction = ref(0)
     const currentTabLogs = ref('0')
     const tableName = ref('')
     const nameTab = ref('getRecordLogs')
     const recordsListStoreProduct = ref([])
-    const drawer = ref(false)
 
-    if (!isEmptyValue(props.isDefaultPanel)) {
-      nameTab.value = props.isDefaultPanel
+    if (!isEmptyValue(props.defaultOpenedTab)) {
+      nameTab.value = props.defaultOpenedTab
     }
 
     // use getter to reactive properties
@@ -250,14 +229,12 @@ export default defineComponent({
      * isLoadLogs
      * isWorkflowLog
      * containerInfo
-     * currentRecordInfo
      * currentTab
      * storeProduct
      * showPanelInfo
      * currentRecordUuid
      * currentRecordId
      */
-
     const isLoadLogs = computed(() => {
       return store.state.utils.showRecordLogs
     })
@@ -281,7 +258,7 @@ export default defineComponent({
 
     // Current Record UUID
     const currentRecordUuid = computed(() => {
-      if (currentTab.value) {
+      if (!isEmptyValue(currentTab.value)) {
         return store.getters.getUuidOfContainer(currentTab.value.containerUuid)
       }
       return ''
@@ -321,14 +298,6 @@ export default defineComponent({
       return false
     })
 
-    // Current Record
-    const currentRecordInfo = computed(() => {
-      if (containerInfo.value.currentRecord) {
-        return containerInfo.value.currentRecord
-      }
-      return {}
-    })
-
     // Open Container the Info
     const showPanelInfo = computed(() => {
       return store.getters.getShowLogs
@@ -338,8 +307,6 @@ export default defineComponent({
      * Function Infomation Panel
      * findRecordLogs @param {object} tab
      * showkey  @param {number, number} key
-     * handleClickLogs @param {string} tabHTML
-     * validate @param {object} list
      * handleClick @param {object} tab
      * findListStoreProduct @param {object} params
      */
@@ -362,19 +329,6 @@ export default defineComponent({
         currentKey.value = key
         typeAction.value = index
       }
-    }
-
-    function handleClickLogs(tabHTML) {
-      findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
-    }
-
-    function validate(list) {
-      return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
-    }
-
-    // List Change History
-    function openRecordLogs(a) {
-      drawer.value = !drawer.value
     }
 
     function handleClick(tab, event) {
@@ -442,9 +396,13 @@ export default defineComponent({
     watch(showPanelInfo, (newValue, oldValue) => {
       if (newValue && newValue !== oldValue) {
         handleClick({
-          name: props.isDefaultPanel
+          name: props.defaultOpenedTab
         })
       }
+    })
+
+    watch(() => props.defaultOpenedTab, (newValue) => {
+      nameTab.value = newValue
     })
 
     findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
@@ -452,31 +410,25 @@ export default defineComponent({
     return {
       // Ref
       currentRecordLogs,
-      listLogs,
       currentKey,
       typeAction,
       currentTabLogs,
       tableName,
       nameTab,
       recordsListStoreProduct,
-      drawer,
       // Computed
       isLoadLogs,
       isWorkflowLog,
       containerInfo,
-      currentRecordInfo,
       currentTab,
       storeProduct,
       showPanelInfo,
       currentRecordUuid,
       currentRecordId,
       // methods
-      validate,
       showkey,
       findRecordLogs,
       handleClick,
-      handleClickLogs,
-      openRecordLogs,
       findListStoreProduct
     }
   }

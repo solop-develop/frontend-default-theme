@@ -73,7 +73,11 @@
     <br>
 
     <span>
-      <upload-resource />
+      <upload-resource
+        :table-name="tableName"
+        :record-id="recordId"
+        :record-uuid="recordUuid"
+      />
     </span>
 
     <el-dialog
@@ -131,29 +135,17 @@ export default defineComponent({
   },
 
   props: {
-    parentUuid: {
+    tableName: {
       type: String,
-      required: false
-    },
-    containerUuid: {
-      type: String,
-      required: false
+      default: ''
     },
     recordId: {
       type: Number,
       default: 0
     },
-    tableName: {
-      type: String,
-      default: ''
-    },
     recordUuid: {
       type: String,
       default: ''
-    },
-    isActiveTab: {
-      type: Boolean,
-      default: false
     }
   },
 
