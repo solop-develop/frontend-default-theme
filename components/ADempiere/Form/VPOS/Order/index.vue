@@ -20,7 +20,7 @@
   <div
     v-if="isLoaded"
     id="headerContainer"
-    style="display: -webkit-box; height: 100%"
+    style="display: grid height: 100%"
   >
     <el-container style="background: white; height: 100%!important;">
       <el-header
@@ -390,7 +390,7 @@
             </span>
           </el-footer>
           <el-footer v-else :class="classOrderFooter" style="display: flex;width: 100% !important; padding-top: 10px;">
-            <el-scrollbar class="scroll-footer-order" style="width: 100% !important;">
+            <el-scrollbar class="scroll-footer-order" style="width: 100% !important;padding-right: 5%;padding-left: 5%;padding-bottom: 20%;">
               <span
                 v-show="isValidForDeleteLine(listOrderLine) && isValidateDocumentType"
               >

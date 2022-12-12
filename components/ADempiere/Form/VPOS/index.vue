@@ -19,6 +19,7 @@
   <component
     :is="templateDevice"
     :metadata="metadata"
+    style="height: 100% !important;overflow: auto;padding-bottom: 5%;"
   />
 </template>
 

@@ -17,7 +17,6 @@
 <template>
   <el-container
     v-shortkey="{ close: ['esc'] }"
-    style="height: 100% !important;"
     @shortkey.native="closeNodeInfo"
   >
     <transition name="el-zoom-in-bottom">
@@ -61,6 +60,7 @@
         :transitions="nodeTransitionList"
         :states="nodeList"
         :state-semantics="currentNode"
+        :orientation="orientation"
         @state-click="onLabelClicked($event)"
       />
     </el-main>
@@ -102,6 +102,10 @@ export default {
     workflowLogs: {
       type: Array,
       default: () => []
+    },
+    orientation: {
+      type: String,
+      default: () => 'horizontal'
     }
   },
   setup(props) {
