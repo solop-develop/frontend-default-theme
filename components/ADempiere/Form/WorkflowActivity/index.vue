@@ -15,7 +15,7 @@
 -->
 <template>
   <el-container style="height: 100% !important;">
-    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 50% !important;' : 'height: 10%!important'">
+    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 40% !important;' : 'height: 10%!important'">
       <el-card :style="!collapse ? 'height: 100% !important;' : 'height: auto'">
         <div slot="header">
           <span> {{ $t('form.activity.title') }} </span>
@@ -53,9 +53,9 @@
       </el-card>
     </el-header>
 
-    <el-main class="main">
+    <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
       <el-container style="height: 100%;">
-        <el-aside v-if="!isEmptyValue(currentActivity)" id="workflow" width="70%" style="background: white;">
+        <!-- <el-aside v-if="!isEmptyValue(currentActivity)" id="workflow" width="70%" style="background: white;">
           <workflow-diagram
             v-if="!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity)"
             :node-transition-list="workflowTranstitionsList"
@@ -63,28 +63,134 @@
             :current-node="currentNode"
             :workflow-logs="listProcessWorkflow"
           />
-        </el-aside>
-        <el-main v-if="!isEmptyValue(currentActivity)" style="overflow: hidden;">
-          <el-card id="logsWorkflow" class="box-card">
+        </el-aside> -->
+        <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
+          <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: auto' : 'height: 20%'">
             <div slot="header" class="clearfix">
               {{ $t('field.logsField') }}
+              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
             </div>
-            <el-scrollbar v-if="!isEmptyValue(currentActivity)" wrap-class="scroll-child">
-              <el-timeline class="info">
-                <el-timeline-item
-                  v-for="(nodes, key) in listProcessWorkflow"
-                  :key="key"
-                  :timestamp="translateDateByLong(nodes.log_date)"
-                  placement="top"
-                >
-                  <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
-                </el-timeline-item>
-              </el-timeline>
-            </el-scrollbar>
+            <!-- <el-scrollbar v-if="(!isEmptyValue(currentActivity) && collapse2)" wrap-class="scroll-child"> -->
+            <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
+              <el-timeline-item
+                v-for="(nodes, key) in listProcessWorkflow"
+                :key="key"
+                :timestamp="translateDateByLong(nodes.log_date)"
+                placement="top"
+              >
+                <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
+              </el-timeline-item>
+            </el-timeline>
+            <!-- </el-scrollbar> -->
+          </el-card>
+          <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 80%' : 'height: 20%'">
+            <div slot="header" class="clearfix">
+              {{ 'Diagrama del Flujo de Trabajo' }}
+              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse3 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse3 = !collapse3)" />
+            </div>
+            <workflow-diagram
+              v-if="(!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity) && collapse3)"
+              :node-transition-list="workflowTranstitionsList"
+              :node-list="workflowStatesList"
+              :current-node="currentNode"
+              :orientation="isMobile ? 'vertical' : 'horizontal'"
+              :workflow-logs="listProcessWorkflow"
+              :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
+            />
           </el-card>
         </el-main>
       </el-container>
     </el-main>
+    <el-footer v-show="false" :style="isStyleFooter">
+      <el-card id="logsWorkflow" class="box-card" style="padding-left: 1%;padding-right: 1%;">
+        <el-row v-if="isMobile" :gutter="20">
+          <el-col :span="12">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Respuesta">
+                <el-input v-model="formInline.user" />
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="12">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Mensajes">
+                <el-select v-model="formInline.region" placeholder="Activity zone">
+                  <el-option label="Zone one" value="shanghai" />
+                  <el-option label="Zone two" value="beijing" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="12">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Re-enviar">
+                <el-select v-model="formInline.region" placeholder="Activity zone">
+                  <el-option label="Zone one" value="shanghai" />
+                  <el-option label="Zone two" value="beijing" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="12">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Opciones">
+                <el-button
+                  type="primary"
+                  icon="el-icon-check"
+                />
+                <el-button
+                  type="success"
+                  icon="el-icon-search"
+                />
+              </el-form-item>
+            </el-form>
+          </el-col>
+        </el-row>
+        <el-row v-else :gutter="20">
+          <el-col :span="6">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Respuesta">
+                <el-input v-model="formInline.user" />
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="6">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Mensajes">
+                <el-select v-model="formInline.region" placeholder="Activity zone">
+                  <el-option label="Zone one" value="shanghai" />
+                  <el-option label="Zone two" value="beijing" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="6">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Re-enviar">
+                <el-select v-model="formInline.region" placeholder="Activity zone">
+                  <el-option label="Zone one" value="shanghai" />
+                  <el-option label="Zone two" value="beijing" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </el-col>
+          <el-col :span="6">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Opciones">
+                <el-button
+                  type="primary"
+                  icon="el-icon-check"
+                />
+                <el-button
+                  type="success"
+                  icon="el-icon-search"
+                />
+              </el-form-item>
+            </el-form>
+          </el-col>
+        </el-row>
+      </el-card>
+    </el-footer>
   </el-container>
 </template>
 
@@ -150,10 +256,24 @@ export default {
           name: this.$t('table.ProcessActivity.Description'),
           isNumeric: false
         }
-      ]
+      ],
+      input: '',
+      collapse2: false,
+      collapse3: false,
+      formInline: {
+        user: '',
+        region: ''
+      }
     }
   },
   computed: {
+    isStyleFooter() {
+      if (this.isMobile) return 'height: 35%;padding-left: 1%;padding-right: 1%;'
+      return 'height: 20%;padding-bottom: 2%;padding-top: 0%;padding-left: 1%;padding-right: 1%;'
+    },
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    },
     styleFooter() {
       const showTitle = this.$store.getters.getIsShowTitleForm
       if (showTitle) {
@@ -261,7 +381,7 @@ export default {
     overflow: auto;
   }
   .header {
-    padding-bottom: 2%;
+    padding-bottom: 0px;
     padding-top: 1.5%;
     box-sizing: border-box;
     flex-shrink: 0;
@@ -289,6 +409,32 @@ export default {
     padding-top: 0px;
     height: 8% !important;
     padding-bottom: 0px;
+  }
+  .el-row {
+    margin-bottom: 20px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .el-col {
+    border-radius: 4px;
+  }
+  .bg-purple-dark {
+    background: #99a9bf;
+  }
+  .bg-purple {
+    background: #d3dce6;
+  }
+  .bg-purple-light {
+    background: #e5e9f2;
+  }
+  .grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+  }
+  .row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
   }
 </style>
 <style scoped>
