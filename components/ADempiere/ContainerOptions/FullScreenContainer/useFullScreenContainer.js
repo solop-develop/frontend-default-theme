@@ -36,7 +36,8 @@ export default ({ parentUuid, containerUuid }) => {
   })
 
   const isViewFullScreenChild = computed(() => {
-    return storedWindow.value.isFullScreenTabsChildren
+    if (!isEmptyValue(storedWindow.value)) return storedWindow.value.isFullScreenTabsChildren
+    return false
   })
 
   const isViewFullScreen = computed(() => {
