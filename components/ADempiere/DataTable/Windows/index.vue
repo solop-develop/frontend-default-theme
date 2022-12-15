@@ -241,6 +241,10 @@ export default defineComponent({
       const showMinimalistView = store.getters.getTableOption(props.containerUuid)
       if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
         return props.header.filter(fieldItem => {
+          if ([fieldItem.columnName, fieldItem.elementName].includes('TaskStatus')) {
+            return true
+          }
+
           const isDisplayedDefault = isDisplayedDefaultTable({
             ...fieldItem,
             isMandatory: props.containerManager.isMandatoryField(fieldItem)
