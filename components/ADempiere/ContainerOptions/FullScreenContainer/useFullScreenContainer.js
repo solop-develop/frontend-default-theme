@@ -36,7 +36,8 @@ export default ({ parentUuid, containerUuid }) => {
   })
 
   const isViewFullScreenChild = computed(() => {
-    return storedWindow.value.isFullScreenTabsChildren
+    if (!isEmptyValue(storedWindow.value)) return storedWindow.value.isFullScreenTabsChildren
+    return false
   })
 
   const isViewFullScreen = computed(() => {
@@ -47,10 +48,14 @@ export default ({ parentUuid, containerUuid }) => {
   })
 
   const iconFullScreen = computed(() => {
-    if (isViewFullScreen.value) {
-      return 'exit-fullscreen'
+    if (storedTab.value.isParentTab) {
+      if (isViewFullScreenParent.value) return 'exit-fullscreen'
+      return 'fullscreen'
     }
-    return 'fullscreen'
+    if (!storedTab.value.isParentTab) {
+      if (isViewFullScreenChild.value) return 'exit-fullscreen'
+      return 'fullscreen'
+    }
   })
 
   function changeFullScreenParent(value) {
@@ -88,11 +93,11 @@ export default ({ parentUuid, containerUuid }) => {
   function changeFullScreen() {
     if (storedTab.value.isParentTab) {
       changeFullScreenParent()
-      changeFullScreenChild(false)
+      // changeFullScreenChild(false)
       return
     }
     changeFullScreenChild()
-    changeFullScreenParent(false)
+    // changeFullScreenParent(false)
   }
 
   return {

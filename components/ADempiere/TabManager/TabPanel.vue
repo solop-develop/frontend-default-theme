@@ -297,7 +297,7 @@ export default defineComponent({
       if (root.isEmptyValue(isWithChildsTab.value)) return '10%!important'
       if (storedWindow.value.isFullScreenTabsParent) return '15% !important'
       if (props.isChildTab && storedWindow.value.isFullScreenTabsChildren) return '15% !important'
-      return '21%!important'
+      return '35%!important'
     })
 
     const styleFooterPanel = computed(() => {

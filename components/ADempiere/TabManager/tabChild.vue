@@ -531,11 +531,11 @@ export default defineComponent({
 </script>
 
 <style>
-.el-tabs--border-card > .el-tabs__content {
+/* .el-tabs--border-card > .el-tabs__content {
   padding: 15px;
   overflow: auto;
   height: 100%;
-}
+} */
 .scroll-child {
   /* max-height: 300px; */
   overflow-x: hidden;
