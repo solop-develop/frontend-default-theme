@@ -26,6 +26,13 @@
       :displayed-value="displayedValue"
     />
 
+    <progress-percentage
+      v-else-if="isPercentageColumn"
+      key="percentage-status"
+      :value="cellValue"
+      :displayed-value="displayedValue"
+    />
+
     <p
       v-else-if="!isEmptyValue(displayedValue) && displayedValue.length >= 23"
       key="display-column"
@@ -82,6 +89,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 // components and mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import ProgressPercentage from '@theme/components/ADempiere/ContainerOptions/ProgressPercentage.vue'
 
 // utils and helpers methods
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
@@ -95,7 +103,8 @@ export default defineComponent({
 
   components: {
     DocumentStatusTag,
-    FieldDefinition
+    FieldDefinition,
+    ProgressPercentage
   },
 
   props: {
@@ -110,7 +119,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { columnName, displayColumnName } = props.fieldAttributes
+    const { columnName, elementName, displayColumnName } = props.fieldAttributes
 
     const cellValue = computed(() => {
       return props.dataRow[columnName]
@@ -135,6 +144,10 @@ export default defineComponent({
       return classCss
     })
 
+    const isPercentageColumn = computed(() => {
+      return [columnName, elementName].includes('TaskStatus')
+    })
+
     function copyContent(value) {
       copyToClipboard({
         text: value,
@@ -144,6 +157,7 @@ export default defineComponent({
 
     return {
       // data
+      isPercentageColumn,
       TEXT_LONG,
       // computeds
       cellValue,
