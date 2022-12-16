@@ -30,7 +30,7 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
@@ -49,7 +49,7 @@ export default defineComponent({
 
   setup(props) {
     const colorsByPercentage = [
-      { color: '#62b5ff' }
+      { color: '#62b5ff' } // blue base
       // { color: '#FA0000', percentage: 10.1 }, // red
       // { color: '#ff3700', percentage: 30.1 }, // red obscure
       // { color: '#ffa200', percentage: 40.1 }, // orange
