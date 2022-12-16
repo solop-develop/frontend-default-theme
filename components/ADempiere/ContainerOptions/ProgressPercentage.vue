@@ -30,7 +30,7 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
@@ -49,16 +49,22 @@ export default defineComponent({
 
   setup(props) {
     const colorsByPercentage = [
-      { color: '#FA0000', percentage: 10.1 }, // red
-      { color: '#ff3700', percentage: 30.1 }, // red obscure
-      { color: '#ffa200', percentage: 40.1 }, // orange
-      { color: '#f6ff00', percentage: 60.1 }, // yellow
-      { color: '#bfff00', percentage: 80.1 }, // chartreuse green
-      { color: '#22ff00', percentage: 90.1 }, // lime green
-      { color: '#00ff6e', percentage: 99.1 }, // foam green
-      { color: '#2be20a', percentage: 100 } // green
+      { color: '#62b5ff' } // blue base
+      // { color: '#FA0000', percentage: 10.1 }, // red
+      // { color: '#ff3700', percentage: 30.1 }, // red obscure
+      // { color: '#ffa200', percentage: 40.1 }, // orange
+      // { color: '#f6ff00', percentage: 60.1 }, // yellow
+      // { color: '#bfff00', percentage: 80.1 }, // chartreuse green
+      // { color: '#22ff00', percentage: 90.1 }, // lime green
+      // { color: '#00ff6e', percentage: 99.1 }, // foam green
+      // { color: '#2be20a', percentage: 100 } // green
     ]
 
+    /**
+     * Get percentage value
+     * TODO: Change 'R_Request TaskStatus' List with number values
+     * @returns {number}
+     */
     const percentageValue = computed(() => {
       if (!isEmptyValue(props.displayedValue)) {
         const matches = props.displayedValue.match(/\b\d+(?:%|percent\b)/gim)
@@ -77,7 +83,7 @@ export default defineComponent({
           return Number(props.value) * 10
         }
       }
-      return 0 //props.value
+      return 0 // props.value
     })
 
     function percentageFormat(percentage) {
@@ -100,6 +106,8 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .percentage-color-palette {
+  color: '#62b5ff'; // blue base
+
   color: #FA0000; // 10% red
   color: #ff3700; // 30% red obscure
   color: #ffa200; // 40% orange
