@@ -77,7 +77,7 @@ export default defineComponent({
           return Number(props.value) * 10
         }
       }
-      return 0 //props.value
+      return 0 // props.value
     })
 
     function percentageFormat(percentage) {
