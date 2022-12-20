@@ -21,7 +21,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     <el-card shadow="always" style="padding: 15px">
       <el-form
         :inline="true"
-        label-position="left"
+        label-position="top"
         class="demo-form-inline"
       >
         <el-col :span="6">
@@ -37,7 +37,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 v-for="item in listPayment"
                 :key="item.KeyColumn"
                 :label="item.DisplayColumn"
-                :value="item"
+                :value="item.id"
               />
             </el-select>
           </el-form-item>
@@ -47,7 +47,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           <el-form-item
             :label="$t('VPayPrint.bankAccount')"
           >
-            {{ currentBankAccount }}
+            <el-input
+              v-show="!isEmptyValue(currentBankAccount)"
+              v-model="currentBankAccount"
+              disabled
+            />
           </el-form-item>
         </el-col>
 
@@ -55,7 +59,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           <el-form-item
             :label="$t('VPayPrint.currentBalance')"
           >
-            {{ currentBalance }}
+            <el-input
+              v-show="!isEmptyValue(currentBalance)"
+              v-model="currentBalance"
+              disabled
+            />
           </el-form-item>
         </el-col>
 
@@ -64,13 +72,14 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :label="$t('VPayPrint.paymentRule')"
           >
             <el-select
+              v-show="!isEmptyValue(paymentRule)"
               v-model="paymentRule"
             >
               <el-option
                 v-for="item in listPaymentRules"
-                :key="item.KeyColumn"
-                :label="item.DisplayColumn"
-                :value="item.KeyColumn"
+                :key="item.uuid"
+                :label="item.name"
+                :value="item.value"
               />
             </el-select>
           </el-form-item>
@@ -80,7 +89,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           <el-form-item
             :label="$t('VPayPrint.currency')"
           >
-            {{ currency }}
+            <el-input
+              v-show="!isEmptyValue(currency)"
+              v-model="currency"
+              disabled
+            />
           </el-form-item>
         </el-col>
 
@@ -147,6 +160,12 @@ export default defineComponent({
   setup(props, { root }) {
     /**
      * Refs
+     * @param {string} currentPaymentSelection - Selection of Current Payment
+     * @param {array} listPayment - List of Available Payment Selection
+     * @param {string} currentBankAccount - Current Payment Selection Bank Account
+     * @param {string} currentBalance - Current Balance of Current Payment Selection
+     * @param {string} paymentRule - Current Payment Rule of the Current Payment Selection
+     * @param {array} listPaymentRules - List of Payment Rule of the Current Payment Selection
      */
     const currentPaymentSelection = ref('')
     const listPayment = ref([])
@@ -166,20 +185,15 @@ export default defineComponent({
         return
       }
       listPaymentSelection()
-    }
-
-    function setPaymentSelection(payment) {
-      if (isEmptyValue(payment)) {
-        return
-      }
-
-      const { id, uuid } = payment
-      paymentSelection({
-        id,
-        uuid
-      })
         .then(response => {
-          listPaymentRules.value = response.payment
+          const { records } = response
+          listPayment.value = records.map(selectionPay => {
+            return {
+              ...selectionPay.values,
+              id: selectionPay.values.KeyColumn,
+              uuid: selectionPay.values.UUID
+            }
+          })
         })
         .catch(error => {
           showMessage({
@@ -189,9 +203,32 @@ export default defineComponent({
         })
     }
 
-    /**
-     * watch
-     */
+    function setPaymentSelection(payment) {
+      if (isEmptyValue(payment)) {
+        return
+      }
+      paymentSelection({
+        id: payment
+      })
+        .then(response => {
+          if (isEmptyValue(response.bank_account)) {
+            return showMessage({ message: 'error', type: 'error' })
+          }
+          currentBankAccount.value = response.bank_account.account_no
+          currentBalance.value = response.bank_account.current_balance
+          currency.value = response.bank_account.currency.iso_code
+          listPaymentRules.value = response.payment_rules
+          paymentRule.value = response.payment_rules[0].value
+          // listPaymentRules.value = response.payment
+        })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
     return {
       // Refs
       currentPaymentSelection,
