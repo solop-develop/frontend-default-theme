@@ -211,7 +211,9 @@ export default defineComponent({
         id: payment
       })
         .then(response => {
-          if (isEmptyValue(response.bank_account)) return showMessage({ message: 'error', type: 'error' })
+          if (isEmptyValue(response.bank_account)) {
+            return showMessage({ message: 'error', type: 'error' })
+          }
           currentBankAccount.value = response.bank_account.account_no
           currentBalance.value = response.bank_account.current_balance
           currency.value = response.bank_account.currency.iso_code
