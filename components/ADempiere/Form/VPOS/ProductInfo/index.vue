@@ -288,11 +288,12 @@ export default {
                     showClose: true
                   })
                 }
-                if (this.isEmptyValue(this.sendProduct) || recordsList.length === 1) {
-                  this.$refs.product.activated = false
+                //if (this.isEmptyValue(this.sendProduct) || recordsList.length === 1) {
+                  //this.$refs.product.activated = false
                   // this.handleSelect(recordsList[0])
-                  clearTimeout(this.timeOutProduct)
-                }
+                  //clearTimeout(this.timeOutProduct)
+                //}
+                
                 this.KeyPerformed = true
                 callBack(this.orderedByProduct(recordsList))
               })
