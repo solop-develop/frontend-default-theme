@@ -327,31 +327,31 @@ export default {
         switch (action.columnName) {
           case 'QtyEntered':
             setTimeout(() => {
-              // this.$message({
-              //   type: 'success',
-              //   message: this.$t('form.pos.pinMessage.updateQtyEntered'),
-              //   showClose: true
-              // })
+              this.$message({
+                type: 'success',
+                message: this.$t('form.pos.pinMessage.updateQtyEntered'),
+                showClose: true
+              })
               this.updateOrderLine(action)
             }, 500)
             break
           case 'PriceEntered':
             setTimeout(() => {
-              // this.$message({
-              //   type: 'success',
-              //   message: this.$t('form.pos.pinMessage.updatePriceEntered'),
-              //   showClose: true
-              // })
+              this.$message({
+                type: 'success',
+                message: this.$t('form.pos.pinMessage.updatePriceEntered'),
+                showClose: true
+              })
               this.updateOrderLine(action)
             }, 500)
             break
           case 'Discount':
             setTimeout(() => {
-              // this.$message({
-              //   type: 'success',
-              //   message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-              //   showClose: true
-              // })
+              this.$message({
+                type: 'success',
+                message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
+                showClose: true
+              })
               this.updateOrderLine(action)
             }, 500)
             break
@@ -781,11 +781,11 @@ export default {
             case 'QtyEntered':
               if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
                 this.updateOrderLine(mutation.payload)
-                // this.$message({
-                //   type: 'success',
-                //   message: this.$t('form.pos.pinMessage.updateQtyEntered'),
-                //   showClose: true
-                // })
+                this.$message({
+                  type: 'success',
+                  message: this.$t('form.pos.pinMessage.updateQtyEntered'),
+                  showClose: true
+                })
               } else {
                 const attributePin = {
                   ...mutation.payload,
@@ -800,11 +800,11 @@ export default {
             case 'PriceEntered':
               if (this.modifyPrice) {
                 this.updateOrderLine(mutation.payload)
-                // this.$message({
-                //   type: 'success',
-                //   message: this.$t('form.pos.pinMessage.updatePriceEntered'),
-                //   showClose: true
-                // })
+                this.$message({
+                  type: 'success',
+                  message: this.$t('form.pos.pinMessage.updatePriceEntered'),
+                  showClose: true
+                })
               } else {
                 const attributePin = {
                   ...mutation.payload,
@@ -819,11 +819,11 @@ export default {
             case 'Discount':
               if (this.modifyPrice) {
                 this.updateOrderLine(mutation.payload)
-                // this.$message({
-                //   type: 'success',
-                //   message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-                //   showClose: true
-                // })
+                this.$message({
+                  type: 'success',
+                  message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
+                  showClose: true
+                })
               } else {
                 const attributePin = {
                   ...mutation.payload,
