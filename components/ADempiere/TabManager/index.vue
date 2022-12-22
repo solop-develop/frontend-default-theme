@@ -119,19 +119,19 @@
       >
         <i class="el-icon-paperclip" />
       </el-button>
-
-      <el-button
-        v-show="showReference"
-        type="primary"
-        size="mini"
-        circle
-        style="margin: 0px"
-        @click="openRecordLogs('listReference')"
-      >
-        <i class="el-icon-zoom-in" />
-      </el-button>
-
-      <el-badge v-show="showChatAvailable" is-dot class="item">
+      <el-badge v-show="showReference" :value="countReference" class="item" type="primary">
+        <el-button
+          v-show="showReference"
+          type="primary"
+          size="mini"
+          circle
+          style="margin: 0px"
+          @click="openRecordLogs('listReference')"
+        >
+          <i class="el-icon-zoom-in" />
+        </el-button>
+      </el-badge>
+      <el-badge v-show="showChatAvailable">
         <el-button
           type="primary"
           size="mini"
@@ -192,7 +192,7 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 // API Request Methods
 import { requestListEntityChats } from '@/api/ADempiere/window'
 import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
-
+import { requestExistsReferences } from '@/api/ADempiere/window'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -291,6 +291,8 @@ export default defineComponent({
 
     const showReference = ref(false)
 
+    const countReference = ref(0)
+
     // use getter to reactive properties
     const currentTabMetadata = computed(() => {
       return store.getters.getStoredTab(props.parentUuid, tabUuid.value)
@@ -363,6 +365,9 @@ export default defineComponent({
       const { tabuuid, tabindex } = tabHTML.$attrs
       findRecordLogs(props.allTabsList[0])
       setTabNumber(tabindex)
+      // chatAvailable()
+      // attachmentAvailable()
+      // getReferences()
 
       // set metadata tab
       if (tabUuid.value !== tabuuid) {
@@ -593,14 +598,28 @@ export default defineComponent({
      */
 
     const getReferences = () => {
-      store.dispatch('getReferencesFromServer', {
-        tableName: currentTabTableName.value,
+      showReference.value = false
+      if (isEmptyValue(currentTabTableName.value) ||
+        (isEmptyValue(currentRecordUuid.value) &&
+        (isEmptyValue(currentRecordId.value) || currentRecordId.value <= 0))) {
+        return
+      }
+      requestExistsReferences({
+        tabId: currentTabMetadata.value.id,
+        tabUuid: currentTabMetadata.value.uuid,
         recordUuid: currentRecordUuid.value,
-        parentUuid: props.parentUuid
+        recordId: currentRecordId.value
       })
         .then(responseReferences => {
-          const { referencesList } = responseReferences
-          showReference.value = !isEmptyValue(referencesList)
+          if (responseReferences > 0) {
+            showReference.value = true
+            countReference.value = responseReferences
+            return
+          }
+          showReference.value = false
+          return
+          // const { referencesList } = responseReferences
+          // showReference.value = !isEmptyValue(referencesList)
         })
         .catch(() => {})
     }
@@ -694,6 +713,7 @@ export default defineComponent({
     setTabNumber(currentTab.value)
     chatAvailable()
     attachmentAvailable()
+    getReferences()
 
     return {
       tabUuid,
@@ -706,6 +726,7 @@ export default defineComponent({
       showChatAvailable,
       showAttachmentAvailable,
       showReference,
+      countReference,
       // computed
       isMobile,
       isDrawerWidth,
