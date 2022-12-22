@@ -347,6 +347,13 @@ export default defineComponent({
       }
       if (tab.name === 'listReference') {
         tab.name = 'listReference'
+        store.dispatch('getReferencesFromServer', {
+          tableName: currentTab.value.tableName,
+          containerUuid: currentTab.value.containerUuid,
+          parentUuid: currentTab.value.parentUuid,
+          recordId: currentRecordId.value,
+          recordUuid: currentRecordUuid.value,
+        })
       }
       if (isEmptyValue(props.containerManager[tab.name])) {
         return
