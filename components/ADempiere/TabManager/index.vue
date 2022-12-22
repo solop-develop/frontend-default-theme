@@ -193,6 +193,7 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 import { requestListEntityChats } from '@/api/ADempiere/window'
 import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
 import { requestExistsReferences } from '@/api/ADempiere/window'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { showMessage } from '@/utils/ADempiere/notification'
