@@ -387,9 +387,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+
 import lang from '@/lang'
 import store from '@/store'
-// components and mixins
+
+// Components and Mixins
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 
 // Utils and Helper Methods
@@ -539,7 +541,6 @@ export default defineComponent({
      */
 
     // Set Values  (Payment Select and Document No)
-
     function setPaymentSelection(payment) {
       if (isEmptyValue(payment)) {
         return
@@ -551,7 +552,11 @@ export default defineComponent({
           listPaymentRules.value = []
           const bankAccount = response.bank_account
           if (isEmptyValue(bankAccount)) {
-            return showMessage({ message: 'error', type: 'error' })
+            showMessage({
+              message: 'error',
+              type: 'error'
+            })
+            return
           }
           currentBankAccount.value = bankAccount.account_no
           currentBalance.value = bankAccount.current_balance
@@ -583,7 +588,6 @@ export default defineComponent({
     }
 
     // List Option Select (List Payment Selection and List Payment Rules)
-
     function findListPaymentRueles(isfindRules) {
       if (!isfindRules) return
       paymentRules({
@@ -631,7 +635,6 @@ export default defineComponent({
     }
 
     // Find List Record in Table
-
     function listTable({
       paymentSelectionId,
       paymentRuleId
@@ -646,7 +649,6 @@ export default defineComponent({
     }
 
     // Bottom Panel Button Panel / Form Options (Process Payment Selecction And PrintPayment And toExport)
-
     function processPayment() {
       isLoadProcess.value = true
       process({
@@ -656,9 +658,6 @@ export default defineComponent({
       })
         .then(response => {
           isLoadProcess.value = false
-          console.log({
-            response
-          })
         })
         .catch(error => {
           isLoadProcess.value = false
@@ -678,9 +677,6 @@ export default defineComponent({
       })
         .then(response => {
           isLoadPrint.value = false
-          console.log({
-            response
-          })
         })
         .catch(error => {
           isLoadPrint.value = false
@@ -700,9 +696,6 @@ export default defineComponent({
       })
         .then(response => {
           isLoadExport.value = false
-          console.log({
-            response
-          })
         })
         .catch(error => {
           isLoadExport.value = false
@@ -728,6 +721,7 @@ export default defineComponent({
         })
       }
     })
+
     watch(paymentRule, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         listTable({
