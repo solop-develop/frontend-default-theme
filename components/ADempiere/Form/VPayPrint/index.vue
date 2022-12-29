@@ -20,6 +20,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
   <el-row style="padding-top: 25px;padding-left: 10px;padding-right: 10px;">
     <div>
       <div style="display: flex">
+        <!-- Left Pane Search Filter -->
         <div style="width: 50%;">
           <el-card shadow="always" style="padding: 10px !important;height: 100%;">
             <el-form
@@ -33,6 +34,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 >
                   <el-select
                     v-model="currentPaymentSelection"
+                    filterable
                     @visible-change="findListPaymentSelection"
                     @change="setPaymentSelection"
                   >
@@ -50,14 +52,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :label="$t('VPayPrint.paymentRule')"
                 >
                   <el-select
-                    v-show="!isEmptyValue(paymentRule)"
+                    v-show="!isEmptyValue(currentPaymentSelection)"
                     v-model="paymentRule"
+                    filterable
+                    @visible-change="findListPaymentRueles"
                   >
                     <el-option
-                      v-for="item in listPaymentRules"
-                      :key="item.uuid"
-                      :label="item.name"
-                      :value="item.value"
+                      v-for="(item, key) in listPaymentRules"
+                      :key="key"
+                      :label="item.displayColumn"
+                      :value="item.id"
                     />
                   </el-select>
                 </el-form-item>
@@ -66,14 +70,19 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-form-item
                   label="Siguiente Secuencia"
                 >
-                  {{ numberPayments }}
+                  <el-input
+                    v-show="!isEmptyValue(currentBalance)"
+                    v-model="numberPayments"
+                  />
                 </el-form-item>
               </el-col>
             </el-form>
           </el-card>
         </div>
+        <!-- Right panel -->
         <div style="width: 50%;">
           <el-card shadow="always" style="padding: 10px !important;">
+            <!-- Top Panel Labels / E Payment Selection Information -->
             <el-row>
               <el-form
                 :inline="true"
@@ -83,59 +92,85 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-col :span="24">
                   <el-form-item
                     label="Banco"
+                    style="margin-bottom: 0px;"
                   >
-                    <el-input
+                    <!-- <el-input
                       v-show="!isEmptyValue(currentBankAccount)"
                       v-model="currentBankAccount"
                       disabled
-                    />
+                    /> -->
+                    <b style="font-size: 18px;"> {{ currentBank }} </b>
                   </el-form-item>
                 </el-col>
                 <el-col :span="24">
                   <el-form-item
                     :label="$t('VPayPrint.bankAccount')"
+                    style="margin-bottom: 0px;"
                   >
-                    <el-input
+                    <!-- <el-input
                       v-show="!isEmptyValue(currentBankAccount)"
                       v-model="currentBankAccount"
                       disabled
-                    />
+                    /> -->
+                    <b style="font-size: 18px;"> {{ currentBankAccount }} </b>
                   </el-form-item>
                 </el-col>
                 <el-col :span="24">
                   <el-form-item
                     :label="$t('VPayPrint.currentBalance')"
+                    style="margin-bottom: 0px;"
                   >
-                    <el-input
-                      v-show="!isEmptyValue(currentBalance)"
-                      v-model="currentBalance"
-                      disabled
-                    />
+                    <b v-show="!isEmptyValue(currentBankAccount)" style="font-size: 18px;"> {{ formatPrice({ value: currentBalance, currency}) }} </b>
                   </el-form-item>
                 </el-col>
               </el-form>
             </el-row>
+            <!-- Bottom Panel Button Panel / Form Options -->
             <el-row>
               <el-col :span="24">
                 <el-card shadow="never" style="padding: 10px !important;">
-                  <div slot="header" class="clearfix" style="text-align: center">
-                    <b> {{ $t('VPayPrint.button.labelPanel') }} </b>
+                  <div slot="header" class="clearfix" style="text-align: center;">
+                    <b> {{ $t('VPayPrint.buttons.labelPanel') }} </b>
                   </div>
-                  <div style="text-align: center">
-                    <el-button plain type="info">
-                      <i class="el-icon-printer" />
-                      <br>
-                      <b> {{ $t('VPayPrint.button.print') }} </b>
+                  <div style="text-align: center;padding-top: 20px;">
+                    <el-button
+                      plain
+                      type="info"
+                      :loading="isLoadPrint"
+                      :disable="isLoadPrint"
+                      @click="printPayment"
+                    >
+                      <span v-show="!isLoadPrint">
+                        <i class="el-icon-printer" />
+                        <br>
+                        <b> {{ $t('VPayPrint.buttons.print') }} </b>
+                      </span>
                     </el-button>
-                    <el-button plain type="primary">
-                      <i class="el-icon-share" />
-                      <br>
-                      <b> {{ $t('VPayPrint.button.toExport') }} </b>
+                    <el-button
+                      plain
+                      type="primary"
+                      :loading="isLoadExport"
+                      :disable="isLoadExport"
+                      @click="toExport"
+                    >
+                      <span v-show="!isLoadExport">
+                        <i class="el-icon-download" />
+                        <br>
+                        <b> {{ $t('VPayPrint.buttons.toExport') }} </b>
+                      </span>
                     </el-button>
-                    <el-button plain type="success">
-                      <i class="el-icon-s-tools" />
-                      <br>
-                      <b> {{ $t('VPayPrint.button.processOnLine') }} </b>
+                    <el-button
+                      plain
+                      type="success"
+                      :loading="isLoadProcess"
+                      :disable="isLoadProcess"
+                      @click="processPayment"
+                    >
+                      <span v-show="!isLoadProcess">
+                        <i class="el-icon-s-tools" />
+                        <br>
+                        <b> {{ $t('VPayPrint.buttons.processOnLine') }} </b>
+                      </span>
                     </el-button>
                   </div>
                 </el-card>
@@ -144,20 +179,34 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </el-card>
         </div>
       </div>
+      <!-- Payment List Table -->
       <div>
         <el-table
           :data="dataLote"
           style="width: 100%"
         >
-          <index-column
-            :page-number="dataLote.length"
-          />
-          <el-table-column
-            v-for="(head, key) in headerTable"
-            :key="key"
-            :prop="head.columnName"
-            :label="head.label"
-          />
+          <el-table-column :label="$t('VPayPrint.headerTable.title')">
+            <index-column
+              :page-number="dataLote.length"
+            />
+            <el-table-column
+              v-for="(head, key) in headerTable"
+              :key="key"
+              :prop="head.columnName"
+              :label="head.label"
+              :align="head.align"
+            >
+              <template slot-scope="scope">
+                <span v-if="head.align === 'right'">
+                  {{ formatQuantity({ value: scope.row[head.columnName] }) }}
+                </span>
+                <span v-else>
+                  {{ scope.row[head.columnName] }}
+                </span>
+                <!-- {{ scope.row[head.columnName] }} -->
+              </template>
+            </el-table-column>
+          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -165,7 +214,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, ref, watch } from '@vue/composition-api'
 import lang from '@/lang'
 // components and mixins
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
@@ -173,11 +222,25 @@ import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexC
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
+import {
+  formatQuantity,
+  formatPrice
+} from '@/utils/ADempiere/formatValue/numberFormat'
 
 // API Request Methods
 import {
-  listPaymentSelection,
-  paymentSelection
+  // Set
+  paymentSelection,
+  // List
+  paymentSelections,
+  paymentRules,
+  // Table
+  listPaymentTable,
+  // Documemnt No Sequence
+  documentSequence,
+  print,
+  exportPayment,
+  process
 } from '@/api/ADempiere/form/VPayPrint.js'
 
 export default defineComponent({
@@ -210,49 +273,113 @@ export default defineComponent({
     const listPayment = ref([])
     const currentBankAccount = ref('')
     const currentBalance = ref('')
+    const currentBank = ref('')
     const paymentRule = ref('')
     const listPaymentRules = ref([])
     const documentNo = ref(null)
     const numberPayments = ref('')
     const currency = ref('')
+    const currentBankAccountId = ref(0)
+    const isLoadPrint = ref(false)
+    const isLoadExport = ref(false)
+    const isLoadProcess = ref(false)
 
     // Table
     const dataLote = ref([])
     const headerTable = [
       {
-        columnName: 'provider',
-        label: lang.t('VPayPrint.headerTable.provider')
+        columnName: 'vendor_name',
+        label: lang.t('VPayPrint.headerTable.provider'),
+        align: 'left'
       },
       {
-        columnName: 'invoice',
-        label: lang.t('VPayPrint.headerTable.invoice')
+        columnName: 'document_no',
+        label: lang.t('VPayPrint.headerTable.invoice'),
+        align: 'left'
       },
       {
-        columnName: 'grandTotal',
-        label: lang.t('VPayPrint.headerTable.grandTotal')
+        columnName: 'grand_total',
+        label: lang.t('VPayPrint.headerTable.grandTotal'),
+        align: 'right'
       },
       {
-        columnName: 'subscriber',
-        label: lang.t('VPayPrint.headerTable.subscriber')
+        columnName: 'payment_amount',
+        label: lang.t('VPayPrint.headerTable.subscriber'),
+        align: 'right'
       },
       {
-        columnName: 'payable',
-        label: lang.t('VPayPrint.headerTable.payable')
+        columnName: 'over_under_amount',
+        label: lang.t('VPayPrint.headerTable.payable'),
+        align: 'right'
       },
       {
-        columnName: 'pending',
-        label: lang.t('VPayPrint.headerTable.pending')
+        columnName: 'open_amount',
+        label: lang.t('VPayPrint.headerTable.pending'),
+        align: 'right'
       }
     ]
 
     /**
      * Methods
      */
+
+    function setPaymentSelection(payment) {
+      if (isEmptyValue(payment)) {
+        return
+      }
+      paymentSelection({
+        id: payment
+      })
+        .then(response => {
+          listPaymentRules.value = []
+          const bankAccount = response.bank_account
+          if (isEmptyValue(bankAccount)) {
+            return showMessage({ message: 'error', type: 'error' })
+          }
+          currentBankAccount.value = bankAccount.account_no
+          currentBalance.value = bankAccount.current_balance
+          currentBank.value = bankAccount.bank_name
+          currentBankAccountId.value = bankAccount.id
+          currency.value = response.currency.iso_code
+        })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
+    // List
+
+    function findListPaymentRueles(isfindRules) {
+      if (!isfindRules) return
+      paymentRules({
+        paymentSelectionId: currentPaymentSelection.value
+      })
+        .then(response => {
+          const { records } = response
+          listPaymentRules.value = records.map(rulesPay => {
+            return {
+              ...rulesPay,
+              displayColumn: rulesPay.values.DisplayColumn,
+              keyColumn: rulesPay.values.KeyColumn
+            }
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
     function findListPaymentSelection(isFind) {
       if (!isFind) {
         return
       }
-      listPaymentSelection()
+      paymentSelections()
         .then(response => {
           const { records } = response
           listPayment.value = records.map(selectionPay => {
@@ -271,31 +398,135 @@ export default defineComponent({
         })
     }
 
-    function setPaymentSelection(payment) {
-      if (isEmptyValue(payment)) {
-        return
-      }
-      paymentSelection({
-        id: payment
+    // List Record in Table
+
+    function listTable({
+      paymentSelectionId,
+      paymentRuleId
+    }) {
+      listPaymentTable({
+        paymentSelectionId,
+        paymentRuleId
+      })
+        .then(responseTable => {
+          dataLote.value = responseTable.records
+        })
+    }
+
+    // Set Document No
+
+    function setDocument({
+      paymentSelectionId,
+      paymentRuleId,
+      banckAccountId
+    }) {
+      documentSequence({
+        paymentSelectionId,
+        paymentRuleId,
+        banckAccountId
       })
         .then(response => {
-          if (isEmptyValue(response.bank_account)) {
-            return showMessage({ message: 'error', type: 'error' })
-          }
-          currentBankAccount.value = response.bank_account.account_no
-          currentBalance.value = response.bank_account.current_balance
-          currency.value = response.bank_account.currency.iso_code
-          listPaymentRules.value = response.payment_rules
-          paymentRule.value = response.payment_rules[0].value
-          // listPaymentRules.value = response.payment
+          numberPayments.value = response.document_no
+        })
+    }
+
+    // Process Payment Selecction
+
+    function processPayment() {
+      isLoadProcess.value = true
+      process({
+        paymentSelectionId: currentPaymentSelection.value,
+        paymentRuleId: paymentRule.value,
+        documentNo: numberPayments.value
+      })
+        .then(response => {
+          isLoadProcess.value = false
+          console.log({
+            response
+          })
         })
         .catch(error => {
+          isLoadProcess.value = false
           showMessage({
             message: error,
             type: 'error'
           })
         })
     }
+
+    function printPayment() {
+      isLoadPrint.value = true
+      print({
+        paymentSelectionId: currentPaymentSelection.value,
+        paymentRuleId: paymentRule.value,
+        documentNo: numberPayments.value
+      })
+        .then(response => {
+          isLoadPrint.value = false
+          console.log({
+            response
+          })
+        })
+        .catch(error => {
+          isLoadPrint.value = false
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
+    function toExport() {
+      isLoadExport.value = true
+      exportPayment({
+        paymentSelectionId: currentPaymentSelection.value,
+        paymentRuleId: paymentRule.value,
+        documentNo: numberPayments.value
+      })
+        .then(response => {
+          isLoadExport.value = false
+          console.log({
+            response
+          })
+        })
+        .catch(error => {
+          isLoadExport.value = false
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
+    /**
+     * Watch
+     */
+    watch(currentPaymentSelection, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue) && newValue !== oldValue) {
+        listTable({
+          paymentSelectionId: newValue,
+          paymentRuleId: paymentRule.value
+        })
+        setDocument({
+          paymentSelectionId: newValue,
+          paymentRuleId: paymentRule.value
+        })
+      }
+    })
+    watch(paymentRule, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue) && newValue !== oldValue) {
+        listTable({
+          paymentSelectionId: currentPaymentSelection.value,
+          paymentRuleId: newValue,
+          banckAccountId: currentBankAccountId.value
+        })
+        setDocument({
+          paymentSelectionId: currentPaymentSelection.value,
+          paymentRuleId: newValue,
+          banckAccountId: currentBankAccountId.value
+        })
+      }
+    })
 
     return {
       // Const
@@ -305,15 +536,29 @@ export default defineComponent({
       listPayment,
       currentBankAccount,
       currentBalance,
+      currentBank,
       paymentRule,
       listPaymentRules,
       documentNo,
+      currentBankAccountId,
       numberPayments,
       currency,
       dataLote,
+      // loading Button
+      isLoadPrint,
+      isLoadExport,
+      isLoadProcess,
       // Methods
       findListPaymentSelection,
-      setPaymentSelection
+      findListPaymentRueles,
+      setPaymentSelection,
+      listTable,
+      setDocument,
+      processPayment,
+      toExport,
+      printPayment,
+      formatQuantity,
+      formatPrice
     }
   }
 })
