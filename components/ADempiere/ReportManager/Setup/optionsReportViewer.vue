@@ -8,20 +8,20 @@
  (at your option) any later version.
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <!-- query criteria -->
   <el-card class="box-card">
-    <div slot="header" class="clearfix">
+    <div v-if="isShowTitle" slot="header" class="clearfix">
       <b>
         {{ $t('report.reportSettings') }}
       </b>
     </div>
+
     <el-collapse v-model="activeCollapse">
       <el-collapse-item name="1">
         <template slot="title">
@@ -40,7 +40,7 @@
               <el-row :gutter="20">
                 <el-col :span="8">
                   <el-form-item
-                    :label="$t('report.reportSettings')"
+                    :label="$t('report.printFormats')"
                     style="display: grid;"
                   >
                     <el-select
@@ -105,6 +105,8 @@
           </div>
         </el-card>
       </el-collapse-item>
+
+      <!-- report parameters -->
       <el-collapse-item name="2">
         <template slot="title">
           <b>
@@ -119,6 +121,7 @@
         />
       </el-collapse-item>
     </el-collapse>
+
     <el-row
       style="
         position: absolute;
@@ -146,13 +149,18 @@
 
 <script>
 import { defineComponent, computed, ref, watch } from '@vue/composition-api'
-import CollapseCriteria from '@theme/components/ADempiere/CollapseCriteria/index.vue'
-import store from '@/store'
+
 import router from '@/router'
+import store from '@/store'
+
+// Components adn Mixins
+import CollapseCriteria from '@theme/components/ADempiere/CollapseCriteria/index.vue'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
-  name: 'optionsReportViwer',
+  name: 'optionsReportViewer',
 
   components: {
     CollapseCriteria
@@ -166,6 +174,10 @@ export default defineComponent({
     containerManager: {
       type: Object,
       required: true
+    },
+    isShowTitle: {
+      type: Boolean,
+      default: true
     }
   },
 
