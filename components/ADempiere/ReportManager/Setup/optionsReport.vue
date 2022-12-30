@@ -15,13 +15,13 @@
 -->
 
 <template>
-  <!-- query criteria -->
   <el-card class="box-card">
-    <div slot="header" class="clearfix">
+    <div v-if="isShowTitle" slot="header" class="clearfix">
       <b>
         {{ $t('report.reportSettings') }}
       </b>
     </div>
+
     <div class="text item">
       <el-form
         label-position="top"
@@ -31,7 +31,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item
-              :label="$t('report.reportSettings')"
+              :label="$t('report.printFormats')"
               style="display: grid;"
             >
               <el-select
@@ -86,6 +86,7 @@
         </el-row>
       </el-form>
     </div>
+
     <el-row
       style="
         position: absolute;
@@ -132,6 +133,10 @@ export default defineComponent({
     containerManager: {
       type: Object,
       required: true
+    },
+    isShowTitle: {
+      type: Boolean,
+      default: true
     }
   },
 
