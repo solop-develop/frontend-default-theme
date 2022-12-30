@@ -141,7 +141,7 @@ export default {
     copyValue() {
       let textToCopy = this.value
       if (isEmptyValue(textToCopy)) {
-        textToCopy  = '' // empty string
+        textToCopy = '' // empty string
       }
       copyToClipboard({
         text: textToCopy,
