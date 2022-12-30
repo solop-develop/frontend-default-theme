@@ -21,12 +21,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     <div v-if="!isMobile">
       <div style="display: flex">
         <!-- Left Pane Search Filter -->
-        <div style="width: 50%;">
+        <div class="panel-left-search-filter" style="width: 50%;">
           <el-card shadow="always" style="padding: 10px !important;height: 100%;">
             <el-form
               :inline="true"
               label-position="top"
-              class="demo-form-inline"
             >
               <el-col :span="24">
                 <el-form-item
@@ -80,14 +79,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </el-card>
         </div>
         <!-- Right panel -->
-        <div style="width: 50%;">
+        <div class="right-panel-top-panel-labels" style="width: 50%;">
           <el-card shadow="always" style="padding: 10px !important;">
             <!-- Top Panel Labels / E Payment Selection Information -->
             <el-row>
               <el-form
                 :inline="true"
                 label-position="top"
-                class="demo-form-inline"
               >
                 <el-col :span="24">
                   <el-form-item
@@ -123,45 +121,108 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     <b> {{ $t('VPayPrint.buttons.labelPanel') }} </b>
                   </div>
                   <div style="text-align: center;padding-top: 20px;">
-                    <el-button
-                      plain
-                      type="info"
-                      :loading="isLoadPrint"
-                      :disable="isLoadPrint"
-                      @click="printPayment"
+                    <!-- Process Print Payment -->
+                    <el-popover
+                      ref="printProcess"
+                      :title="'¿' + $t('VPayPrint.message.printMessage') + actionMessageProcessOnLine + '?'"
+                      placement="top"
+                      trigger="click"
                     >
-                      <span v-show="!isLoadPrint">
-                        <i class="el-icon-printer" />
-                        <br>
-                        <b> {{ $t('VPayPrint.buttons.print') }} </b>
-                      </span>
-                    </el-button>
-                    <el-button
-                      plain
-                      type="primary"
-                      :loading="isLoadExport"
-                      :disable="isLoadExport"
-                      @click="toExport"
+                      <el-button
+                        style="float:right;margin-left: 10px;"
+                        type="primary"
+                        icon="el-icon-check"
+                        @click="checkProcess('printProcess')"
+                      />
+                      <el-button
+                        style="float: right;"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="closeProcess('printProcess')"
+                      />
+                      <el-button
+                        slot="reference"
+                        plain
+                        type="info"
+                        :loading="isLoadPrint"
+                        :disabled="(isLoadPrint || isEmptyValue(dataLot))"
+                        style="margin: 0px 5px 0px 5px;"
+                      >
+                        <span v-show="!isLoadPrint">
+                          <i class="el-icon-printer" />
+                          <br>
+                          <b> {{ $t('VPayPrint.buttons.print') }} </b>
+                        </span>
+                      </el-button>
+                    </el-popover>
+                    <!-- Process Export Payment -->
+                    <el-popover
+                      ref="exportProcess"
+                      :title="'¿' + $t('VPayPrint.message.ExportMessage') + actionMessageProcessOnLine + '?'"
+                      placement="top"
+                      trigger="click"
                     >
-                      <span v-show="!isLoadExport">
-                        <i class="el-icon-download" />
-                        <br>
-                        <b> {{ $t('VPayPrint.buttons.toExport') }} </b>
-                      </span>
-                    </el-button>
-                    <el-button
-                      plain
-                      type="success"
-                      :loading="isLoadProcess"
-                      :disable="isLoadProcess"
-                      @click="processPayment"
+                      <el-button
+                        style="float:right;margin-left: 10px;"
+                        type="primary"
+                        icon="el-icon-check"
+                        @click="checkProcess('exportProcess')"
+                      />
+                      <el-button
+                        style="float: right;"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="closeProcess('exportProcess')"
+                      />
+                      <el-button
+                        slot="reference"
+                        plain
+                        type="primary"
+                        :loading="isLoadExport"
+                        :disabled="(isLoadExport || isEmptyValue(dataLot))"
+                        style="margin: 0px 5px 0px 5px;"
+                      >
+                        <span v-show="!isLoadExport">
+                          <i class="el-icon-download" />
+                          <br>
+                          <b> {{ $t('VPayPrint.buttons.toExport') }} </b>
+                        </span>
+                      </el-button>
+                    </el-popover>
+                    <!-- Process on Line -->
+                    <el-popover
+                      ref="processOnLine"
+                      :title="'¿' + $t('VPayPrint.message.processMessage') + actionMessageProcessOnLine + '?'"
+                      placement="top"
+                      trigger="click"
                     >
-                      <span v-show="!isLoadProcess">
-                        <i class="el-icon-s-tools" />
-                        <br>
-                        <b> {{ $t('VPayPrint.buttons.processOnLine') }} </b>
-                      </span>
-                    </el-button>
+                      <el-button
+                        style="float:right;margin-left: 10px;"
+                        type="primary"
+                        icon="el-icon-check"
+                        @click="checkProcess('processOnLine')"
+                      />
+                      <el-button
+                        style="float: right;"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="closeProcess('processOnLine')"
+                      />
+                      <el-button
+                        slot="reference"
+                        plain
+                        type="success"
+                        :loading="isLoadProcess"
+                        :disabled="(isLoadProcess || isEmptyValue(dataLot))"
+                        style="margin: 0px 5px 0px 5px;"
+                      >
+                        <span v-show="!isLoadProcess">
+                          <i class="el-icon-s-tools" />
+                          <br>
+                          <b> {{ $t('VPayPrint.buttons.processOnLine') }} </b>
+                        </span>
+                      </el-button>
+                    </el-popover>
                   </div>
                 </el-card>
               </el-col>
@@ -200,6 +261,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         </el-table>
       </div>
     </div>
+    <!-- Mode Mobile -->
     <div v-else :style="styleMobile">
       <div style="overflow: auto;">
         <!-- Left Pane Search Filter -->
@@ -304,46 +366,109 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   <div slot="header" class="clearfix" style="text-align: center;">
                     <b> {{ $t('VPayPrint.buttons.labelPanel') }} </b>
                   </div>
-                  <div style="text-align: center;padding-top: 20px;">
-                    <el-button
-                      plain
-                      type="info"
-                      :loading="isLoadPrint"
-                      :disable="isLoadPrint"
-                      @click="printPayment"
+                  <div style="padding-top: 20px;text-align: center;float: right;width: 100%;">
+                    <!-- Process Print Payment -->
+                    <el-popover
+                      ref="printProcess"
+                      :title="'¿' + $t('VPayPrint.message.printMessage') + actionMessageProcessOnLine + '?'"
+                      placement="top"
+                      trigger="click"
                     >
-                      <span v-show="!isLoadPrint">
-                        <i class="el-icon-printer" />
-                        <br>
-                        <b> {{ $t('VPayPrint.buttons.print') }} </b>
-                      </span>
-                    </el-button>
-                    <el-button
-                      plain
-                      type="primary"
-                      :loading="isLoadExport"
-                      :disable="isLoadExport"
-                      @click="toExport"
+                      <el-button
+                        style="float:right;margin-left: 10px;"
+                        type="primary"
+                        icon="el-icon-check"
+                        @click="checkProcess('printProcess')"
+                      />
+                      <el-button
+                        style="float: right;"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="closeProcess('printProcess')"
+                      />
+                      <el-button
+                        slot="reference"
+                        plain
+                        type="info"
+                        :loading="isLoadPrint"
+                        :disabled="(isLoadPrint || isEmptyValue(dataLot))"
+                        style="padding: 10px; margin: 0px 5px 0px 5px;"
+                      >
+                        <span v-show="!isLoadPrint">
+                          <i class="el-icon-printer" />
+                          <br>
+                          <b> {{ $t('VPayPrint.buttons.print') }} </b>
+                        </span>
+                      </el-button>
+                    </el-popover>
+                    <!-- Process Export Payment -->
+                    <el-popover
+                      ref="exportProcess"
+                      :title="'¿' + $t('VPayPrint.message.ExportMessage') + actionMessageProcessOnLine + '?'"
+                      placement="top"
+                      trigger="click"
                     >
-                      <span v-show="!isLoadExport">
-                        <i class="el-icon-download" />
-                        <br>
-                        <b> {{ $t('VPayPrint.buttons.toExport') }} </b>
-                      </span>
-                    </el-button>
-                    <el-button
-                      plain
-                      type="success"
-                      :loading="isLoadProcess"
-                      :disable="isLoadProcess"
-                      @click="processPayment"
+                      <el-button
+                        style="float:right;margin-left: 10px;"
+                        type="primary"
+                        icon="el-icon-check"
+                        @click="checkProcess('exportProcess')"
+                      />
+                      <el-button
+                        style="float: right;"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="closeProcess('exportProcess')"
+                      />
+                      <el-button
+                        slot="reference"
+                        plain
+                        type="primary"
+                        :loading="isLoadExport"
+                        :disabled="(isLoadExport || isEmptyValue(dataLot))"
+                        style="padding: 10px; margin: 0px 5px 0px 5px;"
+                      >
+                        <span v-show="!isLoadExport">
+                          <i class="el-icon-download" />
+                          <br>
+                          <b> {{ $t('VPayPrint.buttons.toExport') }} </b>
+                        </span>
+                      </el-button>
+                    </el-popover>
+                    <!-- Process on Line -->
+                    <el-popover
+                      ref="processOnLine"
+                      :title="'¿' + $t('VPayPrint.message.processMessage') + actionMessageProcessOnLine + '?'"
+                      placement="top"
+                      trigger="click"
                     >
-                      <span v-show="!isLoadProcess">
-                        <i class="el-icon-s-tools" />
-                        <br>
-                        <b> {{ $t('VPayPrint.buttons.processOnLine') }} </b>
-                      </span>
-                    </el-button>
+                      <el-button
+                        style="float:right;margin-left: 10px;"
+                        type="primary"
+                        icon="el-icon-check"
+                        @click="checkProcess('processOnLine')"
+                      />
+                      <el-button
+                        style="float: right;"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="closeProcess('processOnLine')"
+                      />
+                      <el-button
+                        slot="reference"
+                        plain
+                        type="success"
+                        :loading="isLoadProcess"
+                        :disabled="(isLoadProcess || isEmptyValue(dataLot))"
+                        style="padding: 10px; margin: 0px 5px 0px 5px;"
+                      >
+                        <span v-show="!isLoadProcess">
+                          <i class="el-icon-s-tools" />
+                          <br>
+                          <b> {{ $t('VPayPrint.buttons.processOnLine') }} </b>
+                        </span>
+                      </el-button>
+                    </el-popover>
                   </div>
                 </el-card>
               </el-col>
@@ -367,6 +492,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               :prop="head.columnName"
               :label="head.label"
               :align="head.align"
+              min-width="120px"
             >
               <template slot-scope="scope">
                 <span v-if="head.align === 'right'">
@@ -435,7 +561,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props, { root, refs }) {
     /**
      * Const
      *  # headerTable
@@ -458,18 +584,23 @@ export default defineComponent({
         align: 'right'
       },
       {
-        columnName: 'payment_amount',
-        label: lang.t('VPayPrint.headerTable.subscriber'),
-        align: 'right'
-      },
-      {
         columnName: 'over_under_amount',
-        label: lang.t('VPayPrint.headerTable.payable'),
+        label: lang.t('VPayPrint.headerTable.subscriber'),
         align: 'right'
       },
       {
         columnName: 'open_amount',
         label: lang.t('VPayPrint.headerTable.pending'),
+        align: 'right'
+      },
+      {
+        columnName: 'payment_amount',
+        label: lang.t('VPayPrint.headerTable.payable'),
+        align: 'right'
+      },
+      {
+        columnName: 'final_balance',
+        label: 'Saldo Final',
         align: 'right'
       }
     ]
@@ -523,6 +654,14 @@ export default defineComponent({
     // Table
     const dataLot = ref([])
 
+    // isModal
+    const wantProcessTransfer = ref(false)
+
+    // Refs Popover
+    const processOnLine = ref()
+    const printProcess = ref()
+    const exportProcess = ref()
+
     /**
      * Computed
      *  @param {boolean} isMobile - Detect a mobile device
@@ -534,6 +673,12 @@ export default defineComponent({
     const styleMobile = computed(() => {
       if (isMobile.value) return 'overflow: auto;height: 83%;'
       return ''
+    })
+
+    const actionMessageProcessOnLine = computed(() => {
+      if (isEmptyValue(paymentRule.value)) return ''
+      const typeRule = listPaymentRules.value.find(rule => rule.id === paymentRule.value)
+      return paymentRuleTranslation(typeRule)
     })
 
     /**
@@ -658,6 +803,11 @@ export default defineComponent({
       })
         .then(response => {
           isLoadProcess.value = false
+          wantProcessTransfer.value = false
+          showMessage({
+            message: 'OK',
+            type: 'success'
+          })
         })
         .catch(error => {
           isLoadProcess.value = false
@@ -677,6 +827,10 @@ export default defineComponent({
       })
         .then(response => {
           isLoadPrint.value = false
+          showMessage({
+            message: 'OK',
+            type: 'success'
+          })
         })
         .catch(error => {
           isLoadPrint.value = false
@@ -696,6 +850,10 @@ export default defineComponent({
       })
         .then(response => {
           isLoadExport.value = false
+          showMessage({
+            message: 'OK',
+            type: 'success'
+          })
         })
         .catch(error => {
           isLoadExport.value = false
@@ -704,6 +862,46 @@ export default defineComponent({
             type: 'error'
           })
         })
+    }
+
+    // Get Payment Rule Translation
+
+    function paymentRuleTranslation(payment) {
+      const { values } = payment
+      let message
+      switch (values.ValueColumn) {
+        case 'P':
+          message = lang.t('VPayPrint.message.paymentRule.onCredit')
+          break
+        case 'S':
+          message = lang.t('VPayPrint.message.paymentRule.check')
+          break
+        case 'T':
+          message = lang.t('VPayPrint.message.paymentRule.directDeposit')
+          break
+        case 'D':
+          message = lang.t('VPayPrint.message.paymentRule.directDebit')
+          break
+        case 'K':
+          message = lang.t('VPayPrint.message.paymentRule.creditCard')
+          break
+      }
+      return message
+    }
+
+    function checkProcess(namePopover) {
+      if (namePopover === 'processOnLine') {
+        processPayment()
+      } else if (namePopover === 'printProcess') {
+        printPayment()
+      } else if (namePopover === 'exportProcess') {
+        toExport()
+      }
+      closeProcess(namePopover)
+    }
+
+    function closeProcess(namePopover) {
+      refs[namePopover].showPopper = false
     }
 
     /**
@@ -752,10 +950,15 @@ export default defineComponent({
       documentNumberSequence,
       currency,
       dataLot,
-      // loading Button
+      // Refs --> flag that will indicate if you are loading the process button. (isLoadPrint, isLoadExport, isLoadProcess)
       isLoadPrint,
       isLoadExport,
       isLoadProcess,
+      // Refs --> related to message dialog and behavior. (actionMessageProcessOnLine, processOnLine, printProcess, exportProcess)
+      actionMessageProcessOnLine,
+      processOnLine,
+      printProcess,
+      exportProcess,
       // Computed
       isMobile,
       styleMobile,
@@ -769,19 +972,30 @@ export default defineComponent({
       toExport,
       printPayment,
       formatQuantity,
-      formatPrice
+      formatPrice,
+      paymentRuleTranslation,
+      checkProcess,
+      closeProcess
     }
   }
 })
 </script>
 
 <style lang="scss">
-  .from-wf-panel {
-    padding-top: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
+.panel-left-search-filter {
+  .el-form--label-top .el-form-item__label {
+    float: none;
+    display: inline-block;
+    text-align: left;
+    padding: 0px;
   }
-  .el-input--medium .el-input__inner {
-    text-align: end;
+}
+.right-panel-top-panel-labels {
+  .el-form--label-top .el-form-item__label {
+    float: none;
+    display: inline-block;
+    text-align: left;
+    padding: 0px;
   }
+}
 </style>
