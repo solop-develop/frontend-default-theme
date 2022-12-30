@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -43,17 +43,16 @@
             :class="isActiveCurrentTab ? 'custom-panel-field' : ''"
           >
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
-              <template v-for="(fieldAttributes, subKey) in fieldsList">
-                <field-definition
-                  ref="fieldDefinitionRef"
-                  :key="subKey"
-                  :parent-uuid="parentUuid"
-                  :container-uuid="containerUuid"
-                  :container-manager="containerManager"
-                  :field-metadata="fieldAttributes"
-                  :metadata-field="fieldAttributes"
-                />
-              </template>
+              <field-definition
+                v-for="(fieldAttributes, subKey) in fieldsList"
+                ref="fieldDefinitionRef"
+                :key="subKey"
+                :parent-uuid="parentUuid"
+                :container-uuid="containerUuid"
+                :container-manager="containerManager"
+                :field-metadata="fieldAttributes"
+                :metadata-field="fieldAttributes"
+              />
             </el-row>
           </el-card>
         </div>
@@ -278,7 +277,7 @@ export default defineComponent({
 .el-tabs--border-card > .el-tabs__content {
   padding: 15px;
   overflow: auto;
-  height: 90%;
+  height: 92%;
   padding-top: 5px;
   padding-right: 15px;
   padding-bottom: 0px;
