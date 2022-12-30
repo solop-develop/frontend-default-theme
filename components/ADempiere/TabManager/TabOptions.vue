@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -31,6 +31,7 @@
         </b>
       </span>
     </el-button>
+
     <convenience-buttons
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
@@ -39,11 +40,13 @@
       :additional-options="adicionalesOptions"
       style="display: contents;"
     />
+
     <full-screen-container
       style="float: right;"
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
     />
+
     <action-menu
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
@@ -53,54 +56,6 @@
       style="float: right;"
     />
   </div>
-  <!-- <div class="tab-options-main">
-    <div style="margin-right: 0%;padding-right: 10px; float: left; display: flex;">
-      <el-button
-        plain
-        size="small"
-        type="text"
-        @click="changeShowedRecords"
-      >
-        <span style="padding: 10px;">
-          <svg-icon icon-class="table" />
-          <b v-show="!isMobile">
-            {{ label }}
-          </b>
-        </span>
-      </el-button>
-
-      <convenience-buttons
-        :parent-uuid="parentUuid"
-        :container-uuid="currentTabUuid"
-        :container-manager="containerManager"
-        :tab-attributes="tabAttributes"
-        :additional-options="adicionalesOptions"
-      />
-    </div>
-
-    <div style="float: right; padding-left: 1%; display: inline-flex;">
-      <el-button
-        plain
-        size="small"
-        type="text"
-        @click="changeShowedRecords"
-      >
-        <span style="padding: 10px;">
-          <svg-icon icon-class="table" />
-          <b v-show="!isMobile">
-            {{ label }}
-          </b>
-        </span>
-      </el-button>
-      <action-menu
-        :parent-uuid="parentUuid"
-        :container-uuid="currentTabUuid"
-        :container-manager="containerManager"
-        :actions-manager="listAction"
-        :references-manager="referencesManager"
-      />
-    </div>
-  </div> -->
 </template>
 
 <script>
@@ -109,11 +64,10 @@ import { defineComponent, computed } from '@vue/composition-api'
 import language from '@/lang'
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
-// utils and helper methods
 
 export default defineComponent({
   name: 'TabOptions',
@@ -184,10 +138,6 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
-    const currentRecordUuid = computed(() => {
-      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
-    })
-
     const isShowedTableRecords = computed(() => {
       return tabData.value.isShowedTableRecords
     })
@@ -197,19 +147,6 @@ export default defineComponent({
         props.parentUuid,
         props.tabAttributes.uuid
       )
-    })
-
-    const tableHeaders = computed(() => {
-      const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
-      if (panel && panel.fieldsList) {
-        return panel.fieldsList
-      }
-      return []
-    })
-
-    // get records list
-    const recordsList = computed(() => {
-      return tabData.value.recordsList
     })
 
     const label = computed(() => {
@@ -253,11 +190,8 @@ export default defineComponent({
       // computed
       isMobile,
       listAction,
-      recordsList,
       isShowedTableRecords,
-      tableHeaders,
       label,
-      currentRecordUuid,
       // methods
       changeShowedRecords
     }

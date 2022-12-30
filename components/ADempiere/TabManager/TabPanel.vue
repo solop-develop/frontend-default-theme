@@ -9,16 +9,16 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <el-container style="height: 100%;">
-    <el-header :height="styleHeadPanel">
+  <el-container style="height: 100%;" class="tab-panel">
+    <el-header :style="styleHeadPanel" class="tab-panel-header">
       <tab-options
         :parent-uuid="parentUuid"
         :container-manager="containerManager"
@@ -30,19 +30,21 @@
         :adicionales-options="convenienceOptions"
         :is-child-tab="isChildTab"
       />
+
       <filter-fields
+        v-bind="commonFilterFielsProperties"
         :parent-uuid="parentUuid"
         :container-uuid="tabAttributes.uuid"
         :fields-list="containerManager.getFieldsList({ parentUuid, containerUuid: tabAttributes.uuid })"
-        :filter-manager="containerManager.changeFieldShowedFromUser"
-        :showed-manager="containerManager.isDisplayedField"
         :fields-to-hidden="containerManager.getFieldsToHidden"
         :is-filter-records="true"
-        :is-showed-table-records="isShowedTableRecords"
+        :is-showed-table-records="false"
+        :in-table="isShowedTableRecords"
         :container-manager="containerManager"
       />
     </el-header>
-    <el-main>
+
+    <el-main class="tab-panel-body">
       <div style="width: 100%;">
         <default-table
           v-if="isShowedTableRecords"
@@ -87,7 +89,8 @@
         </template>
       </div>
     </el-main>
-    <el-footer :height="styleFooterPanel">
+
+    <el-footer :style="styleFooterPanel" class="tab-panel-footer">
       <!-- pagination table, set custom or use default change page method -->
       <custom-pagination
         :container-manager="containerManager"
@@ -179,13 +182,16 @@ import language from '@/lang'
 import store from '@/store'
 import router from '@/router'
 
-// components and mixins
-import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
+// Components and Mixins
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
+import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
-import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import TabOptions from './TabOptions.vue'
+
+// Utils and Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'TabPanel',
@@ -294,18 +300,17 @@ export default defineComponent({
     })
 
     const styleHeadPanel = computed(() => {
-      if (root.isEmptyValue(isWithChildsTab.value)) return '10%!important'
-      if (storedWindow.value.isFullScreenTabsParent) return '15% !important'
-      if (props.isChildTab && storedWindow.value.isFullScreenTabsChildren) return '15% !important'
-      return '35%!important'
+      return 'height: 76px'
     })
 
     const styleFooterPanel = computed(() => {
-      if (root.isEmptyValue(isWithChildsTab.value)) return '5%!important'
-      if (props.isChildTab && storedWindow.value.isFullScreenTabsChildren) return '10% !important'
-      if (props.isChildTab) return '20% !important'
-      if (storedWindow.value.isFullScreenTabsParent) return '10% !important'
-      return '15% !important'
+      if (props.isChildTab) {
+        if (storedWindow.value.isFullScreenTabsChildren) {
+          return 'height: 10% !important'
+        }
+        return 'height: 20% !important'
+      }
+      return 'height: 36px'
     })
 
     // const inf = store.getters.getContainerInfo
@@ -372,12 +377,27 @@ export default defineComponent({
       const selection = props.containerManager.getSelection({
         containerUuid: props.tabAttributes.uuid
       })
-      if (root.isEmptyValue(selection)) return 0
+      if (isEmptyValue(selection)) {
+        return 0
+      }
       return selection.length
     })
 
     const isWithChildsTab = computed(() => {
       return store.getters.getStoredWindow(props.parentUuid).tabsListChild
+    })
+
+    const commonFilterFielsProperties = computed(() => {
+      if (isShowedTableRecords.value) {
+        return {
+          filterManager: props.containerManager.changeTabTableShowedFromUser,
+          showedManager: props.containerManager.isDisplayedColumn
+        }
+      }
+      return {
+        filterManager: props.containerManager.changeFieldShowedFromUser,
+        showedManager: props.containerManager.isDisplayedField
+      }
     })
 
     function changeShowedRecords() {
@@ -410,7 +430,6 @@ export default defineComponent({
     /**
      * custom method to handle change size page
      */
-
     function handleChangeSizePage(pageSize) {
       props.containerManager.setSizePage({
         parentUuid: props.parentUuid,
@@ -423,7 +442,6 @@ export default defineComponent({
     /**
      * changePreviousRecord
      */
-
     function changePreviousRecord(recordPrevious) {
       const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
@@ -452,7 +470,6 @@ export default defineComponent({
     /**
      * changePreviousRecord
      */
-
     function changeNextRecord(recordNext) {
       const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
@@ -480,6 +497,7 @@ export default defineComponent({
 
     return {
       // computeds
+      commonFilterFielsProperties,
       listAction,
       recordsList,
       isShowedTableRecords,

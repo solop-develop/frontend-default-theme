@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -18,20 +18,6 @@
 
 <template>
   <div>
-    <!-- <auxiliary-panel
-      v-if="isShowedTableRecords"
-      :parent-uuid="parentUuid"
-      :container-uuid="tabUuid"
-      :label="tabsList[currentTab].name"
-    >
-      <record-navigation
-        :parent-uuid="parentUuid"
-        :container-uuid="tabUuid"
-        :container-manager="containerManager"
-        :current-tab="tabsList[currentTab]"
-      />
-    </auxiliary-panel> -->
-    <!-- <div style="display: flex;height: 100%;"> -->
     <el-tabs
       ref="el-tabs-container"
       v-model="currentTab"
@@ -57,21 +43,6 @@
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
         />
-
-        <!-- <span v-if="currentTabMetadata.isShowedTableRecords">
-          <tab-options
-            :parent-uuid="parentUuid"
-            :container-manager="containerManager"
-            :current-tab-uuid="tabUuid"
-            :tabs-list="tabsList"
-            :all-tabs-list="allTabsList"
-            :tab-attributes="tabAttributes"
-            :references-manager="referencesManager"
-            :convenience-options="additionalOptions"
-          />
-          <br>
-        </span> -->
-
         <!-- Close table when clicking on group of fields -->
         <!-- <div
           v-if="isShowedTabs"
@@ -92,7 +63,7 @@
             :actions-manager="actionsManager"
             :references-manager="referencesManager"
             :convenience-options="additionalOptions"
-            :style="isEmptyValue(isWithChildsTab) ? 'height: 100% !important;' : 'height: 95% !important;'"
+            :style="'height: 100% !important;'"
           />
         </div>
         <!-- </div> -->
@@ -269,11 +240,11 @@ export default defineComponent({
 
     const tabStyle = computed(() => {
       // height tab content
-      if (currentTabMetadata.value.isShowedTableRecords) {
-        return {
-          overflow: 'auto'
-        }
-      }
+      // if (currentTabMetadata.value.isShowedTableRecords) {
+      //   return {
+      //     overflow: 'auto'
+      //   }
+      // }
       return {
         height: '100% !important',
         overflow: 'auto'
