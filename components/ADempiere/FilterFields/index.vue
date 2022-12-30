@@ -17,96 +17,86 @@
 -->
 
 <template>
-    <el-row v-if="!isMobile && searchRecordTypeSale" :gutter="5">
-      <el-col :span="19" :style="styleBarOptions">
-        <search-fields
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
-          :fields-list="fieldsList"
-          :container-manager="containerManager"
-          style="float: right;"
+  <el-row v-if="!isMobile && searchRecordTypeSale" :gutter="5">
+    <el-col :span="19">
+      <search-fields
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :fields-list="fieldsList"
+        :container-manager="containerManager"
+        style="float: right;"
+      />
+    </el-col>
+    <el-col v-if="!isShowedTableRecords" :span="5" style="float: right;">
+      <el-select
+        v-model="fieldsListShowed"
+        :filterable="!isMobile"
+        :placeholder="$t('components.filterableItems')"
+        multiple
+        collapse-tags
+        value-key="key"
+        :size="size"
+        :popper-append-to-body="true"
+        style="width: 250px;"
+      >
+        <el-option
+          v-for="(item, key) in fieldsListAvailable"
+          :key="key"
+          :label="item.name"
+          :value="item.columnName"
         />
-      </el-col>
-      <el-col v-if="!isShowedTableRecords" :span="5" style="float: right;">
-        <!-- <el-form :class="cssClass" > -->
-          <!-- <el-form-item> -->
-            <!--
-            <template v-if="!isEmptyValue(groupField)" slot="label">
-              {{ groupField }}
-            </template>
-            -->
+      </el-select>
 
-            <el-select
-              v-model="fieldsListShowed"
-              :filterable="!isMobile"
-              :placeholder="$t('components.filterableItems')"
-              multiple
-              collapse-tags
-              value-key="key"
-              :size="size"
-              :popper-append-to-body="true"
-              style="width: 250px;"
-            >
-              <el-option
-                v-for="(item, key) in fieldsListAvailable"
-                :key="key"
-                :label="item.name"
-                :value="item.columnName"
-              />
-            </el-select>
+      <fields-display-option
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :available-fields="fieldsListAvailable"
+        :available-fields-with-value="fieldsListAvailableWithValue"
+        :showed-fields="fieldsListShowed"
+        :filter-manager="filterManager"
+      />
+    </el-col>
+  </el-row>
 
-            <fields-display-option
-              :parent-uuid="parentUuid"
-              :container-uuid="containerUuid"
-              :available-fields="fieldsListAvailable"
-              :available-fields-with-value="fieldsListAvailableWithValue"
-              :showed-fields="fieldsListShowed"
-              :filter-manager="filterManager"
+  <el-row v-else :gutter="20">
+    <el-col :span="24">
+      <el-form :class="cssClass" style="float: right;">
+        <el-form-item>
+          <template v-if="!isEmptyValue(groupField)" slot="label">
+            {{ groupField }}
+          </template>
+
+          <el-select
+            v-model="fieldsListShowed"
+            :filterable="!isMobile"
+            :placeholder="$t('components.filterableItems')"
+            multiple
+            collapse-tags
+            value-key="key"
+            :size="size"
+            :popper-append-to-body="true"
+            style="width: 250px;"
+          >
+            <el-option
+              v-for="(item, key) in fieldsListAvailable"
+              :key="key"
+              :label="item.name"
+              :value="item.columnName"
             />
-          <!-- </el-form-item> -->
-        <!-- </el-form> -->
-      </el-col>
-    </el-row>
+          </el-select>
 
-    <el-row v-else :gutter="20">
-      <el-col :span="24">
-        <el-form :class="cssClass" style="float: right;">
-          <el-form-item>
-            <template v-if="!isEmptyValue(groupField)" slot="label">
-              {{ groupField }}
-            </template>
-
-            <el-select
-              v-model="fieldsListShowed"
-              :filterable="!isMobile"
-              :placeholder="$t('components.filterableItems')"
-              multiple
-              collapse-tags
-              value-key="key"
-              :size="size"
-              :popper-append-to-body="true"
-              style="width: 250px;"
-            >
-              <el-option
-                v-for="(item, key) in fieldsListAvailable"
-                :key="key"
-                :label="item.name"
-                :value="item.columnName"
-              />
-            </el-select>
-
-            <fields-display-option
-              :parent-uuid="parentUuid"
-              :container-uuid="containerUuid"
-              :available-fields="fieldsListAvailable"
-              :available-fields-with-value="fieldsListAvailableWithValue"
-              :showed-fields="fieldsListShowed"
-              :filter-manager="filterManager"
-            />
-          </el-form-item>
-        </el-form>
-      </el-col>
-    </el-row>
+          <fields-display-option
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+            :available-fields="fieldsListAvailable"
+            :available-fields-with-value="fieldsListAvailableWithValue"
+            :showed-fields="fieldsListShowed"
+            :filter-manager="filterManager"
+          />
+        </el-form-item>
+      </el-form>
+    </el-col>
+  </el-row>
 </template>
 
 <script>
@@ -204,12 +194,6 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
-    const styleBarOptions = computed(() => {
-      // if (props.isShowedTableRecords) {
-        // return 'display: flex;width: 100% !important;'
-      // }
-      // return 'display: flex;width: 99% !important;'
-    })
     const valueToSearch = computed({
       get() {
         return store.getters.getSearchValueTabRecordsList({
@@ -327,7 +311,6 @@ export default defineComponent({
       fieldsListAvailableWithValue,
       valueToSearch,
       searchRecordTypeSale,
-      styleBarOptions,
       showedAttibute,
       // methods
       changeShowed,
