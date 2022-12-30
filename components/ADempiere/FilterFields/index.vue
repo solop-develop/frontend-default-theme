@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,17 +9,16 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <span>
-    <el-row v-if="!isMobile && SearchRecordTypeSale" :gutter="5">
-      <el-col :span="24" :style="styleBarOptions">
+    <el-row v-if="!isMobile && searchRecordTypeSale" :gutter="5">
+      <el-col :span="19" :style="styleBarOptions">
         <search-fields
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
@@ -27,11 +26,15 @@
           :container-manager="containerManager"
           style="float: right;"
         />
-        <el-form v-if="!isShowedTableRecords" :class="cssClass" style="float: right;">
-          <el-form-item>
+      </el-col>
+      <el-col v-if="!isShowedTableRecords" :span="5" style="float: right;">
+        <!-- <el-form :class="cssClass" > -->
+          <!-- <el-form-item> -->
+            <!--
             <template v-if="!isEmptyValue(groupField)" slot="label">
               {{ groupField }}
             </template>
+            -->
 
             <el-select
               v-model="fieldsListShowed"
@@ -42,7 +45,7 @@
               value-key="key"
               :size="size"
               :popper-append-to-body="true"
-              style="width: 250px;float: right;"
+              style="width: 250px;"
             >
               <el-option
                 v-for="(item, key) in fieldsListAvailable"
@@ -60,10 +63,11 @@
               :showed-fields="fieldsListShowed"
               :filter-manager="filterManager"
             />
-          </el-form-item>
-        </el-form>
+          <!-- </el-form-item> -->
+        <!-- </el-form> -->
       </el-col>
     </el-row>
+
     <el-row v-else :gutter="20">
       <el-col :span="24">
         <el-form :class="cssClass" style="float: right;">
@@ -103,7 +107,6 @@
         </el-form>
       </el-col>
     </el-row>
-  </span>
 </template>
 
 <script>
@@ -177,19 +180,23 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
-    const size = props.inTable
-      ? 'mini'
-      : 'small'
+    const size = 'small'
 
-    const cssClass = props.inTable
-      ? 'form-filter-columns'
-      : 'form-filter-fields'
+    const cssClass = computed(() => {
+      if (props.inTable) {
+        return 'form-filter-columns'
+      }
+      return 'form-filter-fields'
+    })
 
-    const showedAttibute = props.inTable
-      ? 'isShowedTableFromUser'
-      : 'isShowedFromUser'
+    const showedAttibute = computed(() => {
+      if (props.inTable) {
+        return 'isShowedTableFromUser'
+      }
+      return 'isShowedFromUser'
+    })
 
-    const SearchRecordTypeSale = computed(() => {
+    const searchRecordTypeSale = computed(() => {
       return root.$route.meta.type === 'window' && props.isFilterRecords
     })
 
@@ -198,8 +205,10 @@ export default defineComponent({
     })
 
     const styleBarOptions = computed(() => {
-      if (props.isShowedTableRecords) return 'display: flex;width: 100% !important;'
-      return 'display: flex;width: 99% !important;'
+      // if (props.isShowedTableRecords) {
+        // return 'display: flex;width: 100% !important;'
+      // }
+      // return 'display: flex;width: 99% !important;'
     })
     const valueToSearch = computed({
       get() {
@@ -254,7 +263,7 @@ export default defineComponent({
     const fieldsListShowed = computed({
       get() {
         return fieldsListAvailable.value.filter(itemField => {
-          return itemField[showedAttibute]
+          return itemField[showedAttibute.value]
         }).map(itemField => {
           return itemField.columnName
         })
@@ -265,38 +274,18 @@ export default defineComponent({
       }
     })
 
-    const changeShowed = (selectedValues) => {
-      if (props.inTable) {
-        return changeShowedTable(selectedValues)
-      }
-      return changeShowedPanel(selectedValues)
-    }
-
     /**
-     * Set fields to hidden/showed in panel
+     * Set fields/columns to hidden/showed in panel/table
      * if is advanced query or browser panel with values or null/not null
      * operator, dispatch search
      * @param {array} selectedValues
      */
-    const changeShowedPanel = (selectedValues) => {
+    const changeShowed = (selectedValues) => {
       props.filterManager({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         fieldsShowed: selectedValues,
         fieldsList: fieldsListAvailable.value
-      })
-    }
-
-    /**
-     * Set columns to hidden/showed in table
-     * @param {array} selectedValues
-     */
-    const changeShowedTable = (selectedValues) => {
-      store.dispatch('changeFieldAttributesBoolean', {
-        containerUuid: props.containerUuid,
-        fieldsIncludes: selectedValues,
-        attribute: 'isShowedTableFromUser',
-        valueAttribute: true
       })
     }
 
@@ -337,8 +326,9 @@ export default defineComponent({
       fieldsListAvailable,
       fieldsListAvailableWithValue,
       valueToSearch,
-      SearchRecordTypeSale,
+      searchRecordTypeSale,
       styleBarOptions,
+      showedAttibute,
       // methods
       changeShowed,
       handleChangeSearch,

@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -17,34 +17,7 @@
 -->
 
 <template>
-  <div v-if="!isChangeOptions" id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
-    <!-- <el-row v-if="isShowSearch">
-      <el-col :span="23">
-        <search-record-fields
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
-          :container-manager="containerManager"
-          style="float: right;"
-        />
-      </el-col>
-      <el-col
-        :span="1"
-        style="text-align: center;"
-      >
-        <columns-display-option
-          :option="currentOption"
-          :container-manager="containerManager"
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
-        />
-
-        <full-screen-container
-          style="float: right;"
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
-        />
-      </el-col>
-    </el-row> -->
+  <div v-if="!isChangeOptions" id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="adjustSize()">
     <el-table
       id="multipleTable"
       ref="multipleTable"
@@ -73,7 +46,6 @@
         min-width="50"
       />
 
-      <!-- <template v-for="(fieldAttributes, key) in headerList"> -->
       <el-table-column
         v-for="(fieldAttributes, key) in headerList"
         :key="key"
@@ -96,23 +68,9 @@
           />
         </template>
       </el-table-column>
-      <!-- </template> -->
     </el-table>
-
-    <!-- pagination table, set custom or use default change page method -->
-    <!-- <custom-pagination
-      :container-manager="containerManager"
-      :parent-uuid="parentUuid"
-      :container-uuid="containerUuid"
-      :total="recordsLength"
-      :current-page="currentPage"
-      :selection="selectionsLength"
-      :records-page="recordsWithFilter.length"
-      :handle-change-page="handleChangePage"
-      :handle-size-change="handleChangeSizePage"
-      :is-navigation="isNavigation"
-    /> -->
   </div>
+
   <loading-view
     v-else
     key="process-loading"
@@ -124,9 +82,8 @@ import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, wa
 
 import store from '@/store'
 import router from '@/router'
-import lang from '@/lang'
 
-// components and mixins
+// Components and Mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
@@ -134,11 +91,12 @@ import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions
 import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
-// constants
-import { BUTTON } from '@/utils/ADempiere/references'
+// Constants
+import { YES_NO } from '@/utils/ADempiere/references'
 
-// utils and helper methods
-import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isDocumentStatus } from '@/utils/ADempiere/constants/systemColumns'
 
 export default defineComponent({
   name: 'WindowsTable',
@@ -238,30 +196,29 @@ export default defineComponent({
     })
 
     const headerList = computed(() => {
-      const showMinimalistView = store.getters.getTableOption(props.containerUuid)
-      if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
-        return props.header.filter(fieldItem => {
-          if ([fieldItem.columnName, fieldItem.elementName].includes('TaskStatus')) {
-            return true
-          }
-
+      // const showMinimalistView = store.getters.getTableOption(props.containerUuid)
+      // if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
+      return props.header.filter(fieldItem => {
+        if ([fieldItem.columnName, fieldItem.elementName].includes('TaskStatus')) {
+          return true
+        }
+        // validate with container manager
+        if (props.containerManager.isDisplayedColumn(fieldItem)) {
           const isDisplayedDefault = isDisplayedDefaultTable({
             ...fieldItem,
             isMandatory: props.containerManager.isMandatoryField(fieldItem)
           })
-          return isDisplayed(fieldItem) &&
-            // fieldItem.isShowedTableFromUser &&
-            fieldItem.displayType !== BUTTON.id &&
-            tableColumnDataType(fieldItem, currentOption.value) &&
-            isDisplayedDefault &&
-            props.containerManager.isDisplayedField(fieldItem)
-        })
-      }
-      return props.header.filter(fieldItem => {
-        return isDisplayed(fieldItem) &&
-          // fieldItem.isShowedTableFromUser &&
-          fieldItem.displayType !== BUTTON.id &&
-          tableColumnDataType(fieldItem, currentOption.value)
+          // madatory, not parent column and without default value to window, mandatory or with default value to others
+          if (isDisplayedDefault) {
+            return true
+          }
+          // showed by user
+          return fieldItem.isShowedTableFromUser
+        }
+
+        //     fieldItem.displayType !== BUTTON.id &&
+        //     tableColumnDataType(fieldItem, currentOption.value) &&
+        return false
       })
     })
 
@@ -415,20 +372,22 @@ export default defineComponent({
      * isDisplayedDefaultTable
      */
     function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, columnName, elementColumnName, name }) {
-      if (columnName === 'C_PaymentTerm_ID') {
-        return false
+      const documentStatus = isDocumentStatus({
+        columnName,
+        elementColumnName
+      })
+      if (documentStatus) {
+        return true
       }
-      // const documentStatus = isDocumentStatus({
-      //   columnName,
-      //   elementColumnName
-      // })
-      // // if (displayType === DATE.id || documentStatus) {
-      // //   return true
-      // // }
-      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DateTrx', 'M_Product_ID', 'QtyEntered', 'DocumentNo', 'DocStatus'].includes(columnName)) {
+
+      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DateTrx', 'M_Product_ID', 'QtyEntered', 'DocumentNo', 'Value', 'DocStatus'].includes(columnName)) {
         return true
       }
       if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
+        // Yes/No field always boolean value (as default value)
+        if (displayType === YES_NO.id) {
+          return false
+        }
         return true
       }
       return false
@@ -485,14 +444,6 @@ export default defineComponent({
         return '* ' + field.name
       }
       return field.name
-    }
-
-    /**
-     * Verify is displayed column/field in table
-     */
-    function isDisplayed(field) {
-      // validate with container manager
-      return props.containerManager.isDisplayedColumn(field)
     }
 
     /**
@@ -609,10 +560,6 @@ export default defineComponent({
       }
     }
 
-    function setTableHeight() {
-      adjustSize()
-    }
-
     function loadSelect() {
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
@@ -693,7 +640,6 @@ export default defineComponent({
 
     onMounted(() => {
       // adjustSize()
-      // setTableHeight()
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (props.isTableSelection) {
         const selectionsList = props.containerManager.getSelection({
@@ -737,7 +683,6 @@ export default defineComponent({
       currentTabChildren,
       getIsLoadedTabRecord,
       // methods
-      setTableHeight,
       adjustSize,
       tableRowClassName,
       headerLabel,
@@ -747,9 +692,7 @@ export default defineComponent({
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
-      isDisplayed,
-      loadSelect,
-      isDisplayedDefaultTable
+      loadSelect
     }
   }
 })

@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -119,16 +119,24 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { columnName, elementName, displayColumnName } = props.fieldAttributes
+    const columnName = computed(() => {
+      return props.fieldAttributes.columnName
+    })
+    const elementName = computed(() => {
+      return props.fieldAttributes.elementName
+    })
+    const displayColumnName = computed(() => {
+      return props.fieldAttributes.displayColumnName
+    })
 
     const cellValue = computed(() => {
-      return props.dataRow[columnName]
+      return props.dataRow[columnName.value]
     })
 
     const displayedValue = computed(() => {
       return formatField({
-        value: props.dataRow[columnName],
-        displayedValue: props.dataRow[displayColumnName],
+        value: props.dataRow[columnName.value],
+        displayedValue: props.dataRow[displayColumnName.value],
         displayType: props.fieldAttributes.displayType
       })
     })
@@ -145,7 +153,7 @@ export default defineComponent({
     })
 
     const isPercentageColumn = computed(() => {
-      return [columnName, elementName].includes('TaskStatus')
+      return [columnName.value, elementName.value].includes('TaskStatus')
     })
 
     function copyContent(value) {
@@ -156,6 +164,8 @@ export default defineComponent({
     }
 
     return {
+      columnName,
+      displayColumnName,
       // data
       isPercentageColumn,
       TEXT_LONG,
