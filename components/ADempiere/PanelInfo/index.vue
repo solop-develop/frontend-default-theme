@@ -352,7 +352,7 @@ export default defineComponent({
           containerUuid: currentTab.value.containerUuid,
           parentUuid: currentTab.value.parentUuid,
           recordId: currentRecordId.value,
-          recordUuid: currentRecordUuid.value,
+          recordUuid: currentRecordUuid.value
         })
       }
       if (isEmptyValue(props.containerManager[tab.name])) {
