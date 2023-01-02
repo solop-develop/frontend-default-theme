@@ -8,11 +8,12 @@
  (at your option) any later version.
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-container style="height: 100% !important;">
     <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 40% !important;' : 'height: 10%!important'">
@@ -195,27 +196,30 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
-import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
+import WorkflowDiagram from '@theme/components/ADempiere/WorkflowManager/WorkflowDiagram.vue'
 
-// constants
+// Constants
 import fieldsList from './fieldsList.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { generateWorkflowDiagram } from '@/utils/ADempiere/dictionary/workflow'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
   name: 'WorkflowActivity',
+
   components: {
     CustomPagination,
     WorkflowDiagram
   },
+
   mixins: [
     formMixin
   ],
+
   props: {
     metadata: {
       type: Object,
@@ -228,6 +232,7 @@ export default {
       }
     }
   },
+
   data() {
     return {
       fieldsList,

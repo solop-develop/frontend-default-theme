@@ -66,7 +66,7 @@ import store from '@/store'
 
 // Components and Mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
-import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons.vue'
+import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 
 export default defineComponent({

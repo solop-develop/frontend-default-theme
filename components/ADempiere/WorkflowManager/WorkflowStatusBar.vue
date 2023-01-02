@@ -17,61 +17,67 @@
 -->
 
 <template>
-  <el-tag
-    :size="size"
-    :type="tagStatus.type"
-    disable-transitions
-  >
-    {{ displayText }}
-  </el-tag>
+  <el-steps :active="indexStepActions" :space="500" align-center finish-status="success">
+    <el-step
+      v-for="(actions, key) in documentActionsList"
+      :key="key"
+      :title="actions.name"
+    />
+  </el-steps>
 </template>
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// Utils and Helper Methods
+import store from '@/store'
+
+// Constants
+import { DOCUMENT_STATUS } from '@/utils/ADempiere/constants/systemColumns'
+
+// Utils and Melper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { tagRender } from '@/utils/ADempiere/dictionary/workflow'
 
 export default defineComponent({
-  name: 'DocumentStatusTag',
+  name: 'WorkflowStatusBar',
 
   props: {
-    value: {
+    containerUuid: {
       type: String,
-      default: ''
-    },
-    displayedValue: {
-      type: [String, Number, Boolean, Date],
-      default: ''
-    },
-    size: {
-      type: String,
-      default: 'medium'
+      required: true
     }
   },
 
   setup(props) {
-    /**
-     * Get tag type of the document status
-     * add a tab depending on the status of the document
-     * @param {string} status, document status key
-     */
-    const tagStatus = computed(() => {
-      return tagRender(props.value)
+    const currentDocStatus = computed(() => {
+      return store.getters.getValueOfFieldOnContainer({
+        containerUuid: props.containerUuid,
+        columnName: DOCUMENT_STATUS
+      })
     })
 
-    const displayText = computed(() => {
-      if (!isEmptyValue(props.displayedValue)) {
-        return props.displayedValue
+    const documentActionsList = computed(() => {
+      const list = store.getters.getWorkFlowActions({
+        containerUuid: props.containerUuid
+      })
+      if (isEmptyValue(list)) {
+        return []
       }
-      return props.value
+      return list.options
+    })
+
+    const indexStepActions = computed(() => {
+      if (isEmptyValue(documentActionsList.value)) {
+        return 0
+      }
+      return documentActionsList.value.findIndex(docs => {
+        return docs.value === currentDocStatus.value
+      })
     })
 
     return {
-      // computeds
-      displayText,
-      tagStatus
+      currentDocStatus,
+      documentActionsList,
+      indexStepActions
     }
   }
 })

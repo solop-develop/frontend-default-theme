@@ -8,10 +8,10 @@
  (at your option) any later version.
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -20,7 +20,11 @@
     @shortkey.native="closeNodeInfo"
   >
     <transition name="el-zoom-in-bottom">
-      <el-card v-show="showedInfo" :style="{ position: 'absolute', zIndex: '9999', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }" class="box-card">
+      <el-card
+        v-show="showedInfo"
+        :style="{ position: 'absolute', zIndex: '9999', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }"
+        class="box-card"
+      >
         <div slot="header" class="clearfix">
           <span>
             {{ infoNode.description }}
@@ -53,7 +57,8 @@
         </div>
       </el-card>
     </transition>
-    <el-main style="overflow: auto;display: block;position: relative;height: 100%;">
+
+    <el-main style="overflow: auto;display: contents; position: relative;height: 100%;">
       <vue-workflow-chart
         v-if="!isEmptyValue(nodeList)"
         id="Diagrama"
@@ -70,10 +75,10 @@
 <script>
 import { ref, computed, watch } from '@vue/composition-api'
 
-// components and mixins
+// Components and Mixins
 import VueWorkflowChart from 'vue-workflow-chart'
 
-// utils and helper methods
+// Utils and helper Methods
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
@@ -108,6 +113,7 @@ export default {
       default: () => 'horizontal'
     }
   },
+
   setup(props) {
     const showedInfo = ref(false)
     const infoNode = ref({})
