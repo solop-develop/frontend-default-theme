@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -39,7 +39,7 @@
                     sm: 24
                   }
                 }"
-                :container-uuid="'Business-Partner-List'"
+                :container-uuid="formUuid"
                 :container-manager="containerManager"
               />
             </el-row>
@@ -69,18 +69,18 @@ import { defineComponent, ref, onUnmounted, computed } from '@vue/composition-ap
 
 import store from '@/store'
 
-// constants
+// Constants
 import { COLUMN_NAME, WORKFLOW_EDITOR_FORM } from '@/utils/ADempiere/dictionary/form/workflowEditor.js'
 import fieldsListDefinition from './fieldsList.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
-// components and mixins
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import useForm from '@theme/components/ADempiere/Form/useForm'
-import WorkflowDiagram from '@theme/components/ADempiere/WorkflowDiagram'
+import WorkflowDiagram from '@theme/components/ADempiere/WorkflowManager/WorkflowDiagram.vue'
 
 /**
  * TODO: Store workflow diagram on vuex to cache on client side.
@@ -141,18 +141,19 @@ export default defineComponent({
 
     // methods
     function selectWorkflow({ workflowId, workflowUuid }) {
+      isLoadingWorkFlow.value = true
+
       if (isEmptyValue(workflowId) && isEmptyValue(workflowUuid)) {
         // clear diagram
         workflowStatesList.value = []
+        isLoadingWorkFlow.value = false
         return
       }
-
-      isLoadingWorkFlow.value = true
 
       const workflow = store.getters.getStoredWorkflowById(workflowId)
       if (workflow) {
         generateWorkflow(workflow)
-        isLoadingWorkFlow.value = true
+        isLoadingWorkFlow.value = false
         return
       }
 
@@ -185,7 +186,6 @@ export default defineComponent({
             if (mutation.payload.value === currentWorkfllowId.value) {
               return
             }
-
             currentWorkfllowId.value = mutation.payload.value
             selectWorkflow({
               workflowId: mutation.payload.value
@@ -201,19 +201,6 @@ export default defineComponent({
       unsubscribeWorkflowChange()
     })
 
-    // without field uuid
-    function getLookupList({ parentUuid, containerUuid, referenceUuid, tableName, columnName, columnUuid, searchValue }) {
-      return store.dispatch('getLookupListFromServer', {
-        parentUuid,
-        containerUuid,
-        referenceUuid,
-        tableName,
-        columnName,
-        columnUuid,
-        searchValue
-      })
-    }
-
     return {
       // ref
       formUuid,
@@ -223,8 +210,7 @@ export default defineComponent({
       workflowTranstitionsList,
       fieldsList,
       containerManager: {
-        ...containerManager,
-        getLookupList
+        ...containerManager
       }
     }
   }
