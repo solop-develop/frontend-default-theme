@@ -93,11 +93,12 @@ import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp/index.vue'
 
 // Constants
 import {
-  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX, IS_ADVANCED_QUERY
+  IS_ADVANCED_QUERY
 } from '@/utils/ADempiere/dictionaryUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { FIELDS_DATE } from '@/utils/ADempiere/references'
 
 export default defineComponent({
   name: 'AdvancedTabQuerySearch',
@@ -224,17 +225,57 @@ export default defineComponent({
         })
     }
 
-    function searchRecords(params) {
-      let filters = store.getters.getValuesView({
-        containerUuid: props.containerUuid + IS_ADVANCED_QUERY
+    function getFilters() {
+      const values = store.getters.getValuesView({
+        containerUuid: props.containerUuid + IS_ADVANCED_QUERY,
+        isOnlyWithValue: true
       })
-      if (!isEmptyValue(filters)) {
-        filters = filters.filter(attribute => {
-          return !isEmptyValue(attribute.value) &&
-            !attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
-            !attribute.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)
+
+      const filters = {}
+      if (!isEmptyValue(values)) {
+        const fieldsList = panelAdvancedQuery.value.fieldsList
+        values.forEach(contextValue => {
+          const field = fieldsList.find(fieldItem => {
+            return fieldItem.columnName === contextValue.columnName ||
+              fieldItem.columnNameTo === contextValue.columnName
+          })
+
+          // hidden of search criteria
+          if (!field.isShowedFromUser) {
+            return
+          }
+
+          // default operator
+          const { columnName, operator } = field
+
+          const condition = {
+            columnName,
+            operator
+          }
+
+          // TODO: Improve conditions
+          if (FIELDS_DATE.includes(field.displayType)) {
+            if (field.columnNameTo === contextValue.columnName) {
+              condition.valueTo = contextValue.value
+            } else {
+              condition.value = contextValue.value
+            }
+          } else {
+            condition.value = contextValue.value
+          }
+
+          filters[columnName] = {
+            ...filters[columnName] || {},
+            ...condition
+          }
         })
       }
+
+      return Object.values(filters)
+    }
+
+    function searchRecords(params) {
+      const filters = getFilters()
 
       isLoadingSearch.value = true
       store.dispatch('getEntities', {
