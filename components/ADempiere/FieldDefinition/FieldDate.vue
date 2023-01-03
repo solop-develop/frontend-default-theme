@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -83,6 +83,12 @@ export default {
       },
       pickerOptionsDateRange: {
         shortcuts: [{
+          text: this.$t('components.date.Today'),
+          onClick(picker) {
+            const currentDay = new Date()
+            picker.$emit('pick', [currentDay, currentDay])
+          }
+        }, {
           text: this.$t('components.date.Yesterday'),
           onClick(picker) {
             const start = new Date()
@@ -139,6 +145,9 @@ export default {
   },
 
   computed: {
+    isRenderRange() {
+      return this.metadata.isRange || this.metadata.isAdvancedQuery
+    },
     typePicker() {
       let picker = 'date'
       if (this.isMultipleValues) {
@@ -149,7 +158,7 @@ export default {
       if (this.metadata.displayType === DATE_PLUS_TIME.id) {
         picker += 'time'
       }
-      if (this.metadata.isRange && !this.metadata.inTable) {
+      if (this.isRenderRange && !this.metadata.inTable) {
         picker += 'range'
       }
       return picker
@@ -225,7 +234,7 @@ export default {
           containerUuid,
           columnName
         })
-        if (!this.metadata.isRange) {
+        if (!this.isRenderRange) {
           return this.parseValue(value)
         }
 
@@ -260,7 +269,7 @@ export default {
         let startValue, endValue
         startValue = value
 
-        if (this.metadata.isRange && !this.metadata.inTable && Array.isArray(value)) {
+        if (this.isRenderRange && !this.metadata.inTable && Array.isArray(value)) {
           startValue = value[0]
           endValue = value[1]
         }
@@ -271,8 +280,12 @@ export default {
         }
 
         if (typeof startValue !== 'object' && startValue !== undefined) {
-          startValue = changeTimeZone({ value: startValue })
-          endValue = changeTimeZone({ value: endValue })
+          startValue = changeTimeZone({
+            value: startValue
+          })
+          endValue = changeTimeZone({
+            value: endValue
+          })
         }
 
         this.$store.commit('updateValueOfField', {
@@ -282,7 +295,7 @@ export default {
           value: startValue
         })
 
-        if (!this.metadata.isRange) {
+        if (!this.isRenderRange) {
           return
         }
         this.$store.commit('updateValueOfField', {
@@ -329,7 +342,7 @@ export default {
       }
 
       // generate range value
-      if (this.metadata.isRange && !this.metadata.inTable) {
+      if (this.isRenderRange && !this.metadata.inTable) {
         let valueTo
         if (Array.isArray(value)) {
           valueTo = value[1]
@@ -362,7 +375,7 @@ export default {
         return
       }
 
-      if (this.metadata.isRange && !this.metadata.inTable && Array.isArray(value)) {
+      if (this.isRenderRange && !this.metadata.inTable && Array.isArray(value)) {
         startValue = value[0]
         endValue = value[1]
       }
