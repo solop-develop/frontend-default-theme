@@ -80,15 +80,14 @@
 <script>
 import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, watch } from '@vue/composition-api'
 
-import store from '@/store'
 import router from '@/router'
+import store from '@/store'
 
 // Components and Mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
-import SearchRecordFields from '@theme/components/ADempiere/searchRecordField'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // Constants
@@ -105,7 +104,6 @@ export default defineComponent({
     CellDisplayInfo,
     ColumnsDisplayOption,
     FullScreenContainer,
-    SearchRecordFields,
     LoadingView
   },
 

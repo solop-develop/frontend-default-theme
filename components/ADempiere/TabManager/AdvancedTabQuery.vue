@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -28,7 +28,7 @@
     >
       <el-popover
         slot="append"
-        v-model="isPanel"
+        v-model="isShowedAdvancedQuery"
         placement="bottom"
         :width="isMobile ? 'auto' : '800'"
         trigger="click"
@@ -43,8 +43,8 @@
           <el-col :span="24">
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <panel-definition
-                :parent-uuid="parentUuid"
-                :container-uuid="containerUuid + IS_ADVANCE_QUERY"
+                :parent-uuid="parentUuid + IS_ADVANCED_QUERY"
+                :container-uuid="containerUuid + IS_ADVANCED_QUERY"
                 :container-manager="containerManagerAdvancedQuery"
                 :is-filter-records="false"
                 :is-advanced-query="true"
@@ -58,13 +58,14 @@
               <el-button
                 type="danger"
                 icon="el-icon-close"
-                @click="isPanel = false"
+                @click="isShowedAdvancedQuery = false"
               />
 
               <el-button
                 type="primary"
                 icon="el-icon-check"
-                @click="searchRecord"
+                :loading="isLoadingSearch"
+                @click="searchRecords"
               />
             </samp>
           </el-col>
@@ -83,19 +84,23 @@
 
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+
 import store from '@/store'
 
-// components
+// Components and Mixins
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp/index.vue'
-// constants
-import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX, IS_ADVANCE_QUERY } from '@/utils/ADempiere/dictionaryUtils'
 
-// utils and helper methods
+// Constants
+import {
+  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX, IS_ADVANCED_QUERY
+} from '@/utils/ADempiere/dictionaryUtils'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
-  name: 'SearchRecordField',
+  name: 'AdvancedTabQuerySearch',
 
   components: {
     TitleAndHelp,
@@ -125,9 +130,9 @@ export default defineComponent({
     /**
     * Refs
     */
-    const isLoadFilter = ref(false)
+    const isLoadingSearch = ref(false)
     const timeOutSearch = ref(null)
-    const isPanel = ref(false)
+    const isShowedAdvancedQuery = ref(false)
 
     /**
     * Computed
@@ -164,9 +169,22 @@ export default defineComponent({
     const containerManagerAdvancedQuery = computed(() => {
       return {
         ...props.containerManager,
+        isDisplayedField({ isDisplayed }) {
+          return true
+        },
         isDisplayedDefault({ isSelectionColumn }) {
           // add is showed from user
-          return isSelectionColumn
+          return false
+        },
+        isMandatoryField({ isMandatory }) {
+          return false
+        },
+        isReadOnlyField({ isReadOnly }) {
+          return false
+        },
+        getFieldsToHidden({ parentUuid, containerUuid }) {
+          const fieldsListTab = store.getters.getStoredFieldsFromTab(parentUuid, containerUuid)
+          return fieldsListTab || []
         }
       }
     })
@@ -175,10 +193,10 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
-    const panelIsAdvanceuery = computed(() => {
+    const panelAdvancedQuery = computed(() => {
       return store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid + IS_ADVANCE_QUERY
+        props.parentUuid + IS_ADVANCED_QUERY,
+        props.containerUuid + IS_ADVANCED_QUERY
       )
     })
 
@@ -194,7 +212,7 @@ export default defineComponent({
     }
 
     function filterRecord(searchText) {
-      isLoadFilter.value = true
+      isLoadingSearch.value = true
 
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
@@ -202,32 +220,40 @@ export default defineComponent({
         searchValue: searchText
       })
         .finally(() => {
-          isLoadFilter.value = false
+          isLoadingSearch.value = false
         })
     }
 
-    function searchRecord(params) {
+    function searchRecords(params) {
       let filters = store.getters.getValuesView({
-        containerUuid: props.containerUuid + IS_ADVANCE_QUERY
+        containerUuid: props.containerUuid + IS_ADVANCED_QUERY
       })
       if (!isEmptyValue(filters)) {
-        filters = filters.filter(attribute => !isEmptyValue(attribute.value) && !attribute.columnName.includes(DISPLAY_COLUMN_PREFIX) && !attribute.columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX))
+        filters = filters.filter(attribute => {
+          return !isEmptyValue(attribute.value) &&
+            !attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+            !attribute.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)
+        })
       }
+
+      isLoadingSearch.value = true
       store.dispatch('getEntities', {
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         filters
       })
-      isPanel.value = false
+        .finally(() => {
+          isLoadingSearch.value = false
+        })
+      isShowedAdvancedQuery.value = false
     }
 
-    watch(isPanel, (newValue, oldValue) => {
-      if (newValue !== oldValue && !isEmptyValue(newValue) && newValue) {
-        if (isEmptyValue(panelIsAdvanceuery.value)) {
-          store.dispatch('setTabAdvanceuery', {
+    watch(isShowedAdvancedQuery, (newValue, oldValue) => {
+      if (newValue && newValue !== oldValue) {
+        if (isEmptyValue(panelAdvancedQuery.value)) {
+          store.dispatch('setTabAdvancedQuery', {
             parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid,
-            isAdvancedQuery: IS_ADVANCE_QUERY
+            containerUuid: props.containerUuid
           })
         }
       }
@@ -235,19 +261,19 @@ export default defineComponent({
 
     return {
       // Refs
-      isLoadFilter,
+      isLoadingSearch,
       timeOutSearch,
-      isPanel,
+      isShowedAdvancedQuery,
       // Const
-      IS_ADVANCE_QUERY,
+      IS_ADVANCED_QUERY,
       // Computeds
       containerManagerAdvancedQuery,
       valueToSearch,
       isMobile,
-      panelIsAdvanceuery,
+      panelAdvancedQuery,
       styleIconSvg,
       // Methods
-      searchRecord,
+      searchRecords,
       handleChangeSearch
     }
   }
