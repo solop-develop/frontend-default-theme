@@ -74,7 +74,7 @@
           :loading="isDisabledDocument"
           size="small"
           style="padding: 0px;border: 0px;"
-          :type="tagRender(additionalOptions.currentDocument).type"
+          :type="tagRender(additionalOptions.currentDocument.value).type"
           @click="handleClickdActions(additionalOptions.currentDocument.value)"
         >
           {{ additionalOptions.currentDocument.name }}
@@ -252,7 +252,14 @@ export default defineComponent({
           value: ''
         }
       }
-      return props.additionalOptions.options.find(docs => docs.value === nextStatus)
+      const currentStatus = props.additionalOptions.options.find(docs => docs.value === nextStatus)
+      // if (isEmptyValue(currentStatus)) {
+      //   return {
+      //     name: '',
+      //     value: ''
+      //   }
+      // }
+      return currentStatus
     }
 
     function handleClickdActions(docsAction) {
