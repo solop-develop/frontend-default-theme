@@ -67,17 +67,17 @@
 <script>
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import FieldOptions from '@theme/components/ADempiere/FieldDefinition/FieldOptions/index.vue'
 
-// constants
+// Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
 import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { evalutateTypeField } from '@/utils/ADempiere/dictionaryUtils'
 
@@ -218,14 +218,6 @@ export default {
     },
 
     isDisplayedField() {
-      // is Advanced Query
-      if (this.field.isAdvancedQuery) {
-        // show only the fields that are marked as select column
-        if (this.field.isSelectionColumn) {
-          return this.field.isSelectionColumn
-        }
-        // return false
-      }
       // is in Table
       if (this.inTable) {
         return this.inTable
@@ -251,9 +243,6 @@ export default {
      * Idicate if field is read only
      */
     isReadOnlyField() {
-      if (this.field.isAdvancedQuery) {
-        return false
-      }
       if (this.inTable) {
         // table manage with isReadOnlyColumn method
         // if rendered the component is editable

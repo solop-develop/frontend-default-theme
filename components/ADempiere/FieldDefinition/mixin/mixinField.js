@@ -9,13 +9,14 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -383,6 +384,7 @@ export default {
       this.$store.dispatch('fieldListInfo', { info })
       this.setContainerInformation()
       this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
+
       if (this.metadata.handleActionPerformed && this.autoSave) {
         this.$store.dispatch('notifyActionPerformed', {
           containerUuid: this.metadata.containerUuid,
@@ -403,6 +405,10 @@ export default {
         if (this.metadata.isActiveLogics) {
           this.activeLogics()
         }
+        return
+      }
+
+      if (this.metadata.isAdvancedQuery) {
         return
       }
 

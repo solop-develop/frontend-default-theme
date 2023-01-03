@@ -19,7 +19,7 @@
 <template>
   <el-row v-if="!isMobile && searchRecordTypeSale" :gutter="5">
     <el-col :span="19">
-      <search-fields
+      <advanced-tab-query
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :fields-list="fieldsList"
@@ -27,6 +27,7 @@
         style="float: right;"
       />
     </el-col>
+
     <el-col v-if="!isShowedTableRecords" :span="5" style="float: right;">
       <el-select
         v-model="fieldsListShowed"
@@ -104,17 +105,15 @@ import { defineComponent, ref, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import FieldsDisplayOption from './fieldsDisplayOptions.vue'
-import Search from '@theme/components/HeaderSearch'
-import searchFields from '@theme/components/ADempiere/searchRecordField'
+import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 
 export default defineComponent({
   name: 'FilterFields',
 
   components: {
-    Search,
-    searchFields,
+    AdvancedTabQuery,
     FieldsDisplayOption
   },
 
@@ -228,7 +227,7 @@ export default defineComponent({
         fieldsList: props.fieldsList,
         showedMethod: props.showedManager,
         isTable: props.inTable
-      })
+      }) || []
     })
 
     const fieldsListAvailableWithValue = computed(() => {
@@ -240,7 +239,7 @@ export default defineComponent({
         isEvaluateDefaultValue: true,
         showedMethod: props.showedManager,
         isTable: props.inTable
-      })
+      }) || []
     })
 
     // fields showed
