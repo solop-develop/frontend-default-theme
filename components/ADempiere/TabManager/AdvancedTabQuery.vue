@@ -36,8 +36,8 @@
       >
         <title-and-help
           style="margin: 0 !important;"
-          :name="$t('tagsView.advancedQuery')"
-          :help="$t('tagsView.advancedQuery')"
+          :name="$t('window.advancedQuery.title')"
+          :help="$t('window.advancedQuery.help')"
         />
         <el-row :gutter="0">
           <el-col :span="24">

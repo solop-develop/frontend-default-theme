@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -77,7 +77,7 @@
                   type="text"
                   @click="openEditAddress(address)"
                 >
-                  {{ $t('edit') }}
+                  {{ $t('businessPartner.edit') }}
                 </el-button>
               </div>
               <el-scrollbar wrap-class="scroll-customer-description">
@@ -140,12 +140,20 @@
 </template>
 
 <script>
-import { updateCustomer, customer } from '@/api/ADempiere/form/point-of-sales.js'
-import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
+// Constants
 import fieldsList from './fieldListUpdate.js'
-import BParterMixin from './mixinBusinessPartner.js'
+
+// Components and Mixins
 import AddAddress from './addAddress.vue'
+import BParterMixin from './mixinBusinessPartner.js'
+import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
+
+// API Request Methods
+import { updateCustomer, customer } from '@/api/ADempiere/form/point-of-sales.js'
 import { requestGetCountryDefinition } from '@/api/ADempiere/system-core.js'
+import { requestLookupList } from '@/api/ADempiere/window.js'
+
+// Utils and Helper Methods
 import {
   getLookupList,
   isDisplayedField,
@@ -156,18 +164,20 @@ import {
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
-import { requestLookupList } from '@/api/ADempiere/window.js'
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'BusinessPartnerUpdate',
+
   components: {
     AddAddress
   },
+
   mixins: [
     formMixin,
     BParterMixin
   ],
+
   props: {
     metadata: {
       type: Object,
@@ -200,6 +210,7 @@ export default {
       default: ''
     }
   },
+
   data() {
     return {
       businessPartnerRecord: {},
@@ -227,6 +238,7 @@ export default {
       columnNameRefType: 'PersonType'
     }
   },
+
   computed: {
     showAddNewAddress: {
       get() {
@@ -306,12 +318,14 @@ export default {
       return templateCustomer.value === this.currentBusinessPartner.value
     }
   },
+
   watch: {
     showCustomer(value) {
       this.getCustomer()
       if (this.isEmptyValue(this.listRefType) && !this.isEmptyValue(this.fieldsList)) this.getListRefType()
     }
   },
+
   methods: {
     getLookupList,
     isDisplayedField,

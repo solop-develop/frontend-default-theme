@@ -48,7 +48,7 @@
                         trigger="hover"
                       >
                         <p>
-                          <b> {{ $t('login.userName') }}:</b>
+                          <b> {{ $t('page.login.userName') }}:</b>
                           {{ nodeList.name }}
                         </p>
                         <el-button slot="reference" type="text">

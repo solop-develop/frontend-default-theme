@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -74,7 +74,7 @@
         type="text"
         @click="redirect({ window: zoomItem })"
       >
-        {{ $t('table.ProcessActivity.zoomIn') }}
+        {{ $t('page.processActivity.zoomIn') }}
         {{ zoomItem.name }}
       </el-button>
     </template>
@@ -84,7 +84,7 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { parseContext } from '@/utils/ADempiere/contextUtils'
 

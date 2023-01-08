@@ -49,7 +49,7 @@
               placement="top"
             >
               <el-card style="padding: 20px!important;">
-                <b> {{ $t('login.userName') }} </b> {{ logs.user_name }} <br>
+                <b> {{ $t('page.login.userName') }} </b> {{ logs.user_name }} <br>
                 {{ logs.text_message }}
               </el-card>
             </el-timeline-item>
