@@ -24,8 +24,8 @@
     :value-format="formatSend"
     :type="typePicker"
     range-separator="-"
-    :start-placeholder="$t('component.startDate')"
-    :end-placeholder="$t('component.endDate')"
+    :start-placeholder="$t('component.date.startDate')"
+    :end-placeholder="$t('component.date.endDate')"
     unlink-panels
     :picker-options="pickerOptions"
     @change="preHandleChange"
