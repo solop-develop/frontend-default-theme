@@ -31,7 +31,7 @@ export const infoOptionItem = {
  * For zoom window of the field
  */
 export const zoomInOptionItem = {
-  name: language.t('table.ProcessActivity.zoomIn'),
+  name: language.t('page.processActivity.zoomIn'),
   enabled: true,
   svg: false,
   icon: 'el-icon-files',

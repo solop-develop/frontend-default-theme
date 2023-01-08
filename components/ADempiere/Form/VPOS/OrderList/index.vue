@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -108,7 +108,7 @@
         width="100"
       >
         <template slot="header">
-          {{ $t('table.ProcessActivity.Status') }}
+          {{ $t('page.processActivity.status') }}
           <el-button-group
             style="display: inline-grid;vertical-align: inherit;"
           >
@@ -278,20 +278,20 @@
 </template>
 
 <script>
-// constants
+// Constants
 import fieldsListOrders from './fieldsListOrders.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
-// components and mixins
+// Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 
-// api request methods
+// API Request Methods
 import { holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import {
   getLookupList,
   isDisplayedField,

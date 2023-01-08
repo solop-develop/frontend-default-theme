@@ -19,7 +19,7 @@
     <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 40% !important;' : 'height: 10%!important'">
       <el-card :style="!collapse ? 'height: 100% !important;' : 'height: auto'">
         <div slot="header">
-          <span> {{ $t('form.activity.title') }} </span>
+          <span> {{ $t('form.workflowActivity.title') }} </span>
           <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
         </div>
 
@@ -248,17 +248,17 @@ export default {
       workflowTableDefinition: [
         {
           columnName: 'workflow.name',
-          name: this.$t('table.ProcessActivity.Name'),
+          name: this.$t('page.processActivity.name'),
           isNumeric: false
         },
         {
           columnName: 'node.name',
-          name: this.$t('form.activity.table.node'),
+          name: this.$t('form.workflowActivity.table.node'),
           isNumeric: false
         },
         {
           columnName: 'node.description',
-          name: this.$t('table.ProcessActivity.Description'),
+          name: this.$t('page.processActivity.description'),
           isNumeric: false
         }
       ],
@@ -462,3 +462,4 @@ export default {
   transition: 0.3s;
   display: block;
 }
+</style>

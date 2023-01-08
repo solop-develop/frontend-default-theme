@@ -24,8 +24,8 @@
     :value-format="formatSend"
     :type="typePicker"
     range-separator="-"
-    :start-placeholder="$t('components.dateStartPlaceholder')"
-    :end-placeholder="$t('components.dateEndPlaceholder')"
+    :start-placeholder="$t('component.startDate')"
+    :end-placeholder="$t('component.endDate')"
     unlink-panels
     :picker-options="pickerOptions"
     @change="preHandleChange"
@@ -37,14 +37,14 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// constants
+// Constants
 import { DATE_PLUS_TIME } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { changeTimeZone } from '@/utils/ADempiere/formatValue/dateFormat'
 
 /**
@@ -61,19 +61,19 @@ export default {
     return {
       pickerOptionsDate: {
         shortcuts: [{
-          text: this.$t('components.date.Today'),
+          text: this.$t('component.date.today'),
           onClick(picker) {
             picker.$emit('pick', new Date())
           }
         }, {
-          text: this.$t('components.date.Yesterday'),
+          text: this.$t('component.date.yesterday'),
           onClick(picker) {
             const date = new Date()
             date.setTime(date.getTime() - 3600 * 1000 * 24)
             picker.$emit('pick', date)
           }
         }, {
-          text: this.$t('components.date.Week'),
+          text: this.$t('component.date.week'),
           onClick(picker) {
             const date = new Date()
             const monthEndDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
@@ -83,20 +83,20 @@ export default {
       },
       pickerOptionsDateRange: {
         shortcuts: [{
-          text: this.$t('components.date.Today'),
+          text: this.$t('component.date.today'),
           onClick(picker) {
             const currentDay = new Date()
             picker.$emit('pick', [currentDay, currentDay])
           }
         }, {
-          text: this.$t('components.date.Yesterday'),
+          text: this.$t('component.date.yesterday'),
           onClick(picker) {
             const start = new Date()
             start.setTime(start.getTime() - 3600 * 1000 * 24)
             picker.$emit('pick', [start, start])
           }
         }, {
-          text: this.$t('components.date.Week'),
+          text: this.$t('component.date.week'),
           onClick(picker) {
             const start_date = new Date()
             start_date.setHours(0, 0, 0, 0)
@@ -110,7 +110,7 @@ export default {
             picker.$emit('pick', [start_date, end_date])
           }
         }, {
-          text: this.$t('components.date.currentWeek'),
+          text: this.$t('component.date.currentWeek'),
           onClick(picker) {
             const start_date = new Date()
             start_date.setHours(0, 0, 0, 0)
@@ -124,7 +124,7 @@ export default {
             picker.$emit('pick', [start_date, end_date])
           }
         }, {
-          text: this.$t('components.date.LastMonth'),
+          text: this.$t('component.date.lastMonth'),
           onClick(picker) {
             const date = new Date()
             const monthEndDay = new Date(date.getFullYear(), date.getMonth(), 0)
@@ -132,7 +132,7 @@ export default {
             picker.$emit('pick', [monthStartDay, monthEndDay])
           }
         }, {
-          text: this.$t('components.date.CurrentMonth'),
+          text: this.$t('component.date.currentMonth'),
           onClick(picker) {
             const date = new Date()
             const monthEndDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
