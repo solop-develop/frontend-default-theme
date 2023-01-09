@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,31 +9,52 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <el-button
-    v-bind="commonsProperties"
-    type="primary"
-    plain
-    :disabled="isDisabledButton"
-    @click="startProcess"
-  >
-    <!-- eslint-disable-next-line -->
-    <component v-bind="iconProps" />
-    {{ displayedValue }}
-  </el-button>
+  <el-button-group>
+    <el-button
+      v-popover:info-field
+      type="primary"
+      icon="el-icon-warning"
+      style="font-size: 24px;padding-top: 5px;padding-bottom: 5px;padding-left: 6px;padding-right: 6px;"
+    />
+    <el-popover
+      ref="info-field"
+      placement="top"
+      trigger="click"
+      class="popover-field-options"
+      style="padding: 0px !important; max-width: 400px"
+    >
+      <context-info
+        :field-attributes="metadata"
+      />
+    </el-popover>
+
+    <el-button
+      v-bind="commonsProperties"
+      type="primary"
+      plain
+      :disabled="isDisabledButton"
+      @click="startProcess"
+    >
+      <!-- eslint-disable-next-line -->
+      <component v-bind="iconProps" />
+      {{ displayedValue }}
+    </el-button>
+  </el-button-group>
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
+import ContextInfo from '@theme/components/ADempiere/FieldDefinition/FieldOptions/ContextInfo'
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// utils and helpers methods
+// Utils and Helpers Methods
 import {
   runProcessOfWindow,
   generateReportOfWindow,
@@ -44,6 +65,10 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 // TODO: Add displayed value
 export default {
   name: 'FieldButton',
+
+  components: {
+    ContextInfo
+  },
 
   mixins: [
     fieldMixin
@@ -57,9 +82,6 @@ export default {
       return typeof this.value !== 'number' || isEmptyValue(this.value) || this.value <= 0
     },
     displayedValue() {
-      if (typeof this.value !== 'number') {
-        return this.metadata.name
-      }
       if (this.emptyValue) {
         return this.metadata.name
       }

@@ -19,7 +19,7 @@
 <template>
   <el-card class="field-option-card context-info">
     <div slot="header">
-      <span>
+      <span style="word-break: break-word;">
         {{ $t('field.field') }}
         <b> {{ fieldAttributes.name }} </b>
         ({{ fieldAttributes.id }}, {{ fieldAttributes.columnName }})
@@ -68,23 +68,26 @@
       </el-form>
     </el-scrollbar>
 
-    <template v-for="(zoomItem, index) in fieldAttributes.reference.zoomWindows">
-      <el-button
-        :key="index"
-        type="text"
-        @click="redirect({ window: zoomItem })"
-      >
-        {{ $t('page.processActivity.zoomIn') }}
-        {{ zoomItem.name }}
-      </el-button>
-    </template>
+    <el-button
+      v-for="(zoomItem, index) in fieldAttributes.reference.zoomWindows"
+      :key="index"
+      type="text"
+      @click="redirect({ window: zoomItem })"
+    >
+      {{ $t('page.processActivity.zoomIn') }}
+      {{ zoomItem.name }}
+    </el-button>
   </el-card>
 </template>
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+import router from '@/router'
+import store from '@/store'
+
 // Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { parseContext } from '@/utils/ADempiere/contextUtils'
 
@@ -101,7 +104,7 @@ export default defineComponent({
   setup(props, { root }) {
     const fieldValue = computed(() => {
       const { parentUuid, containerUuid, columnName } = props.fieldAttributes
-      return root.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid,
         containerUuid,
         columnName
@@ -109,9 +112,12 @@ export default defineComponent({
     })
 
     const messageText = computed(() => {
-      if (!root.isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
-        const contextInfo = root.$store.getters.getContextInfoField(props.fieldAttributes.contextInfo.uuid, props.fieldAttributes.contextInfo.sqlStatement)
-        if (!root.isEmptyValue(contextInfo)) {
+      if (!isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
+        const contextInfo = store.getters.getContextInfoField(
+          props.fieldAttributes.contextInfo.uuid,
+          props.fieldAttributes.contextInfo.sqlStatement
+        )
+        if (!isEmptyValue(contextInfo)) {
           return contextInfo.messageText
         }
       }
@@ -131,12 +137,12 @@ export default defineComponent({
       })
 
       // panel in mobile mode
-      root.$store.commit('changeShowRigthPanel', false)
-      if (!root.isEmptyValue(root.$route.query.fieldColumnName)) {
-        root.$router.push({
-          name: root.$route.name,
+      store.commit('changeShowRigthPanel', false)
+      if (!isEmptyValue(router.query.fieldColumnName)) {
+        router.push({
+          name: router.name,
           query: {
-            ...root.$route.query,
+            ...router.query,
             typeAction: '',
             fieldColumnName: ''
           }
@@ -144,7 +150,7 @@ export default defineComponent({
       }
     }
 
-    if (!root.isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
+    if (!isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
       const sqlParse = parseContext({
         parentUuid: props.fieldAttributes.parentUuid,
         containerUuid: props.fieldAttributes.containerUuid,
@@ -152,7 +158,7 @@ export default defineComponent({
         isBooleanToString: true
       })
 
-      root.$store.dispatch('getContextInfoValueFromServer', {
+      store.dispatch('getContextInfoValueFromServer', {
         contextInfoId: props.fieldAttributes.contextInfo.id,
         contextInfoUuid: props.fieldAttributes.contextInfo.uuid,
         sqlStatement: sqlParse.value
