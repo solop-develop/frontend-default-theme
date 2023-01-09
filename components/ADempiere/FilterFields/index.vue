@@ -17,18 +17,29 @@
 -->
 
 <template>
-  <el-row v-if="!isMobile && searchRecordTypeSale" :gutter="5">
-    <el-col :span="19">
+  <el-row
+    v-if="!isMobile && searchRecordTypeSale"
+    id="panelOptionsBar"
+    class="panel-options-bar"
+  >
+    <span
+      id="LeftPanelSearchOptions"
+      class="left-panel-search-options"
+    >
       <advanced-tab-query
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :fields-list="fieldsList"
         :container-manager="containerManager"
-        style="float: right;"
+        style="float: left;"
       />
-    </el-col>
+    </span>
 
-    <el-col v-if="!isShowedTableRecords" :span="5" style="float: right;">
+    <span
+      v-if="!isShowedTableRecords"
+      id="RightPanelFieldOptions"
+      class="right-panel-field-options"
+    >
       <el-select
         v-model="fieldsListShowed"
         :filterable="!isMobile"
@@ -56,7 +67,7 @@
         :showed-fields="fieldsListShowed"
         :filter-manager="filterManager"
       />
-    </el-col>
+    </span>
   </el-row>
 
   <el-row v-else :gutter="20">
@@ -405,6 +416,22 @@ export default defineComponent({
 .slide-fade-leave-to {
   transform: translateX(20px);
   opacity: 0;
+}
+
+/**
+- Style Bar Option
+└──> Left Panel Search Options
+└──> Right Panel Field Options
+*/
+.panel-options-bar {
+  width: 99% !important;
+  display: flex;
+}
+.left-panel-search-options {
+  width: inherit;
+}
+.right-panel-field-options {
+  display: contents;
 }
 
 </style>
