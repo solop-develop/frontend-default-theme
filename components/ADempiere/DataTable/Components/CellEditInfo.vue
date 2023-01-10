@@ -17,9 +17,13 @@
 -->
 
 <template>
-  <span v-if="isRowCanBeEdited(dataRow)" key="field-component">
+  <span
+    v-if="isRowChangeEdited"
+    key="field-component"
+  >
     <field-definition
       key="field-definition"
+      v-shortkey="{send: ['ctrl', 'enter'], exit: ['ctrl', 'esc']}"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
       :is-data-table="true"
@@ -31,6 +35,7 @@
         recordUuid: dataRow.UUID
       }"
       size="mini"
+      @shortkey.native="keyboardShortcuts"
     />
   </span>
 
@@ -85,6 +90,10 @@ export default defineComponent({
     dataRow: {
       type: Object,
       default: () => {}
+    },
+    tableName: {
+      type: String,
+      default: () => ''
     }
   },
 
@@ -94,6 +103,26 @@ export default defineComponent({
         field: props.fieldAttributes,
         row: props.dataRow
       })
+    })
+
+    const shortkey = computed(() => {
+      return {
+        close: ['esc'],
+        refreshList: ['f5'],
+        enter: ['enter']
+      }
+    })
+
+    const isRowChangeEdited = computed(() => {
+      if (props.dataRow.isEditRow && !isReadOnly.value) return props.dataRow.isEditRow
+      if (!isEmptyValue(props.parentUuid)) return false
+      if (!props.dataRow.isSelectedRow) return false
+      if (props.dataRow.isEditRow && !isReadOnly.value) return true
+      return false
+    })
+
+    const cellTable = computed(() => {
+      return props.dataRow
     })
 
     /**
@@ -108,6 +137,7 @@ export default defineComponent({
     })
 
     function isRowCanBeEdited(record) {
+      if (record.isEditRow && !isReadOnly.value) return record.isEditRow
       if (!isEmptyValue(props.parentUuid)) {
         return false
       }
@@ -120,11 +150,36 @@ export default defineComponent({
       return false
     }
 
+    function exitEdit(record) {
+      record.isEditRow = !record.isEditRow
+    }
+
+    function enterEdit(record) {
+      record.isEditRow = !record.isEditRow
+      props.containerManager.exitEditMode({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        tableName: props.tableName,
+        recordUuid: record.UUID
+      })
+    }
+
+    function keyboardShortcuts(type, record) {
+      if (type.srcKey === 'exit') return exitEdit(props.dataRow)
+      return enterEdit(props.dataRow)
+    }
+
     return {
       // computeds
       cellCssClass,
+      cellTable,
+      isRowChangeEdited,
       // methods
-      isRowCanBeEdited
+      isRowCanBeEdited,
+      exitEdit,
+      enterEdit,
+      keyboardShortcuts,
+      shortkey
     }
   }
 })
