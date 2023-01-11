@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div v-if="!isChangeOptions" id="mainWindowDataTable" :onLoad="adjustSize()" :onresize="adjustSize()">
+  <div v-if="!isChangeOptions" id="mainWindowDataTable" class="multipleTableWindows" :onLoad="adjustSize()" :onresize="adjustSize()">
     <el-table
       id="multipleTable"
       ref="multipleTable"
@@ -34,6 +34,7 @@
       :row-class-name="tableRowClassName"
       @row-click="handleRowClick"
       @row-dblclick="handleRowDblClick"
+      @cell-click="handleCellClick"
       @select="handleSelection"
       @select-all="handleSelectionAll"
     >
@@ -58,13 +59,23 @@
       >
         <template slot-scope="scope">
           <!-- formatted displayed value -->
-          <cell-display-info
+          <!-- <cell-display-info
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
             :field-attributes="fieldAttributes"
             :container-manager="containerManager"
             :scope="scope"
             :data-row="scope.row"
+          /> -->
+          <cell-edit-info
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+            :field-attributes="fieldAttributes"
+            :container-manager="containerManager"
+            :scope="scope"
+            :data-row="scope.row"
+            :data-cell="scope.column"
+            :table-name="panelMetadata.tableName"
           />
         </template>
       </el-table-column>
@@ -84,7 +95,8 @@ import router from '@/router'
 import store from '@/store'
 
 // Components and Mixins
-import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
+import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
+// import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
@@ -101,7 +113,8 @@ export default defineComponent({
   name: 'WindowsTable',
 
   components: {
-    CellDisplayInfo,
+    // CellDisplayInfo,
+    CellEditInfo,
     ColumnsDisplayOption,
     FullScreenContainer,
     LoadingView
@@ -579,6 +592,30 @@ export default defineComponent({
       }, 1000)
     }
 
+    function handleCellClick(row) {
+      const { tableName } = props.panelMetadata
+      let currentRowEdit = {
+        UUID: ''
+      }
+      currentRowEdit = recordsWithFilter.value.find(records => records.isEditRow)
+      if (!isEmptyValue(currentRowEdit) && currentRowEdit.UUID === row.UUID) {
+        row.isEditRow = true
+        return
+      } else {
+        const changeAllOthers = recordsWithFilter.value.filter(records => row[tableName + '_ID'] !== records[tableName + '_ID'])
+        changeAllOthers.forEach(element => {
+          element.isEditRow = false
+        })
+        row.isEditRow = true
+        props.containerManager.exitEditMode({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          tableName,
+          recordUuid: currentRowEdit.UUID
+        })
+      }
+    }
+
     watch(currentTabChildren, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         loadSelect()
@@ -690,7 +727,8 @@ export default defineComponent({
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
-      loadSelect
+      loadSelect,
+      handleCellClick
     }
   }
 })
@@ -703,21 +741,27 @@ export default defineComponent({
 div#mainWindowDataTable{
   width: 100%;
 }
-.el-table .el-table__cell {
-  padding: 0px !important;
-}
-.el-table .success-row {
-  background: #e8f4ff;
-}
-.el-table .cell {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  word-break: break-all;
-  line-height: 15px;
-  padding-left: 10px;
-  padding-right: 10px;
+.multipleTableWindows {
+  .el-table .el-table__cell {
+    padding: 0px !important;
+  }
+  .el-table .success-row {
+    background: #e8f4ff;
+  }
+  .el-table .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .el-table .cell:hover {
+    border: 2px solid blue;
+    overflow: hidden;
+  }
 }
 </style>
