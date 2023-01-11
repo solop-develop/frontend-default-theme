@@ -17,29 +17,30 @@
 -->
 
 <template>
-  <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'">
-    <component
-      :is="componentRender"
-      v-if="inTable"
-      :id="field.panelType !== 'form' ? field.columnName : ''"
-      key="is-table-template"
-      class="in-table"
-      :parent-uuid="parentUuid"
-      :container-uuid="containerUuid"
-      :container-manager="containerManager"
-      :metadata="fieldAttributes"
-      :in-table="true"
-    />
+  <component
+    :is="componentRender"
+    v-if="inTable"
+    :id="field.panelType !== 'form' ? field.columnName : ''"
+    key="is-table-template"
+    class="in-table"
+    :parent-uuid="parentUuid"
+    :container-uuid="containerUuid"
+    :container-manager="containerManager"
+    :metadata="fieldAttributes"
+    :in-table="true"
+  />
 
-    <el-col
-      v-else-if="!inTable && isDisplayedField"
-      key="is-panel-template"
-      :xs="sizeField.xs"
-      :sm="sizeField.sm"
-      :md="sizeField.md"
-      :lg="sizeField.lg"
-      :xl="sizeField.xl"
-    >
+  <el-col
+    v-else-if="!inTable && isDisplayedField"
+    key="is-panel-template"
+    :xs="sizeField.xs"
+    :sm="sizeField.sm"
+    :md="sizeField.md"
+    :lg="sizeField.lg"
+    :xl="sizeField.xl"
+    :class="classPanelCol"
+  >
+    <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'">
       <el-form-item :class="classFrom">
         <template slot="label">
           <field-options
@@ -60,8 +61,8 @@
           :metadata="fieldAttributes"
         />
       </el-form-item>
-    </el-col>
-  </div>
+    </div>
+  </el-col>
 </template>
 
 <script>
@@ -121,6 +122,10 @@ export default {
     isAdvancedQuery: {
       type: Boolean,
       default: false
+    },
+    keyField: {
+      type: Number,
+      default: undefined
     }
   },
 
@@ -284,6 +289,14 @@ export default {
         parentUuid: this.parentUuid,
         containerUuid: this.containerUuid
       })
+    },
+    classPanelCol() {
+      const panel = this.containerManager.getPanel({
+        parentUuid: this.parentUuid,
+        containerUuid: this.containerUuid
+      })
+      if (!isEmptyValue(panel) && panel.isEditSecuence) return 'dragable-field'
+      return ''
     }
   },
 
@@ -408,5 +421,8 @@ export default {
       border-color: #f55 !important;
     }
   }
+}
+.dragable-field:active {
+  border: 1px solid rgb(117, 117, 241);
 }
 </style>

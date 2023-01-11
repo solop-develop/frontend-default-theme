@@ -49,7 +49,7 @@
         value-key="key"
         :size="size"
         :popper-append-to-body="true"
-        style="width: 250px;"
+        style="min-width: 250px;max-width: 300px;"
       >
         <el-option
           v-for="(item, key) in fieldsListAvailable"
@@ -66,6 +66,7 @@
         :available-fields-with-value="fieldsListAvailableWithValue"
         :showed-fields="fieldsListShowed"
         :filter-manager="filterManager"
+        :container-manager="containerManager"
       />
     </span>
   </el-row>
@@ -87,7 +88,7 @@
             value-key="key"
             :size="size"
             :popper-append-to-body="true"
-            style="width: 250px;"
+            style="min-width: 250px;max-width: 300px;"
           >
             <el-option
               v-for="(item, key) in fieldsListAvailable"
@@ -104,6 +105,7 @@
             :available-fields-with-value="fieldsListAvailableWithValue"
             :showed-fields="fieldsListShowed"
             :filter-manager="filterManager"
+            :container-manager="containerManager"
           />
         </el-form-item>
       </el-form>

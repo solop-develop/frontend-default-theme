@@ -95,7 +95,12 @@ export default defineComponent({
     // }
 
     const componentRender = computed(() => {
+      const { isEditSecuence } = panelMetadata.value
       let panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
+
+      if (isEditSecuence) {
+        panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/DraggablePanel.vue')
+      }
 
       if (!isEmptyValue(panelMetadata.value) && panelMetadata.value.isSortTab) {
         panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')

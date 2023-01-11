@@ -36,6 +36,7 @@
           :filter-manager="containerManager.changeFieldShowedFromUser"
           :showed-manager="containerManager.isDisplayedField"
           :fields-to-hidden="containerManager.getFieldsToHidden"
+          :container-manager="containerManager"
         />
       </el-col>
       <el-col :span="1" style="text-align: center;">
