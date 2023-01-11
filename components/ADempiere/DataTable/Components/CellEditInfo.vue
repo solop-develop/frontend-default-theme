@@ -51,11 +51,11 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// components and mixins
+// Components and Mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
-// utils and helpers methods
+// Utils and Helpers Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -114,10 +114,18 @@ export default defineComponent({
     })
 
     const isRowChangeEdited = computed(() => {
-      if (props.dataRow.isEditRow && !isReadOnly.value) return props.dataRow.isEditRow
-      if (!isEmptyValue(props.parentUuid)) return false
-      if (!props.dataRow.isSelectedRow) return false
-      if (props.dataRow.isEditRow && !isReadOnly.value) return true
+      if (props.dataRow.isEditRow && !isReadOnly.value) {
+        return props.dataRow.isEditRow
+      }
+      if (!isEmptyValue(props.parentUuid)) {
+        return false
+      }
+      if (!props.dataRow.isSelectedRow) {
+        return false
+      }
+      if (props.dataRow.isEditRow && !isReadOnly.value) {
+        return true
+      }
       return false
     })
 
@@ -137,7 +145,9 @@ export default defineComponent({
     })
 
     function isRowCanBeEdited(record) {
-      if (record.isEditRow && !isReadOnly.value) return record.isEditRow
+      if (record.isEditRow && !isReadOnly.value) {
+        return record.isEditRow
+      }
       if (!isEmptyValue(props.parentUuid)) {
         return false
       }
@@ -165,7 +175,9 @@ export default defineComponent({
     }
 
     function keyboardShortcuts(type, record) {
-      if (type.srcKey === 'exit') return exitEdit(props.dataRow)
+      if (type.srcKey === 'exit') {
+        return exitEdit(props.dataRow)
+      }
       return enterEdit(props.dataRow)
     }
 
