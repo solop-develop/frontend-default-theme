@@ -108,7 +108,7 @@
           size="mini"
           circle
           style="margin: 0px"
-          @click="openRecordLogs('listChats')"
+          @click="openRecordLogs('recordNotesTab')"
         >
           <svg-icon icon-class="message" />
         </el-button>
