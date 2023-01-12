@@ -44,11 +44,12 @@
       />
     </el-header>
 
-    <el-main class="tab-panel-body">
-      <div style="width: 100%;">
+    <el-main id="tab-panel-body" class="tab-panel-body">
+      <div style="width: 100%;height: 100%;">
         <default-table
           v-if="isShowedTableRecords"
           key="default-table"
+          id="default-table"
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
           :container-manager="containerManager"
