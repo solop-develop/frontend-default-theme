@@ -107,7 +107,12 @@ export default defineComponent({
     containerManager: {
       type: Object,
       required: false
+    },
+    newFieldsListSecuence: {
+      type: Array,
+      default: () => []
     }
+
   },
 
   setup(props) {
@@ -158,9 +163,9 @@ export default defineComponent({
 
     const sequenceOptionLabel = computed(() => {
       const { isEditSecuence } = props.containerManager.getPanel({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
       if (!isEmptyValue(isEditSecuence) && isEditSecuence) return language.t('component.sequenceSort.saveNewSequence')
       return language.t('component.sequenceSort.modifyFieldSequence')
     })
@@ -174,8 +179,32 @@ export default defineComponent({
 
     const handleCommand = (command) => {
       let fieldsShowed = []
-      if (command === 'secuencia') {
+      if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
         const { isEditSecuence, uuid } = props.containerManager.getPanel({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        props.containerManager.changeSequence({
+          uuid,
+          attributeName: 'isEditSecuence',
+          attributeNameControl: undefined,
+          attributeValue: !isEditSecuence,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+
+        return
+      }
+      if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
+        const { isEditSecuence, uuid } = props.containerManager.getPanel({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        props.containerManager.changeSequence({
+          uuid,
+          attributeName: 'fieldsList',
+          attributeNameControl: undefined,
+          attributeValue: props.newFieldsListSecuence,
           parentUuid: props.parentUuid,
           containerUuid: props.containerUuid
         })

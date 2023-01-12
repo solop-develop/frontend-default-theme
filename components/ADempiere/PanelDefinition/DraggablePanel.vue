@@ -35,8 +35,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :fields-to-hidden="containerManager.getFieldsToHidden"
             :is-filter-records="isFilterRecords"
             :container-manager="containerManager"
+            :new-fields-list-secuence="example"
           />
-
           <el-card
             :shadow="shadowGroup"
             :body-style="{ padding: '5px' }"
@@ -47,12 +47,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 v-model="example"
                 class="board-column-content"
                 style="overflow: auto;"
+                @change="handleChange"
               >
                 <field-definition
-                  v-for="(element, subKey) in example"
-                  :key="subKey"
+                  v-for="(element, key) in example"
+                  :key="key"
                   ref="fieldDefinitionRef"
-                  :key-field="subKey"
+                  :key-field="key"
                   :parent-uuid="parentUuid"
                   :container-uuid="containerUuid"
                   :container-manager="containerManager"
@@ -68,6 +69,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     readOnlyLogic: true,
                     isReadOnlyFromLogic: true
                   }"
+                  :is-draggable="true"
                 />
               </draggable>
             </el-row>
@@ -211,7 +213,12 @@ export default defineComponent({
     const fieldDefinitionRef = ref(null)
     const query = root._route.query
 
-    example.value = fieldsList.value
+    example.value = fieldsList.value.map(recordField => {
+      return {
+        ...recordField,
+        isChangeSecuence: false
+      }
+    })
 
     watch(fieldDefinitionRef, (newValue, oldValue) => {
       if (newValue !== oldValue) {
@@ -259,6 +266,10 @@ export default defineComponent({
       )
     }
 
+    function handleChange(params) {
+      params.moved.element.isChangeSecuence = true
+    }
+
     const heightPanel = computed(() => {
       const main = document.getElementById('mainWindow')
       if (
@@ -295,7 +306,6 @@ export default defineComponent({
     return {
       group,
       example,
-      //
       fieldsList,
       shadowGroup,
       heightPanel,
@@ -306,6 +316,7 @@ export default defineComponent({
       isMobile,
       isActiveCurrentTab,
       // methodos
+      handleChange,
       setFocus
     }
   }

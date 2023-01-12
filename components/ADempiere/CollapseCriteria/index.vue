@@ -21,14 +21,14 @@
     <el-divider class="divider" />
 
     <el-row style="display: flex;">
-      <el-col :span="19" style="display: grid;">
+      <el-col :span="24" style="display: grid;">
         <div class="title" @click="handlePanel(isCollapse)">
           <b class="label">
             {{ title }}
           </b>
         </div>
       </el-col>
-      <el-col :span="4">
+      <!-- <el-col :span="4">
         <filter-fields
           :parent-uuid="parentUuid"
           :container-uuid="containerUuid"
@@ -38,7 +38,7 @@
           :fields-to-hidden="containerManager.getFieldsToHidden"
           :container-manager="containerManager"
         />
-      </el-col>
+      </el-col> -->
       <el-col :span="1" style="text-align: center;">
         <el-button type="text" :icon="icon" class="change-icon" @click="handlePanel(isCollapse)" />
       </el-col>
@@ -62,14 +62,14 @@
 import { defineComponent, computed } from '@vue/composition-api'
 
 // components and mixins
-import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
+// import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 
 export default defineComponent({
   name: 'CollapseCriteria',
 
-  components: {
-    FilterFields
-  },
+  // components: {
+  //   FilterFields
+  // },
 
   props: {
     title: {

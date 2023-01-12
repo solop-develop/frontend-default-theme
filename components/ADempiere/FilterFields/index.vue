@@ -36,7 +36,6 @@
     </span>
 
     <span
-      v-if="!isShowedTableRecords"
       id="RightPanelFieldOptions"
       class="right-panel-field-options"
     >
@@ -67,6 +66,7 @@
         :showed-fields="fieldsListShowed"
         :filter-manager="filterManager"
         :container-manager="containerManager"
+        :new-fields-list-secuence="newFieldsListSecuence"
       />
     </span>
   </el-row>
@@ -106,6 +106,7 @@
             :showed-fields="fieldsListShowed"
             :filter-manager="filterManager"
             :container-manager="containerManager"
+            :new-fields-list-secuence="newFieldsListSecuence"
           />
         </el-form-item>
       </el-form>
@@ -178,6 +179,10 @@ export default defineComponent({
     isShowedTableRecords: {
       type: Boolean,
       default: true
+    },
+    newFieldsListSecuence: {
+      type: Array,
+      default: () => []
     }
   },
 

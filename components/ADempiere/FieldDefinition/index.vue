@@ -40,7 +40,7 @@
     :xl="sizeField.xl"
     :class="classPanelCol"
   >
-    <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'">
+    <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'" :style="styleDraggable">
       <el-form-item :class="classFrom">
         <template slot="label">
           <field-options
@@ -126,6 +126,10 @@ export default {
     keyField: {
       type: Number,
       default: undefined
+    },
+    isDraggable: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -295,8 +299,14 @@ export default {
         parentUuid: this.parentUuid,
         containerUuid: this.containerUuid
       })
+      if (!this.isDraggable) return 'border: 1px solid #fff;border-radius: 10px;'
       if (!isEmptyValue(panel) && panel.isEditSecuence) return 'dragable-field'
       return ''
+    },
+    styleDraggable() {
+      if (!this.isDraggable) return ''
+      if (!isEmptyValue(this.field.isChangeSecuence) && this.field.isChangeSecuence) return 'border: 1px solid #a9a9ec;border-radius: 10px;'
+      return 'border: 1px solid #fff;border-radius: 10px;'
     }
   },
 
@@ -423,6 +433,7 @@ export default {
   }
 }
 .dragable-field:active {
-  border: 1px solid rgb(117, 117, 241);
+  border-radius: 5px;
+  border: 3px solid blue;
 }
 </style>
