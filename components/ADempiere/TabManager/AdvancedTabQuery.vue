@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <span :style="styleIconSvg">
+  <span class="advanced-query-container" :style="styleIconSvg">
     <el-input
       v-model="valueToSearch"
       clearable
@@ -32,17 +32,19 @@
         placement="bottom"
         :width="isMobile ? 'auto' : '800'"
         trigger="click"
-        class="option-search-record"
+        class="advanced-query-popover"
       >
         <title-and-help
+          class="advanced-query-title"
           style="margin: 0 !important;"
           :name="$t('window.advancedQuery.title')"
           :help="$t('window.advancedQuery.help')"
         />
         <el-row :gutter="0">
           <el-col :span="24">
-            <el-row style="padding-bottom: 15px;padding-top: 15px;">
+            <el-row style="padding-bottom: 0px; padding-top: 0px;">
               <panel-definition
+                class="advanced-query-panel-definition"
                 :parent-uuid="parentUuid + IS_ADVANCED_QUERY"
                 :container-uuid="containerUuid + IS_ADVANCED_QUERY"
                 :container-manager="containerManagerAdvancedQuery"
@@ -53,8 +55,16 @@
             </el-row>
           </el-col>
 
-          <el-col :span="24" class="location-address-footer">
+          <el-col :span="24" class="advanced-query-footer">
             <samp style="float: right; padding-top: 4px;">
+              <el-button
+                type="info"
+                plain
+                @click="clearValues();"
+              >
+                <svg-icon icon-class="layers-clear" />
+              </el-button>
+
               <el-button
                 type="danger"
                 icon="el-icon-close"
@@ -289,6 +299,12 @@ export default defineComponent({
       isShowedAdvancedQuery.value = false
     }
 
+    function clearValues() {
+      store.dispatch('clearValuesOnContainer', {
+        containerUuid: props.containerUuid + IS_ADVANCED_QUERY
+      })
+    }
+
     watch(isShowedAdvancedQuery, (newValue, oldValue) => {
       if (newValue && newValue !== oldValue) {
         if (isEmptyValue(panelAdvancedQuery.value)) {
@@ -314,6 +330,7 @@ export default defineComponent({
       panelAdvancedQuery,
       styleIconSvg,
       // Methods
+      clearValues,
       searchRecords,
       handleChangeSearch
     }
@@ -324,19 +341,34 @@ export default defineComponent({
 <style lang="scss">
 .input-search {
   line-height: 28px;
-  display: contents;
+  // display: contents;
 
   .el-input-group__append {
     height: 32px !important;
+    // line-height: 27 !important;
   }
 
   .button-search-record {
     padding-left: 6px !important;
     padding-right: 0px !important;
+    padding-top: 9px !important;
 
-    i, svg {
-      font-size: 28px !important;
+    svg {
+      font-size: 27px !important;
     }
+  }
+}
+
+.advanced-query-title {
+  button, button.container-title {
+    padding: 0px !important;
+  }
+}
+
+.advanced-query-footer {
+  button {
+    padding: 4px 8px;
+    font-size: 24px;
   }
 }
 </style>
