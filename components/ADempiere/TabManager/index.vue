@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div>
+  <div class="tab-manager-container">
     <el-tabs
       ref="el-tabs-container"
       v-model="currentTab"
@@ -729,6 +729,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.tab-manager-container {
+  .el-badge__content.is-fixed {
+    right: 150% !important;
+  }
+}
+
 .drawer-panel-info {
   header.el-drawer__header {
     margin-bottom: 10px !important;
