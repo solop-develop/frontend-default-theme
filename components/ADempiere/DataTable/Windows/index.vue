@@ -742,6 +742,10 @@ div#mainWindowDataTable{
   width: 100%;
 }
 .multipleTableWindows {
+  height: 100%;
+  .el-table {
+    height: 100% !important;
+  }
   .el-table .el-table__cell {
     padding: 0px !important;
   }
