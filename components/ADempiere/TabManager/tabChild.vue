@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,28 +9,28 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <el-tabs
     v-if="!isEmptyValue(showedTabsList)"
-    v-model="currentTab"
+    v-model="currentTabNo"
     type="border-card"
     style="width: 100%"
     @tab-click="handleClick"
   >
     <el-tab-pane
       v-for="(tabAttributes, key) in showedTabsList"
-      :key="key"
+      :key="tabAttributes.tabChildIndex"
       :label="tabAttributes.name"
-      :name="String(key)"
+      :name="String(tabAttributes.tabChildIndex)"
       :tabuuid="tabAttributes.uuid"
-      :tabindex="String(key)"
+      :tabindex="String(tabAttributes.tabChildIndex)"
       lazy
       :disabled="isDisabledTab(key)"
       :style="tabStyle"
@@ -43,10 +43,9 @@
       />
       <div
         style="height: 100% !important;"
-        @click="selectTab(tabsList[parseInt(currentTab)])"
+        @click="selectTab(tabsList[parseInt(currentTabNo)])"
       >
         <tab-panel
-          key="tab-panel-65465456"
           :parent-uuid="parentUuid"
           :container-manager="containerManager"
           :tabs-list="tabsList"
@@ -77,7 +76,7 @@
       <div
         v-if="isShowedTabs"
         style="height: 100% !important;"
-        @click="selectTab(tabsList[parseInt(currentTab)])"
+        @click="selectTab(tabsList[parseInt(currentTabNo)])"
       >
         <div v-if="isMobile">
           <tab-panel
@@ -107,7 +106,7 @@
           <el-scrollbar v-else ref="tabPanel" :vertical="false" class="scroll-tab-panel">
           <tab-panel
             v-else
-            key="tab-panel-65465456"
+            key="tab-panel"
             :parent-uuid="parentUuid"
             :container-manager="containerManager"
             :tabs-list="tabsList"
@@ -141,10 +140,11 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { isDisplayedTab } from '@/utils/ADempiere/dictionary/window'
 import { getContextAttributes, generateContextKey } from '@/utils/ADempiere/contextUtils'
 
 export default defineComponent({
-  name: 'TabManager',
+  name: 'TabManagerChild',
 
   components: {
     DefaultTable,
@@ -186,7 +186,7 @@ export default defineComponent({
 
     // if tabParent is present in path set this
     const tabNo = root.$route.query[queryProperty] || '0'
-    const currentTab = ref(tabNo)
+    const currentTabNo = ref(tabNo)
 
     const tabUuid = ref(props.tabsList[tabNo].uuid)
 
@@ -206,7 +206,11 @@ export default defineComponent({
     // tabs with display logic
     const showedTabsList = computed(() => {
       return props.tabsList.filter(tab => {
-        return tab.isShowedTab()
+        return isDisplayedTab({
+          parentUuid: props.parentUuid,
+          containerUuid: tab.uuid,
+          displayLogic: tab.displayLogic
+        })
       })
     })
 
@@ -244,13 +248,13 @@ export default defineComponent({
     function setCurrentTab() {
       store.commit('setCurrentTabChild', {
         parentUuid: props.parentUuid,
-        tab: props.tabsList[currentTab.value]
+        tab: props.tabsList[currentTabNo.value]
       })
     }
 
     // create the table header
     const tableHeaders = computed(() => {
-      const panel = props.tabsList[currentTab.value]
+      const panel = props.tabsList[currentTabNo.value]
       if (panel && panel.fieldsList) {
         return panel.fieldsList
       }
@@ -262,18 +266,24 @@ export default defineComponent({
      */
     const handleClick = (tabHTML) => {
       const { tabuuid, tabindex } = tabHTML.$attrs
+      changeTab({
+        uuid: tabuuid,
+        index: tabindex
+      })
+    }
 
-      setTabNumber(tabindex)
+    function changeTab({ uuid, index }) {
+      setTabNumber(index)
 
       // set metadata tab
-      if (tabUuid.value !== tabuuid) {
-        tabUuid.value = tabuuid
+      if (tabUuid.value !== uuid) {
+        tabUuid.value = uuid
         setCurrentTab()
       }
 
       const containerInfo = store.getters.getContainerInfo
       if (!isEmptyValue(containerInfo)) {
-        const currentTabDefinition = props.tabsList.find(row => row.uuid === tabuuid)
+        const currentTabDefinition = props.tabsList.find(row => row.uuid === uuid)
         if (!isEmptyValue(currentTabDefinition)) {
           if (!isEmptyValue(currentTabDefinition.currentTab)) {
             store.dispatch('changeTabAttribute', {
@@ -284,7 +294,7 @@ export default defineComponent({
             })
           }
           const currentTabData = store.getters.getTabData({
-            containerUuid: tabuuid
+            containerUuid: uuid
           })
 
           const recordsListTab = currentTabData.recordsList
@@ -315,14 +325,14 @@ export default defineComponent({
       if (isEmptyValue(tabNumber)) {
         tabNumber = '0'
       }
-      if (tabNumber !== currentTab.value) {
-        currentTab.value = tabNumber
+      if (tabNumber !== currentTabNo.value) {
+        currentTabNo.value = String(tabNumber)
       }
 
       router.push({
         query: {
           ...root.$route.query,
-          [queryProperty]: currentTab.value
+          [queryProperty]: currentTabNo.value
         },
         params: {
           ...root.$route.params
@@ -418,13 +428,13 @@ export default defineComponent({
 
     // const storedContextAttributes = computed(() => {
     //   return store.getters.getTabContextKey({
-    //     containerUuid: props.tabsList[currentTab.value].uuid
+    //     containerUuid: props.tabsList[currentTabNo.value].uuid
     //   })
     // })
 
     const storedOldContextAttibutes = computed(() => {
       return store.getters.getTabOldContextKey({
-        containerUuid: props.tabsList[currentTab.value].uuid
+        containerUuid: props.tabsList[currentTabNo.value].uuid
       })
     })
 
@@ -438,7 +448,7 @@ export default defineComponent({
     })
 
     const storedOldRecord = computed(() => {
-      return store.getters.getCurrentRecordOnPanel(props.tabsList[currentTab.value].uuid)
+      return store.getters.getCurrentRecordOnPanel(props.tabsList[currentTabNo.value].uuid)
     })
 
     /**
@@ -447,7 +457,7 @@ export default defineComponent({
     const unsuscribeChangeParentRecord = () => {}
 
     // // if changed record in parent tab, reload tab child
-    // watch(currentTab, (newValue, oldValue) => {
+    // watch(currentTabNo, (newValue, oldValue) => {
     //   if (newValue !== oldValue && !isEmptyValue(newValue)) {
     //     getData()
     //   }
@@ -459,13 +469,28 @@ export default defineComponent({
         if (currentContextAttributes.value === storedOldContextAttibutes.value) {
           store.dispatch('setOldAsCurrentTabData', {
             parentUuid: props.parentUuid,
-            containerUuid: props.tabsList[currentTab.value].uuid
+            containerUuid: props.tabsList[currentTabNo.value].uuid
           })
         } else {
           // if there is no petition in progress
           if (!tabData.value.isLoading) {
             getData()
           }
+        }
+      }
+    })
+
+    watch(showedTabsList, (newValue, oldValue) => {
+      if (newValue) {
+        const currentIndexDisplayed = newValue.some(newTab => {
+          return String(newTab.tabChildIndex) === currentTabNo.value
+        })
+        if (!currentIndexDisplayed) {
+          const tab = newValue.at(0)
+          changeTab({
+            uuid: tab.uuid,
+            index: String(tab.tabChildIndex)
+          })
         }
       }
     })
@@ -489,7 +514,7 @@ export default defineComponent({
     //   }
     // })
 
-    setTabNumber(currentTab.value)
+    setTabNumber(currentTabNo.value)
 
     // remove susbscriptions
     onUnmounted(() => {
@@ -504,7 +529,7 @@ export default defineComponent({
 
     return {
       tabUuid,
-      currentTab,
+      currentTabNo,
       tableHeaders,
       recordsList,
       // computed
