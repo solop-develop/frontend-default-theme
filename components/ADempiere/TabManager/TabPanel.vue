@@ -48,8 +48,8 @@
       <div style="width: 100%;height: 100%;">
         <default-table
           v-if="isShowedTableRecords"
-          key="default-table"
           id="default-table"
+          key="default-table"
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
           :container-manager="containerManager"
@@ -200,10 +200,10 @@ export default defineComponent({
   components: {
     CustomPagination,
     DefaultTable,
+    FilterFields,
     FullScreenContainer,
     PanelDefinition,
-    TabOptions,
-    FilterFields
+    TabOptions
   },
 
   props: {
