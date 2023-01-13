@@ -139,6 +139,7 @@ export default {
 
       // prevent losing display value with focus
       this.controlDisplayed = this.generateDisplayedValue(recordSelected)
+      this.$refs.displayBPartner.activated = false
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {
