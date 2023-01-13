@@ -21,7 +21,7 @@
     <div class="sort-panel-header">
       <el-input
         v-model="searchValue"
-        :placeholder="$t('components.sequenceSort.disableWithSearch')"
+        :placeholder="$t('component.sequenceSort.disableWithSearch')"
         clearable
       >
         <svg-icon
@@ -38,7 +38,7 @@
       >
         <div class="board-column">
           <div class="board-column-header">
-            {{ this.$t('components.sequenceSort.available') }} ({{ availableListShowed.length }})
+            {{ $t('component.sequenceSort.available') }} ({{ availableListShowed.length }})
           </div>
 
           <draggable
@@ -73,7 +73,7 @@
       >
         <div class="board-column">
           <div class="board-column-header">
-            {{ this.$t('components.sequenceSort.sequence') }} ({{ sequenceListShowed.length }})
+            {{ $t('component.sequenceSort.sequence') }} ({{ sequenceListShowed.length }})
           </div>
 
           <draggable

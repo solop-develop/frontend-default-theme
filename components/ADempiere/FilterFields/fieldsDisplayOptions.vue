@@ -59,6 +59,10 @@
         <svg-icon :icon-class="iconColumn(4)" />
         {{ $t('fieldDisplayOptions.Show4Columns') }}
       </el-dropdown-item>
+      <el-dropdown-item v-if="!isMobile && isShowSequence" :command="'secuencia'">
+        <i class="el-icon-sort" />
+        {{ sequenceOptionLabel }}
+      </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
 </template>
@@ -67,6 +71,10 @@
 import { computed, defineComponent } from '@vue/composition-api'
 
 import store from '@/store'
+import language from '@/lang'
+
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'FieldsDisplayOption',
@@ -95,7 +103,16 @@ export default defineComponent({
     filterManager: {
       type: Function,
       default: ({ filterList }) => {}
+    },
+    containerManager: {
+      type: Object,
+      required: false
+    },
+    newFieldsListSecuence: {
+      type: Array,
+      default: () => []
     }
+
   },
 
   setup(props) {
@@ -127,11 +144,30 @@ export default defineComponent({
         return field.columnName
       })
     })
+
     const currentColumnSize = computed(() => {
       return store.getters.getSizeColumn({ containerUuid: props.containerUuid })
     })
+
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
+    })
+
+    const isShowSequence = computed(() => {
+      const { isEditSecuence } = props.containerManager.getPanel({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      return !isEmptyValue(isEditSecuence)
+    })
+
+    const sequenceOptionLabel = computed(() => {
+      const { isEditSecuence } = props.containerManager.getPanel({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      if (!isEmptyValue(isEditSecuence) && isEditSecuence) return language.t('component.sequenceSort.saveNewSequence')
+      return language.t('component.sequenceSort.modifyFieldSequence')
     })
 
     function iconColumn(column) {
@@ -143,6 +179,46 @@ export default defineComponent({
 
     const handleCommand = (command) => {
       let fieldsShowed = []
+      if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
+        const { isEditSecuence, uuid } = props.containerManager.getPanel({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        props.containerManager.changeSequence({
+          uuid,
+          attributeName: 'isEditSecuence',
+          attributeNameControl: undefined,
+          attributeValue: !isEditSecuence,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+
+        return
+      }
+      if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
+        const { isEditSecuence, uuid } = props.containerManager.getPanel({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        props.containerManager.changeSequence({
+          uuid,
+          attributeName: 'fieldsList',
+          attributeNameControl: undefined,
+          attributeValue: props.newFieldsListSecuence,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        props.containerManager.changeSequence({
+          uuid,
+          attributeName: 'isEditSecuence',
+          attributeNameControl: undefined,
+          attributeValue: !isEditSecuence,
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+
+        return
+      }
       if (typeof command === 'number') {
         store.dispatch('changeSizeField', {
           parentUuid: props.parentUuid,
@@ -173,6 +249,8 @@ export default defineComponent({
       isHiddenFieldsList,
       currentColumnSize,
       isMobile,
+      sequenceOptionLabel,
+      isShowSequence,
       // methods
       handleCommand,
       iconColumn

@@ -32,6 +32,7 @@
       />
 
       <filter-fields
+        v-if="isShowedTableRecords"
         v-bind="commonFilterFielsProperties"
         :parent-uuid="parentUuid"
         :container-uuid="tabAttributes.uuid"
@@ -75,6 +76,7 @@
             :container-manager="containerManager"
             :group-tab="tabAttributes.tabGroup"
             :style="overflowHeightScrooll"
+            :is-tab-panel="true"
           />
           <!-- </span> -->
           <!-- <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
@@ -301,7 +303,8 @@ export default defineComponent({
     })
 
     const styleHeadPanel = computed(() => {
-      return 'height: 76px'
+      if (isShowedTableRecords.value) return 'height: 70px'
+      return 'height: 45px'
     })
 
     const styleFooterPanel = computed(() => {

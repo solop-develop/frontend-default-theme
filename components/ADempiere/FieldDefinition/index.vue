@@ -17,29 +17,30 @@
 -->
 
 <template>
-  <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'">
-    <component
-      :is="componentRender"
-      v-if="inTable"
-      :id="field.panelType !== 'form' ? field.columnName : ''"
-      key="is-table-template"
-      class="in-table"
-      :parent-uuid="parentUuid"
-      :container-uuid="containerUuid"
-      :container-manager="containerManager"
-      :metadata="fieldAttributes"
-      :in-table="true"
-    />
+  <component
+    :is="componentRender"
+    v-if="inTable"
+    :id="field.panelType !== 'form' ? field.columnName : ''"
+    key="is-table-template"
+    class="in-table"
+    :parent-uuid="parentUuid"
+    :container-uuid="containerUuid"
+    :container-manager="containerManager"
+    :metadata="fieldAttributes"
+    :in-table="true"
+  />
 
-    <el-col
-      v-else-if="!inTable && isDisplayedField"
-      key="is-panel-template"
-      :xs="sizeField.xs"
-      :sm="sizeField.sm"
-      :md="sizeField.md"
-      :lg="sizeField.lg"
-      :xl="sizeField.xl"
-    >
+  <el-col
+    v-else-if="!inTable && isDisplayedField"
+    key="is-panel-template"
+    :xs="sizeField.xs"
+    :sm="sizeField.sm"
+    :md="sizeField.md"
+    :lg="sizeField.lg"
+    :xl="sizeField.xl"
+    :class="classPanelCol"
+  >
+    <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'" :style="styleDraggable">
       <el-form-item :class="classFrom">
         <template slot="label">
           <field-options
@@ -60,8 +61,8 @@
           :metadata="fieldAttributes"
         />
       </el-form-item>
-    </el-col>
-  </div>
+    </div>
+  </el-col>
 </template>
 
 <script>
@@ -119,6 +120,14 @@ export default {
       default: false
     },
     isAdvancedQuery: {
+      type: Boolean,
+      default: false
+    },
+    keyField: {
+      type: Number,
+      default: undefined
+    },
+    isDraggable: {
       type: Boolean,
       default: false
     }
@@ -284,6 +293,20 @@ export default {
         parentUuid: this.parentUuid,
         containerUuid: this.containerUuid
       })
+    },
+    classPanelCol() {
+      const panel = this.containerManager.getPanel({
+        parentUuid: this.parentUuid,
+        containerUuid: this.containerUuid
+      })
+      if (!this.isDraggable) return 'border: 1px solid #fff;border-radius: 10px;'
+      if (!isEmptyValue(panel) && panel.isEditSecuence) return 'dragable-field'
+      return ''
+    },
+    styleDraggable() {
+      if (!this.isDraggable) return ''
+      if (!isEmptyValue(this.field.isChangeSecuence) && this.field.isChangeSecuence) return 'border: 1px solid #a9a9ec;border-radius: 10px;'
+      return 'border: 1px solid #fff;border-radius: 10px;'
     }
   },
 
@@ -408,5 +431,9 @@ export default {
       border-color: #f55 !important;
     }
   }
+}
+.dragable-field:active {
+  border-radius: 5px;
+  border: 3px solid blue;
 }
 </style>

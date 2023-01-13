@@ -1,0 +1,370 @@
+<!--
+ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+Contributor(s): Elsio Sanchez Elsiosanches@gmail.com https://github.com/elsiosanchez
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https:www.gnu.org/licenses/>.
+-->
+
+<template>
+  <div id="tab-panel-content-from" class="wrapper" style="margin-right: 10px">
+    <el-form
+      label-position="top"
+      label-width="200px"
+      @submit.native.prevent="notSubmitForm"
+    >
+      <div class="cards-not-group">
+        <div class="card">
+          <filter-fields
+            v-if="isTabPanel && isShowFilter"
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+            :fields-list="fieldsList"
+            :filter-manager="containerManager.changeFieldShowedFromUser"
+            :showed-manager="containerManager.isDisplayedField"
+            :fields-to-hidden="containerManager.getFieldsToHidden"
+            :is-filter-records="isFilterRecords"
+            :container-manager="containerManager"
+            :new-fields-list-secuence="example"
+          />
+          <el-card
+            :shadow="shadowGroup"
+            :body-style="{ padding: '5px' }"
+            :class="isActiveCurrentTab ? 'custom-panel-field' : ''"
+          >
+            <el-row style="padding-bottom: 15px;padding-top: 15px;">
+              <draggable
+                v-model="example"
+                class="board-column-content"
+                style="overflow: auto;"
+                @change="handleChange"
+              >
+                <field-definition
+                  v-for="(element, key) in example"
+                  :key="key"
+                  ref="fieldDefinitionRef"
+                  :key-field="key"
+                  :parent-uuid="parentUuid"
+                  :container-uuid="containerUuid"
+                  :container-manager="containerManager"
+                  :field-metadata="{
+                    ...element,
+                    isReadOnly: true,
+                    readOnlyLogic: true,
+                    isReadOnlyFromLogic: true
+                  }"
+                  :metadata-field="{
+                    ...element,
+                    isReadOnly: true,
+                    readOnlyLogic: true,
+                    isReadOnlyFromLogic: true
+                  }"
+                  :is-draggable="true"
+                />
+              </draggable>
+            </el-row>
+          </el-card>
+        </div>
+      </div>
+    </el-form>
+  </div>
+</template>
+
+<script>
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+
+import store from '@/store'
+
+// components and mixins
+import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
+import draggable from 'vuedraggable'
+// utils and helper methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { FOCUSABLE_FIELDS_LIST } from '@/utils/ADempiere/componentUtils'
+
+export default defineComponent({
+  name: 'DraggablePanel',
+
+  components: {
+    FieldDefinition,
+    FilterFields,
+    draggable
+  },
+
+  props: {
+    parentUuid: {
+      type: String,
+      default: undefined
+    },
+    containerUuid: {
+      type: String,
+      required: true
+    },
+    containerManager: {
+      type: Object,
+      required: true
+    },
+    panelMetadata: {
+      type: Object,
+      default: () => {}
+    },
+    // TODO: Manage with store and container manager
+    isShowFilter: {
+      type: Boolean,
+      default: true
+    },
+    isFilterRecords: {
+      type: Boolean,
+      default: true
+    },
+    isAdvancedQuery: {
+      type: Boolean,
+      default: false
+    },
+    isTabPanel: {
+      type: Boolean,
+      default: false
+    }
+  },
+
+  setup(props, { root }) {
+    const fieldIndex = ref()
+    const group = ref('sequence')
+    const example = ref([
+      {
+        name: 'Jean',
+        text: '',
+        id: 2
+      },
+      {
+        name: 'Joao',
+        text: 'pqewe',
+        id: 1
+      },
+      {
+        name: 'Juan 4',
+        id: 4,
+        text: ''
+      }
+    ])
+
+    const isActiveCurrentTab = computed(() => {
+      if (
+        !isEmptyValue(props.panelMetadata.name) &&
+        !isEmptyValue(store.getters.getContainerInfo) &&
+        !isEmptyValue(store.getters.getContainerInfo.currentTab.name) &&
+        (store.getters.getContainerInfo.currentTab.name === props.panelMetadata.name)
+      ) {
+        return true
+      }
+      return false
+    })
+    const fieldsList = computed(() => {
+      if (!isEmptyValue(props.panelMetadata) && !isEmptyValue(props.panelMetadata.fieldsList)) {
+        setFocus(props.panelMetadata.fieldsList)
+        return props.panelMetadata.fieldsList
+      }
+
+      if (!isEmptyValue(props.containerManager) && props.containerManager.getFieldsList) {
+        const fields = props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        if (!isEmptyValue(fields)) {
+          setFocus(fields)
+          return fields
+        }
+      }
+
+      return []
+    })
+    const currentFieldList = computed(() => {
+      return store.getters.getCurrentFieldList
+    })
+
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
+    const recordUuid = computed(() => {
+      // TODO: Change query name 'action'
+      const { action } = root.$route.query
+      return action
+    })
+
+    const shadowGroup = computed(() => {
+      if (isMobile.value) {
+        return 'never'
+      }
+      return 'hover'
+    })
+
+    const fieldDefinitionRef = ref(null)
+    const query = root._route.query
+
+    example.value = fieldsList.value.map(recordField => {
+      return {
+        ...recordField,
+        isChangeSecuence: false
+      }
+    })
+
+    watch(fieldDefinitionRef, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (newValue[fieldIndex]) {
+          newValue[fieldIndex].focusField(newValue[fieldIndex].field.columnName)
+        }
+      }
+    })
+
+    watch(fieldIndex, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (fieldDefinitionRef.value[newValue]) {
+          fieldDefinitionRef.value[newValue].focusField(fieldDefinitionRef.value[newValue].field.columnName)
+        }
+      }
+    })
+
+    watch(recordUuid, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (!isEmptyValue(fieldDefinitionRef.value) && !isEmptyValue(fieldIndex.value)) {
+          fieldDefinitionRef.value[fieldIndex.value].focusField(fieldDefinitionRef.value[fieldIndex.value].field.columnName)
+        }
+      }
+    })
+
+    watch(currentFieldList, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue) && !isEmptyValue(newValue.fieldsList) && !isEmptyValue(newValue.columnName)) {
+        const fieldFocusColumnName = store.getters.getFieldFocusColumnName
+        const index = newValue.fieldsList.findIndex(field => field.columnName === fieldFocusColumnName)
+        if (!isEmptyValue(fieldDefinitionRef.value[index])) {
+          fieldDefinitionRef.value[index].focusField(fieldFocusColumnName)
+        }
+      }
+    })
+
+    function setFocus() {
+      const fields = props.containerManager.getFieldsList({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      fieldIndex.value = fields.findIndex(field =>
+        FOCUSABLE_FIELDS_LIST.includes(field.componentPath) &&
+        props.containerManager.isDisplayedField(field) &&
+        !props.containerManager.isReadOnlyField(field)
+      )
+    }
+
+    function handleChange(params) {
+      params.moved.element.isChangeSecuence = true
+    }
+
+    const heightPanel = computed(() => {
+      const main = document.getElementById('mainWindow')
+      if (
+        !isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)
+      ) {
+        return main.clientHeight + 200 + 'px'
+      }
+      return 500 + 'px'
+    })
+    const styleScrollPanelTab = computed(() => {
+      if (props.panelMetadata.isParentTab) {
+        const isFullScreenTabsParent = store.getters.getStoredWindow(props.panelMetadata.parentUuid).isFullScreenTabsParent
+        if (isFullScreenTabsParent) {
+          return {
+            'max-height': '550px',
+            'min-height': '150px',
+            'overflow-x': 'hidden'
+          }
+        }
+        return {
+          'max-height': '650px!important;',
+          'min-height': '150px',
+          'overflow-x': 'hidden'
+        }
+      }
+      return {
+        'max-height': '550px',
+        'min-height': '250px',
+        'overflow-x': 'hidden'
+      }
+    })
+
+    return {
+      group,
+      example,
+      fieldsList,
+      shadowGroup,
+      heightPanel,
+      query,
+      styleScrollPanelTab,
+      fieldDefinitionRef,
+      recordUuid,
+      isMobile,
+      isActiveCurrentTab,
+      // methodos
+      handleChange,
+      setFocus
+    }
+  }
+})
+</script>
+
+<style>
+.el-card {
+  width: 100% !important;
+}
+.el-tabs--border-card > .el-tabs__content {
+  padding: 15px;
+  overflow: auto;
+  height: 92%;
+  padding-top: 5px;
+  padding-right: 15px;
+  padding-bottom: 0px;
+  padding-left: 15px;
+}
+.scroll-tab-panel-conten {
+  max-height: 500px;
+  min-height: 150px;
+  overflow-x: hidden;
+}
+.scroll-tab-child-panel-conten {
+  max-height: 300px;
+  min-height: 200px;
+  overflow-x: hidden;
+}
+</style>
+
+<style scoped>
+.custom-panel-field {
+  margin: 1px;
+  cursor: pointer;
+  border: 1px solid #36a3f7;
+}
+.custom-panel-field:hover {
+  background: transparent !important;
+  border: 1px solid #36a3f7;
+}
+</style>
+
+<style lang="scss">
+
+.el-col {
+  .sortable-chosen {
+    border: 1px solid #f73650;
+  }
+}
+</style>
