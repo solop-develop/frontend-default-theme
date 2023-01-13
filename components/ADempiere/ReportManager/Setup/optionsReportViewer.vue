@@ -339,18 +339,24 @@ export default defineComponent({
     }
 
     function runReport() {
+      const reportDefinition = store.getters.getStoredReport(props.containerUuid)
+      const reportOutputParams = store.getters.getReportParameters({
+        containerUuid: props.containerUuid,
+        fieldsList: reportDefinition.fieldsList
+      })
       const { name, description } = store.getters.getReportOutput(root.$route.params.instanceUuid)
       showNotification({
-          title: lang.t('notifications.processing'),
-          message: name,
-          summary: description,
-          type: 'info'
+        title: lang.t('notifications.processing'),
+        message: name,
+        summary: description,
+        type: 'info'
       })
       store.dispatch('buildReport', {
         containerUuid: props.containerUuid,
         instanceUuid: root.$route.params.instanceUuid,
         isSummary: value1.value,
-        tableName: tableName.value
+        tableName: tableName.value,
+        parametersList: reportOutputParams
       })
         .then(response => {
           store.dispatch('tagsView/delCachedView', findTagViwer.value).then(() => {
