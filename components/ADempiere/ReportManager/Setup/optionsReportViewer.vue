@@ -118,6 +118,7 @@
           :is="componentRender"
           :container-uuid="containerUuid"
           :container-manager="containerManagerReportViwer"
+          :is-tab-panel="true"
         />
       </el-collapse-item>
     </el-collapse>
@@ -152,12 +153,14 @@ import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
+import lang from '@/lang'
 
 // Components adn Mixins
 import CollapseCriteria from '@theme/components/ADempiere/CollapseCriteria/index.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { showNotification } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'optionsReportViewer',
@@ -231,6 +234,10 @@ export default defineComponent({
     })
 
     const tableName = computed(() => {
+      const { tableName } = store.getters.getReportOutput(root.$route.params.instanceUuid)
+      if (!isEmptyValue(tableName)) {
+        return tableName
+      }
       const currentPrintFormat = reportAsPrintFormat.value.childs.find(report => report.printFormatUuid === reportAsPrintFormatValue.value)
       if (isEmptyValue(currentPrintFormat)) {
         return ''
@@ -332,11 +339,24 @@ export default defineComponent({
     }
 
     function runReport() {
+      const reportDefinition = store.getters.getStoredReport(props.containerUuid)
+      const reportOutputParams = store.getters.getReportParameters({
+        containerUuid: props.containerUuid,
+        fieldsList: reportDefinition.fieldsList
+      })
+      const { name, description } = store.getters.getReportOutput(root.$route.params.instanceUuid)
+      showNotification({
+        title: lang.t('notifications.processing'),
+        message: name,
+        summary: description,
+        type: 'info'
+      })
       store.dispatch('buildReport', {
         containerUuid: props.containerUuid,
         instanceUuid: root.$route.params.instanceUuid,
         isSummary: value1.value,
-        tableName: tableName.value
+        tableName: tableName.value,
+        parametersList: reportOutputParams
       })
         .then(response => {
           store.dispatch('tagsView/delCachedView', findTagViwer.value).then(() => {
@@ -346,6 +366,19 @@ export default defineComponent({
                 path: '/redirect' + fullPath
               })
             })
+          })
+          showNotification({
+            title: lang.t('notifications.succesful'),
+            message: name,
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          showNotification({
+            title: lang.t('notifications.error'),
+            message: name,
+            summary: error,
+            type: 'error'
           })
         })
       store.commit('setShowPanelConfig', {
