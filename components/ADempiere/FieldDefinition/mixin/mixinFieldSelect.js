@@ -90,7 +90,9 @@ export default {
       // values, or if only lookupItem does have a value
       if (isEmptyValue(allOptions) || (!isEmptyValue(allOptions) &&
         (!this.blankValues.includes(allOptions[0].value)))) {
-        allOptions.unshift(this.blankOption)
+          if (!this.metadata.required) {
+            allOptions.unshift(this.blankOption)
+          }
       }
       return allOptions
     }
