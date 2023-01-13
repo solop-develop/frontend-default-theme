@@ -19,6 +19,7 @@
 <template>
   <component
     :is="renderTableComponent"
+    id="renderTableComponent"
     :parent-uuid="parentUuid"
     :container-uuid="containerUuid"
     :container-manager="containerManager"

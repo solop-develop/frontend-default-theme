@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -98,12 +98,17 @@ export default defineComponent({
       const { isEditSecuence } = panelMetadata.value
       let panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
 
+      // render panel with dragable fields
       if (isEditSecuence) {
         panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/DraggablePanel.vue')
       }
 
-      if (!isEmptyValue(panelMetadata.value) && panelMetadata.value.isSortTab) {
-        panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')
+      if (!isEmptyValue(panelMetadata.value)) {
+        if (panelMetadata.value.isSortTab) {
+          panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')
+        } else if (panelMetadata.value.isHasTree) {
+          panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/TreePanel.vue')
+        }
       }
 
       return panelComponent

@@ -30,7 +30,11 @@
             <svg-icon icon-class="tree-table" />
             {{ $t('window.containerInfo.log.changeHistory') }}
           </span>
-          <el-scrollbar class="scroll-panel-info">
+          <loading-view
+            v-if="isLoadingRecordLogsList"
+            key="attachment-loading"
+          />
+          <el-scrollbar v-else class="scroll-panel-info">
             <el-descriptions :column="1">
               <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
                 <template slot="label">
@@ -69,7 +73,12 @@
             <i class="el-icon-zoom-in" />
             {{ $t('window.containerInfo.referenceRecords') }}
           </span>
+          <loading-view
+            v-if="isLoadingListReference"
+            key="listReference-loading"
+          />
           <reference-records
+            v-else
             :table-name="currentTab.tableName"
             :parent-uuid="currentTab.parentUuid"
             :record-uuid="currentRecordUuid"
@@ -82,7 +91,12 @@
             <i class="el-icon-paperclip" />
             {{ $t('window.containerInfo.attachment.label') }}
           </span>
+          <loading-view
+            v-if="isLoadingListAttachment"
+            key="attachment-loading"
+          />
           <attachment-manager
+            v-else
             :is-active-tab="'recordAttachmentTab' === nameTab"
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
@@ -95,7 +109,12 @@
             <svg-icon icon-class="message" />
             {{ $t('window.containerInfo.notes') }}
           </span>
+          <loading-view
+            v-if="isLoadingNotesRecord"
+            key="note-loading"
+          />
           <record-notes
+            v-else
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
           />
@@ -157,7 +176,7 @@ import RecordNotes from './Component/RecordNotes/index.vue'
 import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import WorkflowLogs from './Component/workflowLogs/index.vue'
-
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 // API Request Methods
 import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
 
@@ -175,7 +194,8 @@ export default defineComponent({
     RecordNotes,
     ReferenceRecords,
     StoreProduct,
-    WorkflowLogs
+    WorkflowLogs,
+    LoadingView
   },
 
   props: {
@@ -217,6 +237,7 @@ export default defineComponent({
     const tableName = ref('')
     const nameTab = ref('getRecordLogs')
     const recordsListStoreProduct = ref([])
+    const isLoadingListReference = ref(false)
 
     if (!isEmptyValue(props.defaultOpenedTab)) {
       nameTab.value = props.defaultOpenedTab
@@ -304,6 +325,31 @@ export default defineComponent({
     })
 
     /**
+     * IsLoading Optiones Tabs
+     * @param {boolean} isLoadingNotesRecord
+     * @param {boolean} isLoadingListAttachment
+     * @param {boolean} isLoadingRecordLogsList
+     */
+
+    // Loading Notes Register
+
+    const isLoadingNotesRecord = computed(() => {
+      return store.getters.getIsLoadListChat
+    })
+
+    // Loading Notes Register
+
+    const isLoadingListAttachment = computed(() => {
+      return store.getters.getIsLoadListAttachment
+    })
+
+    // Loading Record Logs List
+
+    const isLoadingRecordLogsList = computed(() => {
+      return store.getters.getIsLoadListRecordLogs
+    })
+
+    /**
      * Function Infomation Panel
      * findRecordLogs @param {object} tab
      * showkey  @param {number, number} key
@@ -332,6 +378,7 @@ export default defineComponent({
     }
 
     function handleClick(tab, event) {
+      let tabOptions = tab.name
       if (tab.name === 'accountingInformation') {
         return
       }
@@ -339,14 +386,15 @@ export default defineComponent({
         findListStoreProduct()
         return
       }
-      if (tab.name === language.t('window.containerInfo.attachment.label')) {
-        tab.name = 'recordAttachmentTab'
+      if (tab.name === 'recordAttachmentTab' || tab.name === language.t('window.containerInfo.attachment.label')) {
+        tabOptions = 'getAttachment'
       }
       if (tab.name === language.t('window.containerInfo.notes')) {
-        tab.name = 'recordNotesTab'
+        tabOptions = 'recordNotesTab'
       }
       if (tab.name === 'listReference') {
-        tab.name = 'listReference'
+        tabOptions = 'listReference'
+        isLoadingListReference.value = true
         store.dispatch('getReferencesFromServer', {
           tableName: currentTab.value.tableName,
           containerUuid: currentTab.value.containerUuid,
@@ -354,13 +402,15 @@ export default defineComponent({
           recordId: currentRecordId.value,
           recordUuid: currentRecordUuid.value
         })
+          .then(resp => {
+            isLoadingListReference.value = false
+          })
       }
-      if (isEmptyValue(props.containerManager[tab.name])) {
+      if (isEmptyValue(props.containerManager[tabOptions])) {
         return
       }
-
       nameTab.value = tab.name
-      props.containerManager[tab.name]({
+      props.containerManager[tabOptions]({
         tableName: currentTab.value.tableName,
         containerUuid: currentTab.value.containerUuid,
         parentUuid: currentTab.value.parentUuid,
@@ -432,6 +482,11 @@ export default defineComponent({
       showPanelInfo,
       currentRecordUuid,
       currentRecordId,
+      // IsLoading
+      isLoadingNotesRecord,
+      isLoadingListAttachment,
+      isLoadingListReference,
+      isLoadingRecordLogsList,
       // methods
       showkey,
       findRecordLogs,
