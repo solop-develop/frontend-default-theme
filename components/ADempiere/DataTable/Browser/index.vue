@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div :onLoad="adjustSize()" :onresize="setTableHeight()">
+  <div id="mainWindowDataTable" class="multipleTableWindows" :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row v-if="isShowSearch">
       <el-col :span="23">
         <el-input
