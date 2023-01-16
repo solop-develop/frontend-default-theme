@@ -252,12 +252,12 @@ export default defineComponent({
     const overflowHeightScrooll = computed(() => {
       if (props.tabAttributes.isParentTab) {
         if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
-          return 'max-height: 650px;'
+          return ''
         }
         return 'max-height: 300px;'
       }
       if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsChildren) {
-        return 'max-height: 500px !important;'
+        return ''
       }
       return 'max-height: 300px !important;'
     })
@@ -310,7 +310,7 @@ export default defineComponent({
     const styleFooterPanel = computed(() => {
       if (props.isChildTab) {
         if (storedWindow.value.isFullScreenTabsChildren) {
-          return 'height: 10% !important'
+          return 'height: 100px !important'
         }
         return 'height: 20% !important'
       }
