@@ -44,13 +44,20 @@
         <div class="editor-container">
           <!-- <markdown-editor v-model="message" height="200px" /> -->
           <div id="ChatEditor" />
-
           <el-button
             type="primary"
             icon="el-icon-check"
             style="float: right;"
             @click="sendComment"
           />
+          <el-button
+            type="info"
+            plain
+            style="float: right;margin-right: 1%;"
+            @click="cleatChatEditor('')"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
         </div>
       </el-footer>
     </el-container>
