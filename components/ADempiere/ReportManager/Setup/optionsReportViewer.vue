@@ -25,9 +25,9 @@
     <el-collapse v-model="activeCollapse">
       <el-collapse-item name="1">
         <template slot="title">
-          <b>
+          <b style="font-size: 18px">
             {{ $t('report.preference') }}
-            <i class="el-icon-s-operation" />
+            <i style="font-size: 18px;" class="el-icon-s-operation" />
           </b>
         </template>
         <el-card class="box-card">
@@ -37,7 +37,7 @@
               label-width="10px"
               @submit.native.prevent="notSubmitForm"
             >
-              <el-row :gutter="20">
+              <el-row class="report-view-setup-preferences-fields" :gutter="20">
                 <el-col :span="8">
                   <el-form-item
                     :label="$t('report.printFormats')"
@@ -109,9 +109,9 @@
       <!-- report parameters -->
       <el-collapse-item name="2">
         <template slot="title">
-          <b>
+          <b style="font-size: 18px">
             {{ $t('actionMenu.changeParameters') }}
-            <i class="el-icon-set-up" />
+            <i style="font-size: 18px;" class="el-icon-set-up" />
           </b>
         </template>
         <component
@@ -131,7 +131,14 @@
       "
     >
       <el-col :span="24">
-        <samp>
+        <samp class="report-viewer-setup-footer">
+          <el-button
+            type="info"
+            plain
+            @click="clearParameters();"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
           <el-button
             type="danger"
             icon="el-icon-close"
@@ -400,6 +407,12 @@ export default defineComponent({
       })
     }
 
+    function clearParameters() {
+      store.dispatch('setReportDefaultValues', {
+        containerUuid: props.containerUuid
+      })
+    }
+
     /**
      * Watch
      */
@@ -465,6 +478,7 @@ export default defineComponent({
       componentRender,
       findTagViwer,
       // methods
+      clearParameters,
       updatePrintFormat,
       updateReportView,
       updateReportType,
@@ -475,3 +489,21 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.report-view-setup-preferences-fields {
+  /**
+   * Reduce the spacing between the form element and its label
+   */
+   .el-form-item__label {
+    padding-bottom: 0px;
+  }
+}
+
+.report-viewer-setup-footer {
+  button {
+    padding: 4px 8px;
+    font-size: 24px;
+  }
+}
+</style>

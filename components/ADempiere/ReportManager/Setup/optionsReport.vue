@@ -8,10 +8,10 @@
  (at your option) any later version.
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -28,7 +28,7 @@
         label-width="10px"
         @submit.native.prevent="notSubmitForm"
       >
-        <el-row :gutter="20">
+        <el-row class="report-setup-preferences-fields" :gutter="20">
           <el-col :span="8">
             <el-form-item
               :label="$t('report.printFormats')"
@@ -95,7 +95,7 @@
       "
     >
       <el-col :span="24">
-        <samp>
+        <samp class="report-setup-footer">
           <el-button
             type="danger"
             icon="el-icon-close"
@@ -283,3 +283,21 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.report-setup-preferences-fields {
+  /**
+   * Reduce the spacing between the form element and its label
+   */
+   .el-form-item__label {
+    padding-bottom: 0px;
+  }
+}
+
+.report-setup-footer {
+  button {
+    padding: 4px 8px;
+    font-size: 24px;
+  }
+}
+</style>
