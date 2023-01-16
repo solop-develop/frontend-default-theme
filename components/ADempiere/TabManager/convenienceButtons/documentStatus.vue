@@ -19,7 +19,7 @@
 <template>
   <el-popover
     v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
-    trigger="hover"
+    trigger="click"
     width="900"
   >
     <el-descriptions :title="$t('workflow.documentStatus')" direction="vertical" :column="2" border>
