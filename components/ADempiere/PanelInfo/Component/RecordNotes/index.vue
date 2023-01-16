@@ -18,7 +18,7 @@
 
 <template>
   <span>
-    <el-container style="height: 85vh;">
+    <el-container style="height: 100% !important;">
       <el-main style="overflow: auto;">
         <el-empty v-if="isEmptyValue(listChats)" style="height: 600px;" />
         <!-- <el-scrollbar v-else class="scroll-chats"> -->
@@ -40,18 +40,24 @@
         </el-timeline>
         <!-- </el-scrollbar> -->
       </el-main>
-      <el-footer style="height: 200px !important;overflow: auto;">
+      <el-footer style="height: 30% !important;overflow: auto;">
         <div class="editor-container">
           <!-- <markdown-editor v-model="message" height="200px" /> -->
           <div id="ChatEditor" />
-
           <el-button
             type="primary"
             icon="el-icon-check"
-            circle
-            style="float: right;margin-top: 2%;"
+            style="float: right;"
             @click="sendComment"
           />
+          <el-button
+            type="info"
+            plain
+            style="float: right;margin-right: 1%;"
+            @click="cleatChatEditor('')"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
         </div>
       </el-footer>
     </el-container>
