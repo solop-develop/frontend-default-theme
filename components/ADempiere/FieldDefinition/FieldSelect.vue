@@ -430,7 +430,7 @@ export default {
         searchValue: searchQuery,
         referenceUuid: this.metadata.reference.uuid,
         // app attributes
-        isAddBlankValue: true,
+        isAddBlankValue: !this.metadata.required,
         blankValue: this.blankOption.value
       })
         .then(responseLookupList => {
