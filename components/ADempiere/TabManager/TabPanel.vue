@@ -86,6 +86,8 @@
         :current-page="currentPage"
         :selection="selectionsLength"
         :records-page="recordsWithFilter.length"
+        :handle-change-page="handleChangePage"
+        :handle-size-change="handleChangeSizePage"
       />
     </el-footer>
   </el-container>
