@@ -762,6 +762,8 @@ div#mainWindowDataTable{
     line-height: 15px;
     padding-left: 10px;
     padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
   .el-table .cell:hover {
     border: 2px solid blue;
