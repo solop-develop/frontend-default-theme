@@ -17,29 +17,27 @@
 -->
 
 <template>
-  <el-row class="custom-pagination-content" :gutter="20">
-    <el-col :span="24" style="float: right;">
-      <el-pagination
-        small
-        layout="slot, total, sizes, prev, pager, next"
-        :current-page="currentPage"
-        :page-sizes="NUMBER_RECORDS_PER_PAGE"
-        :page-size="currentPageSize"
-        :total="total"
-        style="float: right;"
-        @size-change="handleSizeChange"
-        @current-change="handleChangePage"
-      >
-        <span class="selections-number">
-          <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
-            <span v-show="isShowedTableRecords">
-              {{ $t('table.dataTable.selected') }}: {{ selection }}
-            </span>
-          </span>
-        </span>
-      </el-pagination>
-    </el-col>
-  </el-row>
+  <span v-show="(isChangeRecord)">
+    <el-button
+      type="primary"
+      plain
+      size="small"
+      :disabled="disableNextRecord"
+      @click="changePreviousRecord()"
+    >
+      {{ $t('table.dataTable.previousRecord') }}
+    </el-button>
+    <el-button
+      type="primary"
+      plain
+      size="small"
+      :disabled="disablePreviousRecord"
+      style="margin-right: 10px;"
+      @click="changeNextRecord()"
+    >
+      {{ $t('table.dataTable.nextRecord') }}
+    </el-button>
+  </span>
 </template>
 
 <script>
