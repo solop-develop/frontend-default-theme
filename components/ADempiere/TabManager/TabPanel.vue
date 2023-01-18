@@ -29,6 +29,9 @@
         :references-manager="referencesManager"
         :adicionales-options="convenienceOptions"
         :is-child-tab="isChildTab"
+        :change-previous-record="changePreviousRecord"
+        :change-next-record="changeNextRecord"
+        :is-change-record="!isShowedTableRecords"
       />
 
       <filter-fields
@@ -60,15 +63,6 @@
           :is-navigation="true"
         />
         <template v-else>
-          <!-- <span v-if="isMobile || isEmptyValue(tabAttributes.childTabs)"> -->
-          <!-- <panel-definition
-            v-if="tabAttributes.isParentTab"
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-          /> -->
           <panel-definition
             key="panel-definition"
             :parent-uuid="parentUuid"
@@ -78,17 +72,6 @@
             :style="overflowHeightScrooll"
             :is-tab-panel="true"
           />
-          <!-- </span> -->
-          <!-- <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
-            <panel-definition
-              key="panel-definition"
-              :parent-uuid="parentUuid"
-              :container-uuid="tabAttributes.uuid"
-              :container-manager="containerManager"
-              :group-tab="tabAttributes.tabGroup"
-              :style="overflowHeightScrooll"
-            />
-          </el-scrollbar> -->
         </template>
       </div>
     </el-main>
@@ -105,77 +88,9 @@
         :records-page="recordsWithFilter.length"
         :handle-change-page="handleChangePage"
         :handle-size-change="handleChangeSizePage"
-        :change-previous-record="changePreviousRecord"
-        :change-next-record="changeNextRecord"
-        :is-change-record="true"
       />
     </el-footer>
   </el-container>
-  <!-- <div>
-    <span v-if="!isShowedTableRecords">
-      <full-screen-container
-        style="float: right;"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-      />
-    </span>
-    <span style="display: grid;">
-      <tab-options
-        :parent-uuid="parentUuid"
-        :container-manager="containerManager"
-        :current-tab-uuid="currentTabUuid"
-        :tabs-list="tabsList"
-        :tab-attributes="tabAttributes"
-        :references-manager="referencesManager"
-        :adicionales-options="convenienceOptions"
-      />
-    </span>
-
-    <div style="width: 100%;">
-      <default-table
-        v-if="isShowedTableRecords"
-        key="default-table"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :header="tableHeaders"
-        :data-table="recordsList"
-        :panel-metadata="tabAttributes"
-        :is-navigation="true"
-      />
-      <template v-else>
-        <span v-if="isMobile || isEmptyValue(tabAttributes.childTabs)">
-          <panel-definition
-            v-if="tabAttributes.isParentTab"
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-          />
-          <panel-definition
-            v-else
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-            :style="overflowHeightScrooll"
-          />
-        </span>
-        <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
-          <panel-definition
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-            :style="overflowHeightScrooll"
-          />
-        </el-scrollbar>
-      </template>
-    </div>
-  </div> -->
 </template>
 
 <script>

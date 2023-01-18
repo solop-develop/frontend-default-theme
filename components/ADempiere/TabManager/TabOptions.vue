@@ -31,7 +31,14 @@
         </b>
       </span>
     </el-button>
-
+    <change-record
+      :parent-uuid="parentUuid"
+      :container-uuid="currentTabUuid"
+      :container-manager="containerManager"
+      :change-previous-record="changePreviousRecord"
+      :change-next-record="changeNextRecord"
+      :is-change-record="isChangeRecord"
+    />
     <convenience-buttons
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
@@ -55,6 +62,14 @@
       :references-manager="referencesManager"
       style="float: right;"
     />
+    <!-- <change-record
+      :parent-uuid="parentUuid"
+      :container-uuid="currentTabUuid"
+      :container-manager="containerManager"
+      :change-previous-record="changePreviousRecord"
+      :change-next-record="changeNextRecord"
+      :is-change-record="isChangeRecord"
+    /> -->
   </div>
 </template>
 
@@ -68,14 +83,15 @@ import store from '@/store'
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
-
+import ChangeRecord from '@theme/components/ADempiere/DataTable/Components/ChangeRecord.vue'
 export default defineComponent({
   name: 'TabOptions',
 
   components: {
     ActionMenu,
     ConvenienceButtons,
-    FullScreenContainer
+    FullScreenContainer,
+    ChangeRecord
   },
 
   props: {
@@ -115,6 +131,22 @@ export default defineComponent({
     adicionalesOptions: {
       type: Object,
       default: () => ({})
+    },
+    isChangeRecord: {
+      type: Boolean,
+      required: false
+    },
+    changeNextRecord: {
+      type: Function,
+      default: (recordNext) => {
+        console.info('implement method Change to Next Record', recordNext)
+      }
+    },
+    changePreviousRecord: {
+      type: Function,
+      default: (recordPrevious) => {
+        console.info('implement method Change to Previous Record ', recordPrevious)
+      }
     }
   },
 
