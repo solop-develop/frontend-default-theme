@@ -24,7 +24,7 @@
         :key="entityLogs.logId"
         :type="entityLogs.type"
         :color="'#0bbd87'"
-        :timestamp="entityLogs.logDate"
+        :timestamp="translateDateByLong(entityLogs.logDate)"
         placement="top"
       >
         <el-card shadow="hover" class="clearfix" style="padding: 2%">
@@ -121,6 +121,7 @@ import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/Docu
 
 // Utils and Helper Methods
 import { isDocumentStatus } from '@/utils/ADempiere/constants/systemColumns'
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'RecordLogs',
@@ -163,7 +164,8 @@ export default defineComponent({
       listLogs,
       // methods
       isDocument,
-      showkey
+      showkey,
+      translateDateByLong
     }
   }
 
