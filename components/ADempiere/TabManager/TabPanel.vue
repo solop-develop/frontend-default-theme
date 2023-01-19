@@ -46,6 +46,33 @@
         :in-table="isShowedTableRecords"
         :container-manager="containerManager"
       />
+      <el-collapse
+        v-show="!isEmptyValue(batchEntry) && isShowedTableRecords"
+        v-model="activeNames"
+        accordion
+        style="margin-top: 5px;"
+      >
+        <el-collapse-item name="1">
+          <template slot="title">
+            {{ $t('table.dataTable.batchEntry') }}
+            <i class="header-icon el-icon-information" />
+          </template>
+          <el-form
+            label-position="top"
+            size="small"
+          >
+            <batch-entry
+              v-if="!isEmptyValue(batchEntry) && isShowedTableRecords && activeNames === '1'"
+              :parent-uuid="parentUuid"
+              :container-uuid="tabAttributes.uuid"
+              :container-manager="containerManager"
+              :field-list-batch-entry="batchEntry"
+              :table-name="tabAttributes.tableName"
+              :field-list-all="tableHeaders"
+            />
+          </el-form>
+        </el-collapse-item>
+      </el-collapse>
     </el-header>
 
     <el-main id="tab-panel-body" class="tab-panel-body">
@@ -94,7 +121,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import language from '@/lang'
 import store from '@/store'
@@ -107,6 +134,7 @@ import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabOptions from './TabOptions.vue'
+import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEntry.vue'
 
 // Utils and Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -120,7 +148,8 @@ export default defineComponent({
     FilterFields,
     FullScreenContainer,
     PanelDefinition,
-    TabOptions
+    TabOptions,
+    BatchEntry
   },
 
   props: {
@@ -164,6 +193,8 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const activeNames = ref(['0'])
+
     const overflowHeightScrooll = computed(() => {
       if (props.tabAttributes.isParentTab) {
         if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
@@ -218,7 +249,13 @@ export default defineComponent({
     })
 
     const styleHeadPanel = computed(() => {
-      if (isShowedTableRecords.value) return 'height: 70px'
+      if (isShowedTableRecords.value) {
+        if (!isEmptyValue(batchEntry.value)) {
+          if (activeNames.value === '1') return 'height: 200px'
+          return 'height: 130px'
+        }
+        return 'height: 70px'
+      }
       return 'height: 45px'
     })
 
@@ -317,6 +354,10 @@ export default defineComponent({
         filterManager: props.containerManager.changeFieldShowedFromUser,
         showedManager: props.containerManager.isDisplayedField
       }
+    })
+
+    const batchEntry = computed(() => {
+      return tableHeaders.value.filter(fieldItem => fieldItem.isQuickEntry)
     })
 
     function changeShowedRecords() {
@@ -434,6 +475,8 @@ export default defineComponent({
       selectionsLength,
       recordsWithFilter,
       storedWindow,
+      batchEntry,
+      activeNames,
       // methods
       handleChangePage,
       handleChangeSizePage,
