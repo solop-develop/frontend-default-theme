@@ -130,6 +130,10 @@ export default {
     isDraggable: {
       type: Boolean,
       default: false
+    },
+    sizeCol: {
+      type: Number,
+      default: undefined
     }
   },
 
@@ -158,6 +162,16 @@ export default {
       })
     },
     sizeField() {
+      if (!this.isEmptyValue(this.sizeCol)) {
+        return {
+          // ...this.field.size,
+          xs: this.sizeCol,
+          sm: this.sizeCol,
+          md: this.sizeCol,
+          lg: this.sizeCol,
+          xl: this.sizeCol
+        }
+      }
       if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
         return {
           // ...this.field.size,
