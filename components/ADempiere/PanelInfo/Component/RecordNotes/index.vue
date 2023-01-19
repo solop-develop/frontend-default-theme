@@ -26,15 +26,21 @@
           <el-timeline-item
             v-for="(chat, key) in listChats"
             :key="key"
-            :timestamp="chat.logDate"
+            :timestamp="translateDateByLong(chat.logDate)"
             type="primary"
             placement="top"
             style="padding-top: 0px;padding-bottom: 0px;"
           >
-            <el-card shadow="always" class="epale">
+            <el-card v-if="!isEmptyValue(chat.userName)" shadow="always" class="epale">
+              <div slot="header" class="clearfix">
+                <span style="color: #606266; font-weight: bold;">
+                  {{ $t('window.containerInfo.log.updatedBy') }} <b>: </b>{{ chat.userName }} <i class="el-icon-user-solid" />
+                </span>
+              </div>
               <div :id="'ChatViwer' + chat.id" />
-              <!-- {{ viwer(chat.characterData) }} -->
-              <!-- <div v-markdown="chat.characterData" style="padding-top: 0px;padding-bottom: 0px;" /> -->
+            </el-card>
+            <el-card v-else shadow="always" class="epale">
+              <div :id="'ChatViwer' + chat.id" />
             </el-card>
           </el-timeline-item>
         </el-timeline>
@@ -81,6 +87,7 @@ import '@toast-ui/editor/dist/toastui-editor.css'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'RecordNotes',
@@ -179,7 +186,8 @@ export default defineComponent({
       chatEditor,
       cleatChatEditor,
       chatViwer,
-      viwer
+      viwer,
+      translateDateByLong
     }
   }
 })
