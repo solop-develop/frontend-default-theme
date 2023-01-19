@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -128,13 +128,13 @@ import store from '@/store'
 import router from '@/router'
 
 // Components and Mixins
+import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEntry.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabOptions from './TabOptions.vue'
-import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEntry.vue'
 
 // Utils and Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
