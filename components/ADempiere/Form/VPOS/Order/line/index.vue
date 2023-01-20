@@ -658,7 +658,10 @@ export default {
                 if (mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.quantity) {
                   return
                 }
-                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line) && !this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
+                if (this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
+                  return
+                }
+                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
                   this.$message({
                     type: 'success',
                     message: this.$t('form.pos.pinMessage.updateQtyEntered'),
@@ -697,10 +700,18 @@ export default {
                 }
                 break
               case 'Discount':
+                // !this.currentPointOfSales.isAllowsModifyDiscount &&
+                // columnName === 'Discount' ||
+                // value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+                // this.currentPointOfSales.maximumLineDiscountAllowed > 0
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
-                if (this.currentPointOfSales.maximumLineDiscountAllowed === 0) {
+                if (
+                  !this.currentPointOfSales.isAllowsModifyDiscount &&
+                  mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+                  this.currentPointOfSales.maximumLineDiscountAllowed > 0
+                ) {
                   this.updateOrderLine(mutation.payload)
                 } else if (
                   this.modifyDiscount &&
@@ -714,7 +725,7 @@ export default {
                     ...mutation.payload,
                     type: 'updateOrder',
                     requestedAccess: 'IsAllowsModifyDiscount',
-                    label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+                    label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') + '1615' : this.$t('form.pos.pinMessage.discount') + '1615'
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
                 }

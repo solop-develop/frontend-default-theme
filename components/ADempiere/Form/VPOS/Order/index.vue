@@ -20,7 +20,7 @@
   <div
     v-if="isLoaded"
     id="headerContainer"
-    style="display: grid height: 100%"
+    style="display: flex; height: 100% !important;"
   >
     <el-container style="background: white; height: 100%!important;">
       <el-header
@@ -1057,10 +1057,12 @@ export default {
         this.visible = true
         return
       } else if (
-        !this.currentPointOfSales.isAllowsModifyDiscount &&
-        columnName === 'Discount' ||
+        this.currentPointOfSales.isAllowsModifyDiscount &&
+        columnName === 'Discount' &&
         value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-        this.currentPointOfSales.maximumLineDiscountAllowed > 0
+        this.currentPointOfSales.maximumLineDiscountAllowed >= 0
+        // &&
+        // this.currentPointOfSales.maximumLineDiscountAllowed > 0
       ) {
         const attributePin = {
           containerUuid: 'line',
