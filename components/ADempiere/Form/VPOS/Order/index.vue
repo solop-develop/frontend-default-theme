@@ -1032,6 +1032,18 @@ export default {
       }
     },
     changeEdit(value, columnName) {
+      // console.log(this.currentPointOfSales.isAllowsModifyDiscount, value, '>', this.currentPointOfSales.maximumLineDiscountAllowed, (value > this.currentPointOfSales.maximumLineDiscountAllowed))
+      // console.log(
+      //   (!this.currentPointOfSales.isAllowsModifyDiscount),
+      //   (columnName === 'Discount'),
+      //   (value > this.currentPointOfSales.maximumLineDiscountAllowed),
+      //   (this.currentPointOfSales.maximumLineDiscountAllowed >= 0),
+      //   (!this.currentPointOfSales.isAllowsModifyDiscount) &&
+      //   (columnName === 'Discount') &&
+      //   (value > this.currentPointOfSales.maximumLineDiscountAllowed)  ||
+      //   (this.currentPointOfSales.maximumLineDiscountAllowed >= 0)
+      // )
+      const changeLine = { columnName, value }
       if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
@@ -1056,51 +1068,58 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
         return
+      }
+      // if (
+      //   (!this.currentPointOfSales.isAllowsModifyDiscount) &&
+      //   (columnName === 'Discount') &&
+      //   (value > this.currentPointOfSales.maximumLineDiscountAllowed) &&
+      //   (this.currentPointOfSales.maximumLineDiscountAllowed >= 0)
+      //   // &&
+      //   // this.currentPointOfSales.maximumLineDiscountAllowed > 0
+      // ) {
+      //   const attributePin = {
+      //     containerUuid: 'line',
+      //     columnName,
+      //     value,
+      //     type: 'updateOrder',
+      //     requestedAccess: 'IsAllowsModifyDiscount',
+      //     label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+      //   }
+      //   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+      //   this.visible = true
+      //   return
+      // }
+      if (
+        !this.currentPointOfSales.isAllowsModifyDiscount &&
+        value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+        this.currentPointOfSales.maximumLineDiscountAllowed > 0
+      ) {
+        this.updateOrderLine(changeLine)
+        return
       } else if (
         this.currentPointOfSales.isAllowsModifyDiscount &&
-        columnName === 'Discount' &&
-        value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-        this.currentPointOfSales.maximumLineDiscountAllowed >= 0
-        // &&
-        // this.currentPointOfSales.maximumLineDiscountAllowed > 0
+        value <= this.currentPointOfSales.maximumLineDiscountAllowed
+        // (this.currentPointOfSales.maximumLineDiscountAllowed > 0) &&
+        // (!this.$store.state['pointOfSales/orderLine/index'].isloadedLine)
       ) {
+        this.updateOrderLine(changeLine)
+        return
+      } else {
         const attributePin = {
           containerUuid: 'line',
           columnName,
           value,
           type: 'updateOrder',
           requestedAccess: 'IsAllowsModifyDiscount',
-          label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+          label: this.$t('form.pos.pinMessage.discount')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
-        return
       }
-      // switch (columnName) {
-      //   case 'QtyEntered':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updateQtyEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      //   case 'PriceEntered':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updatePriceEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      //   case 'Discount':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      // }
-      const changeLine = { columnName, value }
-      this.updateOrderLine(changeLine)
+
+      if (columnName !== 'Discount') {
+        this.updateOrderLine(changeLine)
+      }
     },
     theActionEdit(event) {
       switch (event.srcKey) {

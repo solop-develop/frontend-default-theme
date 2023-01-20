@@ -725,7 +725,7 @@ export default {
                     ...mutation.payload,
                     type: 'updateOrder',
                     requestedAccess: 'IsAllowsModifyDiscount',
-                    label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') + '1615' : this.$t('form.pos.pinMessage.discount') + '1615'
+                    label: this.$t('form.pos.pinMessage.discount')
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
                 }
