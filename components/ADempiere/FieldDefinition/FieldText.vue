@@ -28,6 +28,7 @@
     :autofocus="metadata.inTable"
     :size="inputSize"
     show-word-limit
+    clearable
     @change="preHandleChange"
     @blur="focusLost"
     @focus="focusGained"
@@ -161,6 +162,13 @@ export default {
   .el-textarea__inner {
     &.field-in-table {
       resize: none !important;
+    }
+  }
+
+  // does not superimpose the character counter on the input text
+  .el-textarea {
+    >.el-input__count {
+      line-height: 10px;
     }
   }
 </style>
