@@ -1032,8 +1032,6 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      // console.log(this.currentPointOfSales.isAllowsModifyDiscount, value, '>', this.currentPointOfSales.maximumLineDiscountAllowed, (value > this.currentPointOfSales.maximumLineDiscountAllowed))
-      // console.log(
       //   (!this.currentPointOfSales.isAllowsModifyDiscount),
       //   (columnName === 'Discount'),
       //   (value > this.currentPointOfSales.maximumLineDiscountAllowed),
@@ -1089,14 +1087,21 @@ export default {
       //   this.visible = true
       //   return
       // }
+      if (columnName !== 'Discount') {
+        this.updateOrderLine(changeLine)
+        return
+      }
       if (
-        !this.currentPointOfSales.isAllowsModifyDiscount &&
-        value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-        this.currentPointOfSales.maximumLineDiscountAllowed > 0
+        (columnName === 'Discount') &&
+        this.currentPointOfSales.isAllowsModifyDiscount &&
+        (value > this.currentPointOfSales.maximumLineDiscountAllowed && this.currentPointOfSales.maximumLineDiscountAllowed === 0)
+        // value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+        // this.currentPointOfSales.maximumLineDiscountAllowed > 0
       ) {
         this.updateOrderLine(changeLine)
         return
       } else if (
+        (columnName === 'Discount') &&
         this.currentPointOfSales.isAllowsModifyDiscount &&
         value <= this.currentPointOfSales.maximumLineDiscountAllowed
         // (this.currentPointOfSales.maximumLineDiscountAllowed > 0) &&
@@ -1117,9 +1122,6 @@ export default {
         this.visible = true
       }
 
-      if (columnName !== 'Discount') {
-        this.updateOrderLine(changeLine)
-      }
     },
     theActionEdit(event) {
       switch (event.srcKey) {

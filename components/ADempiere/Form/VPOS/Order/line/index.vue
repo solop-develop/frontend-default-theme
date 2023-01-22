@@ -708,9 +708,10 @@ export default {
                   return
                 }
                 if (
-                  !this.currentPointOfSales.isAllowsModifyDiscount &&
-                  mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-                  this.currentPointOfSales.maximumLineDiscountAllowed > 0
+                  this.currentPointOfSales.isAllowsModifyDiscount &&
+                  (mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed && this.currentPointOfSales.maximumLineDiscountAllowed === 0)
+                  // mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed &&
+                  // this.currentPointOfSales.maximumLineDiscountAllowed > 0
                 ) {
                   this.updateOrderLine(mutation.payload)
                 } else if (
