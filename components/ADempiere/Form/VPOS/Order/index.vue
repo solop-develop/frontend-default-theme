@@ -1121,7 +1121,6 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
       }
-
     },
     theActionEdit(event) {
       switch (event.srcKey) {
