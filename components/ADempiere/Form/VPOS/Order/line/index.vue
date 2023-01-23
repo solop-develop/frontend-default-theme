@@ -205,26 +205,23 @@
   </div>
 </template>
 <script>
-// constants
+// Constants
 import fieldsListLine from './fieldsListLine.js'
 
-// components and mixins
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
 
-// api request methods
+// API Request Methods
 import { validatePin, updateOrderLine } from '@/api/ADempiere/form/point-of-sales.js'
 
-import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
 
 // Format of values ( Date, Price, Quantity )
-// import {
-//   formatQuantity
-// } from '@/utils/ADempiere/valueFormat.js'
 import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
 
 import {
@@ -700,25 +697,17 @@ export default {
                 }
                 break
               case 'Discount':
-                // !this.currentPointOfSales.isAllowsModifyDiscount &&
-                // columnName === 'Discount' ||
-                // value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-                // this.currentPointOfSales.maximumLineDiscountAllowed > 0
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
                 if (
                   this.currentPointOfSales.isAllowsModifyDiscount &&
                   (mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed && this.currentPointOfSales.maximumLineDiscountAllowed === 0)
-                  // mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-                  // this.currentPointOfSales.maximumLineDiscountAllowed > 0
                 ) {
                   this.updateOrderLine(mutation.payload)
                 } else if (
                   this.modifyDiscount &&
                   mutation.payload.value <= this.currentPointOfSales.maximumLineDiscountAllowed
-                  // (this.currentPointOfSales.maximumLineDiscountAllowed > 0) &&
-                  // (!this.$store.state['pointOfSales/orderLine/index'].isloadedLine)
                 ) {
                   this.updateOrderLine(mutation.payload)
                 } else {
