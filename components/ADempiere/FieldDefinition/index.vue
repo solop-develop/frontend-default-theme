@@ -314,14 +314,22 @@ export default {
           parentUuid: this.parentUuid,
           containerUuid: this.containerUuid
         })
-        if (!this.isDraggable) return 'border: 1px solid #fff;border-radius: 10px;'
-        if (!isEmptyValue(panel) && panel.isEditSecuence) return 'dragable-field'
+        if (!this.isDraggable) {
+          return 'border: 1px solid #fff;border-radius: 10px;'
+        }
+        if (!isEmptyValue(panel) && panel.isEditSecuence) {
+          return 'dragable-field'
+        }
       }
       return ''
     },
     styleDraggable() {
-      if (!this.isDraggable) return ''
-      if (!isEmptyValue(this.field.isChangeSecuence) && this.field.isChangeSecuence) return 'border: 1px solid #a9a9ec;border-radius: 10px;'
+      if (!this.isDraggable) {
+        return ''
+      }
+      if (!isEmptyValue(this.field.isChangeSecuence) && this.field.isChangeSecuence) {
+        return 'border: 1px solid #a9a9ec;border-radius: 10px;'
+      }
       return 'border: 1px solid #fff;border-radius: 10px;'
     }
   },
