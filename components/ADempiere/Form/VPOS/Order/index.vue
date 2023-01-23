@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -1032,15 +1032,6 @@ export default {
       }
     },
     changeEdit(value, columnName) {
-      //   (!this.currentPointOfSales.isAllowsModifyDiscount),
-      //   (columnName === 'Discount'),
-      //   (value > this.currentPointOfSales.maximumLineDiscountAllowed),
-      //   (this.currentPointOfSales.maximumLineDiscountAllowed >= 0),
-      //   (!this.currentPointOfSales.isAllowsModifyDiscount) &&
-      //   (columnName === 'Discount') &&
-      //   (value > this.currentPointOfSales.maximumLineDiscountAllowed)  ||
-      //   (this.currentPointOfSales.maximumLineDiscountAllowed >= 0)
-      // )
       const changeLine = { columnName, value }
       if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
@@ -1067,26 +1058,6 @@ export default {
         this.visible = true
         return
       }
-      // if (
-      //   (!this.currentPointOfSales.isAllowsModifyDiscount) &&
-      //   (columnName === 'Discount') &&
-      //   (value > this.currentPointOfSales.maximumLineDiscountAllowed) &&
-      //   (this.currentPointOfSales.maximumLineDiscountAllowed >= 0)
-      //   // &&
-      //   // this.currentPointOfSales.maximumLineDiscountAllowed > 0
-      // ) {
-      //   const attributePin = {
-      //     containerUuid: 'line',
-      //     columnName,
-      //     value,
-      //     type: 'updateOrder',
-      //     requestedAccess: 'IsAllowsModifyDiscount',
-      //     label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
-      //   }
-      //   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-      //   this.visible = true
-      //   return
-      // }
       if (columnName !== 'Discount') {
         this.updateOrderLine(changeLine)
         return
