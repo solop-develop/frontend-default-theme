@@ -254,7 +254,7 @@ export default defineComponent({
     })
 
     const currentPage = computed(() => {
-      if (props.containerManager.getRecordCount) {
+      if (props.containerManager.getPageNumber) {
         return parseInt(props.containerManager.getPageNumber({
           containerUuid: props.containerUuid
         }), 10)
@@ -607,12 +607,14 @@ export default defineComponent({
           element.isEditRow = false
         })
         row.isEditRow = true
-        props.containerManager.exitEditMode({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
-          tableName,
-          recordUuid: currentRowEdit.UUID
-        })
+        if (!isEmptyValue(currentRowEdit) && !isEmptyValue(currentRowEdit.UUID)) {
+          props.containerManager.exitEditMode({
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid,
+            tableName,
+            recordUuid: currentRowEdit.UUID
+          })
+        }
       }
     }
 
