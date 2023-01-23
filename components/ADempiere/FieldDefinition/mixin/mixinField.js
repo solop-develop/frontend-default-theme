@@ -119,7 +119,7 @@ export default {
         if (inTable) {
           // implement container manager row
           if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
+            this.containerManager.setCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
