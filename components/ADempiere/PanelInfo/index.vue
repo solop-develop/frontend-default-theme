@@ -120,6 +120,22 @@
           />
         </el-tab-pane>
 
+        <el-tab-pane name="getListIssues" style="height: 100% !important;">
+          <span slot="label">
+            <svg-icon icon-class="message" />
+            {{ $t('window.containerInfo.issues') }}
+          </span>
+          <loading-view
+            v-if="isLoadingIssuessRecord"
+            key="note-loading"
+          />
+          <record-issues
+            v-else
+            :table-name="allTabsList[0].tableName"
+            :record-id="currentRecordId"
+          />
+        </el-tab-pane>
+
         <el-tab-pane
           v-if="isWorkflowLog"
           name="searchWorkflowHistory"
@@ -172,6 +188,7 @@ import store from '@/store'
 import Accounting from './Component/Accounting/index.vue'
 import AttachmentManager from './Component/AttachmentManager/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
+import recordIssues from './Component/RecordIssues/index.vue'
 import RecordNotes from './Component/RecordNotes/index.vue'
 import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
@@ -192,6 +209,7 @@ export default defineComponent({
     AttachmentManager,
     RecordLogs,
     RecordNotes,
+    recordIssues,
     ReferenceRecords,
     StoreProduct,
     WorkflowLogs,
@@ -329,6 +347,7 @@ export default defineComponent({
      * @param {boolean} isLoadingNotesRecord
      * @param {boolean} isLoadingListAttachment
      * @param {boolean} isLoadingRecordLogsList
+     * @param {boolean} isLoadingIssuessRecord
      */
 
     // Loading Notes Register
@@ -347,6 +366,10 @@ export default defineComponent({
 
     const isLoadingRecordLogsList = computed(() => {
       return store.getters.getIsLoadListRecordLogs
+    })
+
+    const isLoadingIssuessRecord = computed(() => {
+      return store.getters.getIsLoadListIssues
     })
 
     /**
@@ -487,6 +510,7 @@ export default defineComponent({
       isLoadingListAttachment,
       isLoadingListReference,
       isLoadingRecordLogsList,
+      isLoadingIssuessRecord,
       // methods
       showkey,
       findRecordLogs,
