@@ -9,18 +9,18 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <div
     v-if="isLoaded"
     id="headerContainer"
-    style="display: grid height: 100%"
+    style="display: flex; height: 100% !important;"
   >
     <el-container style="background: white; height: 100%!important;">
       <el-header
@@ -1032,6 +1032,7 @@ export default {
       }
     },
     changeEdit(value, columnName) {
+      const changeLine = { columnName, value }
       if (!this.allowsModifyQuantity && (columnName === 'QtyEntered')) {
         const attributePin = {
           containerUuid: 'line',
@@ -1056,49 +1057,37 @@ export default {
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
         return
-      } else if (
-        !this.currentPointOfSales.isAllowsModifyDiscount &&
-        columnName === 'Discount' ||
-        value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-        this.currentPointOfSales.maximumLineDiscountAllowed > 0
+      }
+      if (columnName !== 'Discount') {
+        this.updateOrderLine(changeLine)
+        return
+      }
+      if (
+        (columnName === 'Discount') &&
+        this.currentPointOfSales.isAllowsModifyDiscount &&
+        (value > this.currentPointOfSales.maximumLineDiscountAllowed && this.currentPointOfSales.maximumLineDiscountAllowed === 0)
       ) {
+        this.updateOrderLine(changeLine)
+        return
+      } else if (
+        (columnName === 'Discount') &&
+        this.currentPointOfSales.isAllowsModifyDiscount &&
+        value <= this.currentPointOfSales.maximumLineDiscountAllowed
+      ) {
+        this.updateOrderLine(changeLine)
+        return
+      } else {
         const attributePin = {
           containerUuid: 'line',
           columnName,
           value,
           type: 'updateOrder',
           requestedAccess: 'IsAllowsModifyDiscount',
-          label: columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+          label: this.$t('form.pos.pinMessage.discount')
         }
         this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
         this.visible = true
-        return
       }
-      // switch (columnName) {
-      //   case 'QtyEntered':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updateQtyEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      //   case 'PriceEntered':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updatePriceEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      //   case 'Discount':
-      //     this.$message({
-      //       type: 'success',
-      //       message: this.$t('form.pos.pinMessage.updateDiscountEntered'),
-      //       showClose: true
-      //     })
-      //     break
-      // }
-      const changeLine = { columnName, value }
-      this.updateOrderLine(changeLine)
     },
     theActionEdit(event) {
       switch (event.srcKey) {

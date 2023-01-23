@@ -205,26 +205,23 @@
   </div>
 </template>
 <script>
-// constants
+// Constants
 import fieldsListLine from './fieldsListLine.js'
 
-// components and mixins
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
 
-// api request methods
+// API Request Methods
 import { validatePin, updateOrderLine } from '@/api/ADempiere/form/point-of-sales.js'
 
-import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
 
 // Format of values ( Date, Price, Quantity )
-// import {
-//   formatQuantity
-// } from '@/utils/ADempiere/valueFormat.js'
 import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
 
 import {
@@ -658,7 +655,10 @@ export default {
                 if (mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.quantity) {
                   return
                 }
-                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line) && !this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
+                if (this.$store.state['pointOfSales/orderLine/index'].isloadedLine) {
+                  return
+                }
+                if (this.allowsModifyQuantity && !this.isEmptyValue(this.$store.state['pointOfSales/orderLine/index'].line)) {
                   this.$message({
                     type: 'success',
                     message: this.$t('form.pos.pinMessage.updateQtyEntered'),
@@ -700,13 +700,14 @@ export default {
                 if (this.isEmptyValue(mutation.payload.value) || mutation.payload.value === this.$store.state['pointOfSales/orderLine/index'].line.discountRate) {
                   return
                 }
-                if (this.currentPointOfSales.maximumLineDiscountAllowed === 0) {
+                if (
+                  this.currentPointOfSales.isAllowsModifyDiscount &&
+                  (mutation.payload.value > this.currentPointOfSales.maximumLineDiscountAllowed && this.currentPointOfSales.maximumLineDiscountAllowed === 0)
+                ) {
                   this.updateOrderLine(mutation.payload)
                 } else if (
                   this.modifyDiscount &&
                   mutation.payload.value <= this.currentPointOfSales.maximumLineDiscountAllowed
-                  // (this.currentPointOfSales.maximumLineDiscountAllowed > 0) &&
-                  // (!this.$store.state['pointOfSales/orderLine/index'].isloadedLine)
                 ) {
                   this.updateOrderLine(mutation.payload)
                 } else {
@@ -714,7 +715,7 @@ export default {
                     ...mutation.payload,
                     type: 'updateOrder',
                     requestedAccess: 'IsAllowsModifyDiscount',
-                    label: mutation.payload.columnName === 'PriceEntered' ? this.$t('form.pos.pinMessage.price') : this.$t('form.pos.pinMessage.discount')
+                    label: this.$t('form.pos.pinMessage.discount')
                   }
                   this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
                 }
