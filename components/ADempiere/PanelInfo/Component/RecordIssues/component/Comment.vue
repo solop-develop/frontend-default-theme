@@ -9,11 +9,11 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -92,7 +92,6 @@ import chart from '@toast-ui/editor-plugin-chart'
 import Editor from '@toast-ui/editor'
 import '@toast-ui/editor/dist/toastui-editor.css'
 
-
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -103,10 +102,6 @@ export default defineComponent({
 
   components: {
     Comment
-import {
-  defineComponent, computed, ref, onMounted, nextTick
-} from '@vue/composition-api'
-
   },
 
   props: {
