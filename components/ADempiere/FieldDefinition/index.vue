@@ -17,18 +17,20 @@
 -->
 
 <template>
-  <component
-    :is="componentRender"
-    v-if="inTable"
-    :id="field.panelType !== 'form' ? field.columnName : ''"
-    key="is-table-template"
-    class="in-table"
-    :parent-uuid="parentUuid"
-    :container-uuid="containerUuid"
-    :container-manager="containerManager"
-    :metadata="fieldAttributes"
-    :in-table="true"
-  />
+  <div v-if="inTable">
+    <!-- TODO: This parent div tag is necessary for the edit in table to work -->
+    <component
+      :is="componentRender"
+      :id="field.panelType !== 'form' ? field.columnName : ''"
+      key="is-table-template"
+      class="in-table"
+      :parent-uuid="parentUuid"
+      :container-uuid="containerUuid"
+      :container-manager="containerManager"
+      :metadata="fieldAttributes"
+      :in-table="true"
+    />
+  </div>
 
   <el-col
     v-else-if="!inTable && isDisplayedField"

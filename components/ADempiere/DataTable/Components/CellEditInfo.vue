@@ -23,7 +23,7 @@
   >
     <field-definition
       key="field-definition"
-      v-shortkey="{send: ['ctrl', 'enter'], exit: ['ctrl', 'esc']}"
+      v-shortkey="shortkey"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
       :is-data-table="true"
@@ -35,7 +35,7 @@
         recordUuid: dataRow.UUID
       }"
       size="mini"
-      @shortkey.native="keyboardShortcuts"
+      @shortkey="keyboardShortcuts"
     />
   </span>
 
@@ -107,9 +107,8 @@ export default defineComponent({
 
     const shortkey = computed(() => {
       return {
-        close: ['esc'],
-        refreshList: ['f5'],
-        enter: ['enter']
+        send: ['ctrl', 'enter'],
+        exit: ['esc']
       }
     })
 
@@ -145,19 +144,13 @@ export default defineComponent({
     })
 
     function isRowCanBeEdited(record) {
-      if (record.isEditRow && !isReadOnly.value) {
-        return record.isEditRow
-      }
-      if (!isEmptyValue(props.parentUuid)) {
-        return false
-      }
       if (!record.isSelectedRow) {
         return false
       }
-      if (record.isEditRow && !isReadOnly.value) {
-        return true
+      if (!isReadOnly.value) {
+        return false
       }
-      return false
+      return record.isEditRow
     }
 
     function exitEdit(record) {
@@ -174,11 +167,17 @@ export default defineComponent({
       })
     }
 
-    function keyboardShortcuts(type, record) {
-      if (type.srcKey === 'exit') {
-        return exitEdit(props.dataRow)
+    function keyboardShortcuts(event) {
+      switch (event.srcKey) {
+        case 'exit':
+          exitEdit(props.dataRow)
+          break
+
+        case 'send':
+        default:
+          enterEdit(props.dataRow)
+          break
       }
-      return enterEdit(props.dataRow)
     }
 
     return {
