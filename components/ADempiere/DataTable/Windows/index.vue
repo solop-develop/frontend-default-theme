@@ -59,14 +59,6 @@
       >
         <template slot-scope="scope">
           <!-- formatted displayed value -->
-          <!-- <cell-display-info
-            :parent-uuid="parentUuid"
-            :container-uuid="containerUuid"
-            :field-attributes="fieldAttributes"
-            :container-manager="containerManager"
-            :scope="scope"
-            :data-row="scope.row"
-          /> -->
           <cell-edit-info
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
@@ -592,7 +584,12 @@ export default defineComponent({
       }, 1000)
     }
 
-    function handleCellClick(row) {
+    function handleCellClick(row, column, cell, event) {
+      if (column.type === 'selection') {
+        // does not make the row editable if the checkbox is selected
+        return
+      }
+
       const { tableName } = props.panelMetadata
       let currentRowEdit = {
         UUID: ''

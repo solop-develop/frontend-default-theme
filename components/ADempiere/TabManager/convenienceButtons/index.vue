@@ -306,15 +306,6 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         containerUuid
       })
-      if (getCurrentTab.value.isShowedTableRecords) {
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'isShowedTableRecords',
-          attributeNameControl: undefined,
-          attributeValue: false,
-          parentUuid: props.parentUuid,
-          containerUuid
-        })
-      }
 
       store.dispatch('panelInfo', {
         currentTab: props.tabAttributes,

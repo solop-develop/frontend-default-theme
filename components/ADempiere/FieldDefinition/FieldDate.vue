@@ -257,7 +257,7 @@ export default {
             if (typeof value !== 'object' && value !== undefined) {
               value = new Date(value)
             }
-            return this.containerManager.setCell({
+            this.containerManager.setCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
