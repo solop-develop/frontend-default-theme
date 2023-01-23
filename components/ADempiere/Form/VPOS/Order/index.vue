@@ -1066,8 +1066,6 @@ export default {
         (columnName === 'Discount') &&
         this.currentPointOfSales.isAllowsModifyDiscount &&
         (value > this.currentPointOfSales.maximumLineDiscountAllowed && this.currentPointOfSales.maximumLineDiscountAllowed === 0)
-        // value > this.currentPointOfSales.maximumLineDiscountAllowed &&
-        // this.currentPointOfSales.maximumLineDiscountAllowed > 0
       ) {
         this.updateOrderLine(changeLine)
         return
@@ -1075,8 +1073,6 @@ export default {
         (columnName === 'Discount') &&
         this.currentPointOfSales.isAllowsModifyDiscount &&
         value <= this.currentPointOfSales.maximumLineDiscountAllowed
-        // (this.currentPointOfSales.maximumLineDiscountAllowed > 0) &&
-        // (!this.$store.state['pointOfSales/orderLine/index'].isloadedLine)
       ) {
         this.updateOrderLine(changeLine)
         return
