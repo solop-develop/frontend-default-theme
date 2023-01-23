@@ -472,10 +472,11 @@ export default {
             if (this.isEmptyValue(mutation.payload.value) && ['AD_Org_ID', 'Account_ID'].includes(columnName)) {
               return
             }
+            this.isLoadingRecords = true
             clearTimeout(this.timeOutUpdate)
             this.timeOutUpdate = setTimeout(() => {
               this.searchRecordsList()
-            }, 1800)
+            }, 1500)
           }
         }
       })
@@ -523,6 +524,7 @@ export default {
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
+        this.isLoadingRecords = true
         this.$store.dispatch('listAccountCombinations', {
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.uuidForm,
