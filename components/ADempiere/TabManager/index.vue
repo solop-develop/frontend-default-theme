@@ -102,6 +102,18 @@
           <i class="el-icon-zoom-in" />
         </el-button>
       </el-badge>
+      <el-badge v-show="showIssues" :value="countIssues" class="item" type="primary">
+        <el-button
+          v-show="showIssues"
+          type="primary"
+          size="mini"
+          circle
+          style="margin: 0px"
+          @click="openRecordLogs('getListIssues')"
+        >
+          <i class="el-icon-s-promotion" />
+        </el-button>
+      </el-badge>
       <el-badge v-show="showChatAvailable">
         <el-button
           type="primary"
@@ -163,7 +175,7 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 // API Request Methods
 import { requestListEntityChats } from '@/api/ADempiere/window'
 import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
-import { requestExistsReferences } from '@/api/ADempiere/window'
+import { requestExistsReferences, requestExistsIssues } from '@/api/ADempiere/window'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -262,6 +274,10 @@ export default defineComponent({
     const showAttachmentAvailable = ref(false)
 
     const showReference = ref(false)
+
+    const showIssues = ref(false)
+
+    const countIssues = ref(0)
 
     const countReference = ref(0)
 
@@ -550,6 +566,7 @@ export default defineComponent({
         chatAvailable()
         attachmentAvailable()
         getReferences()
+        getIssues()
       }
     })
 
@@ -589,6 +606,36 @@ export default defineComponent({
             return
           }
           showReference.value = false
+          return
+          // const { referencesList } = responseReferences
+          // showReference.value = !isEmptyValue(referencesList)
+        })
+        .catch(() => {})
+    }
+
+    /**
+     * Issuess
+     */
+
+    const getIssues = () => {
+      showIssues.value = false
+      if (isEmptyValue(currentTabTableName.value) ||
+        (isEmptyValue(currentRecordUuid.value) &&
+        (isEmptyValue(currentRecordId.value) || currentRecordId.value <= 0))) {
+        return
+      }
+      requestExistsIssues({
+        tableName: currentTabTableName.value,
+        recordUuid: currentRecordUuid.value,
+        recordId: currentRecordId.value
+      })
+        .then(responseReferences => {
+          if (responseReferences > 0) {
+            showIssues.value = true
+            countIssues.value = responseReferences
+            return
+          }
+          showIssues.value = false
           return
           // const { referencesList } = responseReferences
           // showReference.value = !isEmptyValue(referencesList)
@@ -686,6 +733,7 @@ export default defineComponent({
     chatAvailable()
     attachmentAvailable()
     getReferences()
+    getIssues()
 
     return {
       tabUuid,
@@ -698,6 +746,8 @@ export default defineComponent({
       showChatAvailable,
       showAttachmentAvailable,
       showReference,
+      showIssues,
+      countIssues,
       countReference,
       // computed
       isMobile,
@@ -721,7 +771,8 @@ export default defineComponent({
       selectTab,
       chatAvailable,
       attachmentAvailable,
-      getReferences
+      getReferences,
+      getIssues
     }
   }
 
