@@ -37,12 +37,12 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
                 width="450"
                 trigger="hover"
               >
-                <b> {{ 'Creado' }} : </b>{{ issues.user_name }} <i class="el-icon-user-solid" /> <br>
-                <b> {{ 'Tipo de Solicitud' }} : </b>{{ issues.user_name }} <br>
-                <b> {{ 'Estado' }} : </b><br>
-                <b> {{ 'Asunto' }} : </b><br>
-                <b> {{ 'Resumen' }} : </b>{{ issues.summary }} <br>
-                <b> {{ 'Asignado' }} : </b>{{ issues.sales_representative.name }} <br>
+                <b> {{ $t('issues.created') }} : </b>{{ issues.user_name }} <i class="el-icon-user-solid" /> <br>
+                <b> {{ $t('issues.typeOfRequest') }} : </b>{{ issues.request_type.name }} <br>
+                <b> {{ $t('issues.status') }} : </b><br>
+                <b> {{ $t('issues.issues') }} : </b><br>
+                <b> {{ $t('issues.summary') }} : </b>{{ issues.summary }} <br>
+                <b> {{ $t('issues.assigned') }} : </b>{{ issues.sales_representative.name }} <br>
                 <el-button slot="reference" type="text" style="color: black;">
                   <b>
                     {{ issues.document_no }}
