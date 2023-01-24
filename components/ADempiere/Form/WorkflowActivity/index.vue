@@ -102,7 +102,7 @@
         </el-main>
       </el-container>
     </el-main>
-    <el-footer v-show="false" :style="isStyleFooter">
+    <el-footer :style="isStyleFooter">
       <el-card id="logsWorkflow" class="box-card" style="padding-left: 1%;padding-right: 1%;">
         <el-row v-if="isMobile" :gutter="20">
           <el-col :span="12">
@@ -116,8 +116,7 @@
             <el-form label-position="top" class="demo-form-inline">
               <el-form-item label="Mensajes">
                 <el-select v-model="formInline.region" placeholder="Activity zone">
-                  <el-option label="Zone one" value="shanghai" />
-                  <el-option label="Zone two" value="beijing" />
+                  <el-option />
                 </el-select>
               </el-form-item>
             </el-form>
@@ -126,8 +125,7 @@
             <el-form label-position="top" class="demo-form-inline">
               <el-form-item label="Re-enviar">
                 <el-select v-model="formInline.region" placeholder="Activity zone">
-                  <el-option label="Zone one" value="shanghai" />
-                  <el-option label="Zone two" value="beijing" />
+                  <el-option />
                 </el-select>
               </el-form-item>
             </el-form>
@@ -138,10 +136,6 @@
                 <el-button
                   type="primary"
                   icon="el-icon-check"
-                />
-                <el-button
-                  type="success"
-                  icon="el-icon-search"
                 />
               </el-form-item>
             </el-form>
@@ -158,9 +152,13 @@
           <el-col :span="6">
             <el-form label-position="top" class="demo-form-inline">
               <el-form-item label="Mensajes">
-                <el-select v-model="formInline.region" placeholder="Activity zone">
-                  <el-option label="Zone one" value="shanghai" />
-                  <el-option label="Zone two" value="beijing" />
+                <el-select v-model="formInline.region">
+                  <el-option
+                    v-for="item in []"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
                 </el-select>
               </el-form-item>
             </el-form>
@@ -168,9 +166,13 @@
           <el-col :span="6">
             <el-form label-position="top" class="demo-form-inline">
               <el-form-item label="Re-enviar">
-                <el-select v-model="formInline.region" placeholder="Activity zone">
-                  <el-option label="Zone one" value="shanghai" />
-                  <el-option label="Zone two" value="beijing" />
+                <el-select v-model="formInline.region">
+                  <el-option
+                    v-for="item in []"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
                 </el-select>
               </el-form-item>
             </el-form>
@@ -181,10 +183,6 @@
                 <el-button
                   type="primary"
                   icon="el-icon-check"
-                />
-                <el-button
-                  type="success"
-                  icon="el-icon-search"
                 />
               </el-form-item>
             </el-form>
