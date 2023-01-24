@@ -9,214 +9,168 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program. If not, see <https:www.gnu.org/licenses/>.
+ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <span>
     <el-container style="height: 100% !important;">
-      <el-main style="overflow: auto;">
-        <el-empty v-if="isEmptyValue(listIssues)" style="height: 600px;" />
-        <!-- <el-card shadow="never"> -->
-        <div
-          v-for="(issues, key) in listIssues"
-          :key="key"
-          class="text item"
-          style="border: 1px solid #d0d7de;display: flex;width: 100%"
-        >
-          <b style="font-size: 30px;padding-top: 20px;padding-left: 5px;padding-right: 5px;">
-            <svg-icon icon-class="issues" style="color: #3fb950;" />
-          </b>
-          <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
-            <p style="font-size: 18px; width: 100%;">
-              <b>
-                <el-popover
-                  placement="top-start"
-                  trigger="hover"
-                >
-                  <lu>
-                    <li>
-                      <b>
-                        {{ $t('issues.documentNo') + ': ' }}
-                      </b>
-                      {{ issues.document_no }}
-                    </li>
-                    <li>
-                      <b>
-                        {{ $t('issues.issues') + ': ' }}
-                      </b>
-                      {{ issues.subject }}
-                    </li>
-                    <li>
-                      <b>
-                        {{ $t('issues.summary') + ': ' }}
-                      </b>
-                      {{ issues.summary }}
-                    </li>
-                    <li>
-                      <b>
-                        {{ $t('issues.created') + ': ' }}
-                      </b>
-                      {{ issues.user_name }}
-                    </li>
-                    <li>
-                      <b>
-                        {{ $t('issues.Priority') + ': ' }}
-                      </b>
-                      {{ issues.priority.name }}
-                    </li>
-                    <li>
-                      <b>
-                        {{ $t('issues.typeOfRequest') + ': ' }}
-                      </b>
-                      {{ issues.request_type.name }}
-                    </li>
-                    <li>
-                      <b>
-                        {{ $t('issues.assigned') + ': ' }}
-                      </b>
-                      {{ issues.sales_representative.name }}
-                    </li>
-                  </lu>
-                  <el-button
-                    slot="reference"
-                    style="color: black;font-size: 18px;font-weight: 605 !important;"
-                    type="text"
-                  >
-                    {{ $t('issues.request') + ': ' + '  ' + issues.subject }}
-                  </el-button>
-                </el-popover>
-              </b>
-              <!-- <el-tag size="medium"> -->
-              <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
-                <svg-icon icon-class="collections" />
-                {{ $t('issues.Priority') + ': '+ '  ' + issues.priority.name }}
-              </el-button>
-              <!-- </el-tag> -->
-              <!-- <el-tag effect="plain" size="medium"> -->
-              <el-button size="medium" plain style="float: right;margin-right: 10px;">
-                <svg-icon icon-class="label" />
-                {{ $t('issues.typeOfRequest') + ': ' + '  ' + issues.request_type.name }}
-              </el-button>
-              <!-- </el-tag> -->
-            </p>
-            <!-- <hr /> -->
-            <!-- <el-divider style="margin: 0px;" /> -->
-          </span>
-        </div>
-        <!-- </el-card> -->
-        <!-- <el-row>
-          <el-col
-            :span="24"
-            v-for="a in 10"
-          >
-            <svg-icon icon-class="issues" style="color: #3fb950;" />
-            {{ 'Solicitudes_' + a }}
-          </el-col>
-        </el-row> -->
-        <!-- <el-descriptions direction="vertical" :column="1" border>
-          <el-descriptions-item
-            v-for="a in 10"
-          >
-            <template slot="label">
-              <svg-icon icon-class="issues" style="color: #3fb950;" />
-              {{ 'Solicitudes_' + a }}
-            </template>
-          </el-descriptions-item>
-        </el-descriptions> -->
-        <!-- <lu>
-          <li
-            v-for="a in 6"
-          >
-            <svg-icon icon-class="issues" style="color: #3fb950;" />
-            {{ 'Solicitudes_' + a }}
-          </li>
-        </lu> -->
-        <!-- <el-scrollbar v-else class="scroll-chats"> -->
-        <!-- <el-timeline v-else>
-          <el-timeline-item
-            v-for="(issues, key) in listIssues"
-            :key="key"
-            :timestamp="translateDateByLong(issues.created)"
-            type="primary"
-            placement="top"
-            style="padding-top: 0px;padding-bottom: 0px;"
-          > -->
-        <!-- <el-card
-          v-for="(issues, key) in listIssues"
-          :key="key"
-          shadow="hover"
-          class="issues-card"
-        >
-          <el-popover
-            placement="top-start"
-            width="450"
-            trigger="hover"
-          >
-            <b> {{ 'Creado' }} : </b>{{ issues.user_name }} <i class="el-icon-user-solid" /> <br>
-            <b> {{ 'Tipo de Solicitud' }} : </b>{{ issues.user_name }} <br>
-            <b> {{ 'Estado' }} : </b><br>
-            <b> {{ 'Asunto' }} : </b><br>
-            <b> {{ 'Resumen' }} : </b>{{ issues.summary }} <br>
-            <b> {{ 'Asignado' }} : </b>{{ issues.sales_representative.name }} <br>
-            <el-button slot="reference" type="text" style="padding-bottom: 0px;padding-top: 10px;">
-              <svg-icon icon-class="issues" style="color: #3fb950;" />
-              <b style="color: black;">
-                {{ issues.document_no }}
-                {{ issues.subject }}
-              </b>
+      <el-main style="overflow: auto;padding: 0px;">
+        <!-- {{ !isEmptyValue(currentIssues) }} {{ !isNewIssues }} -->
+        <el-card v-if="!isNewIssues" class="box-card" style="height: 100%;">
+          <div slot="header" class="clearfix">
+            <b style="color: black; font-size: 19px;">
+              {{ 'Todas las Solicitudes' }}
+            </b>
+            <el-button style="float: right;" plain type="success" @click="newIssues()">
+              {{ 'Crear Nueva Solicitud' }}
+              <i class="el-icon-plus" />
             </el-button>
-          </el-popover>
-          <br>
-          <i style="color: #909399; font-size: 11px;">
-            {{ translateDateByLong(issues.created) }}
-          </i>
-        </el-card> -->
-        <!-- </el-timeline-item>
-        </el-timeline> -->
-        <!-- </el-scrollbar> -->
+          </div>
+          <div class="text item">
+            <el-empty v-if="isEmptyValue(listIssues)" style="height: 600px;" />
+            <div
+              v-for="(issues, key) in listIssues"
+              :key="key"
+              class="text item"
+              style="border: 1px solid #d0d7de;display: flex;width: 100%"
+            >
+              <b style="font-size: 30px;padding-top: 20px;padding-left: 5px;padding-right: 5px;">
+                <svg-icon icon-class="issues" style="color: #3fb950;" />
+              </b>
+              <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
+                <p style="font-size: 18px; width: 100%;">
+                  <b>
+                    <el-popover
+                      placement="top-start"
+                      trigger="hover"
+                      width="900"
+                    >
+                      <el-descriptions :column="2">
+                        <template slot="title">
+                          <b>
+                            <svg-icon icon-class="guide" />
+                            {{ issues.subject }}
+                          </b>
+                        </template>
+                        <template slot="extra">
+                          <b>
+                            {{ $t('issues.documentNo') }}
+                            {{ issues.document_no }}
+                          </b>
+                        </template>
+                        <el-descriptions-item :span="4">
+                          <template slot="label">
+                            <b>
+                              {{ $t('issues.summary') }}
+                            </b>
+                          </template>
+                          {{ issues.summary }}
+                        </el-descriptions-item>
+                        <el-descriptions-item :span="4">
+                          <template slot="label">
+                            <b>
+                              {{ $t('issues.created') }}
+                            </b>
+                          </template>
+                          {{ issues.user_name }}
+                        </el-descriptions-item>
+                        <el-descriptions-item style="float: right;">
+                          <template slot="label">
+                            <b style="padding-top: 10px !important;">
+                              {{ $t('issues.priority') }}
+                            </b>
+                          </template>
+                          <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
+                            <svg-icon icon-class="collections" />
+                            {{ issues.priority.name }}
+                          </el-button>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                          <template slot="label">
+                            <b style="padding-top: 10px !important;">
+                              {{ $t('issues.typeOfRequest') }}
+                            </b>
+                          </template>
+                          <el-button size="medium" plain style="float: right;margin-right: 10px;">
+                            <svg-icon icon-class="label" />
+                            {{ issues.request_type.name }}
+                          </el-button>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                          <template slot="label">
+                            <b style="padding-top: 5px !important;">
+                              {{ $t('issues.assigned') }}
+                            </b>
+                          </template>
+                          {{ issues.sales_representative.name }}
+                          <el-avatar icon="el-icon-user-solid" size="small" style="margin-left: 10px;" />
+                        </el-descriptions-item>
+                      </el-descriptions>
+                      <el-button
+                        slot="reference"
+                        style="color: black;font-size: 18px;font-weight: 605 !important;"
+                        type="text"
+                        @click="SelectionIssue(issues)"
+                      >
+                        <!-- @click="SelectionIssue(issues)" -->
+                        {{ $t('issues.request') + ': ' + '  ' + issues.subject }}
+                      </el-button>
+                    </el-popover>
+                  </b>
+                  <!-- <el-tag size="medium"> -->
+                  <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
+                    <b>
+                      <svg-icon icon-class="collections" />
+                      {{ $t('issues.priority') + ': ' }}
+                    </b>
+                    {{ issues.priority.name }}
+                  </el-button>
+                  <!-- </el-tag> -->
+                  <!-- <el-tag effect="plain" size="medium"> -->
+                  <el-button size="medium" type="info" plain style="float: right;margin-right: 10px;">
+                    <b>
+                      <svg-icon icon-class="label" />
+                      {{ $t('issues.typeOfRequest') + ': ' }}
+                    </b>
+                    {{ issues.request_type.name }}
+                  </el-button>
+                  <!-- </el-tag> -->
+                </p>
+                <!-- <hr /> -->
+                <!-- <el-divider style="margin: 0px;" /> -->
+              </span>
+            </div>
+          </div>
+        </el-card>
+        <comment
+          v-else
+          :table-name="tableName"
+          :record-id="recordId"
+        />
       </el-main>
-      <!-- <el-footer style="height: 30% !important;overflow: auto;">
-        <div class="editor-container">
-          <div id="ChatEditor" />
-          <el-button
-            type="primary"
-            icon="el-icon-check"
-            style="float: right;"
-            @click="sendComment"
-          />
-          <el-button
-            type="info"
-            plain
-            style="float: right;margin-right: 1%;"
-            @click="cleatChatEditor('')"
-          >
-            <svg-icon icon-class="layers-clear" />
-          </el-button>
-        </div>
-      </el-footer> -->
     </el-container>
   </span>
 </template>
 
 <script>
 import {
-  defineComponent, computed, ref, onMounted, nextTick
+  defineComponent, computed, ref
 } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
-import '@toast-ui/chart/dist/toastui-chart.css'
-import chart from '@toast-ui/editor-plugin-chart'
-import Editor from '@toast-ui/editor'
-import '@toast-ui/editor/dist/toastui-editor.css'
-
+// import '@toast-ui/chart/dist/toastui-chart.css'
+// import chart from '@toast-ui/editor-plugin-chart'
+// import Editor from '@toast-ui/editor'
+// import '@toast-ui/editor/dist/toastui-editor.css'
+import Comment from './component/Comment.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -226,7 +180,8 @@ export default defineComponent({
   name: 'RecordIssues',
 
   components: {
-    Editor
+    // Editor
+    Comment
   },
 
   props: {
@@ -242,18 +197,36 @@ export default defineComponent({
 
   setup(props) {
     const message = ref('')
+    const filter = ref('')
+    const priority = ref('')
+    const typeRequest = ref('')
     const chatEditor = ref(null)
     const chatViwer = ref(null)
 
-    const chartOptions = {
-      minWidth: 100,
-      maxWidth: 600,
-      minHeight: 100,
-      maxHeight: 300
-    }
+    // const chartOptions = {
+    //   minWidth: 100,
+    //   maxWidth: 600,
+    //   minHeight: 100,
+    //   maxHeight: 300
+    // }
 
     const listIssues = computed(() => {
       return store.getters.getListIssues
+    })
+
+    const isNewIssues = computed({
+      // getter
+      get() {
+        return store.getters.getNewIssues
+      },
+      // setter
+      set(newValue) {
+        store.commit('setNewIssues', newValue)
+      }
+    })
+
+    const currentIssues = computed(() => {
+      return store.getters.getCurrentIssues
     })
 
     function sendComment() {
@@ -279,38 +252,33 @@ export default defineComponent({
     }
 
     function viwer(params, key) {
-      if (isEmptyValue(params)) {
-        return
-      }
-      params.forEach(element => {
-        const initialValue = element.characterData
-        nextTick(() => {
-          // eslint-disable-next-line
-          chatViwer.value = new Editor.factory({
-            el: document.querySelector(`#ChatViwer${element.id}`),
-            viewer: true,
-            initialValue,
-            plugins: [[chart, chartOptions]]
-          })
-        })
-      })
+      // if (isEmptyValue(params)) {
+      //   return
+      // }
+      // params.forEach(element => {
+      //   const initialValue = element.characterData
+      //   nextTick(() => {
+      //     // eslint-disable-next-line
+      //     chatViwer.value = new Editor.factory({
+      //       el: document.querySelector(`#ChatViwer${element.id}`),
+      //       viewer: true,
+      //       initialValue,
+      //       plugins: [[chart, chartOptions]]
+      //     })
+      //   })
+      // })
     }
-    // watch(listChats, (newValue, oldValue) => {
-    //   viwer(newValue)
-    // })
 
-    onMounted(() => {
-      chatEditor.value = new Editor({
-        el: document.querySelector('#ChatEditor'),
-        initialValue: message.value,
-        height: '200px',
-        initialEditType: 'markdown',
-        previewStyle: 'vertical',
-        plugins: [[chart, chartOptions]]
-      })
-      chatEditor.value.getMarkdown()
-      viwer()
-    })
+    function SelectionIssue(issues) {
+      console.log({ issues })
+      isNewIssues.value = !isNewIssues.value
+      store.dispatch('changeCurrentIssues', issues)
+    }
+
+    function newIssues(issues) {
+      isNewIssues.value = !isNewIssues.value
+      store.dispatch('changeCurrentIssues', issues)
+    }
 
     return {
       message,
@@ -320,7 +288,15 @@ export default defineComponent({
       cleatChatEditor,
       chatViwer,
       viwer,
-      translateDateByLong
+      translateDateByLong,
+      //
+      priority,
+      typeRequest,
+      filter,
+      isNewIssues,
+      currentIssues,
+      SelectionIssue,
+      newIssues
     }
   }
 })
@@ -356,6 +332,9 @@ export default defineComponent({
     padding-left: 0px;
   }
 }
+// .el-descriptions-item__label:not(.is-bordered-label) {
+//   padding-top: 10px;
+// }
 </style>
 <style scoped>
 .scroll-chats {

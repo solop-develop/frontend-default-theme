@@ -18,11 +18,11 @@
 
 <template>
   <el-container style="height: 100% !important;">
-    <el-main style="padding:0px; height: 100% !important;">
+    <el-main style="padding:0px; height: 100% !important;" class="tab-panel-info">
       <el-tabs
         v-model="nameTab"
         type="border-card"
-        style="height: 100% !important;"
+        class="tab-panel-info"
         @tab-click="handleClick"
       >
         <el-tab-pane name="getRecordLogs">
@@ -120,9 +120,9 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="getListIssues" style="height: 100% !important;">
+        <el-tab-pane name="getListIssues" style="height: 100% !important;" class="tab-panel-info">
           <span slot="label">
-            <svg-icon icon-class="message" />
+            <svg-icon icon-class="guide" />
             {{ $t('window.containerInfo.issues') }}
           </span>
           <loading-view
@@ -133,6 +133,7 @@
             v-else
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
+            class="tab-panel-info"
           />
         </el-tab-pane>
 
@@ -522,7 +523,15 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style lang="scss">
+.tab-panel-info {
+  height: 100% !important;
+  .el-tabs--border-card > .el-tabs__content {
+    height: 96% !important;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
 .scroll-panel-info {
   width: 100%;
   height: 800px;
