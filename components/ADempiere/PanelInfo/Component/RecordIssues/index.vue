@@ -270,7 +270,6 @@ export default defineComponent({
     }
 
     function SelectionIssue(issues) {
-      console.log({ issues })
       isNewIssues.value = !isNewIssues.value
       store.dispatch('changeCurrentIssues', issues)
     }
