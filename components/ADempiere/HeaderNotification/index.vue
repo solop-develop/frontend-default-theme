@@ -1,12 +1,13 @@
 <template>
   <el-badge
-    :value="processNotifications.length"
-    :hidden="processNotifications.length === 0"
+    :value="total"
+    :hidden="total === 0"
     type="primary"
     class="item"
     style="vertical-align: baseline;"
   >
     <el-popover
+      ref="badgeNotifications"
       placement="bottom"
       width="400"
       trigger="click"
@@ -17,8 +18,9 @@
         @cell-click="handleCurrentChange"
       >
         <el-table-column prop="name" :label="$t('navbar.badge.Notifications')" />
+        <el-table-column prop="quantity" :label="$t('form.pos.tableProduct.quantity')" width="100" />
 
-        <el-table-column
+        <!-- <el-table-column
           fixed="right"
           width="50"
         >
@@ -44,12 +46,7 @@
           width="50"
         >
           <template slot="header">
-            <!-- <el-button"
-              type="text"
-              @click="handleCurrentChange()"
-            > -->
             <svg-icon icon-class="tree-table" />
-            <!-- </el-button> -->
           </template>
           <template slot-scope="scope">
             <el-button
@@ -61,7 +58,7 @@
               <svg-icon icon-class="tree-table" />
             </el-button>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
 
       <el-button
@@ -75,31 +72,29 @@
 </template>
 
 <script>
+// Utils and Helper Methods
+import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
+import { listNotifiications } from '@/api/ADempiere/dashboard/dashboard.js'
 export default {
   name: 'HeaderNotification',
 
   data() {
     return {
+      processNotifications: [],
+      total: 0,
       currentRow: null
     }
   },
-  computed: {
-    processNotifications() {
-      // TODO: Add process runs
-      return []
-      /*
-      return this.$store.getters.getNotificationProcess.map(item => {
-        if (item.typeActivity) {
-          return {
-            ...item,
-            name: item.name + ' ' + item.quantityActivities
-          }
-        }
-        return item
-      })
-      */
-    }
-  },
+  // computed: {
+  //   processNotifications: {
+  //     get() {
+  //       return []
+  //     },
+  //     set(value) {
+  //       return value
+  //     }
+  //   }
+  // },
   watch: {
     show(value) {
       if (value) {
@@ -109,34 +104,20 @@ export default {
       }
     }
   },
+  created() {
+    this.findNotification()
+  },
   methods: {
     close() {
       this.$refs.badge && this.$refs.badge.blur()
       this.options = []
       this.show = false
     },
-    handleCurrentChange(notification, val, index, rows) {
-      if (!this.isEmptyValue(notification.typeActivity) && notification.typeActivity) {
-        return ''
-      }
-
-      if (val !== null) {
-        let options = {
-          name: 'ProcessActivity'
-        }
-        if (notification && notification.isReport && val.className !== 'procesActivity') {
-          options = {
-            name: 'Report Viewer',
-            params: {
-              reportUuid: notification.reportUuid,
-              instanceUuid: notification.instanceUuid,
-              fileName: notification.download
-            }
-          }
-        }
-
-        this.$router.push(options, () => {})
-      }
+    handleCurrentChange(notification) {
+      zoomIn({
+        uuid: notification.action_uuid
+      })
+      this.$refs.badgeNotifications.showPopper = false
     },
     openProcess(index, rows) {
       this.$router.push({
@@ -150,6 +131,17 @@ export default {
     deleteAll() {
       // rows.splice(index, rows.lenght)
       this.processNotifications.splice(0)
+    },
+    findNotification() {
+      listNotifiications()
+        .then(response => {
+          const { records } = response
+          console.log({ records })
+          records.forEach(element => {
+            this.total += element.quantity
+          })
+          this.processNotifications = records
+        })
     }
   }
 }
