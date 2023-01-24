@@ -82,6 +82,7 @@ export default {
     return {
       processNotifications: [],
       total: 0,
+      identificadorIntervaloDeTiempo: 0,
       currentRow: null
     }
   },
@@ -106,6 +107,7 @@ export default {
   },
   created() {
     this.findNotification()
+    // this.repetirCadaSegundo()
   },
   methods: {
     close() {
@@ -136,13 +138,20 @@ export default {
       listNotifiications()
         .then(response => {
           const { records } = response
-          console.log({ records })
           records.forEach(element => {
             this.total += element.quantity
           })
+          setTimeout(() => {
+            this.mandarMensaje()
+          }, 80000)
           this.processNotifications = records
         })
+    },
+    refresNotification() {
+      this.findNotification()
+      this.total = 0
     }
+
   }
 }
 </script>
