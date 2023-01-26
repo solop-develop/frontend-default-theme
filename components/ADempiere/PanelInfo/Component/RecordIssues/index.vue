@@ -96,7 +96,7 @@
                               {{ $t('issues.typeOfRequest') }}
                             </b>
                           </template>
-                          <el-button size="medium" plain style="float: right;margin-right: 10px;">
+                          <el-button size="medium" plain type="info" style="float: right;margin-right: 10px;">
                             <svg-icon icon-class="label" />
                             {{ issues.request_type.name }}
                           </el-button>
