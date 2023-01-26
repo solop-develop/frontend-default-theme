@@ -162,12 +162,12 @@
               </el-form-item>
             </el-col>
             <el-col v-show="!chooseOption && (currentActivity.node.action_name === 'USER_CHOICE')" :span="8" style="text-align: center;">
-              <el-form-item :label="{{ $t('form.workflowActivity.filtersSearch.approve') }}">
+              <el-form-item :label="$t('form.workflowActivity.filtersSearch.approve')">
                 <el-switch v-model="isProved" />
               </el-form-item>
             </el-col>
             <el-col v-show="chooseOption" :span="8" style="text-align: center;">
-              <el-form-item :label="{{ $t('form.workflowActivity.filtersSearch.user') }}">
+              <el-form-item :label="$t('form.workflowActivity.filtersSearch.user')">
                 <el-select
                   v-if="chooseOption"
                   v-model="userId"
@@ -447,7 +447,8 @@ export default {
         this.forwardWorkflow(this.currentActivity)
       }
       this.clearMessage()
-      this.$store.dispatch('serverListActivity')
+      this.$store.dispatch('serverListActivity', {})
+      this.$store.dispatch('findNotifications')
     },
     forwardWorkflow({ id, uuid }) {
       forwardWorkflowActivity({
