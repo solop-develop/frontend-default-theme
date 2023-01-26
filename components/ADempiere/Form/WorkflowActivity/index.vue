@@ -135,7 +135,8 @@
           </el-card> -->
           <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%' : 'height: 20%'">
             <div slot="header" class="clearfix">
-              {{ 'Diagrama del Flujo de Trabajo' }}
+              {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
+              <!-- {{ 'Diagrama del Flujo de Trabajo' }} -->
               <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse3 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse3 = !collapse3)" />
             </div>
             <workflow-diagram
@@ -161,12 +162,12 @@
               </el-form-item>
             </el-col>
             <el-col v-show="!chooseOption && (currentActivity.node.action_name === 'USER_CHOICE')" :span="8" style="text-align: center;">
-              <el-form-item label="Aprovar">
+              <el-form-item :label="{{ $t('form.workflowActivity.filtersSearch.approve') }}">
                 <el-switch v-model="isProved" />
               </el-form-item>
             </el-col>
             <el-col v-show="chooseOption" :span="8" style="text-align: center;">
-              <el-form-item label="Usuario">
+              <el-form-item :label="{{ $t('form.workflowActivity.filtersSearch.user') }}">
                 <el-select
                   v-if="chooseOption"
                   v-model="userId"
@@ -369,7 +370,7 @@ export default {
     },
     activityList(value) {
       if (!this.isEmptyValue(value)) {
-          this.handleCurrentChange(value[0])
+        this.handleCurrentChange(value[0])
       }
     }
   },
@@ -449,7 +450,7 @@ export default {
       this.$store.dispatch('serverListActivity')
     },
     forwardWorkflow({ id, uuid }) {
-      forwardWorkflowAssctivity({
+      forwardWorkflowActivity({
         id,
         uuid,
         message: this.chatEditor.getMarkdown(),
