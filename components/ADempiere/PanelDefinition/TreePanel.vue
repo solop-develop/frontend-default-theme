@@ -35,7 +35,7 @@
           node-key="record_uuid"
           :filter-node-method="filterNode"
           highlight-current
-          :default-expanded-keys="[recordUuid]"
+          :default-expanded-keys="expandedTree"
           @node-click="handleNodeClick"
         />
       </div>
@@ -117,6 +117,13 @@ export default defineComponent({
       })
     })
 
+    const expandedTree = computed(() => {
+      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new') {
+        return []
+      }
+      return [recordUuid.value]
+    })
+
     const elementId = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
@@ -138,7 +145,7 @@ export default defineComponent({
 
     // if changed record in parent tab, reload tab child
     watch(recordUuid, (newValue, oldValue) => {
-      if (isEmptyValue(newValue)) {
+      if (isEmptyValue(newValue) || recordUuid.value === 'create-new') {
         treePanel.value.setCurrentKey(null)
       } else if (newValue !== oldValue) {
         treePanel.value.setCurrentKey(newValue)
@@ -195,6 +202,7 @@ export default defineComponent({
       nodesList,
       // computeds
       elementId,
+      expandedTree,
       panelMetadata,
       recordUuid,
       // methods
