@@ -74,28 +74,44 @@
 <script>
 // Utils and Helper Methods
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
-import { listNotifiications } from '@/api/ADempiere/dashboard/dashboard.js'
+// import { listNotifiications } from '@/api/ADempiere/dashboard/dashboard.js'
 export default {
   name: 'HeaderNotification',
 
   data() {
     return {
-      processNotifications: [],
-      total: 0,
+      // processNotifications: [],
+      // total: 0,
       identificadorIntervaloDeTiempo: 0,
       currentRow: null
     }
   },
-  // computed: {
-  //   processNotifications: {
-  //     get() {
-  //       return []
-  //     },
-  //     set(value) {
-  //       return value
-  //     }
-  //   }
-  // },
+  computed: {
+    total: {
+      get() {
+        let count = 0
+        if (!this.isEmptyValue(this.processNotifications)) {
+          this.processNotifications.forEach(element => {
+            count += element.quantity
+          })
+        }
+        return count
+      },
+      set(value) {
+        return value
+      }
+    },
+    processNotifications: {
+      get() {
+        console.log(this.$store.getters.getListNotifiications)
+        return this.$store.getters.getListNotifiications
+      },
+      set(value) {
+        console.log({ value })
+        return value
+      }
+    }
+  },
   watch: {
     show(value) {
       if (value) {
@@ -135,16 +151,11 @@ export default {
       this.processNotifications.splice(0)
     },
     findNotification() {
-      listNotifiications()
-        .then(response => {
-          const { records } = response
-          records.forEach(element => {
-            this.total += element.quantity
-          })
+      this.$store.dispatch('findNotifications')
+        .then(() => {
           setTimeout(() => {
-            this.mandarMensaje()
+            this.refresNotification()
           }, 80000)
-          this.processNotifications = records
         })
     },
     refresNotification() {
