@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -19,10 +19,12 @@
 import lang from '@/lang'
 import store from '@/store'
 
-// constants
-import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
+// Constants
+import {
+  DISPLAY_COLUMN_PREFIX, IDENTIFIER_COLUMN_SUFFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { formatField, trimPercentage } from '@/utils/ADempiere/valueFormat'
 
@@ -380,7 +382,7 @@ export default {
     },
 
     setValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
+      const { parentUuid, containerUuid, columnName, elementName, reference } = this.metadata
       const { UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
@@ -388,6 +390,11 @@ export default {
       let value = rowData[columnName]
       if (isEmptyValue(value) && !this.metadata.isSameColumnElement) {
         value = rowData[elementName]
+      }
+      // when value is referneced as Account_ID -> C_ElementValue_ID, C_Currency_ID_To -> C_Currency_ID
+      if (isEmptyValue(value) && !isEmptyValue(reference) && !isEmptyValue(reference.tableName)) {
+        const referenceColumn = reference.tableName + IDENTIFIER_COLUMN_SUFFIX
+        value = rowData[referenceColumn]
       }
 
       // set ID value
