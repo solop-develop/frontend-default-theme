@@ -369,7 +369,7 @@ export default {
     },
     activityList(value) {
       if (!this.isEmptyValue(value)) {
-          this.handleCurrentChange(value[0])
+        this.handleCurrentChange(value[0])
       }
     }
   },
@@ -449,7 +449,7 @@ export default {
       this.$store.dispatch('serverListActivity')
     },
     forwardWorkflow({ id, uuid }) {
-      forwardWorkflowAssctivity({
+      forwardWorkflowActivity({
         id,
         uuid,
         message: this.chatEditor.getMarkdown(),

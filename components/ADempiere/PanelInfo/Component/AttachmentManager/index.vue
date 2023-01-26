@@ -34,7 +34,7 @@
       <div slot="file" slot-scope="{file}">
         <el-image
           class="image-card-attachment"
-          :src="file.image"
+          :src="file.imageDate.uri"
           fit="contain"
         >
           <div slot="error" class="image-slot-error">
@@ -45,6 +45,10 @@
             </h1>
           </div>
         </el-image>
+        <!-- <el-image
+          :src="file.image"
+          :preview-src-list="alo"
+        /> -->
 
         <span class="el-upload-list__item-actions">
           <span
@@ -79,29 +83,53 @@
         :record-uuid="recordUuid"
       />
     </span>
-
     <el-dialog
-      v-if="!isEmptyValue(dialogImageUrl.content_type)"
+      v-if="!isEmptyValue(dialogImageUrl)"
       :visible.sync="dialogVisible"
       :title="dialogImageUrl.file_name"
       :append-to-body="true"
       :show-close="true"
     >
-      <span v-if="!isLoadeDialogFileUrl">
-        <img v-if="dialogImageUrl.content_type.includes('image')" width="100%" :src="dialogImageUrl.src" alt="">
-        <file-render
-          v-else
-          :format="'pdf'"
-          :content="dialogImageUrl.src"
-          :src="dialogImageUrl.src"
-          :mime-type="dialogImageUrl.content_type"
-          :name="dialogImageUrl.file_name"
-        />
-      </span>
-      <loading-view
+      <!-- <el-image :src="qlq" /> -->
+      <el-carousel v-if="attachmentList.length > 1" :initial-index="imageKey" :autoplay="false" :interval="999999" trigger="click" style="min-height: 450px;">
+        <template>
+          <el-carousel-item v-for="(item, key) in attachmentList" :key="key" style="height: 100%!important;">
+            <el-image
+              :src="item.imageDate.uri"
+              style="height: 100%!important;"
+            />
+            <!-- <el-image
+              :src="item"
+              class="image"
+              style="width: 140px;height: 140px;display: contents;"
+            /> -->
+          </el-carousel-item>
+        </template>
+      </el-carousel>
+      <!-- <el-image :src="qlq" lazy /> -->
+      <!-- <span v-if="!isLoadeDialogFileUrl"> -->
+      <!-- <el-image
+        :src="qlq"
+        :preview-src-list="alo"
+      /> -->
+      <!-- <img v-if="dialogImageUrl.content_type.includes('image')" width="100%" :src="dialogImageUrl.src" alt=""> -->
+      <!-- <file-render
+        v-else
+        :format="'pdf'"
+        :content="dialogImageUrl.src"
+        :src="dialogImageUrl.src"
+        :mime-type="dialogImageUrl.content_type"
+        :name="dialogImageUrl.file_name"
+      /> -->
+      <!-- </span> -->
+      <!-- <el-image
+        :src="qlq"
+        :preview-src-list="alo"
+      /> -->
+      <!-- <loading-view
         v-else
         key="attachment-loading"
-      />
+      /> -->
     </el-dialog>
   </span>
 </template>
@@ -183,7 +211,7 @@ export default defineComponent({
           if (element.content_type.includes('image')) {
             return {
               ...element,
-              image: getImageFromSource(element)
+              imageDate: getImageFromSource(element)
             }
           }
           return {
@@ -193,7 +221,7 @@ export default defineComponent({
         })
       }
     })
-
+    const imageKey = ref(0)
     /**
      * Methods
      */
@@ -211,23 +239,21 @@ export default defineComponent({
     }
 
     const handlePictureCardPreview = (file) => {
+      imageKey.value = attachmentList.value.findIndex(list => list.imageDate.uri === file.imageDate.uri)
       // if (file.content_type.includes('application/pdf')) {
       isLoadeDialogFileUrl.value = true
       dialogImageUrl.value = handleDownload(file, false)
       dialogVisible.value = true
-      //   return
-      // }
-      // dialogImageUrl.value = file
-      // dialogVisible.value = true
     }
     const handleDownload = async(file, isDownload = true) => {
-      if (isEmptyValue(file.url)) return
+      // if (isEmptyValue(file.url)) return
+      // file.url = URL.createObjectURL(file)
       let link
-      const urlImage = await axios.get(file.url.uri)
+      const urlImage = await axios.get(file.imageDate.uri)
         .then(response => {
           const { data } = response
-          const blob = new Blob([Uint8Array.from(data.result.data)], {
-            type: 'application/pdf'
+          const blob = new Blob([Uint8Array.from(data)], {
+            type: file.content_type
           })
           link = document.createElement('a')
           link.href = window.URL.createObjectURL(blob)
@@ -281,7 +307,8 @@ export default defineComponent({
         width: 900,
         height: 500
       })
-      return image.uri
+      // beforeAvatarUpload(file)
+      return image
     }
     const octetStream = (file) => {
       let urlImage
@@ -305,6 +332,7 @@ export default defineComponent({
       // computed
       listImageAll,
       attachmentList,
+      imageKey,
       // methods
       beforeAvatarUpload,
       converFile,

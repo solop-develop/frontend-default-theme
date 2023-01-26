@@ -44,7 +44,7 @@
 import { defineComponent, ref } from '@vue/composition-api'
 
 import lang from '@/lang'
-
+import store from '@/store'
 // Constants
 import { config } from '@/utils/ADempiere/config'
 
@@ -104,6 +104,11 @@ export default defineComponent({
           })
           reject(false)
         }).finally(() => {
+          store.dispatch('findAttachment', {
+            tableName: props.tableName,
+            recordId: props.recordId,
+            recordUuid: props.recordUuid
+          })
           // upload.value.uploadFiles = filesList.value
         })
       })
