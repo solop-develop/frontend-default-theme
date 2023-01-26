@@ -83,7 +83,7 @@
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import axios from 'axios'
+// import axios from 'axios'
 import store from '@/store'
 
 // API Request Methods
@@ -95,9 +95,11 @@ import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import UploadResource from './uploadResource.vue'
 
 // Utils and Helper Methods
+import { requestResource } from '@/api/ADempiere/user-interface/component/resource.js'
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'AttachmentManager',
@@ -190,7 +192,6 @@ export default defineComponent({
       ]
     })
     const previewList = computed(() => {
-      console.log({ attachmentList: attachmentList.value })
       return attachmentList.value.map(file => file.imageDate.uri)
     })
     const imageKey = ref(0)
@@ -227,32 +228,44 @@ export default defineComponent({
         const imageURL = URL.createObjectURL(imagenblob)
         link = document.createElement('a')
         link.href = imageURL
-        link.download = 'epale'
+        link.download = file.file_name
         link.click()
         return
       }
-      const urlImage = await axios.get(file.imageDate.uri)
+      requestResource({
+        resourceUuid: file.resource_uuid
+      })
         .then(response => {
-          const { data } = response
-          const blob = new Blob([Uint8Array.from(data)], {
-            type: file.content_type
-          })
-          link = document.createElement('a')
-          link.href = window.URL.createObjectURL(blob)
-          link.download = file.file_name
-          if (isDownload) {
-            link.click()
-          }
-          dialogImageUrl.value = {
-            ...file,
-            src: link.href
-          }
-          isLoadeDialogFileUrl.value = false
+          console.log({ response })
         })
-      return {
-        urlImage,
-        link
-      }
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+      // const urlImage = await axios.get(file.imageDate. )
+      //   .then(response => {
+      //     const { data } = response
+        //     const blob = new Blob([Uint8Array.from(data)], {
+        //       type: file.content_type
+        //     })
+      //     link = document.createElement('a')
+      //     link.href = window.URL.createObjectURL(blob)
+      //     link.download = file.file_name
+      //     if (isDownload) {
+      //       link.click()
+      //     }
+      //     dialogImageUrl.value = {
+      //       ...file,
+      //       src: link.href
+      //     }
+      //     isLoadeDialogFileUrl.value = false
+      //   })
+      // return {
+      //   urlImage,
+      //   link
+      // }
     }
 
     const converFile = (image) => {
