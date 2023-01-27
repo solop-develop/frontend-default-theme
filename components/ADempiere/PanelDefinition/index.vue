@@ -32,9 +32,8 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
-// import store from '@/store'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
@@ -95,15 +94,13 @@ export default defineComponent({
     // }
 
     const componentRender = computed(() => {
-      const { isEditSecuence } = panelMetadata.value
       let panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
 
-      // render panel with dragable fields
-      if (isEditSecuence) {
-        panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/DraggablePanel.vue')
-      }
-
       if (!isEmptyValue(panelMetadata.value)) {
+        // render panel with dragable fields
+        if (panelMetadata.value.isEditSecuence) {
+          panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/DraggablePanel.vue')
+        }
         if (panelMetadata.value.isSortTab) {
           panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')
         } else if (panelMetadata.value.isHasTree) {
