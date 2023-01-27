@@ -475,7 +475,7 @@ export default defineComponent({
     })
 
     watch(showPanelInfo, (newValue, oldValue) => {
-      if (newValue && newValue !== oldValue) {
+      if (newValue) {
         handleClick({
           name: props.defaultOpenedTab
         })
@@ -485,6 +485,12 @@ export default defineComponent({
     watch(() => props.defaultOpenedTab, (newValue) => {
       nameTab.value = newValue
     })
+
+    if (showPanelInfo.value) {
+      handleClick({
+        name: props.defaultOpenedTab
+      })
+    }
 
     findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
 
