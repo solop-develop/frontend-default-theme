@@ -26,7 +26,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       <div class="cards-not-group">
         <div class="card">
           <filter-fields
-            v-if="isTabPanel && isShowFilter"
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
             :fields-list="fieldsList"
@@ -35,7 +34,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :fields-to-hidden="containerManager.getFieldsToHidden"
             :is-filter-records="isFilterRecords"
             :container-manager="containerManager"
-            :new-fields-list-secuence="example"
+            :new-fields-list-secuence="draggableFieldsList"
+            :fields-customization:="fieldsAttributesCustomization"
           />
           <el-card
             :shadow="shadowGroup"
@@ -44,15 +44,14 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           >
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <draggable
-                v-model="example"
+                v-model="draggableFieldsList"
                 class="board-column-content"
                 style="overflow: auto;"
                 @change="handleChange"
               >
                 <field-definition
-                  v-for="(element, key) in example"
+                  v-for="(element, key) in draggableFieldsList"
                   :key="key"
-                  ref="fieldDefinitionRef"
                   :key-field="key"
                   :parent-uuid="parentUuid"
                   :container-uuid="containerUuid"
@@ -81,17 +80,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import draggable from 'vuedraggable'
-// utils and helper methods
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { FOCUSABLE_FIELDS_LIST } from '@/utils/ADempiere/componentUtils'
 
 export default defineComponent({
   name: 'DraggablePanel',
@@ -119,11 +118,6 @@ export default defineComponent({
       type: Object,
       default: () => {}
     },
-    // TODO: Manage with store and container manager
-    isShowFilter: {
-      type: Boolean,
-      default: true
-    },
     isFilterRecords: {
       type: Boolean,
       default: true
@@ -131,33 +125,11 @@ export default defineComponent({
     isAdvancedQuery: {
       type: Boolean,
       default: false
-    },
-    isTabPanel: {
-      type: Boolean,
-      default: false
     }
   },
 
-  setup(props, { root }) {
-    const fieldIndex = ref()
-    const group = ref('sequence')
-    const example = ref([
-      {
-        name: 'Jean',
-        text: '',
-        id: 2
-      },
-      {
-        name: 'Joao',
-        text: 'pqewe',
-        id: 1
-      },
-      {
-        name: 'Juan 4',
-        id: 4,
-        text: ''
-      }
-    ])
+  setup(props) {
+    const draggableFieldsList = ref([])
 
     const isActiveCurrentTab = computed(() => {
       if (
@@ -170,9 +142,9 @@ export default defineComponent({
       }
       return false
     })
+
     const fieldsList = computed(() => {
       if (!isEmptyValue(props.panelMetadata) && !isEmptyValue(props.panelMetadata.fieldsList)) {
-        setFocus(props.panelMetadata.fieldsList)
         return props.panelMetadata.fieldsList
       }
 
@@ -182,25 +154,19 @@ export default defineComponent({
           containerUuid: props.containerUuid
         })
         if (!isEmptyValue(fields)) {
-          setFocus(fields)
           return fields
         }
       }
 
       return []
     })
-    const currentFieldList = computed(() => {
-      return store.getters.getCurrentFieldList
+
+    const sortColumnName = computed(() => {
+      return props.panelMetadata.sortOrderColumnName
     })
 
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
-    })
-
-    const recordUuid = computed(() => {
-      // TODO: Change query name 'action'
-      const { action } = root.$route.query
-      return action
     })
 
     const shadowGroup = computed(() => {
@@ -210,64 +176,51 @@ export default defineComponent({
       return 'hover'
     })
 
-    const fieldDefinitionRef = ref(null)
-    const query = root._route.query
-
-    example.value = fieldsList.value.map(recordField => {
-      return {
-        ...recordField,
-        isChangeSecuence: false
-      }
-    })
-
-    watch(fieldDefinitionRef, (newValue, oldValue) => {
-      if (newValue !== oldValue) {
-        if (newValue[fieldIndex]) {
-          newValue[fieldIndex].focusField(newValue[fieldIndex].field.columnName)
-        }
-      }
-    })
-
-    watch(fieldIndex, (newValue, oldValue) => {
-      if (newValue !== oldValue) {
-        if (fieldDefinitionRef.value[newValue]) {
-          fieldDefinitionRef.value[newValue].focusField(fieldDefinitionRef.value[newValue].field.columnName)
-        }
-      }
-    })
-
-    watch(recordUuid, (newValue, oldValue) => {
-      if (newValue !== oldValue) {
-        if (!isEmptyValue(fieldDefinitionRef.value) && !isEmptyValue(fieldIndex.value)) {
-          fieldDefinitionRef.value[fieldIndex.value].focusField(fieldDefinitionRef.value[fieldIndex.value].field.columnName)
-        }
-      }
-    })
-
-    watch(currentFieldList, (newValue, oldValue) => {
-      if (newValue !== oldValue && !isEmptyValue(newValue) && !isEmptyValue(newValue.fieldsList) && !isEmptyValue(newValue.columnName)) {
-        const fieldFocusColumnName = store.getters.getFieldFocusColumnName
-        const index = newValue.fieldsList.findIndex(field => field.columnName === fieldFocusColumnName)
-        if (!isEmptyValue(fieldDefinitionRef.value[index])) {
-          fieldDefinitionRef.value[index].focusField(fieldFocusColumnName)
-        }
-      }
-    })
-
-    function setFocus() {
-      const fields = props.containerManager.getFieldsList({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
+    function generateOrder(arrayToSort, orderBy = sortColumnName.value) {
+      return arrayToSort.sort((itemA, itemB) => {
+        return itemA[orderBy] - itemB[orderBy]
       })
-      fieldIndex.value = fields.findIndex(field =>
-        FOCUSABLE_FIELDS_LIST.includes(field.componentPath) &&
-        props.containerManager.isDisplayedField(field) &&
-        !props.containerManager.isReadOnlyField(field)
-      )
     }
 
     function handleChange(params) {
-      params.moved.element.isChangeSecuence = true
+      const actionsList = Object.keys(params)
+      const action = actionsList.at() // get property
+
+      movedItem(params[action])
+    }
+
+    function movedItem({ element, oldIndex, newIndex }) {
+      const orderColumn = sortColumnName.value
+      element.isChangeSecuence = true
+
+      let indexEnabledSequence = 0
+      const dataSequence = draggableFieldsList.value.map(itemSequence => {
+        if (newIndex > oldIndex) {
+          // moved to down
+          if (itemSequence.uuid === element.uuid) {
+            itemSequence[orderColumn] = (newIndex + 1) * 10
+            return itemSequence
+          }
+          if (indexEnabledSequence >= oldIndex && indexEnabledSequence < newIndex) {
+            itemSequence[orderColumn] = (indexEnabledSequence + 1) * 10
+          }
+        } else {
+          // moved to up
+          if (itemSequence.uuid === element.uuid) {
+            itemSequence[orderColumn] = (newIndex + 1) * 10
+            return itemSequence
+          }
+          if (indexEnabledSequence < oldIndex && indexEnabledSequence >= newIndex) {
+            itemSequence[orderColumn] += 10
+          }
+        }
+        indexEnabledSequence++
+        return itemSequence
+      })
+
+      // always reorder
+      const sortSequence = generateOrder(dataSequence)
+      draggableFieldsList.value = sortSequence
     }
 
     const heightPanel = computed(() => {
@@ -280,6 +233,7 @@ export default defineComponent({
       }
       return 500 + 'px'
     })
+
     const styleScrollPanelTab = computed(() => {
       if (props.panelMetadata.isParentTab) {
         const isFullScreenTabsParent = store.getters.getStoredWindow(props.panelMetadata.parentUuid).isFullScreenTabsParent
@@ -303,21 +257,36 @@ export default defineComponent({
       }
     })
 
+    draggableFieldsList.value = fieldsList.value.map(recordField => {
+      return {
+        ...recordField,
+        isChangeSecuence: false
+      }
+    })
+
+    const fieldsAttributesCustomization = computed(() => {
+      return draggableFieldsList.value.map(fieldItem => {
+        return {
+          columnName: fieldItem.columnName,
+          sequence: fieldItem[sortColumnName.value],
+          isDisplayedDefault: fieldItem.isShowedFromUser
+        }
+      })
+    })
+
     return {
-      group,
-      example,
+      draggableFieldsList,
+      //
+      fieldsAttributesCustomization,
       fieldsList,
+      // oldFieldsList,
       shadowGroup,
       heightPanel,
-      query,
       styleScrollPanelTab,
-      fieldDefinitionRef,
-      recordUuid,
       isMobile,
       isActiveCurrentTab,
       // methodos
-      handleChange,
-      setFocus
+      handleChange
     }
   }
 })
@@ -361,7 +330,6 @@ export default defineComponent({
 </style>
 
 <style lang="scss">
-
 .el-col {
   .sortable-chosen {
     border: 1px solid #f73650;
