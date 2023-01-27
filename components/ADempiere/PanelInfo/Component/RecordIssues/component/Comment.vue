@@ -52,7 +52,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           type="textarea"
                           :rows="5"
                         /> -->
-                        <v-md-editor v-model="summary" height="30px" />
+                        <v-md-editor v-model="summary" />
                       </el-form-item>
                     </el-col>
                   </el-form>
