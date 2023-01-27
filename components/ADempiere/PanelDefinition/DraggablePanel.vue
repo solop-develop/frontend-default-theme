@@ -35,7 +35,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :is-filter-records="isFilterRecords"
             :container-manager="containerManager"
             :new-fields-list-secuence="draggableFieldsList"
-            :fields-customization:="fieldsAttributesCustomization"
+            :fields-customization="fieldsAttributesCustomization"
           />
           <el-card
             :shadow="shadowGroup"
@@ -49,6 +49,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 style="overflow: auto;"
                 @change="handleChange"
               >
+                <!-- {{ sortColumnName }} -->
                 <field-definition
                   v-for="(element, key) in draggableFieldsList"
                   :key="key"
@@ -279,6 +280,7 @@ export default defineComponent({
       //
       fieldsAttributesCustomization,
       fieldsList,
+      sortColumnName,
       // oldFieldsList,
       shadowGroup,
       heightPanel,
