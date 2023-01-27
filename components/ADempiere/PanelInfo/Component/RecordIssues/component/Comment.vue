@@ -46,12 +46,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   <el-form label-position="top">
                     <el-col :span="24">
                       <el-form-item label="Resumen">
-                        <el-input
+                        <!-- <el-input
                           v-model="summary"
                           placeholder="Resumen"
                           type="textarea"
                           :rows="5"
-                        />
+                        /> -->
+                        <v-md-editor v-model="summary" height="30px" />
                       </el-form-item>
                     </el-col>
                   </el-form>
@@ -236,12 +237,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   <el-form label-position="top">
                     <el-col :span="24">
                       <el-form-item label="Resumen">
-                        <el-input
+                        <!-- <el-input
                           v-model="currentIssues.summary"
                           placeholder="Resumen"
                           type="textarea"
                           :rows="6"
-                        />
+                        /> -->
+                        <v-md-editor v-model="currentIssues.summary" />
                       </el-form-item>
                     </el-col>
                   </el-form>
@@ -282,8 +284,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
                           <b>
                             <svg-icon icon-class="label" style="font-size: 20px;" />
-                            {{ currentIssues.request_type.name }}
+                            {{ $t('issues.typeOfRequest') + ': ' }}
                           </b>
+                          {{ currentIssues.request_type.name }}
                         </el-button>
                       </el-popover>
                     </el-col>
@@ -312,8 +315,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
                           <b>
                             <svg-icon icon-class="collections" style="font-size: 20px;" />
-                            {{ currentIssues.priority.name }}
+                            {{ $t('issues.priority') + ': ' }}
                           </b>
+                          {{ currentIssues.priority.name }}
                         </el-button>
                       </el-popover>
                     </el-col>
@@ -340,7 +344,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           </el-form-item>
                         </el-form>
                         <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
-                          <svg-icon icon-class="user" /> {{ currentIssues.sales_representative.name }}
+                          <b>
+                            <svg-icon icon-class="user" />
+                            {{ $t('issues.assigned') + ': ' }}
+                          </b>
+                          {{ currentIssues.sales_representative.name }}
                         </el-button>
                       </el-popover>
                     </el-col>
@@ -387,11 +395,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </span> -->
                 <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" />
                 <span v-else>
-                  <el-input
+                  <!-- <el-input
                     v-model="commentUpdate"
                     type="textarea"
                     :rows="2"
-                  />
+                  /> -->
+                  <v-md-editor v-model="commentUpdate" />
                   <el-button
                     type="primary"
                     icon="el-icon-check"
@@ -421,11 +430,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       </el-main>
       <el-footer style="height: auto;padding: 0px;">
         <span v-if="!isEmptyValue(currentIssues)">
-          <el-input
-            v-model="comments"
-            type="textarea"
-            :rows="5"
-          />
+          <v-md-editor v-model="comments" />
           <el-button
             type="primary"
             icon="el-icon-check"
@@ -455,11 +460,11 @@ import {
 import store from '@/store'
 
 // Components and Mixins
-
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import 'simple-m-editor/dist/simple-m-editor.css'
 
 import {
   listSalesRepresentatives,
@@ -495,6 +500,7 @@ export default defineComponent({
     const summary = ref('')
     const comments = ref('')
     const commentUpdate = ref('')
+    const markdownContent = ref('')
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -786,6 +792,12 @@ export default defineComponent({
         result: commentUpdate.value
       })
     }
+
+    function handleChange(data) {
+      console.log({ data })
+      markdownContent.value = data.htmlContent
+    }
+
     watch(isPanelEditIssues, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         findRequestTypes(true)
@@ -836,7 +848,9 @@ export default defineComponent({
       editIssues,
       updateIssuesSummary,
       removeIssues,
-      handleCommandIssues
+      handleCommandIssues,
+      handleChange,
+      markdownContent
     }
   }
 })
