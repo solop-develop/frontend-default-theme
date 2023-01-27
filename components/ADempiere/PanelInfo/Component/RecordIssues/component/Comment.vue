@@ -31,7 +31,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-button>
           </div>
           <div class="text item">
-            <div style="width: 60% !important;float: left;">
+            <div style="width: 65% !important;float: left;">
               <el-card class="card-summary" shadow="never">
                 <el-row>
                   <el-form label-position="top">
@@ -52,14 +52,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           type="textarea"
                           :rows="5"
                         /> -->
-                        <v-md-editor v-model="summary" />
+                        <el-card v-if="summaryNewPreview" shadow="never">
+                          <div v-markdown="summary" class="output" />
+                        </el-card>
+                        <v-md-editor v-else v-model="summary" />
                       </el-form-item>
                     </el-col>
                   </el-form>
                 </el-row>
               </el-card>
             </div>
-            <div style="width: 40% !important;float: right;">
+            <div style="width: 35% !important;float: right;">
               <el-card class="card-options" shadow="never">
                 <el-row>
                   <el-form label-position="top" class="form-comments">
@@ -151,6 +154,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           icon="el-icon-check"
           @click="saveIssues()"
         />
+        <el-checkbox
+          v-if="isEmptyValue(currentIssues)"
+          v-model="summaryNewPreview"
+          :label="$t('issues.preview')"
+          :border="true"
+          style="float: right;margin: 10px;margin-top: 5px;margin-bottom: 10px;"
+        />
         <el-card v-else class="comments-card" style="padding: 0px;height: auto;">
           <div slot="header" class="comments-card-clearfix">
             <span v-if="!currentIssues.isEdit">
@@ -164,17 +174,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </span>
             <el-row v-else :gutter="20">
               <el-form label-position="top">
-                <el-col :span="10">
+                <el-col :span="8">
                   <el-form-item label="Asunto">
                     <el-input v-model="currentIssues.subject" placeholder="Asunto" />
                   </el-form-item>
                 </el-col>
-                <el-col :span="10">
+                <el-col :span="8">
                   <el-form-item label="Numero de Docuemneto">
                     <el-input v-model="currentIssues.document_no" placeholder="Asunto" />
                   </el-form-item>
                 </el-col>
-                <el-col :span="4" style="padding-left: 10px;padding-right: 10px;margin-top: 35px;">
+                <el-col :span="8" style="padding-left: 10px;padding-right: 10px;margin-top: 35px;">
                   <el-button
                     type="primary"
                     icon="el-icon-check"
@@ -187,35 +197,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;"
                     @click="currentIssues.isEdit = !currentIssues.isEdit"
                   />
+                  <el-checkbox v-model="summaryUpdatePreview" :label="$t('issues.preview')" :border="true" style="float: right;margin-top: 5px;" />
                 </el-col>
               </el-form>
-              <!-- <el-col :span="7" style="padding-top: 40px;"> -->
-              <!-- <el-button style="float: right;margin-left: 10px;" plain size="mini" type="primary" @click="editIssues(currentIssues)">
-                {{ 'Guardar' }}
-                <i class="el-icon-edit" />
-              </el-button> -->
-              <!-- <el-button style="float: right;margin-right: 10px;" size="mini" plain type="danger">
-                {{ 'Eliminar' }}
-                <i class="el-icon-delete" />
-              </el-button> -->
-              <!-- <el-button style="float: right;" size="mini" plain type="info" @click="currentIssues.isEdit = !currentIssues.isEdit">
-                {{ 'Cancelar' }} 999
-                <svg-icon icon-class="undo" />
-              </el-button> -->
-              <!-- </el-col> -->
             </el-row>
-            <!-- <el-button v-show="!currentIssues.isEdit" style="float: right;margin-right: 10px;" plain size="mini" type="primary" @click="editIssues(currentIssues)">
-              {{ 'Editar' }}
-              <i class="el-icon-edit" />
-            </el-button>
-            <el-button v-show="!currentIssues.isEdit" style="float: right;margin-right: 10px;" size="mini" plain type="danger" @click="removeIssues(currentIssues)">
-              {{ 'Eliminar' }}
-              <i class="el-icon-delete" />
-            </el-button>
-            <el-button v-show="!currentIssues.isEdit" style="float: right;" size="mini" plain type="info" @click="cancelEdit(currentIssues)">
-              {{ 'Cancelar' }}
-              <svg-icon icon-class="undo" />
-            </el-button> -->
             <el-dropdown v-if="!currentIssues.isEdit" trigger="click" style="float: right" @command="handleCommandIssues">
               <span class="el-dropdown-link">
                 <el-button type="text" size="mini" style="color: black;">
@@ -237,13 +222,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   <el-form label-position="top">
                     <el-col :span="24">
                       <el-form-item label="Resumen">
-                        <!-- <el-input
-                          v-model="currentIssues.summary"
-                          placeholder="Resumen"
-                          type="textarea"
-                          :rows="6"
-                        /> -->
-                        <v-md-editor v-model="currentIssues.summary" />
+                        <el-card v-if="summaryUpdatePreview" shadow="never">
+                          <div v-markdown="currentIssues.summary" class="output" />
+                        </el-card>
+                        <v-md-editor v-else v-model="currentIssues.summary" />
                       </el-form-item>
                     </el-col>
                   </el-form>
@@ -345,7 +327,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         </el-form>
                         <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
                           <b>
-                            <svg-icon icon-class="user" />
+                            <svg-icon icon-class="user" style="font-size: 13px !important;" />
                             {{ $t('issues.assigned') + ': ' }}
                           </b>
                           {{ currentIssues.sales_representative.name }}
@@ -358,93 +340,100 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </div>
           </div>
           <i style="font-size: 12px;color: #82848a;">
-            {{ 'Creado el ' }} {{ translateDateByLong(currentIssues.created) }} {{ 'Por: ' }}  {{ currentIssues.user_name }} <svg-icon icon-class="user" />
+            {{ $t('issues.isCreated') }} {{ translateDateByLong(currentIssues.created) }} {{ $t('issues.by') }}  {{ currentIssues.user_name }} <svg-icon icon-class="user" />
           </i>
         </el-card>
         <br>
-        <el-timeline v-if="!isEmptyValue(currentIssues)" style="padding-left: 15px;">
-          <el-timeline-item
-            v-for="(comment, index) in listComments"
-            :key="index"
-            type="primary"
-            :timestamp="translateDateByLong(comment.created)"
-            style="margin-left: 10px;"
-          >
-            <el-card class="list-comments">
-              <div slot="header" class="list-comments-clearfix">
-                <span>
-                  {{ comment.user_name }} <svg-icon icon-class="user" />
-                </span>
-                <el-dropdown trigger="click" style="float: right" @command="handleCommand">
-                  <span class="el-dropdown-link">
-                    <el-button type="text" size="mini" style="color: black;">
-                      <b>
-                        <svg-icon icon-class="more-vertical" />
-                      </b>
-                    </el-button>
+        <el-scrollbar wrap-class="scroll-timeline">
+          <el-timeline v-if="!isEmptyValue(currentIssues)" style="padding-left: 15px;">
+            <el-timeline-item
+              v-for="(comment, index) in listComments"
+              :key="index"
+              type="primary"
+              :timestamp="translateDateByLong(comment.created)"
+              style="margin-left: 10px;"
+            >
+              <el-card class="list-comments">
+                <div slot="header" class="list-comments-clearfix">
+                  <span>
+                    {{ comment.user_name }} <svg-icon icon-class="user" />
                   </span>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item icon="el-icon-edit" :command="{comment, option:'edit'}">Editar</el-dropdown-item>
-                    <el-dropdown-item icon="el-icon-delete" :command="{comment, option:'delete'}">Eliminar</el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </div>
-              <div>
-                <!-- <span v-if="!comment.isEdit">
-                  {{ comment.result }}
-                </span> -->
-                <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" />
-                <span v-else>
-                  <!-- <el-input
-                    v-model="commentUpdate"
-                    type="textarea"
-                    :rows="2"
-                  /> -->
-                  <v-md-editor v-model="commentUpdate" />
-                  <el-button
-                    type="primary"
-                    icon="el-icon-check"
-                    style="float: right;margin-top: 5px;"
-                    @click="updateComment(comment)"
-                  />
-                  <el-button
-                    type="danger"
-                    icon="el-icon-close"
-                    style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;"
-                    @click="comment.isEdit = !comment.isEdit"
-                  />
-                  <el-button
-                    type="info"
-                    plain
-                    style="float: right;margin-top: 5px;margin-bottom: 5px;"
-                    @click="commentUpdate = ''"
-                  >
-                    <svg-icon icon-class="layers-clear" />
-                  </el-button>
-                </span>
-              </div>
-            </el-card>
-            <!-- {{activity.content}} -->
-          </el-timeline-item>
-        </el-timeline>
+                  <el-dropdown trigger="click" style="float: right" @command="handleCommand">
+                    <span class="el-dropdown-link">
+                      <el-button type="text" size="mini" style="color: black;">
+                        <b>
+                          <svg-icon icon-class="more-vertical" />
+                        </b>
+                      </el-button>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item icon="el-icon-edit" :command="{comment, option:'edit'}">Editar</el-dropdown-item>
+                      <el-dropdown-item icon="el-icon-delete" :command="{comment, option:'delete'}">Eliminar</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </div>
+                <div>
+                  <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" />
+                  <span v-else>
+                    <el-card v-if="commentUpdatePreview" shadow="never">
+                      <div v-markdown="commentUpdate" class="output" />
+                    </el-card>
+                    <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
+                    <v-md-editor v-else v-model="commentUpdate" />
+                    <el-button
+                      type="primary"
+                      icon="el-icon-check"
+                      style="float: right;margin-top: 5px;"
+                      @click="updateComment(comment)"
+                    />
+                    <el-button
+                      type="danger"
+                      icon="el-icon-close"
+                      style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;"
+                      @click="comment.isEdit = !comment.isEdit"
+                    />
+                    <el-button
+                      type="info"
+                      plain
+                      style="float: right;margin-top: 5px;margin-bottom: 5px;"
+                      @click="commentUpdate = ''"
+                    >
+                      <svg-icon icon-class="layers-clear" />
+                    </el-button>
+                    <el-checkbox v-model="commentUpdatePreview" :label="$t('issues.preview')" :border="true" style="float: right;margin-top: 5px;" />
+                  </span>
+                </div>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </el-scrollbar>
       </el-main>
       <el-footer style="height: auto;padding: 0px;">
         <span v-if="!isEmptyValue(currentIssues)">
-          <v-md-editor v-model="comments" />
+          <el-card v-if="commentPreview" shadow="never">
+            <div v-markdown="comments" class="output" />
+          </el-card>
+          <v-md-editor v-else v-model="comments" />
           <el-button
             type="primary"
             icon="el-icon-check"
-            style="float: right;"
+            style="float: right;margin-top: 5px;margin-bottom: 10px;"
             @click="addNewComments()"
           />
           <el-button
             type="info"
             plain
-            style="float: right;margin-right: 1%;"
+            style="float: right;margin-right: 1%;margin-top: 5px;margin-bottom: 10px;"
             @click="clearComments()"
           >
             <svg-icon icon-class="layers-clear" />
           </el-button>
+          <el-checkbox
+            v-model="commentPreview"
+            :label="$t('issues.preview')"
+            :border="true"
+            style="float: right;margin-top: 5px;margin-bottom: 10px;"
+          />
         </span>
       </el-footer>
     </el-container>
@@ -501,6 +490,10 @@ export default defineComponent({
     const comments = ref('')
     const commentUpdate = ref('')
     const markdownContent = ref('')
+    const commentUpdatePreview = ref(false)
+    const commentPreview = ref(false)
+    const summaryUpdatePreview = ref(false)
+    const summaryNewPreview = ref(false)
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -816,6 +809,10 @@ export default defineComponent({
       summary,
       comments,
       commentUpdate,
+      commentUpdatePreview,
+      commentPreview,
+      summaryUpdatePreview,
+      summaryNewPreview,
       // list
       listSalesReps,
       listIssuesTypes,
@@ -881,6 +878,9 @@ export default defineComponent({
 <style lang="scss">
 .scroll-comments {
   max-height: 220px;
+}
+.scroll-timeline {
+  max-height: 400px;
 }
 .divider-vertical {
   height: auto !important;
