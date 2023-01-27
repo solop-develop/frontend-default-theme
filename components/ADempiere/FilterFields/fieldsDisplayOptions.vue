@@ -17,64 +17,156 @@
 -->
 
 <template>
-  <el-dropdown trigger="click" class="fields-display-options" size="small" @command="handleCommand">
-    <span class="el-dropdown-link">
-      <svg-icon icon-class="list" />
-    </span>
+  <span>
+    <el-dropdown trigger="click" class="fields-display-options" size="small" @command="handleCommand">
+      <span class="el-dropdown-link">
+        <svg-icon icon-class="list" />
+      </span>
 
-    <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
-      <el-dropdown-item
-        :disabled="!isHiddenFieldsList"
-        command="minimalistView"
-      >
-        <i class="el-icon-menu" />
-        {{ $t('fieldDisplayOptions.minimalistView') }}
-      </el-dropdown-item>
+      <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
+        <el-dropdown-item
+          :disabled="!isHiddenFieldsList"
+          command="minimalistView"
+        >
+          <i class="el-icon-menu" />
+          {{ $t('fieldDisplayOptions.minimalistView') }}
+        </el-dropdown-item>
 
-      <el-dropdown-item
-        :disabled="!isShowFieldsWithValue"
-        command="showWithValue"
-      >
-        <svg-icon icon-class="component" />
-        {{ $t('fieldDisplayOptions.showFieldsWithValue') }}
-      </el-dropdown-item>
+        <el-dropdown-item
+          :disabled="!isShowFieldsWithValue"
+          command="showWithValue"
+        >
+          <svg-icon icon-class="component" />
+          {{ $t('fieldDisplayOptions.showFieldsWithValue') }}
+        </el-dropdown-item>
 
-      <el-dropdown-item
-        :disabled="!isShowFields"
-        command="showAll"
-      >
-        <i class="el-icon-s-grid" />
-        {{ $t('fieldDisplayOptions.showAllFields') }}
-      </el-dropdown-item>
+        <el-dropdown-item
+          :disabled="!isShowFields"
+          command="showAll"
+        >
+          <i class="el-icon-s-grid" />
+          {{ $t('fieldDisplayOptions.showAllFields') }}
+        </el-dropdown-item>
 
-      <el-dropdown-item v-if="!isMobile" :command="2">
-        <svg-icon :icon-class="iconColumn(2)" />
-        {{ $t('fieldDisplayOptions.Show2Columns') }}
-      </el-dropdown-item>
-      <el-dropdown-item v-if="!isMobile" :command="3">
-        <svg-icon :icon-class="iconColumn(3)" />
-        {{ $t('fieldDisplayOptions.Show3Columns') }}
-      </el-dropdown-item>
-      <el-dropdown-item v-if="!isMobile" :command="4">
-        <svg-icon :icon-class="iconColumn(4)" />
-        {{ $t('fieldDisplayOptions.Show4Columns') }}
-      </el-dropdown-item>
-      <el-dropdown-item v-if="!isMobile && isShowSequence" :command="'secuencia'">
-        <i class="el-icon-sort" />
-        {{ sequenceOptionLabel }}
-      </el-dropdown-item>
-    </el-dropdown-menu>
-  </el-dropdown>
+        <el-dropdown-item v-if="!isMobile" :command="2">
+          <svg-icon :icon-class="iconColumn(2)" />
+          {{ $t('fieldDisplayOptions.Show2Columns') }}
+        </el-dropdown-item>
+        <el-dropdown-item v-if="!isMobile" :command="3">
+          <svg-icon :icon-class="iconColumn(3)" />
+          {{ $t('fieldDisplayOptions.Show3Columns') }}
+        </el-dropdown-item>
+        <el-dropdown-item v-if="!isMobile" :command="4">
+          <svg-icon :icon-class="iconColumn(4)" />
+          {{ $t('fieldDisplayOptions.Show4Columns') }}
+        </el-dropdown-item>
+        <el-dropdown-item v-if="!isMobile && isShowSequence" :command="'secuencia'">
+          <i class="el-icon-sort" />
+          {{ sequenceOptionLabel }}
+        </el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <el-dialog
+      :title="$t('component.sequenceSort.saveNewSequence')"
+      :visible.sync="isSaveNewSequence"
+    >
+      <el-form :inline="true" label-position="top">
+        <el-form-item>
+          <template slot="label">
+            <el-radio v-model="level" :label="0" :border="true">
+              {{ $t('form.workflowActivity.filtersSearch.user') }}
+            </el-radio>
+          </template>
+          <el-select
+            v-model="currentUser"
+            :placeholder="$t('form.workflowActivity.filtersSearch.user')"
+            :disabled="level !== 0"
+            filterable
+            @visible-change="findListUser"
+          >
+            <el-option
+              v-for="item in listUser"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <template slot="label">
+            <el-radio v-model="level" :label="1" :border="true">
+              {{ $t('profile.role') }}
+            </el-radio>
+          </template>
+          <el-select
+            v-model="currentRol"
+            :placeholder="$t('profile.role')"
+            :disabled="level !== 1"
+            filterable
+            @visible-change="findListRol"
+          >
+            <el-option
+              v-for="item in listRol"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <template slot="label">
+            <el-radio v-model="level" :label="2" :border="true">
+              {{ $t('component.sequenceSort.customizationlevel') }}
+            </el-radio>
+          </template>
+          <el-select
+            v-model="customizationLevel"
+            :placeholder="$t('component.sequenceSort.customizationlevel')"
+            :disabled="level !== 2 "
+            filterable
+            @visible-change="findListCustomizations"
+          >
+            <el-option
+              v-for="item in listCustomizationsLevel"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button
+          type="danger"
+          icon="el-icon-close"
+          @click="close()"
+        />
+        <el-button
+          type="primary"
+          icon="el-icon-check"
+          @click="saveCustomization"
+        />
+      </span>
+    </el-dialog>
+  </span>
 </template>
 
 <script>
-import { computed, defineComponent } from '@vue/composition-api'
+import {
+  requestListUsers,
+  requestListRoles,
+  requestListCustomizationsLevel
+} from '@/api/ADempiere/user-customization'
+
+import { computed, defineComponent, ref } from '@vue/composition-api'
 
 import store from '@/store'
 import language from '@/lang'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'FieldsDisplayOption',
@@ -111,11 +203,24 @@ export default defineComponent({
     newFieldsListSecuence: {
       type: Array,
       default: () => []
+    },
+    fieldsCustomization: {
+      type: Array,
+      default: () => []
     }
-
   },
 
   setup(props) {
+    const isSaveNewSequence = ref(false)
+
+    const currentUser = ref('')
+    const currentRol = ref('')
+    const customizationLevel = ref('')
+    const level = ref(0)
+
+    const listUser = ref([])
+    const listRol = ref([])
+    const listCustomizationsLevel = ref([])
     // enabled showed optionals and mandatory fields
     const isShowFields = computed(() => {
       return props.availableFields.length > 0 &&
@@ -176,6 +281,109 @@ export default defineComponent({
       }
       return 'eye'
     }
+    function close(params) {
+      isSaveNewSequence.value = false
+      const { isEditSecuence, uuid } = props.containerManager.getPanel({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      // props.containerManager.changeSequence({
+      //   uuid,
+      //   attributeName: 'fieldsList',
+      //   attributeNameControl: undefined,
+      //   attributeValue: props.newFieldsListSecuence,
+      //   parentUuid: props.parentUuid,
+      //   containerUuid: props.containerUuid
+      // })
+      props.containerManager.changeSequence({
+        uuid,
+        attributeName: 'isEditSecuence',
+        attributeNameControl: undefined,
+        attributeValue: !isEditSecuence,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+    }
+
+    function findListUser(params) {
+      // if (!isVisible) {
+      //   return
+      // }
+      requestListUsers({})
+        .then(response => {
+          const { records } = response
+          listUser.value = records
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'warning'
+          })
+        })
+    }
+    function findListRol(params) {
+      // if (!isVisible) {
+      //   return
+      // }
+      requestListRoles({})
+        .then(response => {
+          const { records } = response
+          listRol.value = records
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'warning'
+          })
+        })
+    }
+    function findListCustomizations(params) {
+      // if (!isVisible) {
+      //   return
+      // }
+      requestListCustomizationsLevel({})
+        .then(response => {
+          const { records } = response
+          listCustomizationsLevel.value = records
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'warning'
+          })
+        })
+    }
+
+    function saveCustomization() {
+      let levelId
+      if (level.value === 0) {
+        levelId = currentUser.value
+      } else if (level.value === 1) {
+        levelId = currentRol.value
+      } else if (level.value === 2) {
+        levelId = customizationLevel.value
+      }
+      props.containerManager.applyCustomization({
+        containerUuid: props.containerUuid,
+        level: level.value,
+        levelId,
+        // levelUuid,
+        fieldAttributes: props.fieldsCustomization
+      })
+        .then(response => {
+          showMessage({
+            message: response,
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'warning'
+          })
+        })
+      close()
+    }
 
     const handleCommand = (command) => {
       let fieldsShowed = []
@@ -196,26 +404,27 @@ export default defineComponent({
         return
       }
       if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
-        const { isEditSecuence, uuid } = props.containerManager.getPanel({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-        props.containerManager.changeSequence({
-          uuid,
-          attributeName: 'fieldsList',
-          attributeNameControl: undefined,
-          attributeValue: props.newFieldsListSecuence,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-        props.containerManager.changeSequence({
-          uuid,
-          attributeName: 'isEditSecuence',
-          attributeNameControl: undefined,
-          attributeValue: !isEditSecuence,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
+        // const { isEditSecuence, uuid } = props.containerManager.getPanel({
+        //   parentUuid: props.parentUuid,
+        //   containerUuid: props.containerUuid
+        // })
+        // props.containerManager.changeSequence({
+        //   uuid,
+        //   attributeName: 'fieldsList',
+        //   attributeNameControl: undefined,
+        //   attributeValue: props.newFieldsListSecuence,
+        //   parentUuid: props.parentUuid,
+        //   containerUuid: props.containerUuid
+        // })
+        // props.containerManager.changeSequence({
+        //   uuid,
+        //   attributeName: 'isEditSecuence',
+        //   attributeNameControl: undefined,
+        //   attributeValue: !isEditSecuence,
+        //   parentUuid: props.parentUuid,
+        //   containerUuid: props.containerUuid
+        // })
+        isSaveNewSequence.value = true
 
         return
       }
@@ -243,6 +452,15 @@ export default defineComponent({
     }
 
     return {
+      // ref
+      isSaveNewSequence,
+      currentUser,
+      currentRol,
+      customizationLevel,
+      level,
+      listUser,
+      listRol,
+      listCustomizationsLevel,
       // computeds
       isShowFields,
       isShowFieldsWithValue,
@@ -252,8 +470,13 @@ export default defineComponent({
       sequenceOptionLabel,
       isShowSequence,
       // methods
+      saveCustomization,
+      close,
       handleCommand,
-      iconColumn
+      iconColumn,
+      findListUser,
+      findListRol,
+      findListCustomizations
     }
   }
 })

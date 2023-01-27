@@ -103,11 +103,9 @@ export default {
     },
     processNotifications: {
       get() {
-        console.log(this.$store.getters.getListNotifiications)
         return this.$store.getters.getListNotifiications
       },
       set(value) {
-        console.log({ value })
         return value
       }
     }

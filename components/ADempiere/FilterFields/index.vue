@@ -67,6 +67,7 @@
         :filter-manager="filterManager"
         :container-manager="containerManager"
         :new-fields-list-secuence="newFieldsListSecuence"
+        :fields-customization="fieldsCustomization"
       />
     </span>
   </el-row>
@@ -107,6 +108,7 @@
             :filter-manager="filterManager"
             :container-manager="containerManager"
             :new-fields-list-secuence="newFieldsListSecuence"
+            :fields-customization="fieldsCustomization"
           />
         </el-form-item>
       </el-form>
@@ -145,6 +147,10 @@ export default defineComponent({
       default: ''
     },
     fieldsList: {
+      type: Array,
+      default: () => []
+    },
+    fieldsCustomization: {
       type: Array,
       default: () => []
     },
@@ -188,7 +194,6 @@ export default defineComponent({
 
   setup(props, { root }) {
     const size = 'small'
-
     const cssClass = computed(() => {
       if (props.inTable) {
         return 'form-filter-columns'
