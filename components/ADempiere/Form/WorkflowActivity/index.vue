@@ -16,7 +16,7 @@
 
 <template>
   <el-container v-if="isMobile" style="height: 100% !important;">
-    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 40% !important; width: 100% !important;' : 'height: 7%!important; width: 100% !important;'">
+    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 30% !important; width: 100% !important;' : 'height: 7%!important; width: 100% !important;'">
       <el-card :style="!collapse ? 'height: 100% !important; width: 100% !important;float: left;' : 'height: 100%;width: 100% !important;float: left;'">
         <div slot="header">
           <span> {{ $t('form.workflowActivity.title') }} </span>
@@ -52,22 +52,6 @@
           :records-page="activityList.length"
         />
       </el-card>
-      <!-- <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: 50%; width: 100% !important;float: right;' : 'height: 20%; width: 100% !important;float: right;'">
-        <div slot="header" class="clearfix">
-          {{ $t('field.logsField') }}
-          <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
-        </div>
-        <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info" style="overflow: auto;height: 80%; padding-top: 10px;">
-          <el-timeline-item
-            v-for="(nodes, key) in listProcessWorkflow"
-            :key="key"
-            :timestamp="translateDateByLong(nodes.log_date)"
-            placement="top"
-          >
-            <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
-          </el-timeline-item>
-        </el-timeline>
-      </el-card> -->
     </el-header>
 
     <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
@@ -127,11 +111,11 @@
         </el-main>
       </el-container>
     </el-main>
-    <el-footer style="height: 40%;padding: 0px">
+    <el-footer style="padding: 0px;min-height: 30% !important;max-height: 35% !important;">
       <el-card id="logsWorkflow" class="box-card" style="padding: 0%;overflow: auto;overflow-x: hidden;">
-        <el-form v-show="!isEmptyValue(currentActivity)" label-position="left" :inline="true" class="demo-form-inline">
+        <el-form v-show="!isEmptyValue(currentActivity)" :label-position="chooseOption ? 'top' : 'left'" :inline="true" class="demo-form-inline">
           <el-row :gutter="24" style="text-align: center;">
-            <el-col :span="12" style="text-align: center;margin: 0px;">
+            <el-col :span="!chooseOption ? 12 : 6" style="text-align: center;margin: 0px;">
               <el-form-item label="Reenviar" style="margin: 0px;padding: 0px;">
                 <el-switch v-model="chooseOption" @change="changeOption" />
               </el-form-item>
@@ -141,7 +125,7 @@
                 <el-switch v-model="isProved" />
               </el-form-item>
             </el-col>
-            <el-col v-show="chooseOption" :span="12" style="text-align: center;margin: 0px;">
+            <el-col v-show="chooseOption" :span="18" style="text-align: center;margin: 0px;padding: 0px">
               <el-form-item :label="$t('form.workflowActivity.filtersSearch.user')" style="margin: 0px;padding: 0px;">
                 <el-select
                   v-if="chooseOption"
@@ -159,7 +143,11 @@
             </el-col>
           </el-row>
         </el-form>
-        <v-md-editor v-model="message" />
+        <v-md-editor
+          v-model="message"
+          left-toolbar="undo redo | image"
+          :disabled-menus="[]"
+        />
         <el-button
           type="primary"
           icon="el-icon-check"
@@ -214,7 +202,7 @@
           :records-page="activityList.length"
         />
       </el-card>
-      <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: 100%; width: 100% !important;float: right;' : 'height: 20%; width: 100% !important;float: right;'">
+      <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: 100%; width: 50% !important;float: right;' : 'height: 20%; width: 50% !important;float: right;'">
         <div slot="header" class="clearfix">
           {{ $t('field.logsField') }}
           <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
