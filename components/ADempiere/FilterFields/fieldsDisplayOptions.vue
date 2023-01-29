@@ -287,14 +287,6 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
       })
-      // props.containerManager.changeSequence({
-      //   uuid,
-      //   attributeName: 'fieldsList',
-      //   attributeNameControl: undefined,
-      //   attributeValue: props.newFieldsListSecuence,
-      //   parentUuid: props.parentUuid,
-      //   containerUuid: props.containerUuid
-      // })
       props.containerManager.changeSequence({
         uuid,
         attributeName: 'isEditSecuence',
@@ -371,6 +363,18 @@ export default defineComponent({
         fieldAttributes: props.fieldsCustomization
       })
         .then(response => {
+          const { uuid } = props.containerManager.getPanel({
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid
+          })
+          props.containerManager.changeSequence({
+            uuid,
+            attributeName: 'fieldsList',
+            attributeNameControl: undefined,
+            attributeValue: props.newFieldsListSecuence,
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid
+          })
           showMessage({
             message: response,
             type: 'success'
@@ -388,6 +392,7 @@ export default defineComponent({
     const handleCommand = (command) => {
       let fieldsShowed = []
       if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
+        fieldsShowed = fieldsListAvailable.value
         const { isEditSecuence, uuid } = props.containerManager.getPanel({
           parentUuid: props.parentUuid,
           containerUuid: props.containerUuid
@@ -404,26 +409,6 @@ export default defineComponent({
         return
       }
       if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
-        // const { isEditSecuence, uuid } = props.containerManager.getPanel({
-        //   parentUuid: props.parentUuid,
-        //   containerUuid: props.containerUuid
-        // })
-        // props.containerManager.changeSequence({
-        //   uuid,
-        //   attributeName: 'fieldsList',
-        //   attributeNameControl: undefined,
-        //   attributeValue: props.newFieldsListSecuence,
-        //   parentUuid: props.parentUuid,
-        //   containerUuid: props.containerUuid
-        // })
-        // props.containerManager.changeSequence({
-        //   uuid,
-        //   attributeName: 'isEditSecuence',
-        //   attributeNameControl: undefined,
-        //   attributeValue: !isEditSecuence,
-        //   parentUuid: props.parentUuid,
-        //   containerUuid: props.containerUuid
-        // })
         isSaveNewSequence.value = true
 
         return
