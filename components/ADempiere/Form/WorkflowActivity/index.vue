@@ -15,7 +15,157 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
+  <el-container v-if="isMobile" style="height: 100% !important;">
+    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 30% !important; width: 100% !important;' : 'height: 7%!important; width: 100% !important;'">
+      <el-card :style="!collapse ? 'height: 100% !important; width: 100% !important;float: left;' : 'height: 100%;width: 100% !important;float: left;'">
+        <div slot="header">
+          <span> {{ $t('form.workflowActivity.title') }} </span>
+          <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
+        </div>
+
+        <el-table
+          v-show="!collapse"
+          v-loading="isLoadActivity"
+          :data="activityList"
+          highlight-current-row
+          style="width: 100%;height: 70% !important;"
+          border
+          height="60% !important"
+          @current-change="handleCurrentChange"
+        >
+          <el-table-column
+            v-for="(workflowColumn) in workflowTableDefinition"
+            :key="workflowColumn.columnName"
+            :column-key="workflowColumn.columnName"
+            :label="workflowColumn.name"
+            :align="workflowColumn.isNumeric ? 'right' : 'left'"
+            :prop="workflowColumn.columnName"
+          />
+        </el-table>
+        <custom-pagination
+          v-show="!collapse"
+          :total="recordCount"
+          :current-page="currentPagePagination"
+          :container-manager="containerManagerBPList"
+          :handle-change-page="setPage"
+          :handle-size-change="handleChangeSizePage"
+          :records-page="activityList.length"
+        />
+      </el-card>
+    </el-header>
+
+    <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
+      <el-container style="height: 100%;">
+        <el-header :style="collapse2 ? 'padding: 0px;height: 40%;display: contents;' : 'padding: 0px;height: 10%;display: contents;'">
+          <el-card id="logsWorkflow" class="box-card">
+            <div slot="header" class="clearfix">
+              {{ $t('field.logsField') }}
+              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
+            </div>
+            <!-- {{ currentActivity }} {{ collapse2 }} -->
+            <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
+              <el-timeline-item
+                v-for="(nodes, key) in listProcessWorkflow"
+                :key="key"
+                :timestamp="translateDateByLong(nodes.log_date)"
+                placement="top"
+              >
+                <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
+              </el-timeline-item>
+            </el-timeline>
+          </el-card>
+        </el-header>
+        <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
+          <!-- <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: auto' : 'height: 20%'">
+            <div slot="header" class="clearfix">
+              {{ $t('field.logsField') }}
+              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
+            </div>
+            <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
+              <el-timeline-item
+                v-for="(nodes, key) in listProcessWorkflow"
+                :key="key"
+                :timestamp="translateDateByLong(nodes.log_date)"
+                placement="top"
+              >
+                <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
+              </el-timeline-item>
+            </el-timeline>
+          </el-card> -->
+          <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
+            <div slot="header" class="clearfix">
+              {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
+              <!-- {{ 'Diagrama del Flujo de Trabajo' }} -->
+              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse3 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse3 = !collapse3)" />
+            </div>
+            <workflow-diagram
+              v-if="(!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity) && collapse3)"
+              :node-transition-list="workflowTranstitionsList"
+              :node-list="workflowStatesList"
+              :current-node="currentNode"
+              :orientation="isMobile ? 'vertical' : 'horizontal'"
+              :workflow-logs="listProcessWorkflow"
+              :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
+            />
+          </el-card>
+        </el-main>
+      </el-container>
+    </el-main>
+    <el-footer :style="chooseOption ? 'padding: 0px;height: 35% !important;' : 'padding: 0px;height: 30% !important;'">
+      <el-card id="logsWorkflow" class="box-card" style="padding: 0%;overflow: auto;overflow-x: hidden;">
+        <el-form v-show="!isEmptyValue(currentActivity)" :label-position="chooseOption ? 'top' : 'left'" :inline="true" class="demo-form-inline">
+          <el-row :gutter="24" style="text-align: center;">
+            <el-col :span="!chooseOption ? 12 : 6" style="text-align: center;margin: 0px;">
+              <el-form-item label="Reenviar" style="margin: 0px;padding: 0px;">
+                <el-switch v-model="chooseOption" @change="changeOption" />
+              </el-form-item>
+            </el-col>
+            <el-col v-show="isValidateUserChoice" :span="12" style="text-align: center;margin: 0px;">
+              <el-form-item :label="$t('form.workflowActivity.filtersSearch.approve')" style="margin: 0px;padding: 0px;">
+                <el-switch v-model="isProved" />
+              </el-form-item>
+            </el-col>
+            <el-col v-show="chooseOption" :span="18" style="text-align: center;margin: 0px;padding: 0px">
+              <el-form-item :label="$t('form.workflowActivity.filtersSearch.user')" style="margin: 0px;padding: 0px;">
+                <el-select
+                  v-if="chooseOption"
+                  v-model="userId"
+                  @visible-change="findSalesReps"
+                >
+                  <el-option
+                    v-for="item in listSalesReps"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <v-md-editor
+          v-model="message"
+          left-toolbar="undo redo | image"
+          :disabled-menus="[]"
+        />
+        <el-button
+          type="primary"
+          icon="el-icon-check"
+          style="float: right;"
+          @click="sendOPeration()"
+        />
+        <el-button
+          type="info"
+          plain
+          style="float: right;margin-right: 1%;"
+          @click="clearMessage()"
+        >
+          <svg-icon icon-class="layers-clear" />
+        </el-button>
+      </el-card>
+    </el-footer>
+  </el-container>
+  <el-container v-else style="height: 100% !important;">
     <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 30% !important; width: 100% !important;' : 'height: 10%!important; width: 100% !important;'">
       <el-card :style="!collapse ? 'height: 100% !important; width: 50% !important;float: left;' : 'height: 100%;width: 50% !important;float: left;'">
         <div slot="header">
@@ -52,41 +202,6 @@
           :records-page="activityList.length"
         />
       </el-card>
-      <!-- <el-card :style="!collapse ? 'height: 100% !important; width: 50% !important;float: right;' : 'height: auto;width: 50% !important;float: right;'">
-        <div slot="header">
-          <span> {{ $t('form.workflowActivity.title') }} </span>
-          <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
-        </div>
-
-        <el-table
-          v-show="!collapse"
-          v-loading="isLoadActivity"
-          :data="activityList"
-          highlight-current-row
-          style="width: 100%;height: 70% !important;"
-          border
-          height="60% !important"
-          @current-change="handleCurrentChange"
-        >
-          <el-table-column
-            v-for="(workflowColumn) in workflowTableDefinition"
-            :key="workflowColumn.columnName"
-            :column-key="workflowColumn.columnName"
-            :label="workflowColumn.name"
-            :align="workflowColumn.isNumeric ? 'right' : 'left'"
-            :prop="workflowColumn.columnName"
-          />
-        </el-table>
-        <custom-pagination
-          v-show="!collapse"
-          :total="recordCount"
-          :current-page="currentPagePagination"
-          :container-manager="containerManagerBPList"
-          :handle-change-page="setPage"
-          :handle-size-change="handleChangeSizePage"
-          :records-page="activityList.length"
-        />
-      </el-card> -->
       <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: 100%; width: 50% !important;float: right;' : 'height: 20%; width: 50% !important;float: right;'">
         <div slot="header" class="clearfix">
           {{ $t('field.logsField') }}
@@ -107,15 +222,6 @@
 
     <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
       <el-container style="height: 100%;">
-        <!-- <el-aside v-if="!isEmptyValue(currentActivity)" id="workflow" width="70%" style="background: white;">
-          <workflow-diagram
-            v-if="!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity)"
-            :node-transition-list="workflowTranstitionsList"
-            :node-list="workflowStatesList"
-            :current-node="currentNode"
-            :workflow-logs="listProcessWorkflow"
-          />
-        </el-aside> -->
         <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
           <!-- <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: auto' : 'height: 20%'">
             <div slot="header" class="clearfix">
@@ -161,7 +267,7 @@
                 <el-switch v-model="chooseOption" @change="changeOption" />
               </el-form-item>
             </el-col>
-            <el-col v-show="!chooseOption && (currentActivity.node.action_name === 'USER_CHOICE')" :span="8" style="text-align: center;">
+            <el-col v-show="isValidateUserChoice" :span="8" style="text-align: center;">
               <el-form-item :label="$t('form.workflowActivity.filtersSearch.approve')">
                 <el-switch v-model="isProved" />
               </el-form-item>
@@ -184,7 +290,7 @@
             </el-col>
           </el-row>
         </el-form>
-        <div id="ChatEditorMessage" style="height: 180px;" />
+        <v-md-editor v-model="message" />
         <el-button
           type="primary"
           icon="el-icon-check"
@@ -209,10 +315,8 @@
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import WorkflowDiagram from '@theme/components/ADempiere/WorkflowManager/WorkflowDiagram.vue'
-import '@toast-ui/chart/dist/toastui-chart.css'
-import chart from '@toast-ui/editor-plugin-chart'
-import Editor from '@toast-ui/editor'
-import '@toast-ui/editor/dist/toastui-editor.css'
+import 'simple-m-editor/dist/simple-m-editor.css'
+
 // Constants
 import fieldsList from './fieldsList.js'
 
@@ -221,7 +325,7 @@ import { generateWorkflowDiagram } from '@/utils/ADempiere/dictionary/workflow'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
-// API
+// API Request Methods
 import {
   listSalesRepresentatives
 } from '@/api/ADempiere/window'
@@ -279,7 +383,7 @@ export default {
           isNumeric: false
         },
         {
-          columnName: 'node.description',
+https://zkfiddle.org/sample/20t2jmo/154-font-awesome-effects          columnName: 'node.description',
           name: this.$t('page.processActivity.description'),
           isNumeric: false
         }
@@ -318,8 +422,17 @@ export default {
     }
   },
   computed: {
+    isValidateUserChoice() {
+      if (!this.isEmptyValue(this.currentActivity) && !this.isEmptyValue(this.currentActivity.node) && !this.isEmptyValue(this.currentActivity.node.action_name)) {
+        if (!this.chooseOption && this.currentActivity.node.action_name === 'USER_CHOICE') {
+          return true
+        }
+      }
+      return !this.chooseOption
+      // currentActivity.node.action_name === 'USER_CHOICE'
+    },
     isStyleFooter() {
-      if (this.isMobile) return 'height: 35%;padding-left: 1%;padding-right: 1%;'
+      if (this.isMobile) return 'height: auto;padding-left: 1%;padding-right: 1%;'
       return 'height: auto;padding-bottom: 100px;padding-top: 0%;padding-left: 1%;padding-right: 1%;'
     },
     isMobile() {
@@ -379,15 +492,6 @@ export default {
     if (!this.isEmptyValue(this.currentActivity)) {
       this.generateWorkflow(this.currentActivity)
     }
-    this.chatEditor = new Editor({
-      el: document.querySelector('#ChatEditorMessage'),
-      initialValue: this.message,
-      height: '180px',
-      initialEditType: 'markdown',
-      previewStyle: 'vertical',
-      plugins: [[chart, this.chartOptions]]
-    })
-    this.chatEditor.getMarkdown()
     if (!this.isEmptyValue(this.activityList)) {
       this.handleCurrentChange(this.activityList[0])
     }
@@ -409,7 +513,9 @@ export default {
     },
     handleCurrentChange(activity) {
       this.$store.dispatch('selectedActivity', activity)
-      // this.collapse = !this.collapse
+      if (this.isMobile) {
+        this.collapse = !this.collapse
+      }
       this.collapse2 = true
       this.collapse3 = true
       this.clearData()
@@ -438,7 +544,7 @@ export default {
       this.workflowStatesList = statesList
     },
     clearMessage() {
-      this.chatEditor.setMarkdown('')
+      this.message = ''
     },
     sendOPeration() {
       if (this.isProved) {
@@ -454,7 +560,7 @@ export default {
       forwardWorkflowActivity({
         id,
         uuid,
-        message: this.chatEditor.getMarkdown(),
+        message: this.message,
         userId: this.userId
       })
         .then(response => {
@@ -474,7 +580,7 @@ export default {
       processWorkflowActivity({
         id,
         uuid,
-        message: this.chatEditor.getMarkdown(),
+        message: this.message,
         isApproved: this.isProved
       })
         .then(response => {
@@ -491,7 +597,7 @@ export default {
         })
     },
     clearData() {
-      this.chatEditor.setMarkdown('')
+      this.message = ''
       this.chooseOption = false
       this.userId = ''
       this.isProved = false
