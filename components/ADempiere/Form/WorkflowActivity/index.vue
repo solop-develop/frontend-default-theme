@@ -383,7 +383,7 @@ export default {
           isNumeric: false
         },
         {
-https://zkfiddle.org/sample/20t2jmo/154-font-awesome-effects          columnName: 'node.description',
+          columnName: 'node.description',
           name: this.$t('page.processActivity.description'),
           isNumeric: false
         }
