@@ -42,11 +42,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :body-style="{ padding: '5px' }"
             :class="isActiveCurrentTab ? 'custom-panel-field' : ''"
           >
-          <div slot="header" class="clearfix" style="text-align: center;">
-            <b>
-              {{ $t('component.sequenceSort.modifyFieldSequence') }}
-            </b>
-          </div>
+            <div slot="header" class="clearfix" style="text-align: center;">
+              <b>
+                {{ $t('component.sequenceSort.modifyFieldSequence') }}
+              </b>
+            </div>
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <draggable
                 v-model="draggableFieldsList"
