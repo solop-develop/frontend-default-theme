@@ -316,6 +316,7 @@ import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import WorkflowDiagram from '@theme/components/ADempiere/WorkflowManager/WorkflowDiagram.vue'
 import 'simple-m-editor/dist/simple-m-editor.css'
+
 // Constants
 import fieldsList from './fieldsList.js'
 
@@ -324,7 +325,7 @@ import { generateWorkflowDiagram } from '@/utils/ADempiere/dictionary/workflow'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
-// API
+// API Request Methods
 import {
   listSalesRepresentatives
 } from '@/api/ADempiere/window'
@@ -382,7 +383,7 @@ export default {
           isNumeric: false
         },
         {
-          columnName: 'node.description',
+https://zkfiddle.org/sample/20t2jmo/154-font-awesome-effects          columnName: 'node.description',
           name: this.$t('page.processActivity.description'),
           isNumeric: false
         }
