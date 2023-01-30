@@ -21,8 +21,12 @@
     :id="id"
     :class="cssClassStyle"
   /> -->
-  <v-md-preview v-if="isDisabled" :text="value" />
-  <v-md-editor v-else v-model="value" />
+  <div v-if="isDisabled" v-markdown="comments" class="output" />
+  <v-md-editor
+    v-else
+    v-model="value"
+    @change="preHandleChange"
+  />
 </template>
 
 <script>
@@ -101,42 +105,11 @@ export default {
     }
   },
 
-  watch: {
-    // value(newValue, oldValue) {
-    //   if (this.isDisabled) {
-    //     // not changed value
-    //     this.value = oldValue
-    //     this.editor.setValue(oldValue)
-    //   } else {
-    //     this.editor.setValue(newValue)
-    //   }
-    // },
-    language(langValue) {
-      this.destroyEditor()
-      this.initEditor()
-    },
-    height(heightValue) {
-      this.editor.height(heightValue)
-    },
-    isDisabled(value) {
-      this.classDisable
-      this.destroyEditor()
-      this.initEditor()
-    }
-  },
-
-  mounted() {
-    this.initEditor()
-  },
-
   destroyed() {
     this.destroyEditor()
   },
 
   methods: {
-    initEditor() {
-      console.log('epale')
-    },
     setEvents() {
       if (this.isDisabled) {
         this.removeEventSendValues()
