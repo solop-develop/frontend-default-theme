@@ -17,18 +17,24 @@
 -->
 
 <template>
-  <div
+  <!-- <div
     :id="id"
     :class="cssClassStyle"
+  /> -->
+  <div v-if="isDisabled" v-markdown="comments" class="output" />
+  <v-md-editor
+    v-else
+    v-model="value"
+    @change="preHandleChange"
   />
 </template>
 
 <script>
 // deps for editor
-import 'tui-editor/dist/tui-editor.css' // editor ui
-import 'tui-editor/dist/tui-editor-contents.css' // editor content
-import 'codemirror/lib/codemirror.css' // codemirror
-import Editor from 'tui-editor'
+// import 'tui-editor/dist/tui-editor.css' // editor ui
+// import 'tui-editor/dist/tui-editor-contents.css' // editor content
+// import 'codemirror/lib/codemirror.css' // codemirror
+// import Editor from 'tui-editor'
 
 // components and mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
@@ -99,49 +105,11 @@ export default {
     }
   },
 
-  watch: {
-    value(newValue, oldValue) {
-      if (this.isDisabled) {
-        // not changed value
-        this.value = oldValue
-        this.editor.setValue(oldValue)
-      } else {
-        this.editor.setValue(newValue)
-      }
-    },
-    language(langValue) {
-      this.destroyEditor()
-      this.initEditor()
-    },
-    height(heightValue) {
-      this.editor.height(heightValue)
-    },
-    isDisabled(value) {
-      this.classDisable
-      this.destroyEditor()
-      this.initEditor()
-    }
-  },
-
-  mounted() {
-    this.initEditor()
-  },
-
   destroyed() {
     this.destroyEditor()
   },
 
   methods: {
-    initEditor() {
-      this.editor = new Editor({
-        el: document.getElementById(this.id),
-        ...this.editorOptions
-      })
-      if (!this.isEmptyValue(this.value)) {
-        this.editor.setValue(this.value)
-      }
-      this.setEvents()
-    },
     setEvents() {
       if (this.isDisabled) {
         this.removeEventSendValues()

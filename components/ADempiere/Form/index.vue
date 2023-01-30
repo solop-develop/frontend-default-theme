@@ -86,6 +86,9 @@ export default {
         case 'org.compiere.apps.form.VPayPrint':
           form = import('@theme/components/ADempiere/Form/VPayPrint')
           break
+        case 'Issues':
+          form = import('@theme/components/ADempiere/Form/Issues')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
