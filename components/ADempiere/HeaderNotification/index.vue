@@ -12,54 +12,56 @@
       width="400"
       trigger="click"
     >
-      <el-table
-        :data="processNotifications"
-        :highlight-current-row="true"
-        @cell-click="handleCurrentChange"
-      >
-        <el-table-column prop="name" :label="$t('navbar.badge.Notifications')" />
-        <el-table-column prop="quantity" :label="$t('form.pos.tableProduct.quantity')" width="100" />
-
-        <!-- <el-table-column
-          fixed="right"
-          width="50"
+      <div class="badge-notifications-table">
+        <el-table
+          :data="processNotifications"
+          :highlight-current-row="true"
+          @cell-click="handleCurrentChange"
         >
-          <template slot="header">
-            <el-button
-              icon="el-icon-delete"
-              type="text"
-              @click.native.prevent="deleteAll()"
-            />
-          </template>
+          <el-table-column prop="name" :label="$t('navbar.badge.Notifications')" />
+          <el-table-column prop="quantity" :label="$t('form.pos.tableProduct.quantity')" width="100" />
 
-          <template slot-scope="scope">
-            <el-button
-              icon="el-icon-close"
-              type="text"
-              size="small"
-              @click.native.prevent="deleteRow(scope.$index, processNotifications)"
-            />
-          </template>
-        </el-table-column>
+          <!-- <el-table-column
+            fixed="right"
+            width="50"
+          >
+            <template slot="header">
+              <el-button
+                icon="el-icon-delete"
+                type="text"
+                @click.native.prevent="deleteAll()"
+              />
+            </template>
 
-        <el-table-column
-          width="50"
-        >
-          <template slot="header">
-            <svg-icon icon-class="tree-table" />
-          </template>
-          <template slot-scope="scope">
-            <el-button
-              type="text"
-              size="small"
-              style="color: black"
-              @click="openProcess(scope.$index, getRecordNotification)"
-            >
+            <template slot-scope="scope">
+              <el-button
+                icon="el-icon-close"
+                type="text"
+                size="small"
+                @click.native.prevent="deleteRow(scope.$index, processNotifications)"
+              />
+            </template>
+          </el-table-column>
+
+          <el-table-column
+            width="50"
+          >
+            <template slot="header">
               <svg-icon icon-class="tree-table" />
-            </el-button>
-          </template>
-        </el-table-column> -->
-      </el-table>
+            </template>
+            <template slot-scope="scope">
+              <el-button
+                type="text"
+                size="small"
+                style="color: black"
+                @click="openProcess(scope.$index, getRecordNotification)"
+              >
+                <svg-icon icon-class="tree-table" />
+              </el-button>
+            </template>
+          </el-table-column> -->
+        </el-table>
+      </div>
 
       <el-button
         slot="reference"
@@ -130,6 +132,16 @@ export default {
       this.show = false
     },
     handleCurrentChange(notification) {
+      console.log({ notification })
+      if (notification.name === 'Solicitud') {
+        // zoomIn({
+        //   uuid: notification.action_uuid
+        // })
+        this.$router.push({
+          name: 'Issues'
+        }, () => {})
+        return
+      }
       zoomIn({
         uuid: notification.action_uuid
       })
@@ -173,4 +185,12 @@ export default {
     -webkit-transform: translateY(-50%) translateX(100%);
     transform: translateY(-50%) translateX(100%);
   }
+</style>
+
+<style lang="scss">
+.badge-notifications-table{
+  .el-table tr {
+    height: 35px;
+  }
+}
 </style>
