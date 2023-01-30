@@ -21,17 +21,17 @@
     <el-container style="height: 100% !important;">
       <el-main style="overflow: auto;padding: 0px;">
         <!-- {{ !isEmptyValue(currentIssues) }} {{ !isNewIssues }} -->
-        <el-card v-if="!isNewIssues" class="box-card" style="height: 100%;">
+        <el-card v-if="!isNewIssues" class="all-request-box-card" style="height: 100%;">
           <div slot="header" class="clearfix">
             <b style="color: black; font-size: 19px;">
-              {{ 'Todas las Solicitudes' }}
+              {{ $t('issues.allRequest') }}
             </b>
             <el-button style="float: right;" plain type="success" @click="newIssues()">
-              {{ 'Crear Nueva Solicitud' }}
+              {{ $t('issues.createNewRequest') }}
               <i class="el-icon-plus" />
             </el-button>
           </div>
-          <div class="text item">
+          <!-- <div class="text item">
             <el-empty v-if="isEmptyValue(listIssues)" style="height: 600px;" />
             <div
               v-for="(issues, key) in listIssues"
@@ -117,12 +117,10 @@
                         type="text"
                         @click="SelectionIssue(issues)"
                       >
-                        <!-- @click="SelectionIssue(issues)" -->
                         {{ $t('issues.request') + ': ' + '  ' + issues.subject }}
                       </el-button>
                     </el-popover>
                   </b>
-                  <!-- <el-tag size="medium"> -->
                   <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
                     <b>
                       <svg-icon icon-class="collections" />
@@ -130,8 +128,6 @@
                     </b>
                     {{ issues.priority.name }}
                   </el-button>
-                  <!-- </el-tag> -->
-                  <!-- <el-tag effect="plain" size="medium"> -->
                   <el-button size="medium" type="info" plain style="float: right;margin-right: 10px;">
                     <b>
                       <svg-icon icon-class="label" />
@@ -139,12 +135,120 @@
                     </b>
                     {{ issues.request_type.name }}
                   </el-button>
-                  <!-- </el-tag> -->
                 </p>
-                <!-- <hr /> -->
-                <!-- <el-divider style="margin: 0px;" /> -->
               </span>
             </div>
+          </div> -->
+          <div class="table-list-request">
+            <el-table
+              :data="listIssues"
+              style="width: 100%;border: 1px solid #e6ebf5;"
+              @row-click="SelectionIssue"
+            >
+              <el-table-column style="display: flex;" label="Todas las Solicitudes">
+                <template slot-scope="scope">
+                  <!-- {{ scope.row  }} -->
+                  <b style="font-size: 30px;padding-top: 25px;padding-left: 5px;padding-right: 5px;">
+                    <svg-icon icon-class="issues" style="color: #3fb950;" />
+                  </b>
+                  <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
+                    <p style="font-size: 18px; width: 100%;">
+                      <b>
+                        <el-popover
+                          placement="top-start"
+                          trigger="hover"
+                          width="900"
+                        >
+                          <el-descriptions :column="2">
+                            <template slot="title">
+                              <b>
+                                <svg-icon icon-class="guide" />
+                                {{ scope.row.subject }}
+                              </b>
+                            </template>
+                            <template slot="extra">
+                              <b>
+                                {{ $t('issues.documentNo') }}
+                                {{ scope.row.document_no }}
+                              </b>
+                            </template>
+                            <el-descriptions-item :span="4">
+                              <template slot="label">
+                                <b>
+                                  {{ $t('issues.summary') }}
+                                </b>
+                              </template>
+                              {{ scope.row.summary }}
+                            </el-descriptions-item>
+                            <el-descriptions-item :span="4">
+                              <template slot="label">
+                                <b>
+                                  {{ $t('issues.created') }}
+                                </b>
+                              </template>
+                              {{ scope.row.user_name }}
+                            </el-descriptions-item>
+                            <el-descriptions-item style="float: right;">
+                              <template slot="label">
+                                <b style="padding-top: 10px !important;">
+                                  {{ $t('issues.priority') }}
+                                </b>
+                              </template>
+                              <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
+                                <svg-icon icon-class="collections" />
+                                {{ scope.row.priority.name }}
+                              </el-button>
+                            </el-descriptions-item>
+                            <el-descriptions-item>
+                              <template slot="label">
+                                <b style="padding-top: 10px !important;">
+                                  {{ $t('issues.typeOfRequest') }}
+                                </b>
+                              </template>
+                              <el-button size="medium" plain type="info" style="float: right;margin-right: 10px;">
+                                <svg-icon icon-class="label" />
+                                {{ scope.row.request_type.name }}
+                              </el-button>
+                            </el-descriptions-item>
+                            <el-descriptions-item>
+                              <template slot="label">
+                                <b style="padding-top: 5px !important;">
+                                  {{ $t('issues.assigned') }}
+                                </b>
+                              </template>
+                              {{ scope.row.sales_representative.name }}
+                              <el-avatar icon="el-icon-user-solid" size="small" style="margin-left: 10px;" />
+                            </el-descriptions-item>
+                          </el-descriptions>
+                          <el-button
+                            slot="reference"
+                            style="color: black;font-size: 18px;font-weight: 605 !important;"
+                            type="text"
+                            @click="SelectionIssue(scope.row)"
+                          >
+                            {{ $t('issues.request') + ': ' + '  ' + scope.row.subject }}
+                          </el-button>
+                        </el-popover>
+                      </b>
+                      <el-button type="primary" size="medium" plain style="float: right;">
+                        <b>
+                          <svg-icon icon-class="collections" style="font-size: 20px;" />
+                          {{ $t('issues.priority') + ': ' }}
+                        </b>
+                        {{ scope.row.priority.name }}
+                      </el-button>
+                      <el-button size="medium" type="info" plain style="float: right;">
+                        <b>
+                          <svg-icon icon-class="label" style="font-size: 20px;" />
+                          {{ $t('issues.typeOfRequest') + ': ' }}
+                        </b>
+                        {{ scope.row.request_type.name }}
+                      </el-button>
+                    </p>
+                  </span>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </el-card>
         <comment
@@ -162,18 +266,11 @@ import {
   defineComponent, computed, ref
 } from '@vue/composition-api'
 
-import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
-// import '@toast-ui/chart/dist/toastui-chart.css'
-// import chart from '@toast-ui/editor-plugin-chart'
-// import Editor from '@toast-ui/editor'
-// import '@toast-ui/editor/dist/toastui-editor.css'
 import Comment from './component/Comment.vue'
 // Utils and Helper Methods
-import { isEmptyValue } from '@/utils/ADempiere'
-import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
@@ -200,8 +297,6 @@ export default defineComponent({
     const filter = ref('')
     const priority = ref('')
     const typeRequest = ref('')
-    const chatEditor = ref(null)
-    const chatViwer = ref(null)
 
     // const chartOptions = {
     //   minWidth: 100,
@@ -229,46 +324,6 @@ export default defineComponent({
       return store.getters.getCurrentIssues
     })
 
-    function sendComment() {
-      if (isEmptyValue(chatEditor.value.getMarkdown())) {
-        showMessage({
-          message: lang.t('window.containerInfo.emptyNote'),
-          type: 'warning'
-        })
-        return
-      }
-      store.dispatch('createChatEntry', {
-        tableName: props.tableName,
-        recordId: props.recordId,
-        comment: chatEditor.value.getMarkdown()
-      })
-        .then(() => {
-          cleatChatEditor('')
-        })
-    }
-
-    function cleatChatEditor(params) {
-      chatEditor.value.setMarkdown(params)
-    }
-
-    function viwer(params, key) {
-      // if (isEmptyValue(params)) {
-      //   return
-      // }
-      // params.forEach(element => {
-      //   const initialValue = element.characterData
-      //   nextTick(() => {
-      //     // eslint-disable-next-line
-      //     chatViwer.value = new Editor.factory({
-      //       el: document.querySelector(`#ChatViwer${element.id}`),
-      //       viewer: true,
-      //       initialValue,
-      //       plugins: [[chart, chartOptions]]
-      //     })
-      //   })
-      // })
-    }
-
     function SelectionIssue(issues) {
       isNewIssues.value = !isNewIssues.value
       store.dispatch('changeCurrentIssues', issues)
@@ -282,11 +337,6 @@ export default defineComponent({
     return {
       message,
       listIssues,
-      sendComment,
-      chatEditor,
-      cleatChatEditor,
-      chatViwer,
-      viwer,
       translateDateByLong,
       //
       priority,
@@ -302,6 +352,21 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.all-request-box-card {
+  padding: 0px;
+  .el-card__body {
+    padding: 0px;
+  }
+}
+.table-list-request {
+  .el-table td.el-table__cell div {
+    display: flex;
+    padding: 0px;
+  }
+  .el-table thead {
+    display: none;
+  }
+}
 .p {
   margin: 0px !important;
 }
