@@ -37,7 +37,7 @@
               style="width: 100%;border: 1px solid #e6ebf5;"
               @row-click="SelectionIssue"
             >
-              <el-table-column style="display: flex;" label="Todas las Solicitudes">
+              <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
                 <template slot-scope="scope">
                   <!-- {{ scope.row  }} -->
                   <b style="font-size: 30px;padding-top: 5px;padding-left: 5px;padding-right: 5px;">
