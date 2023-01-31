@@ -20,6 +20,7 @@
   <el-button
     v-if="isWithChildsTab"
     type="text"
+    style="display: none;"
     @click="changeFullScreen"
   >
     <svg-icon :icon-class="iconFullScreen" />
