@@ -70,7 +70,7 @@
       v-shortkey="shortsKey"
       v-loading="!ordersList.isLoaded || isLoadRecord"
       :data="sortTableOrderList"
-      border
+      :border="true"
       :empty-text="$t('form.byInvoice.emptyList')"
       fit
       highlight-current-row
@@ -255,18 +255,21 @@
           <el-button
             :loading="!ordersList.isLoaded || isLoadRecord"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             size="small"
             @click="loadOrdersList();"
           />
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             size="small"
             @click="clear"
           />
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             size="small"
             @click="selectionChangeOrder"
@@ -607,12 +610,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.orders-list-footer {
-  button {
-    padding: 4px 8px;
-    font-size: 24px;
-  }
-}
-</style>

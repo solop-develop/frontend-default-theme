@@ -121,18 +121,21 @@
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             @click="searchRecordsList();"
           />
 
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="changeRecord()"
           />
@@ -569,13 +572,6 @@ export default {
       svg {
         font-size: 30px !important;
       }
-    }
-  }
-
-  .accouting-combintantions-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
     }
   }
 }

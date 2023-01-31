@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -107,6 +107,7 @@
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             size="small"
             @click="getListGeneralInfoSearch();"
@@ -114,6 +115,7 @@
 
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             size="small"
             @click="closeList(); clearValues();"
@@ -121,6 +123,7 @@
 
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="changeRecord()"
           />
@@ -131,18 +134,18 @@
 </template>
 
 <script>
-// constants
+// Constants
 import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/form/generalInfoSearch'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
-// components and mixins
+// Components and Mixins
 import fieldSearchMixin from '../mixinFieldSearch'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form'
 import { OPERATOR_LIKE } from '@/utils/ADempiere/dataUtils'
@@ -431,13 +434,6 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
-    }
-  }
-
-  .general-info-list-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
     }
   }
 }

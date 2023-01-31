@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -107,18 +107,21 @@
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             @click="searchBPartnerList();"
           />
 
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="changeBusinessPartner()"
           />
@@ -129,11 +132,11 @@
 </template>
 
 <script>
-// constants
+// Constants
 import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
 import fieldsList from './fieldsListSearch'
 
-// components and mixins
+// Components and Mixins
 import businessPartnerMixin from './mixinBusinessPartner'
 import fieldSearchMixin from '../mixinFieldSearch'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
@@ -141,7 +144,7 @@ import CustomPagination from '@theme/components/ADempiere/DataTable/Components/C
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
   // createFieldFromDefinition,
@@ -430,13 +433,6 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
-    }
-  }
-
-  .business-partners-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
     }
   }
 }
