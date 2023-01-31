@@ -86,7 +86,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -135,7 +135,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const draggableFieldsList = ref([])
+    // const draggableFieldsList = ref([])
 
     const isActiveCurrentTab = computed(() => {
       if (
@@ -165,6 +165,20 @@ export default defineComponent({
       }
 
       return []
+    })
+
+    const draggableFieldsList = computed({
+      get() {
+        return fieldsList.value.map(recordField => {
+          return {
+            ...recordField,
+            isChangeSecuence: false
+          }
+        })
+      },
+      set(fieldsList) {
+        return fieldsList
+      }
     })
 
     const sortColumnName = computed(() => {
@@ -263,12 +277,12 @@ export default defineComponent({
       }
     })
 
-    draggableFieldsList.value = fieldsList.value.map(recordField => {
-      return {
-        ...recordField,
-        isChangeSecuence: false
-      }
-    })
+    // draggableFieldsList.value = fieldsList.value.map(recordField => {
+    //   return {
+    //     ...recordField,
+    //     isChangeSecuence: false
+    //   }
+    // })
 
     const fieldsAttributesCustomization = computed(() => {
       return draggableFieldsList.value.map(fieldItem => {
