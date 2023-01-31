@@ -133,7 +133,7 @@ export default {
     },
     handleCurrentChange(notification) {
       console.log({ notification })
-      if (notification.name === 'Solicitud') {
+      if (notification.name === 'Solicitud' || notification.name === 'Request') {
         // zoomIn({
         //   uuid: notification.action_uuid
         // })
