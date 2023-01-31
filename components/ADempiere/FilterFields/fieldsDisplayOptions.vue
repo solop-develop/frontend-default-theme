@@ -409,7 +409,11 @@ export default defineComponent({
         return
       }
       if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
+        findListUser()
+        findListRol()
         isSaveNewSequence.value = true
+        currentUser.value = store.getters['user/userInfo'].id
+        currentRol.value = store.getters['user/getRole'].id
 
         return
       }
