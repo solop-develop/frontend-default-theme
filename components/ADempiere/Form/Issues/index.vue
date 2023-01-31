@@ -120,7 +120,7 @@
                             type="text"
                             @click="SelectionIssue(scope.row)"
                           >
-                            {{ '#' + scope.row.document_no + ': ' + '  ' + scope.row.subject }}
+                            {{ '#' + scope.row.document_no + '  ' + scope.row.subject }}
                           </el-button>
                         </el-popover>
                       </b>

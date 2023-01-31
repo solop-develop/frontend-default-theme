@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
+  <el-container>
     <el-main style="padding:0px; height: 100% !important;" class="tab-panel-info">
       <el-tabs
         v-model="nameTab"
@@ -120,7 +120,7 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="getListIssues" style="height: 100% !important;" class="tab-panel-info">
+        <el-tab-pane name="getListIssues" style="height: 95% !important;" class="tab-panel-info">
           <span slot="label">
             <svg-icon icon-class="guide" />
             {{ $t('window.containerInfo.issues') }}
