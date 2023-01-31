@@ -135,9 +135,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    // const draggableFieldsList = ref([])
     const draggableList = ref([])
-    // const draggableFieldsList = ref([])
 
     const isActiveCurrentTab = computed(() => {
       if (
