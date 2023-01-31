@@ -195,16 +195,17 @@ export default defineComponent({
     const activeNames = ref(['0'])
 
     const overflowHeightScrooll = computed(() => {
-      if (props.tabAttributes.isParentTab) {
-        if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
-          return ''
-        }
-        return 'max-height: 300px;'
-      }
-      if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsChildren) {
-        return ''
-      }
-      return 'max-height: 300px !important;'
+      return ''
+      // if (props.tabAttributes.isParentTab) {
+      //   if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
+      //     return ''
+      //   }
+      //   return 'max-height: 300px;'
+      // }
+      // if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsChildren) {
+      //   return ''
+      // }
+      // return 'max-height: 300px !important;'
     })
 
     const isMobile = computed(() => {
@@ -246,10 +247,10 @@ export default defineComponent({
 
     const styleFooterPanel = computed(() => {
       if (props.isChildTab) {
-        if (storedWindow.value.isFullScreenTabsChildren) {
-          return 'height: 100px !important'
-        }
-        return 'height: 20% !important'
+        // if (storedWindow.value.isFullScreenTabsChildren) {
+        return 'height: 100px !important'
+        // }
+        // return 'height: 20% !important'
       }
       return 'height: 36px'
     })
