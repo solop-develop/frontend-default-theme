@@ -132,11 +132,7 @@ export default {
       this.show = false
     },
     handleCurrentChange(notification) {
-      console.log({ notification })
       if (notification.name === 'Solicitud' || notification.name === 'Request') {
-        // zoomIn({
-        //   uuid: notification.action_uuid
-        // })
         this.$router.push({
           name: 'Issues'
         }, () => {})
