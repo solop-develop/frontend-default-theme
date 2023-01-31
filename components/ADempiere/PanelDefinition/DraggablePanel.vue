@@ -34,7 +34,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :fields-to-hidden="containerManager.getFieldsToHidden"
             :is-filter-records="isFilterRecords"
             :container-manager="containerManager"
-            :new-fields-list-secuence="draggableFieldsList"
+            :new-fields-list-secuence="draggableList"
             :fields-customization="fieldsAttributesCustomization"
           />
           <el-card
@@ -49,14 +49,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </div>
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <draggable
-                v-model="draggableFieldsList"
+                v-if="!isLoading"
+                v-model="draggableList"
                 class="board-column-content"
                 style="overflow: auto;"
                 @change="handleChange"
               >
                 <!-- {{ sortColumnName }} -->
                 <field-definition
-                  v-for="(element, key) in draggableFieldsList"
+                  v-for="(element, key) in draggableList"
                   :key="key"
                   :key-field="key"
                   :parent-uuid="parentUuid"
@@ -77,6 +78,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :is-draggable="true"
                 />
               </draggable>
+              <loading-view
+                v-else
+                key="window-loading"
+              />
             </el-row>
           </el-card>
         </div>
@@ -86,11 +91,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
 import store from '@/store'
 
 // Components and Mixins
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import draggable from 'vuedraggable'
@@ -104,7 +110,8 @@ export default defineComponent({
   components: {
     FieldDefinition,
     FilterFields,
-    draggable
+    draggable,
+    LoadingView
   },
 
   props: {
@@ -135,6 +142,9 @@ export default defineComponent({
   },
 
   setup(props) {
+    // const draggableFieldsList = ref([])
+    const draggableList = ref([])
+    const isLoading = ref(false)
     // const draggableFieldsList = ref([])
 
     const isActiveCurrentTab = computed(() => {
@@ -169,15 +179,16 @@ export default defineComponent({
 
     const draggableFieldsList = computed({
       get() {
-        return fieldsList.value.map(recordField => {
+        const list = fieldsList.value.map(recordField => {
           return {
             ...recordField,
             isChangeSecuence: false
           }
         })
+        return generateOrder(list)
       },
       set(fieldsList) {
-        return fieldsList
+        return generateOrder(fieldsList)
       }
     })
 
@@ -205,7 +216,6 @@ export default defineComponent({
     function handleChange(params) {
       const actionsList = Object.keys(params)
       const action = actionsList.at() // get property
-
       movedItem(params[action])
     }
 
@@ -214,7 +224,7 @@ export default defineComponent({
       element.isChangeSecuence = true
 
       let indexEnabledSequence = 0
-      const dataSequence = draggableFieldsList.value.map(itemSequence => {
+      const dataSequence = draggableList.value.map(itemSequence => {
         if (newIndex > oldIndex) {
           // moved to down
           if (itemSequence.uuid === element.uuid) {
@@ -239,8 +249,10 @@ export default defineComponent({
       })
 
       // always reorder
-      const sortSequence = generateOrder(dataSequence)
-      draggableFieldsList.value = sortSequence
+      // sortSequence
+      draggableList.value = generateOrder(dataSequence)
+      draggableFieldsList.value = generateOrder(dataSequence)
+      // isLoading.value = false
     }
 
     const heightPanel = computed(() => {
@@ -294,8 +306,15 @@ export default defineComponent({
       })
     })
 
+    watch(draggableFieldsList, (newValue, oldValue) => {
+      draggableList.value = newValue
+    })
+    draggableList.value = draggableFieldsList.value
+
     return {
       draggableFieldsList,
+      isLoading,
+      draggableList,
       //
       fieldsAttributesCustomization,
       fieldsList,
