@@ -49,7 +49,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </div>
             <el-row style="padding-bottom: 15px;padding-top: 15px;">
               <draggable
-                v-if="!isLoading"
                 v-model="draggableList"
                 class="board-column-content"
                 style="overflow: auto;"
@@ -78,10 +77,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :is-draggable="true"
                 />
               </draggable>
-              <loading-view
-                v-else
-                key="window-loading"
-              />
             </el-row>
           </el-card>
         </div>
@@ -96,7 +91,6 @@ import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 import store from '@/store'
 
 // Components and Mixins
-import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import draggable from 'vuedraggable'
@@ -110,8 +104,7 @@ export default defineComponent({
   components: {
     FieldDefinition,
     FilterFields,
-    draggable,
-    LoadingView
+    draggable
   },
 
   props: {
@@ -144,7 +137,6 @@ export default defineComponent({
   setup(props) {
     // const draggableFieldsList = ref([])
     const draggableList = ref([])
-    const isLoading = ref(false)
     // const draggableFieldsList = ref([])
 
     const isActiveCurrentTab = computed(() => {
@@ -252,7 +244,6 @@ export default defineComponent({
       // sortSequence
       draggableList.value = generateOrder(dataSequence)
       draggableFieldsList.value = generateOrder(dataSequence)
-      // isLoading.value = false
     }
 
     const heightPanel = computed(() => {
@@ -313,7 +304,6 @@ export default defineComponent({
 
     return {
       draggableFieldsList,
-      isLoading,
       draggableList,
       //
       fieldsAttributesCustomization,
