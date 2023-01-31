@@ -328,7 +328,7 @@ export default {
         return
       }
 
-      // add to list if no exist (with callouts)
+      // add to list if no exist (with callouts, table record)
       // const displayedValue = this.displayedValue
       // if (!isEmptyValue(displayedValue)) {
       //   // verify if exists to add (in table)
@@ -354,7 +354,7 @@ export default {
       this.getDefaultValueFromServer()
         .then(responseLookupItem => {
           // with value response update local component list
-          if (!this.isEmptyValue(responseLookupItem)) {
+          if (!this.isEmptyValue(responseLookupItem) && !this.isEmptyValue(responseLookupItem.value)) {
             this.value = responseLookupItem.value
             this.displayedValue = responseLookupItem.displayedValue
             this.uuidValue = responseLookupItem.uuid
@@ -363,13 +363,14 @@ export default {
             // https://github.com/ElemeFE/element/issues/20706
             // https://github.com/ElemeFE/element/issues/21287
             // https://github.com/ElemeFE/element/issues/21465
-            this.optionsList = []
-            this.$nextTick(() => {
-              this.optionsList = this.getStoredLookupAll
-            })
+            // this.optionsList = []
+            // this.$nextTick(() => {
+            //   this.optionsList = this.getStoredLookupAll
+            // })
           }
         })
         .finally(() => {
+          this.optionsList = this.getStoredLookupAll
           this.isLoading = false
         })
     },
