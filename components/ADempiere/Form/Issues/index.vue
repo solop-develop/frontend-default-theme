@@ -223,6 +223,7 @@ export default defineComponent({
 
     function loadIssues() {
       store.dispatch('listRequest', {})
+      store.dispatch('findListMailTemplates')
     }
 
     loadIssues()

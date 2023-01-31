@@ -227,6 +227,7 @@ export default defineComponent({
       isNewIssues.value = !isNewIssues.value
       store.dispatch('changeCurrentIssues', issues)
     }
+    store.dispatch('findListMailTemplates')
 
     return {
       message,

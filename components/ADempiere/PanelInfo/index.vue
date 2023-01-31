@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-container>
+  <el-container style="height: 100% !important;">
     <el-main style="padding:0px; height: 100% !important;" class="tab-panel-info">
       <el-tabs
         v-model="nameTab"
@@ -491,6 +491,8 @@ export default defineComponent({
         name: props.defaultOpenedTab
       })
     }
+
+    store.dispatch('findListMailTemplates')
 
     findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
 

@@ -54,7 +54,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <v-md-preview :text="summary" class="previwer-disable" style="padding: 0px" height="150px" />
                           </el-scrollbar>
                         </el-card>
-                        <v-md-editor v-else v-model="summary" :placeholder="$t('issues.summary')" height="250px" />
+                        <v-md-editor
+                          v-else
+                          v-model="summary"
+                          :placeholder="$t('issues.summary')"
+                          height="250px"
+                          left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | listMailTemplates"
+                          :toolbar="listOption"
+                          right-toolbar="sync-scroll fullscreen"
+                          mode="edit"
+                        />
                       </el-form-item>
                     </el-col>
                   </el-form>
@@ -290,7 +299,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           </el-scrollbar>
                           <!-- <div v-markdown="updateSummary" class="output" /> -->
                         </el-card>
-                        <v-md-editor v-else v-model="updateSummary" height="250px" />
+                        <v-md-editor
+                          v-else
+                          v-model="updateSummary"
+                          height="250px"
+                          left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | listMailTemplates"
+                          :toolbar="listOption"
+                          right-toolbar="sync-scroll fullscreen"
+                          mode="edit"
+                        />
                       </el-form-item>
                       <span v-if="isPanelEditquest">
                         <el-button
@@ -499,7 +516,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       <!-- <div v-markdown="commentUpdate" class="output" /> -->
                     </el-card>
                     <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
-                    <v-md-editor v-else v-model="commentUpdate" height="150px" />
+                    <v-md-editor
+                      v-else
+                      v-model="commentUpdate"
+                      height="150px"
+                      left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | listMailTemplates"
+                      :toolbar="listOption"
+                      right-toolbar="sync-scroll fullscreen"
+                      mode="edit"
+                    />
                     <el-button
                       type="primary"
                       icon="el-icon-check"
@@ -556,7 +581,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 {{ $t('issues.commentary') }}
               </b>
             </div>
-            <v-md-editor v-model="comments" :placeholder="$t('issues.addNewCommentary')" height="150px" />
+            <v-md-editor
+              v-model="comments"
+              :placeholder="$t('issues.addNewCommentary')"
+              height="150px"
+              left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | listMailTemplates"
+              right-toolbar="sync-scroll fullscreen"
+              mode="edit"
+              :toolbar="listOption"
+            />
           </el-card>
           <el-button
             type="primary"
@@ -605,13 +638,12 @@ import {
 import lang from '@/lang'
 import store from '@/store'
 
-// Components and Mixins
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 import 'simple-m-editor/dist/simple-m-editor.css'
-
+// Api
 import {
   listSalesRepresentatives,
   listRequestTypes,
@@ -659,6 +691,10 @@ export default defineComponent({
     const listIssuesTypes = ref([])
     const listStatuses = ref([])
     const listPriority = ref([])
+
+    const listOption = computed(() => {
+      return store.getters.getListMailTemplates
+    })
 
     const isNewIssues = computed({
       // getter
@@ -1002,11 +1038,6 @@ export default defineComponent({
       })
     }
 
-    function handleChange(data) {
-      console.log({ data })
-      markdownContent.value = data.htmlContent
-    }
-
     function labelDisplayChange(comment, isChange = false, isOption = false) {
       if (
         !isEmptyValue(comment.label) &&
@@ -1039,10 +1070,14 @@ export default defineComponent({
       return
     }
     function newIssues(issues) {
-      // isNewIssues.value = !isNewIssues.value
-      // store.dispatch('changeCurrentIssues', {})
       isPanelNewRequest.value = !isPanelNewRequest.value
     }
+
+    function loadListMail() {
+      store.dispatch('findListMailTemplates')
+    }
+
+    loadListMail()
 
     watch(isPanelEditIssues, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
@@ -1085,6 +1120,7 @@ export default defineComponent({
       currentStatusLabel,
       isShowTitleForm,
       isPanelNewRequest,
+      listOption,
       // Methodos
       findSalesReps,
       newIssues,
@@ -1108,10 +1144,10 @@ export default defineComponent({
       updateIssuesSummary,
       removeIssues,
       handleCommandIssues,
-      handleChange,
       exitPopover,
       labelDisplayChange,
       logDisplayLanguaje,
+      loadListMail,
       markdownContent
     }
   }
