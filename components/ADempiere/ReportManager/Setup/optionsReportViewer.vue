@@ -6,10 +6,12 @@
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
+
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
@@ -134,6 +136,7 @@
         <samp class="report-viewer-setup-footer">
           <el-button
             type="info"
+            class="button-base-icon"
             plain
             @click="clearParameters();"
           >
@@ -141,11 +144,13 @@
           </el-button>
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="handleClose()"
           />
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="runReport()"
           />
@@ -497,13 +502,6 @@ export default defineComponent({
    */
    .el-form-item__label {
     padding-bottom: 0px;
-  }
-}
-
-.report-viewer-setup-footer {
-  button {
-    padding: 4px 8px;
-    font-size: 24px;
   }
 }
 </style>

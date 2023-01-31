@@ -59,6 +59,7 @@
             <samp style="float: right; padding-top: 4px;">
               <el-button
                 type="info"
+                class="button-base-icon"
                 plain
                 @click="clearValues();"
               >
@@ -67,12 +68,14 @@
 
               <el-button
                 type="danger"
+                class="button-base-icon"
                 icon="el-icon-close"
                 @click="isShowedAdvancedQuery = false"
               />
 
               <el-button
                 type="primary"
+                class="button-base-icon"
                 icon="el-icon-check"
                 :loading="isLoadingSearch"
                 @click="searchRecords"
@@ -362,13 +365,6 @@ export default defineComponent({
 .advanced-query-title {
   button, button.container-title {
     padding: 0px !important;
-  }
-}
-
-.advanced-query-footer {
-  button {
-    padding: 4px 8px;
-    font-size: 24px;
   }
 }
 </style>

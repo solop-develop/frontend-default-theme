@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -46,18 +46,22 @@
         </el-timeline>
         <!-- </el-scrollbar> -->
       </el-main>
+
       <el-footer style="height: 30% !important;overflow: auto;">
         <div class="editor-container">
           <!-- <markdown-editor v-model="message" height="200px" /> -->
           <div id="ChatEditor" />
+
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             style="float: right;"
             @click="sendComment"
           />
           <el-button
             type="info"
+            class="button-base-icon"
             plain
             style="float: right;margin-right: 1%;"
             @click="cleatChatEditor('')"
