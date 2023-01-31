@@ -21,8 +21,8 @@
     <el-table
       id="multipleTable"
       ref="multipleTable"
-      v-loading="!getIsLoadedTabRecord"
-      border
+      v-loading="!isLoadingDataTale"
+      :border="true"
       :height="sizeViewTable"
       :row-key="keyColumn"
       reserve-selection
@@ -83,7 +83,6 @@
 <script>
 import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, watch } from '@vue/composition-api'
 
-import router from '@/router'
 import store from '@/store'
 
 // Components and Mixins
@@ -158,7 +157,9 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root, refs }) {
+  setup(props) {
+    const multipleTable = ref(null)
+
     const {
       storedWindow
     } = useFullScreenContainer({
@@ -172,16 +173,8 @@ export default defineComponent({
     const panelMain = document.getElementById('mainWindow')
     const heightSize = ref()
     const currentRowSelect = ref({})
-    const isLoadingDataTale = computed(() => {
-      if (props.containerManager && props.containerManager.isLoadedRecords) {
-        return !props.containerManager.isLoadedRecords({
-          containerUuid: props.containerUuid
-        })
-      }
-      return !isEmptyValue(props.dataTable)
-    })
 
-    const getIsLoadedTabRecord = computed(() => {
+    const isLoadingDataTale = computed(() => {
       return store.getters.getIsLoadedTabRecord({
         containerUuid: props.containerUuid
       })
@@ -225,46 +218,17 @@ export default defineComponent({
       })
     })
 
-    const sizeOption = computed(() => {
-      if (props.isShowSearch) {
-        return 1
-      }
-      return 24
-    })
-
-    const styleOption = computed(() => {
-      if (props.isShowSearch) {
-        return ''
-      }
-      return 'text-align: end; padding-right: 5px;'
-    })
-
-    const selectionsLength = computed(() => {
-      return props.containerManager.getSelection({
-        containerUuid: props.containerUuid
-      }).length
-    })
-
-    const currentPage = computed(() => {
-      if (props.containerManager.getPageNumber) {
-        return parseInt(props.containerManager.getPageNumber({
-          containerUuid: props.containerUuid
-        }), 10)
-      }
-      return 1
-    })
-
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })
 
-    const recordsLength = computed(() => {
-      if (props.containerManager.getRecordCount) {
-        return props.containerManager.getRecordCount({
+    const selectionsList = computed(() => {
+      if (props.containerManager.getSelection) {
+        return props.containerManager.getSelection({
           containerUuid: props.containerUuid
         })
       }
-      return recordsWithFilter.value.length
+      return []
     })
 
     const tabData = computed(() => {
@@ -330,6 +294,10 @@ export default defineComponent({
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
+      }
+      currentRowSelect.value = row
+      if (row.isNewRow) {
+        return
       }
 
       if (!isEmptyValue(props.parentUuid)) {
@@ -449,39 +417,6 @@ export default defineComponent({
       return field.name
     }
 
-    /**
-     * custom method to handle change page
-     */
-    function handleChangePage(pageNumber) {
-      props.containerManager.setPage({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        pageSize: store.getters.getTabPageSize({ containerUuid: props.containerUuid }),
-        pageNumber
-      })
-      const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
-      const query = isEmptyValue(props.parentUuid) ? { ...root.$route.query, page: pageNumber } : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
-      router.push({
-        name: root.$route.name,
-        query: {
-          ...query
-        }
-      }, () => {})
-    }
-
-    /**
-     * custom method to handle change size page
-     */
-
-    function handleChangeSizePage(pageSize) {
-      props.containerManager.setSizePage({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        pageSize,
-        pageNumber: 1
-      })
-    }
-
     // get table data
     const recordsWithFilter = computed(() => {
       if (props.containerManager && props.containerManager.getRecordsList) {
@@ -532,18 +467,18 @@ export default defineComponent({
      * USE ONLY MOUNTED
      */
     function toggleSelection(rows) {
-      if (rows) {
+      if (isEmptyValue(multipleTable.value)) {
+        return
+      }
+      if (!isEmptyValue(rows)) {
         rows.forEach(row => {
-          if (!isEmptyValue(refs.multipleTable)) {
-            refs.multipleTable.toggleRowSelection(row)
-          }
+          multipleTable.value.toggleRowSelection(row)
         })
       } else {
-        if (!isEmptyValue(refs.multipleTable)) {
-          refs.multipleTable.clearSelection()
-        }
+        multipleTable.value.clearSelection()
       }
     }
+
     function tableRowClassName(params) {
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (params.row.UUID === recordUuid && !isEmptyValue(props.parentUuid) && isEmptyValue(currentRowSelect.value)) {
@@ -566,11 +501,8 @@ export default defineComponent({
     function loadSelect() {
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
-        const selectionsList = props.containerManager.getSelection({
-          containerUuid: props.containerUuid
-        })
         const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList)) {
+        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList.value)) {
           const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
           props.containerManager.setSelection({
             containerUuid: props.containerUuid,
@@ -578,10 +510,10 @@ export default defineComponent({
           })
           toggleSelection([currentRow])
         }
-        // if (!isEmptyValue(selectionsList)) {
-        //   toggleSelection(selectionsList)
-        // }
-      }, 1000)
+        if (!isEmptyValue(selectionsList.value)) {
+          toggleSelection(selectionsList.value)
+        }
+      }, 100)
     }
 
     function handleCellClick(row, column, cell, event) {
@@ -621,20 +553,31 @@ export default defineComponent({
       }
     })
 
-    watch(getIsLoadedTabRecord, (newValue, oldValue) => {
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      const selectionsList = props.containerManager.getSelection({
-        containerUuid: props.containerUuid
-      })
-      if (selectionsList.length > 1) {
-        toggleSelection(selectionsList)
-        // return
-      }
-      if (newValue && !isEmptyValue(recordUuid)) {
-        const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-        if (!isEmptyValue(currentRow) & !isEmptyValue(refs.multipleTable)) {
-          refs.multipleTable.toggleRowSelection(currentRow)
+    watch(selectionsList, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue)) {
+        const row = newValue.at()
+        if (row.isNewRow) {
+          toggleSelection([row])
         }
+      }
+    })
+
+    watch(isLoadingDataTale, (newValue, oldValue) => {
+      if (selectionsList.value.length > 1) {
+        toggleSelection(selectionsList.value)
+        return
+      }
+      if (newValue) {
+        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+        let currentRow
+        if (!isEmptyValue(recordUuid)) {
+          currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+        }
+        if (isEmptyValue(currentRow)) {
+          currentRow = recordsWithFilter.value.at()
+        }
+        currentRowSelect.value = currentRow
+        toggleSelection([currentRow])
       }
     })
 
@@ -653,12 +596,10 @@ export default defineComponent({
       ) {
         heightSize.value = main.clientHeight
       }
-      // const selectionsList = props.containerManager.getSelection({
-      //   containerUuid: props.containerUuid
-      // })
-      // if (!isEmptyValue(selectionsList)) {
-      //   loadSelect()
-      // }
+
+      if (!isEmptyValue(selectionsList.value)) {
+        loadSelect()
+      }
     })
 
     onBeforeMount(() => {
@@ -674,15 +615,19 @@ export default defineComponent({
 
     onMounted(() => {
       // adjustSize()
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (props.isTableSelection) {
-        const selectionsList = props.containerManager.getSelection({
-          containerUuid: props.containerUuid
-        })
-        if (!isEmptyValue(selectionsList)) {
-          toggleSelection(selectionsList)
-        } else if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid)) {
-          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+        if (!isEmptyValue(selectionsList.value)) {
+          toggleSelection(selectionsList.value)
+        } else if (!isEmptyValue(recordsWithFilter.value)) {
+          const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+          let currentRow
+          if (!isEmptyValue(recordUuid)) {
+            currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+          }
+          if (isEmptyValue(currentRow)) {
+            currentRow = recordsWithFilter.value.at()
+          }
+          currentRowSelect.value = currentRow
           props.containerManager.setSelection({
             containerUuid: props.containerUuid,
             recordsSelected: [currentRow]
@@ -698,35 +643,28 @@ export default defineComponent({
       isChangeOptions,
       heightTable,
       heightSize,
+      multipleTable,
       // computeds
       headerList,
       isLoadingDataTale,
-      sizeOption,
-      styleOption,
       recordsWithFilter,
       currentOption,
       keyColumn,
-      recordsLength,
-      currentPage,
-      selectionsLength,
       tabData,
       defaultSize,
       sizeViewTable,
       isMobile,
       currentRowSelect,
       currentTabChildren,
-      getIsLoadedTabRecord,
+      selectionsList,
       // methods
       adjustSize,
       tableRowClassName,
       headerLabel,
-      handleChangePage,
-      handleChangeSizePage,
       handleRowClick,
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
-      loadSelect,
       handleCellClick
     }
   }
