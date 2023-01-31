@@ -504,18 +504,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 {{ $t('issues.commentary') }}
               </b>
             </div>
-            <v-md-editor v-model="comments" :placeholder="$t('issues.addNewCommentary')" />
+            <v-md-editor v-model="comments" :placeholder="$t('issues.addNewCommentary')" height="200px" />
           </el-card>
           <el-button
             type="primary"
             icon="el-icon-check"
-            style="float: right;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
+            style="float: right;margin-top: 10px;font-size: 16px;"
             @click="addNewComments()"
           />
           <el-button
             type="info"
             plain
-            style="float: right;margin-right: 1%;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
+            style="float: right;margin-right: 1%;margin-top: 10px;font-size: 16px;"
             @click="clearComments()"
           >
             <svg-icon icon-class="layers-clear" />
@@ -524,7 +524,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             v-model="commentPreview"
             :label="$t('issues.preview')"
             :border="true"
-            style="float: right;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
+            style="float: right;margin-top: 10px;font-size: 16px;"
           />
         </span>
       </el-footer>
