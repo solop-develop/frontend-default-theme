@@ -123,9 +123,8 @@
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import language from '@/lang'
-import store from '@/store'
 import router from '@/router'
+import store from '@/store'
 
 // Components and Mixins
 import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEntry.vue'
@@ -206,20 +205,6 @@ export default defineComponent({
         return ''
       }
       return 'max-height: 300px !important;'
-    })
-
-    const listAction = computed(() => {
-      return {
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabAttributes.uuid,
-        defaultActionName: language.t('actionMenu.createNewRecord'),
-        tableName: props.tabAttributes.tableName,
-        getActionList: () => {
-          return store.getters.getStoredActionsMenu({
-            containerUuid: props.tabAttributes.uuid
-          })
-        }
-      }
     })
 
     const isMobile = computed(() => {
@@ -339,10 +324,6 @@ export default defineComponent({
       return selection.length
     })
 
-    const isWithChildsTab = computed(() => {
-      return store.getters.getStoredWindow(props.parentUuid).tabsListChild
-    })
-
     const commonFilterFielsProperties = computed(() => {
       if (isShowedTableRecords.value) {
         return {
@@ -360,15 +341,9 @@ export default defineComponent({
       return tableHeaders.value.filter(fieldItem => fieldItem.isQuickEntry)
     })
 
-    function changeShowedRecords() {
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isShowedTableRecords',
-        attributeNameControl: undefined,
-        attributeValue: !tabData.value.isShowedTableRecords,
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabAttributes.uuid
-      })
-    }
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
+    })
 
     function handleChangePage(pageNumber) {
       props.containerManager.setPage({
@@ -403,8 +378,7 @@ export default defineComponent({
      * changePreviousRecord
      */
     function changePreviousRecord(recordPrevious) {
-      const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
@@ -431,8 +405,7 @@ export default defineComponent({
      * changePreviousRecord
      */
     function changeNextRecord(recordNext) {
-      const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
@@ -458,7 +431,6 @@ export default defineComponent({
     return {
       // computeds
       commonFilterFielsProperties,
-      listAction,
       recordsList,
       isShowedTableRecords,
       tableHeaders,
@@ -466,7 +438,7 @@ export default defineComponent({
       isMobile,
       currentTab,
       overflowHeightScrooll,
-      isWithChildsTab,
+      recordUuid,
       // pagination
       styleHeadPanel,
       styleFooterPanel,
@@ -480,7 +452,6 @@ export default defineComponent({
       // methods
       handleChangePage,
       handleChangeSizePage,
-      changeShowedRecords,
       changePreviousRecord,
       changeNextRecord
     }
