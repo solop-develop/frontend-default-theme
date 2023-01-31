@@ -124,14 +124,14 @@
                           </el-button>
                         </el-popover>
                       </b>
-                      <el-button type="primary" size="medium" plain style="float: right;">
+                      <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
                         <b>
                           <svg-icon icon-class="collections" style="font-size: 20px;" />
                           {{ $t('issues.priority') + ': ' }}
                         </b>
                         {{ scope.row.priority.name }}
                       </el-button>
-                      <el-button size="medium" type="info" plain style="float: right;">
+                      <el-button size="medium" type="info" plain style="float: right;margin-right: 10px;">
                         <b>
                           <svg-icon icon-class="label" style="font-size: 20px;" />
                           {{ $t('issues.typeOfRequest') + ': ' }}

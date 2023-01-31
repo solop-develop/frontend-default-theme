@@ -21,7 +21,7 @@
     <el-container style="height: 100% !important;">
       <el-main style="overflow: auto;padding: 0px;">
         <!-- {{ !isEmptyValue(currentIssues) }} {{ !isNewIssues }} -->
-        <el-card v-if="!isNewIssues" class="all-request-box-card" style="height: 90%;overflow: auto;">
+        <el-card v-if="!isNewIssues" class="all-request-box-card" style="height: 100%;overflow: auto;">
           <div slot="header" class="clearfix">
             <b style="color: black; font-size: 19px;">
               {{ $t('issues.allRequest') }}
@@ -32,19 +32,21 @@
             </el-button>
           </div>
           <div class="table-list-request">
+            <el-empty v-if="isEmptyValue(listIssues)" style="height: 600px;" />
             <el-table
+              v-else
               :data="listIssues"
-              style="width: 100%;border: 1px solid #e6ebf5;"
+              style="width: 100%;"
               @row-click="SelectionIssue"
             >
               <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
                 <template slot-scope="scope">
                   <!-- {{ scope.row  }} -->
-                  <b style="font-size: 30px;padding-top: 5px;padding-left: 5px;padding-right: 5px;">
+                  <b style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
                     <svg-icon icon-class="issues" style="color: #3fb950;" />
                   </b>
                   <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
-                    <p style="font-size: 18px; width: 100%;margin-top: 0px;margin-bottom: 0px;">
+                    <p style="font-size: 18px;width: 100%;margin-top: 5px;margin-bottom: 5px;">
                       <b>
                         <el-popover
                           placement="top-start"
@@ -114,22 +116,22 @@
                           </el-descriptions>
                           <el-button
                             slot="reference"
-                            style="color: black;font-size: 18px;font-weight: 605 !important;"
+                            style="color: black;font-size: 18px;"
                             type="text"
                             @click="SelectionIssue(scope.row)"
                           >
-                            {{ $t('issues.request') + ': ' + '  ' + scope.row.subject }}
+                            {{ '#' + scope.row.document_no + ': ' + '  ' + scope.row.subject }}
                           </el-button>
                         </el-popover>
                       </b>
-                      <el-button type="primary" size="medium" plain style="float: right;">
+                      <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
                         <b>
                           <svg-icon icon-class="collections" style="font-size: 20px;" />
                           {{ $t('issues.priority') + ': ' }}
                         </b>
                         {{ scope.row.priority.name }}
                       </el-button>
-                      <el-button size="medium" type="info" plain style="float: right;">
+                      <el-button size="medium" type="info" plain style="float: right;margin-right: 10px;">
                         <b>
                           <svg-icon icon-class="label" style="font-size: 20px;" />
                           {{ $t('issues.typeOfRequest') + ': ' }}

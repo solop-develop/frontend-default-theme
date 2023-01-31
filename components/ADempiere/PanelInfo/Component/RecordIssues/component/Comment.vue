@@ -22,13 +22,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       <el-main style="overflow: auto;padding: 0px;">
         <el-card v-if="isEmptyValue(currentIssues)" class="comments-card" style="height: auto;padding: 0px;">
           <div slot="header" class="clearfix">
+            <el-button style="float: left; margin-right: 10px;" size="mini" plain type="info" @click="SelectionIssue">
+              <i class="el-icon-arrow-left" style="font-size: 18px;" />
+            </el-button>
             <b style="color: black; font-size: 19px;">
               {{ $t('issues.newRequest') }}
             </b>
-            <el-button style="float: right;" plain type="info" @click="SelectionIssue">
+            <!-- <el-button style="float: right;" plain type="info" @click="SelectionIssue">
               {{ $t('issues.backToList') }}
               <svg-icon icon-class="undo" />
-            </el-button>
+            </el-button> -->
           </div>
           <div class="text item">
             <div style="width: 65% !important;float: left;">
@@ -54,6 +57,25 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </el-col>
                   </el-form>
                 </el-row>
+                <el-button
+                  style="float: right;margin: 10px;font-size: 18px;"
+                  :disabled="isDisabledSave"
+                  type="primary"
+                  icon="el-icon-check"
+                  @click="saveIssues()"
+                />
+                <el-button
+                  type="danger"
+                  icon="el-icon-close"
+                  style="float: right;margin: 10px;font-size: 18px;"
+                  @click="SelectionIssue"
+                />
+                <el-checkbox
+                  v-model="summaryNewPreview"
+                  :label="$t('issues.preview')"
+                  :border="true"
+                  style="float: right;margin: 10px;margin-top: 10px;margin-bottom: 0px;font-size: 18px;"
+                />
               </el-card>
             </div>
             <div style="width: 35% !important;float: right;">
@@ -61,70 +83,128 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-row>
                   <el-form label-position="top" class="form-comments">
                     <el-col :span="24" style="text-align: center;">
-                      <el-form-item style="margin-bottom: 0px;" :label="$t('issues.typeOfRequest')">
-                        <el-select
-                          v-model="currentRequestTypes"
-                          filterable
-                          @visible-change="findRequestTypes"
-                          @change="updateIssuesTypeRequest"
-                        >
-                          <el-option
-                            v-for="item in listIssuesTypes"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id"
-                          />
-                        </el-select>
-                      </el-form-item>
+                      <el-popover
+                        ref="newtypeOfRequest"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item :label="$t('issues.typeOfRequest')">
+                            <el-select
+                              v-model="currentRequestTypes"
+                              filterable
+                              @visible-change="findRequestTypes"
+                              @change="exitPopover('newtypeOfRequest')"
+                            >
+                              <el-option
+                                v-for="item in listIssuesTypes"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
+                          <b>
+                            <svg-icon icon-class="label" style="font-size: 20px;" />
+                            {{ $t('issues.typeOfRequest') + ': ' }}
+                          </b>
+                          {{ currentRequestTypesLabel.name }}
+                        </el-button>
+                      </el-popover>
                     </el-col>
                     <el-col :span="24" style="text-align: center;">
-                      <el-form-item style="margin-bottom: 0px;" :label="$t('issues.status')">
-                        <el-select
-                          v-model="currentStatus"
-                          @visible-change="findStatus"
-                        >
-                          <el-option
-                            v-for="item in listStatuses"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id"
-                          />
-                        </el-select>
-                      </el-form-item>
+                      <el-popover
+                        ref="newStatus"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item :label="$t('issues.status')">
+                            <el-select
+                              v-model="currentStatus"
+                              filterable
+                              @visible-change="findStatus"
+                              @change="exitPopover('newStatus')"
+                            >
+                              <el-option
+                                v-for="item in listStatuses"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                          <b>
+                            <svg-icon icon-class="example" style="font-size: 20px;" />
+                            {{ $t('issues.status') + ': ' }}
+                          </b>
+                          {{ currentStatusLabel.name }}
+                        </el-button>
+                      </el-popover>
                     </el-col>
                     <el-col :span="24" style="text-align: center;">
-                      <el-form-item style="margin-bottom: 0px;" :label="$t('issues.priority')">
-                        <el-select
-                          v-model="currentPriority"
-                          filterable
-                          @visible-change="findPriority"
-                          @change="updateIssuesPriority"
-                        >
-                          <el-option
-                            v-for="item in listPriority"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value"
-                          />
-                        </el-select>
-                      </el-form-item>
+                      <el-popover
+                        ref="newPriority"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item :label="$t('issues.priority')">
+                            <el-select
+                              v-model="currentPriority"
+                              filterable
+                              @visible-change="findPriority"
+                              @change="exitPopover('newPriority')"
+                            >
+                              <el-option
+                                v-for="item in listPriority"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                          <b>
+                            <svg-icon icon-class="collections" style="font-size: 20px;" />
+                            {{ $t('issues.priority') + ': ' }}
+                          </b>
+                          {{ currentPriorityLabel.name }}
+                        </el-button>
+                      </el-popover>
                     </el-col>
                     <el-col :span="24" style="text-align: center;">
-                      <el-form-item label="Agente Comercial">
-                        <el-select
-                          v-model="currentSalesReps"
-                          filterable
-                          @visible-change="findSalesReps"
-                          @change="updateIssuesSalesReps"
-                        >
-                          <el-option
-                            v-for="item in listSalesReps"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id"
-                          />
-                        </el-select>
-                      </el-form-item>
+                      <el-popover
+                        ref="newSalesReps"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item label="Agente Comercial">
+                            <el-select
+                              v-model="currentSalesReps"
+                              filterable
+                              @visible-change="findSalesReps"
+                              @change="exitPopover('newSalesReps')"
+                            >
+                              <el-option
+                                v-for="item in listSalesReps"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
+                          <b>
+                            <svg-icon icon-class="user" style="font-size: 13px !important;" />
+                            {{ $t('issues.assigned') + ': ' }}
+                          </b>
+                          {{ currentSalesRepsLabel.name }}
+                        </el-button>
+                      </el-popover>
                     </el-col>
                   </el-form>
                 </el-row>
@@ -132,21 +212,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </div>
           </div>
         </el-card>
-        <el-button
-          v-if="isEmptyValue(currentIssues)"
-          style="float: right;margin: 10px"
-          :disabled="isDisabledSave"
-          type="primary"
-          icon="el-icon-check"
-          @click="saveIssues()"
-        />
-        <el-checkbox
-          v-if="isEmptyValue(currentIssues)"
-          v-model="summaryNewPreview"
-          :label="$t('issues.preview')"
-          :border="true"
-          style="float: right;margin: 10px;margin-top: 5px;margin-bottom: 10px;"
-        />
         <el-card v-else class="comments-card" style="padding: 0px;height: auto;">
           <div slot="header" class="comments-card-clearfix">
             <span v-if="!currentIssues.isEdit">
@@ -219,13 +284,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         <el-button
                           type="primary"
                           icon="el-icon-check"
-                          style="float: right;margin-top: 5px;margin-left: 10px;margin-right: 10px;"
+                          style="float: right;margin-top: 5px;margin-left: 10px;margin-right: 10px;font-size: 18px;"
                           @click="updateIssuesSummary(currentIssues)"
                         />
                         <el-button
                           type="danger"
                           icon="el-icon-close"
-                          style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;"
+                          style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;font-size: 18px;"
                           @click="editIssues(currentIssues)"
                         />
                         <el-checkbox v-model="summaryUpdatePreview" :label="$t('issues.preview')" :border="true" style="float: right;margin-top: 5px;" />
@@ -356,10 +421,26 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               :timestamp="translateDateByLong(comment.created)"
               style="margin-left: 10px;"
             >
-              <el-card class="list-comments">
+              <span v-if="comment.issue_comment_type === 1">
+                <svg-icon icon-class="user" />
+                <b>
+                  {{ comment.user_name }}
+                </b>
+                {{ logDisplayLanguaje(true, false) }}
+                <b>
+                  {{ labelDisplayChange(comment, true) }}
+                </b>
+                <span v-show="!isEmptyValue(labelDisplayChange(comment, false, true))">
+                  {{ logDisplayLanguaje(false, true) }}
+                </span>
+                <b>
+                  {{ labelDisplayChange(comment, false, true) }}
+                </b>
+              </span>
+              <el-card v-else class="list-comments">
                 <div slot="header" class="list-comments-clearfix">
                   <span>
-                    {{ comment.user_name }} <svg-icon icon-class="user" />
+                    <svg-icon icon-class="user" /> {{ comment.user_name }}
                   </span>
                   <el-dropdown trigger="click" style="float: right" @command="handleCommand">
                     <span class="el-dropdown-link">
@@ -386,19 +467,19 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     <el-button
                       type="primary"
                       icon="el-icon-check"
-                      style="float: right;margin-top: 5px;"
+                      style="float: right;margin-top: 5px;font-size: 18px;"
                       @click="updateComment(comment)"
                     />
                     <el-button
                       type="danger"
                       icon="el-icon-close"
-                      style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;"
+                      style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;font-size: 18px;"
                       @click="comment.isEdit = !comment.isEdit"
                     />
                     <el-button
                       type="info"
                       plain
-                      style="float: right;margin-top: 5px;margin-bottom: 5px;"
+                      style="float: right;margin-top: 5px;margin-bottom: 5px;font-size: 18px;"
                       @click="commentUpdate = ''"
                     >
                       <svg-icon icon-class="layers-clear" />
@@ -428,13 +509,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           <el-button
             type="primary"
             icon="el-icon-check"
-            style="float: right;margin-top: 5px;margin-bottom: 10px;"
+            style="float: right;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
             @click="addNewComments()"
           />
           <el-button
             type="info"
             plain
-            style="float: right;margin-right: 1%;margin-top: 5px;margin-bottom: 10px;"
+            style="float: right;margin-right: 1%;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
             @click="clearComments()"
           >
             <svg-icon icon-class="layers-clear" />
@@ -443,7 +524,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             v-model="commentPreview"
             :label="$t('issues.preview')"
             :border="true"
-            style="float: right;margin-top: 5px;margin-bottom: 10px;"
+            style="float: right;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
           />
         </span>
       </el-footer>
@@ -456,7 +537,7 @@ import {
   defineComponent, computed, ref, watch
 } from '@vue/composition-api'
 
-// import lang from '@/lang'
+import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
@@ -542,6 +623,34 @@ export default defineComponent({
 
     const listComments = computed(() => {
       return store.getters.getListComments
+    })
+
+    const currentRequestTypesLabel = computed(() => {
+      if (!isEmptyValue(currentRequestTypes.value) && !isEmptyValue(listIssuesTypes.value)) {
+        return listIssuesTypes.value.find(list => list.id === currentRequestTypes.value)
+      }
+      return ''
+    })
+
+    const currentPriorityLabel = computed(() => {
+      if (!isEmptyValue(currentPriority.value) && !isEmptyValue(listPriority.value)) {
+        return listPriority.value.find(list => list.value === currentPriority.value)
+      }
+      return ''
+    })
+
+    const currentSalesRepsLabel = computed(() => {
+      if (!isEmptyValue(currentSalesReps.value) && !isEmptyValue(listSalesReps.value)) {
+        return listSalesReps.value.find(list => list.id === currentSalesReps.value)
+      }
+      return ''
+    })
+
+    const currentStatusLabel = computed(() => {
+      if (!isEmptyValue(currentStatus.value) && !isEmptyValue(listStatuses.value)) {
+        return listStatuses.value.find(list => list.id === currentStatus.value)
+      }
+      return ''
     })
 
     function findSalesReps(isVisible) {
@@ -715,6 +824,11 @@ export default defineComponent({
       refs.updatePriority.showPopper = false
     }
 
+    function exitPopover(popoverOption) {
+      if (isEmptyValue(popoverOption)) return
+      refs[popoverOption].showPopper = false
+    }
+
     function SelectionIssue(issues) {
       isNewIssues.value = !isNewIssues.value
       store.dispatch('listRequest', {
@@ -815,6 +929,38 @@ export default defineComponent({
       markdownContent.value = data.htmlContent
     }
 
+    function labelDisplayChange(comment, isChange = false, isOption = false) {
+      if (
+        !isEmptyValue(comment.label) &&
+        isChange
+      ) {
+        return comment.label
+      }
+      if (
+        !isEmptyValue(comment.new_value) &&
+        isOption
+      ) {
+        return comment.displayed_value
+      }
+      if (
+        !isEmptyValue(comment.displayed_value) &&
+        isOption
+      ) {
+        return comment.displayed_value
+      }
+      return ''
+    }
+
+    function logDisplayLanguaje(isChange = false, isOption = false) {
+      if (isChange) {
+        return lang.t('issues.change')
+      }
+      if (isOption) {
+        return lang.t('issues.to')
+      }
+      return
+    }
+
     watch(isPanelEditIssues, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         findRequestTypes(true)
@@ -848,6 +994,10 @@ export default defineComponent({
       currentIssues,
       listComments,
       isPanelEditIssues,
+      currentRequestTypesLabel,
+      currentPriorityLabel,
+      currentSalesRepsLabel,
+      currentStatusLabel,
       // Methodos
       findSalesReps,
       findRequestTypes,
@@ -871,6 +1021,9 @@ export default defineComponent({
       removeIssues,
       handleCommandIssues,
       handleChange,
+      exitPopover,
+      labelDisplayChange,
+      logDisplayLanguaje,
       markdownContent
     }
   }
@@ -904,7 +1057,7 @@ export default defineComponent({
   max-height: 220px;
 }
 .scroll-timeline {
-  max-height: 400px;
+  max-height: 380px;
 }
 .divider-vertical {
   height: auto !important;

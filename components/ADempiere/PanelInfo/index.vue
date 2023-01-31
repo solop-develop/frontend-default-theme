@@ -533,7 +533,7 @@ export default defineComponent({
 .tab-panel-info {
   height: 100% !important;
   .el-tabs--border-card > .el-tabs__content {
-    height: 96% !important;
+    height: 100% !important;
     padding-left: 5px;
     padding-right: 5px;
   }
