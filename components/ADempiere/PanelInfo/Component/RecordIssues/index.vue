@@ -140,9 +140,11 @@
             </div>
           </div> -->
           <div class="table-list-request">
+            <el-empty v-if="isEmptyValue(listIssues)" style="height: 600px;" />
             <el-table
+              v-else
               :data="listIssues"
-              style="width: 100%;border: 1px solid #e6ebf5;"
+              style="width: 100%;"
               @row-click="SelectionIssue"
             >
               <el-table-column style="display: flex;" label="Todas las Solicitudes">

@@ -70,7 +70,7 @@
       </el-tab-pane>
     </el-tabs>
 
-    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;">
+    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;z-index: 9;">
       <el-button
         type="primary"
         size="mini"
