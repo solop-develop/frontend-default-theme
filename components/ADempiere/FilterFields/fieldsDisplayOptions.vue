@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -66,6 +66,7 @@
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
+
     <el-dialog
       :title="$t('component.sequenceSort.saveNewSequence')"
       :visible.sync="isSaveNewSequence"
@@ -73,76 +74,95 @@
       <el-form :inline="true" label-position="top">
         <el-form-item>
           <template slot="label">
-            <el-radio v-model="level" :label="0" :border="true">
+            <el-radio v-model="levelType" :label="0" :border="true" @change="getAvailableUsersList(true)">
               {{ $t('form.workflowActivity.filtersSearch.user') }}
             </el-radio>
           </template>
           <el-select
             v-model="currentUser"
             :placeholder="$t('form.workflowActivity.filtersSearch.user')"
-            :disabled="level !== 0"
+            :disabled="levelType !== 0"
             filterable
-            @visible-change="findListUser"
+            @visible-change="getAvailableUsersList"
           >
             <el-option
-              v-for="item in listUser"
+              v-for="item in availableUsersList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
-            />
+            >
+              <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">
+                {{ isEmptyValue(item.value) ? item.description : item.value }}
+              </span>
+            </el-option>
           </el-select>
         </el-form-item>
+
         <el-form-item>
           <template slot="label">
-            <el-radio v-model="level" :label="1" :border="true">
+            <el-radio v-model="levelType" :label="1" :border="true" @change="getAvailableRolesList(true)">
               {{ $t('profile.role') }}
             </el-radio>
           </template>
           <el-select
-            v-model="currentRol"
+            v-model="currentRole"
             :placeholder="$t('profile.role')"
-            :disabled="level !== 1"
+            :disabled="levelType !== 1"
             filterable
-            @visible-change="findListRol"
+            @visible-change="getAvailableRolesList"
           >
             <el-option
-              v-for="item in listRol"
+              v-for="item in availableRolesList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
-            />
+            >
+              <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">
+                {{ isEmptyValue(item.value) ? item.description : item.value }}
+              </span>
+            </el-option>
           </el-select>
         </el-form-item>
+
         <el-form-item>
           <template slot="label">
-            <el-radio v-model="level" :label="2" :border="true">
+            <el-radio v-model="levelType" :label="2" :border="true" @change="getAvailableCustomizationsList(true)">
               {{ $t('component.sequenceSort.customizationlevel') }}
             </el-radio>
           </template>
           <el-select
             v-model="customizationLevel"
             :placeholder="$t('component.sequenceSort.customizationlevel')"
-            :disabled="level !== 2 "
+            :disabled="levelType !== 2 "
             filterable
-            @visible-change="findListCustomizations"
+            @visible-change="getAvailableCustomizationsList"
           >
             <el-option
-              v-for="item in listCustomizationsLevel"
+              v-for="item in availableCustomizationsLeveList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
-            />
+            >
+              <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">
+                {{ isEmptyValue(item.value) ? item.description : item.value }}
+              </span>
+            </el-option>
           </el-select>
         </el-form-item>
       </el-form>
 
       <span slot="footer" class="dialog-footer">
         <el-button
+          class="button-base-icon"
           type="danger"
           icon="el-icon-close"
           @click="close()"
         />
         <el-button
+          class="button-base-icon"
           type="primary"
           icon="el-icon-check"
           @click="saveCustomization"
@@ -153,20 +173,21 @@
 </template>
 
 <script>
+import { computed, defineComponent, nextTick, onMounted, ref, watch } from '@vue/composition-api'
+
+import store from '@/store'
+import language from '@/lang'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { showMessage } from '@/utils/ADempiere/notification'
+
+// API Request Methods
 import {
   requestListUsers,
   requestListRoles,
   requestListCustomizationsLevel
 } from '@/api/ADempiere/user-customization'
-
-import { computed, defineComponent, ref } from '@vue/composition-api'
-
-import store from '@/store'
-import language from '@/lang'
-
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'FieldsDisplayOption',
@@ -213,14 +234,23 @@ export default defineComponent({
   setup(props) {
     const isSaveNewSequence = ref(false)
 
-    const currentUser = ref('')
-    const currentRol = ref('')
-    const customizationLevel = ref('')
-    const level = ref(0)
+    const currentSessionRoleId = computed(() => {
+      return store.getters['user/getRole'].id
+    })
 
-    const listUser = ref([])
-    const listRol = ref([])
-    const listCustomizationsLevel = ref([])
+    const currentSessionUserId = computed(() => {
+      return store.getters['user/userInfo'].id
+    })
+
+    const currentUser = ref(currentSessionUserId.value)
+    const currentRole = ref(currentSessionRoleId.value)
+    const customizationLevel = ref('')
+    const levelType = ref(0)
+
+    const availableUsersList = ref([])
+    const availableRolesList = ref([])
+    const availableCustomizationsLeveList = ref([])
+
     // enabled showed optionals and mandatory fields
     const isShowFields = computed(() => {
       return props.availableFields.length > 0 &&
@@ -281,6 +311,7 @@ export default defineComponent({
       }
       return 'eye'
     }
+
     function close(params) {
       isSaveNewSequence.value = false
       const { isEditSecuence, uuid } = props.containerManager.getPanel({
@@ -297,14 +328,20 @@ export default defineComponent({
       })
     }
 
-    function findListUser(params) {
-      // if (!isVisible) {
-      //   return
-      // }
+    function getAvailableUsersList(isShowList) {
+      if (!isShowList) {
+        return
+      }
+      if (!isEmptyValue(availableUsersList.value)) {
+        return
+      }
       requestListUsers({})
         .then(response => {
           const { records } = response
-          listUser.value = records
+          availableUsersList.value = []
+          nextTick(() => {
+            availableUsersList.value = records
+          })
         })
         .catch(error => {
           showMessage({
@@ -313,14 +350,21 @@ export default defineComponent({
           })
         })
     }
-    function findListRol(params) {
-      // if (!isVisible) {
-      //   return
-      // }
+
+    function getAvailableRolesList(isShowList) {
+      if (!isShowList) {
+        return
+      }
+      if (!isEmptyValue(availableRolesList.value)) {
+        return
+      }
       requestListRoles({})
         .then(response => {
           const { records } = response
-          listRol.value = records
+          availableRolesList.value = []
+          nextTick(() => {
+            availableRolesList.value = records
+          })
         })
         .catch(error => {
           showMessage({
@@ -329,14 +373,21 @@ export default defineComponent({
           })
         })
     }
-    function findListCustomizations(params) {
-      // if (!isVisible) {
-      //   return
-      // }
+
+    function getAvailableCustomizationsList(isShowList) {
+      if (!isShowList) {
+        return
+      }
+      if (!isEmptyValue(availableCustomizationsLeveList.value)) {
+        return
+      }
       requestListCustomizationsLevel({})
         .then(response => {
           const { records } = response
-          listCustomizationsLevel.value = records
+          availableCustomizationsLeveList.value = []
+          nextTick(() => {
+            availableCustomizationsLeveList.value = records
+          })
         })
         .catch(error => {
           showMessage({
@@ -348,16 +399,16 @@ export default defineComponent({
 
     function saveCustomization() {
       let levelId
-      if (level.value === 0) {
+      if (levelType.value === 0) {
         levelId = currentUser.value
-      } else if (level.value === 1) {
-        levelId = currentRol.value
-      } else if (level.value === 2) {
+      } else if (levelType.value === 1) {
+        levelId = currentRole.value
+      } else if (levelType.value === 2) {
         levelId = customizationLevel.value
       }
       props.containerManager.applyCustomization({
         containerUuid: props.containerUuid,
-        level: level.value,
+        level: levelType.value,
         levelId,
         // levelUuid,
         fieldAttributes: props.fieldsCustomization
@@ -436,17 +487,36 @@ export default defineComponent({
       })
     }
 
+    onMounted(() => {
+      if (levelType === 0) {
+        getAvailableUsersList(true)
+      } else if (levelType === 1) {
+        getAvailableRolesList(true)
+      } else if (levelType === 2) {
+        getAvailableCustomizationsList(true)
+      }
+    })
+
+    watch(isSaveNewSequence, (newValue) => {
+      if (newValue) {
+        getAvailableUsersList(true)
+        getAvailableRolesList(true)
+      }
+    })
+
     return {
       // ref
       isSaveNewSequence,
       currentUser,
-      currentRol,
+      currentRole,
       customizationLevel,
-      level,
-      listUser,
-      listRol,
-      listCustomizationsLevel,
+      levelType,
+      availableUsersList,
+      availableRolesList,
+      availableCustomizationsLeveList,
       // computeds
+      currentSessionRoleId,
+      currentSessionUserId,
       isShowFields,
       isShowFieldsWithValue,
       isHiddenFieldsList,
@@ -459,9 +529,9 @@ export default defineComponent({
       close,
       handleCommand,
       iconColumn,
-      findListUser,
-      findListRol,
-      findListCustomizations
+      getAvailableUsersList,
+      getAvailableRolesList,
+      getAvailableCustomizationsList
     }
   }
 })
