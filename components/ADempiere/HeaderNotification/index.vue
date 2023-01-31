@@ -19,7 +19,7 @@
           @cell-click="handleCurrentChange"
         >
           <el-table-column prop="name" :label="$t('navbar.badge.Notifications')" />
-          <el-table-column prop="quantity" :label="$t('form.pos.tableProduct.quantity')" width="100" />
+          <el-table-column prop="quantity" :align="'right'" :label="$t('form.pos.tableProduct.quantity')" width="100" />
 
           <!-- <el-table-column
             fixed="right"
