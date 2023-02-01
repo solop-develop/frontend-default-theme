@@ -458,7 +458,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </i>
         </el-card>
         <br>
-        <el-scrollbar wrap-class="scroll-timeline-tab">
+        <el-scrollbar ref="scrollTimeLineTabComments" wrap-class="scroll-timeline-tab">
           <el-timeline v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest" style="padding-left: 15px;padding-right: 15px;">
             <el-timeline-item
               v-for="(comment, index) in listComments"
@@ -558,7 +558,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </el-timeline>
         </el-scrollbar>
       </el-main>
-      <el-footer style="height: 31%;padding: 0px;">
+      <el-footer style="height: auto%;padding: 0px;">
         <span v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest">
           <el-card v-if="commentPreview" shadow="never" class="is-add-new-comments">
             <!-- <v-md-preview :text="comments" height="200px" /> -->
@@ -661,7 +661,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import {
-  defineComponent, computed, ref, watch
+  defineComponent, computed, ref, watch, nextTick
 } from '@vue/composition-api'
 
 import lang from '@/lang'
@@ -716,6 +716,7 @@ export default defineComponent({
     const summaryNewPreview = ref(false)
     const isPanelNewRequest = ref(false)
     const isPanelEditRequest = ref(false)
+    const scrollTimeLineTabComments = ref(null)
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -1012,13 +1013,18 @@ export default defineComponent({
       })
     }
 
-    function addNewComments(params) {
+    function addNewComments() {
       const { id, uuid } = currentIssues.value
       store.dispatch('newComments', {
         id,
         uuid,
         result: comments.value
       })
+        .then(response => {
+          nextTick(() => {
+            scrollTimeLineTabComments.value.$refs.wrap.scrollTop = 9999999
+          })
+        })
       commentPreview.value = false
       clearComments()
     }
@@ -1144,6 +1150,7 @@ export default defineComponent({
       listIssuesTypes,
       listStatuses,
       listPriority,
+      scrollTimeLineTabComments,
       // Computed
       isNewIssues,
       isDisabledSave,

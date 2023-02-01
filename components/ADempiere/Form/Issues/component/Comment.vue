@@ -460,7 +460,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </i>
         </el-card>
         <br>
-        <el-scrollbar wrap-class="scroll-timeline-from">
+        <el-scrollbar ref="scrollTimeLineTabComments" wrap-class="scroll-timeline-from">
           <el-timeline v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest" style="padding-left: 15px;padding-right: 15px;">
             <el-timeline-item
               v-for="(comment, index) in listComments"
@@ -632,7 +632,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import {
-  defineComponent, computed, ref, watch
+  defineComponent, computed, ref, watch, nextTick
 } from '@vue/composition-api'
 
 import lang from '@/lang'
@@ -686,6 +686,7 @@ export default defineComponent({
     const summaryNewPreview = ref(false)
     const isPanelNewRequest = ref(false)
     const isPanelEditRequest = ref(false)
+    const scrollTimeLineTabComments = ref(null)
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -985,6 +986,11 @@ export default defineComponent({
         uuid,
         result: comments.value
       })
+        .then(response => {
+          nextTick(() => {
+            scrollTimeLineTabComments.value.$refs.wrap.scrollTop = 9999999
+          })
+        })
       clearComments()
       commentPreview.value = false
     }
@@ -1103,6 +1109,7 @@ export default defineComponent({
       summaryNewPreview,
       updateSummary,
       isPanelEditRequest,
+      scrollTimeLineTabComments,
       // list
       listSalesReps,
       listIssuesTypes,

@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-container style="height: 95% !important;overflow: hidden;">
+  <el-container style="height: 100% !important;overflow: hidden;">
     <el-main style="padding:0px; height: 100% !important;overflow: hidden;" class="tab-panel-info">
       <el-tabs
         v-model="nameTab"
@@ -104,7 +104,7 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="recordNotesTab" style="height: 100% !important;">
+        <el-tab-pane name="recordNotesTab" style="height: 95% !important;">
           <span slot="label">
             <svg-icon icon-class="message" />
             {{ $t('window.containerInfo.notes') }}

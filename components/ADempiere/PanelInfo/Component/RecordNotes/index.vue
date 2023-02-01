@@ -64,41 +64,40 @@
               height="150px"
               :placeholder="$t('window.containerInfo.logWorkflow.addNote')"
             />
-
-            <el-button
-              type="primary"
-              icon="el-icon-check"
-              class="button-base-icon"
-              style="float: right;margin: 10px;"
-              :disabled="isEmptyValue(message)"
-              @click="sendComment"
-            />
-            <el-button
-              type="danger"
-              icon="el-icon-close"
-              class="button-base-icon"
-              style="float: right;margin-top: 10px;"
-              @click="closeNote"
-            />
-            <el-button
-              type="info"
-              plain
-              style="float: right; margin-top: 10px;"
-              class="button-base-icon"
-              :disabled="isEmptyValue(message)"
-              @click="message = ''"
-            >
-              <svg-icon icon-class="layers-clear" />
-            </el-button>
-            <el-checkbox
-              v-model="isShowPreviwer"
-              :label="$t('issues.preview')"
-              class="button-base-icon"
-              :border="true"
-              :disabled="isEmptyValue(message)"
-              style="float: right;margin-top: 10px;"
-            />
           </div>
+          <el-button
+            type="primary"
+            icon="el-icon-check"
+            class="button-base-icon"
+            style="float: right;margin: 10px;"
+            :disabled="isEmptyValue(message)"
+            @click="sendComment"
+          />
+          <el-button
+            type="danger"
+            icon="el-icon-close"
+            class="button-base-icon"
+            style="float: right;margin-top: 10px;"
+            @click="closeNote"
+          />
+          <el-button
+            type="info"
+            plain
+            style="float: right; margin-top: 10px;"
+            class="button-base-icon"
+            :disabled="isEmptyValue(message)"
+            @click="message = ''"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+          <el-checkbox
+            v-model="isShowPreviwer"
+            :label="$t('issues.preview')"
+            class="button-base-icon"
+            :border="true"
+            :disabled="isEmptyValue(message)"
+            style="float: right;margin-top: 10px;"
+          />
         </el-card>
       </el-footer>
     </el-container>
