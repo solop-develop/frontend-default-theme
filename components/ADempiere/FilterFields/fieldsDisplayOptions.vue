@@ -159,7 +159,7 @@
           class="button-base-icon"
           type="danger"
           icon="el-icon-close"
-          @click="close()"
+          @click="closeModalDialog(); toggleDraggablePanel()"
         />
         <el-button
           class="button-base-icon"
@@ -233,6 +233,24 @@ export default defineComponent({
 
   setup(props) {
     const isSaveNewSequence = ref(false)
+
+    const isLoadingSaveCustomization = computed({
+      set(newValue) {
+        props.containerManager.changePanelAttribute({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          attributeName: 'isLoadedFieldsList',
+          attributeValue: !newValue
+        })
+      },
+      get() {
+        const { isLoadedFieldsList } = props.containerManager.getPanel({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        return !isLoadedFieldsList
+      }
+    })
 
     const currentSessionRoleId = computed(() => {
       return store.getters['user/getRole'].id
@@ -312,20 +330,17 @@ export default defineComponent({
       return 'eye'
     }
 
-    function close(params) {
-      isSaveNewSequence.value = false
-      const { isEditSecuence, uuid } = props.containerManager.getPanel({
+    function toggleDraggablePanel(isDragAndDrop = false) {
+      props.containerManager.changePanelAttribute({
         parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-      props.containerManager.changeSequence({
-        uuid,
+        containerUuid: props.containerUuid,
         attributeName: 'isEditSecuence',
-        attributeNameControl: undefined,
-        attributeValue: !isEditSecuence,
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
+        attributeValue: isDragAndDrop
       })
+    }
+
+    function closeModalDialog(params) {
+      isSaveNewSequence.value = false
     }
 
     function getAvailableUsersList(isShowList) {
@@ -406,6 +421,8 @@ export default defineComponent({
       } else if (levelType.value === 2) {
         levelId = customizationLevel.value
       }
+
+      isLoadingSaveCustomization.value = true
       props.containerManager.applyCustomization({
         containerUuid: props.containerUuid,
         level: levelType.value,
@@ -414,22 +431,18 @@ export default defineComponent({
         fieldAttributes: props.fieldsCustomization
       })
         .then(response => {
-          const { uuid } = props.containerManager.getPanel({
+          props.containerManager.changePanelAttribute({
             parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid
-          })
-          props.containerManager.changeSequence({
-            uuid,
+            containerUuid: props.containerUuid,
             attributeName: 'fieldsList',
-            attributeNameControl: undefined,
-            attributeValue: props.newFieldsListSecuence,
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid
+            attributeValue: props.newFieldsListSecuence
           })
           showMessage({
             message: response,
             type: 'success'
           })
+
+          toggleDraggablePanel(false)
         })
         .catch(error => {
           showMessage({
@@ -437,32 +450,28 @@ export default defineComponent({
             type: 'warning'
           })
         })
-      close()
+        .finally(() => {
+          isLoadingSaveCustomization.value = false
+        })
+      closeModalDialog()
     }
 
     const handleCommand = (command) => {
       let fieldsShowed = []
-      if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
-        fieldsShowed = fieldsListAvailable.value
-        const { isEditSecuence, uuid } = props.containerManager.getPanel({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-        props.containerManager.changeSequence({
-          uuid,
-          attributeName: 'isEditSecuence',
-          attributeNameControl: undefined,
-          attributeValue: !isEditSecuence,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-
-        return
-      }
-      if (command === 'secuencia' && sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
-        isSaveNewSequence.value = true
-
-        return
+      if (command === 'secuencia') {
+        if (sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
+          fieldsShowed = fieldsListAvailable.value
+          const { isEditSecuence } = props.containerManager.getPanel({
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid
+          })
+          toggleDraggablePanel(!isEditSecuence)
+          return
+        }
+        if (sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')) {
+          isSaveNewSequence.value = true
+          return
+        }
       }
       if (typeof command === 'number') {
         store.dispatch('changeSizeField', {
@@ -507,6 +516,7 @@ export default defineComponent({
     return {
       // ref
       isSaveNewSequence,
+      isLoadingSaveCustomization,
       currentUser,
       currentRole,
       customizationLevel,
@@ -526,12 +536,13 @@ export default defineComponent({
       isShowSequence,
       // methods
       saveCustomization,
-      close,
+      closeModalDialog,
       handleCommand,
       iconColumn,
       getAvailableUsersList,
       getAvailableRolesList,
-      getAvailableCustomizationsList
+      getAvailableCustomizationsList,
+      toggleDraggablePanel
     }
   }
 })
