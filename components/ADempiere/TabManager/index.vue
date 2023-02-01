@@ -665,7 +665,6 @@ export default defineComponent({
         recordId: currentRecordId.value
       })
         .then(responseReferences => {
-          console.log({ responseReferences })
           if (responseReferences > 0) {
             showIsNote.value = true
             countIsNote.value = responseReferences
