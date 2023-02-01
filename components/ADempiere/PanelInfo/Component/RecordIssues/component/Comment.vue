@@ -661,7 +661,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import {
-  defineComponent, computed, ref, watch
+  defineComponent, computed, ref, watch, nextTick
 } from '@vue/composition-api'
 
 import lang from '@/lang'
@@ -716,6 +716,7 @@ export default defineComponent({
     const summaryNewPreview = ref(false)
     const isPanelNewRequest = ref(false)
     const isPanelEditRequest = ref(false)
+    const scrollTimeLineTabComments = ref(null)
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -1020,7 +1021,9 @@ export default defineComponent({
         result: comments.value
       })
         .then(response => {
-          refs.scrollTimeLineTabComments.$refs.wrap.scrollTop = 9999999
+          nextTick(() => {
+            scrollTimeLineTabComments.value.$refs.wrap.scrollTop = 9999999
+          })
         })
       commentPreview.value = false
       clearComments()
@@ -1147,6 +1150,7 @@ export default defineComponent({
       listIssuesTypes,
       listStatuses,
       listPriority,
+      scrollTimeLineTabComments,
       // Computed
       isNewIssues,
       isDisabledSave,
