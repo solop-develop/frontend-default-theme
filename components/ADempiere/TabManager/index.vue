@@ -114,7 +114,7 @@
           <i class="el-icon-s-promotion" />
         </el-button>
       </el-badge>
-      <el-badge v-show="showChatAvailable">
+      <el-badge v-show="showChatAvailable" :value="countIsNote" class="item" type="primary">
         <el-button
           type="primary"
           size="mini"
@@ -173,7 +173,7 @@ import TabOptions from './TabOptions.vue'
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // API Request Methods
-import { requestListEntityChats } from '@/api/ADempiere/window'
+import { requestListEntityChats, existsChatsEntries } from '@/api/ADempiere/window'
 import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
 import { requestExistsReferences, requestExistsIssues } from '@/api/ADempiere/window'
 
@@ -278,6 +278,10 @@ export default defineComponent({
     const showIssues = ref(false)
 
     const countIssues = ref(0)
+
+    const showIsNote = ref(false)
+
+    const countIsNote = ref(0)
 
     const countReference = ref(0)
 
@@ -567,6 +571,7 @@ export default defineComponent({
         attachmentAvailable()
         getReferences()
         getIssues()
+        getIsNotes()
       }
     })
 
@@ -639,6 +644,35 @@ export default defineComponent({
           return
           // const { referencesList } = responseReferences
           // showReference.value = !isEmptyValue(referencesList)
+        })
+        .catch(() => {})
+    }
+
+    /**
+     * Notes
+     */
+
+    const getIsNotes = () => {
+      showIsNote.value = false
+      // if (isEmptyValue(currentTabTableName.value) ||
+      //   (isEmptyValue(currentRecordUuid.value) &&
+      //   (isEmptyValue(currentRecordId.value) || currentRecordId.value <= 0))) {
+      //   return
+      // }
+      existsChatsEntries({
+        tableName: currentTabTableName.value,
+        recordUuid: currentRecordUuid.value,
+        recordId: currentRecordId.value
+      })
+        .then(responseReferences => {
+          console.log({ responseReferences })
+          if (responseReferences > 0) {
+            showIsNote.value = true
+            countIsNote.value = responseReferences
+            return
+          }
+          showIsNote.value = false
+          return
         })
         .catch(() => {})
     }
@@ -734,6 +768,7 @@ export default defineComponent({
     attachmentAvailable()
     getReferences()
     getIssues()
+    getIsNotes()
 
     return {
       tabUuid,
@@ -747,8 +782,10 @@ export default defineComponent({
       showAttachmentAvailable,
       showReference,
       showIssues,
+      showIsNote,
       countIssues,
       countReference,
+      countIsNote,
       // computed
       isMobile,
       isDrawerWidth,
@@ -772,7 +809,8 @@ export default defineComponent({
       chatAvailable,
       attachmentAvailable,
       getReferences,
-      getIssues
+      getIssues,
+      getIsNotes
     }
   }
 
