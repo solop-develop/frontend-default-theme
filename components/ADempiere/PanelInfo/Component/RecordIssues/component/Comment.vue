@@ -237,7 +237,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         </el-card>
         <el-card v-else class="comments-card" style="padding: 0px;height: auto;">
           <div slot="header" class="comments-card-clearfix" style="height: auto;">
-            <!-- <span v-if="!isPanelEditquest"> -->
+            <!-- <span v-if="!isPanelEditRequest"> -->
             <el-button
               style="margin-right: 10px;"
               class="button-base-icon"
@@ -247,7 +247,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             >
               <i class="el-icon-arrow-left" style="font-size: 18px;" />
             </el-button>
-            <span v-if="!isPanelEditquest" style="color: black; font-size: 18px;">
+            <span v-if="!isPanelEditRequest" style="color: black; font-size: 18px;">
               {{ '#' + currentIssues.document_no }}
               {{ currentIssues.subject }}
             </span>
@@ -268,7 +268,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </el-col>
               </el-form>
             </el-row>
-            <el-dropdown v-if="!isPanelEditquest" trigger="click" style="float: right" @command="handleCommandIssues">
+            <el-dropdown v-if="!isPanelEditRequest" trigger="click" style="float: right" @command="handleCommandIssues">
               <span class="el-dropdown-link">
                 <el-button type="text" size="mini" style="color: black;">
                   <b>
@@ -281,7 +281,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-dropdown-item icon="el-icon-delete" :command="{currentIssues, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
-            <el-button v-if="!isPanelEditquest" style="float: right;margin-right: 10px;" plain type="success" @click="newIssues()">
+            <el-button v-if="!isPanelEditRequest" style="float: right;margin-right: 10px;" plain type="success" @click="newIssues()">
               {{ $t('issues.createNewRequest') }}
               <i class="el-icon-plus" />
             </el-button>
@@ -289,7 +289,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           <div id="panel-issues" style="display: flex;">
             <div id="panel-left" style="width: 70% !important;">
               <el-card class="card-summary" shadow="never" style="height: 100% !important">
-                <el-row v-if="isPanelEditquest" style="height: 100% !important">
+                <el-row v-if="isPanelEditRequest" style="height: 100% !important">
                   <el-form label-position="top">
                     <el-col :span="24">
                       <el-form-item :label="$t('issues.summary')">
@@ -308,7 +308,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           mode="edit"
                         />
                       </el-form-item>
-                      <span v-if="isPanelEditquest">
+                      <span v-if="isPanelEditRequest">
                         <el-button
                           type="primary"
                           icon="el-icon-check"
@@ -715,7 +715,7 @@ export default defineComponent({
     const summaryUpdatePreview = ref(false)
     const summaryNewPreview = ref(false)
     const isPanelNewRequest = ref(false)
-    const isPanelEditquest = ref(false)
+    const isPanelEditRequest = ref(false)
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -983,8 +983,8 @@ export default defineComponent({
     function editIssues(issues) {
       issues.isEdit = !issues.isEdit
       updateSummary.value = issues.summary
-      if (!isPanelEditquest.value) {
-        isPanelEditquest.value = !isPanelEditquest.value
+      if (!isPanelEditRequest.value) {
+        isPanelEditRequest.value = !isPanelEditRequest.value
         return
       }
       updateSummary.value = issues.summary
@@ -1138,7 +1138,7 @@ export default defineComponent({
       summaryUpdatePreview,
       summaryNewPreview,
       updateSummary,
-      isPanelEditquest,
+      isPanelEditRequest,
       listOption,
       listSalesReps,
       listIssuesTypes,
