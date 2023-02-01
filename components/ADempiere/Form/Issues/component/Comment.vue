@@ -20,7 +20,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
   <span>
     <el-container style="height: 100% !important;">
       <el-main style="overflow: auto;padding: 0px;">
-        <el-card v-if="isEmptyValue(currentIssues)" class="comments-card" style="height: auto;padding: 0px;">
+        <el-card v-if="isEmptyValue(currentIssues) || isPanelNewRequest" class="comments-card" style="height: auto;padding: 0px;">
           <div slot="header" class="clearfix">
             <el-button style="float: left; margin-right: 10px;" size="mini" plain type="info" @click="SelectionIssue">
               <i class="el-icon-arrow-left" style="font-size: 18px;" />
@@ -50,31 +50,54 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     <el-col :span="24">
                       <el-form-item style="margin-bottom: 0px;">
                         <el-card v-if="summaryNewPreview" shadow="never">
-                          <div v-markdown="summary" class="output" />
+                          <el-scrollbar wrap-class="scroll-previwer-disable">
+                            <v-md-preview :text="summary" class="previwer-disable" style="padding: 0px" height="150px" />
+                          </el-scrollbar>
                         </el-card>
-                        <v-md-editor v-else v-model="summary" :placeholder="$t('issues.summary')" height="250px" />
+                        <v-md-editor
+                          v-else
+                          v-model="summary"
+                          :placeholder="$t('issues.summary')"
+                          height="250px"
+                          left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
+                          :toolbar="listOption"
+                          right-toolbar="sync-scroll fullscreen"
+                          mode="edit"
+                        />
                       </el-form-item>
                     </el-col>
                   </el-form>
                 </el-row>
                 <el-button
-                  style="float: right;margin: 10px;font-size: 18px;"
+                  style="float: right;margin: 10px;"
                   :disabled="isDisabledSave"
                   type="primary"
                   icon="el-icon-check"
+                  class="button-base-icon"
                   @click="saveIssues()"
                 />
                 <el-button
                   type="danger"
                   icon="el-icon-close"
-                  style="float: right;margin: 10px;font-size: 18px;"
+                  style="float: right;margin-top: 10px;"
+                  class="button-base-icon"
                   @click="SelectionIssue"
                 />
+                <el-button
+                  type="info"
+                  plain
+                  style="float: right; margin-top: 10px;"
+                  class="button-base-icon"
+                  :disabled="isEmptyValue(summary)"
+                  @click="summary = ''"
+                >
+                  <svg-icon icon-class="layers-clear" />
+                </el-button>
                 <el-checkbox
                   v-model="summaryNewPreview"
                   :label="$t('issues.preview')"
                   :border="true"
-                  style="float: right;margin: 10px;margin-top: 10px;margin-bottom: 0px;font-size: 18px;"
+                  style="float: right;margin-top: 10px"
                 />
               </el-card>
             </div>
@@ -213,16 +236,22 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </div>
         </el-card>
         <el-card v-else class="comments-card" style="padding: 0px;height: auto;">
-          <div slot="header" class="comments-card-clearfix" style="height: 40px;">
-            <span v-if="!currentIssues.isEdit">
-              <el-button style="float: left; margin-right: 10px;" size="mini" plain type="info" @click="cancelEdit(currentIssues)">
-                <i class="el-icon-arrow-left" style="font-size: 18px;" />
-              </el-button>
-              <span style="color: black; font-size: 18px;">
-                {{ '#' + currentIssues.document_no }}
-                {{ currentIssues.subject }}
-              </span>
+          <div slot="header" class="comments-card-clearfix" style="height: auto;">
+            <!-- <span v-if="!isPanelEditRequest"> -->
+            <el-button
+              style="margin-right: 10px;"
+              class="button-base-icon"
+              plain
+              type="info"
+              @click="cancelEdit(currentIssues)"
+            >
+              <i class="el-icon-arrow-left" style="font-size: 18px;" />
+            </el-button>
+            <span v-if="!isPanelEditRequest" style="color: black; font-size: 18px;">
+              {{ '#' + currentIssues.document_no }}
+              {{ currentIssues.subject }}
             </span>
+            <!-- </span> -->
             <el-row v-else :gutter="20">
               <el-form label-position="top">
                 <el-col :span="4">
@@ -237,24 +266,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     <el-input v-model="currentIssues.subject" placeholder="Asunto" />
                   </el-form-item>
                 </el-col>
-                <!-- <el-col :span="8" style="margin-top: 2%;margin-bottom: 1%;">
-                  <el-button
-                    type="primary"
-                    icon="el-icon-check"
-                    style="float: right;margin-top: 5px;margin-left: 10px;margin-right: 10px;"
-                    @click="updateIssuesSummary(currentIssues)"
-                  />
-                  <el-button
-                    type="danger"
-                    icon="el-icon-close"
-                    style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;"
-                    @click="currentIssues.isEdit = !currentIssues.isEdit"
-                  />
-                  <el-checkbox v-model="summaryUpdatePreview" :label="$t('issues.preview')" :border="true" style="float: right;margin-top: 5px;" />
-                </el-col> -->
               </el-form>
             </el-row>
-            <el-dropdown v-if="!currentIssues.isEdit" trigger="click" style="float: right" @command="handleCommandIssues">
+            <el-dropdown v-if="!isPanelEditRequest" trigger="click" style="float: right" @command="handleCommandIssues">
               <span class="el-dropdown-link">
                 <el-button type="text" size="mini" style="color: black;">
                   <b>
@@ -267,40 +281,74 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-dropdown-item icon="el-icon-delete" :command="{currentIssues, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
+            <el-button v-if="!isPanelEditRequest" style="float: right;margin-right: 10px;" plain type="success" @click="newIssues()">
+              {{ $t('issues.createNewRequest') }}
+              <i class="el-icon-plus" />
+            </el-button>
           </div>
           <div id="panel-issues" style="display: flex;">
             <div id="panel-left" style="width: 70% !important;">
               <el-card class="card-summary" shadow="never" style="height: 100% !important">
-                <el-row v-if="currentIssues.isEdit" style="height: 100% !important">
+                <el-row v-if="isPanelEditRequest" style="height: 100% !important">
                   <el-form label-position="top">
                     <el-col :span="24">
                       <el-form-item :label="$t('issues.summary')">
                         <el-card v-if="summaryUpdatePreview" shadow="never">
-                          <div v-markdown="currentIssues.summary" class="output" />
+                          <el-scrollbar wrap-class="scroll-previwer-disable">
+                            <v-md-preview :text="updateSummary" class="previwer-disable" style="padding: 0px" height="150px" />
+                          </el-scrollbar>
+                          <!-- <div v-markdown="updateSummary" class="output" /> -->
                         </el-card>
-                        <v-md-editor v-else v-model="currentIssues.summary" />
+                        <v-md-editor
+                          v-else
+                          v-model="updateSummary"
+                          height="250px"
+                          left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
+                          :toolbar="listOption"
+                          right-toolbar="sync-scroll fullscreen"
+                          mode="edit"
+                        />
                       </el-form-item>
-                      <span v-if="currentIssues.isEdit">
+                      <span v-if="isPanelEditRequest">
                         <el-button
                           type="primary"
                           icon="el-icon-check"
-                          style="float: right;margin-top: 5px;margin-left: 10px;margin-right: 10px;font-size: 18px;"
+                          class="button-base-icon"
+                          style="float: right;margin: 10px;"
                           @click="updateIssuesSummary(currentIssues)"
                         />
                         <el-button
                           type="danger"
                           icon="el-icon-close"
-                          style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;font-size: 18px;"
+                          class="button-base-icon"
+                          style="float: right;margin-top: 10px;"
                           @click="editIssues(currentIssues)"
                         />
-                        <el-checkbox v-model="summaryUpdatePreview" :label="$t('issues.preview')" :border="true" style="float: right;margin-top: 5px;" />
+                        <el-button
+                          type="info"
+                          plain
+                          style="float: right; margin-top: 10px;"
+                          class="button-base-icon"
+                          :disabled="isEmptyValue(summary)"
+                          @click="updateSummary = ''"
+                        >
+                          <svg-icon icon-class="layers-clear" />
+                        </el-button>
+                        <el-checkbox
+                          v-model="summaryUpdatePreview"
+                          :label="$t('issues.preview')"
+                          class="button-base-icon"
+                          :border="true"
+                          style="float: right;margin-top: 10px;"
+                        />
                       </span>
                     </el-col>
                   </el-form>
                 </el-row>
                 <p v-else style="font-size: 14px;margin: 0px;height: 100% !important">
                   <el-scrollbar wrap-class="scroll-comments">
-                    <div v-markdown="currentIssues.summary" class="output" style="padding: 10px;" />
+                    <v-md-preview :text="currentIssues.summary" class="previwer-disable" height="200px" style="padding: 0px" />
+                    <!-- <div v-markdown="currentIssues.summary" class="output" style="padding: 10px;" /> -->
                   </el-scrollbar>
                 </p>
               </el-card>
@@ -412,8 +460,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </i>
         </el-card>
         <br>
-        <el-scrollbar wrap-class="scroll-timeline">
-          <el-timeline v-if="!isEmptyValue(currentIssues)" style="padding-left: 15px;">
+        <el-scrollbar wrap-class="scroll-timeline-from">
+          <el-timeline v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest" style="padding-left: 15px;padding-right: 15px;">
             <el-timeline-item
               v-for="(comment, index) in listComments"
               :key="index"
@@ -457,34 +505,55 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   </el-dropdown>
                 </div>
                 <div>
-                  <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" />
+                  <!-- <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" /> -->
+                  <v-md-preview v-if="!comment.isEdit" :text="comment.result" class="previwer-disable" style="padding: 0px" />
                   <span v-else>
                     <el-card v-if="commentUpdatePreview" shadow="never">
-                      <div v-markdown="commentUpdate" class="output" />
+                      <el-scrollbar wrap-class="scroll-previwer-disable">
+                        <v-md-preview :text="commentUpdate" class="previwer-disable" style="padding: 0px" height="150px" />
+                      </el-scrollbar>
+                      <!-- <v-md-preview v-if="commentUpdate" :text="comment.result" class="previwer-disable" style="padding: 0px" /> -->
+                      <!-- <div v-markdown="commentUpdate" class="output" /> -->
                     </el-card>
                     <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
-                    <v-md-editor v-else v-model="commentUpdate" />
+                    <v-md-editor
+                      v-else
+                      v-model="commentUpdate"
+                      height="150px"
+                      left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
+                      :toolbar="listOption"
+                      right-toolbar="sync-scroll fullscreen"
+                      mode="edit"
+                    />
                     <el-button
                       type="primary"
                       icon="el-icon-check"
-                      style="float: right;margin-top: 5px;font-size: 18px;"
+                      class="button-base-icon"
+                      style="float: right; margin: 10px;"
                       @click="updateComment(comment)"
                     />
                     <el-button
                       type="danger"
                       icon="el-icon-close"
-                      style="float: right;margin-right: 1%;margin-top: 5px; margin-bottom: 5px;font-size: 18px;"
+                      class="button-base-icon"
+                      style="float: right; margin-top: 10px;"
                       @click="comment.isEdit = !comment.isEdit"
                     />
                     <el-button
                       type="info"
                       plain
-                      style="float: right;margin-top: 5px;margin-bottom: 5px;font-size: 18px;"
+                      class="button-base-icon"
+                      style="float: right; margin-top: 10px;"
                       @click="commentUpdate = ''"
                     >
                       <svg-icon icon-class="layers-clear" />
                     </el-button>
-                    <el-checkbox v-model="commentUpdatePreview" :label="$t('issues.preview')" :border="true" style="float: right;margin-top: 5px;" />
+                    <el-checkbox
+                      v-model="commentUpdatePreview"
+                      :label="$t('issues.preview')"
+                      :border="true"
+                      style="float: right; margin-top: 10px;"
+                    />
                   </span>
                 </div>
               </el-card>
@@ -492,30 +561,57 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </el-timeline>
         </el-scrollbar>
       </el-main>
-      <el-footer style="height: 30%;padding: 0px;">
-        <span v-if="!isEmptyValue(currentIssues)">
+      <el-footer :style="isShowTitleForm ? 'height: 370px; padding: 0px;' : 'height: 350px; padding: 0px;'">
+        <span v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest">
           <el-card v-if="commentPreview" shadow="never" class="is-add-new-comments">
             <!-- <v-md-preview :text="comments" height="200px" /> -->
-            <div v-markdown="comments" class="output" />
+            <!-- <div v-markdown="comments" class="output" /> -->
+            <div slot="header">
+              <b>
+                {{ $t('issues.preview') }}
+              </b>
+            </div>
+            <el-scrollbar wrap-class="scroll-previwer-disable">
+              <v-md-preview :text="comments" class="previwer-disable" style="padding: 0px" height="150px" />
+            </el-scrollbar>
           </el-card>
-          <el-card v-else shadow="never" class="is-add-new-comments">
+          <el-card v-else shadow="never" class="is-add-new-comments" style="padding: 0px;">
             <div slot="header">
               <b>
                 {{ $t('issues.commentary') }}
               </b>
             </div>
-            <v-md-editor v-model="comments" :placeholder="$t('issues.addNewCommentary')" />
+            <v-md-editor
+              v-model="comments"
+              :placeholder="$t('issues.addNewCommentary')"
+              height="150px"
+              left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
+              right-toolbar="sync-scroll fullscreen"
+              mode="edit"
+              :toolbar="listOption"
+            />
           </el-card>
           <el-button
             type="primary"
             icon="el-icon-check"
-            style="float: right;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
+            class="button-base-icon"
+            style="float: right; margin: 10px;"
+            :disabled="isEmptyValue(comments)"
             @click="addNewComments()"
+          />
+          <el-button
+            type="danger"
+            icon="el-icon-close"
+            style="float: right;margin-top: 10px;"
+            class="button-base-icon"
+            @click="cancelEdit(currentIssues)"
           />
           <el-button
             type="info"
             plain
-            style="float: right;margin-right: 1%;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
+            style="float: right; margin-top: 10px;"
+            class="button-base-icon"
+            :disabled="isEmptyValue(comments)"
             @click="clearComments()"
           >
             <svg-icon icon-class="layers-clear" />
@@ -524,7 +620,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             v-model="commentPreview"
             :label="$t('issues.preview')"
             :border="true"
-            style="float: right;margin-top: 5px;margin-bottom: 10px;font-size: 18px;"
+            style="float: right; margin-top: 10px;"
+            class="button-base-icon"
+            :disabled="isEmptyValue(comments)"
           />
         </span>
       </el-footer>
@@ -540,13 +638,12 @@ import {
 import lang from '@/lang'
 import store from '@/store'
 
-// Components and Mixins
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 import 'simple-m-editor/dist/simple-m-editor.css'
-
+// Api
 import {
   listSalesRepresentatives,
   listRequestTypes,
@@ -579,6 +676,7 @@ export default defineComponent({
     const currentStatus = ref('')
     const currentPriority = ref('')
     const summary = ref('')
+    const updateSummary = ref('')
     const comments = ref('')
     const commentUpdate = ref('')
     const markdownContent = ref('')
@@ -586,11 +684,17 @@ export default defineComponent({
     const commentPreview = ref(false)
     const summaryUpdatePreview = ref(false)
     const summaryNewPreview = ref(false)
+    const isPanelNewRequest = ref(false)
+    const isPanelEditRequest = ref(false)
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
     const listStatuses = ref([])
     const listPriority = ref([])
+
+    const listOption = computed(() => {
+      return store.getters.getListMailTemplates
+    })
 
     const isNewIssues = computed({
       // getter
@@ -614,6 +718,10 @@ export default defineComponent({
 
     const currentIssues = computed(() => {
       return store.getters.getCurrentIssues
+    })
+
+    const isShowTitleForm = computed(() => {
+      return store.getters.getIsShowTitleForm
     })
 
     const isPanelEditIssues = computed(() => {
@@ -724,6 +832,7 @@ export default defineComponent({
     }
 
     function saveIssues() {
+      summaryNewPreview.value = false
       store.dispatch('newIssues', {
         tableName,
         recordId,
@@ -786,14 +895,13 @@ export default defineComponent({
       const {
         id,
         uuid,
-        subject,
-        summary
+        subject
       } = currentIssues.value
       store.dispatch('editIssues', {
         id,
         uuid,
         subject,
-        summary,
+        summary: updateSummary.value,
         requestTypeId: currentIssues.value.request_type.id,
         requestTypeUuid: currentIssues.value.request_type.uuid,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
@@ -830,6 +938,10 @@ export default defineComponent({
     }
 
     function SelectionIssue(issues) {
+      if (isPanelNewRequest.value) {
+        isPanelNewRequest.value = !isPanelNewRequest.value
+        return
+      }
       isNewIssues.value = !isNewIssues.value
       store.dispatch('listRequest', {
         tableName,
@@ -840,6 +952,8 @@ export default defineComponent({
 
     function editIssues(issues) {
       issues.isEdit = !issues.isEdit
+      isPanelEditRequest.value = !isPanelEditRequest.value
+      updateSummary.value = issues.summary
       store.dispatch('listRequest', {
         tableName,
         recordId
@@ -872,6 +986,7 @@ export default defineComponent({
         result: comments.value
       })
       clearComments()
+      commentPreview.value = false
     }
 
     function clearComments() {
@@ -889,7 +1004,6 @@ export default defineComponent({
 
     function handleCommandIssues(command) {
       const { currentIssues, option } = command
-      console.log({ currentIssues, option })
       if (option === 'delete') {
         removeIssues(currentIssues)
         return
@@ -924,11 +1038,6 @@ export default defineComponent({
       })
     }
 
-    function handleChange(data) {
-      console.log({ data })
-      markdownContent.value = data.htmlContent
-    }
-
     function labelDisplayChange(comment, isChange = false, isOption = false) {
       if (
         !isEmptyValue(comment.label) &&
@@ -960,6 +1069,15 @@ export default defineComponent({
       }
       return
     }
+    function newIssues(issues) {
+      isPanelNewRequest.value = !isPanelNewRequest.value
+    }
+
+    function loadListMail() {
+      store.dispatch('findListMailTemplates')
+    }
+
+    loadListMail()
 
     watch(isPanelEditIssues, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
@@ -983,6 +1101,8 @@ export default defineComponent({
       commentPreview,
       summaryUpdatePreview,
       summaryNewPreview,
+      updateSummary,
+      isPanelEditRequest,
       // list
       listSalesReps,
       listIssuesTypes,
@@ -998,8 +1118,12 @@ export default defineComponent({
       currentPriorityLabel,
       currentSalesRepsLabel,
       currentStatusLabel,
+      isShowTitleForm,
+      isPanelNewRequest,
+      listOption,
       // Methodos
       findSalesReps,
+      newIssues,
       findRequestTypes,
       findStatus,
       findPriority,
@@ -1020,10 +1144,10 @@ export default defineComponent({
       updateIssuesSummary,
       removeIssues,
       handleCommandIssues,
-      handleChange,
       exitPopover,
       labelDisplayChange,
       logDisplayLanguaje,
+      loadListMail,
       markdownContent
     }
   }
@@ -1056,8 +1180,11 @@ export default defineComponent({
 .scroll-comments {
   max-height: 220px;
 }
-.scroll-timeline {
-  max-height: 400px;
+.scroll-timeline-from {
+  max-height: 280px;
+}
+.scroll-previwer-disable {
+  max-height: 160px;
 }
 .divider-vertical {
   height: auto !important;
@@ -1078,16 +1205,10 @@ export default defineComponent({
   padding: 0px;
 }
 .is-add-new-comments {
-  .is-add-new-comments .el-card__header {
-    padding-top: 5px;
-    padding-right: 0px;
-    padding-bottom: 5px;
-    padding-left: 0px;
-  }
   .el-card__header{
-    padding-top: 5px;
+    padding-top: 10px;
     padding-right: 0px;
-    padding-bottom: 5px;
+    padding-bottom: 10px;
     padding-left: 10px;
   }
   .el-card__body {
@@ -1175,5 +1296,10 @@ export default defineComponent({
   border: 1px solid;
   border-radius: 4px;
   border: 1px solid #36a3f7;
+}
+.previwer-disable {
+  .github-markdown-body {
+    padding: 10px;
+  }
 }
 </style>

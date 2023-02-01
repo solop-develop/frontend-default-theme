@@ -120,7 +120,7 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="getListIssues" style="height: 100% !important;" class="tab-panel-info">
+        <el-tab-pane name="getListIssues" style="height: 95% !important;" class="tab-panel-info">
           <span slot="label">
             <svg-icon icon-class="guide" />
             {{ $t('window.containerInfo.issues') }}
@@ -491,6 +491,8 @@ export default defineComponent({
         name: props.defaultOpenedTab
       })
     }
+
+    store.dispatch('findListMailTemplates')
 
     findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
 
