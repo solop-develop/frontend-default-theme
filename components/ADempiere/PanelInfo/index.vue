@@ -17,8 +17,8 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
-    <el-main style="padding:0px; height: 100% !important;" class="tab-panel-info">
+  <el-container style="height: 95% !important;overflow: hidden;">
+    <el-main style="padding:0px; height: 100% !important;overflow: hidden;" class="tab-panel-info">
       <el-tabs
         v-model="nameTab"
         type="border-card"
