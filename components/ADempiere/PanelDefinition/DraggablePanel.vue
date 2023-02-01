@@ -56,7 +56,6 @@
                 style="overflow: auto;"
                 @change="handleChange"
               >
-                <!-- {{ sortColumnName }} -->
                 <field-definition
                   v-for="(element, key) in draggableList"
                   :key="key"
@@ -99,6 +98,7 @@ import draggable from 'vuedraggable'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { sortFields } from '@/utils/ADempiere/dictionary/panel'
 
 export default defineComponent({
   name: 'DraggablePanel',
@@ -184,11 +184,19 @@ export default defineComponent({
             ...recordField,
             isChangeSecuence: false
           }
+        }).filter(fieldItem => {
+          return props.containerManager.isDisplayedField(fieldItem)
         })
-        return generateOrder(list)
+        return sortFields({
+          fieldsList: list,
+          orderBy: sortColumnName.value
+        })
       },
-      set(fieldsList) {
-        return generateOrder(fieldsList)
+      set(newFieldsList) {
+        return sortFields({
+          fieldsList: newFieldsList,
+          orderBy: sortColumnName.value
+        })
       }
     })
 
@@ -206,12 +214,6 @@ export default defineComponent({
       }
       return 'hover'
     })
-
-    function generateOrder(arrayToSort, orderBy = sortColumnName.value) {
-      return arrayToSort.sort((itemA, itemB) => {
-        return itemA[orderBy] - itemB[orderBy]
-      })
-    }
 
     function handleChange(params) {
       const actionsList = Object.keys(params)
@@ -250,8 +252,12 @@ export default defineComponent({
 
       // always reorder
       // sortSequence
-      draggableList.value = generateOrder(dataSequence)
-      draggableFieldsList.value = generateOrder(dataSequence)
+      const sortedFieldsList = sortFields({
+        fieldsList: dataSequence,
+        orderBy: orderColumn
+      })
+      draggableList.value = sortedFieldsList
+      draggableFieldsList.value = sortedFieldsList
     }
 
     const heightPanel = computed(() => {
@@ -355,7 +361,6 @@ export default defineComponent({
   overflow-x: hidden;
 }
 </style>
-
 <style scoped>
 .custom-panel-field {
   margin: 1px;
@@ -367,7 +372,6 @@ export default defineComponent({
   border: 1px solid #36a3f7;
 }
 </style>
-
 <style lang="scss">
 .el-col {
   .sortable-chosen {
