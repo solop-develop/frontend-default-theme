@@ -497,8 +497,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       </el-button>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item icon="el-icon-edit" :command="{comment, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
-                      <el-dropdown-item icon="el-icon-delete" :command="{comment, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
+                      <el-dropdown-item icon="el-icon-edit" :disabled="validateUser(comment)" :command="{comment, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
+                      <el-dropdown-item icon="el-icon-delete" :disabled="validateUser(comment)" :command="{comment, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>
                 </div>
@@ -762,6 +762,10 @@ export default defineComponent({
 
     const listComments = computed(() => {
       return store.getters.getListComments
+    })
+
+    const userId = computed(() => {
+      return store.getters['user/userInfo'].id
     })
 
     const currentRequestTypesLabel = computed(() => {
@@ -1119,6 +1123,10 @@ export default defineComponent({
       store.dispatch('findListMailTemplates')
     }
 
+    function validateUser(comment) {
+      return userId.value !== comment.user_id
+    }
+
     loadListMail()
 
     watch(isPanelEditIssues, (newValue, oldValue) => {
@@ -1164,6 +1172,7 @@ export default defineComponent({
       isShowTitleForm,
       isPanelNewRequest,
       // Methodos
+      validateUser,
       findSalesReps,
       newIssues,
       findRequestTypes,
