@@ -59,10 +59,12 @@
 <script>
 import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
+import router from '@/router'
 import store from '@/store'
 
 // API Request Methods
 import { requestListTreeNodes } from '@/api/ADempiere/user-interface/component/tree-trab'
+import { getEntity } from '@/api/ADempiere/user-interface/persistence'
 
 // Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
@@ -72,6 +74,7 @@ import StandardPanel from '@theme/components/ADempiere/PanelDefinition/StandardP
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { convertObjectToKeyValue } from '@/utils/ADempiere/valueFormat'
 
 /**
  * Order or sequence panel based on the functionality of the `org.compiere.grid.VSortTab`
@@ -167,11 +170,96 @@ export default defineComponent({
       setRecord(nodeData.record_uuid)
     }
 
+    async function getRowValues(recordUuid) {
+      const { parentUuid, containerUuid } = props
+      let row = store.getters.getTabRowData({
+        containerUuid,
+        recordUuid
+      })
+
+      if (isEmptyValue(row)) {
+        row = await getEntity({
+          tabUuid: containerUuid,
+          recordUuid
+        }).then(response => {
+          return response.attributes
+        })
+      }
+
+      const currentRoute = router.app._route
+      const defaultValues = store.getters.getParsedDefaultValues({
+        parentUuid,
+        containerUuid,
+        isSOTrxMenu: currentRoute.meta.isSalesTransaction,
+        formatToReturn: 'object'
+      })
+
+      const attributes = convertObjectToKeyValue({
+        object: Object.assign(defaultValues, row)
+      })
+
+      store.dispatch('notifyPanelChange', {
+        parentUuid,
+        containerUuid,
+        attributes
+        // isOverWriteParent: tabDefinition.isParentTab
+      })
+
+      return row
+    }
+
     function setRecord(recordUuid) {
+      /*
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         recordUuid
+      })
+      */
+      customSeekRecord(recordUuid)
+    }
+
+    function customSeekRecord(recordUuid) {
+      const { parentUuid, containerUuid } = props
+      const row = getRowValues(recordUuid)
+
+      const tabDefinition = store.getters.getStoredTab(parentUuid, containerUuid)
+
+      const fieldsList = store.getters.getStoredFieldsFromTab(parentUuid, containerUuid)
+
+      // clear old values
+      store.dispatch('clearPersistenceQueue', {
+        containerUuid,
+        recordUuid: row[UUID]
+      }, {
+        root: true
+      })
+
+      // active logics with set records values
+      fieldsList.forEach(field => {
+        // change Dependents
+        store.dispatch('changeDependentFieldsList', {
+          field,
+          fieldsList,
+          containerManager: props.containerManager,
+          isGetDefaultValue: false
+        })
+      })
+
+      // update records and logics on child tabs
+      tabDefinition.childTabs.filter(tabItem => {
+        // get loaded tabs with records
+        return store.getters.getIsLoadedTabRecord({
+          containerUuid: tabItem.uuid
+        })
+      }).forEach(tabItem => {
+        // if loaded data refresh this data
+        // TODO: Verify with get one entity, not get all list
+        store.dispatch('getEntities', {
+          parentUuid,
+          containerUuid: tabItem.uuid,
+          pageNumber: 1 // reload with first page
+        })
       })
     }
 
