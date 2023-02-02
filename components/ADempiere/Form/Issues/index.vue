@@ -41,10 +41,20 @@
             >
               <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
                 <template slot-scope="scope">
-                  <!-- {{ scope.row  }} -->
-                  <b style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
-                    <svg-icon icon-class="issues" :style="dueTypeColor(scope.row)" />
-                  </b>
+                  <el-popover
+                    placement="top-start"
+                    trigger="hover"
+                  >
+                    <b>
+                      {{ $t('issues.expirationType') }}
+                    </b>
+                    <el-tag :style="dueTypeColor(scope.row)">
+                      {{ scope.row.due_type.name }}
+                    </el-tag>
+                    <b slot="reference" style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
+                      <svg-icon icon-class="issues" :style="dueTypeColor(scope.row)" />
+                    </b>
+                  </el-popover>
 
                   <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
                     <p style="font-size: 18px;width: 100%;margin-top: 5px;margin-bottom: 5px;">
@@ -215,7 +225,7 @@ export default defineComponent({
     function dueTypeColor(issue) {
       const { due_type } = issue
       const { value } = due_type
-
+      const margin = '10px 0px 0px 0px'
       let color = '#3fb950'
       if (value === '5') {
         color = 'orange'
@@ -223,7 +233,8 @@ export default defineComponent({
         color = '#ff2121'
       }
       return {
-        color
+        color,
+        margin
       }
     }
 
