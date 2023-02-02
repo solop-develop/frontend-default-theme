@@ -173,9 +173,9 @@ import TabOptions from './TabOptions.vue'
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // API Request Methods
-import { requestListEntityChats, existsChatsEntries } from '@/api/ADempiere/window'
+import { requestListEntityChats, existsChatsEntries, requestExistsReferences } from '@/api/ADempiere/window'
 import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
-import { requestExistsReferences, requestExistsIssues } from '@/api/ADempiere/window'
+import { requestExistsIssues } from '@/api/ADempiere/user-interface/component/issue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
