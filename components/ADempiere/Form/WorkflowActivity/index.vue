@@ -334,7 +334,7 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 // API Request Methods
 import {
   listSalesRepresentatives
-} from '@/api/ADempiere/window'
+} from '@/api/ADempiere/user-interface/component/issue'
 import {
   processWorkflowActivity,
   forwardWorkflowActivity

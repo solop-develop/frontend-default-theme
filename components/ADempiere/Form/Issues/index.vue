@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -37,14 +37,15 @@
               v-else
               :data="listIssues"
               style="width: 100%;"
-              @row-click="SelectionIssue"
+              @row-click="selectIssue"
             >
               <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
                 <template slot-scope="scope">
                   <!-- {{ scope.row  }} -->
                   <b style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
-                    <svg-icon icon-class="issues" style="color: #3fb950;" />
+                    <svg-icon icon-class="issues" :style="dueTypeColor(scope.row)" />
                   </b>
+
                   <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
                     <p style="font-size: 18px;width: 100%;margin-top: 5px;margin-bottom: 5px;">
                       <b>
@@ -118,7 +119,7 @@
                             slot="reference"
                             style="color: black;font-size: 18px;"
                             type="text"
-                            @click="SelectionIssue(scope.row)"
+                            @click="selectIssue(scope.row)"
                           >
                             {{ '#' + scope.row.document_no + '  ' + scope.row.subject }}
                           </el-button>
@@ -211,14 +212,29 @@ export default defineComponent({
       return store.getters.getCurrentIssues
     })
 
-    function SelectionIssue(issues) {
-      isNewIssues.value = !isNewIssues.value
-      store.dispatch('changeCurrentIssues', issues)
+    function dueTypeColor(issue) {
+      const { due_type } = issue
+      const { value } = due_type
+
+      let color = '#3fb950'
+      if (value === '5') {
+        color = 'orange'
+      } else if (value === '3') {
+        color = '#ff2121'
+      }
+      return {
+        color
+      }
     }
 
-    function newIssues(issues) {
+    function selectIssue(issue) {
       isNewIssues.value = !isNewIssues.value
-      store.dispatch('changeCurrentIssues', issues)
+      store.dispatch('changeCurrentIssues', issue)
+    }
+
+    function newIssues(issue) {
+      isNewIssues.value = !isNewIssues.value
+      store.dispatch('changeCurrentIssues', issue)
     }
 
     function loadIssues() {
@@ -238,7 +254,9 @@ export default defineComponent({
       filter,
       isNewIssues,
       currentIssues,
-      SelectionIssue,
+      // methods
+      dueTypeColor,
+      selectIssue,
       newIssues,
       loadIssues
     }

@@ -668,18 +668,20 @@ import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
+import 'simple-m-editor/dist/simple-m-editor.css'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
-import 'simple-m-editor/dist/simple-m-editor.css'
-// Api
+
+// Api Request Methods
 import {
   listSalesRepresentatives,
   listRequestTypes,
   listStatus,
   listPriorities
-} from '@/api/ADempiere/window'
+} from '@/api/ADempiere/user-interface/component/issue'
 
 export default defineComponent({
   name: 'Comment',

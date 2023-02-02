@@ -638,18 +638,21 @@ import {
 import lang from '@/lang'
 import store from '@/store'
 
+// Components and Mixins
+import 'simple-m-editor/dist/simple-m-editor.css'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
-import 'simple-m-editor/dist/simple-m-editor.css'
-// Api
+
+// Api Request Methods
 import {
   listSalesRepresentatives,
   listRequestTypes,
   listStatus,
   listPriorities
-} from '@/api/ADempiere/window'
+} from '@/api/ADempiere/user-interface/component/issue'
 
 export default defineComponent({
   name: 'Comment',
@@ -675,6 +678,7 @@ export default defineComponent({
     const currentRequestTypes = ref('')
     const currentStatus = ref('')
     const currentPriority = ref('')
+    const currentDateNextAction = ref(null)
     const summary = ref('')
     const updateSummary = ref('')
     const comments = ref('')
@@ -846,7 +850,8 @@ export default defineComponent({
         requestTypeId: currentRequestTypes.value,
         salesRepresentativeId: currentSalesReps.value,
         statusId: currentStatus.value,
-        priorityValue: currentPriority.value
+        priorityValue: currentPriority.value,
+        dateNextAction: currentDateNextAction.value
       })
         .catch(error => {
           showMessage({
@@ -1108,6 +1113,7 @@ export default defineComponent({
       currentRequestTypes,
       currentStatus,
       currentPriority,
+      currentDateNextAction,
       summary,
       comments,
       commentUpdate,
