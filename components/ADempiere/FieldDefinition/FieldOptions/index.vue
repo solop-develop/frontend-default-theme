@@ -121,11 +121,11 @@ import { defineComponent, computed, ref, watch, onMounted } from '@vue/compositi
 import language from '@/lang'
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import LabelField from './LabelField.vue'
 import LabelPopoverOption from './LabelPopoverOption.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import {
   // calculatorOptionItem,
   infoOptionItem,
@@ -136,8 +136,9 @@ import {
 } from '@theme/components/ADempiere/FieldDefinition/FieldOptions/fieldOptionsList.js'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { isLookup, LIST } from '@/utils/ADempiere/references.js'
-import { isEmptyValue, typeValue } from '@/utils/ADempiere/valueUtils.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { logsOptionItem } from './fieldOptionsList'
+import { isSalesTransaction } from '@/utils/ADempiere/contextUtils'
 
 export default defineComponent({
   name: 'FieldOptions',
@@ -243,10 +244,28 @@ export default defineComponent({
 
     function redirect() {
       const { reference } = props.metadata
-      let window = reference.zoomWindows
-      if (typeValue(window) === 'ARRAY') {
-        window = window[0]
+      const { zoomWindows } = reference
+
+      const isSOTrx = isSalesTransaction({
+        parentUuid: props.metadata.parentUuid,
+        containerUuid: props.metadata.containerUuid
+      })
+      const window = zoomWindows.find(zoomWindow => {
+        return zoomWindow.isSalesTransaction === isSOTrx
+      })
+      /*
+      if (typeValue(reference.zoomWindows) === 'ARRAY') {
+        // Is Sales Transaction Window
+        window = reference.zoomWindows.at(0)
+
+        // Is Purchase Transaction Window
+        if (reference.zoomWindows.length > 1) {
+          if (!isSOTrx) {
+            window = reference.zoomWindows.pop()
+          }
+        }
       }
+      */
       let value = valueField.value
 
       let columnName = reference.keyColumnName
