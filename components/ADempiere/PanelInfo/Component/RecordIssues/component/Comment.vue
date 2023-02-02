@@ -28,10 +28,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <b style="color: black; font-size: 19px;">
               {{ $t('issues.newRequest') }}
             </b>
-            <!-- <el-button style="float: right;" plain type="info" @click="SelectionIssue">
-              {{ $t('issues.backToList') }}
-              <svg-icon icon-class="undo" />
-            </el-button> -->
           </div>
           <div class="text item">
             <div style="width: 65% !important;float: left;">
@@ -104,132 +100,159 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <div style="width: 35% !important;float: right;">
               <el-card class="card-options" shadow="never">
                 <el-row>
-                  <el-form label-position="top" class="form-comments">
-                    <el-col :span="24" style="text-align: center;">
-                      <el-popover
-                        ref="newtypeOfRequest"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item :label="$t('issues.typeOfRequest')">
-                            <el-select
-                              v-model="currentRequestTypes"
-                              filterable
-                              @visible-change="findRequestTypes"
-                              @change="exitPopover('newtypeOfRequest')"
-                            >
-                              <el-option
-                                v-for="item in listIssuesTypes"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id"
+                  <el-scrollbar wrap-class="scroll-option-from">
+                    <el-form label-position="top" class="form-comments">
+                      <el-col :span="24" style="text-align: center;">
+                        <el-popover
+                          ref="newtypeOfRequest"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item :label="$t('issues.typeOfRequest')">
+                              <el-select
+                                v-model="currentRequestTypes"
+                                filterable
+                                @visible-change="findRequestTypes"
+                                @change="exitPopover('newtypeOfRequest')"
+                              >
+                                <el-option
+                                  v-for="item in listIssuesTypes"
+                                  :key="item.id"
+                                  :label="item.name"
+                                  :value="item.id"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="label" style="font-size: 20px;" />
+                              {{ $t('issues.typeOfRequest') + ': ' }}
+                            </b>
+                            {{ currentRequestTypesLabel.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;">
+                        <el-popover
+                          ref="newStatus"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item :label="$t('issues.status')">
+                              <el-select
+                                v-model="currentStatus"
+                                filterable
+                                @visible-change="findStatus"
+                                @change="exitPopover('newStatus')"
+                              >
+                                <el-option
+                                  v-for="item in listStatuses"
+                                  :key="item.id"
+                                  :label="item.name"
+                                  :value="item.id"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="example" style="font-size: 20px;" />
+                              {{ $t('issues.status') + ': ' }}
+                            </b>
+                            {{ currentStatusLabel.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;">
+                        <el-popover
+                          ref="newPriority"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item :label="$t('issues.priority')">
+                              <el-select
+                                v-model="currentPriority"
+                                filterable
+                                @visible-change="findPriority"
+                                @change="exitPopover('newPriority')"
+                              >
+                                <el-option
+                                  v-for="item in listPriority"
+                                  :key="item.value"
+                                  :label="item.name"
+                                  :value="item.value"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="collections" style="font-size: 20px;" />
+                              {{ $t('issues.priority') + ': ' }}
+                            </b>
+                            {{ currentPriorityLabel.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;">
+                        <el-popover
+                          ref="newSalesReps"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item label="Agente Comercial">
+                              <el-select
+                                v-model="currentSalesReps"
+                                filterable
+                                @visible-change="findSalesReps"
+                                @change="exitPopover('newSalesReps')"
+                              >
+                                <el-option
+                                  v-for="item in listSalesReps"
+                                  :key="item.id"
+                                  :label="item.name"
+                                  :value="item.id"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
+                            <b>
+                              <svg-icon icon-class="user" style="font-size: 13px !important;" />
+                              {{ $t('issues.assigned') + ': ' }}
+                            </b>
+                            {{ currentSalesRepsLabel.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="updateDate"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item label="Proxima Fecha">
+                              <el-date-picker
+                                v-model="newDateNextAction"
+                                type="datetime"
+                                placeholder="Proxima Fecha"
+                                @change="exitPopover('updateDate')"
                               />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
-                          <b>
-                            <svg-icon icon-class="label" style="font-size: 20px;" />
-                            {{ $t('issues.typeOfRequest') + ': ' }}
-                          </b>
-                          {{ currentRequestTypesLabel.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                    <el-col :span="24" style="text-align: center;">
-                      <el-popover
-                        ref="newStatus"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item :label="$t('issues.status')">
-                            <el-select
-                              v-model="currentStatus"
-                              filterable
-                              @visible-change="findStatus"
-                              @change="exitPopover('newStatus')"
-                            >
-                              <el-option
-                                v-for="item in listStatuses"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id"
-                              />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
-                          <b>
-                            <svg-icon icon-class="example" style="font-size: 20px;" />
-                            {{ $t('issues.status') + ': ' }}
-                          </b>
-                          {{ currentStatusLabel.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                    <el-col :span="24" style="text-align: center;">
-                      <el-popover
-                        ref="newPriority"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item :label="$t('issues.priority')">
-                            <el-select
-                              v-model="currentPriority"
-                              filterable
-                              @visible-change="findPriority"
-                              @change="exitPopover('newPriority')"
-                            >
-                              <el-option
-                                v-for="item in listPriority"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value"
-                              />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
-                          <b>
-                            <svg-icon icon-class="collections" style="font-size: 20px;" />
-                            {{ $t('issues.priority') + ': ' }}
-                          </b>
-                          {{ currentPriorityLabel.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                    <el-col :span="24" style="text-align: center;">
-                      <el-popover
-                        ref="newSalesReps"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item label="Agente Comercial">
-                            <el-select
-                              v-model="currentSalesReps"
-                              filterable
-                              @visible-change="findSalesReps"
-                              @change="exitPopover('newSalesReps')"
-                            >
-                              <el-option
-                                v-for="item in listSalesReps"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id"
-                              />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
-                          <b>
-                            <svg-icon icon-class="user" style="font-size: 13px !important;" />
-                            {{ $t('issues.assigned') + ': ' }}
-                          </b>
-                          {{ currentSalesRepsLabel.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                  </el-form>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" plain size="mini" type="text" style="margin: 0px;font-size: 15px;color: black;">
+                            <i style="font-size: 12px;color: #82848a;">
+                              {{ $t('issues.nextActionDate') + ': ' }}
+                              <span v-if="!isEmptyValue(newDateNextAction)">
+                                {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                              </span>
+                            </i>
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                    </el-form>
+                  </el-scrollbar>
                 </el-row>
               </el-card>
             </div>
@@ -354,101 +377,156 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <div id="panel-rigth" style="width: 30% !important;">
               <el-card class="card-options" shadow="never">
                 <el-row>
-                  <el-form label-position="top" class="form-comments">
-                    <el-col :span="24" style="text-align: center;margin: 5px;">
-                      <el-popover
-                        ref="typeOfRequest"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item :label="$t('issues.typeOfRequest')">
-                            <el-select
-                              v-model="currentRequestTypes"
-                              filterable
-                              @visible-change="findRequestTypes"
-                              @change="updateIssuesTypeRequest"
-                            >
-                              <el-option
-                                v-for="item in listIssuesTypes"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id"
+                  <el-scrollbar wrap-class="scroll-option-from">
+                    <el-form label-position="top" class="form-comments">
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="typeOfRequest"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item :label="$t('issues.typeOfRequest')">
+                              <el-select
+                                v-model="currentRequestTypes"
+                                filterable
+                                @visible-change="findRequestTypes"
+                                @change="updateIssuesTypeRequest"
+                              >
+                                <el-option
+                                  v-for="item in listIssuesTypes"
+                                  :key="item.id"
+                                  :label="item.name"
+                                  :value="item.id"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="label" style="font-size: 20px;" />
+                              {{ $t('issues.typeOfRequest') + ': ' }}
+                            </b>
+                            {{ currentIssues.request_type.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;">
+                        <el-popover
+                          ref="newStatus"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item :label="$t('issues.status')">
+                              <el-select
+                                v-model="currentStatus"
+                                filterable
+                                @visible-change="findStatus"
+                                @change="updateIssuesStatus"
+                              >
+                                <el-option
+                                  v-for="item in listStatuses"
+                                  :key="item.id"
+                                  :label="item.name"
+                                  :value="item.id"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="example" style="font-size: 20px;" />
+                              {{ $t('issues.status') + ': ' }}
+                            </b>
+                            {{ currentIssues.status.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="updatePriority"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item :label="$t('issues.priority')">
+                              <el-select
+                                v-model="currentPriority"
+                                filterable
+                                @visible-change="findPriority"
+                                @change="updateIssuesPriority"
+                              >
+                                <el-option
+                                  v-for="item in listPriority"
+                                  :key="item.value"
+                                  :label="item.name"
+                                  :value="item.value"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="collections" style="font-size: 20px;" />
+                              {{ $t('issues.priority') + ': ' }}
+                            </b>
+                            {{ currentIssues.priority.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="updateSalesReps"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item label="Agente Comercial">
+                              <el-select
+                                v-model="currentSalesReps"
+                                filterable
+                                @visible-change="findSalesReps"
+                                @change="updateIssuesSalesReps"
+                              >
+                                <el-option
+                                  v-for="item in listSalesReps"
+                                  :key="item.id"
+                                  :label="item.name"
+                                  :value="item.id"
+                                />
+                              </el-select>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
+                            <b>
+                              <svg-icon icon-class="user" style="font-size: 13px !important;" />
+                              {{ $t('issues.assigned') + ': ' }}
+                            </b>
+                            {{ currentIssues.sales_representative.name }}
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="updateDate"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item label="Proxima Fecha">
+                              <el-date-picker
+                                v-model="currentDateNextAction"
+                                type="datetime"
+                                placeholder="Proxima Fecha"
+                                @change="updateIssuesDateNextAction"
                               />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
-                          <b>
-                            <svg-icon icon-class="label" style="font-size: 20px;" />
-                            {{ $t('issues.typeOfRequest') + ': ' }}
-                          </b>
-                          {{ currentIssues.request_type.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                    <el-col :span="24" style="text-align: center;margin: 5px;">
-                      <el-popover
-                        ref="updatePriority"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item :label="$t('issues.priority')">
-                            <el-select
-                              v-model="currentPriority"
-                              filterable
-                              @visible-change="findPriority"
-                              @change="updateIssuesPriority"
-                            >
-                              <el-option
-                                v-for="item in listPriority"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value"
-                              />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
-                          <b>
-                            <svg-icon icon-class="collections" style="font-size: 20px;" />
-                            {{ $t('issues.priority') + ': ' }}
-                          </b>
-                          {{ currentIssues.priority.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                    <el-col :span="24" style="text-align: center;margin: 5px;">
-                      <el-popover
-                        ref="updateSalesReps"
-                        trigger="click"
-                      >
-                        <el-form label-position="top">
-                          <el-form-item label="Agente Comercial">
-                            <el-select
-                              v-model="currentSalesReps"
-                              filterable
-                              @visible-change="findSalesReps"
-                              @change="updateIssuesSalesReps"
-                            >
-                              <el-option
-                                v-for="item in listSalesReps"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id"
-                              />
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
-                          <b>
-                            <svg-icon icon-class="user" style="font-size: 13px !important;" />
-                            {{ $t('issues.assigned') + ': ' }}
-                          </b>
-                          {{ currentIssues.sales_representative.name }}
-                        </el-button>
-                      </el-popover>
-                    </el-col>
-                  </el-form>
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" plain size="mini" type="text" style="margin: 0px;font-size: 15px;color: black;">
+                            <i style="font-size: 12px;color: #82848a;">
+                              {{ $t('issues.nextActionDate') + ': ' }} {{ translateDateByLong(currentIssues.date_next_action) }}
+                            </i>
+                          </el-button>
+                        </el-popover>
+                      </el-col>
+                    </el-form>
+                  </el-scrollbar>
                 </el-row>
               </el-card>
             </div>
@@ -673,7 +751,7 @@ import 'simple-m-editor/dist/simple-m-editor.css'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
-import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 // Api Request Methods
 import {
@@ -707,6 +785,8 @@ export default defineComponent({
     const currentRequestTypes = ref('')
     const currentStatus = ref('')
     const currentPriority = ref('')
+    const currentDateNextAction = ref('')
+    const newDateNextAction = ref('')
     const summary = ref('')
     const comments = ref('')
     const updateSummary = ref('')
@@ -833,11 +913,16 @@ export default defineComponent({
     }
 
     function findStatus(isVisible) {
+      let requestTypeId = currentRequestTypes.value
       if (!isVisible) {
         return
       }
+      console.log(isEmptyValue(currentIssues.value), '||', isPanelNewRequest.vaue)
+      if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
+        requestTypeId = currentIssues.value.request_type.id
+      }
       listStatus({
-        requestTypeId: currentRequestTypes.value
+        requestTypeId
       })
         .then(response => {
           const { records } = response
@@ -878,7 +963,8 @@ export default defineComponent({
         requestTypeId: currentRequestTypes.value,
         salesRepresentativeId: currentSalesReps.value,
         statusId: currentStatus.value,
-        priorityValue: currentPriority.value
+        priorityValue: currentPriority.value,
+        dateNextAction: newDateNextAction.value
       })
         .catch(error => {
           showMessage({
@@ -903,7 +989,8 @@ export default defineComponent({
         requestTypeId: currentIssues.value.request_type.id,
         requestTypeUuid: currentIssues.value.request_type.uuid,
         salesRepresentativeId: newValue,
-        priorityValue: currentIssues.value.priority.value
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id
       })
       refs.updateSalesReps.showPopper = false
     }
@@ -923,7 +1010,8 @@ export default defineComponent({
         requestTypeId: newValue,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
         salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
-        priorityValue: currentIssues.value.priority.value
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id
       })
       refs.typeOfRequest.showPopper = false
       // refs.typeOfRequest.activated = false
@@ -943,7 +1031,8 @@ export default defineComponent({
         requestTypeUuid: currentIssues.value.request_type.uuid,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
         salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
-        priorityValue: currentIssues.value.priority.value
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id
       })
       editIssues(issues)
     }
@@ -964,9 +1053,56 @@ export default defineComponent({
         requestTypeUuid: currentIssues.value.request_type.uuid,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
         salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
-        priorityValue: newValue
+        priorityValue: newValue,
+        statusId: currentIssues.value.status.id
       })
       refs.updatePriority.showPopper = false
+    }
+
+    function updateIssuesStatus(newValue) {
+      const {
+        id,
+        uuid,
+        subject,
+        summary
+      } = currentIssues.value
+      store.dispatch('editIssues', {
+        id,
+        uuid,
+        subject,
+        summary,
+        requestTypeId: currentIssues.value.request_type.id,
+        requestTypeUuid: currentIssues.value.request_type.uuid,
+        salesRepresentativeId: currentIssues.value.sales_representative.id,
+        salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentStatus.value
+      })
+      refs.newStatus.showPopper = false
+    }
+
+    function updateIssuesDateNextAction(newValue) {
+      const {
+        id,
+        uuid,
+        subject,
+        summary
+      } = currentIssues.value
+      store.dispatch('editIssues', {
+        id,
+        uuid,
+        subject,
+        summary,
+        requestTypeId: currentIssues.value.request_type.id,
+        requestTypeUuid: currentIssues.value.request_type.uuid,
+        salesRepresentativeId: currentIssues.value.sales_representative.id,
+        salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id,
+        dateNextAction: newValue
+      })
+      console.log(refs.updateDate)
+      refs.updateDate.showPopper = false
     }
 
     function exitPopover(popoverOption) {
@@ -1146,6 +1282,8 @@ export default defineComponent({
       currentRequestTypes,
       currentStatus,
       currentPriority,
+      currentDateNextAction,
+      newDateNextAction,
       summary,
       comments,
       commentUpdate,
@@ -1186,9 +1324,12 @@ export default defineComponent({
       updateIssuesSalesReps,
       updateIssuesTypeRequest,
       updateIssuesPriority,
+      updateIssuesStatus,
+      updateIssuesDateNextAction,
       addNewComments,
       clearComments,
       translateDateByLong,
+      formatDate,
       handleCommand,
       deleteComment,
       updateComment,
@@ -1242,6 +1383,10 @@ export default defineComponent({
 }
 .scroll-timeline {
   max-height: 380px;
+}
+.scroll-option-from {
+  overflow-y: hidden;
+  max-width: 320px;
 }
 .divider-vertical {
   height: auto !important;

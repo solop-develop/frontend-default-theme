@@ -229,6 +229,31 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         </el-button>
                       </el-popover>
                     </el-col>
+                    <el-col :span="24" style="text-align: center;margin: 5px;">
+                      <el-popover
+                        ref="updateDate"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item label="Proxima Fecha">
+                            <el-date-picker
+                              v-model="newDateNextAction"
+                              type="datetime"
+                              placeholder="Proxima Fecha"
+                              @change="exitPopover('updateDate')"
+                            />
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" plain size="mini" type="text" style="margin: 0px;font-size: 15px;color: black;">
+                          <i style="font-size: 12px;color: #82848a;">
+                            {{ $t('issues.nextActionDate') + ': ' }}
+                            <span v-if="!isEmptyValue(newDateNextAction)">
+                              {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                            </span>
+                          </i>
+                        </el-button>
+                      </el-popover>
+                    </el-col>
                   </el-form>
                 </el-row>
               </el-card>
@@ -388,6 +413,37 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         </el-button>
                       </el-popover>
                     </el-col>
+                    <el-col :span="24" style="text-align: center;">
+                      <el-popover
+                        ref="newStatus"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item :label="$t('issues.status')">
+                            <el-select
+                              v-model="currentStatus"
+                              filterable
+                              @visible-change="findStatus"
+                              @change="updateIssuesStatus"
+                            >
+                              <el-option
+                                v-for="item in listStatuses"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" size="mini" type="primary" plain style="margin: 10px;font-size: 15px;">
+                          <b>
+                            <svg-icon icon-class="example" style="font-size: 20px;" />
+                            {{ $t('issues.status') + ': ' }}
+                          </b>
+                          {{ currentIssues.status.name }}
+                        </el-button>
+                      </el-popover>
+                    </el-col>
                     <el-col :span="24" style="text-align: center;margin: 5px;">
                       <el-popover
                         ref="updatePriority"
@@ -441,12 +497,34 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             </el-select>
                           </el-form-item>
                         </el-form>
-                        <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
+                        <el-button slot="reference" plain size="mini" style="margin: 10px;font-size: 15px;color: black;">
                           <b>
                             <svg-icon icon-class="user" style="font-size: 13px !important;" />
                             {{ $t('issues.assigned') + ': ' }}
                           </b>
                           {{ currentIssues.sales_representative.name }}
+                        </el-button>
+                      </el-popover>
+                    </el-col>
+                    <el-col :span="24" style="text-align: center;margin: 5px;">
+                      <el-popover
+                        ref="updateDate"
+                        trigger="click"
+                      >
+                        <el-form label-position="top">
+                          <el-form-item label="Proxima Fecha">
+                            <el-date-picker
+                              v-model="currentDateNextAction"
+                              type="datetime"
+                              placeholder="Proxima Fecha"
+                              @change="updateIssuesDateNextAction"
+                            />
+                          </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" plain size="mini" type="text" style="margin: 0px;font-size: 15px;color: black;">
+                          <i style="font-size: 12px;color: #82848a;">
+                            {{ $t('issues.nextActionDate') + ': ' }} {{ translateDateByLong(currentIssues.date_next_action) }}
+                          </i>
                         </el-button>
                       </el-popover>
                     </el-col>
@@ -644,7 +722,8 @@ import 'simple-m-editor/dist/simple-m-editor.css'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
-import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
+// import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 // Api Request Methods
 import {
@@ -678,7 +757,8 @@ export default defineComponent({
     const currentRequestTypes = ref('')
     const currentStatus = ref('')
     const currentPriority = ref('')
-    const currentDateNextAction = ref(null)
+    const currentDateNextAction = ref('')
+    const newDateNextAction = ref('')
     const summary = ref('')
     const updateSummary = ref('')
     const comments = ref('')
@@ -805,11 +885,16 @@ export default defineComponent({
     }
 
     function findStatus(isVisible) {
+      let requestTypeId = currentRequestTypes.value
       if (!isVisible) {
         return
       }
+      console.log(isEmptyValue(currentIssues.value), '||', isPanelNewRequest.vaue)
+      if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
+        requestTypeId = currentIssues.value.request_type.id
+      }
       listStatus({
-        requestTypeId: currentRequestTypes.value
+        requestTypeId
       })
         .then(response => {
           const { records } = response
@@ -851,7 +936,7 @@ export default defineComponent({
         salesRepresentativeId: currentSalesReps.value,
         statusId: currentStatus.value,
         priorityValue: currentPriority.value,
-        dateNextAction: currentDateNextAction.value
+        dateNextAction: newDateNextAction.value
       })
         .catch(error => {
           showMessage({
@@ -896,7 +981,8 @@ export default defineComponent({
         requestTypeId: newValue,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
         salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
-        priorityValue: currentIssues.value.priority.value
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id
       })
       refs.typeOfRequest.showPopper = false
       // refs.typeOfRequest.activated = false
@@ -916,7 +1002,8 @@ export default defineComponent({
         requestTypeUuid: currentIssues.value.request_type.uuid,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
         salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
-        priorityValue: currentIssues.value.priority.value
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id
       })
       editIssues(issues)
     }
@@ -937,9 +1024,56 @@ export default defineComponent({
         requestTypeUuid: currentIssues.value.request_type.uuid,
         salesRepresentativeId: currentIssues.value.sales_representative.id,
         salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
-        priorityValue: newValue
+        priorityValue: newValue,
+        statusId: currentIssues.value.status.id
       })
       refs.updatePriority.showPopper = false
+    }
+
+    function updateIssuesStatus(newValue) {
+      const {
+        id,
+        uuid,
+        subject,
+        summary
+      } = currentIssues.value
+      store.dispatch('editIssues', {
+        id,
+        uuid,
+        subject,
+        summary,
+        requestTypeId: currentIssues.value.request_type.id,
+        requestTypeUuid: currentIssues.value.request_type.uuid,
+        salesRepresentativeId: currentIssues.value.sales_representative.id,
+        salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentStatus.value
+      })
+      refs.newStatus.showPopper = false
+    }
+
+    function updateIssuesDateNextAction(newValue) {
+      const {
+        id,
+        uuid,
+        subject,
+        summary
+      } = currentIssues.value
+      store.dispatch('editIssues', {
+        id,
+        uuid,
+        subject,
+        summary,
+        requestTypeId: currentIssues.value.request_type.id,
+        requestTypeUuid: currentIssues.value.request_type.uuid,
+        salesRepresentativeId: currentIssues.value.sales_representative.id,
+        salesRepresentativeUuid: currentIssues.value.sales_representative.uuid,
+        priorityValue: currentIssues.value.priority.value,
+        statusId: currentIssues.value.status.id,
+        dateNextAction: newValue
+      })
+      console.log(refs.updateDate)
+      refs.updateDate.showPopper = false
     }
 
     function exitPopover(popoverOption) {
@@ -1114,6 +1248,7 @@ export default defineComponent({
       currentStatus,
       currentPriority,
       currentDateNextAction,
+      newDateNextAction,
       summary,
       comments,
       commentUpdate,
@@ -1156,9 +1291,12 @@ export default defineComponent({
       updateIssuesSalesReps,
       updateIssuesTypeRequest,
       updateIssuesPriority,
+      updateIssuesStatus,
+      updateIssuesDateNextAction,
       addNewComments,
       clearComments,
       translateDateByLong,
+      formatDate,
       handleCommand,
       deleteComment,
       updateComment,
