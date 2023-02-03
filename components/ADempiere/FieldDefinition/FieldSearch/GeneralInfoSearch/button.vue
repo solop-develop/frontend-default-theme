@@ -9,16 +9,16 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <el-popover
-    ref="businessParnerListPopover"
+    ref="generalSearchListPopover"
     v-model="showedPopoverGeneralInfoPanel"
     placement="top"
     width="900"
@@ -43,11 +43,20 @@
 </template>
 
 <script>
+import { defineComponent, computed, ref } from '@vue/composition-api'
+
 import store from '@/store'
 
+// Components and Mixins
 import PanelGeneralInfoSearch from './panel.vue'
 
-export default {
+// Constants
+import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/form/generalInfoSearch'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+
+export default defineComponent({
   name: 'GeneralInfoSearch',
 
   components: {
@@ -83,26 +92,38 @@ export default {
     }
   },
 
-  computed: {
-    uuidForm() {
-      if (!this.isEmptyValue(this.parentMetadata.containerUuid)) {
-        return this.parentMetadata.columnName + '_' + this.parentMetadata.containerUuid
+  setup(props) {
+    const generalSearchListPopover = ref(null)
+
+    const uuidForm = computed(() => {
+      if (!isEmptyValue(props.parentMetadata.containerUuid)) {
+        return props.parentMetadata.columnName + '_' + props.parentMetadata.containerUuid
       }
-      return this.parentMetadata.columnName
-    },
-    showedPopoverGeneralInfoPanel: {
+      return GENERAL_INFO_SEARCH_LIST_FORM
+    })
+
+    const showedPopoverGeneralInfoPanel = computed({
       get() {
-        return store.getters.getGeneralInfoShow({ containerUuid: this.uuidForm })
+        return store.getters.getGeneralInfoShow({
+          containerUuid: uuidForm.value
+        })
       },
       set(value) {
         store.commit('setGeneralInfoShow', {
-          containerUuid: this.uuidForm,
+          containerUuid: uuidForm.value,
           show: value
         })
       }
+    })
+
+    return {
+      generalSearchListPopover,
+      // computeds
+      uuidForm,
+      showedPopoverGeneralInfoPanel
     }
   }
-}
+})
 </script>
 
 <style lang="scss">
