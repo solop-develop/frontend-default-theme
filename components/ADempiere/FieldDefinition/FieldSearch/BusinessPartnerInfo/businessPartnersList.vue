@@ -66,7 +66,8 @@
       </p>
 
       <index-column
-        :page-number="pageNumber"
+      :page-number="pageNumber"
+        :page-size="pageSize"
       />
 
       <el-table-column
@@ -99,6 +100,7 @@
           :handle-change-page="setPage"
           :records-page="recordsList.length"
           :selection="selection"
+          :handle-size-change="handleChangeSizePage"
         />
       </el-col>
 
@@ -253,6 +255,9 @@ export default {
     pageNumber() {
       return this.businessParnerData.pageNumber
     },
+    pageSize() {
+      return this.businessParnerData.pageSize
+    },
     isReadyFromGetData() {
       const { isLoaded } = this.businessParnerData
       return !isLoaded && this.showPopover
@@ -347,7 +352,7 @@ export default {
       })
     },
     setPage(pageNumber) {
-      this.searchBPartnerList(pageNumber)
+      this.searchBPartnerList(pageNumber, this.pageSize)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
@@ -379,7 +384,7 @@ export default {
           })
       })
     },
-    searchBPartnerList(pageNumber = 0, isConvert = true) {
+    searchBPartnerList(pageNumber = 0, pageSize) {
       let parentUuid = this.metadata.parentUuid
       if (isEmptyValue(parentUuid)) {
         parentUuid = this.metadata.containerUuid
@@ -401,7 +406,8 @@ export default {
           tableName: this.metadata.reference.tableName,
           uuid: this.metadata.uuid,
           filters,
-          pageNumber
+          pageNumber,
+          pageSize
         })
           .then(response => {
             if (isEmptyValue(response)) {
@@ -422,6 +428,9 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
+    },
+    handleChangeSizePage(pageSize) {
+      this.searchBPartnerList(this.pageNumber, pageSize)
     }
   }
 }
