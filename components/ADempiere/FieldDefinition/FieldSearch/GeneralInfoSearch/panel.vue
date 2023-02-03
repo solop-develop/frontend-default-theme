@@ -431,7 +431,7 @@ export default {
       }, 500)
     },
     handleChangeSizePage(pageSize) {
-      this.getListGeneralInfoSearch(this.pageNumber, pageSize)
+      this.getListGeneralInfoSearch(1, pageSize)
     }
   }
 }
