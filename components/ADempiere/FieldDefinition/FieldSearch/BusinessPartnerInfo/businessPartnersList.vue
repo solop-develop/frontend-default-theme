@@ -430,7 +430,7 @@ export default {
       }, 500)
     },
     handleChangeSizePage(pageSize) {
-      this.searchBPartnerList(this.pageNumber, pageSize)
+      this.searchBPartnerList(1, pageSize)
     }
   }
 }
