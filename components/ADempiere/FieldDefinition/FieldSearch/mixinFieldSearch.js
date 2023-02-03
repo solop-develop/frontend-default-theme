@@ -97,11 +97,14 @@ export default {
         if (inTable) {
           // implement container manager row
           if (this.containerManager && this.containerManager.getCell) {
-            return this.containerManager.getCell({
+            const value = this.containerManager.getCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName
             })
+            if (!isEmptyValue(value)) {
+              return value
+            }
           }
         }
 
@@ -118,7 +121,7 @@ export default {
         if (inTable) {
           // implement container manager row
           if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
+            this.containerManager.setCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
@@ -150,24 +153,68 @@ export default {
     },
     displayedValue: {
       get() {
+        const {
+          containerUuid, displayColumnName, inTable
+        } = this.metadata
+
+        // table records values
+        if (inTable) {
+          // implement container manager row
+          if (this.containerManager && this.containerManager.getCell) {
+            const value = this.containerManager.getCell({
+              containerUuid,
+              rowIndex: this.metadata.rowIndex,
+              columnName: displayColumnName
+            })
+            if (!isEmptyValue(value)) {
+              return value
+            }
+          }
+        }
+
         return store.getters.getValueOfField({
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName
+          containerUuid,
+          columnName: displayColumnName
         })
       },
       set(value) {
+        const {
+          parentUuid, containerUuid, displayColumnName, inTable
+        } = this.metadata
+
+        // table records values
+        if (inTable) {
+          // implement container manager row
+          if (this.containerManager && this.containerManager.setCell) {
+            this.containerManager.setCell({
+              parentUuid,
+              containerUuid,
+              rowIndex: this.metadata.rowIndex,
+              columnName: displayColumnName,
+              value
+            })
+          }
+        }
+
         store.commit('updateValueOfField', {
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName,
+          parentUuid,
+          containerUuid,
+          columnName: displayColumnName,
           value
         })
+        // update element column name
+        if (!this.metadata.isSameColumnElement) {
+          store.commit('updateValueOfField', {
+            parentUuid,
+            containerUuid,
+            columnName: DISPLAY_COLUMN_PREFIX + this.metadata.elementName,
+            value
+          })
+        }
       }
     },
     uuidValue: {
       get() {
-        if (this.metadata.inTable) {
-          return undefined
-        }
         return this.$store.getters.getValueOfFieldOnContainer({
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.metadata.containerUuid,
@@ -176,16 +223,24 @@ export default {
         })
       },
       set(value) {
-        if (this.metadata.inTable) {
-          return undefined
-        }
+        const { parentUuid, containerUuid } = this.metadata
+
         this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
+          parentUuid,
+          containerUuid,
           // 'ColumnName'_UUID
           columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
           value
         })
+        // update element column name
+        if (!this.metadata.isSameColumnElement) {
+          store.commit('updateValueOfField', {
+            parentUuid,
+            containerUuid,
+            columnName: this.metadata.elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
+            value
+          })
+        }
       }
     },
 
@@ -217,6 +272,7 @@ export default {
 
   methods: {
     clearValues() {
+      this.controlDisplayed = undefined
       this.setValues(this.blankValues)
     },
     // subscribeChanges() {
@@ -398,59 +454,19 @@ export default {
       }
 
       // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value
-      })
+      this.value = value
       // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
-        value: displayedValue
-      })
+      this.displayedValue = displayedValue
       // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-        value: uuid
-      })
-
-      // set on element name, used by columns views aliases
-      if (!this.metadata.isSameColumnElement) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: displayedValue
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value: uuid
-        })
-      }
+      this.uuidValue = uuid
 
       this.$store.dispatch('notifyFieldChange', {
-        containerUuid: this.metadata.containerUuid,
+        parentUuid,
+        containerUuid,
         containerManager: this.containerManager,
         field: this.metadata,
-        columnName: this.metadata.columnName
+        columnName,
+        newValue: value
       })
     },
 
@@ -551,7 +567,7 @@ export default {
 
       // prevent losing display value with focus
       this.controlDisplayed = this.generateDisplayedValue(recordSelected)
-      this.$refs.displayBPartner.activated = false
+      this.$refs.autocompleteGeneralInfo.activated = false
     }
   }
 
