@@ -67,6 +67,7 @@
 
       <index-column
         :page-number="pageNumber"
+        :page-size="pageSize"
       />
 
       <el-table-column
@@ -99,6 +100,7 @@
           :handle-change-page="setPage"
           :records-page="recordsList.length"
           :selection="selection"
+          :handle-size-change="handleChangeSizePage"
         />
       </el-col>
 
@@ -258,6 +260,9 @@ export default {
     pageNumber() {
       return this.generalInfoData.pageNumber
     },
+    pageSize() {
+      return this.generalInfoData.pageSize
+    },
     isReadyFromGetData() {
       const { isLoaded } = this.generalInfoData
       return !isLoaded && this.showPopover
@@ -337,7 +342,7 @@ export default {
       })
     },
     setPage(pageNumber) {
-      this.getListGeneralInfoSearch(pageNumber)
+      this.getListGeneralInfoSearch(pageNumber, this.pageSize)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
@@ -368,7 +373,7 @@ export default {
         this.isLoadingFields = false
       })
     },
-    getListGeneralInfoSearch(pageNumber = 0) {
+    getListGeneralInfoSearch(pageNumber = 0, pageSize) {
       const values = this.$store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
@@ -402,7 +407,8 @@ export default {
           uuid: this.metadata.uuid,
           contextColumnNames: this.metadata.reference.contextColumnNames,
           filters: values,
-          pageNumber
+          pageNumber,
+          pageSize
         })
           .then(response => {
             if (isEmptyValue(response)) {
@@ -423,6 +429,9 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
+    },
+    handleChangeSizePage(pageSize) {
+      this.getListGeneralInfoSearch(1, pageSize)
     }
   }
 }
