@@ -254,6 +254,7 @@
         </el-main>
       </el-container>
     </el-main>
+
     <el-footer :style="isStyleFooter">
       <el-card id="logsWorkflow" class="box-card" style="padding-left: 1%;padding-right: 1%;overflow: auto;">
         <el-form v-show="!isEmptyValue(currentActivity)" :inline="true" class="demo-form-inline">
@@ -263,11 +264,13 @@
                 <el-switch v-model="chooseOption" @change="changeOption" />
               </el-form-item>
             </el-col>
+
             <el-col v-show="isValidateUserChoice" :span="8" style="text-align: center;">
               <el-form-item :label="$t('form.workflowActivity.filtersSearch.approve')">
                 <el-switch v-model="isProved" />
               </el-form-item>
             </el-col>
+
             <el-col v-show="chooseOption" :span="8" style="text-align: center;">
               <el-form-item :label="$t('form.workflowActivity.filtersSearch.user')">
                 <el-select
@@ -298,9 +301,10 @@
         />
         <el-button
           type="primary"
-          icon="el-icon-search"
+          icon="el-icon-zoom-in"
+          :alt="$t('page.processActivity.zoomIn')"
           plain
-          style="float: right;margin-right: 5px;margin-left: 0px;"
+          style="float: right; margin-right: 5px; margin-left: 0px;"
           class="button-base-icon"
           @click="zoomRecord(currentActivity)"
         />
@@ -308,7 +312,7 @@
           type="info"
           class="button-base-icon"
           plain
-          style="float: right;margin-right: 5px;"
+          style="float: right; margin-right: 5px;"
           @click="clearMessage()"
         >
           <svg-icon icon-class="layers-clear" />
