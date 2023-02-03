@@ -66,7 +66,7 @@
       </p>
 
       <index-column
-      :page-number="pageNumber"
+        :page-number="pageNumber"
         :page-size="pageSize"
       />
 
