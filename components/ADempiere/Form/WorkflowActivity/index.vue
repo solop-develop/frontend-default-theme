@@ -152,14 +152,24 @@
         />
         <el-button
           type="primary"
+          class="button-base-icon"
           icon="el-icon-check"
           style="float: right;"
           @click="sendOPeration()"
         />
         <el-button
-          type="info"
+          type="primary"
+          icon="el-icon-search"
           plain
-          style="float: right;margin-right: 1%;"
+          style="float: right;margin-right: 5px;margin-left: 0px;"
+          class="button-base-icon"
+          @click="zoomRecord(currentActivity)"
+        />
+        <el-button
+          type="info"
+          class="button-base-icon"
+          plain
+          style="float: right;margin-right: 5px;"
           @click="clearMessage()"
         >
           <svg-icon icon-class="layers-clear" />
@@ -225,22 +235,6 @@
     <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
       <el-container style="height: 100%;">
         <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
-          <!-- <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: auto' : 'height: 20%'">
-            <div slot="header" class="clearfix">
-              {{ $t('field.logsField') }}
-              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
-            </div>
-            <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
-              <el-timeline-item
-                v-for="(nodes, key) in listProcessWorkflow"
-                :key="key"
-                :timestamp="translateDateByLong(nodes.log_date)"
-                placement="top"
-              >
-                <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
-              </el-timeline-item>
-            </el-timeline>
-          </el-card> -->
           <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%' : 'height: 20%'">
             <div slot="header" class="clearfix">
               {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
@@ -303,10 +297,18 @@
           @click="sendOPeration()"
         />
         <el-button
+          type="primary"
+          icon="el-icon-search"
+          plain
+          style="float: right;margin-right: 5px;margin-left: 0px;"
+          class="button-base-icon"
+          @click="zoomRecord(currentActivity)"
+        />
+        <el-button
           type="info"
           class="button-base-icon"
           plain
-          style="float: right;margin-right: 1%;"
+          style="float: right;margin-right: 5px;"
           @click="clearMessage()"
         >
           <svg-icon icon-class="layers-clear" />
@@ -330,6 +332,7 @@ import fieldsList from './fieldsList.js'
 import { generateWorkflowDiagram } from '@/utils/ADempiere/dictionary/workflow'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 
 // API Request Methods
 import {
@@ -613,6 +616,21 @@ export default {
     },
     changeOptionB(value) {
       this.chooseOption = !value
+    },
+    zoomRecord(currentActivity) {
+      const { zoom_windows } = currentActivity
+      const { uuid } = zoom_windows[0]
+      zoomIn({
+        uuid,
+        params: {
+          filters: [
+            {
+              columnName: 'UUID',
+              value: currentActivity.record_uuid
+            }
+          ]
+        }
+      })
     },
     findSalesReps(isVisible) {
       if (!isVisible) {
