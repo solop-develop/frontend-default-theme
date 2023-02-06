@@ -247,7 +247,7 @@ export default defineComponent({
       if (isMobile.value) {
         return '90%'
       }
-      return '50%'
+      return '55%'
     })
 
     const tabStyle = computed(() => {
