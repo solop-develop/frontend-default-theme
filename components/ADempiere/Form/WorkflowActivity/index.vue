@@ -113,7 +113,7 @@
         </el-main>
       </el-container>
     </el-main>
-    <el-footer :style="chooseOption ? 'padding: 0px;height: 35% !important;' : 'padding: 0px;height: 30% !important;'">
+    <el-footer :style="chooseOption ? 'padding: 0px;height: auto;padding-left: 1%;padding-right: 1%;' : 'padding: 0px;height: auto;padding-left: 1%;padding-right: 1%;'">
       <el-card id="logsWorkflow" class="box-card" style="padding: 0%;overflow: auto;overflow-x: hidden;">
         <el-form v-show="!isEmptyValue(currentActivity)" :label-position="chooseOption ? 'top' : 'left'" :inline="true" class="demo-form-inline">
           <el-row :gutter="24" style="text-align: center;">
