@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,27 @@ export default [
       isCustomField: true,
       size: 24,
       isDisplayed: false,
-      index: 10
+      index: 0
+    }
+  },
+  {
+    // columnName: 'AD_Client_ID',
+    uuid: '8d5813f4-fb40-11e8-a479-7a0060f0aa01',
+    overwriteDefinition: {
+      isCustomField: true,
+      size: 24,
+      isDisplayed: false,
+      index: 0
+    }
+  },
+  {
+    // columnName: 'AD_Org_ID',
+    uuid: '8d392624-fb40-11e8-a479-7a0060f0aa01',
+    overwriteDefinition: {
+      isCustomField: true,
+      size: 24,
+      isDisplayed: false,
+      index: 0
     }
   },
   {

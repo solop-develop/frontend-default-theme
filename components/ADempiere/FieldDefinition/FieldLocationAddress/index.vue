@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -52,6 +52,7 @@
       type="text"
       style="width: 100%;"
       :disabled="isDisabled"
+      @click="setContextValues()"
     >
       <el-input
         v-model="displayedValueNotEdit"
@@ -68,12 +69,12 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import mixinLocation from './mixinLocationAddress.js'
 import LocationAddressForm from './locationAddressForm.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -179,6 +180,23 @@ export default {
       this.$store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm
       })
+    },
+    setContextValues() {
+      if (this.isDisabled) {
+        return
+      }
+      const value = this.value
+      if (isEmptyValue(value) || value <= 0) {
+        const currentValues = this.$store.getters.getValuesView({
+          containerUuid: this.metadata.containerUuid
+        })
+        this.$store.dispatch('clearValuesOnContainer', {
+          containerUuid: this.uuidForm
+        }).then(() => {
+          console.log(122, currentValues)
+        })
+      }
+      console.log(123, this.uuidForm, this.value)
     }
   }
 }
