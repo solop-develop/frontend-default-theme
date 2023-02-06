@@ -48,7 +48,7 @@
                     <b>
                       {{ $t('issues.expirationType') }}
                     </b>
-                    <el-tag :style="dueTypeColor(scope.row)">
+                    <el-tag :style="dueTypeColorDescription(scope.row)">
                       {{ scope.row.due_type.name }}
                     </el-tag>
                     <b slot="reference" style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
@@ -56,8 +56,8 @@
                     </b>
                   </el-popover>
 
-                  <span style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
-                    <p style="font-size: 18px;width: 100%;margin-top: 5px;margin-bottom: 5px;">
+                  <div style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
+                    <p style="font-size: 18px;width: 100%;margin-top: 10px;margin-bottom: 10px;">
                       <b>
                         <el-popover
                           placement="top-start"
@@ -83,7 +83,10 @@
                                   {{ $t('issues.summary') }}
                                 </b>
                               </template>
-                              {{ scope.row.summary }}
+                              <el-scrollbar wrap-class="scroll-previwer-disable" style="width: 100%; overflow: hidden;">
+                                <v-md-preview :text="scope.row.summary" class="previwer-disable" style="padding: 0px" height="150px" />
+                              </el-scrollbar>
+                              <!-- {{ scope.row.summary }} -->
                             </el-descriptions-item>
                             <el-descriptions-item :span="4">
                               <template slot="label">
@@ -124,14 +127,48 @@
                               {{ scope.row.sales_representative.name }}
                               <el-avatar icon="el-icon-user-solid" size="small" style="margin-left: 10px;" />
                             </el-descriptions-item>
+                            <el-descriptions-item>
+                              <template slot="label">
+                                <b>
+                                  {{ $t('issues.expirationType') }}
+                                </b>
+                              </template>
+                              <el-tag :style="dueTypeColorDescription(scope.row)">
+                                {{ scope.row.due_type.name }}
+                              </el-tag>
+                            </el-descriptions-item>
+                            <el-descriptions-item :span="4" style="float: right;">
+                              <template slot="label">
+                                <b>
+                                  <svg-icon icon-class="calendar" style="font-size: 18px;" />
+                                  {{ $t('issues.nextActionDate') }}
+                                </b>
+                              </template>
+                              <span v-if="scope.row.date_next_action > 0">
+                                {{ translateDateByLong(scope.row.date_next_action) }}
+                              </span>
+                            </el-descriptions-item>
                           </el-descriptions>
                           <el-button
                             slot="reference"
-                            style="color: black;font-size: 18px;"
+                            style="color: black;padding: 0px;"
                             type="text"
                             @click="selectIssue(scope.row)"
                           >
-                            {{ '#' + scope.row.document_no + '  ' + scope.row.subject }}
+                            <p style="margin: 0px;font-size: 18px;text-align: left;margin-top: 5px;margin-bottom: 5px;">
+                              {{ '#' + scope.row.document_no + '  ' + scope.row.subject }}
+                            </p>
+                            <p style="margin: 0px;">
+                              <i style="font-size: 12px;color: #82848a;">
+                                <b>
+                                  <svg-icon icon-class="calendar" style="font-size: 18px;" />
+                                  {{ $t('issues.nextActionDate') + ': ' }}
+                                </b>
+                                <span v-if="scope.row.date_next_action > 0">
+                                  {{ translateDateByLong(scope.row.date_next_action) }}
+                                </span>
+                              </i>
+                            </p>
                           </el-button>
                         </el-popover>
                       </b>
@@ -150,7 +187,7 @@
                         {{ scope.row.request_type.name }}
                       </el-button>
                     </p>
-                  </span>
+                  </div>
                 </template>
               </el-table-column>
             </el-table>
@@ -225,7 +262,23 @@ export default defineComponent({
     function dueTypeColor(issue) {
       const { due_type } = issue
       const { value } = due_type
-      const margin = '10px 0px 0px 0px'
+      const margin = '20px 0px 0px 0px'
+      let color = '#3fb950'
+      if (value === '5') {
+        color = 'orange'
+      } else if (value === '3') {
+        color = '#ff2121'
+      }
+      return {
+        color,
+        margin
+      }
+    }
+
+    function dueTypeColorDescription(issue) {
+      const { due_type } = issue
+      const { value } = due_type
+      const margin = '0px'
       let color = '#3fb950'
       if (value === '5') {
         color = 'orange'
@@ -267,6 +320,7 @@ export default defineComponent({
       currentIssues,
       // methods
       dueTypeColor,
+      dueTypeColorDescription,
       selectIssue,
       newIssues,
       loadIssues
@@ -289,6 +343,9 @@ export default defineComponent({
   }
   .el-table thead {
     display: none;
+  }
+  .el-table--medium .el-table__cell {
+    padding: 0px;
   }
 }
 .p {

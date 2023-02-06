@@ -226,7 +226,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           </el-button>
                         </el-popover>
                       </el-col>
-                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                      <!-- <el-col :span="24" style="text-align: center;margin: 5px;">
                         <el-popover
                           ref="updateDate"
                           trigger="click"
@@ -248,6 +248,31 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                                 {{ translateDateByLong(Date.parse(newDateNextAction)) }}
                               </span>
                             </i>
+                          </el-button>
+                        </el-popover>
+                      </el-col> -->
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="updateDate"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item label="Proxima Fecha">
+                              <el-date-picker
+                                v-model="newDateNextAction"
+                                type="datetime"
+                                placeholder="Proxima Fecha"
+                                @change="exitPopover('updateDate')"
+                              />
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              {{ $t('issues.nextActionDate') + ': ' }}
+                              <i v-if="!isEmptyValue(newDateNextAction)" style="font-size: 11px !important;">
+                                {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                              </i>
+                            </b>
                           </el-button>
                         </el-popover>
                       </el-col>
@@ -503,7 +528,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           </el-button>
                         </el-popover>
                       </el-col>
-                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                      <!-- <el-col :span="24" style="text-align: center;margin: 5px;">
                         <el-popover
                           ref="updateDate"
                           trigger="click"
@@ -522,6 +547,32 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <i style="font-size: 12px;color: #82848a;">
                               {{ $t('issues.nextActionDate') + ': ' }} {{ translateDateByLong(currentIssues.date_next_action) }}
                             </i>
+                          </el-button>
+                        </el-popover>
+                      </el-col> -->
+                      <el-col :span="24" style="text-align: center;margin: 5px;">
+                        <el-popover
+                          ref="updateDate"
+                          trigger="click"
+                        >
+                          <el-form label-position="top">
+                            <el-form-item label="Proxima Fecha">
+                              <el-date-picker
+                                v-model="currentDateNextAction"
+                                type="datetime"
+                                placeholder="Proxima Fecha"
+                                @change="updateIssuesDateNextAction"
+                              />
+                            </el-form-item>
+                          </el-form>
+                          <el-button slot="reference" size="mini" type="info" plain style="margin: 10px;font-size: 15px;">
+                            <b>
+                              <svg-icon icon-class="user" style="font-size: 13px !important;" />
+                              {{ $t('issues.nextActionDate') + ': ' }}
+                              <i v-if="currentIssues.date_next_action > 0" style="font-size: 11px !important;">
+                                {{ translateDateByLong(currentIssues.date_next_action) }}
+                              </i>
+                            </b>
                           </el-button>
                         </el-popover>
                       </el-col>
@@ -917,7 +968,6 @@ export default defineComponent({
       if (!isVisible) {
         return
       }
-      console.log(isEmptyValue(currentIssues.value), '||', isPanelNewRequest.vaue)
       if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
         requestTypeId = currentIssues.value.request_type.id
       }
@@ -966,6 +1016,11 @@ export default defineComponent({
         priorityValue: currentPriority.value,
         dateNextAction: newDateNextAction.value
       })
+        .then(response => {
+          isPanelNewRequest.value = !isPanelNewRequest.value
+          store.commit('setCurrentIssues', response)
+          store.dispatch('listComments', response)
+        })
         .catch(error => {
           showMessage({
             message: error.message,
@@ -1101,7 +1156,6 @@ export default defineComponent({
         statusId: currentIssues.value.status.id,
         dateNextAction: newValue
       })
-      console.log(refs.updateDate)
       refs.updateDate.showPopper = false
     }
 
@@ -1386,7 +1440,7 @@ export default defineComponent({
 }
 .scroll-option-from {
   overflow-y: hidden;
-  max-width: 320px;
+  max-width: 350px;
 }
 .divider-vertical {
   height: auto !important;
