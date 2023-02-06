@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -86,6 +86,7 @@
           <samp style="float: right; padding-top: 4px;">
             <el-button
               :disabled="isLoadingFields"
+              class="button-base-icon"
               type="info"
               @click="openCoordinatesMap()"
             >
@@ -94,12 +95,14 @@
 
             <el-button
               type="danger"
+              class="button-base-icon"
               icon="el-icon-close"
               @click="cancelChanges"
             />
 
             <el-button
               :disabled="isLoadingFields"
+              class="button-base-icon"
               type="primary"
               icon="el-icon-check"
               @click="sendValuesToServer"
@@ -114,23 +117,26 @@
 <script>
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import mixinLocation from './mixinLocationAddress.js'
 
-// constants
+// Constants
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
-import { COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import {
+  COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP, COORDENATES_COLUMN_NAMES
+} from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
-// api request methods
+// API Request Methods
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
 import {
   createLocationAddress,
   updateLocationAddress
 } from '@/api/ADempiere/field/location.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { showNotification } from '@/utils/ADempiere/notification.js'
 import { formatCoordinateByDecimal, getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
@@ -185,16 +191,14 @@ export default {
 
   computed: {
     fieldCoordination() {
-      return this.metadataList.filter(fields => fields.columnName === 'Latitude' ||
-        fields.columnName === 'Longitude' ||
-        fields.columnName === 'Altitude'
-      )
+      return this.metadataList.filter(fields => {
+        return COORDENATES_COLUMN_NAMES.includes(fields.columnName)
+      })
     },
     fieldDefaultLocation() {
-      return this.metadataList.filter(fields => fields.columnName !== 'Latitude' &&
-        fields.columnName !== 'Longitude' &&
-        fields.columnName !== 'Altitude'
-      )
+      return this.metadataList.filter(fields => {
+        return !COORDENATES_COLUMN_NAMES.includes(fields.columnName)
+      })
     },
     containerManagerLocation() {
       return {
@@ -261,6 +265,7 @@ export default {
     clearTimeout(this.timeOutFields)
     this.timeOutFields = setTimeout(() => {
       this.getFieldsList()
+      this.setDefaultValues()
     }, 500)
   },
 
@@ -273,6 +278,22 @@ export default {
       if (event.srcKey === 'closeForm') {
         this.toggleShowedLocationForm()
       }
+    },
+
+    setDefaultValues() {
+      if (!isEmptyValue(this.locationId) && this.locationId > 0) {
+        return
+      }
+
+      const parsedDefaultValues = this.$store.getters.getParsedDefaultValues({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.uuidForm,
+        fieldsList: this.metadataList,
+        formatToReturn: 'object'
+      })
+      this.setValues({
+        values: parsedDefaultValues
+      })
     },
 
     /**
@@ -541,6 +562,26 @@ export default {
       return attributesToServer
     },
 
+    responseManager(responseLocation) {
+      // set form values
+      this.setValues({
+        values: responseLocation.attributes
+      })
+
+      // set field parent values
+      this.setParentValues(responseLocation.attributes)
+      this.isShowedLocationForm = false
+
+      // set context values to form continer
+      this.$store.dispatch('updateValuesOfContainer', {
+        parentUuid: this.parentUuid,
+        containerUuid: this.uuidForm,
+        attributes: responseLocation.attributes
+      })
+
+      return responseLocation.attributes
+    },
+
     sendValuesToServer() {
       const emptyMandatoryFields = this.$store.getters.getFieldsListEmptyMandatory({
         containerUuid: this.uuidForm,
@@ -562,61 +603,15 @@ export default {
         containerUuid: this.uuidForm
       })
       const attributesToServer = this.getAttributesToServer(attributes)
-
-      const updateLocation = (responseLocation) => {
-        // set form values
-        this.setValues({
-          values: responseLocation.attributes
+        .filter(attribute => {
+          return !LOG_COLUMNS_NAME_LIST.includes(attribute.columnName) &&
+            !attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+            !attribute.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)
         })
-
-        // set field parent values
-        this.setParentValues(responseLocation.attributes)
-        this.isShowedLocationForm = false
-
-        // set context values to form continer
-        this.$store.dispatch('updateValuesOfContainer', {
-          parentUuid: this.parentUuid,
-          containerUuid: this.uuidForm,
-          attributes
-        })
-
-        return responseLocation.attributes
-      }
 
       const locationId = this.locationId
       if (this.isEmptyValue(locationId) || locationId === 0) {
-        createLocationAddress({
-          attributesList: attributesToServer
-        })
-          .then(updateLocation)
-          .then(responseCreate => {
-            const {
-              parentUuid,
-              containerUuid,
-              columnName // 'C_Location_ID' by default
-            } = this.metadata
-
-            const recordUuid = this.$store.getters.getValueOfField({
-              parentUuid,
-              containerUuid,
-              columnName: 'UUID'
-            })
-
-            this.containerManager.actionPerformed({
-              containerUuid,
-              field: this.metadata,
-              value: responseCreate[columnName],
-              recordUuid
-            })
-          })
-          .catch(error => {
-            this.$message({
-              message: error.message,
-              isShowClose: true,
-              type: 'error'
-            })
-            console.warn(`Error create Location Address: ${error.message}. Code: ${error.code}.`)
-          })
+        this.createNewLocation(attributesToServer)
         // break to only create
         return
       }
@@ -624,7 +619,7 @@ export default {
         id: locationId,
         attributesList: attributesToServer
       })
-        .then(updateLocation)
+        .then(this.responseManager)
         .catch(error => {
           this.$message({
             message: error.message,
@@ -632,6 +627,46 @@ export default {
             type: 'error'
           })
           console.warn(`Error update Location Address: ${error.message}. Code: ${error.code}.`)
+        })
+    },
+
+    createNewLocation(attributesList) {
+      const {
+        parentUuid,
+        containerUuid,
+        columnName // 'C_Location_ID' by default
+      } = this.metadata
+
+      attributesList = attributesList
+        .filter(attribute => {
+          return !isEmptyValue(attribute.value)
+        })
+
+      createLocationAddress({
+        attributesList
+      })
+        .then(this.responseManager)
+        .then(responseCreate => {
+          const recordUuid = this.$store.getters.getValueOfField({
+            parentUuid,
+            containerUuid,
+            columnName: 'UUID'
+          })
+
+          this.containerManager.actionPerformed({
+            containerUuid,
+            field: this.metadata,
+            value: responseCreate[columnName],
+            recordUuid
+          })
+        })
+        .catch(error => {
+          this.$message({
+            message: error.message,
+            isShowClose: true,
+            type: 'error'
+          })
+          console.warn(`Error create Location Address: ${error.message}. Code: ${error.code}.`)
         })
     },
 
@@ -699,6 +734,7 @@ export default {
 
               this.metadataList = listOfFields
               this.changeCaptureSequence(this.countryId)
+              this.setDefaultValues()
               this.isLoadingFields = false
             }
           })
@@ -722,16 +758,6 @@ export default {
   }
   .el-form-item--small.el-form-item {
     margin-bottom: 5px !important;
-  }
-
-  .location-address-footer {
-    button {
-      padding: 4px 8px;
-
-      i, svg {
-        font-size: 20px !important;
-      }
-    }
   }
 }
 </style>
