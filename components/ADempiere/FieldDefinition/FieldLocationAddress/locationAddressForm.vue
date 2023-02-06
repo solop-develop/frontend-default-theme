@@ -127,6 +127,7 @@ import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } fr
 import {
   COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP, COORDENATES_COLUMN_NAMES
 } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // API Request Methods
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
@@ -264,9 +265,7 @@ export default {
     clearTimeout(this.timeOutFields)
     this.timeOutFields = setTimeout(() => {
       this.getFieldsList()
-      if (isEmptyValue(this.locationId) || this.locationId <= 0) {
-        this.setDefaultValues()
-      }
+      this.setDefaultValues()
     }, 500)
   },
 
@@ -282,6 +281,10 @@ export default {
     },
 
     setDefaultValues() {
+      if (!isEmptyValue(this.locationId) && this.locationId > 0) {
+        return
+      }
+
       const parsedDefaultValues = this.$store.getters.getParsedDefaultValues({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.uuidForm,
@@ -576,7 +579,7 @@ export default {
         attributes: responseLocation.attributes
       })
 
-      return {} // responseLocation.attributes
+      return responseLocation.attributes
     },
 
     sendValuesToServer() {
@@ -600,10 +603,15 @@ export default {
         containerUuid: this.uuidForm
       })
       const attributesToServer = this.getAttributesToServer(attributes)
+        .filter(attribute => {
+          return !LOG_COLUMNS_NAME_LIST.includes(attribute.columnName) &&
+            !attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+            !attribute.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)
+        })
 
       const locationId = this.locationId
       if (this.isEmptyValue(locationId) || locationId === 0) {
-        // this.createNewLocation(attributesToServer)
+        this.createNewLocation(attributesToServer)
         // break to only create
         return
       }
@@ -628,6 +636,11 @@ export default {
         containerUuid,
         columnName // 'C_Location_ID' by default
       } = this.metadata
+
+      attributesList = attributesList
+        .filter(attribute => {
+          return !isEmptyValue(attribute.value)
+        })
 
       createLocationAddress({
         attributesList
@@ -721,6 +734,7 @@ export default {
 
               this.metadataList = listOfFields
               this.changeCaptureSequence(this.countryId)
+              this.setDefaultValues()
               this.isLoadingFields = false
             }
           })

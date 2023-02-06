@@ -164,8 +164,8 @@ export default {
         this.displayedValue = undefined
       } else {
         if (newValue !== oldValue) {
-          this.displayedValue = undefined
-          this.setDefaultValue()
+          // this.displayedValue = undefined
+          // this.setDefaultValue()
         }
       }
     }
@@ -180,6 +180,14 @@ export default {
       this.$store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm
       })
+
+      this.$store.dispatch('notifyFieldChange', {
+        containerUuid: this.metadata.containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName: this.metadata.columnName,
+        newValue: undefined
+      })
     },
     setContextValues() {
       if (this.isDisabled) {
@@ -187,16 +195,10 @@ export default {
       }
       const value = this.value
       if (isEmptyValue(value) || value <= 0) {
-        const currentValues = this.$store.getters.getValuesView({
-          containerUuid: this.metadata.containerUuid
-        })
-        this.$store.dispatch('clearValuesOnContainer', {
-          containerUuid: this.uuidForm
-        }).then(() => {
-          console.log(122, currentValues)
-        })
+        // this.$store.dispatch('clearValuesOnContainer', {
+        //   containerUuid: this.uuidForm
+        // })
       }
-      console.log(123, this.uuidForm, this.value)
     }
   }
 }
