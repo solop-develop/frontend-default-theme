@@ -1,3 +1,21 @@
+<!--
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
+-->
+
 <template>
   <el-badge
     :value="total"
@@ -74,26 +92,36 @@
 </template>
 
 <script>
+import { defineComponent, ref, computed } from '@vue/composition-api'
+
+import router from '@/router'
+import store from '@/store'
+
 // Utils and Helper Methods
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
-// import { listNotifiications } from '@/api/ADempiere/dashboard/dashboard.js'
-export default {
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+
+export default defineComponent({
   name: 'HeaderNotification',
 
-  data() {
-    return {
-      // processNotifications: [],
-      // total: 0,
-      identificadorIntervaloDeTiempo: 0,
-      currentRow: null
-    }
-  },
-  computed: {
-    total: {
+  setup() {
+    const badgeNotifications = ref(null)
+    // const show = ref(false)
+
+    const processNotifications = computed({
+      get() {
+        return store.getters.getListNotifiications
+      },
+      set(value) {
+        return value
+      }
+    })
+
+    const total = computed({
       get() {
         let count = 0
-        if (!this.isEmptyValue(this.processNotifications)) {
-          this.processNotifications.forEach(element => {
+        if (!isEmptyValue(processNotifications.value)) {
+          processNotifications.value.forEach(element => {
             count += element.quantity
           })
         }
@@ -102,38 +130,16 @@ export default {
       set(value) {
         return value
       }
-    },
-    processNotifications: {
-      get() {
-        return this.$store.getters.getListNotifiications
-      },
-      set(value) {
-        return value
-      }
-    }
-  },
-  watch: {
-    show(value) {
-      if (value) {
-        document.body.addEventListener('click', this.close)
-      } else {
-        document.body.removeEventListener('click', this.close)
-      }
-    }
-  },
-  created() {
-    this.findNotification()
-    // this.repetirCadaSegundo()
-  },
-  methods: {
-    close() {
-      this.$refs.badge && this.$refs.badge.blur()
-      this.options = []
-      this.show = false
-    },
-    handleCurrentChange(notification) {
+    })
+
+    // function close() {
+    //   // this.$refs.badge && this.$refs.badge.blur()
+    //   show.value = false
+    // }
+
+    function handleCurrentChange(notification) {
       if (notification.name === 'Solicitud' || notification.name === 'Request') {
-        this.$router.push({
+        router.push({
           name: 'Issues'
         }, () => {})
         return
@@ -141,36 +147,56 @@ export default {
       zoomIn({
         uuid: notification.action_uuid
       })
-      this.$refs.badgeNotifications.showPopper = false
-    },
-    openProcess(index, rows) {
-      this.$router.push({
-        name: '8e51c232-fb40-11e8-a479-7a0060f0aa01'
-      }, () => {})
-      this.deleteRow(index, this.processNotifications)
-    },
-    deleteRow(index, rows) {
-      rows.splice(index, 1)
-    },
-    deleteAll() {
-      // rows.splice(index, rows.lenght)
-      this.processNotifications.splice(0)
-    },
-    findNotification() {
-      this.$store.dispatch('findNotifications')
-        .then(() => {
-          setTimeout(() => {
-            this.refresNotification()
-          }, 80000)
-        })
-    },
-    refresNotification() {
-      this.findNotification()
-      this.total = 0
+      badgeNotifications.value.showPopper = false
     }
 
+    // function openProcess(index, rows) {
+    //   router.push({
+    //     name: '8e51c232-fb40-11e8-a479-7a0060f0aa01'
+    //   }, () => {})
+    //   deleteRow(index, processNotifications.value)
+    // }
+
+    // function deleteRow(index, rows) {
+    //   rows.splice(index, 1)
+    // }
+
+    // function deleteAll() {
+    //   // rows.splice(index, rows.lenght)
+    //   processNotifications.value.splice(0)
+    // }
+
+    function listActivities() {
+      total.value = 0
+      store.dispatch('findNotifications')
+        .finally(() => {
+          setTimeout(() => {
+            listActivities()
+          }, 90000)
+        })
+    }
+
+    // watch(show, (newValue, oldValue) => {
+    //   if (newValue) {
+    //     document.body.addEventListener('click', close)
+    //   } else {
+    //     document.body.removeEventListener('click', close)
+    //   }
+    // })
+
+    listActivities()
+
+    return {
+      badgeNotifications,
+      total,
+      processNotifications,
+      // methods
+      handleCurrentChange
+      // deleteAll,
+      // openProcess
+    }
   }
-}
+})
 </script>
 
 <style>
@@ -182,7 +208,6 @@ export default {
     transform: translateY(-50%) translateX(100%);
   }
 </style>
-
 <style lang="scss">
 .badge-notifications-table{
   .el-table tr {
