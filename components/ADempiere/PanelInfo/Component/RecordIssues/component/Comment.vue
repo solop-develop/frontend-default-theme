@@ -328,7 +328,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item icon="el-icon-edit" :command="{currentIssues, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
                 <el-dropdown-item icon="el-icon-delete" :command="{currentIssues, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
-                <el-dropdown-item :command="{currentIssues, option:'fullscreen'}"> <svg-icon icon-class="fullscreen" style="margin-right: 3px;" /> {{ 'Pantalla Completa' }} </el-dropdown-item>
+                <!-- <el-dropdown-item :command="{currentIssues, option:'fullscreen'}"> <svg-icon icon-class="fullscreen" style="margin-right: 3px;" /> {{ 'Pantalla Completa' }} </el-dropdown-item> -->
               </el-dropdown-menu>
             </el-dropdown>
             <!-- style="margin-right: 3px;" -->
