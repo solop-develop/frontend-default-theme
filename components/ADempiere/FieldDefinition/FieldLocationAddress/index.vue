@@ -31,14 +31,15 @@
     v-else
     key="standard-location"
     ref="locationAddress"
-    v-model="isShowedLocationForm"
+    v-model="visble"
     class="popover-location"
     placement="left-end"
     width="350"
     trigger="click"
+    @hide="hideLocationFrom"
+    @show="setContextValues"
   >
     <location-address-form
-      v-if="isShowedLocationForm"
       class="location-form"
       :parent-uuid="parentUuid"
       :container-uuid="containerUuid"
@@ -52,15 +53,14 @@
       type="text"
       style="width: 100%;"
       :disabled="isDisabled"
-      @click="setContextValues()"
     >
       <el-input
         v-model="displayedValueNotEdit"
-        :class="cssClassStyle"
         clearable
         v-bind="commonsProperties"
+        :disabled="isDisabled"
         style="width: 100%;"
-        @clear="clearValues"
+        @clear="cleanTextValue"
       >
         <i slot="prefix" class="el-icon-location-information el-input__icon" />
       </el-input>
@@ -69,15 +69,17 @@
 </template>
 
 <script>
+import { defineComponent, computed, ref, watch } from '@vue/composition-api'
+import store from '@/store'
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
-import mixinLocation from './mixinLocationAddress.js'
+// import mixinLocation from './mixinLocationAddress.js'
 import LocationAddressForm from './locationAddressForm.vue'
-
+import useLocationField from './useLocationField.js'
 // Utils and Helper Methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
-export default {
+export default defineComponent({
   name: 'FieldLocationAddress',
 
   components: {
@@ -85,8 +87,8 @@ export default {
   },
 
   mixins: [
-    fieldMixin,
-    mixinLocation
+    fieldMixin
+    // mixinLocation
   ],
 
   props: {
@@ -101,107 +103,105 @@ export default {
     containerManager: {
       type: Object,
       required: true
+    },
+    metadata: {
+      type: Object,
+      required: true
     }
   },
+  setup(props, { root, refs }) {
+    const {
+      parentUuid,
+      containerUuid,
+      displayColumnName,
+      columnName
+    } = props.metadata
 
-  computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-location '
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
+    const visble = ref(false)
 
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
+    const { isShowedLocationForm, uuidForm, setValues } = useLocationField({
+      metadata: props.metadata,
+      containerManager: props.containerManager
+    })
 
-      return styleClass
-    },
-    displayedValueNotEdit: {
+    const displayedValueNotEdit = computed({
+      // getter
       get() {
-        return this.displayedValue
+        return displayedValue.value
       },
-      set(value) {
+      // setter
+      set(newValue) {
         // emty, dont edit
       }
-    },
-    displayedValue: {
-      get() {
-        /**
-         * TODO: Add DisplayColumnName (to locator's and location's fields) in entities
-         * list response, to set value or empty value in fieldValue state when
-         * change records with dataTable.
-         */
-        if (isEmptyValue(this.value)) {
-          return undefined
-        }
+    })
 
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
+    const displayedValue = computed({
+      get() {
+        return store.getters.getValueOfFieldOnContainer({
+          parentUuid: parentUuid,
+          containerUuid: containerUuid,
           // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
+          columnName: displayColumnName
         })
       },
       set(value) {
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
+        store.commit('updateValueOfField', {
+          parentUuid: parentUuid,
+          containerUuid: containerUuid,
           // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
+          columnName: displayColumnName,
           value
         })
       }
-    },
-    popoverPlacement() {
-      return this.metadata.popoverPlacement || 'top'
+    })
+
+    function setContextValues(params) {
+      // isShowedLocationForm.value = true
+      // if (isShowedLocationForm.value) {
+      //   return
+      // }
+      store.commit('setShowedLocation', true)
     }
-  },
 
-  watch: {
-    value(newValue, oldValue) {
-      if (isEmptyValue(newValue)) {
-        this.displayedValue = undefined
-      } else {
-        if (newValue !== oldValue) {
-          // this.displayedValue = undefined
-          // this.setDefaultValue()
-        }
-      }
+    function hideLocationFrom(params) {
+      store.commit('setShowedLocation', false)
     }
-  },
 
-  methods: {
-    clearValues() {
-      // TODO: Clear values into form
-      this.value = undefined
-      this.displayedValue = undefined
+    function cleanTextValue() {
+      displayedValue.value = undefined
 
-      this.$store.dispatch('clearValuesOnContainer', {
-        containerUuid: this.uuidForm
+      store.dispatch('clearValuesOnContainer', {
+        containerUuid: uuidForm.value
       })
 
-      this.$store.dispatch('notifyFieldChange', {
-        containerUuid: this.metadata.containerUuid,
-        containerManager: this.containerManager,
-        field: this.metadata,
-        columnName: this.metadata.columnName,
+      store.dispatch('notifyFieldChange', {
+        containerUuid,
+        containerManager: props.containerManager,
+        field: props.metadata,
+        columnName,
         newValue: undefined
       })
-    },
-    setContextValues() {
-      if (this.isDisabled) {
-        return
-      }
-      const value = this.value
-      if (isEmptyValue(value) || value <= 0) {
-        // this.$store.dispatch('clearValuesOnContainer', {
-        //   containerUuid: this.uuidForm
-        // })
-      }
+    }
+
+    watch(isShowedLocationForm, (newValue, oldValue) => {
+      // if (newValue !== visble.value) {
+      visble.value = newValue
+      // }
+    })
+
+    return {
+      uuidForm,
+      visble,
+      isShowedLocationForm,
+      displayedValueNotEdit,
+      displayedValue,
+      setValues,
+      cleanTextValue,
+      setContextValues,
+      hideLocationFrom
     }
   }
-}
+})
 </script>
 
 <style lang="scss">
