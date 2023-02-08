@@ -134,7 +134,7 @@ export default defineComponent({
         // emty, dont edit
       }
     })
-
+    // store.commit('setShowedLocation', false)
     const displayedValue = computed({
       get() {
         return store.getters.getValueOfFieldOnContainer({
@@ -185,9 +185,18 @@ export default defineComponent({
 
     watch(isShowedLocationForm, (newValue, oldValue) => {
       // if (newValue !== visble.value) {
-      visble.value = newValue
+      // visble.value = newValue
       // }
+      if (!newValue) {
+        visble.value = newValue
+      }
     })
+    // watch(visble, (newValue, oldValue) => {
+    //   console.log({ newValue })
+    //   // if (newValue !== visble.value) {
+    //   // visble.value = newValue
+    //   // }
+    // })
 
     return {
       uuidForm,

@@ -88,7 +88,7 @@ export default function useLocationField({
     // setter
     set(newValue) {
       // return newValue
-      store.commit('setShowedLocation', newValue)
+      // store.commit('setShowedLocation', newValue)
       // return newValue
     }
   })
