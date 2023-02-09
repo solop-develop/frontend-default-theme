@@ -250,7 +250,6 @@ export default defineComponent({
         parentUuid: props.metadata.parentUuid,
         containerUuid: props.metadata.containerUuid
       })
-
       let window = zoomWindows.find(zoomWindow => {
         // Is Sales Transaction Window or Is Purchase Transaction Window
         return zoomWindow.isSalesTransaction === isSOTrx
