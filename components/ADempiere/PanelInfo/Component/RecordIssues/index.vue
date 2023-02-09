@@ -75,7 +75,7 @@
                             <template slot="extra">
                               <b>
                                 <!-- {{ $t('issues.documentNo') }} -->
-                                {{  '#' }}
+                                {{ '#' }}
                                 {{ scope.row.document_no }}
                               </b>
                             </template>

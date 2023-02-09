@@ -42,14 +42,26 @@
     </el-col>
 
     <el-col class="tree-col-standard-panel" :span="18">
-      <standard-panel
+      <draggable-panel
+        v-if="panelMetadata.isEditSecuence"
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :container-manager="containerManager"
         :panel-metadata="panelMetadata"
-        :is-show-filter="false"
-        :is-filter-records="false"
-        :is-advanced-query="false"
+        :is-show-filter="true"
+        :is-filter-records="true"
+        :is-advanced-query="true"
+        :is-tab-panel="true"
+      />
+      <standard-panel
+        v-else
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :container-manager="containerManager"
+        :panel-metadata="panelMetadata"
+        :is-show-filter="true"
+        :is-filter-records="true"
+        :is-advanced-query="true"
         :is-tab-panel="true"
       />
     </el-col>
@@ -70,6 +82,7 @@ import { getEntity } from '@/api/ADempiere/user-interface/persistence'
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // Components and Mixins
+import DraggablePanel from '@theme/components/ADempiere/PanelDefinition/DraggablePanel.vue'
 import StandardPanel from '@theme/components/ADempiere/PanelDefinition/StandardPanel.vue'
 
 // Utils and Helper Methods
@@ -83,6 +96,7 @@ export default defineComponent({
   name: 'TreePanel',
 
   components: {
+    DraggablePanel,
     StandardPanel
   },
 
