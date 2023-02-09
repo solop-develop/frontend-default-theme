@@ -47,9 +47,9 @@
         :container-uuid="containerUuid"
         :container-manager="containerManager"
         :panel-metadata="panelMetadata"
-        :is-show-filter="false"
-        :is-filter-records="false"
-        :is-advanced-query="false"
+        :is-show-filter="true"
+        :is-filter-records="true"
+        :is-advanced-query="true"
         :is-tab-panel="true"
       />
     </el-col>
