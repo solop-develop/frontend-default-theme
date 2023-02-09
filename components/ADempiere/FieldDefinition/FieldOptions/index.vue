@@ -250,22 +250,15 @@ export default defineComponent({
         parentUuid: props.metadata.parentUuid,
         containerUuid: props.metadata.containerUuid
       })
-      const window = zoomWindows.find(zoomWindow => {
+
+      let window = zoomWindows.find(zoomWindow => {
+        // Is Sales Transaction Window or Is Purchase Transaction Window
         return zoomWindow.isSalesTransaction === isSOTrx
       })
-      /*
-      if (typeValue(reference.zoomWindows) === 'ARRAY') {
-        // Is Sales Transaction Window
-        window = reference.zoomWindows.at(0)
-
-        // Is Purchase Transaction Window
-        if (reference.zoomWindows.length > 1) {
-          if (!isSOTrx) {
-            window = reference.zoomWindows.pop()
-          }
-        }
+      if (isEmptyValue(window)) {
+        window = zoomWindows.at(0)
       }
-      */
+
       let value = valueField.value
 
       let columnName = reference.keyColumnName
