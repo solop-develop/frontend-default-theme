@@ -266,7 +266,6 @@ export default defineComponent({
       return store.getters.getListIssues
     })
 
-
     const isNewIssues = computed({
       // getter
       get() {
