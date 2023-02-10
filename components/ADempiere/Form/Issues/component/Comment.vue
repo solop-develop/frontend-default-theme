@@ -737,13 +737,15 @@ import store from '@/store'
 // Components and Mixins
 import 'simple-m-editor/dist/simple-m-editor.css'
 
+// Constants
+import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 // import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
-import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
 
 // Api Request Methods
 import {
