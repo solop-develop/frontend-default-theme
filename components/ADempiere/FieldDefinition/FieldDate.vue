@@ -45,6 +45,7 @@ import { DATE_PLUS_TIME } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { changeTimeZone } from '@/utils/ADempiere/formatValue/dateFormat'
 
 /**
@@ -165,7 +166,7 @@ export default {
     },
     cssClassStyle() {
       let styleClass = ' custom-field-date '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
+      if (!isEmptyValue(this.metadata.cssClassName)) {
         styleClass += this.metadata.cssClassName
       }
 
@@ -184,13 +185,13 @@ export default {
      */
     formatView() {
       let format = ''
-      if (!this.isEmptyValue(this.metadata.vFormat)) {
+      if (!isEmptyValue(this.metadata.vFormat)) {
         format = this.metadata.vFormat
           .replace(/[Y]/gi, 'y')
           .replace(/[m]/gi, 'M')
           .replace(/[D]/gi, 'd')
       }
-      if (this.isEmptyValue(format)) {
+      if (isEmptyValue(format)) {
         format = 'yyyy-MM-dd'
       }
       if (this.typePicker.replace('range', '') === 'datetime') {
@@ -270,8 +271,8 @@ export default {
         startValue = value
 
         if (this.isRenderRange && !this.metadata.inTable && Array.isArray(value)) {
-          startValue = value[0]
-          endValue = value[1]
+          startValue = value.at(0)
+          endValue = value.at(1)
         }
 
         if (startValue === null) {
@@ -311,7 +312,7 @@ export default {
   methods: {
     parseValue(value) {
       // not return undefined to v-model
-      if (this.isEmptyValue(value)) {
+      if (isEmptyValue(value)) {
         if (this.isMultipleValues) {
           return []
         }
@@ -328,7 +329,7 @@ export default {
           })
         } else {
           const tempValue = []
-          if (!this.isEmptyValue(value)) {
+          if (!isEmptyValue(value)) {
             tempValue.push(value)
           }
           value = tempValue
@@ -345,17 +346,17 @@ export default {
       if (this.isRenderRange && !this.metadata.inTable) {
         let valueTo
         if (Array.isArray(value)) {
-          valueTo = value[1]
-          value = value[0]
+          valueTo = value.at(1)
+          value = value.at(0)
         }
         if (typeof valueTo === 'number') {
           valueTo = new Date(valueTo).toUTCString()
         }
-        if (this.isEmptyValue(valueTo)) {
+        if (isEmptyValue(valueTo)) {
           valueTo = undefined
         }
         value = [value, valueTo]
-        if (this.isEmptyValue(value[0]) || this.isEmptyValue(value[1])) {
+        if (isEmptyValue(value.at(0)) || isEmptyValue(value.at(1))) {
           value = []
         }
       }
@@ -376,8 +377,8 @@ export default {
       }
 
       if (this.isRenderRange && !this.metadata.inTable && Array.isArray(value)) {
-        startValue = value[0]
-        endValue = value[1]
+        startValue = value.at(0)
+        endValue = value.at(1)
       }
 
       if (startValue === null) {

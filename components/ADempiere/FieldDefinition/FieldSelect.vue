@@ -79,7 +79,7 @@ export default {
         styleClass += ' field-empty-required '
       }
 
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
+      if (!isEmptyValue(this.metadata.cssClassName)) {
         styleClass += this.metadata.cssClassName
       }
 
@@ -228,7 +228,7 @@ export default {
       }
     },
     currentTab() {
-      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+      if (isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
         return {}
       }
       return this.containerManager.getPanel({
@@ -246,7 +246,7 @@ export default {
       let value = this.value
       if (isMultiple) {
         const valueInArray = []
-        if (!this.isEmptyValue(value)) {
+        if (!isEmptyValue(value)) {
           valueInArray.push(value)
         }
         value = valueInArray
@@ -254,7 +254,7 @@ export default {
         if (Array.isArray(value)) {
           if (value.length) {
             // set first value
-            value = value[0]
+            value = value.at(0)
           } else {
             value = this.blankOption.value
           }
@@ -309,7 +309,6 @@ export default {
       }
     },
     setDisplayedValue() {
-      this.optionsList = this.getStoredLookupAll
       const value = this.value
       // if empty clear all values
       if (isEmptyValue(value)) {
@@ -317,6 +316,12 @@ export default {
         this.uuidValue = undefined
         return
       }
+
+      this.optionsList = []
+      this.$nextTick(() => {
+        // this.$refs[this.metadata.columnName].selectedLabel = this.displayedValue
+        this.optionsList = this.getStoredLookupAll
+      })
 
       // find local list value
       const option = this.findOption(value)
@@ -343,6 +348,11 @@ export default {
       // request displayed value
       this.getValueOfLookup()
     },
+
+    // TODO: With remote and filter is enabled not working displayed value
+    // https://github.com/ElemeFE/element/issues/20706
+    // https://github.com/ElemeFE/element/issues/21287
+    // https://github.com/ElemeFE/element/issues/21465
     getValueOfLookup() {
       if (this.metadata.isAdvancedQuery && this.isSelectMultiple) {
         return
@@ -354,24 +364,16 @@ export default {
       this.getDefaultValueFromServer()
         .then(responseLookupItem => {
           // with value response update local component list
-          if (!this.isEmptyValue(responseLookupItem) && !this.isEmptyValue(responseLookupItem.value)) {
+          if (!isEmptyValue(responseLookupItem) && !isEmptyValue(responseLookupItem.value)) {
             this.value = responseLookupItem.value
             this.displayedValue = responseLookupItem.displayedValue
             this.uuidValue = responseLookupItem.uuid
-
-            // TODO: With remote and filter is enabled not working displayed value
-            // https://github.com/ElemeFE/element/issues/20706
-            // https://github.com/ElemeFE/element/issues/21287
-            // https://github.com/ElemeFE/element/issues/21465
-            this.optionsList = []
-            this.$nextTick(() => {
-              this.optionsList = this.getStoredLookupAll
-            })
           }
         })
         .finally(() => {
           this.optionsList = []
           this.$nextTick(() => {
+            // this.$refs[this.metadata.columnName].selectedLabel = this.displayedValue
             this.optionsList = this.getStoredLookupAll
           })
           this.isLoading = false
@@ -400,8 +402,8 @@ export default {
     },
     remoteSearch(searchQuery = '') {
       const results = this.localSearch(searchQuery)
-      if (this.isEmptyValue(searchQuery) ||
-        (!this.isEmptyValue(searchQuery) && (this.isEmptyValue(results) || results.length < 3))) {
+      if (isEmptyValue(searchQuery) ||
+        (!isEmptyValue(searchQuery) && (isEmptyValue(results) || results.length < 3))) {
         clearTimeout(this.timeOut)
         this.timeOut = setTimeout(() => {
           this.loadListFromServer(searchQuery)
@@ -412,7 +414,7 @@ export default {
       this.optionsList = results
     },
     localSearch(searchQuery = '') {
-      if (this.isEmptyValue(searchQuery)) {
+      if (isEmptyValue(searchQuery)) {
         return this.optionsList
       }
       return this.optionsList.filter(option => {
@@ -438,7 +440,7 @@ export default {
         blankValue: this.blankOption.value
       })
         .then(responseLookupList => {
-          if (!this.isEmptyValue(responseLookupList)) {
+          if (!isEmptyValue(responseLookupList)) {
             this.optionsList = responseLookupList
           } else {
             this.optionsList = this.getStoredLookupAll
@@ -471,7 +473,7 @@ export default {
         })
     },
     setContainerInformation() {
-      if (!this.isEmptyValue(this.currentTab)) {
+      if (!isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
