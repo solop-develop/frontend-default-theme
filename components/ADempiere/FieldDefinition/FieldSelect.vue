@@ -43,11 +43,11 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 /**
@@ -363,14 +363,18 @@ export default {
             // https://github.com/ElemeFE/element/issues/20706
             // https://github.com/ElemeFE/element/issues/21287
             // https://github.com/ElemeFE/element/issues/21465
-            // this.optionsList = []
-            // this.$nextTick(() => {
-            //   this.optionsList = this.getStoredLookupAll
-            // })
+            this.optionsList = []
+            this.$nextTick(() => {
+              this.optionsList = this.getStoredLookupAll
+            })
           }
         })
         .finally(() => {
-          this.optionsList = this.getStoredLookupAll
+          this.optionsList = []
+          this.$nextTick(() => {
+            this.optionsList = this.getStoredLookupAll
+          })
+          // this.optionsList = this.getStoredLookupAll
           this.isLoading = false
         })
     },
