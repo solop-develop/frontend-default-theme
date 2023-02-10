@@ -34,38 +34,38 @@
             v-if="isLoadingRecordLogsList"
             key="attachment-loading"
           />
-          <el-scrollbar v-else class="scroll-panel-info">
-            <el-descriptions :column="1">
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="table" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.tableName') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentTab.tableName }}
-                </span>
-              </el-descriptions-item>
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="user" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.recordID') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordId }}
-                </span>
-              </el-descriptions-item>
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="user" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.recordUUID') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordUuid }}
-                </span>
-              </el-descriptions-item>
-            </el-descriptions>
-            <record-logs />
-          </el-scrollbar>
+          <!-- <el-scrollbar v-else class="scroll-panel-info"> -->
+          <el-descriptions :column="1">
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="table" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.tableName') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentTab.tableName }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="user" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.recordID') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentRecordId }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="user" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.recordUUID') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentRecordUuid }}
+              </span>
+            </el-descriptions-item>
+          </el-descriptions>
+          <record-logs style="overflow: auto" />
+          <!-- </el-scrollbar> -->
         </el-tab-pane>
 
         <el-tab-pane name="listReference">
