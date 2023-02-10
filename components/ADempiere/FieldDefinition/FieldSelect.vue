@@ -47,6 +47,9 @@
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
 
+// Constants
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
@@ -145,7 +148,7 @@ export default {
           value
         })
         // update element column name
-        if (columnName !== this.metadata.elementName) {
+        if (!this.metadata.isSameColumnElement) {
           this.$store.commit('updateValueOfField', {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
@@ -222,9 +225,18 @@ export default {
           parentUuid: this.metadata.parentUuid,
           containerUuid,
           // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
+          columnName: displayColumnName,
           value
         })
+        // update element column name
+        if (!this.metadata.isSameColumnElement) {
+          this.$store.commit('updateValueOfField', {
+            parentUuid: this.metadata.parentUuid,
+            containerUuid,
+            columnName: DISPLAY_COLUMN_PREFIX + this.metadata.elementName,
+            value
+          })
+        }
       }
     },
     currentTab() {
@@ -298,7 +310,8 @@ export default {
       })
     },
     findOption(value) {
-      const option = this.optionsList.find(item => item.value === value)
+      // const option = this.optionsList.find(item => item.value === value)
+      const option = this.getStoredLookupAll.find(item => item.value === value)
       if (option && option.displayedValue) {
         return option
       }
