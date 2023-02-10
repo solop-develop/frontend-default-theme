@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -115,26 +115,25 @@
       :selection="selectionsLength"
       :records-page="recordsWithFilter.length"
       :handle-change-page="handleChangePage"
-      :is-navigation="isNavigation"
       :handle-size-change="handleChangeSizePage"
     />
   </div>
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, watch } from '@vue/composition-api'
+import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref } from '@vue/composition-api'
 
-import store from '@/store'
 import router from '@/router'
+import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
 import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
@@ -186,14 +185,12 @@ export default defineComponent({
     isShowSearch: {
       type: Boolean,
       default: true
-    },
-    isNavigation: {
-      type: Boolean,
-      default: false
     }
   },
 
-  setup(props, { root, refs }) {
+  setup(props, { root }) {
+    const multipleTable = ref(null)
+
     const {
       storedWindow
     } = useFullScreenContainer({
@@ -366,7 +363,7 @@ export default defineComponent({
 
       if (!isEmptyValue(props.parentUuid)) {
         currentRowSelect.value = row
-        toggleSelection()
+        toggleSelection([])
         props.containerManager.setSelection({
           containerUuid: props.containerUuid,
           recordsSelected: [row]
@@ -475,7 +472,9 @@ export default defineComponent({
         pageSize: store.getters.getBrowserPageSize({ containerUuid: props.containerUuid })
       })
       const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
-      const query = isEmptyValue(props.parentUuid) ? { ...root.$route.query, page: pageNumber } : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
+      const query = isEmptyValue(props.parentUuid)
+        ? { ...root.$route.query, page: pageNumber }
+        : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
       router.push({
         name: root.$route.name,
         query: {
@@ -509,23 +508,6 @@ export default defineComponent({
         })
       }
       return props.dataTable
-    })
-
-    const currentTabChildren = computed(() => {
-      if (isEmptyValue(props.parentUuid)) {
-        return {}
-      }
-      const currentTab = store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
-      if (!isEmptyValue(currentTab) && !currentTab.isParentTab) {
-        const record = store.getters.getTabCurrentRow({
-          containerUuid: props.containerUuid
-        })
-        return record
-      }
-      return {}
     })
 
     const isLoadFilter = ref(false)
@@ -566,13 +548,16 @@ export default defineComponent({
      * Select or unselect rows
      * USE ONLY MOUNTED
      */
-    function toggleSelection(rows) {
-      if (rows) {
+    function toggleSelection(rows = []) {
+      if (isEmptyValue(multipleTable.value)) {
+        return
+      }
+      if (!isEmptyValue(rows)) {
         rows.forEach(row => {
-          refs.multipleTable.toggleRowSelection(row)
+          multipleTable.value.toggleRowSelection(row)
         })
       } else {
-        refs.multipleTable.clearSelection()
+        multipleTable.value.clearSelection()
       }
     }
     function tableRowClassName(params) {
@@ -604,26 +589,9 @@ export default defineComponent({
         const selectionsList = props.containerManager.getSelection({
           containerUuid: props.containerUuid
         })
-        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList)) {
-          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-          props.containerManager.setSelection({
-            containerUuid: props.containerUuid,
-            recordsSelected: [currentRow]
-          })
-          toggleSelection([currentRow])
-        }
-        // if (!isEmptyValue(selectionsList)) {
-        //   toggleSelection(selectionsList)
-        // }
+        toggleSelection(selectionsList)
       }, 1000)
     }
-
-    watch(currentTabChildren, (newValue, oldValue) => {
-      if (!isEmptyValue(newValue) && newValue !== oldValue) {
-        loadSelect()
-      }
-    })
 
     onUpdated(() => {
       const main = document.getElementById('mainWindow')
@@ -648,26 +616,19 @@ export default defineComponent({
     onMounted(() => {
       // adjustSize()
       // setTableHeight()
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (props.isTableSelection) {
         const selectionsList = props.containerManager.getSelection({
           containerUuid: props.containerUuid
         })
         if (!isEmptyValue(selectionsList)) {
           toggleSelection(selectionsList)
-        } else if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid)) {
-          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-          props.containerManager.setSelection({
-            containerUuid: props.containerUuid,
-            recordsSelected: [currentRow]
-          })
-          toggleSelection([currentRow])
         }
       }
     })
 
     return {
       // data
+      multipleTable,
       timeOut,
       timeOutSearch,
       valueToSearch,
@@ -690,7 +651,6 @@ export default defineComponent({
       sizeViewTable,
       isMobile,
       currentRowSelect,
-      currentTabChildren,
       // methods
       filterRecord,
       setTableHeight,
