@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -62,12 +62,13 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isDecimalField } from '@/utils/ADempiere/references.js'
 import { calculationValue, formatNumber, INPUT_NUMBER_PATTERN } from '@/utils/ADempiere/formatValue/numberFormat.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
   name: 'FieldNumber',
@@ -89,7 +90,7 @@ export default {
   computed: {
     cssClassStyle() {
       let styleClass = ' custom-field-number '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
+      if (!isEmptyValue(this.metadata.cssClassName)) {
         styleClass += this.metadata.cssClassName
       }
 
@@ -100,20 +101,22 @@ export default {
       return styleClass
     },
     maxValue() {
-      if (this.isEmptyValue(this.metadata.valueMax)) {
+      if (isEmptyValue(this.metadata.valueMax)) {
+        // Number.POSITIVE_INFINITY
         return Infinity
       }
       return Number(this.metadata.valueMax)
     },
     minValue() {
-      if (this.isEmptyValue(this.metadata.valueMin)) {
+      if (isEmptyValue(this.metadata.valueMin)) {
+        // Number.NEGATIVE_INFINITY
         return -Infinity
       }
       return Number(this.metadata.valueMin)
     },
     precision() {
       // Amount, Costs+Prices, Number, Quantity
-      if (!this.isEmptyValue(this.metadata.precision)) {
+      if (!isEmptyValue(this.metadata.precision)) {
         return this.metadata.precision
       }
       if (isDecimalField(this.metadata.displayType)) {
@@ -122,7 +125,7 @@ export default {
       return undefined
     },
     isShowControls() {
-      if (!this.isEmptyValue(this.metadata.showControl)) {
+      if (!isEmptyValue(this.metadata.showControl)) {
         if (this.metadata.showControl === 0) {
           return false
         }
@@ -130,7 +133,7 @@ export default {
       return true
     },
     controlsPosition() {
-      if (!this.isEmptyValue(this.metadata.showControl)) {
+      if (!isEmptyValue(this.metadata.showControl)) {
         // show side controls
         if (this.metadata.showControl === 1) {
           return undefined
@@ -153,7 +156,7 @@ export default {
     },
     currencyCode() {
       const currencyIsoCode = this.$store.getters.getCurrencyCode
-      if (!this.isEmptyValue(this.metadata.labelCurrency)) {
+      if (!isEmptyValue(this.metadata.labelCurrency)) {
         if (this.metadata.labelCurrency !== currencyIsoCode) {
           return this.metadata.labelCurrency
         }
@@ -164,13 +167,13 @@ export default {
 
   methods: {
     keyPressField() {
-      if (!this.isEmptyValue(this.$refs[this.metadata.columnName])) {
+      if (!isEmptyValue(this.$refs[this.metadata.columnName])) {
         this.$refs[this.metadata.columnName].handleBlur()
         this.preHandleChange(this.$refs[this.metadata.columnName].currentValue)
       }
     },
     parseValue(value) {
-      if (this.isEmptyValue(value)) {
+      if (isEmptyValue(value)) {
         return undefined
       }
       return Number(value)
@@ -184,14 +187,14 @@ export default {
       // this.focusGained(event)
       this.$nextTick(() => {
         // this.$refs[this.metadata.columnName].focus()
-        if (!this.isEmptyValue(this.$refs) && !this.isEmptyValue(this.$refs[this.metadata.columnName])) {
+        if (!isEmptyValue(this.$refs) && !isEmptyValue(this.$refs[this.metadata.columnName])) {
           this.$refs[this.metadata.columnName].select()
         }
       })
     },
     select() {
       this.$nextTick(() => {
-        if (!this.isEmptyValue(this.$refs) && !this.isEmptyValue(this.$refs[this.metadata.columnName])) {
+        if (!isEmptyValue(this.$refs) && !isEmptyValue(this.$refs[this.metadata.columnName])) {
           this.$refs[this.metadata.columnName].select()
         }
       })
@@ -204,7 +207,7 @@ export default {
       const isAllowed = event.key.match(INPUT_NUMBER_PATTERN)
       if (isAllowed) {
         const result = calculationValue(this.value, event)
-        if (!this.isEmptyValue(result)) {
+        if (!isEmptyValue(result)) {
           this.valueToDisplay = result
           this.isShowed = true
         } else {
@@ -216,7 +219,7 @@ export default {
           event.preventDefault()
           const newValue = String(this.value).slice(0, -1)
           const result = calculationValue(newValue, event)
-          if (!this.isEmptyValue(result)) {
+          if (!isEmptyValue(result)) {
             this.value = this.parseValue(result)
             this.valueToDisplay = result
             this.isShowed = true
@@ -230,7 +233,7 @@ export default {
           event.preventDefault()
           const newValue = String(this.value).slice(-1)
           const result = calculationValue(newValue, event)
-          if (!this.isEmptyValue(result)) {
+          if (!isEmptyValue(result)) {
             this.value = this.parseValue(result)
             this.valueToDisplay = result
             this.isShowed = true
@@ -245,7 +248,7 @@ export default {
     },
     calculateValue(event) {
       const result = calculationValue(this.value, event)
-      if (!this.isEmptyValue(result)) {
+      if (!isEmptyValue(result)) {
         this.valueToDisplay = result
       } else {
         this.valueToDisplay = '...'
@@ -256,7 +259,7 @@ export default {
       const isAllowed = event.key.match(oeprationPattern)
       if (isAllowed) {
         const result = this.calculationValue(this.value, event)
-        if (!this.isEmptyValue(result)) {
+        if (!isEmptyValue(result)) {
           this.valueToDisplay = result
         } else {
           this.valueToDisplay = '...'
@@ -269,7 +272,7 @@ export default {
           if (newValue > 0) {
             event.preventDefault()
             const result = this.calculationValue(newValue, event)
-            if (!this.isEmptyValue(result)) {
+            if (!isEmptyValue(result)) {
               this.value = this.validateValue(result)
               this.valueToDisplay = result
             } else {
@@ -283,7 +286,7 @@ export default {
             event.preventDefault()
             const newValue = String(this.value).slice(-1)
             const result = this.calculationValue(newValue, event)
-            if (!this.isEmptyValue(result)) {
+            if (!isEmptyValue(result)) {
               this.value = this.validateValue(result)
               this.valueToDisplay = result
             } else {
@@ -303,7 +306,7 @@ export default {
       this.value = value
     },
     changeValue() {
-      if (!this.isEmptyValue(this.valueToDisplay) && this.valueToDisplay !== '...') {
+      if (!isEmptyValue(this.valueToDisplay) && this.valueToDisplay !== '...') {
         const result = this.parseValue(this.valueToDisplay)
         this.preHandleChange(result)
       }
