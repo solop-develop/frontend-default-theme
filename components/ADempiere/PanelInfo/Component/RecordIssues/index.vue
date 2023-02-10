@@ -224,10 +224,13 @@ import store from '@/store'
 
 // Components and Mixins
 import Comment from './component/Comment.vue'
+
+// Constants
+import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
+
 // Utils and Helper Methods
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
-import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
 
 export default defineComponent({
   name: 'RecordIssues',
