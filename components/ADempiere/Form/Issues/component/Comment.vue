@@ -274,6 +274,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             >
               <i class="el-icon-arrow-left" style="font-size: 18px;" />
             </el-button>
+            <!-- <el-button
+              type="primary"
+              icon="el-icon-zoom-in"
+              :alt="$t('page.processActivity.zoomIn')"
+              plain
+              style="float: right; margin-right: 5px; margin-left: 0px;margin-top: 5px;"
+              class="button-base-icon"
+              @click="zoomIssues(scope.row)"
+            /> -->
             <span v-if="!isPanelEditRequest" style="color: black; font-size: 18px;">
               {{ '#' + currentIssues.document_no }}
               {{ currentIssues.subject }}
@@ -306,6 +315,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item icon="el-icon-edit" :command="{currentIssues, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
                 <el-dropdown-item icon="el-icon-delete" :command="{currentIssues, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
+                <el-dropdown-item icon="el-icon-zoom-in" :command="{currentIssues, option:$t('page.processActivity.zoomIn')}"> {{ $t('page.processActivity.zoomIn') }} </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <el-button v-if="!isPanelEditRequest" style="float: right;margin-right: 10px;" plain type="success" @click="newIssues()">
@@ -732,6 +742,8 @@ import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 // import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
+import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
+import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
 
 // Api Request Methods
 import {
@@ -1197,6 +1209,10 @@ export default defineComponent({
         removeIssues(currentIssues)
         return
       }
+      if (option === lang.t('page.processActivity.zoomIn')) {
+        zoomIssues(currentIssues)
+        return
+      }
       editIssues(currentIssues)
     }
 
@@ -1268,6 +1284,20 @@ export default defineComponent({
 
     function validateUser(comment) {
       return userId.value !== comment.user_id
+    }
+
+    function zoomIssues(issues) {
+      zoomIn({
+        uuid: REQUEST_WINDOW_UUID,
+        params: {
+          filters: [
+            {
+              columnName: 'UUID',
+              value: issues.uuid
+            }
+          ]
+        }
+      })
     }
 
     loadListMail()
@@ -1353,6 +1383,7 @@ export default defineComponent({
       labelDisplayChange,
       logDisplayLanguaje,
       loadListMail,
+      zoomIssues,
       markdownContent
     }
   }

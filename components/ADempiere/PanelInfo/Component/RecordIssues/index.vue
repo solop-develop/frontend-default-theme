@@ -175,6 +175,15 @@
                           </el-button>
                         </el-popover>
                       </b>
+                      <el-button
+                        type="primary"
+                        icon="el-icon-zoom-in"
+                        :alt="$t('page.processActivity.zoomIn')"
+                        plain
+                        style="float: right; margin-right: 5px; margin-left: 0px;margin-top: 5px;"
+                        class="button-base-icon"
+                        @click="zoomIssues(scope.row)"
+                      />
                       <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;margin-top: 5px;">
                         <b>
                           <svg-icon icon-class="collections" style="font-size: 20px;" />
@@ -217,6 +226,8 @@ import store from '@/store'
 import Comment from './component/Comment.vue'
 // Utils and Helper Methods
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
+import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
 
 export default defineComponent({
   name: 'RecordIssues',
@@ -254,6 +265,7 @@ export default defineComponent({
     const listIssues = computed(() => {
       return store.getters.getListIssues
     })
+
 
     const isNewIssues = computed({
       // getter
@@ -313,6 +325,20 @@ export default defineComponent({
       store.dispatch('changeCurrentIssues', issue)
     }
 
+    function zoomIssues(issues) {
+      zoomIn({
+        uuid: REQUEST_WINDOW_UUID,
+        params: {
+          filters: [
+            {
+              columnName: 'UUID',
+              value: issues.uuid
+            }
+          ]
+        }
+      })
+    }
+
     store.dispatch('findListMailTemplates')
 
     return {
@@ -330,7 +356,8 @@ export default defineComponent({
       dueTypeColor,
       selectIssue,
       dueTypeColorDescription,
-      newIssues
+      newIssues,
+      zoomIssues
     }
   }
 })
