@@ -402,7 +402,7 @@ export default defineComponent({
         containerUuid: props.currentTabUuid,
         row: previosRecord
       })
-      setRecordpath(recordId)
+      setRecordPath(recordId)
     }
 
     /**
@@ -433,10 +433,10 @@ export default defineComponent({
         row: nextRecord
       })
 
-      setRecordpath(recordId)
+      setRecordPath(recordId)
     }
 
-    function setRecordpath(recordId) {
+    function setRecordPath(recordId) {
       router.push({
         query: {
           ...root.$route.query,
@@ -475,7 +475,7 @@ export default defineComponent({
       handleChangeSizePage,
       changePreviousRecord,
       changeNextRecord,
-      setRecordpath
+      setRecordPath
     }
   }
 
