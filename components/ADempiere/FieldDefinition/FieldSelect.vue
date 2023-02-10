@@ -374,7 +374,6 @@ export default {
           this.$nextTick(() => {
             this.optionsList = this.getStoredLookupAll
           })
-          // this.optionsList = this.getStoredLookupAll
           this.isLoading = false
         })
     },
