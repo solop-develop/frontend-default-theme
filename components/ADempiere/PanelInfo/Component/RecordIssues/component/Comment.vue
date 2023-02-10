@@ -328,6 +328,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item icon="el-icon-edit" :command="{currentIssues, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
                 <el-dropdown-item icon="el-icon-delete" :command="{currentIssues, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
+                <el-dropdown-item icon="el-icon-zoom-in" :command="{currentIssues, option:$t('page.processActivity.zoomIn')}"> {{ $t('page.processActivity.zoomIn') }} </el-dropdown-item>
                 <!-- <el-dropdown-item :command="{currentIssues, option:'fullscreen'}"> <svg-icon icon-class="fullscreen" style="margin-right: 3px;" /> {{ 'Pantalla Completa' }} </el-dropdown-item> -->
               </el-dropdown-menu>
             </el-dropdown>
@@ -1546,10 +1547,14 @@ import store from '@/store'
 // Components and Mixins
 import 'simple-m-editor/dist/simple-m-editor.css'
 
+// Constants
+import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
+import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 
 // Api Request Methods
 import {
@@ -2024,6 +2029,10 @@ export default defineComponent({
         centerDialogVisible.value = !centerDialogVisible.value
         return
       }
+      if (option === lang.t('page.processActivity.zoomIn')) {
+        zoomIssues(currentIssues)
+        return
+      }
       editIssues(currentIssues)
     }
 
@@ -2097,6 +2106,20 @@ export default defineComponent({
 
     function validateUser(comment) {
       return userId.value !== comment.user_id
+    }
+
+    function zoomIssues(issues) {
+      zoomIn({
+        uuid: REQUEST_WINDOW_UUID,
+        params: {
+          filters: [
+            {
+              columnName: 'UUID',
+              value: issues.uuid
+            }
+          ]
+        }
+      })
     }
 
     loadListMail()
@@ -2179,6 +2202,7 @@ export default defineComponent({
       exitPopover,
       labelDisplayChange,
       logDisplayLanguaje,
+      zoomIssues,
       markdownContent
     }
   }
