@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -34,38 +34,38 @@
             v-if="isLoadingRecordLogsList"
             key="attachment-loading"
           />
-          <el-scrollbar v-else class="scroll-panel-info">
-            <el-descriptions :column="1">
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="table" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.tableName') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentTab.tableName }}
-                </span>
-              </el-descriptions-item>
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="user" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.recordID') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordId }}
-                </span>
-              </el-descriptions-item>
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="user" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.recordUUID') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordUuid }}
-                </span>
-              </el-descriptions-item>
-            </el-descriptions>
-            <record-logs />
-          </el-scrollbar>
+          <!-- <el-scrollbar v-else class="scroll-panel-info"> -->
+          <el-descriptions :column="1">
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="table" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.tableName') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentTab.tableName }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="user" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.recordID') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentRecordId }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="user" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.recordUUID') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentRecordUuid }}
+              </span>
+            </el-descriptions-item>
+          </el-descriptions>
+          <record-logs style="overflow: auto" />
+          <!-- </el-scrollbar> -->
         </el-tab-pane>
 
         <el-tab-pane name="listReference">
@@ -195,6 +195,7 @@ import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import WorkflowLogs from './Component/workflowLogs/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
 // API Request Methods
 import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
 

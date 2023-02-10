@@ -138,7 +138,7 @@
         <svg-icon icon-class="tab" style="margin-right: 10px;" />
         {{ $t('window.containerInfo.log.tab') }}
         <span style="color: #606266; font-weight: bold;">
-          {{ currentTabMetadata.name }}
+          {{ currentTabPanelInfo.name }}
         </span>
       </span>
 
@@ -297,6 +297,23 @@ export default defineComponent({
     const isShowedTabs = computed(() => {
       const storedWindow = store.getters.getStoredWindow(props.parentUuid)
       return storedWindow.isShowedTabsParent
+    })
+
+    // Container Info
+    const containerInfo = computed(() => {
+      const inf = store.getters.getContainerInfo
+      if (inf) {
+        return inf
+      }
+      return {}
+    })
+
+    // Current Tab the Panel Info
+    const currentTabPanelInfo = computed(() => {
+      if (containerInfo.value.currentTab) {
+        return containerInfo.value.currentTab
+      }
+      return {}
     })
 
     const isShowedTableRecords = computed(() => {
@@ -798,6 +815,8 @@ export default defineComponent({
       currentRecordUuid,
       currentRecordId,
       isWithChildsTab,
+      containerInfo,
+      currentTabPanelInfo,
       // methods
       handleClick,
       changeShowedRecords,

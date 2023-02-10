@@ -380,6 +380,8 @@ export default defineComponent({
      */
     function changePreviousRecord(recordPrevious) {
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      const previosRecord = recordsWithFilter.value[posicionIndex - 1]
+      const recordId = previosRecord[props.tabAttributes.tableName + '_ID']
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
@@ -392,14 +394,15 @@ export default defineComponent({
         attributeNameControl: undefined,
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex - 1]
+        row: previosRecord
       })
 
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex - 1]
+        row: previosRecord
       })
+      setRecordPath(recordId)
     }
 
     /**
@@ -407,6 +410,8 @@ export default defineComponent({
      */
     function changeNextRecord(recordNext) {
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      const nextRecord = recordsWithFilter.value[posicionIndex + 1]
+      const recordId = nextRecord[props.tabAttributes.tableName + '_ID']
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
@@ -419,14 +424,29 @@ export default defineComponent({
         attributeNameControl: undefined,
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex + 1]
+        row: nextRecord
       })
 
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex + 1]
+        row: nextRecord
       })
+
+      setRecordPath(recordId)
+    }
+
+    function setRecordPath(recordId) {
+      router.push({
+        query: {
+          ...root.$route.query,
+          recordId
+        },
+        params: {
+          ...root.$route.params,
+          recordId
+        }
+      }, () => {})
     }
 
     return {
@@ -454,7 +474,8 @@ export default defineComponent({
       handleChangePage,
       handleChangeSizePage,
       changePreviousRecord,
-      changeNextRecord
+      changeNextRecord,
+      setRecordPath
     }
   }
 
