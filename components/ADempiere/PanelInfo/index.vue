@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -195,6 +195,7 @@ import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import WorkflowLogs from './Component/workflowLogs/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
 // API Request Methods
 import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
 
