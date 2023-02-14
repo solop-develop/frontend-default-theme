@@ -98,6 +98,7 @@
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
+import router from '@/router'
 import store from '@/store'
 
 // Components and Mixins
@@ -140,7 +141,7 @@ export default defineComponent({
     }
   },
 
-  setup(props) {
+  setup(props, { root }) {
     /**
     * Refs
     */
@@ -289,6 +290,10 @@ export default defineComponent({
 
     function searchRecords(params) {
       const filters = getFilters()
+
+      let query = Object.assign({}, root.$route.query)
+      delete query.filters
+      router.replace({ query })
 
       isLoadingSearch.value = true
       store.dispatch('getEntities', {
