@@ -291,7 +291,7 @@ export default defineComponent({
     function searchRecords(params) {
       const filters = getFilters()
 
-      let query = Object.assign({}, root.$route.query)
+      const query = Object.assign({}, root.$route.query)
       delete query.filters
       router.replace({ query })
 
