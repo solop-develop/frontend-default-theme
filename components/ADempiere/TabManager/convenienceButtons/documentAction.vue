@@ -242,22 +242,18 @@ export default defineComponent({
     function sendAction(params) {
       isVisibleDocAction.value = false
 
-      store.dispatch('changeActionsDoc', {
+      store.dispatch('runDocumentAction', {
         tableName: props.tabAttributes.tableName,
-        uuid: recordUuid.value,
+        recordUuid: recordUuid.value,
         containerUuid,
         docAction: selectDocActions.value
       })
-        .then(response => {
-          refreshCurrentRecord()
-        })
         .catch(error => {
           console.warn(`Error Run Doc Action: ${error.message}. Code: ${error.code}.`)
         })
-
-      setTimeout(() => {
-        refreshCurrentRecord()
-      }, 700)
+        .finally(() => {
+          refreshCurrentRecord()
+        })
     }
 
     function handleCommandActions(params) {
