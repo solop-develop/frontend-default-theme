@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -76,6 +76,7 @@
                 :displayed-value="item.value"
               />
             </div>
+            <!-- {{ item.description }} -->
 
             <!-- TODO: Add description legend info -->
             <!--
@@ -104,8 +105,16 @@
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-// components and mixins
+import store from '@/store'
+
+// Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import {
+  refreshRecord
+} from '@/utils/ADempiere/dictionary/window'
 
 export default defineComponent({
   name: 'DocumentStatus',
@@ -124,16 +133,20 @@ export default defineComponent({
   setup(props, { root }) {
     const displayedValue = computed(() => {
       const { parentUuid, containerUuid, displayColumnName } = props.fieldAttributes
-      return root.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid,
         containerUuid,
         columnName: displayColumnName
       })
     })
 
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.fieldAttributes.containerUuid)
+    })
+
     const value = computed(() => {
       const { parentUuid, containerUuid, columnName } = props.fieldAttributes
-      return root.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid,
         containerUuid,
         columnName
@@ -143,7 +156,7 @@ export default defineComponent({
 
     const withoutRecord = computed(() => {
       // TODO: Validate with record attribute
-      if (root.isEmptyValue(root.$route.query.action) ||
+      if (isEmptyValue(root.$route.query.action) ||
         ['create-new', 'reference', 'advancedQuery', 'criteria'].includes(root.$route.query.action)) {
         return true
       }
@@ -151,7 +164,7 @@ export default defineComponent({
     })
 
     const documentActions = computed(() => {
-      return root.$store.getters.getListDocumentActions
+      return store.getters.getListDocumentActions
     })
 
     const listDocumentActions = computed(() => {
@@ -173,10 +186,6 @@ export default defineComponent({
       return currentActionNode.value.name
     })
 
-    const processOrder = computed(() => {
-      return root.$store.getters.getOrders
-    })
-
     function listActionDocument(isShowList) {
       if (!isShowList) {
         return
@@ -184,7 +193,7 @@ export default defineComponent({
       if (!withoutRecord.value && root.$route.query.action !== documentActions.value.recordUuid) {
         const tableName = props.fieldAttributes.tabTableName
 
-        root.$store.dispatch('listDocumentActionStatus', {
+        store.dispatch('listDocumentActionStatus', {
           recordUuid: root.$route.query.action,
           tableName,
           recordId: root.$route.params.recordId
@@ -193,38 +202,21 @@ export default defineComponent({
     }
 
     function documentActionChange(value) {
-      // this.$store.dispatch('notifyFieldChange', {
-      //   parentUuid: this.fieldAttributes.parentUuid,
-      //   containerUuid: this.fieldAttributes.containerUuid,
-      //   columnName: 'DocAction',
-      //   isSendToServer: true,
-      //   newValue: value
-      // })
+      const { tabTableName: tableName, containerUuid } = props.fieldAttributes
 
-      const tableName = props.fieldAttributes.tabTableName
+      store.commit('setShowFieldOption', false)
 
-      root.$store.dispatch('startProcess', {
-        action: {
-          uuid: processOrder.value.uuid,
-          id: processOrder.value.id,
-          name: processOrder.value.name
-        }, // process metadata
+      store.dispatch('runDocumentAction', {
         tableName,
-        recordId: root.$route.params.recordId,
-        recordUuid: root.$route.query.action,
-        parametersList: [
-          {
-            columnName: props.fieldAttributes.columnName,
-            value: props.valueActionDocument
-          }
-        ],
-        isActionDocument: true,
-        parentUuid: props.fieldAttributes.parentUuid,
-        panelType: props.fieldAttributes.panelType,
-        containerUuid: props.fieldAttributes.containerUuid // determinate if get table name and record id (window) or selection (browser)
+        recordUuid: recordUuid.value,
+        docAction: value,
+        containerUuid
+      }).finally(() => {
+        refreshRecord.refreshRecord({
+          parentUuid: props.fieldAttributes.parentUuid,
+          containerUuid
+        })
       })
-
-      valueActionDocument.value = ''
     }
 
     return {
