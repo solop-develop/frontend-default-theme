@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,12 +9,13 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <div
     ref="rightMenu"
@@ -47,6 +48,7 @@ import { addClass, removeClass } from '@/utils'
 
 export default {
   name: 'RightPanel',
+
   props: {
     clickNotClose: {
       default: false,
@@ -57,11 +59,13 @@ export default {
       type: Number
     }
   },
+
   data() {
     return {
       show: false
     }
   },
+
   computed: {
     isShowRightPanel: {
       get() {
@@ -81,6 +85,7 @@ export default {
       return this.$store.state.settings.theme
     }
   },
+
   watch: {
     show(value) {
       if (value && !this.clickNotClose) {
@@ -93,6 +98,7 @@ export default {
       }
     }
   },
+
   beforeDestroy() {
     this.$nextTick(() => {
       if (this.$refs.rightMenu) {
@@ -101,6 +107,7 @@ export default {
       }
     })
   },
+
   methods: {
     addEventClick() {
       window.addEventListener('click', this.closeSidebar)
