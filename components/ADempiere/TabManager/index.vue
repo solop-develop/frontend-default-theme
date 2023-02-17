@@ -485,15 +485,21 @@ export default defineComponent({
       const pageNumber = query.page
       if (query.filters) {
         filters = query.filters
-      } if (!isEmptyValue(query.action)) {
+      }
+      if (!isEmptyValue(query.action)) {
         filtersRecord = {
-          key: 'UUID',
+          columnName: UUID,
           value: query.action
         }
       }
-      if (
-        !isEmptyValue(routerParams.filters)
-      ) {
+      if (!isEmptyValue(query.recordId)) {
+        const storedTab = store.getters.getStoredTab(props.parentUuid, containerUuid)
+        filtersRecord = {
+          columnName: storedTab.keyColumn,
+          value: Number(query.recordId)
+        }
+      }
+      if (!isEmptyValue(routerParams.filters)) {
         filters = routerParams.filters
       }
 

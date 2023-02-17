@@ -243,7 +243,6 @@ export const refreshLookup = {
   isRender: false,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/EmptyOption'),
   executeMethod: ({ containerManager, fieldAttributes, value }) => {
-    console.log(123, { ...fieldAttributes })
     store.dispatch('deleteLookup', {
       parentUuid: fieldAttributes.parentUuid,
       containerUuid: fieldAttributes.containerUuid,
