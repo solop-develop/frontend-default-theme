@@ -108,6 +108,22 @@ export default ({
       })
     }
 
+    // implement container manager row
+    if (props.inTable && props.containerManager && props.containerManager.setCell) {
+      props.containerManager.setCell({
+        containerUuid,
+        rowIndex: props.metadata.rowIndex,
+        columnName,
+        value: id
+      })
+      props.containerManager.setCell({
+        containerUuid,
+        rowIndex: props.metadata.rowIndex,
+        columnName: DISPLAY_COLUMN_PREFIX + columnName,
+        value: description
+      })
+    }
+
     store.dispatch('notifyFieldChange', {
       containerUuid,
       containerManager,
