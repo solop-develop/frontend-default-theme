@@ -109,16 +109,16 @@ export default ({
     }
 
     // implement container manager row
-    if (props.inTable && props.containerManager && props.containerManager.setCell) {
-      props.containerManager.setCell({
+    if (fieldAttributes.inTable && containerManager && containerManager.setCell) {
+      containerManager.setCell({
         containerUuid,
-        rowIndex: props.metadata.rowIndex,
+        rowIndex: fieldAttributes.rowIndex,
         columnName,
         value: id
       })
-      props.containerManager.setCell({
+      containerManager.setCell({
         containerUuid,
-        rowIndex: props.metadata.rowIndex,
+        rowIndex: fieldAttributes.rowIndex,
         columnName: DISPLAY_COLUMN_PREFIX + columnName,
         value: description
       })
