@@ -71,6 +71,7 @@
 <script>
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import mixinLocation from './mixinLocationAddress.js'
 import LocationAddressForm from './locationAddressForm.vue'
 
@@ -86,6 +87,7 @@ export default {
 
   mixins: [
     fieldMixin,
+    fieldWithDisplayColumn,
     mixinLocation
   ],
 
@@ -125,34 +127,6 @@ export default {
         // emty, dont edit
       }
     },
-    displayedValue: {
-      get() {
-        /**
-         * TODO: Add DisplayColumnName (to locator's and location's fields) in entities
-         * list response, to set value or empty value in fieldValue state when
-         * change records with dataTable.
-         */
-        if (isEmptyValue(this.value)) {
-          return undefined
-        }
-
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
-          value
-        })
-      }
-    },
     popoverPlacement() {
       return this.metadata.popoverPlacement || 'top'
     }
@@ -173,9 +147,9 @@ export default {
 
   methods: {
     clearValues() {
-      // TODO: Clear values into form
       this.value = undefined
       this.displayedValue = undefined
+      this.uuidValue = undefined
 
       this.$store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm

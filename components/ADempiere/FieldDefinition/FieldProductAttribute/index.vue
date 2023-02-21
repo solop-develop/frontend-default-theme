@@ -58,6 +58,7 @@
 <script>
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import panelProductAttribute from './panelProductAttribute'
 
 // Utils and Helper Methods
@@ -71,7 +72,8 @@ export default {
   },
 
   mixins: [
-    fieldMixin
+    fieldMixin,
+    fieldWithDisplayColumn
   ],
 
   props: {
@@ -142,25 +144,6 @@ export default {
       return {
         ...this.commonsProperties,
         disabled: true
-      }
-    },
-    displayedValue: {
-      get() {
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
-          value
-        })
       }
     },
     popoverPlacement() {

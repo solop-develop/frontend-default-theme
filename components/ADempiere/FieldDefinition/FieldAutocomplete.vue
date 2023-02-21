@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -54,8 +54,9 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
 
 export default {
@@ -63,6 +64,7 @@ export default {
 
   mixins: [
     fieldMixin,
+    fieldWithDisplayColumn,
     selectMixin
   ],
 
@@ -121,25 +123,6 @@ export default {
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
-          value
-        })
-      }
-    },
-    displayedValue: {
-      get() {
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
           value
         })
       }
@@ -203,21 +186,9 @@ export default {
       })
     },
     handleSelect(item) {
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.metadata.containerUuid,
-        columnName: this.metadata.columnName,
-        value: item.id
-      })
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.metadata.containerUuid,
-        columnName: this.metadata.displayColumnName,
-        value: item.name
-      })
-      this.$store.commit('updateValueOfField', {
-        containerUuid: this.metadata.containerUuid,
-        columnName: this.metadata.columnName + '_UUID',
-        value: item.uuid
-      })
+      this.value = item.id
+      this.displayValue = item.name
+      this.uuidValue = item.uuid
     }
   }
 }

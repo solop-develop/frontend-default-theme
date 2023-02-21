@@ -37,7 +37,6 @@
       :precision="precision"
       :controls="isShowControls"
       :controls-position="controlsPosition"
-      style="text-align-last: end !important"
       autofocus
       @change="preHandleChange"
       @focus="focusGained"
@@ -55,7 +54,6 @@
       v-bind="commonsProperties"
       readonly
       autofocus
-      style="text-align-last: end !important"
       @focus="customFocusGained"
     />
   </el-tooltip>
@@ -316,9 +314,20 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
   /* Show input width 100% in container */
   .el-input-number, .el-input {
     width: 100% !important; /* ADempiere Custom */
   }
+</style>
+
+<style lang="scss">
+.custom-field-number {
+  &.el-input-number, &.el-input {
+    .el-input__inner {
+      text-align-last: end !important;
+    }
+  }
+}
 </style>

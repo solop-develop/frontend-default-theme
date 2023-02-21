@@ -45,10 +45,8 @@
 <script>
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
-
-// Constants
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -60,7 +58,6 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
  * - Table Direct
  *
  * TODO: String values add single quotation marks 'value'
- * TODO: No blanck option enabled if is mandatory field
  * TODO: No includes default value into list on forms or field with dynamic validation (see default value City on location form)
  */
 export default {
@@ -68,6 +65,7 @@ export default {
 
   mixins: [
     fieldMixin,
+    fieldWithDisplayColumn,
     selectMixin
   ],
 
@@ -153,87 +151,6 @@ export default {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
             columnName: this.metadata.elementName,
-            value
-          })
-        }
-      }
-    },
-    uuidValue: {
-      get() {
-        if (this.metadata.inTable) {
-          return undefined
-        }
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + '_UUID'
-        })
-      },
-      set(value) {
-        if (this.metadata.inTable) {
-          return undefined
-        }
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + '_UUID',
-          value
-        })
-      }
-    },
-    displayedValue: {
-      get() {
-        // DisplayColumn_'ColumnName'
-        const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.getCell) {
-            return this.containerManager.getCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName
-            })
-          }
-        }
-
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName
-        })
-      },
-      set(value) {
-        const { displayColumnName, containerUuid, inTable } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName: displayColumnName,
-              value
-            })
-          }
-        }
-
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: displayColumnName,
-          value
-        })
-        // update element column name
-        if (!this.metadata.isSameColumnElement) {
-          this.$store.commit('updateValueOfField', {
-            parentUuid: this.metadata.parentUuid,
-            containerUuid,
-            columnName: DISPLAY_COLUMN_PREFIX + this.metadata.elementName,
             value
           })
         }

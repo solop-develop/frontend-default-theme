@@ -119,11 +119,14 @@ import store from '@/store'
 
 // Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import mixinLocation from './mixinLocationAddress.js'
 
 // Constants
 import FieldsList from './fieldsList.js'
-import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
+import {
+  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
 import {
   COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP, COORDENATES_COLUMN_NAMES
 } from '@/utils/ADempiere/dictionary/form/locationAddress'
@@ -153,7 +156,8 @@ export default {
   },
 
   mixins: [
-    mixinLocation
+    mixinLocation,
+    fieldWithDisplayColumn
   ],
 
   props: {
@@ -463,7 +467,7 @@ export default {
      * @param {object} values
      */
     setParentValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName, displayColumnName } = this.metadata
+      const { columnName, elementName } = this.metadata
       const { UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
@@ -474,53 +478,11 @@ export default {
       }
 
       // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value: rowData[columnName]
-      })
+      this.value = value
       // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: displayColumnName,
-        value: displayedValue
-      })
+      this.displayedValue = displayedValue
       // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-        value: uuid
-      })
-
-      // set on element name, used by columns views aliases
-      if (!this.metadata.isSameColumnElement) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: displayedValue
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value: uuid
-        })
-      }
+      this.uuidValue = uuid
     },
 
     /**

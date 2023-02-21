@@ -21,8 +21,11 @@ import store from '@/store'
 
 // Constants
 import {
-  DISPLAY_COLUMN_PREFIX, IDENTIFIER_COLUMN_SUFFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+  IDENTIFIER_COLUMN_SUFFIX
 } from '@/utils/ADempiere/dictionaryUtils'
+
+// Components and Mixins
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 
 // Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
@@ -30,6 +33,10 @@ import { formatField, trimPercentage } from '@/utils/ADempiere/valueFormat'
 
 export default {
   name: 'MixinFieldSearch',
+
+  mixins: [
+    fieldWithDisplayColumn
+  ],
 
   data() {
     return {
@@ -130,10 +137,6 @@ export default {
           }
         }
 
-        // const option = this.findOption(value)
-        // // always update uuid
-        // this.uuidValue = option.uuid
-
         store.commit('updateValueOfField', {
           parentUuid: this.metadata.parentUuid,
           containerUuid,
@@ -146,98 +149,6 @@ export default {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
             columnName: this.metadata.elementName,
-            value
-          })
-        }
-      }
-    },
-    displayedValue: {
-      get() {
-        const {
-          containerUuid, displayColumnName, inTable
-        } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.getCell) {
-            const value = this.containerManager.getCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName: displayColumnName
-            })
-            if (!isEmptyValue(value)) {
-              return value
-            }
-          }
-        }
-
-        return store.getters.getValueOfField({
-          containerUuid,
-          columnName: displayColumnName
-        })
-      },
-      set(value) {
-        const {
-          parentUuid, containerUuid, displayColumnName, inTable
-        } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.setCell) {
-            this.containerManager.setCell({
-              parentUuid,
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName: displayColumnName,
-              value
-            })
-          }
-        }
-
-        store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: displayColumnName,
-          value
-        })
-        // update element column name
-        if (!this.metadata.isSameColumnElement) {
-          store.commit('updateValueOfField', {
-            parentUuid,
-            containerUuid,
-            columnName: DISPLAY_COLUMN_PREFIX + this.metadata.elementName,
-            value
-          })
-        }
-      }
-    },
-    uuidValue: {
-      get() {
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
-        })
-      },
-      set(value) {
-        const { parentUuid, containerUuid } = this.metadata
-
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value
-        })
-        // update element column name
-        if (!this.metadata.isSameColumnElement) {
-          store.commit('updateValueOfField', {
-            parentUuid,
-            containerUuid,
-            columnName: this.metadata.elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
             value
           })
         }
@@ -261,14 +172,6 @@ export default {
         })
     }
   },
-
-  // created() {
-  //   this.unsubscribe = this.subscribeChanges()
-  // },
-
-  // beforeDestroy() {
-  //   this.unsubscribe()
-  // },
 
   methods: {
     clearValues() {
