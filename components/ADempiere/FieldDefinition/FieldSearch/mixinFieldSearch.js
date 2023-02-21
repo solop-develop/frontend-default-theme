@@ -17,7 +17,6 @@
  */
 
 import lang from '@/lang'
-import store from '@/store'
 
 // Constants
 import {
@@ -95,64 +94,6 @@ export default {
       })
 
       return allOptions
-    },
-
-    value: {
-      get() {
-        const { columnName, containerUuid, inTable } = this.metadata
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.getCell) {
-            const value = this.containerManager.getCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName
-            })
-            if (!isEmptyValue(value)) {
-              return value
-            }
-          }
-        }
-
-        return store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName
-        })
-      },
-      set(value) {
-        const { columnName, containerUuid, inTable } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.setCell) {
-            this.containerManager.setCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName,
-              value
-            })
-          }
-        }
-
-        store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName,
-          value
-        })
-        // update element column name
-        if (!this.metadata.isSameColumnElement) {
-          store.commit('updateValueOfField', {
-            parentUuid: this.metadata.parentUuid,
-            containerUuid,
-            columnName: this.metadata.elementName,
-            value
-          })
-        }
-      }
     },
 
     storedIdentifierColumns() {
