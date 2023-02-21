@@ -169,6 +169,10 @@ export default {
       type: String,
       required: true
     },
+    containerManager: {
+      type: Object,
+      required: true
+    },
     metadata: {
       type: Object,
       default: () => {
@@ -467,7 +471,7 @@ export default {
      * @param {object} values
      */
     setParentValues(rowData) {
-      const { columnName, elementName } = this.metadata
+      const { containerUuid, columnName, elementName } = this.metadata
       const { UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
@@ -483,6 +487,14 @@ export default {
       this.displayedValue = displayedValue
       // set UUID value
       this.uuidValue = uuid
+
+      store.dispatch('notifyFieldChange', {
+        containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName,
+        newValue: value
+      })
     },
 
     /**
