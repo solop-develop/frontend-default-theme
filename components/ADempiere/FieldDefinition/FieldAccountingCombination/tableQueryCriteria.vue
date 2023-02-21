@@ -226,6 +226,12 @@ export default {
       }
       return ACCOUTING_COMBINATIONS_LIST_FORM
     },
+    accoutingCombinationId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.metadata.containerUuid,
+        columnName: this.metadata.columnName
+      })
+    },
     title() {
       let title = this.metadata.panelName
       if (!isEmptyValue(this.metadata.panelName) && !isSameValues(this.metadata.panelName, this.metadata.name)) {
@@ -324,13 +330,6 @@ export default {
     currentCombinations() {
       return this.$store.getters.getCurrentAccountCombinations({
         containerUuid: this.uuidForm
-      })
-    },
-
-    accoutingCombinationId() {
-      return this.$store.getters.getValueOfField({
-        containerUuid: this.metadata.containerUuid,
-        columnName: this.metadata.columnName
       })
     }
   },
@@ -465,21 +464,23 @@ export default {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          const { columnName } = mutation.payload
-          if (mutation.payload.containerUuid === this.uuidForm && !columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)) {
-            // not included in the query criteria filter
-            if (columnName === 'Alias') {
-              return
+          if (mutation.payload.containerUuid === this.uuidForm) {
+            const { columnName } = mutation.payload
+            if (!columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)) {
+              // not included in the query criteria filter
+              if (columnName === 'Alias') {
+                return
+              }
+              // mandatory values
+              if (this.isEmptyValue(mutation.payload.value) && ['AD_Org_ID', 'Account_ID'].includes(columnName)) {
+                return
+              }
+              this.isLoadingRecords = true
+              clearTimeout(this.timeOutUpdate)
+              this.timeOutUpdate = setTimeout(() => {
+                this.searchRecordsList()
+              }, 1500)
             }
-            // mandatory values
-            if (this.isEmptyValue(mutation.payload.value) && ['AD_Org_ID', 'Account_ID'].includes(columnName)) {
-              return
-            }
-            this.isLoadingRecords = true
-            clearTimeout(this.timeOutUpdate)
-            this.timeOutUpdate = setTimeout(() => {
-              this.searchRecordsList()
-            }, 1500)
           }
         }
       })

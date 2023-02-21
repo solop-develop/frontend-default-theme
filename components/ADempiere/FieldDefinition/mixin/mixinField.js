@@ -16,6 +16,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import store from '@/store'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
@@ -43,10 +45,10 @@ export default {
 
   computed: {
     autoSave() {
-      return this.$store.state.settings.autoSave
+      return store.state.settings.autoSave
     },
     isMobile() {
-      return this.$store.state.app.device === 'mobile'
+      return store.state.app.device === 'mobile'
     },
     isDisabled() {
       return Boolean(this.metadata.readonly || this.metadata.disabled)
@@ -79,7 +81,7 @@ export default {
       return isEmptyValue(this.value) && this.metadata.required
     },
     storedDefaultValue() {
-      return this.$store.getters.getStoredDefaultValue({
+      return store.getters.getStoredDefaultValue({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.contextColumnNames,
@@ -92,21 +94,22 @@ export default {
     value: {
       get() {
         const { columnName, containerUuid, inTable } = this.metadata
-
         // table records values
         if (inTable) {
           // implement container manager row
           if (this.containerManager && this.containerManager.getCell) {
-            return this.containerManager.getCell({
+            const value = this.containerManager.getCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName
             })
+            if (!isEmptyValue(value)) {
+              return value
+            }
           }
         }
 
-        // main panel values
-        return this.$store.getters.getValueOfFieldOnContainer({
+        return store.getters.getValueOfFieldOnContainer({
           parentUuid: this.metadata.parentUuid,
           containerUuid,
           columnName
@@ -128,12 +131,21 @@ export default {
           }
         }
 
-        this.$store.commit('updateValueOfField', {
+        store.commit('updateValueOfField', {
           parentUuid: this.metadata.parentUuid,
           containerUuid,
           columnName,
           value
         })
+        // update element column name
+        if (!this.metadata.isSameColumnElement) {
+          store.commit('updateValueOfField', {
+            parentUuid: this.metadata.parentUuid,
+            containerUuid,
+            columnName: this.metadata.elementName,
+            value
+          })
+        }
       }
     },
     currentTab() {
@@ -146,17 +158,19 @@ export default {
       })
     },
     currentRecord() {
-      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
+      return store.getters.getTabCurrentRow({
+        containerUuid: this.metadata.containerUuid
+      })
     },
     currentFieldList() {
-      return this.$store.getters.getCurrentFieldList
+      return store.getters.getCurrentFieldList
     }
   },
 
   watch: {
     currentFieldList(value) {
-      const tabPanel = this.$store.getters.getContainerInfo
-      const fieldFocusColumnName = this.$store.getters.getFieldFocusColumnName
+      const tabPanel = store.getters.getContainerInfo
+      const fieldFocusColumnName = store.getters.getFieldFocusColumnName
       if (
         !isEmptyValue(fieldFocusColumnName) &&
         !isEmptyValue(tabPanel) &&
@@ -184,7 +198,7 @@ export default {
   },
 
   mounted() {
-    const tabPanel = this.$store.getters.getContainerInfo
+    const tabPanel = store.getters.getContainerInfo
     if (
       this.metadata.handleRequestFocus &&
       !isEmptyValue(tabPanel) &&
@@ -280,8 +294,8 @@ export default {
       // const info = {
       //   columnName: this.metadata.columnName
       // }
-      // this.$store.dispatch('fieldListInfo', { info })
-      this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
+      // store.dispatch('fieldListInfo', { info })
+      store.commit('setFieldFocusColumnName', this.metadata.columnName)
 
       if (this.metadata.handleContentSelection) {
         // select all the content inside the text box
@@ -292,7 +306,7 @@ export default {
         }
       }
       if (this.metadata.handleFocusGained) {
-        this.$store.dispatch('notifyFocusGained', {
+        store.dispatch('notifyFocusGained', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
           value: this.value
@@ -301,9 +315,9 @@ export default {
       this.setContainerInformation()
     },
     focusLost(value) {
-      this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
+      store.commit('setFieldFocusColumnName', this.metadata.columnName)
       if (this.metadata.handleFocusLost) {
-        this.$store.dispatch('notifyFocusLost', {
+        store.dispatch('notifyFocusLost', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
           value: this.value
@@ -312,7 +326,7 @@ export default {
     },
     keyPressed(value) {
       if (this.metadata.handleKeyPressed) {
-        this.$store.dispatch('notifyKeyPressed', {
+        store.dispatch('notifyKeyPressed', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
           value: value.key,
@@ -326,7 +340,7 @@ export default {
      */
     actionKeyPerformed(event) {
       if (this.metadata.handleActionKeyPerformed) {
-        this.$store.dispatch('notifyActionKeyPerformed', {
+        store.dispatch('notifyActionKeyPerformed', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
           value: event.target.value,
@@ -338,7 +352,7 @@ export default {
     },
     keyReleased(value) {
       if (this.metadata.handleKeyReleased) {
-        this.$store.dispatch('notifyKeyReleased', {
+        store.dispatch('notifyKeyReleased', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
           value: value.key,
@@ -360,7 +374,7 @@ export default {
         })
       }
 
-      this.$store.dispatch('changeDependentFieldsList', {
+      store.dispatch('changeDependentFieldsList', {
         field: this.metadata,
         fieldsList,
         containerManager: this.containerManager
@@ -381,18 +395,18 @@ export default {
       const info = {
         columnName: this.metadata.columnName
       }
-      this.$store.dispatch('fieldListInfo', { info })
+      store.dispatch('fieldListInfo', { info })
       this.setContainerInformation()
-      this.$store.commit('setFieldFocusColumnName', this.metadata.columnName)
+      store.commit('setFieldFocusColumnName', this.metadata.columnName)
 
       if (this.metadata.handleActionPerformed && this.autoSave) {
-        this.$store.dispatch('notifyActionPerformed', {
+        store.dispatch('notifyActionPerformed', {
           containerUuid: this.metadata.containerUuid,
           columnName: this.metadata.columnName,
           value
         })
         if (!this.metadata.isSameColumnElement) {
-          this.$store.dispatch('notifyActionPerformed', {
+          store.dispatch('notifyActionPerformed', {
             containerUuid: this.metadata.containerUuid,
             columnName: this.metadata.elementName,
             value
@@ -412,7 +426,7 @@ export default {
         return
       }
 
-      this.$store.dispatch('notifyFieldChange', {
+      store.dispatch('notifyFieldChange', {
         containerUuid: this.metadata.containerUuid,
         containerManager: this.containerManager,
         field: this.metadata,
@@ -426,7 +440,7 @@ export default {
 
     setContainerInformation() {
       if (!isEmptyValue(this.currentTab)) {
-        this.$store.dispatch('panelInfo', {
+        store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
         })

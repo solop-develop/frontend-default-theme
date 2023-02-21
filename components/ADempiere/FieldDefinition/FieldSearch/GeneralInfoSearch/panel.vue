@@ -250,7 +250,7 @@ export default {
       })
     },
     isloadingTable() {
-      return this.isLoadingRecords && !this.isEmptyValue(this.storedFieldsList)
+      return this.isLoadingRecords && !isEmptyValue(this.storedFieldsList)
     },
     generalInfoData() {
       return this.$store.getters.getGeneralInfoData({
@@ -347,11 +347,11 @@ export default {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          if (!this.isEmptyValue(mutation.payload.columnName) &&
-            !this.isEmptyValue(mutation.payload.value) &&
-            mutation.payload.containerUuid === this.uuidForm
-          ) {
-            this.getListGeneralInfoSearch()
+          if (mutation.payload.containerUuid === this.uuidForm) {
+            if (!isEmptyValue(mutation.payload.columnName) &&
+              !isEmptyValue(mutation.payload.value)) {
+              this.getListGeneralInfoSearch()
+            }
           }
         }
       })
@@ -360,7 +360,7 @@ export default {
       this.isLoadingFields = true
       const storedFieldsList = this.$store.getters.getTableHeader({ containerUuid: this.uuidForm })
 
-      if (!this.isEmptyValue(storedFieldsList)) {
+      if (!isEmptyValue(storedFieldsList)) {
         this.isLoadingFields = false
         return
       }
@@ -382,7 +382,7 @@ export default {
           if (attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX)) {
             return false
           }
-          return !this.isEmptyValue(attribute.value)
+          return !isEmptyValue(attribute.value)
         })
         .map(attribute => {
           if (attribute.value.startsWith('%') || attribute.value.endsWith('%')) {

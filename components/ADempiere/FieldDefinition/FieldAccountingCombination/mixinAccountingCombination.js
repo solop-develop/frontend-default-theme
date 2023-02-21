@@ -9,18 +9,18 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// constants
-import {
-  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
-} from '@/utils/ADempiere/dictionaryUtils'
+import store from '@/store'
+
+// Constants
 import { COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
+import { ORGANIZATION } from '@/utils/ADempiere/constants/systemColumns'
 
 export default {
   name: 'mixinAccountingCombination',
@@ -48,25 +48,25 @@ export default {
       }
     },
     recordsList() {
-      return this.$store.getters.getAccountCombinationsRecordsList({
+      return store.getters.getAccountCombinationsRecordsList({
         containerUuid: this.uuidForm
       })
     },
     // context attributes values
     acctSchemaId() {
-      return this.$store.getters.getValueOfField({
+      return store.getters.getValueOfField({
         containerUuid: this.uuidForm,
         columnName: 'C_AcctSchema_ID'
       })
     },
     organizationId() {
-      return this.$store.getters.getValueOfField({
+      return store.getters.getValueOfField({
         containerUuid: this.uuidForm,
-        columnName: 'AD_Org_ID'
+        columnName: ORGANIZATION
       })
     },
     accoutId() {
-      return this.$store.getters.getValueOfField({
+      return store.getters.getValueOfField({
         containerUuid: this.uuidForm,
         columnName: 'Account_ID'
       })
@@ -74,7 +74,7 @@ export default {
     contextAttributesList() {
       return [
         { columnName: 'C_AcctSchema_ID', value: this.acctSchemaId },
-        { columnName: 'AD_Org_ID', value: this.organizationId },
+        { columnName: ORGANIZATION, value: this.organizationId },
         { columnName: 'Account_ID', value: this.accoutId }
       ]
     }
@@ -101,66 +101,22 @@ export default {
      * @returns {string}
      */
     setValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
-      const { C_ValidCombination_ID: id, UUID: uuid } = rowData
-
+      const { C_ValidCombination_ID: value, UUID: uuid } = rowData
       const displayedValue = this.generateDisplayedValue(rowData)
 
       // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value: id
-      })
+      this.value = value
       // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
-        value: displayedValue
-      })
+      this.displayedValue = displayedValue
       // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-        value: uuid
-      })
+      this.uuidValue = uuid
 
-      // set on element name, used by columns views aliases
-      if (!this.metadata.isSameColumnElement) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value: id
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: displayedValue
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value: uuid
-        })
-      }
-
-      this.$store.dispatch('notifyFieldChange', {
+      store.dispatch('notifyFieldChange', {
         containerUuid: this.metadata.containerUuid,
         containerManager: this.containerManager,
         field: this.metadata,
         columnName: this.metadata.columnName,
-        newValue: id
+        newValue: value
       })
     }
   }
