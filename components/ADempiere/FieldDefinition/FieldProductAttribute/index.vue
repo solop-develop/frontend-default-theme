@@ -43,7 +43,7 @@
       <el-button
         slot="append"
         v-popover:productAttribute
-        class="button-base-icon"
+        class="button-show-popover"
         :disabled="isDisabled"
       >
         <svg-icon
@@ -109,6 +109,9 @@ export default {
       })
     },
     isDisabled() {
+      if (this.metadata.readonly || this.metadata.disabled) {
+        return true
+      }
       if (isEmptyValue(this.productId) || this.productId <= 0) {
         return true
       }

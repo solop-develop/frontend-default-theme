@@ -65,16 +65,24 @@ export default {
         ref: this.metadata.columnName
       }
     },
+    cssClassCustomField() {
+      return ' '
+    },
     cssClassStyle() {
-      let styleClass = ''
+      let styleClass = this.cssClassCustomField
       if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
+        styleClass += ' field-empty-required'
       }
 
       if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass = this.metadata.cssClassName
+        styleClass += ' ' + this.metadata.cssClassName
       }
 
+      // return {
+      //   [this.cssClassCustomField]: !isEmptyValue(this.cssClassCustomField)
+      //   'field-empty-required': isEmptyRequired.value,
+      //   [fieldMetadata.cssClassName]: fieldMetadata.cssClassName
+      // }
       return styleClass
     },
     isEmptyRequired() {
