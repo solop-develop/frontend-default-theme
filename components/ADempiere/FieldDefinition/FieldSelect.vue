@@ -252,6 +252,7 @@ export default {
         // this.$refs[this.metadata.columnName].selectedLabel = this.displayedValue
         this.optionsList = this.getStoredLookupAll
       })
+      this.optionsList = this.getStoredLookupAll
 
       // find local list value
       const option = this.findOption(value)
@@ -306,6 +307,7 @@ export default {
             // this.$refs[this.metadata.columnName].selectedLabel = this.displayedValue
             this.optionsList = this.getStoredLookupAll
           })
+          this.optionsList = this.getStoredLookupAll
           this.isLoading = false
         })
     },

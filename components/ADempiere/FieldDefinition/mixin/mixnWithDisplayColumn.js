@@ -55,7 +55,7 @@ export default {
           columnName
         })
       },
-      set(value) {
+      set(newValue) {
         const { columnName, containerUuid, inTable } = this.metadata
 
         // table records values
@@ -66,7 +66,7 @@ export default {
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
-              value
+              value: newValue
             })
           }
         }
@@ -75,7 +75,7 @@ export default {
           parentUuid: this.metadata.parentUuid,
           containerUuid,
           columnName,
-          value
+          value: newValue
         })
         // update element column name
         if (!this.metadata.isSameColumnElement) {
@@ -83,7 +83,7 @@ export default {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
             columnName: this.metadata.elementName,
-            value
+            value: newValue
           })
         }
       }
@@ -93,6 +93,12 @@ export default {
         // if (isEmptyValue(this.value)) {
         //   return undefined
         // }
+        const storedDefaultValue = this.storedDefaultValue
+        if (!isEmptyValue(storedDefaultValue)) {
+          if (!isEmptyValue(storedDefaultValue.displayedValue)) {
+            return storedDefaultValue.displayedValue
+          }
+        }
 
         // DisplayColumn_'ColumnName'
         const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
@@ -122,7 +128,7 @@ export default {
           columnName
         })
       },
-      set(value) {
+      set(newValue) {
         const { displayColumnName, containerUuid, inTable } = this.metadata
 
         // table records values
@@ -133,7 +139,7 @@ export default {
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName: displayColumnName,
-              value
+              value: newValue
             })
           }
         }
@@ -143,7 +149,7 @@ export default {
           containerUuid,
           // DisplayColumn_'ColumnName'
           columnName: displayColumnName,
-          value
+          value: newValue
         })
         // update element column name
         if (!this.metadata.isSameColumnElement) {
@@ -151,7 +157,7 @@ export default {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
             columnName: DISPLAY_COLUMN_PREFIX + this.metadata.elementName,
-            value
+            value: newValue
           })
         }
       }

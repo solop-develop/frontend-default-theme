@@ -131,7 +131,7 @@ import {
   documentStatusOptionItem, translateOptionItem,
   refreshLookup, zoomInOptionItem
 } from '@theme/components/ADempiere/FieldDefinition/FieldOptions/fieldOptionsList.js'
-import { isLookup } from '@/utils/ADempiere/references.js'
+import { isSupportLookup } from '@/utils/ADempiere/references.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -280,7 +280,7 @@ export default defineComponent({
         menuOptions.push(documentStatusOptionItem)
       }
 
-      if (isLookup(field.displayType)) {
+      if (isSupportLookup(field.displayType)) {
         menuOptions.push(refreshLookup)
         if (field.reference && !isEmptyValue(field.reference.zoomWindows)) {
           menuOptions.push(zoomInOptionItem)

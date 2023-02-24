@@ -115,7 +115,7 @@ export default {
           columnName
         })
       },
-      set(value) {
+      set(newValue) {
         const { columnName, containerUuid, inTable } = this.metadata
 
         // table records values
@@ -126,7 +126,7 @@ export default {
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
-              value
+              value: newValue
             })
           }
         }
@@ -135,7 +135,7 @@ export default {
           parentUuid: this.metadata.parentUuid,
           containerUuid,
           columnName,
-          value
+          value: newValue
         })
         // update element column name
         if (!this.metadata.isSameColumnElement) {
@@ -143,7 +143,7 @@ export default {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
             columnName: this.metadata.elementName,
-            value
+            value: newValue
           })
         }
       }
