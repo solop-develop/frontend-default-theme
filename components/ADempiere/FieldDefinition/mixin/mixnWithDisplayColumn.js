@@ -25,7 +25,7 @@ import {
 } from '@/utils/ADempiere/dictionaryUtils'
 
 // Utils and Helper Methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'MixinWithDisplayColumn',
@@ -191,6 +191,26 @@ export default {
             value
           })
         }
+      }
+    }
+  },
+
+  data() {
+    return {
+      controlDisplayed: ''
+    }
+  },
+
+  methods: {
+    setNewDisplayedValue() {
+      const displayValue = this.displayedValue
+      if (!isSameValues(this.controlDisplayed, displayValue)) {
+        this.controlDisplayed = displayValue
+      }
+    },
+    setOldDisplayedValue() {
+      if (!isSameValues(this.controlDisplayed, this.displayedValue)) {
+        this.displayedValue = this.controlDisplayed
       }
     }
   }

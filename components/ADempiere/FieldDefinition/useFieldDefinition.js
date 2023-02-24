@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,7 +20,7 @@ import { computed, onMounted } from '@vue/composition-api'
 
 import store from '@/store'
 
-// utils and helpers methods
+// Utils and Helpers Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default function useFieldDefinition({ fieldMetadata, containerManager }) {
@@ -46,6 +46,10 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
     return isEmptyValue(value.value) && fieldMetadata.required
   })
 
+  const cssClassCustomField = computed(() => {
+    return ' '
+  })
+
   const cssClassStyle = computed(() => {
     let styleClass = ''
     if (isEmptyRequired.value) {
@@ -56,7 +60,10 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
       styleClass = fieldMetadata.cssClassName
     }
 
+    styleClass += cssClassCustomField.value
+
     // return {
+    //   [this.cssClassCustomField]: !isEmptyValue(this.cssClassCustomField)
     //   'field-empty-required': isEmptyRequired.value,
     //   [fieldMetadata.cssClassName]: fieldMetadata.cssClassName
     // }
@@ -99,7 +106,7 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
         columnName
       })
     },
-    set(value) {
+    set(newValue) {
       const { columnName, containerUuid, inTable } = fieldMetadata
 
       // table records values
@@ -110,7 +117,7 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
             containerUuid,
             rowIndex: fieldMetadata.rowIndex,
             columnName,
-            value
+            value: newValue
           })
         }
       }
@@ -119,8 +126,16 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
         parentUuid: fieldMetadata.parentUuid,
         containerUuid,
         columnName,
-        value
+        value: newValue
       })
+      if (!fieldMetadata.isSameColumnElement) {
+        store.commit('updateValueOfField', {
+          parentUuid: fieldMetadata.parentUuid,
+          containerUuid,
+          columnName: fieldMetadata.elementName,
+          value: newValue
+        })
+      }
     }
   })
 
@@ -139,7 +154,13 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
   const displayedValue = computed({
     get() {
     },
-    set(value) {
+    set(newValue) {
+    }
+  })
+  const uuidValue = computed({
+    get() {
+    },
+    set(newValue) {
     }
   })
 
@@ -173,7 +194,8 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
     // return default parsed value
     return Promise.resolve({
       value: parseValue(value.value),
-      displayedValue: undefined
+      displayedValue: undefined,
+      uuid: undefined
     })
   }
 
@@ -330,21 +352,25 @@ export default function useFieldDefinition({ fieldMetadata, containerManager }) 
     if (!isEmptyValue(storedValues)) {
       // get from server
       const {
+        uuid: uuidOfStore,
         value: valueOfStore,
         displayedValue: displayedValueOfStore
       } = storedValues
 
       // set value into component and fieldValue store
+      uuidValue.value = uuidOfStore
       displayedValue.value = displayedValueOfStore
       value.value = parseValue(valueOfStore)
     } else {
       // get from server
       const {
+        uuid: uuidOfSserver,
         value: valueOfServer,
         displayedValue: displayedValueOfServer
       } = await this.getDefaultValueFromServer()
 
       // set value into component and fieldValue store
+      uuidValue.value = uuidOfSserver
       displayedValue.value = displayedValueOfServer
       value.value = parseValue(valueOfServer)
     }
