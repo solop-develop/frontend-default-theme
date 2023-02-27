@@ -415,13 +415,6 @@ export default defineComponent({
       }
     }
 
-    function headerLabel(field) {
-      if (field.isMandatory || field.isMandatoryFromLogic) {
-        return '* ' + field.name
-      }
-      return field.name
-    }
-
     // get table data
     const recordsWithFilter = computed(() => {
       if (props.containerManager && props.containerManager.getRecordsList) {
@@ -665,7 +658,6 @@ export default defineComponent({
       // methods
       adjustSize,
       tableRowClassName,
-      headerLabel,
       handleRowClick,
       handleRowDblClick,
       handleSelection,
