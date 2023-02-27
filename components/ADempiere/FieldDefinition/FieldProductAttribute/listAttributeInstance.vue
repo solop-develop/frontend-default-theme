@@ -17,66 +17,81 @@
 -->
 
 <template>
-  <el-form
-    v-shortkey="{ closeForm: ['esc'] }"
-    label-position="top"
-    size="small"
-    class="product-attribute-list"
+  <el-main
+    v-shortkey="shortsKey"
+    class="product-attributes-list-container"
+    style="padding-top: 0px"
+    @shortkey.native="keyAction"
   >
+
+    <el-form
+      v-shortkey="shortsKey"
+      label-position="top"
+      size="small"
+      class="form-min-label"
+      @submit.native.prevent="notSubmitForm"
+      @shortkey.native="keyAction"
+    >
+      <el-row>
+        <el-col :span="24">
+          <el-form-item :label="$t('field.productAttribute.searchValue')">
+            <el-input
+              v-model="searchValue"
+              style="width: 100%;"
+              clearable
+              @input="listWithSearchValue"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+
     <el-row :gutter="0">
       <el-col :span="24">
         <el-table
           :data="listDataAttribute"
           height="250"
           stripe
+          fit
+          size="mini"
           style="width: 100%"
           @row-click="selectAttribute"
           @row-dblclick="selectValue"
         >
+          <index-column
+            :page-number="1"
+            :page-size="ROWS_OF_RECORDS_BY_PAGE"
+          />
+
           <el-table-column
             prop="description"
             :label="$t('field.productAttribute.description')"
-            height="100"
-            style="padding: 20px !important;"
+            width="300"
           >
             <template slot-scope="scope">
-              <p v-if="!isEmptyValue(scope.row.description)">
-                {{ scope.row.description }}
-              </p>
-              <p
-                v-else
-                style="padding: 5px;"
-              />
+              {{ scope.row.description }}
             </template>
           </el-table-column>
           <el-table-column
             prop="lot"
             :label="$t('field.productAttribute.lot')"
-            height="50"
-            style="padding: 20px !important;"
           >
             <template slot-scope="scope">
-              <p>
-                {{ scope.row.lot }}
-              </p>
+              {{ scope.row.lot }}
             </template>
           </el-table-column>
           <el-table-column
             prop="serial"
             :label="$t('field.productAttribute.serial')"
-            height="50"
-            style="padding: 20px !important;"
           >
             <template slot-scope="scope">
-              <p>
-                {{ scope.row.serial }}
-              </p>
+              {{ scope.row.serial }}
             </template>
           </el-table-column>
         </el-table>
       </el-col>
 
-      <el-col :span="24" class="product-attribute-list-footer">
+      <el-col :span="24" class="product-attributes-list-footer">
         <samp style="float: right; padding-top: 4px;">
           <el-button
             :loading="isLoadingRecords"
@@ -101,23 +116,34 @@
         </samp>
       </el-col>
     </el-row>
-  </el-form>
+  <!-- </el-form> -->
+  </el-main>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from '@vue/composition-api'
+import { defineComponent, computed, ref, onMounted } from '@vue/composition-api'
 
 import store from '@/store'
+
+// Components and Mixins
+import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
+
+// Constants
+import { ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/tableUtils'
 
 // API Request Methods
 import {
   requestListProductAttributesSetInstances
-} from '@/api/ADempiere/form/productAttribute'
+} from '@/api/ADempiere/field/productAttribute'
 
 import useProductAttribute from './useProductAttribute.js'
 
 export default defineComponent({
   name: 'ListAttributeInstance',
+
+  components: {
+    IndexColumn
+  },
 
   props: {
     parentUuid: {
@@ -152,8 +178,34 @@ export default defineComponent({
     })
 
     const listDataAttribute = ref([])
+    const timeOutSearch = ref(null)
     const isLoadingRecords = ref(false)
     const currentSelectAttributes = ref({})
+
+    const searchValue = ref('')
+
+    const shortsKey = computed(() => {
+      return {
+        close: ['esc'],
+        refreshList: ['f5']
+      }
+    })
+
+    function keyAction(event) {
+      switch (event.srcKey) {
+        case 'refreshList':
+          /**
+           * TODO: When refreshing you are making 2 list requests, you can be the
+           * observer that activates the second request
+          */
+          listProductAttributesSetInstances()
+          break
+
+        case 'close':
+          close()
+          break
+      }
+    }
 
     function selectAttribute(row, column, event) {
       store.commit('setCurrentProductAttribute', row)
@@ -168,7 +220,8 @@ export default defineComponent({
     function listProductAttributesSetInstances() {
       isLoadingRecords.value = true
       requestListProductAttributesSetInstances({
-        productId: productId.value
+        productId: productId.value,
+        searchValue: searchValue.value
       })
         .then(response => {
           const { records } = response
@@ -182,20 +235,33 @@ export default defineComponent({
         })
     }
 
+    function listWithSearchValue() {
+      clearTimeout(timeOutSearch.value)
+      timeOutSearch.value = setTimeout(() => {
+        listProductAttributesSetInstances()
+      }, 500)
+    }
+
     onMounted(() => {
       listProductAttributesSetInstances()
     })
 
     return {
+      ROWS_OF_RECORDS_BY_PAGE,
       // Refs
       currentSelectAttributes,
       listDataAttribute,
       isLoadingRecords,
+      searchValue,
+      // Computeds
+      shortsKey,
       // Methods
       clearValues,
+      keyAction,
       setValues,
       selectValue,
       listProductAttributesSetInstances,
+      listWithSearchValue,
       close,
       selectAttribute
     }
@@ -205,8 +271,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.product-attribute-list {
-  .product-attribute-list-footer {
+.product-attributes-list {
+  .product-attributes-list-footer {
     padding-bottom: 10px;
   }
 }

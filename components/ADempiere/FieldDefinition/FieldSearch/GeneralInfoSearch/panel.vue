@@ -141,6 +141,7 @@ import store from '@/store'
 // Constants
 import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/field/generalInfoSearch'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { OPERATOR_LIKE } from '@/utils/ADempiere/dataUtils'
 
 // Components and Mixins
 import fieldSearchMixin from '../mixinFieldSearch'
@@ -152,7 +153,6 @@ import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexC
 // Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form'
-import { OPERATOR_LIKE } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'PanelGeneralInfoSearch',
