@@ -83,13 +83,18 @@
       <template v-for="(fieldAttributes, key) in headerList">
         <el-table-column
           :key="key"
-          :label="headerLabel(fieldAttributes)"
           :column-key="fieldAttributes.columnName"
           :prop="fieldAttributes.columnName"
           sortable
           min-width="210"
           :fixed="fieldAttributes.isFixedTableColumn"
         >
+          <template slot="header">
+            <span v-if="containerManager.isMandatoryColumn(fieldAttributes)" style="color: red">
+              *
+            </span>
+            {{ fieldAttributes.name }}
+          </template>
           <template slot-scope="scope">
             <!-- formatted displayed value -->
             <cell-edit-info
@@ -446,13 +451,6 @@ export default defineComponent({
       }
     }
 
-    function headerLabel(field) {
-      if (field.isMandatory || field.isMandatoryFromLogic) {
-        return '* ' + field.name
-      }
-      return field.name
-    }
-
     /**
      * Verify is displayed column/field in table
      */
@@ -657,7 +655,6 @@ export default defineComponent({
       adjustSize,
       tableRowClassName,
       handleChangeSearch,
-      headerLabel,
       handleChangePage,
       handleRowClick,
       handleRowDblClick,
