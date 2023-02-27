@@ -17,6 +17,7 @@
  */
 
 import lang from '@/lang'
+import store from '@/store'
 
 // Constants
 import {
@@ -74,13 +75,13 @@ export default {
     },
     // implement to overwrite
     recordsList() {
-      return this.$store.getters.getGeneralInfoRecordsList({
+      return store.getters.getGeneralInfoRecordsList({
         containerUuid: this.uuidForm
       })
     },
     // includes list lookups and default values
     getStoredLookupsAndDefaultValues() {
-      const allOptions = this.$store.getters.getStoredLookupAll({
+      const allOptions = store.getters.getStoredLookupAll({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,
@@ -97,7 +98,7 @@ export default {
     },
 
     storedIdentifierColumns() {
-      const listIdentifier = this.$store.getters.getIdentifier({
+      const listIdentifier = store.getters.getIdentifier({
         containerUuid: this.uuidForm
       })
       if (this.isEmptyValue(listIdentifier)) {
@@ -120,14 +121,14 @@ export default {
       this.setValues(this.blankValues)
     },
     // subscribeChanges() {
-    //   return this.$store.subscribe((mutation, state) => {Q
+    //   return store.subscribe((mutation, state) => {Q
     //     if (mutation.type === 'updateValueOfField') {
     //       if (mutation.payload.containerUuid === this.metadata.containerUuid) {
     //         // add displayed value to persistence
     //         if (mutation.payload.columnName === this.metadata.columnName) {
     //           this.preHandleChange(mutation.payload.value)
 
-    //           this.$store.dispatch('notifyFieldChange', {
+    //           store.dispatch('notifyFieldChange', {
     //             containerUuid: this.metadata.containerUuid,
     //             containerManager: this.containerManager,
     //             field: this.metadata,
@@ -304,7 +305,7 @@ export default {
       // set UUID value
       this.uuidValue = uuid
 
-      this.$store.dispatch('notifyFieldChange', {
+      store.dispatch('notifyFieldChange', {
         parentUuid,
         containerUuid,
         containerManager: this.containerManager,

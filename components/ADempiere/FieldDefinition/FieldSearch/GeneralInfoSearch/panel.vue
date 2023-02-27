@@ -136,8 +136,10 @@
 </template>
 
 <script>
+import store from '@/store'
+
 // Constants
-import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/form/generalInfoSearch'
+import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/field/generalInfoSearch'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
@@ -240,12 +242,12 @@ export default {
       }
     },
     storedFieldsList() {
-      return this.$store.getters.getTableHeader({
+      return store.getters.getTableHeader({
         containerUuid: this.uuidForm
       })
     },
     fieldsListQueryCriteria() {
-      return this.$store.getters.getQueryFieldsList({
+      return store.getters.getQueryFieldsList({
         containerUuid: this.uuidForm
       })
     },
@@ -253,7 +255,7 @@ export default {
       return this.isLoadingRecords && !isEmptyValue(this.storedFieldsList)
     },
     generalInfoData() {
-      return this.$store.getters.getGeneralInfoData({
+      return store.getters.getGeneralInfoData({
         containerUuid: this.uuidForm
       })
     },
@@ -269,13 +271,13 @@ export default {
     },
     currentRow: {
       set(rowSelected) {
-        this.$store.commit('setGeneralInfoSelectedRow', {
+        store.commit('setGeneralInfoSelectedRow', {
           containerUuid: this.uuidForm,
           currentRow: rowSelected
         })
       },
       get() {
-        return this.$store.getters.getGeneralInfoCurrentRow({
+        return store.getters.getGeneralInfoCurrentRow({
           containerUuid: this.uuidForm
         })
       }
@@ -336,7 +338,7 @@ export default {
       }
     },
     closeList() {
-      this.$store.commit('setGeneralInfoShow', {
+      store.commit('setGeneralInfoShow', {
         containerUuid: this.uuidForm,
         show: false
       })
@@ -345,7 +347,7 @@ export default {
       this.getListGeneralInfoSearch(pageNumber, this.pageSize)
     },
     subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
+      return store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
           if (mutation.payload.containerUuid === this.uuidForm) {
             if (!isEmptyValue(mutation.payload.columnName) &&
@@ -358,7 +360,7 @@ export default {
     },
     setFieldsList() {
       this.isLoadingFields = true
-      const storedFieldsList = this.$store.getters.getTableHeader({ containerUuid: this.uuidForm })
+      const storedFieldsList = store.getters.getTableHeader({ containerUuid: this.uuidForm })
 
       if (!isEmptyValue(storedFieldsList)) {
         this.isLoadingFields = false
@@ -374,7 +376,7 @@ export default {
       })
     },
     getListGeneralInfoSearch(pageNumber = 0, pageSize) {
-      const values = this.$store.getters.getValuesView({
+      const values = store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
       })

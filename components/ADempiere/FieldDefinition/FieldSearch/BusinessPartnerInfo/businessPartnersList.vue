@@ -32,7 +32,7 @@
 
         <el-form
           label-position="top"
-          size="small"
+          size="mini"
           @submit.native.prevent="notSubmitForm"
         >
           <el-row>
@@ -134,9 +134,11 @@
 </template>
 
 <script>
+import store from '@/store'
+
 // Constants
-import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
-import fieldsList from './fieldsListSearch'
+import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
+import FIELDS_LIST from './fieldsListSearch'
 
 // Components and Mixins
 import businessPartnerMixin from './mixinBusinessPartner'
@@ -196,7 +198,7 @@ export default {
   data() {
     return {
       activeAccordion: 'query-criteria',
-      fieldsList,
+      fieldsList: FIELDS_LIST,
       metadataList: [],
       timeOutRecords: null,
       isLoadingRecords: false,
@@ -248,7 +250,7 @@ export default {
       })
     },
     businessParnerData() {
-      return this.$store.getters.getBusinessPartnerData({
+      return store.getters.getBusinessPartnerData({
         containerUuid: this.uuidForm
       })
     },
@@ -264,13 +266,13 @@ export default {
     },
     currentRow: {
       set(rowSelected) {
-        this.$store.commit('setBusinessPartnerSelectedRow', {
+        store.commit('setBusinessPartnerSelectedRow', {
           containerUuid: this.uuidForm,
           currentRow: rowSelected
         })
       },
       get() {
-        return this.$store.getters.getBusinessPartnerCurrentRow({
+        return store.getters.getBusinessPartnerCurrentRow({
           containerUuid: this.uuidForm
         })
       }
@@ -346,7 +348,7 @@ export default {
       }
     },
     closeList() {
-      this.$store.commit('setBusinessPartnerShow', {
+      store.commit('setBusinessPartnerShow', {
         containerUuid: this.uuidForm,
         show: false
       })
@@ -355,7 +357,7 @@ export default {
       this.searchBPartnerList(pageNumber, this.pageSize)
     },
     subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
+      return store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
           if (mutation.payload.containerUuid === this.uuidForm) {
             this.searchBPartnerList()
@@ -390,7 +392,7 @@ export default {
         parentUuid = this.metadata.containerUuid
       }
 
-      const filters = this.$store.getters.getValuesView({
+      const filters = store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
       })
