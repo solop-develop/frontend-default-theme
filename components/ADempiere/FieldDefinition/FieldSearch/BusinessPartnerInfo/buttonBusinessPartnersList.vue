@@ -90,7 +90,9 @@ export default {
     },
     showedPopoverBusinessPartnerList: {
       get() {
-        return store.getters.getBPShow({ containerUuid: this.uuidForm })
+        return store.getters.getBPShow({
+          containerUuid: this.uuidForm
+        })
       },
       set(value) {
         store.commit('setBusinessPartnerShow', {

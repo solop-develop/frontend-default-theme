@@ -51,7 +51,7 @@
                   :disabled="warehouseId > 0"
                   @visible-change="getWarehousesList"
                   @change="getListWarehouseLocator({})"
-                  @clear="clearWarehouses"
+                  @clear="clearWarehouses()"
                 >
                   <el-option
                     v-for="(warehouse, key) in warehousesList"
@@ -418,9 +418,14 @@ export default defineComponent({
       }
     }
     function clearWarehouses() {
+      // store.commit('setWarehousesList', {
+      //   containerUuid: uuidForm.value,
+      //   recordsList: []
+      // })
       setTimeout(() => {
         currentWarehouseId.value = warehouseId.value
       }, 100)
+      listAvailableWarehouses()
     }
 
     onMounted(() => {

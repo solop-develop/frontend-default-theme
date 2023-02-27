@@ -23,7 +23,7 @@
     placement="top-end"
     width="550"
     trigger="click"
-    popper-class="product-attribute-popover"
+    popper-class="warehouse-locators-popover"
   >
     <list-warehouse-locators
       v-if="isShowedPopover"
