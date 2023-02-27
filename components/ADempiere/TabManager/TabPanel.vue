@@ -235,7 +235,9 @@ export default defineComponent({
       return 'height: 36px'
     })
 
-    // const inf = store.getters.getContainerInfo
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
+    })
 
     const list = store.getters.getTabRecordsList({
       containerUuid: currentTab.value.containerUuid
@@ -324,10 +326,6 @@ export default defineComponent({
 
     const batchEntry = computed(() => {
       return tableHeaders.value.filter(fieldItem => fieldItem.isQuickEntry)
-    })
-
-    const recordUuid = computed(() => {
-      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
     })
 
     function handleChangePage(pageNumber) {

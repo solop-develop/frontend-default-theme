@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div id="mainBrowseDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
+  <div v-if="!isChangeOptions" id="mainBrowseDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
     <el-row>
       <el-col :span="24">
         <filter-fields
@@ -26,7 +26,7 @@
           :fields-to-hidden="containerManager.getFieldsToHidden"
           :filter-manager="containerManager.changeColumnShowedFromUser"
           :showed-manager="containerManager.isDisplayedColumn"
-          :is-filter-records="true"
+          :is-filter-records="false"
           :is-showed-table-records="false"
           :in-table="true"
           :container-manager="containerManager"
@@ -106,10 +106,15 @@
       :handle-size-change="handleChangeSizePage"
     />
   </div>
+
+  <loading-view
+    v-else
+    key="browser-table-loading"
+  />
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, onUpdated, ref } from '@vue/composition-api'
+import { defineComponent, computed, onMounted, onUpdated, ref, watch } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
@@ -118,6 +123,7 @@ import store from '@/store'
 import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
@@ -128,7 +134,8 @@ export default defineComponent({
   components: {
     CellEditInfo,
     CustomPagination,
-    FilterFields
+    FilterFields,
+    LoadingView
   },
 
   props: {
@@ -174,6 +181,7 @@ export default defineComponent({
 
     const heightTable = ref()
     const timeOut = ref(null)
+    const isChangeOptions = ref(false)
     const panelMain = document.getElementById('mainBrowse')
     const heightSize = ref()
     const currentRowSelect = ref({})
@@ -402,6 +410,13 @@ export default defineComponent({
       }, 1000)
     }
 
+    watch(currentOption, (newValue, oldValue) => {
+      isChangeOptions.value = true
+      setTimeout(() => {
+        isChangeOptions.value = false
+      }, 500)
+    })
+
     onUpdated(() => {
       const main = document.getElementById('mainBrowse')
       if (!isEmptyValue(main) &&
@@ -433,6 +448,7 @@ export default defineComponent({
       // Refs
       multipleTable,
       timeOut,
+      isChangeOptions,
       heightTable,
       heightSize,
       // Computeds

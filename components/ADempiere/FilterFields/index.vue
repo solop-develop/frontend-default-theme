@@ -18,7 +18,7 @@
 
 <template>
   <el-row
-    v-if="!isMobile && searchRecordTypeSale"
+    v-if="!isMobile && isFilterRecords"
     id="panelOptionsBar"
     class="panel-options-bar"
   >
@@ -107,7 +107,6 @@
 
           <columns-display-option
             v-if="inTable"
-            :container-manager="containerManager"
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
           />
@@ -221,10 +220,6 @@ export default defineComponent({
         return 'isShowedTableFromUser'
       }
       return 'isShowedFromUser'
-    })
-
-    const searchRecordTypeSale = computed(() => {
-      return root.$route.meta.type === 'window' && props.isFilterRecords
     })
 
     const isMobile = computed(() => {
@@ -350,7 +345,6 @@ export default defineComponent({
       fieldsListAvailable,
       fieldsListAvailableWithValue,
       valueToSearch,
-      searchRecordTypeSale,
       showedAttibute,
       // methods
       changeShowed,
