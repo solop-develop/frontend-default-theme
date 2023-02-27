@@ -20,10 +20,12 @@
   <el-input
     v-model="displayedValue"
     v-bind="commonsProperties"
+    clearable
     type="text"
     :autofocus="metadata.inTable"
     show-word-limit
     @change="handleSelect"
+    @clear="clearValues"
     @blur="focusLost"
     @focus="setNewDisplayedValue"
     @keydown.native="keyPressed"
@@ -44,7 +46,7 @@
 
 <script>
 // Constants
-import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
+import { TABLE_NAME } from '@/utils/ADempiere/dictionary/field/accoutingCombination.js'
 
 // Components and Mixins
 import ButtonToList from './buttonToList.vue'
@@ -84,6 +86,9 @@ export default {
   },
 
   computed: {
+    cssClassCustomField() {
+      return ' custom-field-accouting-combination '
+    },
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid

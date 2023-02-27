@@ -18,12 +18,22 @@
 
 import store from '@/store'
 
+// Components and Mixins
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
+
 // Constants
-import { COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
+import { COLUMN_NAME } from '@/utils/ADempiere/dictionary/field/accoutingCombination.js'
 import { ORGANIZATION } from '@/utils/ADempiere/constants/systemColumns'
+import {
+  DISPLAY_COLUMN_PREFIX
+} from '@/utils/ADempiere/dictionaryUtils'
 
 export default {
   name: 'mixinAccountingCombination',
+
+  mixins: [
+    fieldWithDisplayColumn
+  ],
 
   props: {
     metadata: {
@@ -42,9 +52,12 @@ export default {
   computed: {
     blankValues() {
       return {
-        C_ValidCombination_ID: undefined,
-        UUID: undefined,
-        Combination: undefined
+        [this.metadata.columnName]: undefined,
+        [this.metadata.elementName]: undefined,
+        [DISPLAY_COLUMN_PREFIX + this.metadata.columnName]: undefined,
+        [DISPLAY_COLUMN_PREFIX + this.metadata.elementName]: undefined,
+        uuid: undefined,
+        UUID: undefined
       }
     },
     recordsList() {
