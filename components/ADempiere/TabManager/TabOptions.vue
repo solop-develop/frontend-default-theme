@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -62,14 +62,6 @@
       :references-manager="referencesManager"
       style="float: right;"
     />
-    <!-- <change-record
-      :parent-uuid="parentUuid"
-      :container-uuid="currentTabUuid"
-      :container-manager="containerManager"
-      :change-previous-record="changePreviousRecord"
-      :change-next-record="changeNextRecord"
-      :is-change-record="isChangeRecord"
-    /> -->
   </div>
 </template>
 
@@ -111,15 +103,7 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    tabsList: {
-      type: Array,
-      default: () => []
-    },
     tabAttributes: {
-      type: Object,
-      default: () => ({})
-    },
-    actionsManager: {
       type: Object,
       default: () => ({})
     },

@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -17,37 +17,19 @@
 -->
 
 <template>
-  <div id="mainWindowDataTable" class="multipleTableWindows" :onLoad="adjustSize()" :onresize="setTableHeight()">
-    <el-row v-if="isShowSearch">
-      <el-col :span="23">
-        <el-input
-          v-model="valueToSearch"
-          clearable
-          size="mini"
-          class="input-search"
-          @input="handleChangeSearch"
-        >
-          <i
-            slot="prefix"
-            class="el-icon-search el-input__icon"
-          />
-        </el-input>
-      </el-col>
-      <el-col
-        :span="1"
-        style="text-align: center;"
-      >
-        <columns-display-option
-          :option="currentOption"
+  <div id="mainBrowseDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
+    <el-row>
+      <el-col :span="24">
+        <filter-fields
+          :container-uuid="panelMetadata.uuid"
+          :fields-list="containerManager.getFieldsList({ containerUuid: panelMetadata.uuid })"
+          :fields-to-hidden="containerManager.getFieldsToHidden"
+          :filter-manager="containerManager.changeColumnShowedFromUser"
+          :showed-manager="containerManager.isDisplayedColumn"
+          :is-filter-records="true"
+          :is-showed-table-records="false"
+          :in-table="true"
           :container-manager="containerManager"
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
-        />
-
-        <full-screen-container
-          style="float: right;"
-          :parent-uuid="parentUuid"
-          :container-uuid="containerUuid"
         />
       </el-col>
     </el-row>
@@ -82,6 +64,7 @@
 
       <template v-for="(fieldAttributes, key) in headerList">
         <el-table-column
+          v-if="isDisplayed(fieldAttributes)"
           :key="key"
           :column-key="fieldAttributes.columnName"
           :prop="fieldAttributes.columnName"
@@ -126,17 +109,15 @@
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref } from '@vue/composition-api'
+import { defineComponent, computed, onMounted, onUpdated, ref } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
 
 // Components and Mixins
 import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
-import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
-import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
-import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
+import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
@@ -146,9 +127,8 @@ export default defineComponent({
 
   components: {
     CellEditInfo,
-    ColumnsDisplayOption,
     CustomPagination,
-    FullScreenContainer
+    FilterFields
   },
 
   props: {
@@ -186,29 +166,18 @@ export default defineComponent({
     isTableSelection: {
       type: Boolean,
       default: true
-    },
-    isShowSearch: {
-      type: Boolean,
-      default: true
     }
   },
 
   setup(props, { root }) {
     const multipleTable = ref(null)
 
-    const {
-      storedWindow
-    } = useFullScreenContainer({
-      parentUuid: props.parentUuid,
-      containerUuid: props.containerUuid
-    })
-
     const heightTable = ref()
-    const timeOut = ref(() => {})
-    const timeOutSearch = ref(() => {})
-    const panelMain = document.getElementById('mainWindow')
+    const timeOut = ref(null)
+    const panelMain = document.getElementById('mainBrowse')
     const heightSize = ref()
     const currentRowSelect = ref({})
+
     const isLoadingDataTale = computed(() => {
       if (props.containerManager && props.containerManager.isLoadedRecords) {
         return !props.containerManager.isLoadedRecords({
@@ -216,27 +185,6 @@ export default defineComponent({
         })
       }
       return !isEmptyValue(props.dataTable)
-    })
-
-    // value of search
-    const valueToSearch = computed({
-      get() {
-        if (!props.isShowSearch) {
-          return ''
-        }
-        return store.getters.getSearchValueTabRecordsList({
-          containerUuid: props.containerUuid
-        })
-      },
-      set(searchValue) {
-        if (!props.isShowSearch) {
-          return ''
-        }
-        store.commit('setSearchValueTabRecordsList', {
-          containerUuid: props.containerUuid,
-          searchValue
-        })
-      }
     })
 
     const currentOption = computed(() => {
@@ -252,24 +200,10 @@ export default defineComponent({
 
     const headerList = computed(() => {
       return props.header.filter(fieldItem => {
-        return isDisplayed(fieldItem) &&
+        return props.containerManager.isDisplayedColumn(fieldItem) &&
           // fieldItem.isShowedTableFromUser &&
           tableColumnDataType(fieldItem, currentOption.value)
       })
-    })
-
-    const sizeOption = computed(() => {
-      if (props.isShowSearch) {
-        return 1
-      }
-      return 24
-    })
-
-    const styleOption = computed(() => {
-      if (props.isShowSearch) {
-        return ''
-      }
-      return 'text-align: end; padding-right: 5px;'
     })
 
     const selectionsLength = computed(() => {
@@ -300,53 +234,21 @@ export default defineComponent({
       return recordsWithFilter.value.length
     })
 
-    const tabData = computed(() => {
-      if (props.containerManager.getRecordList) {
-        return props.containerManager.getRecordList({
-          containerUuid: props.containerUuid
-        })
-      }
-      return {}
-    })
-
     const defaultSize = computed(() => {
-      const main = document.getElementById('multipleTable')
-      if (
-        !isEmptyValue(main) &&
-        !isEmptyValue(main.clientHeight)
-      ) {
-        return main.clientHeight
+      // const main = document.getElementById('multipleTable')
+      if (!isEmptyValue(multipleTable.value) &&
+        !isEmptyValue(multipleTable.value.$el.clientHeight)) {
+        return multipleTable.value.$el.clientHeight
       }
-      return 600
+      return 500
     })
 
     const sizeViewTable = computed(() => {
       if (isMobile.value) {
         return 500
       }
-      if (!isEmptyValue(props.parentUuid)) {
-        if (!isEmptyValue(panelMain) && !isEmptyValue(heightSize.value)) {
-          const currentTab = store.getters.getStoredTab(
-            props.parentUuid,
-            props.containerUuid
-          )
-
-          if (!isEmptyValue(currentTab)) {
-            if (currentTab.isParentTab) {
-              if (storedWindow.value.isFullScreenTabsParent) {
-                return heightSize.value - 250
-              } else {
-                return heightSize.value - 200
-              }
-            } else {
-              if (storedWindow.value.isFullScreenTabsChildren) {
-                return heightSize.value - 250
-              } else {
-                return heightSize.value - 200
-              }
-            }
-          }
-        }
+      if (!isEmptyValue(panelMain) && !isEmptyValue(heightSize.value)) {
+        return heightSize.value - 400
       }
 
       if (props.containerManager.panelMain() === 'mainBrowser') {
@@ -365,44 +267,6 @@ export default defineComponent({
         // enable edit mode
         row.isEditRow = true
       }
-
-      if (!isEmptyValue(props.parentUuid)) {
-        currentRowSelect.value = row
-        toggleSelection([])
-        props.containerManager.setSelection({
-          containerUuid: props.containerUuid,
-          recordsSelected: [row]
-        })
-        toggleSelection([row])
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'currentRowSelect',
-          attributeNameControl: undefined,
-          attributeValue: row,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-
-        if (isMobile.value) {
-          store.dispatch('changeTabAttribute', {
-            attributeName: 'isShowedTableRecords',
-            attributeNameControl: undefined,
-            attributeValue: false,
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid
-          })
-
-          props.containerManager.seekRecord({
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid,
-            row
-          })
-        }
-        props.containerManager.seekRecord({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
-          row
-        })
-      }
     }
 
     /**
@@ -412,35 +276,6 @@ export default defineComponent({
      */
     function handleRowDblClick(row, column, event) {
       // disable edit mode
-
-      if (!isEmptyValue(props.parentUuid)) {
-        const currentTab = store.getters.getStoredTab(
-          props.parentUuid,
-          props.containerUuid
-        )
-
-        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-        if (recordUuid !== row.UUID && currentTab.isParentTab) {
-          // props.containerManager.seekRecord({
-          //   parentUuid: props.parentUuid,
-          //   containerUuid: props.containerUuid,
-          //   row
-          // })
-          props.containerManager.setSelection({
-            containerUuid: props.containerUuid,
-            recordsSelected: []
-          })
-        }
-
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'isShowedTableRecords',
-          attributeNameControl: undefined,
-          attributeValue: false,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
-      }
-
       if (props.containerManager.confirmRowChanges && row.isSelectedRow && row.isEditRow) {
         row.isEditRow = false
         props.containerManager.confirmRowChanges({
@@ -456,7 +291,8 @@ export default defineComponent({
      */
     function isDisplayed(field) {
       // validate with container manager
-      return props.containerManager.isDisplayedColumn(field)
+      return props.containerManager.isDisplayedColumn(field) &&
+        field.isShowedTableFromUser
     }
 
     /**
@@ -469,14 +305,12 @@ export default defineComponent({
         pageNumber,
         pageSize: store.getters.getBrowserPageSize({ containerUuid: props.containerUuid })
       })
-      const getTabData = isEmptyValue(props.parentUuid) ? {} : store.getters.getStoredTab(props.parentUuid, props.containerUuid)
-      const query = isEmptyValue(props.parentUuid)
-        ? { ...root.$route.query, page: pageNumber }
-        : { ...root.$route.query, page: getTabData.isParentTab ? pageNumber : root.$route.query.page, pageChild: !getTabData.isParentTab ? pageNumber : root.$route.query.pageChild }
+
       router.push({
         name: root.$route.name,
         query: {
-          ...query
+          ...root.$route.query,
+          page: pageNumber
         }
       }, () => {})
     }
@@ -490,14 +324,6 @@ export default defineComponent({
       })
     }
 
-    function handleChangeSearch(value) {
-      clearTimeout(timeOutSearch.value)
-      timeOutSearch.value = setTimeout(() => {
-        // get records
-        filterRecord(value)
-      }, 1000)
-    }
-
     // get table data
     const recordsWithFilter = computed(() => {
       if (props.containerManager && props.containerManager.getRecordsList) {
@@ -507,22 +333,6 @@ export default defineComponent({
       }
       return props.dataTable
     })
-
-    const isLoadFilter = ref(false)
-
-    function filterRecord(searchText) {
-      isLoadFilter.value = true
-
-      store.dispatch('getEntities', {
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        searchValue: searchText
-      })
-        .finally(() => {
-          clearTimeout(timeOut.value)
-          isLoadFilter.value = false
-        })
-    }
 
     function handleSelection(selections, rowSelected) {
       let index = 0
@@ -558,6 +368,7 @@ export default defineComponent({
         multipleTable.value.clearSelection()
       }
     }
+
     function tableRowClassName(params) {
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (params.row.UUID === recordUuid && !isEmptyValue(props.parentUuid) && isEmptyValue(currentRowSelect.value)) {
@@ -592,11 +403,9 @@ export default defineComponent({
     }
 
     onUpdated(() => {
-      const main = document.getElementById('mainWindow')
-      if (
-        !isEmptyValue(main) &&
-        !isEmptyValue(main.clientHeight)
-      ) {
+      const main = document.getElementById('mainBrowse')
+      if (!isEmptyValue(main) &&
+        !isEmptyValue(main.clientHeight)) {
         heightSize.value = main.clientHeight
       }
       // const selectionsList = props.containerManager.getSelection({
@@ -605,10 +414,6 @@ export default defineComponent({
       // if (!isEmptyValue(selectionsList)) {
       //   loadSelect()
       // }
-    })
-
-    onBeforeMount(() => {
-      loadSelect()
     })
 
     onMounted(() => {
@@ -625,36 +430,28 @@ export default defineComponent({
     })
 
     return {
-      // data
+      // Refs
       multipleTable,
       timeOut,
-      timeOutSearch,
-      valueToSearch,
-      isLoadFilter,
       heightTable,
       heightSize,
-      // computeds
+      // Computeds
       headerList,
       isLoadingDataTale,
-      sizeOption,
-      styleOption,
       recordsWithFilter,
       currentOption,
       keyColumn,
       recordsLength,
       currentPage,
       selectionsLength,
-      tabData,
       defaultSize,
       sizeViewTable,
       isMobile,
       currentRowSelect,
-      // methods
-      filterRecord,
+      // Methods
       setTableHeight,
       adjustSize,
       tableRowClassName,
-      handleChangeSearch,
       handleChangePage,
       handleRowClick,
       handleRowDblClick,
