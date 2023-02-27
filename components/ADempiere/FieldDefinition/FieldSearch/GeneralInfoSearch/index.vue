@@ -57,13 +57,14 @@
 </template>
 
 <script>
+import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
 import ButtonGeneralInfoSearch from './button.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -103,12 +104,15 @@ export default {
   },
 
   computed: {
-    // to recrods list overwrite
+    cssClassCustomField() {
+      return ' custom-field-search-info '
+    },
     uuidForm() {
       return this.metadata.containerUuid
     },
+    // to records list overwrite
     recordsList() {
-      return this.$store.getters.getGeneralInfoRecordsList({
+      return store.getters.getGeneralInfoRecordsList({
         containerUuid: this.uuidForm
       })
     }

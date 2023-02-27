@@ -59,14 +59,14 @@
 </template>
 
 <script>
-// Constants
-import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
-
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
 import businessPartnerMixin from './mixinBusinessPartner'
 import ButtonBusinessPartnersList from './buttonBusinessPartnersList.vue'
+
+// Constants
+import { TABLE_NAME } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -100,6 +100,9 @@ export default {
   },
 
   computed: {
+    cssClassCustomField() {
+      return ' custom-field-bpartner-info '
+    },
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid

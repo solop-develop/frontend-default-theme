@@ -16,6 +16,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import store from '@/store'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
@@ -54,7 +56,7 @@ export default {
       }
     },
     recordsList() {
-      return this.$store.getters.getBusinessPartnerRecordsList({
+      return store.getters.getBusinessPartnerRecordsList({
         containerUuid: this.uuidForm
       })
     }

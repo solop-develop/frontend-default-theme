@@ -45,8 +45,12 @@
 
 <script>
 import store from '@/store'
+
+// Components and Mixins
 import BusinessPartnersList from './businessPartnersList.vue'
-// import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
+
+// Constants
+import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
 
 export default {
   name: 'ButtonBusinessPartnersList',
@@ -82,7 +86,7 @@ export default {
       if (!this.isEmptyValue(this.parentMetadata.containerUuid)) {
         return this.parentMetadata.columnName + '_' + this.parentMetadata.containerUuid
       }
-      return this.parentMetadata.columnName
+      return BUSINESS_PARTNERS_LIST_FORM
     },
     showedPopoverBusinessPartnerList: {
       get() {
