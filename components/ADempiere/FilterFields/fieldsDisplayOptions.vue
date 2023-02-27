@@ -307,11 +307,15 @@ export default defineComponent({
     })
 
     const isShowSequence = computed(() => {
-      const { isEditSecuence } = props.containerManager.getPanel({
+      const panel = props.containerManager.getPanel({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
       })
-      return !isEmptyValue(isEditSecuence)
+      if (!isEmptyValue(panel)) {
+        const { isEditSecuence } = panel
+        return Boolean(isEditSecuence)
+      }
+      return false
     })
 
     const sequenceOptionLabel = computed(() => {

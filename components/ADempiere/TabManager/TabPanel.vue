@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
         :container-manager="containerManager"
         :current-tab-uuid="currentTabUuid"
         :container-uuid="tabAttributes.uuid"
-        :tabs-list="tabsList"
         :tab-attributes="tabAttributes"
         :references-manager="referencesManager"
         :adicionales-options="convenienceOptions"
@@ -131,7 +130,7 @@ import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEn
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
-import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
+// import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabOptions from './TabOptions.vue'
 
@@ -145,7 +144,7 @@ export default defineComponent({
     CustomPagination,
     DefaultTable,
     FilterFields,
-    FullScreenContainer,
+    // FullScreenContainer,
     PanelDefinition,
     TabOptions,
     BatchEntry
@@ -164,15 +163,7 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    tabsList: {
-      type: Array,
-      default: () => []
-    },
     tabAttributes: {
-      type: Object,
-      default: () => ({})
-    },
-    actionsManager: {
       type: Object,
       default: () => ({})
     },
@@ -208,19 +199,8 @@ export default defineComponent({
       // return 'max-height: 300px !important;'
     })
 
-    const isMobile = computed(() => {
-      return store.state.app.device === 'mobile'
-    })
-
     const isShowedTableRecords = computed(() => {
-      return tabData.value.isShowedTableRecords
-    })
-
-    const tabData = computed(() => {
-      return store.getters.getStoredTab(
-        props.parentUuid,
-        props.tabAttributes.uuid
-      )
+      return currentTab.value.isShowedTableRecords
     })
 
     const currentTab = computed(() => {
@@ -255,10 +235,16 @@ export default defineComponent({
       return 'height: 36px'
     })
 
-    // const inf = store.getters.getContainerInfo
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
+    })
 
-    const list = store.getters.getTabRecordsList({ containerUuid: currentTab.value.containerUuid })
-    const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(currentTab.value.containerUuid))
+    const list = store.getters.getTabRecordsList({
+      containerUuid: currentTab.value.containerUuid
+    })
+    const currentRecord = list.find(row => {
+      return row.UUID === recordUuid.value
+    })
     store.dispatch('panelInfo', {
       currentTab: currentTab.value,
       currentRecord
@@ -274,7 +260,7 @@ export default defineComponent({
     }
 
     const tableHeaders = computed(() => {
-      const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
+      const panel = currentTab.value
       if (panel && panel.fieldsList) {
         return panel.fieldsList
       }
@@ -328,7 +314,7 @@ export default defineComponent({
     const commonFilterFielsProperties = computed(() => {
       if (isShowedTableRecords.value) {
         return {
-          filterManager: props.containerManager.changeTabTableShowedFromUser,
+          filterManager: props.containerManager.changeColumnShowedFromUser,
           showedManager: props.containerManager.isDisplayedColumn
         }
       }
@@ -342,10 +328,6 @@ export default defineComponent({
       return tableHeaders.value.filter(fieldItem => fieldItem.isQuickEntry)
     })
 
-    const recordUuid = computed(() => {
-      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
-    })
-
     function handleChangePage(pageNumber) {
       props.containerManager.setPage({
         parentUuid: props.parentUuid,
@@ -357,8 +339,8 @@ export default defineComponent({
         name: root.$route.name,
         query: {
           ...root.$route.query,
-          page: tabData.value.isParentTab ? pageNumber : root.$route.query.page,
-          pageChild: !tabData.value.isParentTab ? pageNumber : root.$route.query.pageChild
+          page: currentTab.value.isParentTab ? pageNumber : root.$route.query.page,
+          pageChild: !currentTab.value.isParentTab ? pageNumber : root.$route.query.pageChild
         }
       }, () => {})
     }
@@ -455,8 +437,6 @@ export default defineComponent({
       recordsList,
       isShowedTableRecords,
       tableHeaders,
-      tabData,
-      isMobile,
       currentTab,
       overflowHeightScrooll,
       recordUuid,

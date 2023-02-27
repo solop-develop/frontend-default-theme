@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-dropdown trigger="click" class="column-option" @command="handleCommand">
+  <el-dropdown trigger="click" class="columns-display-options" @command="handleCommand">
     <span class="el-dropdown-link">
       <svg-icon icon-class="list" />
     </span>
@@ -66,22 +66,15 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+import store from '@/store'
+
 export default defineComponent({
   name: 'ColumnsDisplayOption',
 
   props: {
-    option: {
-      type: String,
-      required: true,
-      default: () => ''
-    },
     parentUuid: {
       type: String,
       default: undefined
-    },
-    containerManager: {
-      type: Object,
-      required: false
     },
     containerUuid: {
       type: String,
@@ -89,21 +82,20 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
-    const selectionsRecords = computed(() => {
-      return props.containerManager.getSelection({
-        containerUuid: props.containerUuid
-      })
+  setup(props) {
+    const currentOption = computed(() => {
+      return store.getters.getTableOption(props.containerUuid)
     })
+
     const optionIcon = (icon) => {
-      if (icon === props.option) {
+      if (icon === currentOption.value) {
         return 'eye-open'
       }
       return 'eye'
     }
 
     const handleCommand = (command) => {
-      root.$store.dispatch(command.dispatch, {
+      store.dispatch(command.dispatch, {
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
         tableOption: command.value
@@ -112,7 +104,7 @@ export default defineComponent({
 
     return {
       // Computed
-      selectionsRecords,
+      currentOption,
       // Methods
       handleCommand,
       optionIcon
@@ -121,12 +113,13 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
-  .column-option {
-    display: inline-block;
-    position: relative;
-    color: #606266;
-    font-size: 16px;
-    /* float: right; */
-  }
+<style scoped lang="scss">
+.columns-display-options {
+  display: inline-block;
+  position: relative;
+  color: #606266;
+  font-size: 16px;
+  /* float: right; */
+  padding-left: 5px;
+}
 </style>

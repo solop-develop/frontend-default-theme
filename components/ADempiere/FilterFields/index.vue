@@ -18,7 +18,7 @@
 
 <template>
   <el-row
-    v-if="!isMobile && searchRecordTypeSale"
+    v-if="!isMobile && isFilterRecords"
     id="panelOptionsBar"
     class="panel-options-bar"
   >
@@ -58,7 +58,13 @@
         />
       </el-select>
 
+      <columns-display-option
+        v-if="inTable"
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+      />
       <fields-display-option
+        v-else
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :available-fields="fieldsListAvailable"
@@ -99,7 +105,13 @@
             />
           </el-select>
 
+          <columns-display-option
+            v-if="inTable"
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+          />
           <fields-display-option
+            v-else
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
             :available-fields="fieldsListAvailable"
@@ -122,14 +134,16 @@ import { defineComponent, ref, computed } from '@vue/composition-api'
 import store from '@/store'
 
 // Components and Mixins
-import FieldsDisplayOption from './fieldsDisplayOptions.vue'
 import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
+import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption.vue'
+import FieldsDisplayOption from './fieldsDisplayOptions.vue'
 
 export default defineComponent({
   name: 'FilterFields',
 
   components: {
     AdvancedTabQuery,
+    ColumnsDisplayOption,
     FieldsDisplayOption
   },
 
@@ -208,10 +222,6 @@ export default defineComponent({
       return 'isShowedFromUser'
     })
 
-    const searchRecordTypeSale = computed(() => {
-      return root.$route.meta.type === 'window' && props.isFilterRecords
-    })
-
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })
@@ -254,6 +264,9 @@ export default defineComponent({
     })
 
     const fieldsListAvailableWithValue = computed(() => {
+      if (props.inTable) {
+        return []
+      }
       // get fields not mandatory with default value
       return props.fieldsToHidden({
         parentUuid: props.parentUuid,
@@ -332,7 +345,6 @@ export default defineComponent({
       fieldsListAvailable,
       fieldsListAvailableWithValue,
       valueToSearch,
-      searchRecordTypeSale,
       showedAttibute,
       // methods
       changeShowed,
@@ -445,5 +457,4 @@ export default defineComponent({
 .right-panel-field-options {
   display: contents;
 }
-
 </style>
