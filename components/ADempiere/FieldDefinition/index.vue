@@ -78,7 +78,6 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -172,16 +171,6 @@ export default {
           md: this.sizeCol,
           lg: this.sizeCol,
           xl: this.sizeCol
-        }
-      }
-      if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
-        return {
-          // ...this.field.size,
-          xs: 24,
-          sm: 24,
-          md: 24,
-          lg: 24,
-          xl: 24
         }
       }
       if (!this.field.isCustomField && DEFAULT_COLUMNS_PER_ROW >= 0 && !this.isMobile) {

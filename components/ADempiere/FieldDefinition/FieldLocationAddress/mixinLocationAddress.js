@@ -17,12 +17,12 @@
  */
 
 // Constants
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils.js'
 
 // Utils and Helpers Methods
-import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
