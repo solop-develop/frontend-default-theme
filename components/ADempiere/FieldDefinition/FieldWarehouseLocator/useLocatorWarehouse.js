@@ -22,14 +22,14 @@ import store from '@/store'
 
 // Constants
 import {
-  DISPLAY_COLUMN_PREFIX,
-  UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+  DISPLAY_COLUMN_PREFIX
 } from '@/utils/ADempiere/dictionaryUtils'
 import { WAREHOUSE } from '@/utils/ADempiere/constants/systemColumns'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getContextAttributes } from '@/utils/ADempiere/contextUtils'
+import useDisplayedColumn from '@theme/components/ADempiere/FieldDefinition/useDisplayedColumn.js'
 
 export default ({
   parentUuid,
@@ -37,6 +37,15 @@ export default ({
   containerManager,
   fieldAttributes
 }) => {
+  const {
+    value,
+    uuidValue,
+    displayedValue
+  } = useDisplayedColumn({
+    containerManager,
+    fieldMetadata: fieldAttributes
+  })
+
   const blankValues = computed(() => {
     return {
       [fieldAttributes.columnName]: undefined,
@@ -54,7 +63,7 @@ export default ({
     if (!isEmptyValue(fieldAttributes.containerUuid)) {
       return fieldAttributes.columnName + '_' + containerUuid
     }
-    return fieldAttributes.columnName
+    return 'Warehouse-Locator-Form'
   })
 
   const warehouseId = computed(() => {
@@ -107,66 +116,20 @@ export default ({
   }
 
   function setValues(row) {
-    const { id, uuid, value } = row
+    const { id, uuid, value: displayValue } = row
 
     // const { parentUuid, containerUuid } = fieldAttributes
 
     const columnName = fieldAttributes.columnName
 
-    store.commit('updateValueOfField', {
-      parentUuid,
-      containerUuid,
-      columnName,
-      value: id
-    })
-    // set display column (name) value
-    store.commit('updateValueOfField', {
-      parentUuid,
-      containerUuid,
-      // DisplayColumn_'ColumnName'
-      columnName: DISPLAY_COLUMN_PREFIX + columnName,
-      value: value
-    })
-    // set UUID value
-    store.commit('updateValueOfField', {
-      parentUuid,
-      containerUuid,
-      columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-      value: uuid
-    })
-    // update element column name
-    if (fieldAttributes.isSameColumnElement) {
-      store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: fieldAttributes.elementName,
-        value: id
-      })
-      // set display column (name) value
-      store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + fieldAttributes.elementName,
-        value: value
-      })
-    }
+    // set ID value
+    value.value = id
 
-    // implement container manager row
-    if (fieldAttributes.inTable && containerManager && containerManager.setCell) {
-      containerManager.setCell({
-        containerUuid,
-        rowIndex: fieldAttributes.rowIndex,
-        columnName,
-        value: id
-      })
-      containerManager.setCell({
-        containerUuid,
-        rowIndex: fieldAttributes.rowIndex,
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
-        value: value
-      })
-    }
+    // set display column (Value) value
+    displayedValue.value = displayValue
+
+    // set UUID value
+    uuidValue.value = uuid
 
     store.dispatch('notifyFieldChange', {
       containerUuid,
