@@ -32,7 +32,10 @@
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
               :container-manager="containerManagerLocation"
-              :metadata-field="fieldAttributes"
+              :metadata-field="{
+                ...fieldAttributes,
+                sizeCol: 24
+              }"
             />
           </el-col>
         </template>
@@ -129,7 +132,7 @@ import {
 } from '@/utils/ADempiere/dictionaryUtils'
 import {
   COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP, COORDENATES_COLUMN_NAMES
-} from '@/utils/ADempiere/dictionary/form/locationAddress'
+} from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // API Request Methods
@@ -142,7 +145,7 @@ import {
 // Utils and Helper Methods
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { formatCoordinateByDecimal, getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { formatCoordinateByDecimal, getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 /**
