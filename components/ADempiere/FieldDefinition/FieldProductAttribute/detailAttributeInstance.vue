@@ -131,7 +131,7 @@ import {
   requestGetProductAttributeSet,
   requestGetProductAttributeSetInstace,
   requestSaveAttributeSetInstance
-} from '@/api/ADempiere/form/productAttribute'
+} from '@/api/ADempiere/field/productAttribute'
 
 // Constants
 import {

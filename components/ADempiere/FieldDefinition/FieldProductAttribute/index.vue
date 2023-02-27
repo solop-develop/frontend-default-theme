@@ -22,7 +22,7 @@
       ref="productAttribute"
       v-model="isShowProductAttribute"
       placement="top-end"
-      width="450"
+      width="600"
       trigger="click"
       popper-class="product-attribute-popover"
     >
@@ -56,6 +56,8 @@
 </template>
 
 <script>
+import store from '@/store'
+
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
@@ -102,8 +104,11 @@ export default {
   },
 
   computed: {
+    cssClassCustomField() {
+      return ' custom-field-product-attribute '
+    },
     productId() {
-      return this.$store.getters.getValueOfField({
+      return store.getters.getValueOfField({
         containerUuid: this.containerUuid,
         columnName: 'M_Product_ID'
       })
@@ -119,7 +124,7 @@ export default {
     },
     isShowProductAttribute: {
       get() {
-        return this.$store.getters.getShowProductAttribute
+        return store.getters.getShowProductAttribute
       },
       set(value) {
         if (value && this.isEmptyValue(this.attributeSet) && this.metadata.tabTableName === 'M_Product') {
@@ -128,11 +133,11 @@ export default {
             type: 'info',
             showClose: value
           })
-          this.$store.commit('setShowProductAttribute', !value)
+          store.commit('setShowProductAttribute', !value)
           this.$refs.productAttribute.showPopper = !value
           return
         }
-        this.$store.commit('setShowProductAttribute', value)
+        store.commit('setShowProductAttribute', value)
       }
     },
     displayedValueNotEdit: {
@@ -153,7 +158,7 @@ export default {
       return this.metadata.popoverPlacement || 'top'
     },
     attributeSet() {
-      return this.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         columnName: 'M_AttributeSet_ID'
@@ -174,8 +179,9 @@ export default {
       // TODO: Clear values into form
       this.value = undefined
       this.displayedValue = undefined
+      this.uuidValue = undefined
 
-      this.$store.dispatch('clearValuesOnContainer', {
+      store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm
       })
     }
