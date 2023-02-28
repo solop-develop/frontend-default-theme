@@ -842,6 +842,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+// Tab Manager
 .tab-manager-container {
   .el-badge__content.is-fixed {
     right: 150% !important;

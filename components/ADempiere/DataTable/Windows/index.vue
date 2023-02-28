@@ -103,12 +103,8 @@ import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/Fu
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
-// Constants
-import { YES_NO } from '@/utils/ADempiere/references'
-
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { isDocumentStatus } from '@/utils/ADempiere/constants/systemColumns'
 
 export default defineComponent({
   name: 'WindowsTable',
@@ -204,14 +200,12 @@ export default defineComponent({
       // const showMinimalistView = store.getters.getTableOption(props.containerUuid)
       // if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
       return props.header.filter(fieldItem => {
-        if ([fieldItem.columnName, fieldItem.elementName].includes('TaskStatus')) {
-          return true
-        }
         // validate with container manager
         if (props.containerManager.isDisplayedColumn(fieldItem)) {
-          const isDisplayedDefault = isDisplayedDefaultTable({
+          const isMandatoryGenerated = props.containerManager.isMandatoryColumn(fieldItem)
+          const isDisplayedDefault = props.containerManager.isDisplayedDefaultTable({
             ...fieldItem,
-            isMandatory: props.containerManager.isMandatoryField(fieldItem)
+            isMandatory: isMandatoryGenerated
           })
           // madatory, not parent column and without default value to window, mandatory or with default value to others
           if (isDisplayedDefault) {
@@ -330,31 +324,6 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         row
       })
-    }
-
-    /**
-     * isDisplayedDefaultTable
-     */
-    function isDisplayedDefaultTable({ isMandatory, isParent, defaultValue, displayType, columnName, elementColumnName, name }) {
-      const documentStatus = isDocumentStatus({
-        columnName,
-        elementColumnName
-      })
-      if (documentStatus) {
-        return true
-      }
-
-      if (['DateInvoiced', 'DateOrdered', 'DatePromised', 'DateTrx', 'M_Product_ID', 'QtyEntered', 'DocumentNo', 'Value', 'DocStatus'].includes(columnName)) {
-        return true
-      }
-      if (isMandatory && !isParent && isEmptyValue(defaultValue)) {
-        // Yes/No field always boolean value (as default value)
-        if (displayType === YES_NO.id) {
-          return false
-        }
-        return true
-      }
-      return false
     }
 
     /**
