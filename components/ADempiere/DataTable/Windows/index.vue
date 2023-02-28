@@ -17,7 +17,13 @@
 -->
 
 <template>
-  <div v-if="!isChangeOptions" id="mainWindowDataTable" class="multipleTableWindow" :onLoad="adjustSize()" :onresize="adjustSize()">
+  <div
+    v-if="!isChangeOptions"
+    id="mainWindowDataTable"
+    class="multipleTableWindow"
+    :onLoad="adjustSize()"
+    :onresize="adjustSize()"
+  >
     <el-table
       id="multipleTable"
       ref="multipleTable"
