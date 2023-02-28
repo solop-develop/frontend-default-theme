@@ -129,7 +129,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -196,17 +196,13 @@ export default defineComponent({
       type: Object,
       required: false
     },
-    isShowedTableRecords: {
-      type: Boolean,
-      default: true
-    },
     newFieldsListSecuence: {
       type: Array,
       default: () => []
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const size = 'small'
     const cssClass = computed(() => {
       if (props.inTable) {
@@ -226,23 +222,9 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
-    const valueToSearch = computed({
-      get() {
-        return store.getters.getSearchValueTabRecordsList({
-          containerUuid: props.containerUuid
-        })
-      },
-      set(searchValue) {
-        store.commit('setSearchValueTabRecordsList', {
-          containerUuid: props.containerUuid,
-          searchValue
-        })
-      }
-    })
-
     const fieldsListAvailable = computed(() => {
       /*
-      if (!props.inTable && props.panelType === 'window' && !root.isEmptyValue(props.groupField)) {
+      if (!props.inTable && props.panelType === 'window' && !isEmptyValue(props.groupField)) {
         // compare group fields to window
         return store.getters.getFieldsListNotMandatory({
           containerUuid: props.containerUuid,
@@ -308,54 +290,24 @@ export default defineComponent({
       })
     }
 
-    const isLoadFilter = ref(false)
-    const timeOutSearch = ref(null)
-
-    function handleChangeSearch(value) {
-      clearTimeout(timeOutSearch.value)
-      timeOutSearch.value = setTimeout(() => {
-        // get records
-        filterRecord(value)
-      }, 1000)
-    }
-
-    function filterRecord(searchText) {
-      isLoadFilter.value = true
-
-      store.dispatch('getEntities', {
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        searchValue: searchText
-      })
-        .finally(() => {
-          isLoadFilter.value = false
-        })
-    }
-
     return {
-      // const
+      // Computeds
       cssClass,
-      // ref
-      isLoadFilter,
-      timeOutSearch,
-      // computeds
       isMobile,
       size,
       fieldsListShowed,
       fieldsListAvailable,
       fieldsListAvailableWithValue,
-      valueToSearch,
       showedAttibute,
       // methods
-      changeShowed,
-      handleChangeSearch,
-      filterRecord
+      changeShowed
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+// Filter Fields
 .form-filter-fields {
   .el-form-item {
     display: flex;
@@ -374,6 +326,7 @@ export default defineComponent({
 }
 </style>
 <style lang="scss">
+// Filter Fields
 .form-filter-fields {
   .el-form-item {
     >.el-form-item__content {

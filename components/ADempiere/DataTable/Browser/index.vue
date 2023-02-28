@@ -33,7 +33,6 @@
           :filter-manager="containerManager.changeColumnShowedFromUser"
           :showed-manager="containerManager.isDisplayedColumn"
           :is-filter-records="false"
-          :is-showed-table-records="false"
           :in-table="true"
           :container-manager="containerManager"
         />
@@ -68,35 +67,33 @@
         min-width="50"
       />
 
-      <template v-for="(fieldAttributes, key) in headerList">
-        <el-table-column
-          v-if="isDisplayed(fieldAttributes)"
-          :key="key"
-          :column-key="fieldAttributes.columnName"
-          :prop="fieldAttributes.columnName"
-          sortable
-          min-width="210"
-          :fixed="fieldAttributes.isFixedTableColumn"
-        >
-          <template slot="header">
-            <span v-if="containerManager.isMandatoryColumn(fieldAttributes)" style="color: red">
-              *
-            </span>
-            {{ fieldAttributes.name }}
-          </template>
-          <template slot-scope="scope">
-            <!-- formatted displayed value -->
-            <cell-edit-info
-              :parent-uuid="parentUuid"
-              :container-uuid="containerUuid"
-              :field-attributes="fieldAttributes"
-              :container-manager="containerManager"
-              :scope="scope"
-              :data-row="scope.row"
-            />
-          </template>
-        </el-table-column>
-      </template>
+      <el-table-column
+        v-for="(fieldAttributes, key) in headerList"
+        :key="key"
+        :column-key="fieldAttributes.columnName"
+        :prop="fieldAttributes.columnName"
+        sortable
+        min-width="210"
+        :fixed="fieldAttributes.isFixedTableColumn"
+      >
+        <template slot="header">
+          <span v-if="containerManager.isMandatoryColumn(fieldAttributes)" style="color: red">
+            *
+          </span>
+          {{ fieldAttributes.name }}
+        </template>
+        <template slot-scope="scope">
+          <!-- formatted displayed value -->
+          <cell-edit-info
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+            :field-attributes="fieldAttributes"
+            :container-manager="containerManager"
+            :scope="scope"
+            :data-row="scope.row"
+          />
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- pagination table, set custom or use default change page method -->
@@ -132,7 +129,7 @@ import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // Utils and Helper Methods
-import { isEmptyValue, tableColumnDataType } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'BrowserTable',
@@ -214,9 +211,22 @@ export default defineComponent({
 
     const headerList = computed(() => {
       return props.header.filter(fieldItem => {
-        return props.containerManager.isDisplayedColumn(fieldItem) &&
-          // fieldItem.isShowedTableFromUser &&
-          tableColumnDataType(fieldItem, currentOption.value)
+        if (props.containerManager.isDisplayedColumn(fieldItem)) {
+          const isMandatoryGenerated = props.containerManager.isMandatoryColumn(fieldItem)
+          const isDisplayedDefault = props.containerManager.isDisplayedDefaultTable({
+            ...fieldItem,
+            isMandatory: isMandatoryGenerated
+          })
+          // madatory, not parent column and without default value to window, mandatory or with default value to others
+          if (isDisplayedDefault) {
+            return true
+          }
+          // tableColumnDataType(fieldItem, currentOption.value)
+          // showed by user
+          return fieldItem.isShowedTableFromUser
+        }
+
+        return false
       })
     })
 
@@ -294,15 +304,6 @@ export default defineComponent({
           row
         })
       }
-    }
-
-    /**
-     * Verify is displayed column/field in table
-     */
-    function isDisplayed(field) {
-      // validate with container manager
-      return props.containerManager.isDisplayedColumn(field) &&
-        field.isShowedTableFromUser
     }
 
     /**
@@ -475,7 +476,6 @@ export default defineComponent({
       handleRowDblClick,
       handleSelection,
       handleSelectionAll,
-      isDisplayed,
       loadSelect,
       handleChangeSizePage
     }

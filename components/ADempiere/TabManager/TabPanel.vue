@@ -41,7 +41,6 @@
         :fields-list="containerManager.getFieldsList({ parentUuid, containerUuid: tabAttributes.uuid })"
         :fields-to-hidden="containerManager.getFieldsToHidden"
         :is-filter-records="true"
-        :is-showed-table-records="false"
         :in-table="isShowedTableRecords"
         :container-manager="containerManager"
       />
@@ -217,12 +216,18 @@ export default defineComponent({
     const styleHeadPanel = computed(() => {
       if (isShowedTableRecords.value) {
         if (!isEmptyValue(batchEntry.value)) {
-          if (activeNames.value === '1') return 'height: 200px'
+          // batch entry expand
+          if (activeNames.value === '1') {
+            return 'height: 200px'
+          }
+          // batch entry collapse
           return 'height: 130px'
         }
-        return 'height: 70px'
+        // multi record
+        return 'height: 78px'
       }
-      return 'height: 45px'
+      // mono record
+      return 'height: 39px'
     })
 
     const styleFooterPanel = computed(() => {
