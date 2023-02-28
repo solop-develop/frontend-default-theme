@@ -71,7 +71,7 @@
       fit
       :height="200"
       :max-height="400"
-      size="small"
+      size="mini"
       @current-change="handleCurrentChange"
       @row-dblclick="changeRecord"
     >

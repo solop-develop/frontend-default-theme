@@ -57,7 +57,7 @@
       border
       fit
       :max-height="300"
-      size="small"
+      size="mini"
       @current-change="handleCurrentChange"
       @row-dblclick="changeRecord"
     >

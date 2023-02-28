@@ -74,6 +74,10 @@ export default {
         styleClass += ' field-empty-required'
       }
 
+      if (this.inTable) {
+        styleClass += ' field-in-table'
+      }
+
       if (!isEmptyValue(this.metadata.cssClassName)) {
         styleClass += ' ' + this.metadata.cssClassName
       }

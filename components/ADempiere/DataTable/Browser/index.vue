@@ -17,7 +17,13 @@
 -->
 
 <template>
-  <div v-if="!isChangeOptions" id="mainBrowseDataTable" :onLoad="adjustSize()" :onresize="setTableHeight()">
+  <div
+    v-if="!isChangeOptions"
+    id="mainBrowseDataTable"
+    class="multipleTableBrowser"
+    :onLoad="adjustSize()"
+    :onresize="setTableHeight()"
+  >
     <el-row>
       <el-col :span="24">
         <filter-fields
@@ -182,7 +188,7 @@ export default defineComponent({
     const heightTable = ref()
     const timeOut = ref(null)
     const isChangeOptions = ref(false)
-    const panelMain = document.getElementById('mainBrowse')
+    const panelMain = document.getElementById('mainBrowseDataTable')
     const heightSize = ref()
     const currentRowSelect = ref({})
 
@@ -258,11 +264,7 @@ export default defineComponent({
       if (!isEmptyValue(panelMain) && !isEmptyValue(heightSize.value)) {
         return heightSize.value - 400
       }
-
-      if (props.containerManager.panelMain() === 'mainBrowser') {
-        return defaultSize.value
-      }
-      return 'auto'
+      return defaultSize.value
     })
 
     /**
@@ -482,24 +484,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
- div#mainWindow{
-    width: 100%;
-}
-.el-table .el-table__cell {
-  padding: 0px !important;
-}
-.el-table .success-row {
-  background: #e8f4ff;
-}
-.el-table .cell {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  word-break: break-all;
-  line-height: 15px;
-  padding-left: 10px;
-  padding-right: 10px;
+.multipleTableBrowser {
+  .el-table .success-row {
+    background: #e8f4ff;
+  }
+  .el-table .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 }
 </style>
