@@ -29,7 +29,7 @@
       :ref="metadata.columnName"
       key="number-input-focus"
       v-model="value"
-      v-shortkey="{ close: ['esc'], enter: ['enter'] }"
+      v-shortkey="shortcutKeys"
       v-bind="commonsProperties"
       type="number"
       :min="minValue"
@@ -44,7 +44,7 @@
       @keydown.native="keyPressed"
       @keyup.native="keyReleased"
       @shortkey.native="keyPressField"
-      @keyup.native.enter="select"
+      @keyup.native.enter="actionKeyEnter"
     />
 
     <el-input
@@ -60,12 +60,17 @@
 </template>
 
 <script>
+import store from '@/store'
+
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
+// Constants
+import { INPUT_NUMBER_PATTERN } from '@/utils/ADempiere/formatValue/numberFormat.js'
+
 // Utils and Helper Methods
 import { isDecimalField } from '@/utils/ADempiere/references.js'
-import { calculationValue, formatNumber, INPUT_NUMBER_PATTERN } from '@/utils/ADempiere/formatValue/numberFormat.js'
+import { formatNumber } from '@/utils/ADempiere/formatValue/numberFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
@@ -86,17 +91,8 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-number '
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-number '
     },
     maxValue() {
       if (isEmptyValue(this.metadata.valueMax)) {
@@ -118,7 +114,7 @@ export default {
         return this.metadata.precision
       }
       if (isDecimalField(this.metadata.displayType)) {
-        return this.$store.getters.getStandardPrecision
+        return store.getters.getStandardPrecision
       }
       return undefined
     },
@@ -153,22 +149,52 @@ export default {
       }
     },
     currencyCode() {
-      const currencyIsoCode = this.$store.getters.getCurrencyCode
+      const currencyIsoCode = store.getters.getCurrencyCode
       if (!isEmptyValue(this.metadata.labelCurrency)) {
         if (this.metadata.labelCurrency !== currencyIsoCode) {
           return this.metadata.labelCurrency
         }
       }
       return currencyIsoCode
+    },
+    shortcutKeys() {
+      const alphabet = {
+        a: ['a'], A: ['A'], b: ['b'], B: ['B'], c: ['c'], C: ['C'], d: ['d'], D: ['D'],
+        e: ['e'], E: ['E'], f: ['f'], F: ['F'], g: ['g'], G: ['G'], h: ['h'], H: ['H'],
+        i: ['i'], I: ['I'], j: ['j'], J: ['J'], k: ['k'], K: ['K'], l: ['l'], L: ['L'], m: ['m'], M: ['M'], n: ['n'], N: ['N'],
+        o: ['o'], O: ['O'], p: ['p'], P: ['P'], q: ['q'], Q: ['Q'], r: ['r'], R: ['R'], s: ['s'], S: ['S'], t: ['t'], T: ['T'],
+        u: ['u'], U: ['U'], v: ['v'], V: ['V'], w: ['w'], W: ['W'], x: ['x'], X: ['X'], y: ['y'], Y: ['Y'], z: ['z'], Z: ['Z']
+      }
+
+      // generate new object
+      const alphabetWithShift = Object.keys(alphabet).reduce((acc, item, index) => {
+        acc[index] = [
+          'shift',
+          item.at()
+        ]
+        return acc
+      }, {})
+
+      return {
+        ...alphabet,
+        ...alphabetWithShift,
+        close: ['esc']
+      }
     }
   },
 
   methods: {
-    keyPressField() {
-      if (!isEmptyValue(this.$refs[this.metadata.columnName])) {
-        this.$refs[this.metadata.columnName].handleBlur()
-        this.preHandleChange(this.$refs[this.metadata.columnName].currentValue)
+    keyPressField(event) {
+      switch (event.srcKey) {
+        case 'close':
+          this.customFocusLost(event)
+          break
       }
+
+      // if (!isEmptyValue(this.$refs[this.metadata.columnName])) {
+      //   this.$refs[this.metadata.columnName].handleBlur()
+      //   this.preHandleChange(this.$refs[this.metadata.columnName].currentValue)
+      // }
     },
     parseValue(value) {
       if (isEmptyValue(value)) {
@@ -190,126 +216,26 @@ export default {
         }
       })
     },
-    select() {
-      this.$nextTick(() => {
-        if (!isEmptyValue(this.$refs) && !isEmptyValue(this.$refs[this.metadata.columnName])) {
-          this.$refs[this.metadata.columnName].select()
-        }
-      })
+    actionKeyEnter(event) {
+      // this.$nextTick(() => {
+      //   if (!isEmptyValue(this.$refs) && !isEmptyValue(this.$refs[this.metadata.columnName])) {
+      //     this.$refs[this.metaedata.columnName].select()
+      //   }
+      // })
+      this.actionKeyPerformed(event)
     },
     customFocusLost(event) {
-      this.isFocus = false
-      // this.focusLost(event)
-    },
-    calculateDisplayedValue(event) {
-      const isAllowed = event.key.match(INPUT_NUMBER_PATTERN)
-      if (isAllowed) {
-        const result = calculationValue(this.value, event)
-        if (!isEmptyValue(result)) {
-          this.valueToDisplay = result
-          this.isShowed = true
-        } else {
-          this.valueToDisplay = '...'
-          this.isShowed = true
-        }
-      } else if (!isAllowed && event.key === 'Backspace') {
-        if (String(this.value).slice(0, -1) > 0) {
-          event.preventDefault()
-          const newValue = String(this.value).slice(0, -1)
-          const result = calculationValue(newValue, event)
-          if (!isEmptyValue(result)) {
-            this.value = this.parseValue(result)
-            this.valueToDisplay = result
-            this.isShowed = true
-          } else {
-            this.valueToDisplay = '...'
-            this.isShowed = true
-          }
-        }
-      } else if (!isAllowed && event.key === 'Delete') {
-        if (String(this.value).slice(-1) > 0) {
-          event.preventDefault()
-          const newValue = String(this.value).slice(-1)
-          const result = calculationValue(newValue, event)
-          if (!isEmptyValue(result)) {
-            this.value = this.parseValue(result)
-            this.valueToDisplay = result
-            this.isShowed = true
-          } else {
-            this.valueToDisplay = '...'
-            this.isShowed = true
-          }
-        }
-      } else {
-        event.preventDefault()
-      }
-    },
-    calculateValue(event) {
-      const result = calculationValue(this.value, event)
-      if (!isEmptyValue(result)) {
-        this.valueToDisplay = result
-      } else {
-        this.valueToDisplay = '...'
-      }
-      this.isShowed = true
+      this.focusLost(event)
 
-      /**
-      const isAllowed = event.key.match(oeprationPattern)
-      if (isAllowed) {
-        const result = this.calculationValue(this.value, event)
-        if (!isEmptyValue(result)) {
-          this.valueToDisplay = result
-        } else {
-          this.valueToDisplay = '...'
-        }
-        this.isShowed = true
-      } else {
-        const { selectionStart, selectionEnd } = event.target
-        if (event.key === 'Backspace') {
-          const newValue = this.deleteChar({ value: this.value, selectionStart, selectionEnd })
-          if (newValue > 0) {
-            event.preventDefault()
-            const result = this.calculationValue(newValue, event)
-            if (!isEmptyValue(result)) {
-              this.value = this.validateValue(result)
-              this.valueToDisplay = result
-            } else {
-              this.valueToDisplay = '...'
-            }
-            this.isShowed = true
-          }
-        } else if (event.key === 'Delete') {
-          const newValue = this.deleteChar({ value: this.value, selectionStart, selectionEnd, isReverse: false })
-          if (String(this.value).slice(-1) > 0) {
-            event.preventDefault()
-            const newValue = String(this.value).slice(-1)
-            const result = this.calculationValue(newValue, event)
-            if (!isEmptyValue(result)) {
-              this.value = this.validateValue(result)
-              this.valueToDisplay = result
-            } else {
-              this.valueToDisplay = '...'
-            }
-            this.isShowed = true
-          }
-        } else {
-          event.preventDefault()
-        }
-      }
-      */
+      // to change value first
+      setTimeout(() => {
+        this.isFocus = false
+      }, 100)
     },
     validateInput(event) {
       const value = String(event.target.value)
         .replace(INPUT_NUMBER_PATTERN, '')
       this.value = value
-    },
-    changeValue() {
-      if (!isEmptyValue(this.valueToDisplay) && this.valueToDisplay !== '...') {
-        const result = this.parseValue(this.valueToDisplay)
-        this.preHandleChange(result)
-      }
-
-      this.isShowed = false
     }
   }
 }
