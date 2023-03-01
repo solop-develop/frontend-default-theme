@@ -70,7 +70,7 @@
       </el-tab-pane>
     </el-tabs>
 
-    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;z-index: 9;">
+    <div :style="sizeBadgeRight">
       <el-button
         type="primary"
         size="mini"
@@ -245,9 +245,16 @@ export default defineComponent({
 
     const isDrawerWidth = computed(() => {
       if (isMobile.value) {
-        return '90%'
+        return '100%'
       }
       return '55%'
+    })
+
+    const sizeBadgeRight = computed(() => {
+      if (isMobile.value) {
+        return 'width: 1%;height: 100%;position: fixed;right: 5%;top: 45%;z-index: 9;'
+      }
+      return 'width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;z-index: 9;'
     })
 
     const tabStyle = computed(() => {
@@ -811,6 +818,7 @@ export default defineComponent({
       // computed
       isMobile,
       isDrawerWidth,
+      sizeBadgeRight,
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
