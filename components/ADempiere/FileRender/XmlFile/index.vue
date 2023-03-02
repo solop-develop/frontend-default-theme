@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -11,7 +11,7 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -35,7 +35,9 @@
 <script>
 import { defineComponent, computed, ref, onMounted } from '@vue/composition-api'
 
-// components and mixins
+import store from '@/store'
+
+// Components and Mixins
 import XmlViewer from 'vue-xml-viewer'
 import DownloadFile from '@theme/components/ADempiere/FileRender/downloadFile.vue'
 
@@ -71,13 +73,13 @@ export default defineComponent({
     const xmlComment = ref('')
     const htmlCommentPattern = /<\!--.*?-->/g
 
-    const getStoredReportOutput = computed(() => {
-      return root.$store.getters.getReportOutput(root.$route.params.instanceUuid)
+    const storedReportOutput = computed(() => {
+      return store.getters.getReportOutput(root.$route.params.instanceUuid)
     })
 
     onMounted(() => {
       // eslint-disable-next-line new-cap
-      const xmlDocument = new Buffer.from(getStoredReportOutput.value.outputStream_asB64, 'base64')
+      const xmlDocument = new Buffer.from(storedReportOutput.value.outputStream_asB64, 'base64')
       const xmlAsString = xmlDocument.toString()
 
       xmlComment.value = xmlAsString.match(htmlCommentPattern).toString()

@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -159,17 +159,16 @@
 </template>
 
 <script>
-
 import { computed, defineComponent } from '@vue/composition-api'
 
-import language from '@/lang'
+import lang from '@/lang'
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import MenuReferences from './References.vue'
 
-// utils and helper methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+// Utils and Helper Methods
+import { isEmptyValue, getTypeOfValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'MenuActions',
@@ -245,19 +244,22 @@ export default defineComponent({
 
     const defaultActionToRun = computed(() => {
       if (isUndoAction.value) {
-        return actionsList.value[1]
+        return actionsList.value.at(1)
       }
-      return actionsList.value[0]
+      return actionsList.value.at()
     })
 
     const defaultActionName = computed(() => {
       if (!isEmptyValue(props.actionsManager.defaultActionName)) {
+        if (getTypeOfValue(props.actionsManager.defaultActionName) === 'FUNCTION') {
+          return props.actionsManager.defaultActionName()
+        }
         return props.actionsManager.defaultActionName
       }
       if (!isEmptyValue(actionsList.value)) {
-        return actionsList.value[0].name
+        return actionsList.value.at().name
       }
-      return language.t('actionMenu.runProcess')
+      return lang.t('actionMenu.runProcess')
     })
 
     /**
