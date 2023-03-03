@@ -307,7 +307,7 @@ import {
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
-import { isEmptyValue } from '@/utils/ADempiere/valueFormat'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 
