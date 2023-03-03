@@ -69,11 +69,38 @@
             <el-divider />
             <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ scope.row.product.value }}</span></p><br>
             <p><b style="float: left">{{ $t('form.productInfo.upc') }}</b><span style="float: right"> {{ scope.row.product.upc }} </span></p><br>
-            <p><b style="float: left">{{ $t('form.productInfo.quantityOnHand') }}</b><span style="float: right"> {{ formatQuantity(scope.row.quantityOnHand) }} </span></p><br>
-            <p><b style="float: left">{{ $t('form.productInfo.price') }}</b><span style="float: right"> {{ formatPrice(scope.row.priceStandard, scope.row.currency.iSOCode) }} </span></p><br>
-            <p><b style="float: left">{{ $t('form.productInfo.taxAmount') }}</b><span style="float: right"> {{ formatPrice(getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), scope.row.currency.iSOCode) }} </span></p><br>
-            <p><b style="float: left">{{ $t('form.productInfo.grandTotal') }}</b><span style="float: right"><b> {{ formatPrice(getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate) + scope.row.priceStandard, scope.row.currency.iSOCode) }} </b></span></p><br>
-            <p><b style="float: left">{{ $t('form.productInfo.grandTotalConverted') }} ({{ scope.row.schemaCurrency.iSOCode }}) </b><span style="float: right"><b> {{ formatPrice(getTaxAmount(scope.row.schemaPriceStandard, scope.row.taxRate.rate) + scope.row.schemaPriceStandard, scope.row.schemaCurrency.iSOCode) }} </b></span></p>
+            <p>
+              <b style="float: left">{{ $t('form.productInfo.quantityOnHand') }}</b>
+              <span style="float: right">
+                {{ formatQuantity({ value: scope.row.quantityOnHand }) }}
+              </span>
+            </p><br>
+            <p>
+              <b style="float: left">{{ $t('form.productInfo.price') }}</b>
+              <span style="float: right">
+                {{ formatPrice({ value: scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
+              </span>
+            </p><br>
+            <p>
+              <b style="float: left">{{ $t('form.productInfo.taxAmount') }}</b>
+              <span style="float: right">
+                {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), currency: scope.row.currency.iSOCode }) }}
+              </span>
+            </p><br>
+            <p>
+              <b style="float: left">{{ $t('form.productInfo.grandTotal') }}</b>
+              <span style="float: right"><b>
+                {{ formatPrice(getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate) + scope.row.priceStandard, scope.row.currency.iSOCode) }}
+              </b></span>
+            </p><br>
+            <p>
+              <b style="float: left">
+                {{ $t('form.productInfo.grandTotalConverted') }} ({{ scope.row.schemaCurrency.iSOCode }})
+              </b>
+              <span style="float: right"><b>
+                {{ formatPrice({ value: getTaxAmount(scope.row.schemaPriceStandard, scope.row.taxRate.rate) + scope.row.schemaPriceStandard, currency: scope.row.schemaCurrency.iSOCode }) }}
+              </b></span>
+            </p>
             <div slot="reference" class="name-wrapper">
               {{ scope.row.product.name }}
             </div>
@@ -86,7 +113,7 @@
         width="100"
       >
         <template slot-scope="scope">
-          {{ formatQuantity(scope.row.quantityOnHand) }}
+          {{ formatQuantity({ value: scope.row.quantityOnHand }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -94,7 +121,7 @@
         align="right"
       >
         <template slot-scope="scope">
-          {{ formatQuantity(scope.row.quantityAvailable) }}
+          {{ formatQuantity({ value: scope.row.quantityAvailable }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -102,7 +129,7 @@
         align="right"
       >
         <template slot-scope="scope">
-          {{ formatPrice(scope.row.priceStandard, scope.row.currency.iSOCode) }}
+          {{ formatPrice({ value: scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -110,7 +137,7 @@
         align="right"
       >
         <template slot-scope="scope">
-          {{ formatPrice(getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), scope.row.currency.iSOCode) }}
+          {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), currency: scope.row.currency.iSOCode }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -118,7 +145,7 @@
         align="right"
       >
         <template slot-scope="scope">
-          {{ formatPrice(getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate) + scope.row.priceStandard, scope.row.currency.iSOCode) }}
+          {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate) + scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
         </template>
       </el-table-column>
       <!-- <el-table-column
@@ -164,7 +191,8 @@ import fieldsListProductPrice from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and herlper methods
-import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { formatPrice, formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
 import {
   getLookupList,
   isDisplayedField,
@@ -178,12 +206,15 @@ import {
 
 export default {
   name: 'ProductList',
+
   components: {
     CustomPagination
   },
+
   mixins: [
     formMixin
   ],
+
   props: {
     metadata: {
       type: Object,
@@ -217,6 +248,7 @@ export default {
       })
     }
   },
+
   data() {
     return {
       defaultMaxPagination: 50,
@@ -242,7 +274,7 @@ export default {
     },
     listWithPrice() {
       const { productPricesList } = this.productPrice
-      if (!this.isEmptyValue(productPricesList)) {
+      if (!isEmptyValue(productPricesList)) {
         return productPricesList
       }
       return []
@@ -260,16 +292,16 @@ export default {
     },
     listPrice() {
       const pos = this.currentPoint
-      if (!this.isEmptyValue(pos)) {
+      if (!isEmptyValue(pos)) {
         return pos.priceList.id
       }
       return 0
     },
     // process() {
-    //   if (!this.isEmptyValue(this.reportAsociated)) {
+    //   if (!isEmptyValue(this.reportAsociated)) {
     //     const process = this.reportAsociated.map(element => {
     //       const findProcess = this.$store.getters.getProcess(element.uuid)
-    //       if (!this.isEmptyValue(findProcess)) {
+    //       if (!isEmptyValue(findProcess)) {
     //         return {
     //           ...element,
     //           name: findProcess.name,
@@ -296,7 +328,7 @@ export default {
       this.setCurrent(this.listWithPrice[value])
     },
     currentPoint(value) {
-      if (!this.isEmptyValue(value)) {
+      if (!isEmptyValue(value)) {
         this.loadProductsPricesList()
       }
     }
@@ -325,13 +357,13 @@ export default {
     isReadOnlyField,
     changeFieldShowedFromUser,
     getImageFromSource(keyValue) {
-      if (this.isEmptyValue(keyValue)) {
+      if (isEmptyValue(keyValue)) {
         return this.defaultImage
       }
 
       // const image = this.valuesImage.find(item => item.identifier === fileName).value
       const image = this.resource[keyValue]
-      if (this.isEmptyValue(image)) {
+      if (isEmptyValue(image)) {
         return this.defaultImage
       }
       return image
@@ -404,19 +436,19 @@ export default {
       })
     },
     getTaxAmount(basePrice, taxRate) {
-      if (this.isEmptyValue(basePrice) || this.isEmptyValue(taxRate)) {
+      if (isEmptyValue(basePrice) || isEmptyValue(taxRate)) {
         return 0
       }
       return (basePrice * taxRate) / 100
     },
     associatedprocesses(product, report) {
-      report.parametersList.push({ columnName: 'M_Product_ID', value: product }, { columnName: 'M_PriceList_ID', value: this.listPrice })
-      this.$store.dispatch('processOption', {
-        action: report,
-        parametersList: report.parametersList,
-        reportFormat: 'pdf',
-        routeToDelete: this.$route
-      })
+      // report.parametersList.push({ columnName: 'M_Product_ID', value: product }, { columnName: 'M_PriceList_ID', value: this.listPrice })
+      // this.$store.dispatch('processOption', {
+      //   action: report,
+      //   parametersList: report.parametersList,
+      //   reportFormat: 'pdf',
+      //   routeToDelete: this.$route
+      // })
     },
     findPosition(current) {
       const arrow = this.listWithPrice.findIndex(element => {
@@ -428,7 +460,7 @@ export default {
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
-        // if (!this.isEmptyValue(this.listWithPrice)) {
+        // if (!isEmptyValue(this.listWithPrice)) {
         //   this.setCurrent(this.listWithPrice[0])
         // }
         if (mutation.type === 'updateValueOfField' &&
@@ -448,7 +480,7 @@ export default {
      * @param {object} PointOfSales
      */
     validatePos(PointOfSales) {
-      if (this.isEmptyValue(PointOfSales)) {
+      if (isEmptyValue(PointOfSales)) {
         const message = this.$t('notifications.errorPointOfSale')
         this.$store.commit('setListProductPrice', {
           isLoaded: true,
