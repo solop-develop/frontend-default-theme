@@ -32,26 +32,23 @@
           label-width="10px"
           @submit.native.prevent="notSubmitForm"
         >
-          <template
+          <field-definition
             v-for="(field) in sortFieldsListOrder"
-          >
-            <field-definition
-              :key="field.columnName"
-              :metadata-field="field"
-              :container-uuid="'Orders-List'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-          </template>
+            :key="field.columnName"
+            :metadata-field="field"
+            :container-uuid="'Orders-List'"
+            :container-manager="{
+              ...containerManager,
+              getLookupList,
+              isDisplayedField,
+              isDisplayedDefault,
+              generalInfoSearch,
+              searchTableHeader,
+              isMandatoryField,
+              isReadOnlyField,
+              changeFieldShowedFromUser
+            }"
+          />
         </el-form>
         <div
           v-else
@@ -283,7 +280,9 @@
 <script>
 // Constants
 import fieldsListOrders from './fieldsListOrders.js'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import {
+  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
@@ -308,6 +307,7 @@ import {
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
+import { isEmptyValue } from '@/utils/ADempiere/valueFormat'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 
@@ -364,22 +364,22 @@ export default {
 
   computed: {
     heightTable() {
-      if (this.isEmptyValue(this.activeAccordion)) {
+      if (isEmptyValue(this.activeAccordion)) {
         return 600
       }
       return 350
     },
     highlightRow() {
-      if (!this.isEmptyValue(this.selectOrder)) {
+      if (!isEmptyValue(this.selectOrder)) {
         return true
       }
       return false
     },
     selectOrder() {
       const action = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
-      if (!this.isEmptyValue(this.ordersList.ordersList)) {
+      if (!isEmptyValue(this.ordersList.ordersList)) {
         const order = this.ordersList.ordersList.find(item => item.uuid === action)
-        if (!this.isEmptyValue(order)) {
+        if (!isEmptyValue(order)) {
           return order
         }
       }
@@ -400,7 +400,7 @@ export default {
     },
     sortTableOrderList: {
       get() {
-        if (this.isEmptyValue(this.ordersList.ordersList)) {
+        if (isEmptyValue(this.ordersList.ordersList)) {
           return []
         }
         return this.ordersList.ordersList
@@ -414,7 +414,7 @@ export default {
 
   watch: {
     showField(value) {
-      if (value && this.isEmptyValue(this.metadataList)) {
+      if (value && isEmptyValue(this.metadataList)) {
         this.setFieldsList()
       }
     },
@@ -458,10 +458,10 @@ export default {
     },
     sortDescendingTable(listDate, column, params) {
       return listDate.sort((element, item) => {
-        if ((!this.isEmptyValue(params) && element[column][params] > item[column][params]) || element[column] > item[column]) {
+        if ((!isEmptyValue(params) && element[column][params] > item[column][params]) || element[column] > item[column]) {
           return 1
         }
-        if ((!this.isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
+        if ((!isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
           return -1
         }
         return 0
@@ -469,10 +469,10 @@ export default {
     },
     sortAscendingTable(listDate, column, params) {
       return listDate.sort((element, item) => {
-        if ((!this.isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
+        if ((!isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
           return 1
         }
-        if ((!this.isEmptyValue(params) && element[column][params] > item[column][params]) || (element[column] > item[column])) {
+        if ((!isEmptyValue(params) && element[column][params] > item[column][params]) || (element[column] > item[column])) {
           return -1
         }
         return 0
@@ -491,7 +491,7 @@ export default {
     },
     loadOrdersList(pageNumber = 0) {
       const point = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      if (!this.isEmptyValue(point)) {
+      if (!isEmptyValue(point)) {
         this.isLoadRecord = true
         this.$store.dispatch('listOrdersFromServer', {
           posUuid: point,
@@ -511,7 +511,7 @@ export default {
     selectionChangeOrder() {
       const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
       const currentOrder = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
-      if (!this.isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
+      if (!isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
         this.$store.state['pointOfSales/point/index'].conversionsList = []
         this.$store.dispatch('currentOrder', this.changeOrder)
         this.$store.dispatch('deleteAllCollectBox')
@@ -554,7 +554,7 @@ export default {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField' &&
           !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
-          !mutation.payload.columnName.endsWith('_UUID') &&
+          !mutation.payload.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX) &&
           mutation.payload.containerUuid === this.metadata.containerUuid) {
           clearTimeout(this.timeOut)
           this.isLoadRecord = true
