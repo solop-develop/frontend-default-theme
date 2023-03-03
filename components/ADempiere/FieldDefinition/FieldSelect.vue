@@ -57,7 +57,7 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
  * - Table List
  * - Table Direct
  *
- * TODO: String values add single quotation marks 'value'
+ * TODO: String values add single quotation marks 'value' (see removeQuotationMark)
  * TODO: No includes default value into list on forms or field with dynamic validation (see default value City on location form)
  */
 export default {
@@ -70,20 +70,11 @@ export default {
   ],
 
   computed: {
-    cssClassStyle() {
+    cssClassCustomField() {
       let styleClass = ' custom-field-select '
       if (this.isSelectMultiple) {
         styleClass += ' custom-field-select-multiple '
       }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
       return styleClass
     },
 
@@ -166,7 +157,9 @@ export default {
       })
     },
     currentRecord() {
-      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
+      return this.$store.getters.getTabCurrentRow({
+        containerUuid: this.metadata.containerUuid
+      })
     }
   },
 

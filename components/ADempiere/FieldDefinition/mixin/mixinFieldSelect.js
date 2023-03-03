@@ -21,7 +21,7 @@ import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
 import { convertBooleanToString } from '@/utils/ADempiere/formatValue/booleanFormat.js'
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { getTypeOfValue, isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
   name: 'MixinFieldSelect',
@@ -88,12 +88,11 @@ export default {
 
       // sets the value to blank when the lookupList or lookupItem have no
       // values, or if only lookupItem does have a value
-      if (!this.metadata.required) {
-        if (isEmptyValue(allOptions) || (!isEmptyValue(allOptions) &&
-          (!this.blankValues.includes(allOptions[0].value)))) {
-          allOptions.unshift(this.blankOption)
-        }
+      if (isEmptyValue(allOptions) || (!isEmptyValue(allOptions) &&
+        (!this.blankValues.includes(allOptions.at().value)))) {
+        allOptions.unshift(this.blankOption)
       }
+
       return allOptions
     }
   },
@@ -103,7 +102,7 @@ export default {
      @overwride
      */
     parseValue(value) {
-      if (typeof value === 'boolean') {
+      if (getTypeOfValue(value) === 'BOOLEAN') {
         // value ? 'Y' : 'N'
         value = convertBooleanToString(value)
       }
