@@ -50,7 +50,6 @@ export default {
       return {
         // label with '' value is assumed to be undefined non-existent
         displayedValue: ' ',
-        id: undefined,
         uuid: undefined,
         value
       }

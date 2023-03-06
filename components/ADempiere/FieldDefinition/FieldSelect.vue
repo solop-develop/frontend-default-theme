@@ -18,6 +18,7 @@
 
 <template>
   <el-select
+    :key="componentKey"
     v-model="value"
     v-bind="commonsProperties"
     :filterable="true"
@@ -68,6 +69,12 @@ export default {
     fieldWithDisplayColumn,
     selectMixin
   ],
+
+  data() {
+    return {
+      componentKey: 0
+    }
+  },
 
   computed: {
     cssClassCustomField() {
@@ -211,6 +218,9 @@ export default {
   },
 
   methods: {
+    forceRerender() {
+      this.componentKey += 1
+    },
     preHandleChange(value) {
       const { displayedValue } = this.findOption(value)
       this.displayedValue = displayedValue
@@ -240,12 +250,8 @@ export default {
         return
       }
 
-      this.optionsList = []
-      this.$nextTick(() => {
-        // this.$refs[this.metadata.columnName].selectedLabel = this.displayedValue
-        this.optionsList = this.getStoredLookupAll
-      })
       this.optionsList = this.getStoredLookupAll
+      this.forceRerender()
 
       // find local list value
       const option = this.findOption(value)
@@ -285,6 +291,7 @@ export default {
 
       this.displayedValue = undefined
       this.uuidValue = undefined
+      // this.setDefaultValue()
       this.getDefaultValueFromServer()
         .then(responseLookupItem => {
           // with value response update local component list
@@ -295,12 +302,9 @@ export default {
           }
         })
         .finally(() => {
-          this.optionsList = []
-          this.$nextTick(() => {
-            // this.$refs[this.metadata.columnName].selectedLabel = this.displayedValue
-            this.optionsList = this.getStoredLookupAll
-          })
           this.optionsList = this.getStoredLookupAll
+          this.forceRerender()
+
           this.isLoading = false
         })
     },
