@@ -85,7 +85,7 @@
           </el-collapse>
         </el-col>
 
-        <el-col v-show="!metadata.pos" :span="24" class="location-address-footer">
+        <el-col :span="24" class="location-address-footer">
           <samp style="float: right; padding-top: 4px;">
             <el-button
               :disabled="isLoadingFields"
@@ -261,16 +261,10 @@ export default {
     }
   },
 
-  created() {
-    this.unsubscribe = this.subscribeChanges()
-  },
-
   mounted() {
-    if (this.metadata.pos) {
-      this.fieldsList.forEach(element => {
-        element.containerUuid = this.metadata.containerUuid
-      })
-    }
+    this.unsubscribe()
+    this.unsubscribe = this.subscribeChanges()
+
     this.getLocation()
 
     clearTimeout(this.timeOutFields)

@@ -79,7 +79,7 @@ export default {
       }
     },
     currentTab() {
-      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+      if (isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
         return {}
       }
       return this.containerManager.getPanel({
@@ -107,7 +107,7 @@ export default {
       })
     },
     setContainerInformation() {
-      if (!this.isEmptyValue(this.currentTab)) {
+      if (!isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
@@ -127,7 +127,7 @@ export default {
     generateDisplayedValue(entityValues) {
       let displayValue = ''
 
-      if (this.isEmptyValue(entityValues)) {
+      if (isEmptyValue(entityValues)) {
         return displayValue
       }
 
@@ -140,7 +140,7 @@ export default {
       // TODO: Change with current country display sequence
       let displaySequence = this.$store.getters.getDisplaySequence
       const country = this.currentCountryDefinition
-      if (!this.isEmptyValue(country)) {
+      if (!isEmptyValue(country)) {
         displaySequence = country.displaySequence
       }
       const locationDisplayedSequence = getSequenceAsList(displaySequence)
@@ -167,10 +167,10 @@ export default {
       })
 
       const addDisplayValue = (value) => {
-        if (this.isEmptyValue(value)) {
+        if (isEmptyValue(value)) {
           value = ''
         }
-        if (!this.isEmptyValue(displayValue)) {
+        if (!isEmptyValue(displayValue)) {
           displayValue += ', ' + value
         } else {
           displayValue = value
@@ -190,11 +190,11 @@ export default {
         const displayColumnName = DISPLAY_COLUMN_PREFIX + columnName
 
         let currrentValue = ''
-        if (!this.isEmptyValue(entityValues[displayColumnName])) {
+        if (!isEmptyValue(entityValues[displayColumnName])) {
           currrentValue = entityValues[displayColumnName]
         }
 
-        if (this.isEmptyValue(currrentValue)) {
+        if (isEmptyValue(currrentValue)) {
           if (columnName === 'C_City_ID') {
             currrentValue = entityValues['City']
           }
@@ -202,14 +202,14 @@ export default {
             currrentValue = entityValues['RegionName']
           }
 
-          if (this.isEmptyValue(currrentValue)) {
+          if (isEmptyValue(currrentValue)) {
             currrentValue = this.$store.getters.getValueOfField({
               containerUuid: this.uuidForm,
               columnName: displayColumnName
             })
           }
         }
-        if (this.isEmptyValue(currrentValue)) {
+        if (isEmptyValue(currrentValue)) {
           currrentValue = entityValues[columnName]
         }
 
