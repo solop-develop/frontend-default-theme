@@ -79,9 +79,12 @@
           trigger="click"
           class="popover-field-options"
           style="padding: 0px !important; max-width: 400px"
+          v-shortkey="shortsKey"
+          @shortkey.native="keyAction"
           @hide="closePopover"
         >
           <component
+            v-if="isShowedFieldOption"
             :is="currentFieldOption.componentRender"
             :field-attributes="metadata"
             :field-value="valueField"
@@ -163,7 +166,7 @@ export default defineComponent({
       get() {
         return store.getters.getIsShowFieldOption &&
           currentFieldOption.value.isRender &&
-          currentFieldOption.value.fieldAttributes.name === props.metadata.name
+          currentFieldOption.value.fieldAttributes.id === props.metadata.id
       },
       set(isShow) {
         store.commit('setShowFieldOption', isShow)
@@ -335,6 +338,20 @@ export default defineComponent({
       }
     })
 
+    const shortsKey = computed(() => {
+      return {
+        close: ['esc']
+      }
+    })
+
+    function keyAction(event) {
+      switch (event.srcKey) {
+        case 'close':
+          this.closePopover()
+          break
+      }
+    }
+
     const closePopover = () => {
       isShowedFieldOption.value = false
       // store.commit('changeShowRigthPanel', false)
@@ -427,9 +444,11 @@ export default defineComponent({
       isShowedFieldOption,
       valueField,
       triggerMenu,
+      shortsKey,
       showPanelFieldOption,
       // methods
       closePopover,
+      keyAction,
       handleClose,
       handleCommand,
       handleOpen,
