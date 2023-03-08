@@ -75,17 +75,17 @@
         <el-popover
           ref="popoverOption"
           v-model="isShowedFieldOption"
+          v-shortkey="shortsKey"
           placement="top"
           trigger="click"
           class="popover-field-options"
           style="padding: 0px !important; max-width: 400px"
-          v-shortkey="shortsKey"
           @shortkey.native="keyAction"
           @hide="closePopover"
         >
           <component
-            v-if="isShowedFieldOption"
             :is="currentFieldOption.componentRender"
+            v-if="isShowedFieldOption"
             :field-attributes="metadata"
             :field-value="valueField"
             :record-uuid="recordUuid"
