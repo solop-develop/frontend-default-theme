@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez esanchez@erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +21,7 @@
     <div slot="header">
       <span style="word-break: break-word;">
         {{ $t('field.field') }}
-        <b> {{ fieldAttributes.name }} </b>
+        <b>{{ fieldAttributes.name }}</b>
         ({{ fieldAttributes.id }}, {{ fieldAttributes.columnName }})
       </span>
     </div>
@@ -68,22 +68,22 @@
       </el-form>
     </el-scrollbar>
 
-    <el-button
-      v-for="(zoomItem, index) in fieldAttributes.reference.zoomWindows"
-      :key="index"
-      type="text"
-      @click="redirect({ window: zoomItem })"
-    >
-      {{ $t('page.processActivity.zoomIn') }}
-      {{ zoomItem.name }}
-    </el-button>
+    <span v-for="(zoomItem, index) in fieldAttributes.reference.zoomWindows" :key="index">
+      <el-button
+        :key="index"
+        type="text"
+        @click="redirect({ window: zoomItem })"
+      >
+        {{ $t('page.processActivity.zoomIn') }}
+        {{ zoomItem.name }}
+      </el-button>
+    </span>
   </el-card>
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, onMounted } from '@vue/composition-api'
 
-import router from '@/router'
 import store from '@/store'
 
 // Utils and Helper Methods
@@ -101,7 +101,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const fieldValue = computed(() => {
       const { parentUuid, containerUuid, columnName } = props.fieldAttributes
       return store.getters.getValueOfFieldOnContainer({
@@ -112,63 +112,63 @@ export default defineComponent({
     })
 
     const messageText = computed(() => {
-      if (!isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
-        const contextInfo = store.getters.getContextInfoField(
-          props.fieldAttributes.contextInfo.uuid,
-          props.fieldAttributes.contextInfo.sqlStatement
+      const { contextInfo } = props.fieldAttributes
+      if (!isEmptyValue(contextInfo.sqlStatement)) {
+        const storedContextInfo = store.getters.getContextInfoField(
+          contextInfo.uuid,
+          contextInfo.sqlStatement
         )
-        if (!isEmptyValue(contextInfo)) {
-          return contextInfo.messageText
+        if (!isEmptyValue(storedContextInfo)) {
+          return storedContextInfo.messageText || ''
         }
       }
       return ''
     })
 
     function redirect({ window }) {
+      // panel in mobile mode
+      store.commit('changeShowRigthPanel', false)
+
       const { columnName } = props.fieldAttributes
+
+      const filters = [{
+        columnName,
+        value: fieldValue.value
+      }]
 
       zoomIn({
         uuid: window.uuid,
         query: {
-          action: 'zoomIn',
-          columnName,
-          value: fieldValue.value
+          filters
+        },
+        params: {
+          filters
         }
       })
+    }
 
-      // panel in mobile mode
-      store.commit('changeShowRigthPanel', false)
-      if (!isEmptyValue(router.query.fieldColumnName)) {
-        router.push({
-          name: router.name,
-          query: {
-            ...router.query,
-            typeAction: '',
-            fieldColumnName: ''
-          }
-        }, () => {})
+    onMounted(() => {
+      if (!isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
+        const sqlParse = parseContext({
+          parentUuid: props.fieldAttributes.parentUuid,
+          containerUuid: props.fieldAttributes.containerUuid,
+          value: props.fieldAttributes.contextInfo.sqlStatement,
+          isSQL: true,
+          isBooleanToString: true
+        })
+
+        store.dispatch('getContextInfoValueFromServer', {
+          id: props.fieldAttributes.contextInfo.id,
+          uuid: props.fieldAttributes.contextInfo.uuid,
+          query: sqlParse.query
+        })
       }
-    }
-
-    if (!isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
-      const sqlParse = parseContext({
-        parentUuid: props.fieldAttributes.parentUuid,
-        containerUuid: props.fieldAttributes.containerUuid,
-        value: props.fieldAttributes.contextInfo.sqlStatement,
-        isBooleanToString: true
-      })
-
-      store.dispatch('getContextInfoValueFromServer', {
-        contextInfoId: props.fieldAttributes.contextInfo.id,
-        contextInfoUuid: props.fieldAttributes.contextInfo.uuid,
-        sqlStatement: sqlParse.value
-      })
-    }
+    })
 
     return {
-      // computeds
+      // Computeds
       messageText,
-      // methods
+      // Methods
       redirect
     }
   }
