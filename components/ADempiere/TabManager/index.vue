@@ -508,6 +508,7 @@ export default defineComponent({
         tabUuid: routerParams.containerUuid,
         containerUuid,
         filters,
+        referenceUuid: query.referenceUuid,
         filtersRecord,
         pageNumber
       }).then(responseData => {
@@ -563,7 +564,8 @@ export default defineComponent({
         }, () => {})
       })
     }
-    if (isReadyFromGetData.value || (!isReadyFromGetData.value && !isEmptyValue(root.$route.params.filters))) {
+    if (isReadyFromGetData.value || (!isReadyFromGetData.value &&
+      (!isEmptyValue(root.$route.params.filters) || !isEmptyValue(root.$route.query.referenceUuid)))) {
       getData()
     }
     watch(currentRecordLogs, (newValue, oldValue) => {
