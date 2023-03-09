@@ -61,7 +61,6 @@
             :current-tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
             :actions-manager="actionsManager"
-            :references-manager="referencesManager"
             :convenience-options="additionalOptions"
             :style="'height: 100% !important;'"
           />
@@ -215,10 +214,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
-    },
     additionalOptions: {
       type: Object,
       default: () => ({})

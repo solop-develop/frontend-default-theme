@@ -25,7 +25,6 @@
         :current-tab-uuid="currentTabUuid"
         :container-uuid="tabAttributes.uuid"
         :tab-attributes="tabAttributes"
-        :references-manager="referencesManager"
         :adicionales-options="convenienceOptions"
         :is-child-tab="isChildTab"
         :change-previous-record="changePreviousRecord"
@@ -167,10 +166,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
-    },
     convenienceOptions: {
       type: Object,
       default: () => ({})
