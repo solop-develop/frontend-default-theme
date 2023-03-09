@@ -79,13 +79,6 @@ export default defineComponent({
   },
 
   setup(props) {
-    const storedTab = computed(() => {
-      return store.getters.getStoredTab(
-        props.parentUuid,
-        props.tabUuid
-      )
-    })
-
     const getterReferences = computed(() => {
       return store.getters.getStoredReferences({
         windowUuid: props.parentUuid,
@@ -98,24 +91,14 @@ export default defineComponent({
       if (isEmptyValue(referenceElement.windowUuid)) {
         return
       }
-      const { keyColumn } = storedTab.value
-
-      const recordId = store.getters.getValueOfFieldOnContainer({
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabUuid,
-        columnName: keyColumn
-      })
-
-      const pairsValues = [{
-        columnName: keyColumn,
-        value: Number(recordId)
-      }]
 
       zoomIn({
         uuid: referenceElement.windowUuid,
         params: {
-          filters: pairsValues,
           containerUuid: props.tabUuid
+        },
+        query: {
+          referenceUuid: referenceElement.uuid
         }
       })
       store.commit('setShowLogs', false)
