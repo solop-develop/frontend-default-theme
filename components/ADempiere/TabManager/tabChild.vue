@@ -53,7 +53,6 @@
           :current-tab-uuid="tabUuid"
           :tab-attributes="tabAttributes"
           :actions-manager="actionsManager"
-          :references-manager="referencesManager"
           :is-child-tab="true"
           style="height: 100% !important;"
         />
@@ -68,7 +67,6 @@
           :tabs-list="tabsList"
           :all-tabs-list="allTabsList"
           :tab-attributes="tabAttributes"
-          :references-manager="referencesManager"
         />
         <br>
       </div>
@@ -88,7 +86,6 @@
             :current-tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
             :actions-manager="actionsManager"
-            :references-manager="referencesManager"
           />
         </div>
         <div v-else>
@@ -114,7 +111,6 @@
             :current-tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
             :actions-manager="actionsManager"
-            :references-manager="referencesManager"
           />
           </el-scrollbar>
         </div>
@@ -171,11 +167,6 @@ export default defineComponent({
       default: () => []
     },
     actionsManager: {
-      type: Object,
-      default: () => ({})
-    },
-    // used only window
-    referencesManager: {
       type: Object,
       default: () => ({})
     }

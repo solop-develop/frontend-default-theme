@@ -59,7 +59,6 @@
       :container-uuid="currentTabUuid"
       :container-manager="containerManager"
       :actions-manager="listAction"
-      :references-manager="referencesManager"
       style="float: right;"
     />
   </div>
@@ -108,10 +107,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
-    },
     adicionalesOptions: {
       type: Object,
       default: () => ({})
