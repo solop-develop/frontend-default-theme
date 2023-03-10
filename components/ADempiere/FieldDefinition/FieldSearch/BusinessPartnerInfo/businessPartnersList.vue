@@ -107,12 +107,12 @@
       <el-col :span="10">
         <samp style="float: right; padding-top: 4px;">
           <el-button
-              type="info"
-              class="button-base-icon"
-              plain
-              @click="clearFormValues(); searchBPartnerList();"
-            >
-              <svg-icon icon-class="layers-clear" />
+            type="info"
+            class="button-base-icon"
+            plain
+            @click="clearFormValues(); searchBPartnerList();"
+          >
+            <svg-icon icon-class="layers-clear" />
           </el-button>
 
           <el-button
