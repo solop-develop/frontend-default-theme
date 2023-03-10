@@ -60,7 +60,7 @@
           <svg-icon :icon-class="iconColumn(4)" />
           {{ $t('fieldDisplayOptions.Show4Columns') }}
         </el-dropdown-item>
-        <el-dropdown-item v-if="!isMobile && isShowSequence" :command="'secuencia'">
+        <el-dropdown-item v-if="!isMobile" :command="'secuencia'">
           <i class="el-icon-sort" />
           {{ sequenceOptionLabel }}
         </el-dropdown-item>
