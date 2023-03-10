@@ -94,7 +94,7 @@
     <el-row :gutter="24" class="business-partners-footer">
       <el-col :span="14">
         <custom-pagination
-          :total="businessParnerData.recordCount"
+          :total="businessPartnerData.recordCount"
           :current-page="pageNumber"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
@@ -259,19 +259,19 @@ export default {
         }
       })
     },
-    businessParnerData() {
+    businessPartnerData() {
       return store.getters.getBusinessPartnerData({
         containerUuid: this.uuidForm
       })
     },
     pageNumber() {
-      return this.businessParnerData.pageNumber
+      return this.businessPartnerData.pageNumber
     },
     pageSize() {
-      return this.businessParnerData.pageSize
+      return this.businessPartnerData.pageSize
     },
     isReadyFromGetData() {
-      const { isLoaded } = this.businessParnerData
+      const { isLoaded } = this.businessPartnerData
       return !isLoaded && this.showPopover
     },
     currentRow: {
