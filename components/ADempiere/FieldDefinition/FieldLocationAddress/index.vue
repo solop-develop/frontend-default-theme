@@ -17,19 +17,7 @@
 -->
 
 <template>
-  <location-address-form
-    v-if="metadata.pos"
-    key="point-of-sales"
-    class="location-form"
-    :parent-metadata="metadata"
-    :parent-uuid="parentUuid"
-    :container-uuid="containerUuid"
-    :container-manager="containerManager"
-  />
-
   <el-popover
-    v-else
-    key="standard-location"
     ref="locationAddress"
     v-model="isShowedLocationForm"
     class="popover-location"
@@ -107,17 +95,8 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-location '
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-location-address '
     },
     displayedValueNotEdit: {
       get() {
@@ -151,9 +130,7 @@ export default {
       this.displayedValue = undefined
       this.uuidValue = undefined
 
-      this.$store.dispatch('clearValuesOnContainer', {
-        containerUuid: this.uuidForm
-      })
+      this.clearFormValues()
 
       this.$store.dispatch('notifyFieldChange', {
         containerUuid: this.metadata.containerUuid,

@@ -88,6 +88,15 @@
         <el-col :span="24" class="location-address-footer">
           <samp style="float: right; padding-top: 4px;">
             <el-button
+              type="info"
+              class="button-base-icon"
+              plain
+              @click="clearFormValues();"
+            >
+              <svg-icon icon-class="layers-clear" />
+            </el-button>
+
+            <el-button
               :disabled="isLoadingFields"
               class="button-base-icon"
               type="info"
@@ -216,19 +225,24 @@ export default {
         ...this.containerManager,
 
         getFieldsList({ containerUuid }) {
-          return store.getters.getFieldLocation
+          return store.getters.getFieldLocationAddress({
+            containerUuid
+          })
         },
 
         isReadOnlyField({ isReadOnly }) {
           return isReadOnly
+        },
+
+        isDisplayedField({ isDisplayed, columnName, containerUuid }) {
+          return isDisplayed
         }
       }
     },
-    fieldsListLocation() {
-      if (!this.isEmptyValue(this.$store.getters.getFieldLocation)) {
-        return this.$store.getters.getFieldLocation
-      }
-      return []
+    fieldsListLocationAddress() {
+      return this.$store.getters.getFieldLocationAddress({
+        containerUuid: this.uuidForm
+      })
     },
     locationId() {
       return this.$store.getters.getValueOfField({
@@ -406,11 +420,11 @@ export default {
         id: countryId
       })
         .then(responseCountry => {
-          const { captureSequence, regionName } = responseCountry
+          const { captureSequence, hasRegion, regionName } = responseCountry
 
           // capture sequence by form fields
           const newSequence = getSequenceAsList(captureSequence)
-          let newFieldsList = this.fieldsListLocation
+          let newFieldsList = this.fieldsListLocationAddress
             .map(item => {
               if (!isEmptyValue(item.sequenceFields)) {
                 // is manage with capture sequence and displayed
@@ -432,25 +446,27 @@ export default {
                 ...item
               }
             })
-            .filter(item => item.isDisplayed)
             .sort((itemA, itemB) => {
               return itemA.index - itemB.index
             })
 
-          // rename field title on region
-          if (captureSequence.includes('@R@') && !isEmptyValue(regionName)) {
-            newFieldsList = newFieldsList.map(field => {
-              if (field.sequenceFields === 'R') {
-                return {
-                  ...field,
-                  name: regionName
-                }
+          newFieldsList = newFieldsList.map(field => {
+            // rename field title on region and hidden/showd if country has region
+            if (captureSequence.includes('@R@') && field.sequenceFields === 'R') {
+              return {
+                ...field,
+                isDisplayed: hasRegion,
+                name: !isEmptyValue(regionName) ? regionName : field.name
               }
-              return field
-            })
-          }
+            }
+            return field
+          })
 
           // set new order of fields
+          this.$store.commit('setFieldsListLocationAddress', {
+            containerUuid: this.uuidForm,
+            fieldsList: newFieldsList
+          })
           this.metadataList = newFieldsList
         })
         .catch(error => {
@@ -680,8 +696,8 @@ export default {
       this.isLoadingFields = true
       const listOfFields = []
 
-      if (!isEmptyValue(this.fieldsListLocation)) {
-        this.metadataList = this.fieldsListLocation
+      if (!isEmptyValue(this.fieldsListLocationAddress)) {
+        this.metadataList = this.fieldsListLocationAddress
         this.changeCaptureSequence(this.countryId)
         this.isLoadingFields = false
         return
@@ -701,9 +717,21 @@ export default {
           })
           .finally(() => {
             if (listOfFields.length === this.fieldsList.length) {
-              this.$store.commit('setFieldsListLocation', listOfFields)
+              const fieldsWithDependents = listOfFields
+              this.$store.commit('setFieldsListLocationAddress', {
+                containerUuid: this.uuidForm,
+                fieldsList: fieldsWithDependents
+              })
 
-              this.metadataList = listOfFields
+              this.$store.dispatch('addPanel', {
+                ...this.metadata,
+                isCustomForm: true,
+                containerUuid: this.uuidForm,
+                uuid: this.uuidForm,
+                fieldsList: fieldsWithDependents
+              })
+
+              this.metadataList = fieldsWithDependents
               this.changeCaptureSequence(this.countryId)
               this.setDefaultValues()
               this.isLoadingFields = false
