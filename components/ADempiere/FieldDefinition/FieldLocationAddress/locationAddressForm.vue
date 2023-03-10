@@ -446,7 +446,6 @@ export default {
                 ...item
               }
             })
-            .filter(item => item.isDisplayed)
             .sort((itemA, itemB) => {
               return itemA.index - itemB.index
             })
