@@ -16,12 +16,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import store from '@/store'
+
 // Constants
 import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils.js'
 
-// Utils and Helpers Methods
+// Utils and Helper Methods
 import { getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
@@ -50,10 +52,15 @@ export default {
       return LOCATION_ADDRESS_FORM
     },
     countryId() {
-      return this.$store.getters.getValueOfField({
+      return store.getters.getValueOfField({
         containerUuid: this.uuidForm,
         columnName: 'C_Country_ID'
       })
+    },
+    currentCountryDefinition() {
+      return store.getters.getStoredCountryFromId({
+        id: this.countryId
+      }) || {}
     },
     blankValues() {
       return {
@@ -65,17 +72,12 @@ export default {
         [this.metadata.displayColumnName]: undefined
       }
     },
-    currentCountryDefinition() {
-      return this.$store.getters.getStoredCountryFromId({
-        id: this.countryId
-      })
-    },
     isShowedLocationForm: {
       get() {
-        return this.$store.getters.getIsShowedLocation
+        return store.getters.getIsShowedLocation
       },
       set(value) {
-        this.$store.commit('setShowedLocation', Boolean(value))
+        store.commit('setShowedLocation', Boolean(value))
       }
     },
     currentTab() {
@@ -88,7 +90,9 @@ export default {
       })
     },
     currentRecord() {
-      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
+      return store.getters.getTabCurrentRow({
+        containerUuid: this.metadata.containerUuid
+      })
     }
   },
 
@@ -100,15 +104,20 @@ export default {
 
   methods: {
     clearValues() {
-      this.setValues({ values: this.blankValues })
+      this.setValues({
+        values: this.blankValues
+      })
 
-      this.$store.dispatch('clearValuesOnContainer', {
+      this.clearFormValues()
+    },
+    clearFormValues() {
+      store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm
       })
     },
     setContainerInformation() {
       if (!isEmptyValue(this.currentTab)) {
-        this.$store.dispatch('panelInfo', {
+        store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
         })
@@ -138,7 +147,7 @@ export default {
       }
 
       // TODO: Change with current country display sequence
-      let displaySequence = this.$store.getters.getDisplaySequence
+      let displaySequence = store.getters.getDisplaySequence
       const country = this.currentCountryDefinition
       if (!isEmptyValue(country)) {
         displaySequence = country.displaySequence
@@ -203,7 +212,7 @@ export default {
           }
 
           if (isEmptyValue(currrentValue)) {
-            currrentValue = this.$store.getters.getValueOfField({
+            currrentValue = store.getters.getValueOfField({
               containerUuid: this.uuidForm,
               columnName: displayColumnName
             })
