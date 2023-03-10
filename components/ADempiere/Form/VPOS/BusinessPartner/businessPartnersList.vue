@@ -95,8 +95,8 @@
     <el-row :gutter="24" class="pos-bpartner-list-footer">
       <el-col :span="18">
         <custom-pagination
-          :total="businessParners.recordCount"
-          :current-page="businessParners.pageNumber"
+          :total="businessPartners.recordCount"
+          :current-page="businessPartners.pageNumber"
           :handle-change-page="handleChangePage"
           :records-page="businessPartnersList.length"
         />
@@ -216,14 +216,14 @@ export default {
   },
 
   computed: {
-    businessParners() {
+    businessPartners() {
       return this.$store.getters.getBusinessPartner
     },
     businessPartnersList() {
       return this.$store.getters.getBusinessPartnersList
     },
     isReadyFromGetData() {
-      const { isLoaded, isReload } = this.businessParners
+      const { isLoaded, isReload } = this.businessPartners
       return (!isLoaded || isReload) && this.showsPopover
     },
     popoverListBusinessParnet() {

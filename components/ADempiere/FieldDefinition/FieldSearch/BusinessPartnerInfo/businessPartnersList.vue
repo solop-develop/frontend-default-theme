@@ -92,9 +92,9 @@
     </el-table>
 
     <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="18">
+      <el-col :span="14">
         <custom-pagination
-          :total="businessParnerData.recordCount"
+          :total="businessPartnerData.recordCount"
           :current-page="pageNumber"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
@@ -104,8 +104,17 @@
         />
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="10">
         <samp style="float: right; padding-top: 4px;">
+          <el-button
+            type="info"
+            class="button-base-icon"
+            plain
+            @click="clearFormValues(); searchBPartnerList();"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+
           <el-button
             :loading="isLoadingRecords"
             type="success"
@@ -139,6 +148,7 @@ import store from '@/store'
 // Constants
 import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
 import FIELDS_LIST from './fieldsListSearch'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
 import businessPartnerMixin from './mixinBusinessPartner'
@@ -249,19 +259,19 @@ export default {
         }
       })
     },
-    businessParnerData() {
+    businessPartnerData() {
       return store.getters.getBusinessPartnerData({
         containerUuid: this.uuidForm
       })
     },
     pageNumber() {
-      return this.businessParnerData.pageNumber
+      return this.businessPartnerData.pageNumber
     },
     pageSize() {
-      return this.businessParnerData.pageSize
+      return this.businessPartnerData.pageSize
     },
     isReadyFromGetData() {
-      const { isLoaded } = this.businessParnerData
+      const { isLoaded } = this.businessPartnerData
       return !isLoaded && this.showPopover
     },
     currentRow: {
@@ -396,6 +406,12 @@ export default {
         containerUuid: this.uuidForm,
         format: 'array'
       })
+        .filter(attribute => {
+          if (attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX)) {
+            return false
+          }
+          return !isEmptyValue(attribute.value)
+        })
 
       this.isLoadingRecords = true
       clearTimeout(this.timeOutRecords)

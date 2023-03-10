@@ -18,7 +18,7 @@
 
 <template>
   <el-popover
-    ref="businessParnerListPopover"
+    ref="businessPartnerListPopover"
     v-model="showedPopoverBusinessPartnerList"
     placement="top"
     width="900"

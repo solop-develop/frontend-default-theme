@@ -92,7 +92,7 @@
     </el-table>
 
     <el-row :gutter="24" class="general-info-list-footer">
-      <el-col :span="18">
+      <el-col :span="14">
         <custom-pagination
           :total="generalInfoData.recordCount"
           :current-page="pageNumber"
@@ -104,8 +104,17 @@
         />
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="10">
         <samp style="float: right; paddint-top: 4px;">
+          <el-button
+            type="info"
+            class="button-base-icon"
+            plain
+            @click="clearFormValues(); getListGeneralInfoSearch();"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+
           <el-button
             :loading="isLoadingRecords"
             type="success"
