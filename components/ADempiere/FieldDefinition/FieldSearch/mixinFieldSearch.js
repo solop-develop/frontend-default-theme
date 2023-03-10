@@ -120,6 +120,11 @@ export default {
       this.controlDisplayed = undefined
       this.setValues(this.blankValues)
     },
+    clearFormValues() {
+      store.dispatch('clearValuesOnContainer', {
+        containerUuid: this.uuidForm
+      })
+    },
     // subscribeChanges() {
     //   return store.subscribe((mutation, state) => {Q
     //     if (mutation.type === 'updateValueOfField') {
