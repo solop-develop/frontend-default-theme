@@ -47,6 +47,7 @@
         :class="cssClassStyle"
         clearable
         v-bind="commonsProperties"
+        readonly
         style="width: 100%;"
         @clear="clearValues"
       >
