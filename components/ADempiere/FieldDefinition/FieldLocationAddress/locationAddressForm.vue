@@ -142,7 +142,8 @@ import {
 import {
   COLUMN_NAME, LOCATION_ADDRESS_FORM, MANDATORY_CHAR,
   URL_BASE_MAP, COORDENATES_COLUMN_NAMES,
-  COLUMNNAME_City, COLUMNNAME_C_City_ID, COLUMNNAME_RegionName, COLUMNNAME_C_Region_ID, COLUMNNAME_C_Country_ID
+  COLUMNNAME_City, COLUMNNAME_C_City_ID,
+  COLUMNNAME_RegionName, COLUMNNAME_C_Region_ID, COLUMNNAME_C_Country_ID
 } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { LOG_COLUMNS_NAME_LIST, UUID } from '@/utils/ADempiere/constants/systemColumns'
 
@@ -438,7 +439,7 @@ export default {
       })
         .then(responseCountry => {
           const {
-            captureSequence, hasRegion, regionName
+            captureSequence, hasRegion, regionName, allowCitiesOutOfList
           } = responseCountry
 
           // capture sequence by form fields
@@ -464,13 +465,23 @@ export default {
                 }
 
                 // rename field title in region and hidden/showd if country has region
-                if ((captureSequence.includes('@R@') || captureSequence.includes('@R!@')) && item.sequenceFields === 'R') {
+                if (item.sequenceFields === 'R' && (captureSequence.includes('@R@') || captureSequence.includes('@R!@'))) {
                   return {
                     ...item,
                     index,
                     isDisplayed: hasRegion,
                     isMandatory,
                     name: !isEmptyValue(regionName) ? regionName : item.name
+                  }
+                }
+                // show/hidden city text field
+                if (item.columnName === COLUMNNAME_City) {
+                  index++
+                  return {
+                    ...item,
+                    index,
+                    // displayed/hidden
+                    isDisplayed: allowCitiesOutOfList
                   }
                 }
 
