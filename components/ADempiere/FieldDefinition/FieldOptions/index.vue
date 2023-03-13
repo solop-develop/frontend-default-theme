@@ -268,7 +268,9 @@ export default defineComponent({
       // }
 
       // add hide this field with isShowedFromUser
-      if (field.isParent || !field.required || !isEmptyValue(field.defaultValue)) {
+      if (!field.isCustomField &&
+        (field.isParent || !field.required || !isEmptyValue(field.defaultValue))
+      ) {
         menuOptions.push(hideThisField)
       }
       // infoOption, operatorOption
@@ -305,9 +307,10 @@ export default defineComponent({
       /**
        * Show change history only in windows
        */
-      if (!isEmptyValue(props.metadata.parentUuid)) {
+      if (!(field.isCustomField || isEmptyValue(field.parentUuid))) {
         optionsList.push(logsOptionItem)
       }
+
       return optionsList.concat(menuOptions)
     })
 
