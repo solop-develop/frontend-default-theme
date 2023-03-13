@@ -140,9 +140,11 @@ import {
   DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
 } from '@/utils/ADempiere/dictionaryUtils'
 import {
-  COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP, COORDENATES_COLUMN_NAMES
+  COLUMN_NAME, LOCATION_ADDRESS_FORM, MANDATORY_CHAR,
+  URL_BASE_MAP, COORDENATES_COLUMN_NAMES,
+  COLUMNNAME_City, COLUMNNAME_C_City_ID, COLUMNNAME_RegionName, COLUMNNAME_C_Region_ID, COLUMNNAME_C_Country_ID
 } from '@/utils/ADempiere/dictionary/field/locationAddress'
-import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
+import { LOG_COLUMNS_NAME_LIST, UUID } from '@/utils/ADempiere/constants/systemColumns'
 
 // API Request Methods
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
@@ -234,7 +236,22 @@ export default {
           return isReadOnly
         },
 
+        isMandatoryField({ isMandatory }) {
+          if (isMandatory) {
+            return true
+          }
+          return false
+        },
         isDisplayedField({ isDisplayed, columnName, containerUuid }) {
+          if (columnName === COLUMNNAME_City) {
+            const cityId = store.getters.getValueOfField({
+              containerUuid,
+              columnName: COLUMNNAME_C_City_ID
+            })
+            if (!isEmptyValue(cityId) && cityId > 0) {
+              return false
+            }
+          }
           return isDisplayed
         }
       }
@@ -246,7 +263,7 @@ export default {
     },
     locationId() {
       return this.$store.getters.getValueOfField({
-        parentUuid: this.metadata.parentUuid,
+        // parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         columnName: this.metadata.columnName
       })
@@ -284,7 +301,6 @@ export default {
     clearTimeout(this.timeOutFields)
     this.timeOutFields = setTimeout(() => {
       this.getFieldsList()
-      this.setDefaultValues()
     }, 500)
   },
 
@@ -320,31 +336,31 @@ export default {
      * TODO: Displayed value not wortking
      */
     setValues({ values }) {
-      // let cityName = values['DisplayColumn_C_City_ID']
+      // let cityName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_City_ID]
       // if (isEmptyValue(cityName)) {
-      //   cityName = values['City']
-      //   if (!isEmptyValue(values['C_City_ID']) && values['C_City_ID'] > 0) {
+      //   cityName = values[COLUMNNAME_City]
+      //   if (!isEmptyValue(values[COLUMNNAME_C_City_ID]) && values[COLUMNNAME_C_City_ID] > 0) {
       //     // get with default value
       //     cityName = undefined
       //   } else {
       //     // set with empty id
-      //     // values['C_City_ID'] = -1
+      //     // values[COLUMNNAME_C_City_ID] = -1
       //   }
       // }
 
-      // let regionName = values['DisplayColumn_C_Region_ID']
+      // let regionName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Region_ID]
       // if (isEmptyValue(regionName)) {
-      //   regionName = values['RegionName']
-      //   if (!isEmptyValue(values['C_Region_ID']) && values['C_Region_ID'] > 0) {
+      //   regionName = values[COLUMNNAME_RegionName]
+      //   if (!isEmptyValue(values[COLUMNNAME_C_Region_ID]) && values[COLUMNNAME_C_Region_ID] > 0) {
       //     // get with default value
       //     regionName = undefined
       //   } else {
       //     // set with empty id
-      //     // values['C_Region_ID'] = -1
+      //     // values[COLUMNNAME_C_Region_ID] = -1
       //   }
       // }
 
-      // let countryName = values['DisplayColumn_C_Region_ID']
+      // let countryName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Region_ID]
       // if (isEmptyValue(countryName)) {
       //   if (!isEmptyValue(this.currentCountryDefinition)) {
       //     countryName = this.currentCountryDefinition.name
@@ -384,7 +400,8 @@ export default {
         })
 
         baseUrlMap += this.generateDisplayedValue(values)
-        let countryName = values[DISPLAY_COLUMN_PREFIX + 'C_Country_ID']
+        // 'DisplayColumn_C_Country_ID'
+        let countryName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Country_ID]
         if (isEmptyValue(countryName)) {
           countryName = this.currentCountryDefinition.name
         }
@@ -403,7 +420,7 @@ export default {
         if (
           mutation.type === 'updateValueOfField' &&
           mutation.payload.containerUuid === this.uuidForm &&
-          mutation.payload.columnName === 'C_Country_ID'
+          mutation.payload.columnName === COLUMNNAME_C_Country_ID
         ) {
           // Get country definition to sequence fields and displayed value
           this.changeCaptureSequence(mutation.payload.value)
@@ -420,47 +437,72 @@ export default {
         id: countryId
       })
         .then(responseCountry => {
-          const { captureSequence, hasRegion, regionName } = responseCountry
+          const {
+            captureSequence, hasRegion, regionName
+          } = responseCountry
 
           // capture sequence by form fields
           const newSequence = getSequenceAsList(captureSequence)
-          let newFieldsList = this.fieldsListLocationAddress
-            .map(item => {
-              if (!isEmptyValue(item.sequenceFields)) {
-                // is manage with capture sequence and displayed
-                if (newSequence.includes(item.sequenceFields)) {
-                  return {
-                    ...item,
-                    isDisplayed: true,
-                    index: newSequence.indexOf(item.sequenceFields)
-                  }
-                }
-                // is manage with capture sequence and not displayed
+          const newFieldsList = this.fieldsListLocationAddress
+            .map((item, indexArray, arrayList) => {
+              if (isEmptyValue(item.sequenceFields)) {
+                // does not handle capture sequence, keeps the display of the definition in the field
                 return {
-                  ...item,
-                  isDisplayed: false
+                  ...item
                 }
               }
-              // does not handle capture sequence, keeps the display of the definition in the field
+
+              // is manage with capture sequence and displayed
+              if (newSequence.includes(item.sequenceFields)) {
+                let index = newSequence.indexOf(item.sequenceFields)
+                index *= 10
+
+                let isMandatory = newSequence.includes(item.sequenceFields + MANDATORY_CHAR)
+                // country always is displayed and mandatory
+                if (item.columnName === COLUMNNAME_C_Country_ID) {
+                  isMandatory = true
+                }
+
+                // rename field title in region and hidden/showd if country has region
+                if ((captureSequence.includes('@R@') || captureSequence.includes('@R!@')) && item.sequenceFields === 'R') {
+                  return {
+                    ...item,
+                    index,
+                    isDisplayed: hasRegion,
+                    isMandatory,
+                    name: !isEmptyValue(regionName) ? regionName : item.name
+                  }
+                }
+
+                return {
+                  ...item,
+                  isDisplayed: true,
+                  isMandatory,
+                  index
+                }
+              } else {
+                // country always is displayed and mandatory
+                if (item.columnName === COLUMNNAME_C_Country_ID || item.sequenceFields === 'CO') {
+                  if (!(captureSequence.includes('@CO@') || captureSequence.includes('@CO!@'))) {
+                    return {
+                      ...item,
+                      isDisplayed: true,
+                      isMandatory: true,
+                      index: arrayList.length * 10 // to last index
+                    }
+                  }
+                }
+              }
+              // is manage with capture sequence and not displayed
               return {
-                ...item
+                ...item,
+                isDisplayed: false,
+                isMandatory: false
               }
             })
             .sort((itemA, itemB) => {
               return itemA.index - itemB.index
             })
-
-          newFieldsList = newFieldsList.map(field => {
-            // rename field title on region and hidden/showd if country has region
-            if (captureSequence.includes('@R@') && field.sequenceFields === 'R') {
-              return {
-                ...field,
-                isDisplayed: hasRegion,
-                name: !isEmptyValue(regionName) ? regionName : field.name
-              }
-            }
-            return field
-          })
 
           // set new order of fields
           this.$store.commit('setFieldsListLocationAddress', {
@@ -526,22 +568,22 @@ export default {
 
       const cityName = this.$store.getters.getValueOfField({
         containerUuid: this.containerUuid,
-        columnName: 'DisplayColumn_C_City_ID'
+        columnName: DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_City_ID // 'DisplayColumn_C_City_ID'
       })
       if (!this.isEmptyValue(cityName)) {
         attributesToServer.push({
-          columnName: 'City',
+          columnName: COLUMNNAME_City,
           value: cityName
         })
       }
 
       const regionName = this.$store.getters.getValueOfField({
         containerUuid: this.containerUuid,
-        columnName: 'DisplayColumn_C_Region_ID'
+        columnName: DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Region_ID // 'DisplayColumn_C_Region_ID'
       })
       if (!this.isEmptyValue(cityName)) {
         attributesToServer.push({
-          columnName: 'RegionName',
+          columnName: COLUMNNAME_RegionName,
           value: regionName
         })
       }
@@ -559,19 +601,14 @@ export default {
       this.setParentValues(responseLocation.attributes)
       this.isShowedLocationForm = false
 
-      // set context values to form continer
-      this.$store.dispatch('updateValuesOfContainer', {
-        parentUuid: this.parentUuid,
-        containerUuid: this.uuidForm,
-        attributes: responseLocation.attributes
-      })
-
       return responseLocation.attributes
     },
 
     sendValuesToServer() {
       const emptyMandatoryFields = this.$store.getters.getFieldsListEmptyMandatory({
         containerUuid: this.uuidForm,
+        fieldsList: this.fieldsListLocationAddress,
+        showedMethod: this.containerManagerLocation.isDisplayedField,
         formatReturn: 'name'
       })
 
@@ -637,7 +674,7 @@ export default {
           const recordUuid = this.$store.getters.getValueOfField({
             parentUuid,
             containerUuid,
-            columnName: 'UUID'
+            columnName: UUID
           })
 
           this.containerManager.actionPerformed({
@@ -668,6 +705,7 @@ export default {
       const id = this.locationId
       if (isEmptyValue(id)) {
         this.clearValues()
+        this.changeCaptureSequence(this.countryId)
         return
       }
 
@@ -682,7 +720,7 @@ export default {
             values: attributes
           })
 
-          const countryId = attributes['C_Country_ID']
+          const countryId = attributes[COLUMNNAME_C_Country_ID]
           this.changeCaptureSequence(countryId)
         })
         .catch(error => {
@@ -728,13 +766,18 @@ export default {
                 isCustomForm: true,
                 containerUuid: this.uuidForm,
                 uuid: this.uuidForm,
+                isSetDefaultValues: false,
                 fieldsList: fieldsWithDependents
               })
 
               this.metadataList = fieldsWithDependents
               this.changeCaptureSequence(this.countryId)
-              this.setDefaultValues()
+
               this.isLoadingFields = false
+
+              if (isEmptyValue(this.locationId) || this.locationId <= 0) {
+                this.setDefaultValues()
+              }
             }
           })
       })
