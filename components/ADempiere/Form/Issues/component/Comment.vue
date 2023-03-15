@@ -1469,6 +1469,10 @@ export default defineComponent({
     padding: 0px;
   }
 }
+.v-md-editor__menu--list {
+  max-height: 110px;
+  overflow: auto;
+}
 .comments-card {
   .comments-card .el-card__header {
     padding-top: 5px;

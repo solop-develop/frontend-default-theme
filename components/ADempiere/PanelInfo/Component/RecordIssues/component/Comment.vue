@@ -2318,6 +2318,10 @@ export default defineComponent({
     border-radius: 4px;
   }
 }
+.v-md-editor__menu--list {
+  max-height: 110px;
+  overflow: auto;
+}
 .form-comments {
   .el-form-item--medium .el-form-item__label {
     line-height: 20px;
