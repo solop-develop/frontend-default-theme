@@ -316,6 +316,120 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-dropdown-item icon="el-icon-edit" :command="{currentIssues, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
                 <el-dropdown-item icon="el-icon-delete" :command="{currentIssues, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
                 <el-dropdown-item icon="el-icon-zoom-in" :command="{currentIssues, option:$t('page.processActivity.zoomIn')}"> {{ $t('page.processActivity.zoomIn') }} </el-dropdown-item>
+                <el-dropdown-item icon="el-icon-time" :command="{currentIssues, option: 'timeRecord'}">
+                  <el-popover
+                    ref="timeRecord"
+                    placement="left"
+                    :title="$t('timeControl.timeRecord')"
+                    trigger="click"
+                    width="450"
+                  >
+                    <el-form
+                      label-position="top"
+                    >
+                      <el-row style="padding-bottom: 10px;" :gutter="20">
+                        <el-col :span="12">
+                          <el-form-item
+                            :label="$t('table.recentItems.date')"
+                            :rules="{
+                              required: true
+                            }"
+                          >
+                            <el-date-picker
+                              v-model="dateValue"
+                              type="date"
+                              placeholder="Pick a day"
+                              style="width: -webkit-fill-available;"
+                            />
+                          </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                          <el-form-item
+                            :label="$t('timeControl.name')"
+                            :rules="{
+                              required: true
+                            }"
+                          >
+                            <el-input v-model="name" type="text" />
+                          </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                          <el-form-item
+                            :label="$t('timeControl.description')"
+                          >
+                            <el-input v-model="description" type="textarea" autosize />
+                          </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                          <el-form-item
+                            :label="$t('accounting.quantity')"
+                            :rules="{
+                              required: true
+                            }"
+                          >
+                            <el-input-number v-model="num" controls-position="right" :precision="2" style="width: -webkit-fill-available;" />
+                          </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                          <el-form-item
+                            :label="$t('accounting.Project')"
+                          >
+                            <el-select
+                              v-model="proyect"
+                              filterable
+                              style="width: -webkit-fill-available;"
+                              @visible-change="findProyect"
+                            >
+                              <el-option
+                                v-for="item in listProyect"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-col>
+                        <!-- <el-col :span="12">
+                          <el-form-item
+                            :label="$t('issues.request')"
+                          >
+                            <el-select
+                              v-model="request"
+                              filterable
+                              style="width: -webkit-fill-available;"
+                              @visible-change="findRequest"
+                            >
+                              <el-option
+                                v-for="item in listRequest"
+                                :key="item.id"
+                                :label="item.summary"
+                                :value="item.id"
+                              />
+                            </el-select>
+                          </el-form-item>
+                        </el-col> -->
+                        <el-col :span="24">
+                          <!-- <el-form-item
+                            :style="cssStyleButton"
+                          > -->
+                          <el-button
+                            type="primary"
+                            :loading="isLoadingCreate"
+                            :disabled="isValidateAdd"
+                            style="float: right;"
+                            @click="addNewRecord()"
+                          >
+                            {{ $t('timeControl.addChild') }}
+                          </el-button>
+                          <!-- </el-form-item> -->
+                        </el-col>
+                      </el-row>
+                    </el-form>
+                    <el-button slot="reference" type="text">
+                      {{ $t('timeControl.timeRecord') }}
+                    </el-button>
+                  </el-popover>
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <el-button v-if="!isPanelEditRequest" style="float: right;margin-right: 10px;" plain type="success" @click="newIssues()">
@@ -746,6 +860,11 @@ import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 // import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
+import {
+  requestCreateResource,
+  requestlistIssues,
+  requestlistProject
+} from '@/api/ADempiere/form/timeRecord.js'
 
 // Api Request Methods
 import {
@@ -794,6 +913,15 @@ export default defineComponent({
     const isPanelEditRequest = ref(false)
     const scrollTimeLineTabComments = ref(null)
     const scrollIssues = ref(null)
+    const dateValue = ref('')
+    const name = ref('')
+    const description = ref('')
+    const num = ref(0)
+    const listRequest = ref([])
+    const listProyect = ref([])
+    const request = ref('')
+    const isLoadingCreate = ref(false)
+    const proyect = ref('')
     // List
     const listSalesReps = ref([])
     const listIssuesTypes = ref([])
@@ -1207,6 +1335,9 @@ export default defineComponent({
 
     function handleCommandIssues(command) {
       const { currentIssues, option } = command
+      if (option === 'timeRecord') {
+        return
+      }
       if (option === 'delete') {
         removeIssues(currentIssues)
         return
@@ -1302,6 +1433,85 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Record TIme
+     */
+
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
+    const isValidateAdd = computed(() => {
+      if (isEmptyValue(dateValue.value) || isEmptyValue(name.value) || isEmptyValue(num.value)) {
+        return true
+      }
+      return false
+    })
+
+    const cssStyleButton = computed(() => {
+      if (isMobile.value) {
+        return 'padding-top: 20px;padding-bottom: 10px;text-align: center;margin-bottom: 0px !important;'
+      }
+      return 'padding-top: 35px;'
+    })
+
+    function addNewRecord() {
+      isLoadingCreate.value = true
+      requestCreateResource({
+        requestId: currentIssues.value.id,
+        projectId: proyect.value,
+        name: name.value,
+        description: description.value,
+        quantity: num.value,
+        date: dateValue.value
+      })
+        .then(response => {
+          showMessage({
+            message: lang.t('data.createRecordSuccessful'),
+            type: 'success'
+          })
+          name.value = ''
+          description.value = ''
+          request.value = ''
+          proyect.value = ''
+          dateValue.value = ''
+          num.value = ''
+        })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+          console.warn(`requestCreateResource: Add Resource Server (State) - Error ${error.code}: ${error.message}.`)
+        })
+        .finally(() => {
+          isLoadingCreate.value = false
+          refs.timeRecord.doClose()
+          refs.timeRecord.doShow()
+          refs.timeRecord.showPopper = false
+        })
+    }
+
+    function findRequest(isFind) {
+      if (isFind) {
+        requestlistIssues()
+          .then(response => {
+            const { records } = response
+            listRequest.value = records
+          })
+      }
+    }
+
+    function findProyect(isFind) {
+      if (isFind) {
+        requestlistProject()
+          .then(response => {
+            const { records } = response
+            listProyect.value = records
+          })
+      }
+    }
+
     loadListMail()
 
     watch(isPanelEditIssues, (newValue, oldValue) => {
@@ -1314,6 +1524,7 @@ export default defineComponent({
 
     return {
       // Ref
+      isValidateAdd,
       subject,
       currentSalesReps,
       currentRequestTypes,
@@ -1335,11 +1546,21 @@ export default defineComponent({
       isCollapseComments,
       isLoadingNewIssues,
       centerDialogVisible,
+      dateValue,
+      cssStyleButton,
+      isLoadingCreate,
+      name,
+      description,
+      num,
+      request,
+      proyect,
       // list
       listSalesReps,
       listIssuesTypes,
       listStatuses,
       listPriority,
+      listRequest,
+      listProyect,
       // Computed
       isNewIssues,
       isDisabledSave,
@@ -1386,6 +1607,9 @@ export default defineComponent({
       logDisplayLanguaje,
       loadListMail,
       zoomIssues,
+      findRequest,
+      findProyect,
+      addNewRecord,
       markdownContent
     }
   }
