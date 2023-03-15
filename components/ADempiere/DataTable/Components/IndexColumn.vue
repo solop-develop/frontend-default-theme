@@ -21,6 +21,7 @@
     type="index"
     :index="indexTable"
     label="#"
+    class-name="number-align"
     min-width="30"
     header-align="center"
   />
@@ -29,13 +30,12 @@
 <script>
 import { defineComponent } from '@vue/composition-api'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { indexRowByPage, ROWS_OF_RECORDS_BY_PAGE } from '@/utils/ADempiere/tableUtils'
 
 /**
- * This component is custom column to view real index of row on table,
- * considering the page number to calculate the index of the total
- * number of records
+ * This component is custom column to view real index of row on table, considering
+ * the page number to calculate the index of the total number of records
  */
 export default defineComponent({
   name: 'IndexColumn',
@@ -66,3 +66,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+.number-align {
+  text-align-last: end !important;
+}
+</style>
