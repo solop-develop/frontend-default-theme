@@ -17,7 +17,196 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
+  <el-container :style="isNewIssues  ? 'height: 90vh;padding: 0px;display: contents' : 'height: 90vh;padding: 0px;'">
+    <!-- <el-header>Cabecera</el-header> -->
+    <el-main style="padding: 0px;">
+      <el-card v-if="!isNewIssues" class="all-request-box-card">
+        <div slot="header" class="clearfix">
+          <b style="color: black; font-size: 19px;">
+            {{ $t('issues.allRequest') }}
+          </b>
+          <el-button style="float: right;" plain type="success" @click="newIssues()">
+            {{ $t('issues.createNewRequest') }}
+            <i class="el-icon-plus" />
+          </el-button>
+        </div>
+        <div class="table-list-request">
+          <el-empty v-if="isEmptyValue(listIssues)" style="height: 600px;" />
+          <el-table
+            v-else
+            :data="listIssues"
+          >
+            <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
+              <template slot-scope="scope">
+                <el-popover
+                  placement="top-start"
+                  trigger="hover"
+                >
+                  <b>
+                    {{ $t('issues.expirationType') }}
+                  </b>
+                  <el-tag :style="dueTypeColorDescription(scope.row)">
+                    {{ scope.row.due_type.name }}
+                  </el-tag>
+                  <b slot="reference" style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
+                    <svg-icon icon-class="issues" :style="dueTypeColor(scope.row)" />
+                  </b>
+                </el-popover>
+
+                <div style="margin-top: 0px;margin-bottom: 0px;width: 100%;">
+                  <p style="font-size: 18px;width: 100%;margin-top: 10px;margin-bottom: 10px;">
+                    <b>
+                      <el-popover
+                        placement="top-start"
+                        trigger="hover"
+                        width="900"
+                      >
+                        <el-descriptions :column="2">
+                          <template slot="title">
+                            <b>
+                              <svg-icon icon-class="guide" />
+                              {{ scope.row.subject }}
+                            </b>
+                          </template>
+                          <template slot="extra">
+                            <b>
+                              {{ '#' }}
+                              {{ scope.row.document_no }}
+                            </b>
+                          </template>
+                          <el-descriptions-item :span="4">
+                            <template slot="label">
+                              <b>
+                                {{ $t('issues.summary') }}
+                              </b>
+                            </template>
+                            <el-scrollbar wrap-class="scroll-previwer-disable" style="width: 100%; overflow: hidden;">
+                              <v-md-preview :text="scope.row.summary" class="previwer-disable" style="padding: 0px" height="150px" />
+                            </el-scrollbar>
+                          </el-descriptions-item>
+                          <el-descriptions-item :span="4">
+                            <template slot="label">
+                              <b>
+                                {{ $t('issues.created') }}
+                              </b>
+                            </template>
+                            {{ scope.row.user_name }}
+                          </el-descriptions-item>
+                          <el-descriptions-item style="float: right;">
+                            <template slot="label">
+                              <b style="padding-top: 10px !important;">
+                                {{ $t('issues.priority') }}
+                              </b>
+                            </template>
+                            <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
+                              <svg-icon icon-class="collections" />
+                              {{ scope.row.priority.name }}
+                            </el-button>
+                          </el-descriptions-item>
+                          <el-descriptions-item>
+                            <template slot="label">
+                              <b style="padding-top: 10px !important;">
+                                {{ $t('issues.typeOfRequest') }}
+                              </b>
+                            </template>
+                            <el-button size="medium" plain type="info" style="float: right;margin-right: 10px;">
+                              <svg-icon icon-class="label" />
+                              {{ scope.row.request_type.name }}
+                            </el-button>
+                          </el-descriptions-item>
+                          <el-descriptions-item>
+                            <template slot="label">
+                              <b style="padding-top: 5px !important;">
+                                {{ $t('issues.assigned') }}
+                              </b>
+                            </template>
+                            {{ scope.row.sales_representative.name }}
+                            <el-avatar icon="el-icon-user-solid" size="small" style="margin-left: 10px;" />
+                          </el-descriptions-item>
+                          <el-descriptions-item>
+                            <template slot="label">
+                              <b>
+                                {{ $t('issues.expirationType') }}
+                              </b>
+                            </template>
+                            <el-tag :style="dueTypeColorDescription(scope.row)">
+                              {{ scope.row.due_type.name }}
+                            </el-tag>
+                          </el-descriptions-item>
+                          <el-descriptions-item :span="4" style="float: right;">
+                            <template slot="label">
+                              <b>
+                                <svg-icon icon-class="calendar" style="font-size: 18px;" />
+                                {{ $t('issues.nextActionDate') }}
+                              </b>
+                            </template>
+                            <span v-if="scope.row.date_next_action > 0">
+                              {{ translateDateByLong(scope.row.date_next_action) }}
+                            </span>
+                          </el-descriptions-item>
+                        </el-descriptions>
+                        <el-button
+                          slot="reference"
+                          style="color: black;padding: 0px;"
+                          type="text"
+                          @click="selectIssue(scope.row)"
+                        >
+                          <p style="margin: 0px;font-size: 18px;text-align: left;margin-top: 5px;margin-bottom: 5px;">
+                            {{ '#' + scope.row.document_no + '  ' + scope.row.subject }}
+                          </p>
+                          <p style="margin: 0px;text-align: initial;">
+                            <i style="font-size: 12px;color: #82848a;">
+                              <b>
+                                <svg-icon icon-class="calendar" style="font-size: 18px;" />
+                                {{ $t('issues.nextActionDate') + ': ' }}
+                              </b>
+                              <span v-if="scope.row.date_next_action > 0">
+                                {{ translateDateByLong(scope.row.date_next_action) }}
+                              </span>
+                            </i>
+                          </p>
+                        </el-button>
+                      </el-popover>
+                    </b>
+                    <el-button
+                      type="primary"
+                      icon="el-icon-zoom-in"
+                      :alt="$t('page.processActivity.zoomIn')"
+                      plain
+                      style="float: right; margin-right: 5px; margin-left: 0px;margin-top: 5px;"
+                      class="button-base-icon"
+                      @click="zoomIssues(scope.row)"
+                    />
+                    <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
+                      <b>
+                        <svg-icon icon-class="collections" style="font-size: 20px;" />
+                        {{ $t('issues.priority') + ': ' }}
+                      </b>
+                      {{ scope.row.priority.name }}
+                    </el-button>
+                    <el-button size="medium" type="info" plain style="float: right;margin-right: 10px;">
+                      <b>
+                        <svg-icon icon-class="label" style="font-size: 20px;" />
+                        {{ $t('issues.typeOfRequest') + ': ' }}
+                      </b>
+                      {{ scope.row.request_type.name }}
+                    </el-button>
+                  </p>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-card>
+    </el-main>
+    <el-footer v-if="isNewIssues" height="20%">
+      <comment
+        :table-name="tableName"
+        :record-id="recordId"
+      />
+    </el-footer>
+  </el-container>
+  <!-- <el-container style="height: 100% !important;">
     <el-main style="overflow: auto;padding: 0px;">
       <el-card v-if="!isNewIssues" class="all-request-box-card">
         <div slot="header" class="clearfix">
@@ -198,13 +387,15 @@
           </el-table>
         </div>
       </el-card>
+    </el-main>
+    <el-footer height="20%">
       <comment
-        v-else
+        v-if="isNewIssues"
         :table-name="tableName"
         :record-id="recordId"
       />
-    </el-main>
-  </el-container>
+    </el-footer>
+  </el-container> -->
 </template>
 
 <script>

@@ -18,8 +18,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <span>
-    <el-container style="height: 100% !important;">
-      <el-main ref="scrollIssues" style="overflow: auto;padding: 0px;">
+    <el-container style="height: 90vh">
+      <el-header ref="scrollIssues" height="70%" style="overflow: auto;padding: 0px;">
         <el-card v-if="isEmptyValue(currentIssues) || isPanelNewRequest" class="comments-card" style="height: auto;padding: 0px;">
           <div slot="header" class="clearfix">
             <el-button style="float: left; margin-right: 10px;" size="mini" plain type="info" @click="SelectionIssue">
@@ -770,9 +770,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </el-timeline-item>
         </el-timeline>
         <!-- </el-scrollbar> -->
-      </el-main>
-      <el-footer :style="isShowTitleForm ? 'height: 370px; padding: 0px;' : 'height: 350px; padding: 0px;'">
-        <span v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest">
+      </el-header>
+      <!-- <el-footer :style="isShowTitleForm ? 'height: 370px; padding: 0px;' : 'height: 350px; padding: 0px;'"> -->
+      <el-main height="auto" style="height: auto;overflow: auto;padding: 0px 0px 30px !important;">
+        <div v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest">
           <el-card v-if="commentPreview" shadow="never" class="is-add-new-comments">
             <!-- <v-md-preview :text="comments" height="200px" /> -->
             <!-- <div v-markdown="comments" class="output" /> -->
@@ -834,8 +835,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             class="button-base-icon"
             :disabled="isEmptyValue(comments)"
           />
-        </span>
-      </el-footer>
+        </div>
+      </el-main>
     </el-container>
   </span>
 </template>
