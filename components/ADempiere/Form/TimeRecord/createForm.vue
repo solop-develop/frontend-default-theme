@@ -65,7 +65,12 @@
           }"
           :style="cssStyleFront"
         >
-          <el-input-number v-model="num" controls-position="right" :precision="2" style="width: -webkit-fill-available;" />
+          <el-input-number
+            v-model="quantity"
+            controls-position="right"
+            :precision="2"
+            style="width: -webkit-fill-available;"
+          />
         </el-form-item>
       </el-col>
       <el-col :span="sizeColumn">
@@ -77,7 +82,7 @@
             v-model="proyect"
             filterable
             style="width: -webkit-fill-available;"
-            @visible-change="findProyect"
+            @visible-change="geProjectsList"
           >
             <el-option
               v-for="item in listProyect"
@@ -97,7 +102,7 @@
             v-model="request"
             filterable
             style="width: -webkit-fill-available;"
-            @visible-change="findRequest"
+            @visible-change="geRequestsList"
           >
             <el-option
               v-for="item in listRequest"
@@ -158,17 +163,11 @@ export default defineComponent({
     const description = ref('')
     const isLoadingCreate = ref(false)
     const dateValue = ref('')
-    const num = ref(0)
+    const quantity = ref(0)
     const listRequest = ref([])
     const listProyect = ref([])
     const request = ref('')
     const proyect = ref('')
-
-    const isLoadingRecords = ref(false)
-    // Pagination
-    const recordCount = ref(0)
-    const pageNumber = ref(0)
-    const visible = ref(false)
 
     /**
      * Computed
@@ -181,7 +180,8 @@ export default defineComponent({
      */
 
     const isValidateAdd = computed(() => {
-      if (isEmptyValue(dateValue.value) || isEmptyValue(name.value) || isEmptyValue(num.value)) {
+      if (isEmptyValue(dateValue.value) || isEmptyValue(name.value) ||
+        (isEmptyValue(quantity.value) || quantity.value <= 0)) {
         return true
       }
       return false
@@ -229,7 +229,7 @@ export default defineComponent({
         projectId: proyect.value,
         name: name.value,
         description: description.value,
-        quantity: num.value,
+        quantity: quantity.value,
         date: dateValue.value
       })
         .then(response => {
@@ -253,7 +253,7 @@ export default defineComponent({
         })
     }
 
-    function findRequest(isFind) {
+    function geRequestsList(isFind) {
       if (isFind) {
         requestlistIssues()
           .then(response => {
@@ -263,7 +263,7 @@ export default defineComponent({
       }
     }
 
-    function findProyect(isFind) {
+    function geProjectsList(isFind) {
       if (isFind) {
         requestlistProject()
           .then(response => {
@@ -278,18 +278,14 @@ export default defineComponent({
       name,
       description,
       isLoadingCreate,
-      isLoadingRecords,
-      recordCount,
-      pageNumber,
-      visible,
       dateValue,
-      num,
+      quantity,
       request,
       proyect,
       listProyect,
-      findProyect,
+      geProjectsList,
       listRequest,
-      findRequest,
+      geRequestsList,
       // Computeds
       isValidateAdd,
       isMobile,
