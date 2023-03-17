@@ -17,8 +17,8 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
-    <el-main style="overflow: auto;padding: 0px;">
+  <el-container :style="isNewIssues ? 'height: 90vh;padding: 0px;display: contents' : 'height: 90vh;padding: 0px;'">
+    <el-main style="padding: 0px;">
       <el-card v-if="!isNewIssues" class="all-request-box-card">
         <div slot="header" class="clearfix">
           <b style="color: black; font-size: 19px;">
@@ -34,7 +34,6 @@
           <el-table
             v-else
             :data="listIssues"
-            height="600"
           >
             <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
               <template slot-scope="scope">
@@ -198,12 +197,13 @@
           </el-table>
         </div>
       </el-card>
+    </el-main>
+    <el-footer v-if="isNewIssues" height="20%">
       <comment
-        v-else
         :table-name="tableName"
         :record-id="recordId"
       />
-    </el-main>
+    </el-footer>
   </el-container>
 </template>
 
