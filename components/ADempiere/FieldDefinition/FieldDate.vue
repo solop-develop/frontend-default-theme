@@ -164,17 +164,8 @@ export default {
       }
       return picker
     },
-    cssClassStyle() {
-      let styleClass = ' custom-field-date '
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-date '
     },
     isMultipleValues() {
       return this.metadata.isAdvancedQuery &&

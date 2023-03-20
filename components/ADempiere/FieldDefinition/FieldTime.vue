@@ -63,17 +63,8 @@ export default {
       }
       return -Infinity
     },
-    cssClassStyle() {
-      let styleClass = ' custom-field-time '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-time '
     }
   },
 

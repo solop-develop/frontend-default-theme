@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,39 +9,34 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <!-- <div
-    :id="id"
-    :class="cssClassStyle"
-  /> -->
-  <div v-if="isDisabled" v-markdown="comments" class="output" />
+  <div
+    v-if="isDisabled"
+    key="text-long-readonly"
+    v-markdown="value"
+    class="custom-field-text-long-disable"
+  />
   <v-md-editor
     v-else
+    key="text-long-writable"
     v-model="value"
+    left-toolbar="clear h bold italic strikethrough quote ul ol table hr link image | emoji listMailTemplates"
+    height="250px"
     @change="preHandleChange"
   />
 </template>
 
 <script>
-// deps for editor
-// import 'tui-editor/dist/tui-editor.css' // editor ui
-// import 'tui-editor/dist/tui-editor-contents.css' // editor content
-// import 'codemirror/lib/codemirror.css' // codemirror
-// import Editor from 'tui-editor'
-
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldMixinText from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldText.js'
-
-// utils and helper methods
-import { getLanguage } from '@/lang'
 
 export default {
   name: 'FieldTextLong',
@@ -50,16 +45,6 @@ export default {
     fieldMixin,
     fieldMixinText
   ],
-
-  props: {
-    id: {
-      type: String,
-      required: false,
-      default() {
-        return 'markdown-editor-' + +new Date() + ((Math.random() * 1000).toFixed(0))
-      }
-    }
-  },
 
   data() {
     return {
@@ -70,100 +55,19 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
+    cssClassCustomField() {
       let styleClass = ' custom-field-text-long '
       if (this.isDisabled) {
         styleClass += ' custom-field-text-long-disable '
       }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
       return styleClass
-    },
-    language() {
-      // https://github.com/nhnent/tui.editor/tree/master/src/js/langs
-      if (this.isEmptyValue(getLanguage())) {
-        return 'en_US'
-      }
-      return getLanguage()
-    },
-    editorOptions() {
-      return {
-        previewStyle: 'vertical',
-        useCommandShortcut: true,
-        usageStatistics: false, // send hostname to google analytics
-        hideModeSwitch: this.isDisabled,
-        initialEditType: this.mode,
-        height: this.height,
-        language: this.language
-      }
-    }
-  },
-
-  destroyed() {
-    this.destroyEditor()
-  },
-
-  methods: {
-    setEvents() {
-      if (this.isDisabled) {
-        this.removeEventSendValues()
-        this.addReanOnlyChanges()
-      } else {
-        this.addEventSendValues()
-        this.removeReadOnlyChanges()
-      }
-    },
-    addEventSendValues() {
-      // with change event send multiple request to server
-      this.editor.on('blur', () => {
-        if (!this.isDisabled) {
-          this.preHandleChange(this.editor.getValue())
-        }
-      })
-    },
-    addReanOnlyChanges() {
-      this.editor.on('change', () => {
-        this.editor.setValue(this.value)
-      })
-    },
-    removeEventSendValues() {
-      this.editor.off('blur')
-    },
-    removeReadOnlyChanges() {
-      this.editor.off('change')
-    },
-    destroyEditor() {
-      if (!this.editor) {
-        return
-      }
-      this.removeEventSendValues()
-      this.removeReadOnlyChanges()
-      this.editor.remove()
-    },
-    setHtml(value) {
-      this.editor.setHtml(value)
-    },
-    getHtml() {
-      return this.editor.getHtml()
     }
   }
 }
 </script>
 
 <style scoped>
-  .custom-field-text-long-disable {
-    background: #F5F7FA;
-  }
-</style>
-<style lang="scss">
-  .tui-editor .te-preview-style-vertical .te-md-splitter {
-    display: table;
-    width: 100%;
-  }
+.custom-field-text-long-disable {
+  background: #F5F7FA;
+}
 </style>

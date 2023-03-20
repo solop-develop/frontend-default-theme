@@ -77,8 +77,8 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = this.metadata.cssClassName + ' custom-field-select'
+    cssClassCustomField() {
+      let styleClass = ' custom-field-select'
       if (this.isSelectMultiple) {
         styleClass += ' custom-field-select-multiple'
       }

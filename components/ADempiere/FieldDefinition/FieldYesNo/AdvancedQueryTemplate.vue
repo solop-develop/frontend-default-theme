@@ -36,10 +36,10 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default {
@@ -72,12 +72,8 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-yes-no-advanced-query '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-yes-no-advanced-query '
     }
   },
 
