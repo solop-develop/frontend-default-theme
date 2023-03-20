@@ -58,7 +58,7 @@ export default defineComponent({
     },
     isFilterRecords: {
       type: Boolean,
-      default: true
+      default: false
     },
     isAdvancedQuery: {
       type: Boolean,
