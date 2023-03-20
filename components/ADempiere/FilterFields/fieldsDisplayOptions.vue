@@ -319,11 +319,14 @@ export default defineComponent({
     })
 
     const sequenceOptionLabel = computed(() => {
-      const { isEditSecuence } = props.containerManager.getPanel({
+      const panel = props.containerManager.getPanel({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
       })
-      if (!isEmptyValue(isEditSecuence) && isEditSecuence) return language.t('component.sequenceSort.saveNewSequence')
+      const { isEditSecuence } = panel
+      if (!isEmptyValue(isEditSecuence) && isEditSecuence) {
+        return language.t('component.sequenceSort.saveNewSequence')
+      }
       return language.t('component.sequenceSort.modifyFieldSequence')
     })
 

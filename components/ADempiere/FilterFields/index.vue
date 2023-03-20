@@ -190,7 +190,7 @@ export default defineComponent({
     },
     isFilterRecords: {
       type: Boolean,
-      default: true
+      default: false
     },
     containerManager: {
       type: Object,
