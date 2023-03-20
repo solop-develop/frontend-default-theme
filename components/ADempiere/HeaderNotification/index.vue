@@ -100,6 +100,7 @@ import store from '@/store'
 // Utils and Helper Methods
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { getToken } from '@/utils/auth'
 
 export default defineComponent({
   name: 'HeaderNotification',
@@ -171,7 +172,9 @@ export default defineComponent({
       store.dispatch('findNotifications')
         .finally(() => {
           setTimeout(() => {
-            listActivities()
+            if (!isEmptyValue(getToken())) {
+              listActivities()
+            }
           }, 90000)
         })
     }
