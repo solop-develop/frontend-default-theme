@@ -24,7 +24,7 @@
     <el-row style="padding-bottom: 10px;">
       <el-col :span="sizeColumn">
         <el-form-item
-          :label="$t('table.recentItems.date')"
+          :label="$t('form.timeRecord.date')"
           :rules="{
             required: true
           }"
@@ -40,7 +40,7 @@
       </el-col>
       <el-col :span="sizeColumn">
         <el-form-item
-          :label="$t('timeControl.name')"
+          :label="$t('form.timeRecord.name')"
           :rules="{
             required: true
           }"
@@ -51,7 +51,7 @@
       </el-col>
       <el-col :span="sizeColumn">
         <el-form-item
-          :label="$t('timeControl.description')"
+          :label="$t('form.timeRecord.description')"
           :style="cssStyleFront"
         >
           <el-input v-model="description" type="textarea" autosize />
@@ -59,7 +59,7 @@
       </el-col>
       <el-col :span="sizeColumn">
         <el-form-item
-          :label="$t('accounting.quantity')"
+          :label="$t('form.timeRecord.quantity')"
           :rules="{
             required: true
           }"
@@ -75,7 +75,7 @@
       </el-col>
       <el-col :span="sizeColumn">
         <el-form-item
-          :label="$t('accounting.Project')"
+          :label="$t('form.timeRecord.project')"
           :style="cssStyleFront"
         >
           <el-select
@@ -95,7 +95,7 @@
       </el-col>
       <el-col :span="sizeColumn">
         <el-form-item
-          :label="$t('issues.request')"
+          :label="$t('form.timeRecord.request')"
           :style="cssStyleFront"
         >
           <el-select
@@ -124,7 +124,7 @@
             style="float: right;"
             @click="addNewRecord()"
           >
-            {{ $t('timeControl.addChild') }}
+            {{ $t('form.timeRecord.add') }}
           </el-button>
         </el-form-item>
       </el-col>

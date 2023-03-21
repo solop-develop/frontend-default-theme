@@ -35,6 +35,7 @@
             v-else
             :data="listIssues"
           >
+            <!-- @row-click="selectIssue" -->
             <el-table-column style="display: flex;" :label="$t('issues.allRequest')">
               <template slot-scope="scope">
                 <el-popover
@@ -58,7 +59,7 @@
                       <el-popover
                         placement="top-start"
                         trigger="hover"
-                        width="900"
+                        width="650"
                       >
                         <el-descriptions :column="2">
                           <template slot="title">
@@ -167,6 +168,7 @@
                         </el-button>
                       </el-popover>
                     </b>
+
                     <el-button
                       type="primary"
                       icon="el-icon-zoom-in"
@@ -176,6 +178,29 @@
                       class="button-base-icon"
                       @click="zoomIssues(scope.row)"
                     />
+
+                    <el-popover
+                      ref="timeRecord"
+                      placement="left"
+                      :title="$t('form.timeRecord.timeRecord') + ' (' + scope.row.id + ')'"
+                      trigger="click"
+                      width="450"
+                    >
+                      <record-time
+                        :issue-id="scope.row.id"
+                      />
+                      <el-button
+                        slot="reference"
+                        type="primary"
+                        plain
+                        class="button-base-icon"
+                        style="float: right; margin-right: 5px; margin-left: 0px;margin-top: 5px;"
+                        :alt="$t('form.timeRecord.timeRecord')"
+                      >
+                        <i class="el-icon-time" />
+                      </el-button>
+                    </el-popover>
+
                     <el-button type="primary" size="medium" plain style="float: right;margin-right: 10px;">
                       <b>
                         <svg-icon icon-class="collections" style="font-size: 20px;" />
@@ -216,6 +241,7 @@ import store from '@/store'
 
 // Components and Mixins
 import Comment from './component/Comment.vue'
+import RecordTime from './recordTime.vue'
 
 // Constants
 import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
@@ -229,7 +255,8 @@ export default defineComponent({
 
   components: {
     // Editor
-    Comment
+    Comment,
+    RecordTime
   },
 
   props: {
