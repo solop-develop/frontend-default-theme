@@ -334,7 +334,7 @@ export default defineComponent({
 
     const isWorkflowLog = computed(() => {
       if (storedWindow.value) {
-        return storedWindow.value.windowType === 'T' && currentTab.value.isParentTab
+        return storedWindow.value.windowType === 'T' && storedWindow.value.windowType === 'SO' && storedWindow.value.windowType === 'PO' && storedWindow.value.windowType === 'FI' && currentTab.value.isParentTab
       }
       return false
     })
