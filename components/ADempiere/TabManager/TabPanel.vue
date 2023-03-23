@@ -95,6 +95,7 @@
             :group-tab="tabAttributes.tabGroup"
             :style="overflowHeightScrooll"
             :is-tab-panel="true"
+            :is-filter-records="true"
           />
         </template>
       </div>
