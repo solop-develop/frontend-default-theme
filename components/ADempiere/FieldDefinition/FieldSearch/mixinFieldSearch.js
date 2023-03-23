@@ -309,6 +309,9 @@ export default {
       this.displayedValue = displayedValue
       // set UUID value
       this.uuidValue = uuid
+      if (this.metadata.isAdvancedQuery) {
+        return
+      }
 
       store.dispatch('notifyFieldChange', {
         parentUuid,
