@@ -309,6 +309,8 @@ export default {
       this.displayedValue = displayedValue
       // set UUID value
       this.uuidValue = uuid
+
+      // no enable callouts or create/update record
       if (this.metadata.isAdvancedQuery) {
         return
       }
