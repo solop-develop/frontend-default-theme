@@ -255,12 +255,12 @@ export default defineComponent({
           })
 
           // hidden of search criteria
-          if (isEmptyValue(field)){
+          if (isEmptyValue(field)) {
             return
           }
           if (!field.isShowedFromUser) {
-              return
-            }
+            return
+          }
           // default operator
           const { columnName, operator } = field
 
