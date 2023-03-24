@@ -17,103 +17,88 @@
 -->
 
 <template>
-  <el-container v-if="isMobile" style="height: 100% !important;">
-    <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 30% !important; width: 100% !important;' : 'height: 7%!important; width: 100% !important;'">
-      <el-card :style="!collapse ? 'height: 100% !important; width: 100% !important;float: left;' : 'height: 100%;width: 100% !important;float: left;'">
-        <div slot="header">
-          <span> {{ $t('form.workflowActivity.title') }} </span>
-          <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
-        </div>
+  <div v-if="isMobile" style="height: 100%">
+    <div style="height: 75% !important;">
+      <el-container style="height: 100% !important;">
+        <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 60% !important; width: 100% !important;' : 'height: 10%!important; width: 100% !important;'">
+          <el-card :style="!collapse ? 'height: 100% !important; width: 100% !important;float: left;' : 'height: 100%;width: 100% !important;float: left;'">
+            <div slot="header">
+              <span> {{ $t('form.workflowActivity.title') }} </span>
+              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
+            </div>
 
-        <el-table
-          v-show="!collapse"
-          v-loading="isLoadActivity"
-          :data="activityList"
-          highlight-current-row
-          style="width: 100%;height: 70% !important;"
-          :border="true"
-          height="60% !important"
-          @current-change="handleCurrentChange"
-        >
-          <el-table-column
-            v-for="(workflowColumn) in workflowTableDefinition"
-            :key="workflowColumn.columnName"
-            :column-key="workflowColumn.columnName"
-            :label="workflowColumn.name"
-            :align="workflowColumn.isNumeric ? 'right' : 'left'"
-            :prop="workflowColumn.columnName"
-          />
-        </el-table>
-        <custom-pagination
-          v-show="!collapse"
-          :total="recordCount"
-          :current-page="currentPagePagination"
-          :container-manager="containerManagerBPList"
-          :handle-change-page="setPage"
-          :handle-size-change="handleChangeSizePage"
-          :records-page="activityList.length"
-        />
-      </el-card>
-    </el-header>
-
-    <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
-      <el-container style="height: 100%;">
-        <el-header :style="collapse2 ? 'padding: 0px;height: 40%;display: contents;' : 'padding: 0px;height: 10%;display: contents;'">
-          <el-card id="logsWorkflow" class="box-card">
-            <div slot="header" class="clearfix">
-              {{ $t('field.logsField') }}
-              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
-            </div>
-            <!-- {{ currentActivity }} {{ collapse2 }} -->
-            <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
-              <el-timeline-item
-                v-for="(nodes, key) in listProcessWorkflow"
-                :key="key"
-                :timestamp="translateDateByLong(nodes.log_date)"
-                placement="top"
-              >
-                <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
-              </el-timeline-item>
-            </el-timeline>
-          </el-card>
-        </el-header>
-        <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
-          <!-- <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: auto' : 'height: 20%'">
-            <div slot="header" class="clearfix">
-              {{ $t('field.logsField') }}
-              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
-            </div>
-            <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
-              <el-timeline-item
-                v-for="(nodes, key) in listProcessWorkflow"
-                :key="key"
-                :timestamp="translateDateByLong(nodes.log_date)"
-                placement="top"
-              >
-                <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
-              </el-timeline-item>
-            </el-timeline>
-          </el-card> -->
-          <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
-            <div slot="header" class="clearfix">
-              {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
-              <!-- {{ 'Diagrama del Flujo de Trabajo' }} -->
-              <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse3 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse3 = !collapse3)" />
-            </div>
-            <workflow-diagram
-              v-if="(!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity) && collapse3)"
-              :node-transition-list="workflowTranstitionsList"
-              :node-list="workflowStatesList"
-              :current-node="currentNode"
-              :orientation="isMobile ? 'vertical' : 'horizontal'"
-              :workflow-logs="listProcessWorkflow"
-              :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
+            <el-table
+              v-show="!collapse"
+              v-loading="isLoadActivity"
+              :data="activityList"
+              highlight-current-row
+              style="width: 100%;height: 70% !important;"
+              :border="true"
+              height="60% !important"
+              @current-change="handleCurrentChange"
+            >
+              <el-table-column
+                v-for="(workflowColumn) in workflowTableDefinition"
+                :key="workflowColumn.columnName"
+                :column-key="workflowColumn.columnName"
+                :label="workflowColumn.name"
+                :align="workflowColumn.isNumeric ? 'right' : 'left'"
+                :prop="workflowColumn.columnName"
+              />
+            </el-table>
+            <custom-pagination
+              v-show="!collapse"
+              :total="recordCount"
+              :current-page="currentPagePagination"
+              :container-manager="containerManagerBPList"
+              :handle-change-page="setPage"
+              :handle-size-change="handleChangeSizePage"
+              :records-page="activityList.length"
             />
           </el-card>
+        </el-header>
+        <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
+          <el-container style="height: 100% !important;">
+            <el-header :style="collapse2 ? 'padding: 0px;height: 40%;display: contents;' : 'padding: 0px;height: 10%;display: contents;'">
+              <el-card id="logsWorkflow" class="box-card">
+                <div slot="header" class="clearfix">
+                  {{ $t('field.logsField') }}
+                  <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
+                </div>
+                <el-timeline v-if="(!isEmptyValue(currentActivity) && collapse2)" class="info">
+                  <el-timeline-item
+                    v-for="(nodes, key) in listProcessWorkflow"
+                    :key="key"
+                    :timestamp="translateDateByLong(nodes.log_date)"
+                    placement="top"
+                  >
+                    <b>  {{ nodes.node_name }} </b> {{ nodes.text_message }}
+                  </el-timeline-item>
+                </el-timeline>
+              </el-card>
+            </el-header>
+            <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
+              <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
+                <div slot="header" class="clearfix">
+                  {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
+                  <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse3 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse3 = !collapse3)" />
+                </div>
+                <workflow-diagram
+                  v-if="(!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity) && collapse3)"
+                  :node-transition-list="workflowTranstitionsList"
+                  :node-list="workflowStatesList"
+                  :current-node="currentNode"
+                  :orientation="isMobile ? 'vertical' : 'horizontal'"
+                  :workflow-logs="listProcessWorkflow"
+                  :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
+                />
+              </el-card>
+            </el-main>
+          </el-container>
         </el-main>
       </el-container>
-    </el-main>
-    <el-footer :style="chooseOption ? 'padding: 0px;height: auto;padding-left: 1%;padding-right: 1%;' : 'padding: 0px;height: auto;padding-left: 1%;padding-right: 1%;'">
+    </div>
+    <div style="height: 25% !important;text-align: end;">
       <el-card id="logsWorkflow" class="box-card" style="padding: 0%;overflow: auto;overflow-x: hidden;">
         <el-form v-show="!isEmptyValue(currentActivity)" :label-position="chooseOption ? 'top' : 'left'" :inline="true" class="demo-form-inline">
           <el-row :gutter="24" style="text-align: center;">
@@ -175,8 +160,8 @@
           <svg-icon icon-class="layers-clear" />
         </el-button>
       </el-card>
-    </el-footer>
-  </el-container>
+    </div>
+  </div>
   <el-container v-else style="height: 100% !important;">
     <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 30% !important; width: 100% !important;' : 'height: 10%!important; width: 100% !important;'">
       <el-card :style="!collapse ? 'height: 100% !important; width: 50% !important;float: left;' : 'height: 100%;width: 50% !important;float: left;'">
