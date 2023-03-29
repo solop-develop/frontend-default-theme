@@ -32,12 +32,18 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           v-if="currentSetp === 1"
           :metadata="metadata"
         />
-        <automatic-match v-else-if="currentSetp === 2" />
-        <manual-match v-else-if="currentSetp === 3" />
+        <!-- <hr>
+        <automatic-match v-if="currentSetp === 1" />
+        <hr> -->
+        <manual-match v-if="currentSetp === 2" />
         <automatic-match
-          v-else-if="currentSetp === 4"
+          v-else-if="currentSetp === 3"
           :title="label"
         />
+        <!-- <automatic-match
+          v-else-if="currentSetp === 4"
+          :title="label"
+        /> -->
       </transition>
     </div>
     <div style="height: 5% !important;text-align: end;">
@@ -102,14 +108,14 @@ export default defineComponent({
       {
         name: lang.t('VBankStatementMatch.steps.searchCriteria')
       },
+      // {
+      //   name: lang.t('VBankStatementMatch.steps.automaticMatch')
+      // },
       {
-        name: lang.t('VBankStatementMatch.steps.automaticMatch')
+        name: lang.t('VBankStatementMatch.steps.pendingMatch')
       },
       {
-        name: lang.t('VBankStatementMatch.steps.andbookCoincidences')
-      },
-      {
-        name: lang.t('VBankStatementMatch.steps.simulateReconciliation')
+        name: lang.t('VBankStatementMatch.steps.summaryAdjustment')
       }
     ])
 
@@ -124,7 +130,7 @@ export default defineComponent({
     })
 
     const isNext = computed(() => {
-      return currentSetp.value === 4
+      return currentSetp.value === 3
     })
 
     const initialSept = computed(() => {
@@ -132,7 +138,7 @@ export default defineComponent({
     })
 
     const label = computed(() => {
-      if (currentSetp.value === 4) return lang.t('VBankStatementMatch.steps.simulateReconciliation')
+      if (currentSetp.value === 3) return lang.t('VBankStatementMatch.steps.summaryAdjustment')
       return ''
     })
 

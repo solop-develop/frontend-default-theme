@@ -21,6 +21,10 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
       <el-table
         :data="tableData"
         :border="true"
+        v-loading="loading"
+        element-loading-text="Loading..."
+        element-loading-spinner="el-icon-loading"
+        element-loading-background="rgba(0, 0, 0, 0.2)"
       >
         <el-table-column
           :label="title"
@@ -54,6 +58,10 @@ export default defineComponent({
     title: {
       type: String,
       default: ''
+    },
+    loading: {
+      type: Boolean,
+      default: true
     }
   },
   setup(props, { root }) {

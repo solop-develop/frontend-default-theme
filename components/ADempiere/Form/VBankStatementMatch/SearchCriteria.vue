@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <div style="height: -webkit-fill-available;">
+  <div>
     <el-card id="panel-top-search-criteria" class="panel-top-search-criteria">
       <el-form
         :inline="true"
@@ -102,9 +102,17 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             plain
             style="float: right; margin-left: 5px;"
             class="button-base-icon"
+            @click="searchMatch"
           />
         </el-form-item>
       </el-form>
+    </el-card>
+    <br>
+    <el-card v-if="isPanelFooter">
+      <hr>
+      <automatic-match
+        :loading="!isShowTable"
+      />
     </el-card>
   </div>
 </template>
@@ -114,13 +122,15 @@ import { defineComponent, ref } from '@vue/composition-api'
 import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { isHiddenField } from '@/utils/ADempiere/references'
+import AutomaticMatch from './AutomaticMatch.vue'
 import store from '@/store'
 // import lang from '@/lang'
 
 export default defineComponent({
   name: 'SearchCriteria',
   components: {
-    FieldDefinition
+    FieldDefinition,
+    AutomaticMatch
     // FieldSearch
   },
   props: {
@@ -173,23 +183,9 @@ export default defineComponent({
       }
     ])
 
-    const systemPayment = ref([])
+    const isShowTable = ref(false)
 
-    const importedMovements = ref([])
-
-    const item = {
-      date: '2016-05-02',
-      collection: 'Si',
-      documentNo: '45256',
-      businessPartner: 'Tom',
-      paymentType: 'Check',
-      currency: 'VES',
-      amount: '213.20',
-      desciption: 'No. 189, Grove St, Los Angeles'
-    }
-
-    systemPayment.value = Array(20).fill(item)
-    importedMovements.value = Array(20).fill(item)
+    const isPanelFooter = ref(false)
 
     /**
      * Methods
@@ -302,6 +298,14 @@ export default defineComponent({
       bankAccount.value = value
     }
 
+    function searchMatch() {
+      isPanelFooter.value = true
+      setTimeout(() => {
+        // isPanelFooter.value = false
+        isShowTable.value = true
+      }, 3000)
+    }
+
     createField()
 
     return {
@@ -313,8 +317,8 @@ export default defineComponent({
       transactionDate,
       modeSearch,
       modeSearchOptions,
-      systemPayment,
-      importedMovements,
+      isShowTable,
+      isPanelFooter,
       createField,
       isMandatoryField,
       isDisplayedField,
@@ -325,7 +329,8 @@ export default defineComponent({
       getSearchInfoList,
       isDisplayedDefault,
       findListBankAccount,
-      changeBankAccount
+      changeBankAccount,
+      searchMatch
     }
   }
 })
