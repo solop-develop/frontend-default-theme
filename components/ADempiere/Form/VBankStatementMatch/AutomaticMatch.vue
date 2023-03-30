@@ -1,7 +1,7 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
 Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -19,9 +19,9 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   <div style="height: 100% !important;">
     <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100% !important;">
       <el-table
+        v-loading="loading"
         :data="tableData"
         :border="true"
-        v-loading="loading"
         element-loading-text="Loading..."
         element-loading-spinner="el-icon-loading"
         element-loading-background="rgba(0, 0, 0, 0.2)"

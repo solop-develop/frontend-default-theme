@@ -1,7 +1,7 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
 Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -78,7 +78,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent, ref, computed } from '@vue/composition-api'
 import lang from '@/lang'
 import SearchCriteria from './SearchCriteria.vue'

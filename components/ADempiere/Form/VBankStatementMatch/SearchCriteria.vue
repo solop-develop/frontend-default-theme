@@ -1,7 +1,7 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
 Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -27,19 +27,21 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           :label="$t('VBankStatementMatch.field.bankAccount')"
           class="form-item-criteria"
         >
-          <el-select
-            v-model="bankAccount"
-            placeholder="Select"
-            @visible-change="findListBankAccount"
-            @change="changeBankAccount"
-          >
-            <el-option
-              v-for="item in bankAccountOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
+          <field-definition
+            :metadata-field="bankAccount"
+            :container-uuid="metadata.containerUuid"
+            :container-manager="{
+              isDisplayedField,
+              generalInfoSearch,
+              searchTableHeader,
+              isMandatoryField,
+              isReadOnlyField,
+              isDisplayedDefault,
+              getSearchInfoList,
+              getLookupList
+            }"
+            :in-table="true"
+          />
         </el-form-item>
         <el-form-item
           :label="$t('VBankStatementMatch.field.businessPartner')"
@@ -79,7 +81,9 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           <el-date-picker
             v-model="transactionDate"
             type="daterange"
-            range-separator="To"
+            range-separator="-"
+            format="yyyy-MM-dd"
+            value-format="timestamp"
             start-placeholder="Start date"
             end-placeholder="End date"
           />
@@ -109,7 +113,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     </el-card>
     <br>
     <el-card v-if="isPanelFooter">
-      <hr>
       <automatic-match
         :loading="!isShowTable"
       />
@@ -121,10 +124,11 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 import { defineComponent, ref } from '@vue/composition-api'
 import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
-import { isHiddenField } from '@/utils/ADempiere/references'
+// import { isHiddenField } from '@/utils/ADempiere/references'
 import AutomaticMatch from './AutomaticMatch.vue'
 import store from '@/store'
-// import lang from '@/lang'
+import lang from '@/lang'
+import { isDisplayedField } from './containerManagerFrom.ts'
 
 export default defineComponent({
   name: 'SearchCriteria',
@@ -158,9 +162,7 @@ export default defineComponent({
     * Refs
     */
 
-    const bankAccountOptions = ref([])
-
-    const bankAccount = ref('')
+    const bankAccount = ref({ componentPath: 'FieldSelect' })
 
     const bPartner = ref({ componentPath: 'FieldSearch' })
 
@@ -174,11 +176,11 @@ export default defineComponent({
 
     const modeSearchOptions = ref([
       {
-        label: 'Not Matched',
+        label: lang.t('VBankStatementMatch.field.selectNotMatched'),
         value: 0
       },
       {
-        label: 'Matched',
+        label: lang.t('VBankStatementMatch.field.selectMatched'),
         value: 1
       }
     ])
@@ -199,14 +201,14 @@ export default defineComponent({
       return true
     }
 
-    function isDisplayedField({ displayType, isActive, isDisplayed, isDisplayedFromLogic }) {
-      // button field not showed
-      if (isHiddenField(displayType)) {
-        return false
-      }
-      // verify if field is active
-      return isActive && isDisplayed
-    }
+    // function isDisplayedField({ displayType, isActive, isDisplayed, isDisplayedFromLogic }) {
+    //   // button field not showed
+    //   if (isHiddenField(displayType)) {
+    //     return false
+    //   }
+    //   // verify if field is active
+    //   return isActive && isDisplayed
+    // }
 
     function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
       return isQueryCriteria && isReadOnlyFromLogic
@@ -259,6 +261,20 @@ export default defineComponent({
       })
     }
 
+    function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, searchValue, isAddBlankValue, blankValue }) {
+      return store.dispatch('getLookupListFromServer', {
+        parentUuid,
+        containerUuid,
+        contextColumnNames,
+        columnName,
+        searchValue,
+        tableName: 'C_BankStatement',
+        // app attributes
+        isAddBlankValue,
+        blankValue
+      })
+    }
+
     function createField() {
       createFieldFromDictionary({
         containerUuid: props.metadata.containerUuid,
@@ -279,26 +295,46 @@ export default defineComponent({
         })
     }
 
-    function findListBankAccount(isVisible) {
-      if (!isVisible) return
-      // listBankAccount()
-      //   .then(response => {
-      //     const { records } = response
-      //     bankAccountOptions.value = records
-      //   })
-      //   .catch(error => {
-      //     showMessage({
-      //       message: error.message,
-      //       type: 'warning'
-      //     })
-      //   })
-    }
-
-    function changeBankAccount(value) {
-      bankAccount.value = value
+    function createFieldAccount() {
+      createFieldFromDictionary({
+        containerUuid: props.metadata.containerUuid,
+        uuid: '',
+        elementUuid: '',
+        elementColumnName: '',
+        tableName: '',
+        columnName: '',
+        overwriteDefinition: {
+          containerUuid: props.metadata.containerUuid
+        },
+        columnUuid: '8c104566-fb40-11e8-a479-7a0060f0aa01'
+      })
+        .then(response => {
+          bankAccount.value = response
+        }).catch(error => {
+          console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
+        })
     }
 
     function searchMatch() {
+      const bankAccountId = store.getters.getValueOfFieldOnContainer({
+        parentUuid: bankAccount.value.parentUuid,
+        containerUuid: bankAccount.value.containerUuid,
+        columnName: bankAccount.value.columnName
+      })
+      const businessPartnerId = store.getters.getValueOfFieldOnContainer({
+        parentUuid: bPartner.value.parentUuid,
+        containerUuid: bPartner.value.containerUuid,
+        columnName: bPartner.value.columnName
+      })
+      store.dispatch('searchMatch', {
+        bankAccountId,
+        dateFrom: transactionDate.value[0],
+        dateTo: transactionDate.value[1],
+        businessPartnerId,
+        paymentAmountFrom: totalPayment.value,
+        paymentAmountTo: totalPayment1.value,
+        matchMode: modeSearch.value
+      })
       isPanelFooter.value = true
       setTimeout(() => {
         // isPanelFooter.value = false
@@ -307,9 +343,9 @@ export default defineComponent({
     }
 
     createField()
+    createFieldAccount()
 
     return {
-      bankAccountOptions,
       bankAccount,
       bPartner,
       totalPayment,
@@ -320,16 +356,16 @@ export default defineComponent({
       isShowTable,
       isPanelFooter,
       createField,
+      createFieldAccount,
       isMandatoryField,
       isDisplayedField,
-      isHiddenField,
+      // isHiddenField,
       isReadOnlyField,
       generalInfoSearch,
       searchTableHeader,
       getSearchInfoList,
+      getLookupList,
       isDisplayedDefault,
-      findListBankAccount,
-      changeBankAccount,
       searchMatch
     }
   }
