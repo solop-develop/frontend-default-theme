@@ -44,8 +44,9 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
                 <el-autocomplete
                   ref="searchValue"
                   v-model="findProduct"
-                  :select-when-unmatched="true"
                   :trigger-on-focus="false"
+                  :select-when-unmatched="true"
+                  :highlight-first-item="true"
                   :placeholder="$t('quickAccess.searchWithEnter')"
                   :fetch-suggestions="querySearchAsync"
                   style="width: 100%;"
@@ -203,7 +204,7 @@ import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'ExpressShipment',
-  setup() {
+  setup(props, { root, refs }) {
     /**
    * Ref
    */
@@ -283,39 +284,46 @@ export default defineComponent({
       store.dispatch('createShipment', {
         id: order
       })
+      if (!isEmptyValue(refs.searchValue)) {
+        refs.searchValue.suggestions = []
+      }
+      store.commit('setListProduct', [])
+      findProduct.value = null
     }
 
     function querySearchAsync(queryString, callBack) {
-      const results = listProdcut.value.filter(createFilter(queryString))
+      let results = listProdcut.value.filter(createFilter(queryString))
+      if (isEmptyValue(results)) {
+        store.dispatch('findListProduct', {
+          searchValue: queryString,
+          shipmentId: salesOrder.value
+        })
+          .then(response => {
+            results = response
+          })
+          .catch(error => {
+            showMessage({
+              type: 'error',
+              message: lang.t('form.pos.optionsPoinSales.salesOrder.emptyProductDelivery')
+            })
+            console.warn(`Error getting List Product: ${error.message}. Code: ${error.code}.`)
+          })
+      }
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
-        if (isEmptyValue(results)) {
-          store.dispatch('findListProduct', {
-            searchValue: queryString,
-            shipmentId: salesOrder.value
-          })
-            .then(response => {
-              console.log({ response })
-            })
-            .catch(error => {
-              showMessage({
-                type: 'error',
-                message: lang.t('form.pos.optionsPoinSales.salesOrder.emptyProductDelivery')
-              })
-              console.warn(`Error getting List Product: ${error.message}. Code: ${error.code}.`)
-            })
-        }
         const suggestionOpen = results.length
-        if (this.isEmptyValue(queryString) || queryString.length < 4) {
+        if (queryString.length < 4 && suggestionOpen > 1) {
           // not show list
           callBack(results)
           return
         }
+
         if (suggestionOpen <= 1) {
           handleSelect(results[0])
+          refs.searchValue.activated = false
         }
         callBack(results)
-      }, 500)
+      }, 1000)
     }
 
     function createFilter(queryString) {
@@ -331,9 +339,11 @@ export default defineComponent({
         const isProductExists = productdeliveryList.value.find(list => list.product.value === product.value)
         if (isEmptyValue(isProductExists)) {
           createShipmentLine(product)
+          findProduct.value = null
           return
         }
         updateShipmentLine(isProductExists)
+        findProduct.value = null
         // }
       }
     }
