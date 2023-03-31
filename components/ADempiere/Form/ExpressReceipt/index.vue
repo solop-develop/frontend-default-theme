@@ -21,26 +21,44 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-form ref="form-express-receipt" inline label-position="top">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="Orden de Comprar" class="front-item-receipt">
-                <el-select v-model="purchaseOrder" placeholder="Please Select Purchase Order" style="width: 100%;">
-                  <el-option label="Zone" value="shanghai" />
-                  <el-option label="Zone two" value="beijing" />
+              <el-form-item label="Orden de Compra" class="front-item-receipt">
+                <el-select
+                  v-model="salesOrder"
+                  placeholder="Please Select Purchase Order"
+                  style="width: 100%;"
+                  filterable
+                  @visible-change="findSalesOrder"
+                  @change="selectSalesOrder"
+                >
+                  <el-option
+                    v-for="item in listOrder"
+                    :key="item.id"
+                    :label="item.label"
+                    :value="item.id"
+                  />
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col v-if="!isEmptyValue(salesOrder)" :span="12">
               <el-form-item label="Código Producto" class="front-item-receipt">
-                <el-select v-model="purchaseOrder" placeholder="Please Select Purchase Order" style="width: 100%;">
-                  <el-option label="Zone one" value="shanghai" />
-                  <el-option label="Zone two" value="beijing" />
-                </el-select>
+                <el-autocomplete
+                  ref="searchValue"
+                  v-model="findProduct"
+                  :trigger-on-focus="false"
+                  :select-when-unmatched="true"
+                  :highlight-first-item="true"
+                  :placeholder="$t('quickAccess.searchWithEnter')"
+                  :fetch-suggestions="querySearchAsync"
+                  style="width: 100%;"
+                  @select="handleSelect"
+                />
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
       </div>
     </el-card>
-    <el-card class="box-card">
+    <el-card v-if="!isEmptyValue(salesOrder)" class="box-card">
       <el-table
         ref="listProducto"
         v-loading="isLoadedServer"
@@ -48,8 +66,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         :empty-text="$t('quickAccess.searchWithEnter')"
         :border="true"
         fit
-        height="450"
         highlight-current-row
+        @cell-click="editQuantity"
       >
         <el-table-column
           prop="product.value"
@@ -63,40 +81,384 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           prop="quantity"
           :label="$t('form.pos.tableProduct.quantity')"
           :align="'right'"
-          :width="isEditQuantity ? '200px' : '90px'"
         >
           <template slot-scope="scope">
-            <!-- <el-input-number
-              v-if="isEditQuantity"
-              v-model="scope.row.quantity"
-              controls-position="right"
-              :min="1"
-            /> -->
-            <span>
-              {{ scope }}
+            <span v-if="scope.row.isEditQuantity && isEditQuantity">
+              <el-input-number
+                ref="editQuantityField"
+                v-model="scope.row.quantity"
+                controls-position="right"
+                :min="1"
+                @change="updateShipmentLine(scope.row)"
+              />
+            </span>
+            <span v-else>
+              {{ scope.row.quantity }}
             </span>
           </template>
         </el-table-column>
+        <el-table-column
+          :label="$t('form.pos.tableProduct.options')"
+          column-key="value"
+          width="160"
+        >
+          <template slot-scope="scope">
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteShipmentLine(scope.row)" />
+          </template>
+        </el-table-column>
       </el-table>
+      <!-- Action Panel Footer -->
+      <el-row>
+        <el-col :span="24">
+          <el-button
+            type="primary"
+            icon="el-icon-check"
+            class="button-base-icon"
+            style="float: right; margin: 10px;"
+            :disabled="isEmptyValue(salesOrder)"
+            @click="visible = true"
+          />
+          <el-button
+            type="danger"
+            icon="el-icon-close"
+            style="float: right;margin-top: 10px;"
+            class="button-base-icon"
+            @click="closeForm"
+          />
+          <el-button
+            type="info"
+            plain
+            style="float: right; margin-top: 10px;"
+            class="button-base-icon"
+            @click="clearForm"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+        </el-col>
+      </el-row>
     </el-card>
+    <el-dialog
+      title="Recibos"
+      :visible.sync="visible"
+    >
+      <p class="total">
+        {{ $t('form.pos.order.order') }}:
+        <b class="order-info">
+          {{ currentOrder.document_no }}
+        </b>
+      </p>
+      <p class="total">
+        {{ 'Recibo' }}:
+        <b class="order-info">
+          {{ currentShipment.documentNo }}
+        </b>
+      </p>
+      <p class="total">
+        {{ $t('form.pos.order.itemQuantity') }}:
+        <b v-if="!isEmptyValue(productdeliveryList)" class="order-info">
+          {{ quantityProduct }}
+        </b>
+        <b v-else>
+          {{ 0 }}
+        </b>
+      </p>
+      <p class="total">
+        {{ $t('form.pos.order.numberLines') }}:
+        <b class="order-info">
+          {{ productdeliveryList.length }}
+        </b>
+      </p>
+      <!-- <div slot="footer"> -->
+      <el-button
+        type="primary"
+        icon="el-icon-check"
+        class="button-base-icon"
+        style="float: right; margin: 10px;"
+        :disabled="isEmptyValue(salesOrder)"
+        @click="processShipment"
+      />
+      <el-button
+        type="danger"
+        icon="el-icon-close"
+        style="float: right;margin-top: 10px;"
+        class="button-base-icon"
+        @click="visible = false"
+      />
+      <!-- </div> -->
+    </el-dialog>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
+<script>
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+import lang from '@/lang'
+import store from '@/store'
+import router from '@/router'
+// Api
+import {
+  listOrders
+  // Shipment
+} from '@/api/ADempiere/form/ExpressShipment.js'
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere'
+import { showMessage } from '@/utils/ADempiere/notification'
+
 export default defineComponent({
-  name: 'ExpressReceipt',
-  setup() {
-    const route = 'epae'
-    const purchaseOrder = ref('')
-    const productdeliveryList = ref([])
+  name: 'ExpressShipment',
+  setup(props, { root, refs }) {
+    /**
+   * Ref
+   */
+    const editQuantityField = ref(null)
+    const salesOrder = ref('')
+    const findProduct = ref('')
+    const timeOut = ref(null)
+    const listOrder = ref([])
     const isLoadedServer = ref(false)
     const isEditQuantity = ref(false)
+    const quantity = ref(0)
+    const visible = ref(false)
+    /**
+   * Computed
+   */
+    const listProdcut = computed(() => {
+      return store.getters.getListProduct
+    })
+    const productdeliveryList = computed(() => {
+      return store.getters.getListShipmentLines
+    })
+    const currentShipment = computed(() => {
+      return store.getters.getCurrentShipment
+    })
+    const quantityProduct = computed(() => {
+      if (isEmptyValue(productdeliveryList)) return 0
+
+      const result = productdeliveryList.value.map(line => {
+        return line.quantity
+      })
+
+      if (!isEmptyValue(result)) {
+        return result.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        })
+      }
+      return 0
+    })
+    const currentOrder = computed(() => {
+      if (isEmptyValue(listOrder.value) || isEmptyValue(salesOrder.value)) {
+        return {
+          document_no: ''
+        }
+      }
+      return listOrder.value.find(order => salesOrder.value === order.id)
+    })
+    /**
+     * Methods
+     */
+
+    function findSalesOrder(isFindOrder) {
+      if (!isFindOrder) return
+      listOrders({
+        searchValue: salesOrder.value
+      })
+        .then(response => {
+          const { records } = response
+          listOrder.value = records.map(order => {
+            const { id, uuid, document_no } = order
+            return {
+              id,
+              label: document_no,
+              document_no,
+              uuid
+            }
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+    }
+
+    function selectSalesOrder(order) {
+      store.dispatch('createShipment', {
+        id: order
+      })
+      if (!isEmptyValue(refs.searchValue)) {
+        refs.searchValue.suggestions = []
+      }
+      store.commit('setListProduct', [])
+      findProduct.value = null
+    }
+
+    function querySearchAsync(queryString, callBack) {
+      let results = listProdcut.value.filter(createFilter(queryString))
+      if (isEmptyValue(results)) {
+        store.dispatch('findListProduct', {
+          searchValue: queryString,
+          shipmentId: salesOrder.value
+        })
+          .then(response => {
+            results = response
+          })
+          .catch(error => {
+            showMessage({
+              type: 'error',
+              message: lang.t('form.pos.optionsPoinSales.salesOrder.emptyProductDelivery')
+            })
+            console.warn(`Error getting List Product: ${error.message}. Code: ${error.code}.`)
+          })
+      }
+      clearTimeout(timeOut.value)
+      timeOut.value = setTimeout(() => {
+        const suggestionOpen = results.length
+        if (queryString.length < 4 && suggestionOpen > 1) {
+          // not show list
+          callBack(results)
+          return
+        }
+
+        if (suggestionOpen <= 1) {
+          handleSelect(results[0])
+          refs.searchValue.activated = false
+        }
+        callBack(results)
+      }, 1000)
+    }
+
+    function createFilter(queryString) {
+      return (link) => {
+        const search = queryString.toLowerCase()
+        return link.value.toLowerCase().includes(search) || link.name.toLowerCase().includes(search) || link.upc.toLowerCase().includes(search)
+      }
+    }
+
+    function handleSelect(product) {
+      if (typeof product === 'object') {
+        // if (!isEmptyValue(productdeliveryList.value)) {
+        const isProductExists = productdeliveryList.value.find(list => list.product.value === product.value)
+        if (isEmptyValue(isProductExists)) {
+          createShipmentLine(product)
+          findProduct.value = null
+          return
+        }
+        updateShipmentLine(isProductExists)
+        findProduct.value = null
+        // }
+      }
+    }
+
+    function editQuantity(row) {
+      isEditQuantity.value = !row.isEditQuantity
+      const list = productdeliveryList.value.filter(line => line.id !== row.id)
+      list.forEach(element => {
+        element.isEditQuantity = false
+      })
+      row.isEditQuantity = true
+      quantity.value = row.quantity
+      setTimeout(() => {
+        if (!isEmptyValue(editQuantityField.value)) {
+          editQuantityField.value.focus()
+        }
+      }, 500)
+    }
+
+    /**
+     * Shipment Line
+     */
+
+    function createShipmentLine(product) {
+      store.dispatch('createLine', {
+        shipmentId: 0,
+        productId: product.id,
+        productUuid: product.uuid
+      })
+    }
+
+    function updateShipmentLine({
+      id,
+      uuid,
+      quantity
+    }) {
+      isEditQuantity.value = false
+      store.dispatch('updateLine', {
+        id,
+        uuid,
+        quantity: quantity + 1
+      })
+    }
+
+    function deleteShipmentLine(line) {
+      const { id, uuid } = line
+      store.dispatch('deleteLine', {
+        id,
+        uuid,
+        shipmentId: currentShipment.value.id
+      })
+    }
+
+    /**
+     * Action Panel Footer
+     */
+
+    function closeForm() {
+      const currentRoute = router.app._route
+      const tabViewsVisited = store.getters.visitedViews
+      store.dispatch('tagsView/delView', currentRoute)
+      const oldRouter = tabViewsVisited[tabViewsVisited.length - 1]
+      router.push({
+        path: oldRouter.path
+      }, () => {})
+    }
+
+    function clearForm(params) {
+      salesOrder.value = ''
+      findProduct.value = ''
+    }
+
+    function processShipment() {
+      if (isEmptyValue(salesOrder.value)) return
+      store.dispatch('processShipment')
+      visible.value = false
+    }
+
+    /**
+   * Watch
+   */
+    watch(salesOrder, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue) && newValue !== oldValue) {
+        findSalesOrder(true)
+      }
+    })
+
     return {
-      route,
-      purchaseOrder,
+      editQuantityField,
+      salesOrder,
+      listOrder,
+      findProduct,
       productdeliveryList,
       isLoadedServer,
-      isEditQuantity
+      isEditQuantity,
+      quantity,
+      currentOrder,
+      currentShipment,
+      quantityProduct,
+      visible,
+      // Methods
+      findSalesOrder,
+      selectSalesOrder,
+      handleSelect,
+      createFilter,
+      querySearchAsync,
+      editQuantity,
+      // Shipment Line
+      createShipmentLine,
+      updateShipmentLine,
+      deleteShipmentLine,
+      // Action Panel Footer
+      processShipment,
+      closeForm,
+      clearForm
     }
   }
 })
@@ -105,5 +467,12 @@ export default defineComponent({
 <style scoped lang="scss">
 .front-item-receipt {
   width: 100%;
+}
+.custom-field-number {
+  &.el-input-number, &.el-input {
+    .el-input__inner {
+      text-align-last: end !important;
+    }
+  }
 }
 </style>
