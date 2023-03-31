@@ -65,8 +65,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         :empty-text="$t('quickAccess.searchWithEnter')"
         :border="true"
         fit
-        height="450"
         highlight-current-row
+        @cell-click="editQuantity"
       >
         <el-table-column
           prop="product.value"
@@ -80,7 +80,22 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           prop="quantity"
           :label="$t('form.pos.tableProduct.quantity')"
           :align="'right'"
-        />
+        >
+          <template slot-scope="scope">
+            <span v-if="scope.row.isEditQuantity && isEditQuantity">
+              <el-input-number
+                ref="editQuantityField"
+                v-model="scope.row.quantity"
+                controls-position="right"
+                :min="1"
+                @change="updateShipmentLine(scope.row)"
+              />
+            </span>
+            <span v-else>
+              {{ scope.row.quantity }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column
           :label="$t('form.pos.tableProduct.options')"
           column-key="value"
@@ -100,7 +115,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             class="button-base-icon"
             style="float: right; margin: 10px;"
             :disabled="isEmptyValue(salesOrder)"
-            @click="processShipment"
+            @click="visible = true"
           />
           <el-button
             type="danger"
@@ -121,6 +136,55 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         </el-col>
       </el-row>
     </el-card>
+    <el-dialog
+      :title="$t('form.pos.optionsPoinSales.salesOrder.confirmDelivery')"
+      :visible.sync="visible"
+    >
+      <p class="total">
+        {{ $t('form.pos.order.order') }}:
+        <b class="order-info">
+          {{ currentOrder.document_no }}
+        </b>
+      </p>
+      <p class="total">
+        {{ 'Entrega' }}:
+        <b class="order-info">
+          {{ currentShipment.documentNo }}
+        </b>
+      </p>
+      <p class="total">
+        {{ $t('form.pos.order.itemQuantity') }}:
+        <b v-if="!isEmptyValue(productdeliveryList)" class="order-info">
+          {{ quantityProduct }}
+        </b>
+        <b v-else>
+          {{ 0 }}
+        </b>
+      </p>
+      <p class="total">
+        {{ $t('form.pos.order.numberLines') }}:
+        <b class="order-info">
+          {{ productdeliveryList.length }}
+        </b>
+      </p>
+      <!-- <div slot="footer"> -->
+      <el-button
+        type="primary"
+        icon="el-icon-check"
+        class="button-base-icon"
+        style="float: right; margin: 10px;"
+        :disabled="isEmptyValue(salesOrder)"
+        @click="processShipment"
+      />
+      <el-button
+        type="danger"
+        icon="el-icon-close"
+        style="float: right;margin-top: 10px;"
+        class="button-base-icon"
+        @click="visible = false"
+      />
+      <!-- </div> -->
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -143,12 +207,15 @@ export default defineComponent({
     /**
    * Ref
    */
+    const editQuantityField = ref(null)
     const salesOrder = ref('')
     const findProduct = ref('')
     const timeOut = ref(null)
     const listOrder = ref([])
     const isLoadedServer = ref(false)
     const isEditQuantity = ref(false)
+    const quantity = ref(0)
+    const visible = ref(false)
     /**
    * Computed
    */
@@ -160,6 +227,28 @@ export default defineComponent({
     })
     const currentShipment = computed(() => {
       return store.getters.getCurrentShipment
+    })
+    const quantityProduct = computed(() => {
+      if (isEmptyValue(productdeliveryList)) return 0
+
+      const result = productdeliveryList.value.map(line => {
+        return line.quantity
+      })
+
+      if (!isEmptyValue(result)) {
+        return result.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        })
+      }
+      return 0
+    })
+    const currentOrder = computed(() => {
+      if (isEmptyValue(listOrder.value) || isEmptyValue(salesOrder.value)) {
+        return {
+          document_no: ''
+        }
+      }
+      return listOrder.value.find(order => salesOrder.value === order.id)
     })
     /**
      * Methods
@@ -177,6 +266,7 @@ export default defineComponent({
             return {
               id,
               label: document_no,
+              document_no,
               uuid
             }
           })
@@ -196,9 +286,7 @@ export default defineComponent({
     }
 
     function querySearchAsync(queryString, callBack) {
-      console.log(listProdcut.value)
       const results = listProdcut.value.filter(createFilter(queryString))
-      console.log({ results })
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
         if (isEmptyValue(results)) {
@@ -250,6 +338,21 @@ export default defineComponent({
       }
     }
 
+    function editQuantity(row) {
+      isEditQuantity.value = !row.isEditQuantity
+      const list = productdeliveryList.value.filter(line => line.id !== row.id)
+      list.forEach(element => {
+        element.isEditQuantity = false
+      })
+      row.isEditQuantity = true
+      quantity.value = row.quantity
+      setTimeout(() => {
+        if (!isEmptyValue(editQuantityField.value)) {
+          editQuantityField.value.focus()
+        }
+      }, 500)
+    }
+
     /**
      * Shipment Line
      */
@@ -267,6 +370,7 @@ export default defineComponent({
       uuid,
       quantity
     }) {
+      isEditQuantity.value = false
       store.dispatch('updateLine', {
         id,
         uuid,
@@ -275,7 +379,6 @@ export default defineComponent({
     }
 
     function deleteShipmentLine(line) {
-      console.log({ line, salesOrder: salesOrder.value, currentShipment: currentShipment.value })
       const { id, uuid } = line
       store.dispatch('deleteLine', {
         id,
@@ -305,9 +408,8 @@ export default defineComponent({
 
     function processShipment() {
       if (isEmptyValue(salesOrder.value)) return
-      store.dispatch('processShipment', {
-        id: salesOrder.value
-      })
+      store.dispatch('processShipment')
+      visible.value = false
     }
 
     /**
@@ -320,19 +422,25 @@ export default defineComponent({
     })
 
     return {
+      editQuantityField,
       salesOrder,
       listOrder,
       findProduct,
       productdeliveryList,
       isLoadedServer,
       isEditQuantity,
+      quantity,
+      currentOrder,
       currentShipment,
+      quantityProduct,
+      visible,
       // Methods
       findSalesOrder,
       selectSalesOrder,
       handleSelect,
       createFilter,
       querySearchAsync,
+      editQuantity,
       // Shipment Line
       createShipmentLine,
       updateShipmentLine,
@@ -349,5 +457,12 @@ export default defineComponent({
 <style scoped lang="scss">
 .front-item-receipt {
   width: 100%;
+}
+.custom-field-number {
+  &.el-input-number, &.el-input {
+    .el-input__inner {
+      text-align-last: end !important;
+    }
+  }
 }
 </style>
