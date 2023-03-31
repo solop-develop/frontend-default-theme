@@ -92,6 +92,12 @@ export default {
         case 'Issues':
           form = import('@theme/components/ADempiere/Form/Issues')
           break
+        case 'ExpressReceipt':
+          form = import('@theme/components/ADempiere/Form/ExpressReceipt')
+          break
+        case 'ExpressShipment':
+          form = import('@theme/components/ADempiere/Form/ExpressShipment')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
