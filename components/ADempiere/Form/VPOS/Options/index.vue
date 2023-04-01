@@ -329,7 +329,6 @@
                 placement="right"
                 trigger="click"
                 width="900"
-                :disabled="!isProcessed || !isAllowsConfirmShipmentByOrder"
               >
                 <confirm-delivery
                   :is-selectable="false"
@@ -344,7 +343,7 @@
                 >
                   <svg-icon icon-class="shopping" />
                   <br>
-                  {{ $t('form.pos.optionsPoinSales.salesOrder.deliverAllProducts') }}
+                  {{ $t('form.pos.optionsPoinSales.salesOrder.deliverAllProducts') }} {{ 1651651 }}
                 </div>
               </el-popover>
             </el-card>
