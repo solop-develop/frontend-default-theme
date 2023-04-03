@@ -214,7 +214,7 @@ import router from '@/router'
 import {
   listOrders
   // Shipment
-} from '@/api/ADempiere/form/expressShipment.js'
+} from '@/api/ADempiere/form/ExpressShipment.js'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
