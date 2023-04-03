@@ -21,7 +21,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-form ref="form-express-receipt" inline label-position="top">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="Orden de Venta" class="front-item-receipt">
+              <el-form-item :label="$t('ExpressShipment.field.salesOrder')" class="front-item-receipt">
                 <el-select
                   v-model="salesOrder"
                   placeholder="Please Select Purchase Order"
@@ -40,7 +40,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               </el-form-item>
             </el-col>
             <el-col v-if="!isEmptyValue(salesOrder)" :span="12">
-              <el-form-item label="Código Producto" class="front-item-receipt">
+              <el-form-item :label="$t('ExpressShipment.field.productcode')" class="front-item-receipt">
                 <el-autocomplete
                   ref="searchValue"
                   v-model="findProduct"
@@ -50,8 +50,22 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
                   :placeholder="$t('quickAccess.searchWithEnter')"
                   :fetch-suggestions="querySearchAsync"
                   style="width: 100%;"
+                  :disabled="isComplete"
                   @select="handleSelect"
-                />
+                >
+                  <template slot="prefix">
+                    <svg-icon
+                      icon-class="shopping"
+                      class="el-input__icon"
+                    />
+                  </template>
+
+                  <template slot-scope="props">
+                    <div class="header" style="margin: 0px">
+                      <b> {{ props.item.value }} - {{ props.item.name }} </b>
+                    </div>
+                  </template>
+                </el-autocomplete>
               </el-form-item>
             </el-col>
           </el-row>
@@ -115,7 +129,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             icon="el-icon-check"
             class="button-base-icon"
             style="float: right; margin: 10px;"
-            :disabled="isEmptyValue(salesOrder)"
+            :disabled="isEmptyValue(salesOrder) || isComplete"
             @click="visible = true"
           />
           <el-button
@@ -142,13 +156,13 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
       :visible.sync="visible"
     >
       <p class="total">
-        {{ $t('form.pos.order.order') }}:
+        {{ $t('ExpressShipment.modal.nrOrder') }}:
         <b class="order-info">
           {{ currentOrder.document_no }}
         </b>
       </p>
       <p class="total">
-        {{ 'Entrega' }}:
+        {{ $t('ExpressShipment.modal.nrShipments') }}:
         <b class="order-info">
           {{ currentShipment.documentNo }}
         </b>
@@ -228,6 +242,13 @@ export default defineComponent({
     })
     const currentShipment = computed(() => {
       return store.getters.getCurrentShipment
+    })
+    const isComplete = computed(() => {
+      const { isCompleted } = store.getters.getCurrentShipment
+      if (!isEmptyValue(store.getters.getCurrentShipment)) {
+        return isCompleted
+      }
+      return false
     })
     const quantityProduct = computed(() => {
       if (isEmptyValue(productdeliveryList)) return 0
@@ -321,9 +342,11 @@ export default defineComponent({
         if (suggestionOpen <= 1) {
           handleSelect(results[0])
           refs.searchValue.activated = false
+          callBack(results)
+          return
         }
         callBack(results)
-      }, 1000)
+      }, 500)
     }
 
     function createFilter(queryString) {
@@ -334,7 +357,7 @@ export default defineComponent({
     }
 
     function handleSelect(product) {
-      if (typeof product === 'object') {
+      if (typeof product === 'object' && !isEmptyValue(product.id)) {
         // if (!isEmptyValue(productdeliveryList.value)) {
         const isProductExists = productdeliveryList.value.find(list => list.product.value === product.value)
         if (isEmptyValue(isProductExists)) {
@@ -342,7 +365,12 @@ export default defineComponent({
           findProduct.value = null
           return
         }
-        updateShipmentLine(isProductExists)
+        const { id, uuid, quantity } = isProductExists
+        updateShipmentLine({
+          id,
+          uuid,
+          quantity: quantity + 1
+        })
         findProduct.value = null
         // }
       }
@@ -384,7 +412,7 @@ export default defineComponent({
       store.dispatch('updateLine', {
         id,
         uuid,
-        quantity: quantity + 1
+        quantity
       })
     }
 
@@ -440,6 +468,7 @@ export default defineComponent({
       isLoadedServer,
       isEditQuantity,
       quantity,
+      isComplete,
       currentOrder,
       currentShipment,
       quantityProduct,
