@@ -8,10 +8,10 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -202,22 +202,27 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     </el-dialog>
   </div>
 </template>
+
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+
 import lang from '@/lang'
 import store from '@/store'
 import router from '@/router'
-// Api
+
+// Api Request Methods
 import {
   listOrders
   // Shipment
-} from '@/api/ADempiere/form/ExpressShipment.js'
+} from '@/api/ADempiere/form/expressShipment.js'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'ExpressShipment',
+
   setup(props, { root, refs }) {
     /**
    * Ref
