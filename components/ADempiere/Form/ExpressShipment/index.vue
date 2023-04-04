@@ -21,7 +21,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         <el-form ref="form-express-receipt" inline label-position="top">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item :label="$t('ExpressShipment.field.salesOrder')" class="front-item-receipt">
+              <el-form-item :label="$t('form.expressShipment.field.salesOrder')" class="front-item-receipt">
                 <el-select
                   v-model="salesOrder"
                   placeholder="Please Select Purchase Order"
@@ -40,7 +40,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               </el-form-item>
             </el-col>
             <el-col v-if="!isEmptyValue(salesOrder)" :span="12">
-              <el-form-item :label="$t('ExpressShipment.field.productcode')" class="front-item-receipt">
+              <el-form-item :label="$t('form.expressShipment.field.productcode')" class="front-item-receipt">
                 <el-autocomplete
                   ref="searchValue"
                   v-model="findProduct"
@@ -156,13 +156,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       :visible.sync="visible"
     >
       <p class="total">
-        {{ $t('ExpressShipment.modal.nrOrder') }}:
+        {{ $t('form.expressShipment.modal.nrOrder') }}:
         <b class="order-info">
           {{ currentOrder.document_no }}
         </b>
       </p>
       <p class="total">
-        {{ $t('ExpressShipment.modal.nrShipments') }}:
+        {{ $t('form.expressShipment.modal.nrShipments') }}:
         <b class="order-info">
           {{ currentShipment.documentNo }}
         </b>
