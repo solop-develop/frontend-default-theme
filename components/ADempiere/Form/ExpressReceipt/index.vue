@@ -8,10 +8,10 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -21,12 +21,13 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-form ref="form-express-receipt" inline label-position="top">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="Orden de Compra" class="front-item-receipt">
+              <el-form-item :label="$t('form.expressReceipt.field.salesOrder')" class="front-item-receipt">
                 <el-select
                   v-model="salesOrder"
                   placeholder="Please Select Purchase Order"
                   style="width: 100%;"
                   filterable
+                  clearable
                   @visible-change="findSalesOrder"
                   @change="selectSalesOrder"
                 >
@@ -40,7 +41,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               </el-form-item>
             </el-col>
             <el-col v-if="!isEmptyValue(salesOrder)" :span="12">
-              <el-form-item label="Código Producto" class="front-item-receipt">
+              <el-form-item :label="$t('form.expressReceipt.field.productcode')" class="front-item-receipt">
                 <el-autocomplete
                   ref="searchValue"
                   v-model="findProduct"
@@ -50,8 +51,22 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
                   :placeholder="$t('quickAccess.searchWithEnter')"
                   :fetch-suggestions="querySearchAsync"
                   style="width: 100%;"
+                  :disabled="isComplete"
                   @select="handleSelect"
-                />
+                >
+                  <template slot="prefix">
+                    <svg-icon
+                      icon-class="shopping"
+                      class="el-input__icon"
+                    />
+                  </template>
+
+                  <template slot-scope="props">
+                    <div class="header" style="margin: 0px">
+                      <b> {{ props.item.value }} - {{ props.item.name }} </b>
+                    </div>
+                  </template>
+                </el-autocomplete>
               </el-form-item>
             </el-col>
           </el-row>
@@ -115,7 +130,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             icon="el-icon-check"
             class="button-base-icon"
             style="float: right; margin: 10px;"
-            :disabled="isEmptyValue(salesOrder)"
+            :disabled="isEmptyValue(salesOrder) || isComplete"
             @click="visible = true"
           />
           <el-button
@@ -138,17 +153,17 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
       </el-row>
     </el-card>
     <el-dialog
-      title="Recibos"
+      :title="$t('form.expressReceipt.title')"
       :visible.sync="visible"
     >
       <p class="total">
-        {{ $t('form.pos.order.order') }}:
+        {{ $t('form.expressReceipt.modal.nrOrder') }}:
         <b class="order-info">
           {{ currentOrder.document_no }}
         </b>
       </p>
       <p class="total">
-        {{ 'Recibo' }}:
+        {{ $t('form.expressReceipt.modal.nrShipments') }}:
         <b class="order-info">
           {{ currentShipment.documentNo }}
         </b>
@@ -188,22 +203,27 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     </el-dialog>
   </div>
 </template>
+
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+
 import lang from '@/lang'
 import store from '@/store'
 import router from '@/router'
-// Api
+
+// Api Request Methods
 import {
   listOrders
   // Shipment
-} from '@/api/ADempiere/form/ExpressShipment.js'
+} from '@/api/ADempiere/form/ExpressReceipt.js'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'ExpressShipment',
+
   setup(props, { root, refs }) {
     /**
    * Ref
@@ -221,13 +241,20 @@ export default defineComponent({
    * Computed
    */
     const listProdcut = computed(() => {
-      return store.getters.getListProduct
+      return store.getters.getListProductReceipt
     })
     const productdeliveryList = computed(() => {
-      return store.getters.getListShipmentLines
+      return store.getters.getListReceipt
     })
     const currentShipment = computed(() => {
-      return store.getters.getCurrentShipment
+      return store.getters.getCurrentReceipt
+    })
+    const isComplete = computed(() => {
+      const { isCompleted } = store.getters.getCurrentReceipt
+      if (!isEmptyValue(store.getters.getCurrentReceipt)) {
+        return isCompleted
+      }
+      return false
     })
     const quantityProduct = computed(() => {
       if (isEmptyValue(productdeliveryList)) return 0
@@ -281,22 +308,22 @@ export default defineComponent({
     }
 
     function selectSalesOrder(order) {
-      store.dispatch('createShipment', {
+      store.dispatch('createReceipt', {
         id: order
       })
       if (!isEmptyValue(refs.searchValue)) {
         refs.searchValue.suggestions = []
       }
-      store.commit('setListProduct', [])
+      store.commit('setListProductReceipt', [])
       findProduct.value = null
     }
 
     function querySearchAsync(queryString, callBack) {
       let results = listProdcut.value.filter(createFilter(queryString))
       if (isEmptyValue(results)) {
-        store.dispatch('findListProduct', {
+        store.dispatch('findListProductReceipt', {
           searchValue: queryString,
-          shipmentId: salesOrder.value
+          receiptId: salesOrder.value
         })
           .then(response => {
             results = response
@@ -321,9 +348,11 @@ export default defineComponent({
         if (suggestionOpen <= 1) {
           handleSelect(results[0])
           refs.searchValue.activated = false
+          callBack(results)
+          return
         }
         callBack(results)
-      }, 1000)
+      }, 500)
     }
 
     function createFilter(queryString) {
@@ -334,7 +363,7 @@ export default defineComponent({
     }
 
     function handleSelect(product) {
-      if (typeof product === 'object') {
+      if (typeof product === 'object' && !isEmptyValue(product.id)) {
         // if (!isEmptyValue(productdeliveryList.value)) {
         const isProductExists = productdeliveryList.value.find(list => list.product.value === product.value)
         if (isEmptyValue(isProductExists)) {
@@ -342,7 +371,12 @@ export default defineComponent({
           findProduct.value = null
           return
         }
-        updateShipmentLine(isProductExists)
+        const { id, uuid, quantity } = isProductExists
+        updateShipmentLine({
+          id,
+          uuid,
+          quantity: quantity + 1
+        })
         findProduct.value = null
         // }
       }
@@ -368,8 +402,8 @@ export default defineComponent({
      */
 
     function createShipmentLine(product) {
-      store.dispatch('createLine', {
-        shipmentId: 0,
+      store.dispatch('createLineReceipt', {
+        receiptId: 0,
         productId: product.id,
         productUuid: product.uuid
       })
@@ -381,16 +415,16 @@ export default defineComponent({
       quantity
     }) {
       isEditQuantity.value = false
-      store.dispatch('updateLine', {
+      store.dispatch('updateLineReceipt', {
         id,
         uuid,
-        quantity: quantity + 1
+        quantity
       })
     }
 
     function deleteShipmentLine(line) {
       const { id, uuid } = line
-      store.dispatch('deleteLine', {
+      store.dispatch('deleteLineReceipt', {
         id,
         uuid,
         shipmentId: currentShipment.value.id
@@ -418,7 +452,7 @@ export default defineComponent({
 
     function processShipment() {
       if (isEmptyValue(salesOrder.value)) return
-      store.dispatch('processShipment')
+      store.dispatch('processReceipt')
       visible.value = false
     }
 
@@ -440,6 +474,7 @@ export default defineComponent({
       isLoadedServer,
       isEditQuantity,
       quantity,
+      isComplete,
       currentOrder,
       currentShipment,
       quantityProduct,
