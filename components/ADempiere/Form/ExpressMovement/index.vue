@@ -16,28 +16,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div class="main-express-receipt">
-    <el-card class="box-card" style="margin: 0px;">
+    <el-card class="box-card">
       <div slot="header" class="clearfix-express-receipt">
-        <el-form
-          ref="form-express-receipt"
-          label-position="top"
-          class="field-from"
-          inline
-        >
-          <el-row :gutter="10">
+        <el-form ref="form-express-receipt" inline label-position="top">
+          <el-row :gutter="20">
             <el-col :span="8">
-              <el-form-item class="front-item-receipt">
-                <template slot="label" style="width: 450px;">
-                  {{ $t('VBankStatementMatch.field.businessPartner') }}
-                  <br>
-                  <br>
-                </template>
+              <el-form-item :label="$t('VBankStatementMatch.field.businessPartner')" class="front-item-receipt">
                 <el-select
                   v-model="currentBusinessPartners"
                   placeholder="Please Select Business Partner"
                   style="width: 100%;"
                   filterable
-                  class="select-from"
                   @visible-change="findBusinessPartners"
                 >
                   <el-option
@@ -45,25 +34,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     :key="item.id"
                     :label="item.label"
                     :value="item.id"
-                    popper-class="select-from"
                   />
                 </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item class="front-item-receipt">
-                <template slot="label" style="width: 450px;">
-                  {{ $t('form.expressReceipt.field.salesOrder') }}
-                  <br>
-                  <br>
-                </template>
+              <el-form-item :label="$t('form.expressShipment.field.salesOrder')" class="front-item-receipt">
                 <el-select
                   v-model="salesOrder"
                   placeholder="Please Select Purchase Order"
                   style="width: 100%;"
                   filterable
-                  clearable
-                  class="select-from"
                   @visible-change="findSalesOrder"
                   @change="selectSalesOrder"
                 >
@@ -72,7 +53,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     :key="item.id"
                     :label="item.label"
                     :value="item.id"
-                    class="select-from"
                   />
                 </el-select>
               </el-form-item>
@@ -84,11 +64,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               >
                 <template slot="label" style="width: 450px;">
                   {{ $t('form.expressReceipt.field.productcode') }}
-                  <p style="margin: 0px;">
-                    <el-checkbox v-model="isQuantityFromOrderLine">
-                      Cantidad Completa de la Linea
-                    </el-checkbox>
-                  </p>
+                  <el-checkbox v-model="isQuantityFromOrderLine" style="float: right;">
+                    Cantidad Completa de la Linea
+                  </el-checkbox>
                 </template>
                 <el-autocomplete
                   ref="searchValue"
@@ -130,8 +108,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         :border="true"
         fit
         highlight-current-row
-        style="min-height: 400px;"
-        class="table-form"
         @cell-click="editQuantity"
       >
         <el-table-column
@@ -179,48 +155,41 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             type="primary"
             icon="el-icon-check"
             class="button-base-icon"
-            style="float: right; margin-top: 10px;font-size: 28px;"
+            style="float: right; margin: 10px;"
             :disabled="isEmptyValue(salesOrder) || isComplete"
             @click="visible = true"
           />
           <el-button
             type="danger"
             icon="el-icon-close"
-            style="float: right; margin-top: 10px;font-size: 28px;"
+            style="float: right;margin-top: 10px;"
             class="button-base-icon"
             @click="closeForm"
           />
           <el-button
             type="info"
             plain
-            style="float: right; margin-top: 10px;font-size: 28px;"
+            style="float: right; margin-top: 10px;"
             class="button-base-icon"
             @click="clearForm"
           >
             <svg-icon icon-class="layers-clear" />
           </el-button>
-          <el-button
-            type="success"
-            class="button-base-icon"
-            icon="el-icon-refresh-right"
-            style="float: right; margin-top: 10px;font-size: 28px;"
-            @click="refreshLine"
-          />
         </el-col>
       </el-row>
     </el-card>
     <el-dialog
-      :title="$t('form.expressReceipt.title')"
+      :title="$t('form.pos.optionsPoinSales.salesOrder.confirmDelivery')"
       :visible.sync="visible"
     >
       <p class="total">
-        {{ $t('form.expressReceipt.modal.nrOrder') }}:
+        {{ $t('form.expressShipment.modal.nrOrder') }}:
         <b class="order-info">
           {{ currentOrder.document_no }}
         </b>
       </p>
       <p class="total">
-        {{ $t('form.expressReceipt.modal.nrShipments') }}:
+        {{ $t('form.expressShipment.modal.nrShipments') }}:
         <b class="order-info">
           {{ currentShipment.documentNo }}
         </b>
@@ -271,9 +240,9 @@ import router from '@/router'
 // Api Request Methods
 import {
   listOrders,
-  listBusinessPartnersReceipt
+  listBusinessPartnersShipment
   // Shipment
-} from '@/api/ADempiere/form/ExpressReceipt.js'
+} from '@/api/ADempiere/form/ExpressShipment.js'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
@@ -288,33 +257,32 @@ export default defineComponent({
    * Ref
    */
     const editQuantityField = ref(null)
-    const timeOut = ref(null)
+    const salesOrder = ref('')
     const currentBusinessPartners = ref('')
     const findProduct = ref('')
-    const salesOrder = ref('')
-    const quantity = ref(0)
     const isQuantityFromOrderLine = ref(false)
+    const timeOut = ref(null)
+    const listOrder = ref([])
+    const listBusinessPartners = ref([])
     const isLoadedServer = ref(false)
     const isEditQuantity = ref(false)
-    const isLoadingLine = ref(false)
+    const quantity = ref(0)
     const visible = ref(false)
-    const listBusinessPartners = ref([])
-    const listOrder = ref([])
     /**
-     * Computed
-     */
+   * Computed
+   */
     const listProdcut = computed(() => {
-      return store.getters.getListProductReceipt
+      return store.getters.getListProduct
     })
     const productdeliveryList = computed(() => {
-      return store.getters.getListReceipt
+      return store.getters.getListShipmentLines
     })
     const currentShipment = computed(() => {
-      return store.getters.getCurrentReceipt
+      return store.getters.getCurrentShipment
     })
     const isComplete = computed(() => {
-      const { isCompleted } = store.getters.getCurrentReceipt
-      if (!isEmptyValue(store.getters.getCurrentReceipt)) {
+      const { isCompleted } = store.getters.getCurrentShipment
+      if (!isEmptyValue(store.getters.getCurrentShipment)) {
         return isCompleted
       }
       return false
@@ -344,6 +312,7 @@ export default defineComponent({
     /**
      * Methods
      */
+
     function findSalesOrder(isFindOrder) {
       if (!isFindOrder) return
       listOrders({
@@ -372,7 +341,7 @@ export default defineComponent({
 
     function findBusinessPartners(isFindOrder) {
       if (!isFindOrder) return
-      listBusinessPartnersReceipt({
+      listBusinessPartnersShipment({
         searchValue: currentBusinessPartners.value
       })
         .then(response => {
@@ -396,22 +365,22 @@ export default defineComponent({
     }
 
     function selectSalesOrder(order) {
-      store.dispatch('createReceipt', {
+      store.dispatch('createShipment', {
         id: order
       })
       if (!isEmptyValue(refs.searchValue)) {
         refs.searchValue.suggestions = []
       }
-      store.commit('setListProductReceipt', [])
+      store.commit('setListProduct', [])
       findProduct.value = null
     }
 
     function querySearchAsync(queryString, callBack) {
       let results = listProdcut.value.filter(createFilter(queryString))
       if (isEmptyValue(results)) {
-        store.dispatch('findListProductReceipt', {
+        store.dispatch('findListProduct', {
           searchValue: queryString,
-          receiptId: salesOrder.value
+          shipmentId: salesOrder.value
         })
           .then(response => {
             results = response
@@ -484,12 +453,14 @@ export default defineComponent({
         }
       }, 500)
     }
+
     /**
      * Shipment Line
      */
+
     function createShipmentLine(product) {
-      store.dispatch('createLineReceipt', {
-        receiptId: 0,
+      store.dispatch('createLine', {
+        shipmentId: 0,
         productId: product.id,
         productUuid: product.uuid,
         isQuantityFromOrderLine: isQuantityFromOrderLine.value
@@ -502,7 +473,7 @@ export default defineComponent({
       quantity
     }) {
       isEditQuantity.value = false
-      store.dispatch('updateLineReceipt', {
+      store.dispatch('updateLine', {
         id,
         uuid,
         quantity
@@ -511,15 +482,17 @@ export default defineComponent({
 
     function deleteShipmentLine(line) {
       const { id, uuid } = line
-      store.dispatch('deleteLineReceipt', {
+      store.dispatch('deleteLine', {
         id,
         uuid,
         shipmentId: currentShipment.value.id
       })
     }
+
     /**
      * Action Panel Footer
      */
+
     function closeForm() {
       const currentRoute = router.app._route
       const tabViewsVisited = store.getters.visitedViews
@@ -537,25 +510,14 @@ export default defineComponent({
 
     function processShipment() {
       if (isEmptyValue(salesOrder.value)) return
-      store.dispatch('processReceipt')
+      store.dispatch('processShipment')
       visible.value = false
     }
 
-    function refreshLine() {
-      const { id, uuid } = store.getters.getCurrentReceipt
-      dispatch('listLineReceipt', {
-        receiptId: id,
-        receiptUuid: uuid
-      })
-    }
     /**
    * Watch
    */
-    watch(salesOrder, (newValue, oldValue) => {
-      if (!isEmptyValue(newValue) && newValue !== oldValue) {
-        findSalesOrder(true)
-      }
-    })
+
 
     return {
       editQuantityField,
@@ -574,7 +536,6 @@ export default defineComponent({
       quantityProduct,
       visible,
       isQuantityFromOrderLine,
-      isLoadingLine,
       // Methods
       findSalesOrder,
       findBusinessPartners,
@@ -590,18 +551,13 @@ export default defineComponent({
       // Action Panel Footer
       processShipment,
       closeForm,
-      clearForm,
-      refreshLine
+      clearForm
     }
   }
 })
 </script>
 
 <style scoped lang="scss">
-.el-form-item--medium .el-form-item__label {
-  width: 450px;
-}
-
 .front-item-receipt {
   width: 100%;
 }
@@ -613,34 +569,9 @@ export default defineComponent({
   }
 }
 </style>
-<style lang="scss">
-.field-from {
-  .el-form-item--medium .el-form-item__label {
-    line-height: 36px;
-    width: 450px;
-    font-size: 18px;
-  }
-}
-.select-from {
-  .el-select-dropdown__item {
-    padding: 0 20px;
-    position: relative;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #606266;
-    height: 34px;
-    line-height: 34px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 18px;
-  }
-}
-.table-form {
-  .el-table__header-wrapper {
-    font-size: 18px;
-  }
+<style>
+.el-form-item--medium .el-form-item__label {
+  line-height: 36px;
+  width: 450px;
 }
 </style>
-

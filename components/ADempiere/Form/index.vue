@@ -102,6 +102,9 @@ export default {
         case 'ExpressShipment':
           form = import('@theme/components/ADempiere/Form/ExpressShipment')
           break
+        case 'ExpressMovement':
+          form = import('@theme/components/ADempiere/Form/ExpressMovement')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
