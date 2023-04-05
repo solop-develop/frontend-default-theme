@@ -231,7 +231,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
@@ -517,7 +517,6 @@ export default defineComponent({
     /**
    * Watch
    */
-
 
     return {
       editQuantityField,

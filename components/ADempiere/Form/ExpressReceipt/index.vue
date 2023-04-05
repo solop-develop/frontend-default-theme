@@ -29,8 +29,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-form-item class="front-item-receipt">
                 <template slot="label" style="width: 450px;">
                   {{ $t('VBankStatementMatch.field.businessPartner') }}
-                  <br>
-                  <br>
+                  <!-- <br>
+                  <br> -->
                 </template>
                 <el-select
                   v-model="currentBusinessPartners"
@@ -54,8 +54,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-form-item class="front-item-receipt">
                 <template slot="label" style="width: 450px;">
                   {{ $t('form.expressReceipt.field.salesOrder') }}
-                  <br>
-                  <br>
+                  <!-- <br>
+                  <br> -->
                 </template>
                 <el-select
                   v-model="salesOrder"
@@ -84,11 +84,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               >
                 <template slot="label" style="width: 450px;">
                   {{ $t('form.expressReceipt.field.productcode') }}
-                  <p style="margin: 0px;">
+                  <!-- <p style="margin: 0px;">
                     <el-checkbox v-model="isQuantityFromOrderLine">
                       Cantidad Completa de la Linea
                     </el-checkbox>
-                  </p>
+                  </p> -->
                 </template>
                 <el-autocomplete
                   ref="searchValue"
@@ -115,6 +115,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </div>
                   </template>
                 </el-autocomplete>
+                <el-checkbox v-model="isQuantityFromOrderLine">
+                  {{ $t('form.pos.tableProduct.isQuantityFromOrderLine') }}
+                </el-checkbox>
               </el-form-item>
             </el-col>
           </el-row>
