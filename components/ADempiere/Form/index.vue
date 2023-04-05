@@ -89,6 +89,10 @@ export default {
         case 'org.compiere.apps.form.VPayPrint':
           form = import('@theme/components/ADempiere/Form/VPayPrint')
           break
+        case 'VBankStatementMatch':
+        case 'org.spin.apps.form.VBankStatementMatch':
+          form = import('@theme/components/ADempiere/Form/VBankStatementMatch')
+          break
         case 'Issues':
           form = import('@theme/components/ADempiere/Form/Issues')
           break
