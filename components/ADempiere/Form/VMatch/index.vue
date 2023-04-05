@@ -34,7 +34,8 @@
     >
       <search-criteria
         v-if="active === 0"
-        :metadata="fieldsList"
+        :fields-list="fieldsList"
+        :metadata="metadata"
       />
       <invoices
         v-if="active === 1"
@@ -188,7 +189,7 @@ export default {
     padding-right: 1%;
   }
   .from-footer {
-    height: 5% !important;
+    height: 10% !important;
     box-sizing: border-box;
     flex-shrink: 0;
   }

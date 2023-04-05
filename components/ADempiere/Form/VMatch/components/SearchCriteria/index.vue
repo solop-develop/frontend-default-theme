@@ -15,18 +15,27 @@
 -->
 <template>
   <el-form
-    v-if="!isEmptyValue(metadata)"
+    v-if="!isEmptyValue(listMetadata)"
     label-position="top"
     class="from-main"
     @submit.native.prevent="notSubmitForm"
   >
     <el-form-item>
       <el-row>
-        <el-col v-for="(field, index) in metadata" :key="index" :span="6">
+        <el-col v-for="(field, index) in listMetadata" :key="index" :span="6">
           <field-definition
-            :key="field.columnName"
+            :key="index"
+            :container-uuid="metadata.containerUuid"
             :metadata-field="field"
-            :v-model="field.value"
+            :container-manager="{
+              isDisplayedField,
+              generalInfoSearch,
+              searchTableHeader,
+              isMandatoryField,
+              isReadOnlyField,
+              isDisplayedDefault,
+              getSearchInfoList
+            }"
           />
         </el-col>
       </el-row>
@@ -34,10 +43,16 @@
   </el-form>
 </template>
 
-<script>
-import FieldDefinition from '@theme/components/ADempiere/FieldDefinition'
+<script lang="ts">
+import { defineComponent, computed } from '@vue/composition-api'
+import store from '@/store'
+// Components
+import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
+// Function
+import { isEmptyValue } from '@/utils/ADempiere'
+import { isHiddenField } from '@/utils/ADempiere/references'
 
-export default {
+export default defineComponent({
   name: 'SearchCriteria',
 
   components: {
@@ -45,11 +60,112 @@ export default {
   },
 
   props: {
-    metadata: {
+    fieldsList: {
       type: Array,
       required: true,
       default: () => []
+    },
+    metadata: {
+      type: Object,
+      default: () => {
+        return {
+          uuid: 'V-Match',
+          containerUuid: 'V-Match'
+        }
+      }
+    }
+  },
+  setup(props, { root }) {
+    /**
+    * Computed
+    */
+
+    const listMetadata = computed(() => {
+      return props.fieldsList
+    })
+    /**
+     * Methods
+     */
+
+    function isMandatoryField({ isMandatory, isMandatoryFromLogic }) {
+      return isMandatory || isMandatoryFromLogic
+    }
+
+    function isDisplayedDefault({ isMandatory }) {
+      return true
+    }
+
+    function isDisplayedField({ displayType, isActive, isDisplayed }) {
+      // button field not showed
+      if (isHiddenField(displayType)) {
+        return false
+      }
+      // verify if field is active
+      return isActive && isDisplayed
+    }
+
+    function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
+      return isQueryCriteria && isReadOnlyFromLogic
+    }
+
+    function generalInfoSearch({
+      containerUuid,
+      contextColumnNames,
+      filters,
+      uuid,
+      searchValue,
+      tableName,
+      columnName,
+      pageNumber
+    }) {
+      return store.dispatch('findGeneralInfo', {
+        containerUuid,
+        contextColumnNames,
+        filters,
+        // fieldUuid: uuid,
+        searchValue,
+        tableName,
+        columnName,
+        pageNumber
+      })
+    }
+
+    function searchTableHeader({
+      containerUuid,
+      tableName
+    }) {
+      return store.dispatch('searchTableHeader', {
+        containerUuid,
+        tableName
+      })
+    }
+
+    function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
+      return store.dispatch('searchInfoList', {
+        parentUuid,
+        containerUuid,
+        contextColumnNames,
+        fieldUuid: uuid,
+        tableName,
+        columnName,
+        filters,
+        searchValue,
+        pageNumber,
+        pageSize
+      })
+    }
+
+    return {
+      listMetadata,
+      isDisplayedField,
+      generalInfoSearch,
+      searchTableHeader,
+      isMandatoryField,
+      isReadOnlyField,
+      isDisplayedDefault,
+      getSearchInfoList,
+      isEmptyValue
     }
   }
-}
+})
 </script>
