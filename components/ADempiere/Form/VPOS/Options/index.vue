@@ -343,7 +343,7 @@
                 >
                   <svg-icon icon-class="shopping" />
                   <br>
-                  {{ $t('form.pos.optionsPoinSales.salesOrder.deliverAllProducts') }} {{ 1651651 }}
+                  {{ $t('form.pos.optionsPoinSales.salesOrder.deliverAllProducts') }}
                 </div>
               </el-popover>
             </el-card>
@@ -535,6 +535,18 @@
               </p>
             </el-card>
           </el-col>
+          <el-col v-if="currentPointOfSales.isPosManager" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <p
+                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
+                @click="isMnemonicCommand = !isMnemonicCommand"
+              >
+                <svg-icon icon-class="keyboard" />
+                <br>
+                {{ $t('form.mnemonicCommand.title') }}
+              </p>
+            </el-card>
+          </el-col>
         </el-row>
       </el-collapse-item>
 
@@ -582,6 +594,16 @@
     </el-dialog>
 
     <el-dialog
+      :title="$t('form.mnemonicCommand.title')"
+      :visible.sync="isMnemonicCommand"
+      close-on-press-escape
+      width="70%"
+      center
+      class="dialogo-seller"
+    >
+      <mnemonic-command />
+    </el-dialog>
+    <el-dialog
       v-shortkey="isComputedRender ? {close: ['esc'], enter: ['enter']} : {}"
       :title="$t(isLabelPanel)"
       :visible.sync="isComputedRender"
@@ -624,6 +646,7 @@ import CashWithdrawal from './Cashwithdrawal'
 import DiscountOrder from './DiscountOrder'
 import AssignSeller from './AssignSeller'
 import SalesDiscountOff from './SalesDiscountOff'
+import MnemonicCommand from './MnemonicCommand'
 import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
 import TableTimeControl from '@theme/components/ADempiere/Form/TimeControl/table.vue'
@@ -664,7 +687,8 @@ export default {
     SalesDiscountOff,
     DiscountOrder,
     OrdersList,
-    TableTimeControl
+    TableTimeControl,
+    MnemonicCommand
   },
 
   mixins: [
@@ -697,7 +721,8 @@ export default {
       messageReverseSales: '',
       showConfirmDelivery: false,
       isShowResource: false,
-      isLoadingPin: false
+      isLoadingPin: false,
+      isMnemonicCommand: false
     }
   },
 
