@@ -543,7 +543,7 @@ export default defineComponent({
 
     function refreshLine() {
       const { id, uuid } = store.getters.getCurrentReceipt
-      dispatch('listLineReceipt', {
+      store.dispatch('listLineReceipt', {
         receiptId: id,
         receiptUuid: uuid
       })
