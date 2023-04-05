@@ -20,7 +20,25 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       <div slot="header" class="clearfix-express-receipt">
         <el-form ref="form-express-receipt" inline label-position="top">
           <el-row :gutter="20">
-            <el-col :span="12">
+            <el-col :span="8">
+              <el-form-item :label="$t('VBankStatementMatch.field.businessPartner')" class="front-item-receipt">
+                <el-select
+                  v-model="currentBusinessPartners"
+                  placeholder="Please Select Business Partner"
+                  style="width: 100%;"
+                  filterable
+                  @visible-change="findBusinessPartners"
+                >
+                  <el-option
+                    v-for="item in listBusinessPartners"
+                    :key="item.id"
+                    :label="item.label"
+                    :value="item.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item :label="$t('form.expressShipment.field.salesOrder')" class="front-item-receipt">
                 <el-select
                   v-model="salesOrder"
@@ -39,8 +57,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col v-if="!isEmptyValue(salesOrder)" :span="12">
-              <el-form-item :label="$t('form.expressShipment.field.productcode')" class="front-item-receipt">
+            <el-col v-if="!isEmptyValue(salesOrder)" :span="8">
+              <el-form-item
+                class="front-item-receipt"
+                style="width: 450px;"
+              >
+                <template slot="label" style="width: 450px;">
+                  {{ $t('form.expressReceipt.field.productcode') }}
+                  <el-checkbox v-model="isQuantityFromOrderLine" style="float: right;">
+                    Cantidad Completa de la Linea
+                  </el-checkbox>
+                </template>
                 <el-autocomplete
                   ref="searchValue"
                   v-model="findProduct"
@@ -212,13 +239,15 @@ import router from '@/router'
 
 // Api Request Methods
 import {
-  listOrders
+  listOrders,
+  listBusinessPartnersShipment
   // Shipment
 } from '@/api/ADempiere/form/ExpressShipment.js'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
+import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'ExpressShipment',
@@ -229,9 +258,12 @@ export default defineComponent({
    */
     const editQuantityField = ref(null)
     const salesOrder = ref('')
+    const currentBusinessPartners = ref('')
     const findProduct = ref('')
+    const isQuantityFromOrderLine = ref(false)
     const timeOut = ref(null)
     const listOrder = ref([])
+    const listBusinessPartners = ref([])
     const isLoadedServer = ref(false)
     const isEditQuantity = ref(false)
     const quantity = ref(0)
@@ -284,15 +316,41 @@ export default defineComponent({
     function findSalesOrder(isFindOrder) {
       if (!isFindOrder) return
       listOrders({
-        searchValue: salesOrder.value
+        searchValue: salesOrder.value,
+        businessPartnerId: currentBusinessPartners.value
       })
         .then(response => {
           const { records } = response
           listOrder.value = records.map(order => {
-            const { id, uuid, document_no } = order
+            const { id, uuid, document_no, date_ordered } = order
             return {
               id,
-              label: document_no,
+              label: document_no + '_' + dateTimeFormats(date_ordered, 'YYYY-MM-DD \ HH:MM:SS'),
+              document_no,
+              uuid
+            }
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+    }
+
+    function findBusinessPartners(isFindOrder) {
+      if (!isFindOrder) return
+      listBusinessPartnersShipment({
+        searchValue: currentBusinessPartners.value
+      })
+        .then(response => {
+          const { records } = response
+          listBusinessPartners.value = records.map(order => {
+            const { id, uuid, document_no, name } = order
+            return {
+              id,
+              label: name,
               document_no,
               uuid
             }
@@ -404,7 +462,8 @@ export default defineComponent({
       store.dispatch('createLine', {
         shipmentId: 0,
         productId: product.id,
-        productUuid: product.uuid
+        productUuid: product.uuid,
+        isQuantityFromOrderLine: isQuantityFromOrderLine.value
       })
     }
 
@@ -468,6 +527,8 @@ export default defineComponent({
       editQuantityField,
       salesOrder,
       listOrder,
+      currentBusinessPartners,
+      listBusinessPartners,
       findProduct,
       productdeliveryList,
       isLoadedServer,
@@ -478,8 +539,10 @@ export default defineComponent({
       currentShipment,
       quantityProduct,
       visible,
+      isQuantityFromOrderLine,
       // Methods
       findSalesOrder,
+      findBusinessPartners,
       selectSalesOrder,
       handleSelect,
       createFilter,
@@ -508,5 +571,11 @@ export default defineComponent({
       text-align-last: end !important;
     }
   }
+}
+</style>
+<style>
+.el-form-item--medium .el-form-item__label {
+  line-height: 36px;
+  width: 450px;
 }
 </style>
