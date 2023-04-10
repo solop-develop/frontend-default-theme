@@ -135,6 +135,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         </el-collapse-item>
       </el-collapse>
     </el-card>
+    <!-- Add New Command or Modify Dialog -->
     <el-dialog
       :title="$t('form.mnemonicCommand.title')"
       :visible.sync="isAddComand"
@@ -148,7 +149,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-form-item :label="$t('form.mnemonicCommand.addKeyboardShortcuts')">
           <el-input
             v-model="inputCommand"
-            v-shortkey="{f1: ['ctrl', 'f1'], f2: ['ctrl', 'f2'], f3: ['ctrl', 'f3'], f4: ['ctrl', 'f4'], f5: ['ctrl', 'f5'], F6: ['ctrl', 'f6'], f7: ['ctrl', 'f7'], f8: ['ctrl', 'f8'], f9: ['ctrl', 'f9'], f10: ['ctrl', 'f10'], f11: ['ctrl', 'f11'], f12: ['ctrl', 'f12']}"
+            v-shortkey="keyListCommant"
             readonly
             style="font-size: 20px;"
             @shortkey.native="theActionCommand"
@@ -182,6 +183,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         </el-row>
       </div>
       <br>
+      <!-- Foot actions button panel -->
       <el-button
         type="primary"
         icon="el-icon-check"
@@ -210,19 +212,16 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
+import store from '@/store'
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
+// Constants
 import keyList from './keyList'
 import salesOrder from './salesOrder'
 import cashManagement from './cashManagement'
 import generalOptions from './generalOptions'
-import store from '@/store'
-import { defineComponent, ref, watch } from '@vue/composition-api'
+import keyListCommant from './keyListCommant'
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
-import {
-  deleteCommandShortcut,
-  saveCommandShortcut,
-  listCommandShortcut
-} from '@/api/ADempiere/form/CommandShortcut'
-import { showMessage } from '@/utils/ADempiere/notification'
 export default defineComponent({
   name: 'MnemonicCommand',
   setup() {
@@ -233,18 +232,26 @@ export default defineComponent({
     /**
      * Ref
      */
+    const isPersistenceComand = ref(false)
     const liveKeinputCommandy = ref('')
+    const currentCommandSend = ref('')
     const setCommandSelect = ref({})
     const isAddComand = ref(false)
-    const isPersistenceComand = ref(false)
     const inputCommand = ref('')
     const liveKey = ref('')
     const deatKey = ref('')
-    const currentCommandSend = ref('')
-    const listOption = ({
-      salesOrder,
-      cashManagement,
-      generalOptions
+    /**
+     * Computed
+     */
+    const listOption = computed(() => {
+      return {
+        salesOrder,
+        cashManagement,
+        generalOptions
+      }
+    })
+    const lisCommantShortkey = computed(() => {
+      return store.getters.getLisCommantShortkey
     })
     /**
      * Methods
@@ -256,23 +263,14 @@ export default defineComponent({
     }
 
     function saveCommand() {
-      saveCommandShortcut({
-        posUuid: store.getters.posAttributes.currentPointOfSales.uuid,
+      store.dispatch('saveCommand', {
         command: currentCommandSend.value,
         shortcut: inputCommand.value
       })
-        .then(response => {
-          showMessage({
-            message: 'OK',
-            type: 'success'
-          })
+        .then(() => {
           isAddComand.value = false
         })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'error'
-          })
+        .catch(() => {
           isAddComand.value = false
         })
     }
@@ -280,8 +278,7 @@ export default defineComponent({
     function findCommand(command) {
       currentCommandSend.value = command
       isAddComand.value = !isAddComand.value
-      listCommandShortcut({
-        posUuid: store.getters.posAttributes.currentPointOfSales.uuid,
+      store.dispatch('listCommand', {
         searchValue: command
       })
         .then(response => {
@@ -292,36 +289,26 @@ export default defineComponent({
             inputCommand.value = setCommandSelect.value.shortcut
             return
           }
-          inputCommand.value = ''
-        })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'error'
-          })
         })
     }
 
-    function deleteCommand(params) {
-      deleteCommandShortcut({
-        posUuid: store.getters.posAttributes.currentPointOfSales.uuid,
+    function deleteCommand() {
+      store.dispatch('removeCommand', {
         id: setCommandSelect.value.id
       })
-        .then(response => {
-          showMessage({
-            message: response,
-            type: 'success'
-          })
+        .then(() => {
           isAddComand.value = false
         })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'error'
-          })
+        .catch(() => {
           isAddComand.value = false
         })
     }
+
+    /**
+     * Watch - watch works directly on a ref
+     * @param newValue - New Assessed Property value
+     * @param oldValue - Old Assessed Property value
+     */
 
     watch(isAddComand, (newValue, oldValue) => {
       if (!newValue) {
@@ -331,10 +318,11 @@ export default defineComponent({
 
     return {
       // Import
-      keyList,
-      salesOrder,
       cashManagement,
       generalOptions,
+      keyListCommant,
+      salesOrder,
+      keyList,
       // Const
       collapseOption,
       // Ref
@@ -344,9 +332,11 @@ export default defineComponent({
       setCommandSelect,
       inputCommand,
       isAddComand,
-      listOption,
       liveKey,
       deatKey,
+      // Computed
+      lisCommantShortkey,
+      listOption,
       // Methods
       theActionCommand,
       deleteCommand,

@@ -14,49 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-export default [
-  {
-    key: 'Control',
-    shortkeyName: 'ctrl'
-  },
-  {
-    key: 'F1',
-    shortkeyName: 'f1'
-  },
-  {
-    key: 'F2',
-    shortkeyName: 'f2'
-  },
-  {
-    key: 'F3',
-    shortkeyName: 'f3'
-  },
-  {
-    key: 'F6',
-    shortkeyName: 'f6'
-  },
-  {
-    key: 'F7',
-    shortkeyName: 'f7'
-  },
-  {
-    key: 'F8',
-    shortkeyName: 'f8'
-  },
-  {
-    key: 'F9',
-    shortkeyName: 'f9'
-  },
-  {
-    key: 'F10',
-    shortkeyName: 'f10'
-  },
-  {
-    key: 'F11',
-    shortkeyName: 'f11'
-  },
-  {
-    key: 'F12',
-    shortkeyName: 'f12'
-  }
-]
+export default {
+  f1: ['ctrl', 'f1'],
+  f2: ['ctrl', 'f2'],
+  f3: ['ctrl', 'f3'],
+  f4: ['ctrl', 'f4'],
+  f5: ['ctrl', 'f5'],
+  F6: ['ctrl', 'f6'],
+  f7: ['ctrl', 'f7'],
+  f8: ['ctrl', 'f8'],
+  f9: ['ctrl', 'f9'],
+  f10: ['ctrl', 'f10'],
+  f11: ['ctrl', 'f11'],
+  f12: ['ctrl', 'f12']
+}
