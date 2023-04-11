@@ -43,6 +43,10 @@
         <SplitArea :size="isShowedPOSOptions ? 80 : 99" :min-size="990">
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
             <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: auto">
+              <component-dialgo
+                v-if="!isEmptyValue(listShortkey)"
+                :metadata="metadata"
+              />
               <order
                 v-shortkey="listShortkey"
                 :metadata="metadata"
@@ -82,7 +86,8 @@ import Order from '@theme/components/ADempiere/Form/VPOS/Order'
 import KeyLayout from '@theme/components/ADempiere/Form/VPOS/KeyLayout'
 import Options from '@theme/components/ADempiere/Form/VPOS/Options'
 import Collection from '@theme/components/ADempiere/Form/VPOS/Collection'
-import { selectCommand } from '../Options/MnemonicCommand/mnemonicCommandAction.ts'
+import { selectCommand } from '../Options/MnemonicCommand/mnemonicCommandAction.js'
+import ComponentDialgo from '../Options/MnemonicCommand/component.vue'
 
 export default {
   name: 'VposDesktop',
@@ -90,7 +95,8 @@ export default {
     Order,
     KeyLayout,
     Options,
-    Collection
+    Collection,
+    ComponentDialgo
   },
   props: {
     metadata: {
@@ -145,9 +151,10 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch('listCommand')
     // load pont of sales list
+    this.$store.dispatch('listCommand')
     if (this.isEmptyValue(this.listPointOfSales)) {
+      // this.$store.dispatch('listCommand')
       // set pos id with query path
       this.$store.dispatch('listPointOfSalesFromServer', this.$route.query.pos)
     }
@@ -168,6 +175,7 @@ export default {
     },
     posListWithOrganization() {
       return this.$store.subscribe((mutation, state) => {
+        // this.$store.dispatch('listCommand')
         if (mutation.type === 'user/SET_ORGANIZATION') {
           this.$store.dispatch('listPointOfSalesFromServer')
         }

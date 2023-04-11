@@ -548,6 +548,7 @@ export default {
       this.clear()
     },
     clear() {
+      this.$store.commit('setDialogoComponent', false)
       this.$store.commit('showListOrders', false)
     },
     subscribeChanges() {

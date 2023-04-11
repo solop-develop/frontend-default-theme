@@ -650,7 +650,7 @@ import MnemonicCommand from './MnemonicCommand'
 import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
 import TableTimeControl from '@theme/components/ADempiere/Form/TimeControl/table.vue'
-
+import ComponentDialgo from '@theme/components/ADempiere/Form/VPOS/Options/MnemonicCommand/component.vue'
 // API Request Methods
 import {
   generateImmediateInvoice,
@@ -688,7 +688,8 @@ export default {
     DiscountOrder,
     OrdersList,
     TableTimeControl,
-    MnemonicCommand
+    MnemonicCommand,
+    ComponentDialgo
   },
 
   mixins: [
