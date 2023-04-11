@@ -259,7 +259,7 @@ export default defineComponent({
     function theActionCommand(event) {
       if (isEmptyValue(event)) return
       const { srcKey } = event
-      inputCommand.value = 'Ctrl +' + srcKey
+      inputCommand.value = 'ctrl + ' + srcKey
     }
 
     function saveCommand() {
@@ -278,11 +278,13 @@ export default defineComponent({
     function findCommand(command) {
       currentCommandSend.value = command
       isAddComand.value = !isAddComand.value
-      store.dispatch('listCommand', {
-        searchValue: command
-      })
+      store.dispatch('listCommand', command)
         .then(response => {
           const { records } = response
+          console.log({
+            records,
+            command
+          })
           setCommandSelect.value = records.find(list => list.command === command)
           if (!isEmptyValue(setCommandSelect.value)) {
             isPersistenceComand.value = true

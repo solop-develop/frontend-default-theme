@@ -44,7 +44,9 @@
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
             <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: auto">
               <order
+                v-shortkey="listShortkey"
                 :metadata="metadata"
+                @shortkey.native="actionShortkey"
               />
             </SplitArea>
             <el-drawer
@@ -80,6 +82,7 @@ import Order from '@theme/components/ADempiere/Form/VPOS/Order'
 import KeyLayout from '@theme/components/ADempiere/Form/VPOS/KeyLayout'
 import Options from '@theme/components/ADempiere/Form/VPOS/Options'
 import Collection from '@theme/components/ADempiere/Form/VPOS/Collection'
+import { selectCommand } from '../Options/MnemonicCommand/mnemonicCommandAction.ts'
 
 export default {
   name: 'VposDesktop',
@@ -118,6 +121,16 @@ export default {
     },
     listPointOfSales() {
       return this.$store.getters.posAttributes.pointOfSalesList
+    },
+    listShortkey() {
+      const list = this.$store.getters.getLisCommantShortkey
+      const command = {}
+      list.forEach(element => {
+        const { shortcut } = element
+        const option = shortcut.split(' ')
+        command[option[2]] = [option[0], option[2]]
+      })
+      return command
     }
   },
   watch: {
@@ -132,6 +145,7 @@ export default {
     }
   },
   created() {
+    this.$store.dispatch('listCommand')
     // load pont of sales list
     if (this.isEmptyValue(this.listPointOfSales)) {
       // set pos id with query path
@@ -146,6 +160,11 @@ export default {
   methods: {
     handleClose() {
       this.$store.commit('setShowPOSCollection', false)
+    },
+    actionShortkey(event) {
+      if (this.isEmptyValue(event)) return
+      const { srcKey } = event
+      selectCommand(srcKey)
     },
     posListWithOrganization() {
       return this.$store.subscribe((mutation, state) => {
