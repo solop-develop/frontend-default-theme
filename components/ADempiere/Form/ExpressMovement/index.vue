@@ -69,8 +69,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-col>
             <el-col :span="9">
               <el-form-item
-              :label="$t('form.expressMovement.field.warehouseTo')"
-              class="front-item-receipt"
+                :label="$t('form.expressMovement.field.warehouseTo')"
+                class="front-item-receipt"
               >
                 <el-select
                   v-model="warehouseDestination"
