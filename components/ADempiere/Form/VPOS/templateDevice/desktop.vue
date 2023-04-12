@@ -43,8 +43,14 @@
         <SplitArea :size="isShowedPOSOptions ? 80 : 99" :min-size="990">
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
             <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: auto">
-              <order
+              <component-dialgo
+                v-if="!isEmptyValue(listShortkey)"
                 :metadata="metadata"
+              />
+              <order
+                v-shortkey="listShortkey"
+                :metadata="metadata"
+                @shortkey.native="actionShortkey"
               />
             </SplitArea>
             <el-drawer
@@ -80,6 +86,8 @@ import Order from '@theme/components/ADempiere/Form/VPOS/Order'
 import KeyLayout from '@theme/components/ADempiere/Form/VPOS/KeyLayout'
 import Options from '@theme/components/ADempiere/Form/VPOS/Options'
 import Collection from '@theme/components/ADempiere/Form/VPOS/Collection'
+import { selectCommand } from '../Options/MnemonicCommand/mnemonicCommandAction.js'
+import ComponentDialgo from '../Options/MnemonicCommand/component.vue'
 
 export default {
   name: 'VposDesktop',
@@ -87,7 +95,8 @@ export default {
     Order,
     KeyLayout,
     Options,
-    Collection
+    Collection,
+    ComponentDialgo
   },
   props: {
     metadata: {
@@ -118,6 +127,16 @@ export default {
     },
     listPointOfSales() {
       return this.$store.getters.posAttributes.pointOfSalesList
+    },
+    listShortkey() {
+      const list = this.$store.getters.getLisCommantShortkey
+      const command = {}
+      list.forEach(element => {
+        const { shortcut } = element
+        const option = shortcut.split(' ')
+        command[option[2]] = [option[0], option[2]]
+      })
+      return command
     }
   },
   watch: {
@@ -133,7 +152,9 @@ export default {
   },
   created() {
     // load pont of sales list
+    this.$store.dispatch('listCommand')
     if (this.isEmptyValue(this.listPointOfSales)) {
+      // this.$store.dispatch('listCommand')
       // set pos id with query path
       this.$store.dispatch('listPointOfSalesFromServer', this.$route.query.pos)
     }
@@ -147,8 +168,14 @@ export default {
     handleClose() {
       this.$store.commit('setShowPOSCollection', false)
     },
+    actionShortkey(event) {
+      if (this.isEmptyValue(event)) return
+      const { srcKey } = event
+      selectCommand(srcKey)
+    },
     posListWithOrganization() {
       return this.$store.subscribe((mutation, state) => {
+        // this.$store.dispatch('listCommand')
         if (mutation.type === 'user/SET_ORGANIZATION') {
           this.$store.dispatch('listPointOfSalesFromServer')
         }
