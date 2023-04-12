@@ -111,7 +111,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   </template>
                 </el-autocomplete>
                 <el-checkbox v-model="isQuantityFromOrderLine">
-                  {{ $t('form.pos.tableProduct.isQuantityFromOrderLine') }}
+                  {{ $t('form.expressReceipt.field.isQuantityFromOrderLine') }}
                 </el-checkbox>
               </el-form-item>
             </el-col>
