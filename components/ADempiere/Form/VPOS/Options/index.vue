@@ -209,7 +209,7 @@
                 >
                   <i class="el-icon-error" />
                   <br>
-                  {{ $t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction') }} {{ 55 }}
+                  {{ $t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction') }}
                 </el-button>
               </el-popover>
             </el-card>
