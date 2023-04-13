@@ -18,13 +18,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
   <div class="main-express-receipt">
     <el-card class="box-card">
       <div slot="header" class="clearfix-express-receipt">
-        <el-form ref="form-express-receipt" inline label-position="top">
+        <el-form ref="form-express-receipt" class="field-from" inline label-position="top">
           <el-row :gutter="20">
             <el-col v-if="!isEmptyValue(currentMovement)" :span="3">
-              <el-form-item
-                :label="$t('form.expressMovement.field.documentNo')"
-                class="front-item-receipt"
-              >
+              <el-form-item class="front-item-receipt">
+                <template slot="label" style="width: 450px;">
+                  {{ $t('form.expressMovement.field.documentNo') }}
+                </template>
                 <b>
                   <el-tag style="width: 100%;font-size: 16px;">
                     <i class="el-icon-tickets" />
@@ -69,9 +69,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-col>
             <el-col :span="9">
               <el-form-item
-                :label="$t('form.expressMovement.field.warehouseTo')"
                 class="front-item-receipt"
               >
+                <template slot="label" style="width: 450px;">
+                  {{ $t('form.expressMovement.field.warehouseTo') }}
+                </template>
                 <el-select
                   v-model="warehouseDestination"
                   placeholder="Please Select Warehouse Destination"
@@ -592,6 +594,7 @@ export default defineComponent({
   }
 })
 </script>
+
 <style scoped lang="scss">
 .el-form-item--medium .el-form-item__label {
   width: 450px;
@@ -612,7 +615,7 @@ export default defineComponent({
 .field-from {
   .el-form-item--medium .el-form-item__label {
     line-height: 36px;
-    // width: 450px;
+    width: 450px;
     font-size: 18px;
   }
 }
@@ -635,6 +638,7 @@ export default defineComponent({
 .table-form {
   .el-table__header-wrapper {
     font-size: 18px;
+    line-height: 22px;
   }
 }
 </style>

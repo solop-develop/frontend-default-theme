@@ -283,7 +283,7 @@ export default {
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
         pin,
-        requestedAmount: value,
+        requestedAmount: (typeof value === 'number') ? value : '',
         requestedAccess
       })
         .then(response => {
