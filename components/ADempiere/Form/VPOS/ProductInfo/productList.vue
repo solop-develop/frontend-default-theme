@@ -341,6 +341,7 @@ export default {
       //   isShowed: false
       // })
       this.showProductList = false
+      this.$store.commit('setDialogoComponent', false)
     },
     addProductFromList() {
       if (!this.isSelectable) {

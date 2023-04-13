@@ -20,7 +20,7 @@ export default {
   f3: ['ctrl', 'f3'],
   f4: ['ctrl', 'f4'],
   f5: ['ctrl', 'f5'],
-  F6: ['ctrl', 'f6'],
+  f6: ['ctrl', 'f6'],
   f7: ['ctrl', 'f7'],
   f8: ['ctrl', 'f8'],
   f9: ['ctrl', 'f9'],

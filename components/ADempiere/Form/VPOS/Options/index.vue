@@ -158,7 +158,6 @@
                 v-model="visibleReverse"
                 placement="top"
                 width="450"
-                :disabled="!isProcessed"
               >
                 <el-row v-if="!isLoadingReverse" :gutter="24" class="container-reverse">
                   <el-col :span="24" class="container-reverse">
@@ -189,7 +188,7 @@
                         type="primary"
                         style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
                         icon="el-icon-check"
-                        @click="adviserPin ? validateOption($t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction')) : reverseSalesTransaction()"
+                        @click="reverseSalesTransaction()"
                       />
                     </samp>
                   </el-col>
@@ -210,7 +209,7 @@
                 >
                   <i class="el-icon-error" />
                   <br>
-                  {{ $t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction') }}
+                  {{ $t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction') }} {{ 55 }}
                 </el-button>
               </el-popover>
             </el-card>
@@ -350,7 +349,7 @@
           </el-col>
 
           <!-- applyDiscountOnOrder -->
-          <el-col v-if="isAllowsModifyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
                 v-model="showCount"
@@ -382,7 +381,6 @@
                 <el-button
                   slot="reference"
                   type="text"
-                  :disabled="isOptionPopoverDiscuent"
                   :class="classOptionPopoverDiscuent"
                 >
                   <i class="el-icon-document-remove" />
@@ -722,8 +720,8 @@ export default {
       messageReverseSales: '',
       showConfirmDelivery: false,
       isShowResource: false,
-      isLoadingPin: false,
-      isMnemonicCommand: false
+      isLoadingPin: false
+      // isMnemonicCommand: false
     }
   },
 
@@ -737,6 +735,14 @@ export default {
       },
       set(val) {
         this.$store.commit('setShowPOSOptions', val)
+      }
+    },
+    isMnemonicCommand: {
+      get() {
+        return this.$store.getters.getModifyCommand
+      },
+      set(val) {
+        this.$store.commit('setModifyCommand', val)
       }
     },
     isComputedRender: {

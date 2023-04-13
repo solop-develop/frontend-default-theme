@@ -29,6 +29,10 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   >
     <component
       :is="isComponentRender"
+      :is-selectable="false"
+      :is-visible="deliverAllProducts"
+      :is-complete-products="isCompleteProducts"
+      popover-name="isShowPopoverMenu"
       style="max-height: 100%;"
     />
   </el-dialog>
@@ -37,7 +41,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 <script>
 import store from '@/store'
 import lang from '@/lang'
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 export default defineComponent({
   name: 'ComponentDialgo',
   props: {
@@ -48,6 +52,10 @@ export default defineComponent({
   },
   setup() {
     /**
+     * Ref
+     */
+    const isCompleteProducts = ref(false)
+    /**
      * Computed
      */
     const isDialogoComponent = computed({
@@ -55,7 +63,6 @@ export default defineComponent({
         return store.getters.getDialogoComponent
       },
       set(value) {
-        console.log({ value })
         store.commit('setDialogoComponent', value)
       }
     })
@@ -72,10 +79,36 @@ export default defineComponent({
         case 'addResource':
           component = () => import('@theme/components/ADempiere/Form/TimeControl/table.vue')
           break
+        case 'cancelSaleTransaction':
+          component = () => import('@theme/components/ADempiere/Form/VPOS/Options/reverseSalesTransaction/index.vue')
+          break
+        case 'confirmDelivery':
+          isCompleteProducts.value = false
+          component = () => import('@theme/components/ADempiere/Form/VPOS/ConfirmDelivery')
+          break
+        case 'deliverAllProducts':
+          isCompleteProducts.value = true
+          component = () => import('@theme/components/ADempiere/Form/VPOS/ConfirmDelivery')
+          break
+        case 'applyDiscountOnOrder':
+          isCompleteProducts.value = true
+          component = () => import('@theme/components/ADempiere/Form/VPOS/Options/applyDiscount/index.vue')
+          break
+        case 'changePos':
+          component = () => import('@theme/components/ADempiere/Form/VPOS/Options/listGeneralOptions/index.vue')
+          break
+        case 'listProducts':
+          component = () => import('@theme/components/ADempiere/Form/VPOS/ProductInfo/productList')
+          break
+        case 'changeWarehouseList':
+          component = () => import('@theme/components/ADempiere/Form/VPOS/Options/listGeneralOptions/index.vue')
+          break
+        case 'changePriceList':
+          component = () => import('@theme/components/ADempiere/Form/VPOS/Options/listGeneralOptions/index.vue')
+          break
       }
       return component
     })
-
     const isComponentTitle = computed(() => {
       let component
       switch (currentCommand.value.command) {
@@ -85,12 +118,37 @@ export default defineComponent({
         case 'addResource':
           component = lang.t('timeControl.addResource')
           break
+        case 'cancelSaleTransaction':
+          component = lang.t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction')
+          break
+        case 'applyDiscountOnOrder':
+          component = lang.t('form.pos.salesDiscountOff')
+          break
+        case 'changePos':
+          component = lang.t('form.pos.optionsPoinSales.generalOptions.changePos')
+          break
+        case 'listProducts':
+          component = lang.t('form.pos.optionsPoinSales.generalOptions.listProducts')
+          break
+        case 'changeWarehouseList':
+          component = lang.t('form.pos.optionsPoinSales.generalOptions.changeWarehouseList')
+          break
+        case 'changePriceList':
+          component = lang.t('form.pos.optionsPoinSales.generalOptions.changePriceList')
+          break
       }
       return component
     })
 
+    const deliverAllProducts = computed(() => {
+      return store.getters.getDeliverAllProducts
+    })
+
     return {
+      // Ref
+      isCompleteProducts,
       // Computed
+      deliverAllProducts,
       isDialogoComponent,
       currentCommand,
       isComponentRender,

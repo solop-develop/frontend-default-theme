@@ -110,12 +110,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   </template>
 
                   <template slot-scope="props">
-                    <div class="header" style="margin: 0px">
+                    <div class="header" style="margin: 0px;">
                       <b> {{ props.item.value }} - {{ props.item.name }} </b>
                     </div>
                   </template>
                 </el-autocomplete>
-                <el-checkbox v-model="isQuantityFromOrderLine">
+                <el-checkbox v-model="isQuantityFromOrderLine" class="add-qauntity">
                   {{ $t('form.expressReceipt.field.isQuantityFromOrderLine') }}
                 </el-checkbox>
               </el-form-item>
@@ -643,6 +643,15 @@ export default defineComponent({
 .table-form {
   .el-table__header-wrapper {
     font-size: 18px;
+    line-height: 22px;
+  }
+}
+.add-qauntity {
+  .el-checkbox__label {
+    display: inline-block;
+    padding-left: 10px;
+    line-height: 19px;
+    font-size: 16px;
   }
 }
 </style>

@@ -24,6 +24,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           <el-row :gutter="12" style="padding-right: 10px;">
             <el-col
               v-for="(option, key) in listOption.salesOrder"
+              v-show="option.visible"
               :key="key"
               :span="6"
               style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;"
@@ -46,6 +47,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-collapse-item :title="$t('form.pos.optionsPoinSales.cashManagement.title')" name="2">
           <el-col
             v-for="(option, key) in listOption.cashManagement"
+            v-show="option.visible"
             :key="key"
             :span="6"
             style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;"
@@ -166,9 +168,9 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-row :gutter="20">
           <el-col :span="12" :offset="8">
             <p style="text-align: center;">
-              <el-card v-if="!isEmptyValue(inputCommand)" shadow="hover" class="card-command" style="height: 50px;width: 300px;padding-top: 10px !important;padding-bottom: 10px !important;">
+              <el-card v-if="!isEmptyValue(displayCommand)" shadow="hover" class="card-command" style="height: 50px;width: 300px;padding-top: 10px !important;padding-bottom: 10px !important;">
                 <b style="font-size: 22px;text-align: center;">
-                  {{ inputCommand.toUpperCase() }}
+                  {{ displayCommand.toUpperCase() }}
                 </b>
                 <el-button
                   v-show="!isEmptyValue(setCommandSelect)"
@@ -237,6 +239,7 @@ export default defineComponent({
     const currentCommandSend = ref('')
     const setCommandSelect = ref({})
     const isAddComand = ref(false)
+    const displayCommand = ref('')
     const inputCommand = ref('')
     const liveKey = ref('')
     const deatKey = ref('')
@@ -250,29 +253,14 @@ export default defineComponent({
         generalOptions
       }
     })
-    const lisCommantShortkey = computed(() => {
-      return store.getters.getLisCommantShortkey
-    })
     /**
      * Methods
      */
     function theActionCommand(event) {
       if (isEmptyValue(event)) return
       const { srcKey } = event
+      displayCommand.value = 'ctrl + ' + srcKey
       inputCommand.value = 'ctrl + ' + srcKey
-    }
-
-    function saveCommand() {
-      store.dispatch('saveCommand', {
-        command: currentCommandSend.value,
-        shortcut: inputCommand.value
-      })
-        .then(() => {
-          isAddComand.value = false
-        })
-        .catch(() => {
-          isAddComand.value = false
-        })
     }
 
     function findCommand(command) {
@@ -281,13 +269,10 @@ export default defineComponent({
       store.dispatch('listCommand', command)
         .then(response => {
           const { records } = response
-          console.log({
-            records,
-            command
-          })
           setCommandSelect.value = records.find(list => list.command === command)
           if (!isEmptyValue(setCommandSelect.value)) {
             isPersistenceComand.value = true
+            displayCommand.value = setCommandSelect.value.shortcut
             inputCommand.value = setCommandSelect.value.shortcut
             return
           }
@@ -300,9 +285,28 @@ export default defineComponent({
       })
         .then(() => {
           isAddComand.value = false
+          displayCommand.value = ''
+          inputCommand.value = ''
         })
         .catch(() => {
           isAddComand.value = false
+        })
+    }
+
+    function saveCommand() {
+      store.dispatch('saveCommand', {
+        command: currentCommandSend.value,
+        shortcut: inputCommand.value
+      })
+        .then(() => {
+          isAddComand.value = false
+          displayCommand.value = ''
+          inputCommand.value = ''
+        })
+        .catch(() => {
+          isAddComand.value = false
+          displayCommand.value = ''
+          inputCommand.value = ''
         })
     }
 
@@ -332,12 +336,12 @@ export default defineComponent({
       liveKeinputCommandy,
       currentCommandSend,
       setCommandSelect,
+      displayCommand,
       inputCommand,
       isAddComand,
       liveKey,
       deatKey,
       // Computed
-      lisCommantShortkey,
       listOption,
       // Methods
       theActionCommand,
