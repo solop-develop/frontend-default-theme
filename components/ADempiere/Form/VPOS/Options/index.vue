@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -158,7 +158,6 @@
                 v-model="visibleReverse"
                 placement="top"
                 width="450"
-                :disabled="!isProcessed"
               >
                 <el-row v-if="!isLoadingReverse" :gutter="24" class="container-reverse">
                   <el-col :span="24" class="container-reverse">
@@ -189,7 +188,7 @@
                         type="primary"
                         style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
                         icon="el-icon-check"
-                        @click="adviserPin ? validateOption($t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction')) : reverseSalesTransaction()"
+                        @click="reverseSalesTransaction()"
                       />
                     </samp>
                   </el-col>
@@ -329,7 +328,6 @@
                 placement="right"
                 trigger="click"
                 width="900"
-                :disabled="!isProcessed || !isAllowsConfirmShipmentByOrder"
               >
                 <confirm-delivery
                   :is-selectable="false"
@@ -351,7 +349,7 @@
           </el-col>
 
           <!-- applyDiscountOnOrder -->
-          <el-col v-if="isAllowsModifyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
                 v-model="showCount"
@@ -383,7 +381,6 @@
                 <el-button
                   slot="reference"
                   type="text"
-                  :disabled="isOptionPopoverDiscuent"
                   :class="classOptionPopoverDiscuent"
                 >
                   <i class="el-icon-document-remove" />
@@ -536,6 +533,18 @@
               </p>
             </el-card>
           </el-col>
+          <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <p
+                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
+                @click="isMnemonicCommand = !isMnemonicCommand"
+              >
+                <svg-icon icon-class="keyboard" />
+                <br>
+                {{ $t('form.mnemonicCommand.title') }}
+              </p>
+            </el-card>
+          </el-col>
         </el-row>
       </el-collapse-item>
 
@@ -583,6 +592,16 @@
     </el-dialog>
 
     <el-dialog
+      :title="$t('form.mnemonicCommand.title')"
+      :visible.sync="isMnemonicCommand"
+      close-on-press-escape
+      width="70%"
+      center
+      class="dialogo-seller"
+    >
+      <mnemonic-command />
+    </el-dialog>
+    <el-dialog
       v-shortkey="isComputedRender ? {close: ['esc'], enter: ['enter']} : {}"
       :title="$t(isLabelPanel)"
       :visible.sync="isComputedRender"
@@ -625,11 +644,12 @@ import CashWithdrawal from './Cashwithdrawal'
 import DiscountOrder from './DiscountOrder'
 import AssignSeller from './AssignSeller'
 import SalesDiscountOff from './SalesDiscountOff'
+import MnemonicCommand from './MnemonicCommand'
 import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
 import TableTimeControl from '@theme/components/ADempiere/Form/TimeControl/table.vue'
-
-// api request methods
+import ComponentDialgo from '@theme/components/ADempiere/Form/VPOS/Options/MnemonicCommand/component.vue'
+// API Request Methods
 import {
   generateImmediateInvoice,
   withdrawal,
@@ -640,11 +660,16 @@ import {
 } from '@/api/ADempiere/form/point-of-sales.js'
 import { createShipment, shipments } from '@/api/ADempiere/form/point-of-sales.js'
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
+
+// Constants
 import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 // import posProcess from '@/utils/ADempiere/constants/posProcess'
+
+// Utils and Helper Methods
 import {
   buildLinkHref
 } from '@/utils/ADempiere/resource.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'PointOfSalesOptions',
@@ -660,7 +685,9 @@ export default {
     SalesDiscountOff,
     DiscountOrder,
     OrdersList,
-    TableTimeControl
+    TableTimeControl,
+    MnemonicCommand,
+    ComponentDialgo
   },
 
   mixins: [
@@ -694,6 +721,7 @@ export default {
       showConfirmDelivery: false,
       isShowResource: false,
       isLoadingPin: false
+      // isMnemonicCommand: false
     }
   },
 
@@ -707,6 +735,14 @@ export default {
       },
       set(val) {
         this.$store.commit('setShowPOSOptions', val)
+      }
+    },
+    isMnemonicCommand: {
+      get() {
+        return this.$store.getters.getModifyCommand
+      },
+      set(val) {
+        this.$store.commit('setModifyCommand', val)
       }
     },
     isComputedRender: {
@@ -849,7 +885,7 @@ export default {
         return this.ordersList.isShowPopover
       },
       set(value) {
-        if (!this.isEmptyValue(this.$route.query.pos)) {
+        if (!isEmptyValue(this.$route.query.pos)) {
           this.$store.commit('showListOrders', value)
         }
       }
@@ -879,23 +915,23 @@ export default {
       return this.$store.getters.posAttributes.currentPointOfSales.isPosRequiredPin
     },
     blockOption() {
-      if (!this.isEmptyValue(this.currentOrder.uuid)) {
+      if (!isEmptyValue(this.currentOrder.uuid)) {
         return 'cursor: pointer; text-align: center !important; color: black;min-height: 50px;'
       }
       return 'cursor: not-allowed; text-align: center !important; color: gray;min-height: 50px;'
     },
     blockOptionIsProcess() {
-      if (!this.isEmptyValue(this.currentOrder.uuid)) {
+      if (!isEmptyValue(this.currentOrder.uuid)) {
         return this.currentOrder.isProcessed
       }
       return true
     },
     isAllowsApplyDiscount() {
-      if (!this.isEmptyValue(this.currentPointOfSales.isAllowsApplyDiscount)) return this.currentPointOfSales.isAllowsApplyDiscount
+      if (!isEmptyValue(this.currentPointOfSales.isAllowsApplyDiscount)) return this.currentPointOfSales.isAllowsApplyDiscount
       return false
     },
     isOptionPopoverDiscuent() {
-      if (!this.isEmptyValue(this.currentOrder.uuid) && this.currentOrder.grandTotal > 0) return this.currentOrder.isProcessed
+      if (!isEmptyValue(this.currentOrder.uuid) && this.currentOrder.grandTotal > 0) return this.currentOrder.isProcessed
       return true
     },
     classOptionPopoverDiscuent() {
@@ -907,7 +943,7 @@ export default {
       return 'is-enable-option-popover'
     },
     classblockOption() {
-      if (!this.isEmptyValue(this.currentOrder.uuid)) return 'is-enable-option-card'
+      if (!isEmptyValue(this.currentOrder.uuid)) return 'is-enable-option-card'
       return 'is-disabled-option-card'
     },
     size() {
@@ -930,13 +966,13 @@ export default {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
     ordersList() {
-      if (this.isEmptyValue(this.currentPointOfSales)) {
+      if (isEmptyValue(this.currentPointOfSales)) {
         return []
       }
       return this.currentPointOfSales.listOrder
     },
     currentOrder() {
-      if (this.isEmptyValue(this.currentPointOfSales)) {
+      if (isEmptyValue(this.currentPointOfSales)) {
         return {
           documentType: {},
           documentStatus: {
@@ -977,7 +1013,7 @@ export default {
         return this.$store.getters.getConfirmDelivery
       },
       set(value) {
-        if (!this.isEmptyValue(this.currentOrder.uuid)) {
+        if (!isEmptyValue(this.currentOrder.uuid)) {
           this.$store.commit('setConfirmDelivery', value)
         }
       }
@@ -988,13 +1024,13 @@ export default {
         return this.$store.getters.getDeliverAllProducts
       },
       set(value) {
-        if (!this.isEmptyValue(this.currentOrder.uuid)) {
+        if (!isEmptyValue(this.currentOrder.uuid)) {
           this.$store.commit('setDeliverAllProducts', value)
         }
       }
     },
     isProcessed() {
-      if (!this.isEmptyValue(this.currentOrder.documentStatus.value) && this.currentOrder.documentStatus.value === 'CO') {
+      if (!isEmptyValue(this.currentOrder.documentStatus.value) && this.currentOrder.documentStatus.value === 'CO') {
         return true
       }
       return false
@@ -1011,21 +1047,21 @@ export default {
     //   }
     // },
     visible(value) {
-      if (value && !this.isEmptyValue(this.$refs)) {
+      if (value && !isEmptyValue(this.$refs)) {
         setTimeout(() => {
           this.focusPin()
         }, 300)
       }
     },
     showCount(value) {
-      if (value && !this.isEmptyValue(this.$refs)) {
+      if (value && !isEmptyValue(this.$refs)) {
         setTimeout(() => {
           this.focusDiscount(value, 'applyDiscountOnOrder')
         }, 300)
       }
     },
     showSalesDiscount(value) {
-      if (value && !this.isEmptyValue(this.$refs)) {
+      if (value && !isEmptyValue(this.$refs)) {
         setTimeout(() => {
           this.focusDiscount(value, 'salesDiscountOff')
         }, 300)
@@ -1171,7 +1207,7 @@ export default {
       }
     },
     openCashOpening() {
-      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+      if (!isEmptyValue(this.currentPointOfSales.displayCurrency)) {
         this.$store.dispatch('searchConversion', {
           conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
           currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
@@ -1184,7 +1220,7 @@ export default {
       this.$store.commit('setshowCashOpen', true)
     },
     openCashWithdrawal() {
-      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+      if (!isEmptyValue(this.currentPointOfSales.displayCurrency)) {
         this.$store.dispatch('searchConversion', {
           conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
           currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
@@ -1208,7 +1244,7 @@ export default {
       this.$store.commit('setShowUnassignSeller', true)
     },
     moneyIncome() {
-      if (!this.isEmptyValue(this.currentPointOfSales.displayCurrency)) {
+      if (!isEmptyValue(this.currentPointOfSales.displayCurrency)) {
         this.$store.dispatch('searchConversion', {
           conversionTypeUuid: this.currentPointOfSales.conversionTypeUuid,
           currencyFromUuid: this.currentPointOfSales.priceList.currency.uuid,
@@ -1244,7 +1280,7 @@ export default {
       const { value } = this.attributePin
       this.isLoadingPin = true
       this.focusPin()
-      const attributePin = this.isEmptyValue(this.$store.getters.getOverdrawnInvoice.attributePin) ? this.attributePin : this.$store.getters.getOverdrawnInvoice.attributePin
+      const attributePin = isEmptyValue(this.$store.getters.getOverdrawnInvoice.attributePin) ? this.attributePin : this.$store.getters.getOverdrawnInvoice.attributePin
       const { requestedAccess } = attributePin
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
@@ -1362,7 +1398,7 @@ export default {
       })
         .then(response => {
           const { processLog } = response
-          if (!this.isEmptyValue(processLog)) {
+          if (!isEmptyValue(processLog)) {
             const link = buildLinkHref({
               fileName: processLog.output.file_name,
               outputStream: processLog.output.output_stream,
@@ -1438,7 +1474,7 @@ export default {
       this.$store.commit('setShowPOSOptions', false)
     },
     completePreparedOrder() {
-      if (this.isEmptyValue(this.currentOrder.uuid) || this.currentOrder.documentStatus.value !== 'DR') {
+      if (isEmptyValue(this.currentOrder.uuid) || this.currentOrder.documentStatus.value !== 'DR') {
         return ''
       }
       const orderUuid = this.currentOrder.uuid
@@ -1453,7 +1489,7 @@ export default {
       processOrder({
         posUuid,
         orderUuid,
-        isOpenRefund: !this.isEmptyValue(this.$store.getters.getListRefundReference),
+        isOpenRefund: !isEmptyValue(this.$store.getters.getListRefundReference),
         createPayments: false,
         payments: []
       })
@@ -1530,7 +1566,7 @@ export default {
     },
     createNewCustomerReturnOrder() {
       // TODO: New Customer Return Order
-      if (this.isEmptyValue(this.currentOrder.uuid)) {
+      if (isEmptyValue(this.currentOrder.uuid)) {
         return ''
       }
 
@@ -1541,17 +1577,17 @@ export default {
       this.$store.commit('setShowPOSOptions', false)
     },
     showModal(action) {
-      this.$store.dispatch('setShowDialog', {
-        type: action.type,
-        action: {
-          ...action,
-          containerUuid: action.uuid
-        }
-      })
+      // this.$store.dispatch('setShowDialog', {
+      //   type: action.type,
+      //   action: {
+      //     ...action,
+      //     containerUuid: action.uuid
+      //   }
+      // })
     },
     copyOrder() {
       // TODO: Support Copy Order
-      if (this.isEmptyValue(this.currentOrder.uuid)) {
+      if (isEmptyValue(this.currentOrder.uuid)) {
         return ''
       }
       console.info('Support Copy Order', this.currentOrder.uuid)
@@ -1561,7 +1597,7 @@ export default {
       this.showModal(process)
     },
     deleteOrder() {
-      if (this.isEmptyValue(this.currentOrder.uuid) || this.isProcessed) {
+      if (isEmptyValue(this.currentOrder.uuid) || this.isProcessed) {
         return ''
       }
       this.$store.dispatch('updateOrderPos', true)
@@ -1691,8 +1727,9 @@ export default {
         containerUuid: this.$route.meta.uuid,
         columnName: 'C_DocTypeTarget_ID_UUID'
       })
-      let customerUuid = this.isEmptyValue(bpartner) ? this.$store.getters.getNewCustomer.uuid : bpartner
-      if (this.isEmptyValue(customerUuid) || id === 1000006) {
+      let customerUuid = isEmptyValue(bpartner) ? this.$store.getters.getNewCustomer.uuid : bpartner
+      // TODO: Validate this static identifier
+      if (isEmptyValue(customerUuid) || id === 1000006) {
         customerUuid = this.currentPointOfSales.templateCustomer.uuid
       }
       this.$store.dispatch('createOrder', {

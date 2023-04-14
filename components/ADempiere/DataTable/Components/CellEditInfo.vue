@@ -17,9 +17,13 @@
 -->
 
 <template>
-  <span v-if="isRowCanBeEdited(dataRow)" key="field-component">
+  <span
+    v-if="isRowChangeEdited"
+    key="field-component"
+  >
     <field-definition
       key="field-definition"
+      v-shortkey="shortkey"
       :container-uuid="containerUuid"
       :container-manager="containerManager"
       :is-data-table="true"
@@ -31,6 +35,7 @@
         recordUuid: dataRow.UUID
       }"
       size="mini"
+      @shortkey="keyboardShortcuts"
     />
   </span>
 
@@ -46,11 +51,11 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// components and mixins
+// Components and Mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
-// utils and helpers methods
+// Utils and Helpers Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -85,6 +90,10 @@ export default defineComponent({
     dataRow: {
       type: Object,
       default: () => {}
+    },
+    tableName: {
+      type: String,
+      default: () => ''
     }
   },
 
@@ -94,6 +103,33 @@ export default defineComponent({
         field: props.fieldAttributes,
         row: props.dataRow
       })
+    })
+
+    const shortkey = computed(() => {
+      return {
+        send: ['ctrl', 'enter'],
+        exit: ['esc']
+      }
+    })
+
+    const isRowChangeEdited = computed(() => {
+      if (props.dataRow.isEditRow && !isReadOnly.value) {
+        return props.dataRow.isEditRow
+      }
+      if (!isEmptyValue(props.parentUuid)) {
+        return false
+      }
+      if (!props.dataRow.isSelectedRow) {
+        return false
+      }
+      if (props.dataRow.isEditRow && !isReadOnly.value) {
+        return true
+      }
+      return false
+    })
+
+    const cellTable = computed(() => {
+      return props.dataRow
     })
 
     /**
@@ -108,23 +144,53 @@ export default defineComponent({
     })
 
     function isRowCanBeEdited(record) {
-      if (!isEmptyValue(props.parentUuid)) {
-        return false
-      }
       if (!record.isSelectedRow) {
         return false
       }
-      if (record.isEditRow && !isReadOnly.value) {
-        return true
+      if (!isReadOnly.value) {
+        return false
       }
-      return false
+      return record.isEditRow
+    }
+
+    function exitEdit(record) {
+      record.isEditRow = !record.isEditRow
+    }
+
+    function enterEdit(record) {
+      record.isEditRow = !record.isEditRow
+      props.containerManager.exitEditMode({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        tableName: props.tableName,
+        recordUuid: record.UUID
+      })
+    }
+
+    function keyboardShortcuts(event) {
+      switch (event.srcKey) {
+        case 'exit':
+          exitEdit(props.dataRow)
+          break
+
+        case 'send':
+        default:
+          enterEdit(props.dataRow)
+          break
+      }
     }
 
     return {
       // computeds
       cellCssClass,
+      cellTable,
+      isRowChangeEdited,
       // methods
-      isRowCanBeEdited
+      isRowCanBeEdited,
+      exitEdit,
+      enterEdit,
+      keyboardShortcuts,
+      shortkey
     }
   }
 })

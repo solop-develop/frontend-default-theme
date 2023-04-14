@@ -9,50 +9,96 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <span>
-    <el-container style="height: 85vh;">
-      <el-main style="overflow: auto;">
+    <el-container style="height: 100% !important;">
+      <el-main style="overflow: auto;padding-left: 10px;padding-right: 10px;">
         <el-empty v-if="isEmptyValue(listChats)" style="height: 600px;" />
         <!-- <el-scrollbar v-else class="scroll-chats"> -->
-        <el-timeline v-else>
+        <el-timeline v-else style="padding-left: 0px">
           <el-timeline-item
             v-for="(chat, key) in listChats"
             :key="key"
-            :timestamp="chat.logDate"
+            :timestamp="translateDateByLong(chat.logDate)"
             type="primary"
             placement="top"
             style="padding-top: 0px;padding-bottom: 0px;"
           >
-            <el-card shadow="always" class="epale">
-              <div :id="'ChatViwer' + chat.id" />
-              <!-- {{ viwer(chat.characterData) }} -->
-              <!-- <div v-markdown="chat.characterData" style="padding-top: 0px;padding-bottom: 0px;" /> -->
+            <el-card v-if="!isEmptyValue(chat.userName)" shadow="always" class="list-notes-previwer">
+              <div slot="header" class="clearfix">
+                <span style="color: #606266; font-weight: bold;">
+                  {{ $t('window.containerInfo.log.updatedBy') }} <b>: </b>{{ chat.userName }} <i class="el-icon-user-solid" />
+                </span>
+              </div>
+              <el-scrollbar wrap-class="scroll-previwer-list-note">
+                <v-md-preview :text="chat.characterData" class="previwer-disable" style="padding: 0px" height="150px" />
+              </el-scrollbar>
             </el-card>
           </el-timeline-item>
         </el-timeline>
-        <!-- </el-scrollbar> -->
       </el-main>
-      <el-footer style="height: 200px !important;overflow: auto;">
-        <div class="editor-container">
-          <!-- <markdown-editor v-model="message" height="200px" /> -->
-          <div id="ChatEditor" />
 
+      <el-footer style="height: auto;padding: 5px;">
+        <el-card shadow="never" class="is-add-new-comments">
+          <div slot="header">
+            {{ $t('window.containerInfo.logWorkflow.addNote') }}
+          </div>
+          <div class="editor-container">
+            <el-scrollbar v-if="isShowPreviwer" wrap-class="scroll-previwer-note">
+              <v-md-preview :text="message" class="previwer-disable" style="padding: 0px" height="150px" />
+            </el-scrollbar>
+            <v-md-editor
+              v-else
+              v-model="message"
+              left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code | emoji listMailTemplates"
+              :toolbar="listOption"
+              right-toolbar="sync-scroll fullscreen"
+              mode="edit"
+              height="150px"
+              :placeholder="$t('window.containerInfo.logWorkflow.addNote')"
+            />
+          </div>
           <el-button
             type="primary"
             icon="el-icon-check"
-            circle
-            style="float: right;margin-top: 2%;"
+            class="button-base-icon"
+            style="float: right;margin: 10px;"
+            :disabled="isEmptyValue(message)"
             @click="sendComment"
           />
-        </div>
+          <el-button
+            type="danger"
+            icon="el-icon-close"
+            class="button-base-icon"
+            style="float: right;margin-top: 10px;"
+            @click="closeNote"
+          />
+          <el-button
+            type="info"
+            plain
+            style="float: right; margin-top: 10px;"
+            class="button-base-icon"
+            :disabled="isEmptyValue(message)"
+            @click="message = ''"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+          <el-checkbox
+            v-model="isShowPreviwer"
+            :label="$t('issues.preview')"
+            class="button-base-icon"
+            :border="true"
+            :disabled="isEmptyValue(message)"
+            style="float: right;margin-top: 10px;"
+          />
+        </el-card>
       </el-footer>
     </el-container>
   </span>
@@ -60,28 +106,19 @@
 
 <script>
 import {
-  defineComponent, computed, ref, onMounted, watch, nextTick
+  defineComponent, computed, ref
 } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
 
-// Components and Mixins
-import '@toast-ui/chart/dist/toastui-chart.css'
-import chart from '@toast-ui/editor-plugin-chart'
-import Editor from '@toast-ui/editor'
-import '@toast-ui/editor/dist/toastui-editor.css'
-
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
+import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'RecordNotes',
-
-  components: {
-    Editor
-  },
 
   props: {
     tableName: {
@@ -96,22 +133,18 @@ export default defineComponent({
 
   setup(props) {
     const message = ref('')
-    const chatEditor = ref(null)
-    const chatViwer = ref(null)
-
-    const chartOptions = {
-      minWidth: 100,
-      maxWidth: 600,
-      minHeight: 100,
-      maxHeight: 300
-    }
+    const isShowPreviwer = ref(false)
 
     const listChats = computed(() => {
       return store.getters.getChatEntries
     })
 
+    const listOption = computed(() => {
+      return store.getters.getListMailTemplates
+    })
+
     function sendComment() {
-      if (isEmptyValue(chatEditor.value.getMarkdown())) {
+      if (isEmptyValue(message.value)) {
         showMessage({
           message: lang.t('window.containerInfo.emptyNote'),
           type: 'warning'
@@ -121,65 +154,40 @@ export default defineComponent({
       store.dispatch('createChatEntry', {
         tableName: props.tableName,
         recordId: props.recordId,
-        comment: chatEditor.value.getMarkdown()
+        comment: message.value
       })
         .then(() => {
-          cleatChatEditor('')
+          message.value = ''
         })
     }
 
-    function cleatChatEditor(params) {
-      chatEditor.value.setMarkdown(params)
-    }
-
-    function viwer(params, key) {
-      if (isEmptyValue(params)) {
-        return
-      }
-      params.forEach(element => {
-        const initialValue = element.characterData
-        nextTick(() => {
-          // eslint-disable-next-line
-          chatViwer.value = new Editor.factory({
-            el: document.querySelector(`#ChatViwer${element.id}`),
-            viewer: true,
-            initialValue,
-            plugins: [[chart, chartOptions]]
-          })
-        })
+    function closeNote() {
+      store.dispatch('showLogs', {
+        show: false
       })
     }
-    watch(listChats, (newValue, oldValue) => {
-      viwer(newValue)
-    })
 
-    onMounted(() => {
-      chatEditor.value = new Editor({
-        el: document.querySelector('#ChatEditor'),
-        initialValue: message.value,
-        height: '200px',
-        initialEditType: 'markdown',
-        previewStyle: 'vertical',
-        plugins: [[chart, chartOptions]]
-      })
-      chatEditor.value.getMarkdown()
-      viwer()
-    })
+    function loadListMail() {
+      store.dispatch('findListMailTemplates')
+    }
+
+    loadListMail()
 
     return {
       message,
       listChats,
+      listOption,
+      isShowPreviwer,
       sendComment,
-      chatEditor,
-      cleatChatEditor,
-      chatViwer,
-      viwer
+      closeNote,
+      loadListMail,
+      translateDateByLong
     }
   }
 })
 </script>
 
-<style>
+<style lang="scss">
 .p {
   margin: 0px !important;
 }
@@ -195,10 +203,33 @@ export default defineComponent({
   width: auto !important;
 }
 .te-preview {
-    overflow: auto;
-    width: auto !important;
-    padding: 0 25px;
-    height: 100%;
+  overflow: auto;
+  width: auto !important;
+  padding: 0 25px;
+  height: 100%;
+}
+.scroll-previwer-note {
+  max-height: 120px;
+}
+.scroll-previwer-list-note {
+  max-height: 100px;
+}
+.github-markdown-body {
+  padding: 10px;
+}
+.list-notes-previwer {
+  .el-card__body {
+    padding-top: 0px !important;
+    padding-right: 5px;
+    padding-bottom: 0px !important;
+    padding-left: 5px;
+  }
+  .el-card__header {
+    padding: 18px 10px;
+    border-bottom: 1px solid #e6ebf5;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
 }
 </style>
 <style scoped>

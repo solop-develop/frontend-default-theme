@@ -61,16 +61,17 @@
         <el-descriptions-item
           v-for="(item, index) in tabAttributes.identifierColumns"
           :key="index"
-          :label="item.columnName"
+          :label="item.name"
         >
-          <li
+          <cell-display-info
             v-for="(record, key) in listOfRecordsToDeleted"
             :key="key"
-          >
-            {{ record[item.columnName] }}
-          </li>
+            :field-attributes="item"
+            :data-row="record"
+          />
         </el-descriptions-item>
       </el-descriptions>
+
       <div style="text-align: right; margin: 0">
         <el-button size="mini" type="text" @click="isVisibleConfirmDelete = false">
           {{ $t('window.cancel') }}
@@ -128,6 +129,7 @@ import store from '@/store'
 import language from '@/lang'
 
 // Components and Mixins
+import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import DocumentAction from '@theme/components/ADempiere/TabManager/convenienceButtons/documentAction.vue'
 
 // Constants
@@ -144,6 +146,7 @@ export default defineComponent({
   name: 'ConvenienceButtons',
 
   components: {
+    CellDisplayInfo,
     DocumentAction
   },
 
@@ -306,15 +309,6 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         containerUuid
       })
-      if (getCurrentTab.value.isShowedTableRecords) {
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'isShowedTableRecords',
-          attributeNameControl: undefined,
-          attributeValue: false,
-          parentUuid: props.parentUuid,
-          containerUuid
-        })
-      }
 
       store.dispatch('panelInfo', {
         currentTab: props.tabAttributes,

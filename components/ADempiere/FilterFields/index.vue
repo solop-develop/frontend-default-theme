@@ -17,18 +17,28 @@
 -->
 
 <template>
-  <el-row v-if="!isMobile && searchRecordTypeSale" :gutter="5">
-    <el-col :span="19">
+  <el-row
+    v-if="!isMobile && isFilterRecords"
+    id="panelOptionsBar"
+    class="panel-options-bar"
+  >
+    <span
+      id="LeftPanelSearchOptions"
+      class="left-panel-search-options"
+    >
       <advanced-tab-query
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :fields-list="fieldsList"
         :container-manager="containerManager"
-        style="float: right;"
+        style="float: left;"
       />
-    </el-col>
+    </span>
 
-    <el-col v-if="!isShowedTableRecords" :span="5" style="float: right;">
+    <span
+      id="RightPanelFieldOptions"
+      class="right-panel-field-options"
+    >
       <el-select
         v-model="fieldsListShowed"
         :filterable="!isMobile"
@@ -38,7 +48,7 @@
         value-key="key"
         :size="size"
         :popper-append-to-body="true"
-        style="width: 250px;"
+        style="min-width: 250px;max-width: 300px;"
       >
         <el-option
           v-for="(item, key) in fieldsListAvailable"
@@ -48,15 +58,24 @@
         />
       </el-select>
 
+      <columns-display-option
+        v-if="inTable"
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+      />
       <fields-display-option
+        v-else
         :parent-uuid="parentUuid"
         :container-uuid="containerUuid"
         :available-fields="fieldsListAvailable"
         :available-fields-with-value="fieldsListAvailableWithValue"
         :showed-fields="fieldsListShowed"
         :filter-manager="filterManager"
+        :container-manager="containerManager"
+        :new-fields-list-secuence="newFieldsListSecuence"
+        :fields-customization="fieldsCustomization"
       />
-    </el-col>
+    </span>
   </el-row>
 
   <el-row v-else :gutter="20">
@@ -76,7 +95,7 @@
             value-key="key"
             :size="size"
             :popper-append-to-body="true"
-            style="width: 250px;"
+            style="min-width: 250px;max-width: 300px;"
           >
             <el-option
               v-for="(item, key) in fieldsListAvailable"
@@ -86,13 +105,22 @@
             />
           </el-select>
 
+          <columns-display-option
+            v-if="inTable"
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+          />
           <fields-display-option
+            v-else
             :parent-uuid="parentUuid"
             :container-uuid="containerUuid"
             :available-fields="fieldsListAvailable"
             :available-fields-with-value="fieldsListAvailableWithValue"
             :showed-fields="fieldsListShowed"
             :filter-manager="filterManager"
+            :container-manager="containerManager"
+            :new-fields-list-secuence="newFieldsListSecuence"
+            :fields-customization="fieldsCustomization"
           />
         </el-form-item>
       </el-form>
@@ -101,19 +129,21 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
 // Components and Mixins
-import FieldsDisplayOption from './fieldsDisplayOptions.vue'
 import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
+import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption.vue'
+import FieldsDisplayOption from './fieldsDisplayOptions.vue'
 
 export default defineComponent({
   name: 'FilterFields',
 
   components: {
     AdvancedTabQuery,
+    ColumnsDisplayOption,
     FieldsDisplayOption
   },
 
@@ -131,6 +161,10 @@ export default defineComponent({
       default: ''
     },
     fieldsList: {
+      type: Array,
+      default: () => []
+    },
+    fieldsCustomization: {
       type: Array,
       default: () => []
     },
@@ -156,21 +190,20 @@ export default defineComponent({
     },
     isFilterRecords: {
       type: Boolean,
-      default: true
+      default: false
     },
     containerManager: {
       type: Object,
       required: false
     },
-    isShowedTableRecords: {
-      type: Boolean,
-      default: true
+    newFieldsListSecuence: {
+      type: Array,
+      default: () => []
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const size = 'small'
-
     const cssClass = computed(() => {
       if (props.inTable) {
         return 'form-filter-columns'
@@ -185,31 +218,13 @@ export default defineComponent({
       return 'isShowedFromUser'
     })
 
-    const searchRecordTypeSale = computed(() => {
-      return root.$route.meta.type === 'window' && props.isFilterRecords
-    })
-
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })
 
-    const valueToSearch = computed({
-      get() {
-        return store.getters.getSearchValueTabRecordsList({
-          containerUuid: props.containerUuid
-        })
-      },
-      set(searchValue) {
-        store.commit('setSearchValueTabRecordsList', {
-          containerUuid: props.containerUuid,
-          searchValue
-        })
-      }
-    })
-
     const fieldsListAvailable = computed(() => {
       /*
-      if (!props.inTable && props.panelType === 'window' && !root.isEmptyValue(props.groupField)) {
+      if (!props.inTable && props.panelType === 'window' && !isEmptyValue(props.groupField)) {
         // compare group fields to window
         return store.getters.getFieldsListNotMandatory({
           containerUuid: props.containerUuid,
@@ -231,6 +246,9 @@ export default defineComponent({
     })
 
     const fieldsListAvailableWithValue = computed(() => {
+      if (props.inTable) {
+        return []
+      }
       // get fields not mandatory with default value
       return props.fieldsToHidden({
         parentUuid: props.parentUuid,
@@ -272,55 +290,24 @@ export default defineComponent({
       })
     }
 
-    const isLoadFilter = ref(false)
-    const timeOutSearch = ref(null)
-
-    function handleChangeSearch(value) {
-      clearTimeout(timeOutSearch.value)
-      timeOutSearch.value = setTimeout(() => {
-        // get records
-        filterRecord(value)
-      }, 1000)
-    }
-
-    function filterRecord(searchText) {
-      isLoadFilter.value = true
-
-      store.dispatch('getEntities', {
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        searchValue: searchText
-      })
-        .finally(() => {
-          isLoadFilter.value = false
-        })
-    }
-
     return {
-      // const
+      // Computeds
       cssClass,
-      // ref
-      isLoadFilter,
-      timeOutSearch,
-      // computeds
       isMobile,
       size,
       fieldsListShowed,
       fieldsListAvailable,
       fieldsListAvailableWithValue,
-      valueToSearch,
-      searchRecordTypeSale,
       showedAttibute,
       // methods
-      changeShowed,
-      handleChangeSearch,
-      filterRecord
+      changeShowed
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+// Filter Fields
 .form-filter-fields {
   .el-form-item {
     display: flex;
@@ -339,6 +326,7 @@ export default defineComponent({
 }
 </style>
 <style lang="scss">
+// Filter Fields
 .form-filter-fields {
   .el-form-item {
     >.el-form-item__content {
@@ -407,4 +395,19 @@ export default defineComponent({
   opacity: 0;
 }
 
+/**
+- Style Bar Option
+└──> Left Panel Search Options
+└──> Right Panel Field Options
+*/
+.panel-options-bar {
+  width: 99% !important;
+  display: flex;
+}
+.left-panel-search-options {
+  width: inherit;
+}
+.right-panel-field-options {
+  display: contents;
+}
 </style>

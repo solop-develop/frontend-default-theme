@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,16 +9,17 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <component
     :is="renderTableComponent"
+    id="renderTableComponent"
     :parent-uuid="parentUuid"
     :container-uuid="containerUuid"
     :container-manager="containerManager"
@@ -84,7 +85,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root, refs }) {
+  setup(props, { root }) {
     const renderTableComponent = computed(() => {
       const { type } = root.$route.meta
       let dataTableCompenent
@@ -107,24 +108,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
- div#mainWindow{
-    width: 100%;
-}
-.el-table .el-table__cell {
-  padding: 0px !important;
-}
 .el-table .success-row {
   background: #e8f4ff;
-}
-.el-table .cell {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  word-break: break-all;
-  line-height: 15px;
-  padding-left: 10px;
-  padding-right: 10px;
 }
 </style>

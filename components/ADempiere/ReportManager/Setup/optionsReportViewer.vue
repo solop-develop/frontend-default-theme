@@ -6,10 +6,12 @@
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
+
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
@@ -25,9 +27,9 @@
     <el-collapse v-model="activeCollapse">
       <el-collapse-item name="1">
         <template slot="title">
-          <b>
+          <b style="font-size: 18px">
             {{ $t('report.preference') }}
-            <i class="el-icon-s-operation" />
+            <i style="font-size: 18px;" class="el-icon-s-operation" />
           </b>
         </template>
         <el-card class="box-card">
@@ -37,7 +39,7 @@
               label-width="10px"
               @submit.native.prevent="notSubmitForm"
             >
-              <el-row :gutter="20">
+              <el-row class="report-view-setup-preferences-fields" :gutter="20">
                 <el-col :span="8">
                   <el-form-item
                     :label="$t('report.printFormats')"
@@ -109,15 +111,16 @@
       <!-- report parameters -->
       <el-collapse-item name="2">
         <template slot="title">
-          <b>
+          <b style="font-size: 18px">
             {{ $t('actionMenu.changeParameters') }}
-            <i class="el-icon-set-up" />
+            <i style="font-size: 18px;" class="el-icon-set-up" />
           </b>
         </template>
         <component
           :is="componentRender"
           :container-uuid="containerUuid"
           :container-manager="containerManagerReportViwer"
+          :is-tab-panel="true"
         />
       </el-collapse-item>
     </el-collapse>
@@ -130,14 +133,24 @@
       "
     >
       <el-col :span="24">
-        <samp>
+        <samp class="report-viewer-setup-footer">
+          <el-button
+            type="info"
+            class="button-base-icon"
+            plain
+            @click="clearParameters();"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="handleClose()"
           />
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="runReport()"
           />
@@ -152,12 +165,14 @@ import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
 import router from '@/router'
 import store from '@/store'
+import lang from '@/lang'
 
 // Components adn Mixins
 import CollapseCriteria from '@theme/components/ADempiere/CollapseCriteria/index.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { showNotification } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'optionsReportViewer',
@@ -231,6 +246,10 @@ export default defineComponent({
     })
 
     const tableName = computed(() => {
+      const { tableName } = store.getters.getReportOutput(root.$route.params.instanceUuid)
+      if (!isEmptyValue(tableName)) {
+        return tableName
+      }
       const currentPrintFormat = reportAsPrintFormat.value.childs.find(report => report.printFormatUuid === reportAsPrintFormatValue.value)
       if (isEmptyValue(currentPrintFormat)) {
         return ''
@@ -332,11 +351,24 @@ export default defineComponent({
     }
 
     function runReport() {
+      const reportDefinition = store.getters.getStoredReport(props.containerUuid)
+      const reportOutputParams = store.getters.getReportParameters({
+        containerUuid: props.containerUuid,
+        fieldsList: reportDefinition.fieldsList
+      })
+      const { name, description } = store.getters.getReportOutput(root.$route.params.instanceUuid)
+      showNotification({
+        title: lang.t('notifications.processing'),
+        message: name,
+        summary: description,
+        type: 'info'
+      })
       store.dispatch('buildReport', {
         containerUuid: props.containerUuid,
         instanceUuid: root.$route.params.instanceUuid,
         isSummary: value1.value,
-        tableName: tableName.value
+        tableName: tableName.value,
+        parametersList: reportOutputParams
       })
         .then(response => {
           store.dispatch('tagsView/delCachedView', findTagViwer.value).then(() => {
@@ -346,6 +378,19 @@ export default defineComponent({
                 path: '/redirect' + fullPath
               })
             })
+          })
+          showNotification({
+            title: lang.t('notifications.succesful'),
+            message: name,
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          showNotification({
+            title: lang.t('notifications.error'),
+            message: name,
+            summary: error,
+            type: 'error'
           })
         })
       store.commit('setShowPanelConfig', {
@@ -364,6 +409,12 @@ export default defineComponent({
         reportViewUuid,
         printFormatUuid,
         reportType
+      })
+    }
+
+    function clearParameters() {
+      store.dispatch('setReportDefaultValues', {
+        containerUuid: props.containerUuid
       })
     }
 
@@ -432,6 +483,7 @@ export default defineComponent({
       componentRender,
       findTagViwer,
       // methods
+      clearParameters,
       updatePrintFormat,
       updateReportView,
       updateReportType,
@@ -442,3 +494,14 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.report-view-setup-preferences-fields {
+  /**
+   * Reduce the spacing between the form element and its label
+   */
+   .el-form-item__label {
+    padding-bottom: 0px;
+  }
+}
+</style>

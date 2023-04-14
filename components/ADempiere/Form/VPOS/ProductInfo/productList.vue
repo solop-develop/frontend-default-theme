@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -45,7 +45,7 @@
       v-loading="isLoadingRecords"
       :data="localTableSearch(listWithPrice)"
       :empty-text="$t('quickAccess.searchWithEnter')"
-      border
+      :border="true"
       fit
       height="450"
       highlight-current-row
@@ -107,16 +107,19 @@
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             @click="loadProductsPricesList"
           />
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="close"
           />
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="addProductFromList"
           />
@@ -127,12 +130,12 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 // import fieldsListProductPrice from './fieldsList.js'
 import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
@@ -338,6 +341,7 @@ export default {
       //   isShowed: false
       // })
       this.showProductList = false
+      this.$store.commit('setDialogoComponent', false)
     },
     addProductFromList() {
       if (!this.isSelectable) {
@@ -400,13 +404,6 @@ export default {
    */
   .el-form-item__label {
     padding-bottom: 0px;
-  }
-
-  .products-list-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
-    }
   }
 }
 </style>

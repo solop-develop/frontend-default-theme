@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
   <component
@@ -82,9 +82,28 @@ export default {
         case 'org.spin.tcs.form.TimeControl':
           form = import('@theme/components/ADempiere/Form/TimeControl')
           break
+        case 'TimeRecord':
+          form = import('@theme/components/ADempiere/Form/TimeRecord')
+          break
         case 'VPayPrint':
         case 'org.compiere.apps.form.VPayPrint':
           form = import('@theme/components/ADempiere/Form/VPayPrint')
+          break
+        case 'VBankStatementMatch':
+        case 'org.spin.apps.form.VBankStatementMatch':
+          form = import('@theme/components/ADempiere/Form/VBankStatementMatch')
+          break
+        case 'Issues':
+          form = import('@theme/components/ADempiere/Form/Issues')
+          break
+        case 'ExpressReceipt':
+          form = import('@theme/components/ADempiere/Form/ExpressReceipt')
+          break
+        case 'ExpressShipment':
+          form = import('@theme/components/ADempiere/Form/ExpressShipment')
+          break
+        case 'ExpressMovement':
+          form = import('@theme/components/ADempiere/Form/ExpressMovement')
           break
         case 'VAllocation':
           form = import('@theme/components/ADempiere/Form/VAllocation')

@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -69,17 +69,16 @@ import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import FieldOptions from '@theme/components/ADempiere/FieldDefinition/FieldOptions/index.vue'
 
-// constants
+// Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { evalutateTypeField } from '@/utils/ADempiere/dictionaryUtils'
 
@@ -153,17 +152,6 @@ export default defineComponent({
     })
 
     const sizeField = computed(() => {
-      // TODO: Add flag to max width
-      if (field.value.containerUuid === LOCATION_ADDRESS_FORM) {
-        return {
-          // ...field.value.size,
-          xs: 24,
-          sm: 24,
-          md: 24,
-          lg: 24,
-          xl: 24
-        }
-      }
       if (isEmptyValue(field.value.size)) {
         const size = 24
         return {
@@ -339,9 +327,6 @@ export default defineComponent({
   .field-text-long {
     max-height: 300px;
     min-height: 250px;
-  }
-  .from-field {
-    max-height: 65px;
   }
   .el-form-item {
     margin-bottom: 12px !important;

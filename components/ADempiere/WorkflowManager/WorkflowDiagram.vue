@@ -20,16 +20,16 @@
     @shortkey.native="closeNodeInfo"
   >
     <transition name="el-zoom-in-bottom">
-      <el-card
+      <!-- <el-card
         v-show="showedInfo"
-        :style="{ position: 'absolute', zIndex: '9999', left: leftContextualMenu + 'px', top: topContextualMenu + 'px' }"
+        :style="{ position: 'absolute', zIndex: '9999', left: leftContextualMenu + 'px', top: topContextualMenu + 'px', width: '40% !important;' }"
         class="box-card"
       >
         <div slot="header" class="clearfix">
           <span>
-            {{ infoNode.description }}
+            <svg-icon icon-class="example" />
+            {{ infoNode.label }}
           </span>
-
           <el-button
             style="float: right; padding: 3px 0"
             type="text"
@@ -38,9 +38,7 @@
           />
         </div>
 
-        {{ infoNode.help }}
-
-        <div v-if="!isEmptyValue(nodeLogs)" class="text item" style="padding: 20px">
+        <div v-if="!isEmptyValue(nodeLogs)" class="text item">
           <el-timeline class="info">
             <el-timeline-item
               v-for="(logs, key) in nodeLogs"
@@ -49,12 +47,62 @@
               placement="top"
             >
               <el-card style="padding: 20px!important;">
-                <b> {{ $t('login.userName') }} </b> {{ logs.user_name }} <br>
-                {{ logs.text_message }}
+                <span>
+                  <b> {{ $t('page.login.userName') }} : </b>{{ logs.user_name }} <i class="el-icon-user-solid" />
+                </span>
+                <br>
+                <b> {{ $t('report.summary') }}  :</b> {{ logs.text_message }}
+                <br>
+                <b> {{ 'Responsable' }}  :</b> {{ logs.responsible_name }}
+                <br>
               </el-card>
             </el-timeline-item>
           </el-timeline>
         </div>
+      </el-card> -->
+      <el-card
+        v-show="showedInfo"
+        shadow="always"
+        class="collapse-workflow"
+        :style="{ position: 'absolute', zIndex: '9999', padding: '10px', left: leftContextualMenu + 'px', top: topContextualMenu + 'px', width: '40% !important;' }"
+      >
+        <el-collapse
+          accordion
+          style="padding: 0px;"
+        >
+          <el-collapse-item name="1" style="padding: 0px;">
+            <template slot="title">
+              <b style="padding-left: 1%;float: left;width: 90%;">
+                <svg-icon icon-class="example" />
+                {{ infoNode.label }}
+              </b>
+              <el-button
+                style="float: right;font-size: 20px;color: black;text-align: end;"
+                type="text"
+                icon="el-icon-close"
+                @click="showedInfo = !showedInfo"
+              />
+            </template>
+            <el-timeline class="info">
+              <el-timeline-item
+                v-for="(logs, key) in nodeLogs"
+                :key="key"
+                :timestamp="translateDateByLong(logs.log_date)"
+                placement="top"
+              >
+                <el-card style="padding: 20px!important;">
+                  <span>
+                    <b> {{ $t('page.login.userName') }} : </b>{{ logs.user_name }} <i class="el-icon-user-solid" />
+                  </span>
+                  <br>
+                  <b v-show="!isEmptyValue(logs.text_message)"> {{ $t('report.summary') }}  :</b> {{ logs.text_message }}
+                  <br>
+                  <b v-show="!isEmptyValue(logs.responsible_name)"> {{ $t('window.containerInfo.logWorkflow.responsible') }}  :</b> {{ logs.responsible_name }}
+                </el-card>
+              </el-timeline-item>
+            </el-timeline>
+          </el-collapse-item>
+        </el-collapse>
       </el-card>
     </transition>
 
@@ -66,6 +114,7 @@
         :states="nodeList"
         :state-semantics="currentNode"
         :orientation="orientation"
+        style="position: inherit;"
         @state-click="onLabelClicked($event)"
       />
     </el-main>
@@ -127,8 +176,7 @@ export default {
 
     function onLabelClicked(id) {
       infoNode.value = props.nodeList.find(node => node.id === id)
-      nodeLogs.value = props.workflowLogs.filter(node => node.node_uuid === infoNode.value.uuid)
-
+      nodeLogs.value = props.workflowLogs.filter(node => node.node_uuid === infoNode.value.id)
       const menuMinWidth = 105
       const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
       const offsetWidth = this.$el.offsetWidth // container width
@@ -221,5 +269,21 @@ export default {
 }
 .vue-workflow-chart-transition-path-delete {
   stroke: #AED5FE;
+}
+.collapse-workflow {
+  width: 30% !important;
+  .el-collapse-item__content {
+    padding-bottom: 0px;
+    font-size: 13px;
+    color: #303133;
+    line-height: 1.7692307692;
+  }
+  .el-timeline-item {
+    position: relative;
+    padding-bottom: 0px;
+  }
+  .el-collapse-item__header {
+    width: 100% !important;
+  }
 }
 </style>

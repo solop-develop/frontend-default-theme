@@ -9,56 +9,62 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <el-popover
-    key="product-attribute"
-    ref="ProductAttribute"
-    v-model="isShowProductAttribute"
-    class="product-attribute"
-    placement="left-end"
-    width="500"
-    trigger="click"
-  >
-    <panel-product-attribute
-      class="product-attribute-form"
-      :parent-uuid="parentUuid"
-      :container-uuid="containerUuid"
-      :container-manager="containerManager"
-      :metadata="metadata"
-      :show="isShowProductAttribute"
-    />
-
-    <el-button
-      slot="reference"
-      class="button-product-attribute-show"
-      type="text"
-      style="width: 100%;"
-      :disabled="isDisabled"
+  <span>
+    <el-popover
+      ref="productAttribute"
+      v-model="isShowProductAttribute"
+      placement="top-end"
+      width="600"
+      trigger="click"
+      popper-class="product-attribute-popover"
     >
-      <el-input
-        v-model="displayedValueNotEdit"
-        v-bind="properties"
-        @clear="clearValues"
+      <panel-product-attribute
+        class="product-attribute-form"
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :container-manager="containerManager"
+        :metadata="metadata"
+      />
+    </el-popover>
+
+    <el-input
+      v-model="displayedValueNotEdit"
+      v-bind="properties"
+      @clear="clearValues"
+    >
+      <el-button
+        slot="append"
+        v-popover:productAttribute
+        class="button-show-popover"
+        :disabled="isDisabled"
       >
-        <el-button slot="append">
-          <svg-icon icon-class="setAttribute" />
-        </el-button>
-      </el-input>
-    </el-button>
-  </el-popover>
+        <svg-icon
+          icon-class="setAttribute"
+          style="font-size: 20px;"
+        />
+      </el-button>
+    </el-input>
+  </span>
 </template>
 
 <script>
-// components and mixins
+import store from '@/store'
+
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import panelProductAttribute from './panelProductAttribute'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'FieldProductAttribute',
@@ -68,7 +74,8 @@ export default {
   },
 
   mixins: [
-    fieldMixin
+    fieldMixin,
+    fieldWithDisplayColumn
   ],
 
   props: {
@@ -97,22 +104,40 @@ export default {
   },
 
   computed: {
+    cssClassCustomField() {
+      return ' custom-field-product-attribute '
+    },
+    productId() {
+      return store.getters.getValueOfField({
+        containerUuid: this.containerUuid,
+        columnName: 'M_Product_ID'
+      })
+    },
+    isDisabled() {
+      if (this.metadata.readonly || this.metadata.disabled) {
+        return true
+      }
+      if (isEmptyValue(this.productId) || this.productId <= 0) {
+        return true
+      }
+      return false
+    },
     isShowProductAttribute: {
       get() {
-        return this.$store.getters.getShowProductAttribute
+        return store.getters.getShowProductAttribute
       },
       set(value) {
         if (value && this.isEmptyValue(this.attributeSet) && this.metadata.tabTableName === 'M_Product') {
           this.$message({
-            message: this.$t('field.emptyFieldAttribute'),
+            message: this.$t('field.productAttribute.emptySetAttribute'),
             type: 'info',
             showClose: value
           })
-          this.$store.commit('setShowProductAttribute', !value)
-          this.$refs.ProductAttribute.showPopper = !value
+          store.commit('setShowProductAttribute', !value)
+          this.$refs.productAttribute.showPopper = !value
           return
         }
-        this.$store.commit('setShowProductAttribute', value)
+        store.commit('setShowProductAttribute', value)
       }
     },
     displayedValueNotEdit: {
@@ -129,34 +154,23 @@ export default {
         disabled: true
       }
     },
-    displayedValue: {
-      get() {
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
-          value
-        })
-      }
-    },
     popoverPlacement() {
       return this.metadata.popoverPlacement || 'top'
     },
     attributeSet() {
-      return this.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         columnName: 'M_AttributeSet_ID'
       })
+    }
+  },
+
+  watch: {
+    productId(newValue, oldValue) {
+      if (isEmptyValue(newValue)) {
+        this.clearValues()
+      }
     }
   },
 
@@ -165,11 +179,19 @@ export default {
       // TODO: Clear values into form
       this.value = undefined
       this.displayedValue = undefined
+      this.uuidValue = undefined
 
-      this.$store.dispatch('clearValuesOnContainer', {
+      store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm
       })
     }
   }
 }
 </script>
+
+<style lang="scss">
+.product-attribute-popover {
+  margin: 0px;
+  padding: 0px;
+}
+</style>

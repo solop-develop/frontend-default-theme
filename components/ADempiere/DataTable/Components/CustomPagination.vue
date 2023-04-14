@@ -32,22 +32,6 @@
       >
         <span class="selections-number">
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
-            <span v-show="(!isShowedTableRecords && isChangeRecord)">
-              <el-button
-                type="text"
-                icon="el-icon-arrow-down"
-                :disabled="disablePreviousRecord"
-                style="font-size: 20px;"
-                @click="changeNextRecord()"
-              />
-              <el-button
-                type="text"
-                icon="el-icon-arrow-up"
-                :disabled="disableNextRecord"
-                style="font-size: 20px;"
-                @click="changePreviousRecord()"
-              />
-            </span>
             <span v-show="isShowedTableRecords">
               {{ $t('table.dataTable.selected') }}: {{ selection }}
             </span>

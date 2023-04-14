@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -23,7 +23,6 @@
     :pattern="pattern"
     :maxlength="maxLength"
     :autofocus="metadata.inTable"
-    :size="inputSize"
     show-word-limit
     @change="preHandleChange"
     @blur="focusLost"
@@ -41,9 +40,12 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldMixinText from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldText.js'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
   name: 'FieldUrl',
@@ -72,41 +74,22 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      const { cssClassName, inTable } = this.metadata
-      let styleClass = ' custom-field-text '
-      if (!this.isEmptyValue(cssClassName)) {
-        styleClass += cssClassName
-      }
-
-      if (inTable) {
-        styleClass += ' field-in-table '
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-url '
     },
 
     validText() {
-      if (this.isEmptyValue(this.value)) {
+      if (isEmptyValue(this.value)) {
         return true
       }
-      if (this.isEmptyValue(this.patternValidate)) {
+      if (isEmptyValue(this.patternValidate)) {
         return true
       }
       return (new RegExp(this.patternValidate)).test(this.value)
     },
 
-    inputSize() {
-      if (this.isEmptyValue(this.metadata.inputSize)) {
-        return 'medium'
-      }
-      return this.metadata.inputSize
-    },
     maxLength() {
-      if (!this.isEmptyValue(this.metadata.fieldLength) && this.metadata.fieldLength > 0) {
+      if (!isEmptyValue(this.metadata.fieldLength) && this.metadata.fieldLength > 0) {
         return Number(this.metadata.fieldLength)
       }
       return undefined
@@ -116,7 +99,7 @@ export default {
 </script>
 
 <style lang="scss">
-  .custom-field-text {
-    max-height: 36px;
-  }
+.custom-field-url {
+  max-height: 36px;
+}
 </style>

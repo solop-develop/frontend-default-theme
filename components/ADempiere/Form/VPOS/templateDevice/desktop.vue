@@ -43,8 +43,14 @@
         <SplitArea :size="isShowedPOSOptions ? 80 : 99" :min-size="990">
           <Split :gutter-size="isShowedPOSKeyLaout ? 10 : 0" @onDrag="onDragKeyLayout">
             <SplitArea :size="isShowedPOSKeyLaout ? 69 : 99" :min-size="900" style="overflow: auto">
-              <order
+              <component-dialgo
+                v-if="!isEmptyValue(listShortkey)"
                 :metadata="metadata"
+              />
+              <order
+                v-shortkey="listShortkey"
+                :metadata="metadata"
+                @shortkey.native="actionShortkey"
               />
             </SplitArea>
             <el-drawer
@@ -72,6 +78,56 @@
         </SplitArea>
       </Split>
     </el-main>
+    <!-- Requires pin to execute the command -->
+    <el-dialog
+      :title="$t('form.pos.pinMessage.pin') + titleActionPinCommand"
+      :visible.sync="pinCommand"
+      close-on-press-escape
+      append-to-body
+      width="45%"
+      center
+      class="dialogo-seller"
+    >
+      <el-form autocomplete="off">
+        <el-input
+          id="pin"
+          ref="pin"
+          v-model="inputPin"
+          v-shortkey="pinCommand ? {close: ['esc'], enter: ['enter']} : {}"
+          autofocus
+          type="password"
+          :placeholder="$t('form.pos.tableProduct.pin')"
+          :focus="true"
+          autocomplete="off"
+          @shortkey.native="theAction"
+        />
+      </el-form>
+      <br>
+      <!-- Foot actions button panel -->
+      <el-button
+        type="primary"
+        icon="el-icon-check"
+        class="button-base-icon"
+        style="float: right; margin: 10px;"
+        @click="sendPin"
+      />
+      <el-button
+        type="danger"
+        icon="el-icon-close"
+        style="float: right;margin-top: 10px;"
+        class="button-base-icon"
+        @click="pinCommand = false"
+      />
+      <el-button
+        type="info"
+        plain
+        style="float: right; margin-top: 10px;"
+        class="button-base-icon"
+        @click="inputPin = ''"
+      >
+        <svg-icon icon-class="layers-clear" />
+      </el-button>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -80,6 +136,9 @@ import Order from '@theme/components/ADempiere/Form/VPOS/Order'
 import KeyLayout from '@theme/components/ADempiere/Form/VPOS/KeyLayout'
 import Options from '@theme/components/ADempiere/Form/VPOS/Options'
 import Collection from '@theme/components/ADempiere/Form/VPOS/Collection'
+import { selectCommand } from '../Options/MnemonicCommand/mnemonicCommandAction.js'
+import ComponentDialgo from '../Options/MnemonicCommand/component.vue'
+import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
 
 export default {
   name: 'VposDesktop',
@@ -87,7 +146,8 @@ export default {
     Order,
     KeyLayout,
     Options,
-    Collection
+    Collection,
+    ComponentDialgo
   },
   props: {
     metadata: {
@@ -97,7 +157,12 @@ export default {
   },
   data() {
     return {
-      unsubscribePOSList: () => {}
+      unsubscribePOSList: () => {},
+      pinCommand: false,
+      isLoadingPin: false,
+      titleActionPinCommand: '',
+      inputPin: '',
+      actionCommand: {}
     }
   },
   computed: {
@@ -118,6 +183,18 @@ export default {
     },
     listPointOfSales() {
       return this.$store.getters.posAttributes.pointOfSalesList
+    },
+    listShortkey() {
+      const list = this.$store.getters.getLisCommantShortkey
+      const command = {}
+      list.forEach(element => {
+        const { shortcut } = element
+        const option = shortcut.split(' ')
+        command[option[2]] = [option[0], option[2]]
+      })
+      const isModifyCommand = this.$store.getters.getModifyCommand
+      if (isModifyCommand) return
+      return command
     }
   },
   watch: {
@@ -133,7 +210,9 @@ export default {
   },
   created() {
     // load pont of sales list
+    this.$store.dispatch('listCommand')
     if (this.isEmptyValue(this.listPointOfSales)) {
+      // this.$store.dispatch('listCommand')
       // set pos id with query path
       this.$store.dispatch('listPointOfSalesFromServer', this.$route.query.pos)
     }
@@ -147,8 +226,70 @@ export default {
     handleClose() {
       this.$store.commit('setShowPOSCollection', false)
     },
+    actionShortkey(event) {
+      if (this.isEmptyValue(event)) return
+      const { srcKey } = event
+      const isRequirePin = selectCommand(srcKey)
+      if (isRequirePin.isRequirePin) {
+        this.actionCommand = isRequirePin
+        this.titleActionPinCommand = isRequirePin.pinName
+        this.pinCommand = isRequirePin.isRequirePin
+        setTimeout(() => {
+          this.focusPin()
+        }, 300)
+      }
+    },
+    theAction(event) {
+      if (this.pinCommand) {
+        switch (event.srcKey) {
+          case 'enter':
+            this.sendPin()
+            break
+          case 'close':
+            this.pinCommand = false
+            break
+        }
+      }
+    },
+    sendPin(pin) {
+      this.isLoadingPin = true
+      validatePin({
+        posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+        pin: this.inputPin,
+        requestedAccess: this.actionCommand.requestedAccess
+      })
+        .then(response => {
+          selectCommand({
+            ...this.actionCommand,
+            pinVerificationApproved: true
+          })
+          this.$message({
+            type: 'success',
+            message: this.$t('pointOfSales.pin.validateSuccessfully'),
+            showClose: true
+          })
+          this.pinCommand = false
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+          this.inputPin = ''
+          this.focusPin()
+        })
+        .finally(() => {
+          this.inputPin = ''
+          this.isLoadingPin = false
+        })
+    },
+    focusPin() {
+      this.$refs.pin.focus()
+    },
     posListWithOrganization() {
       return this.$store.subscribe((mutation, state) => {
+        // this.$store.dispatch('listCommand')
         if (mutation.type === 'user/SET_ORGANIZATION') {
           this.$store.dispatch('listPointOfSalesFromServer')
         }

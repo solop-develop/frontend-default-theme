@@ -538,6 +538,7 @@ export default defineComponent({
     }
     function closeShowList(params) {
       store.commit('showListResources', false)
+      store.commit('setDialogoComponent', false)
       // router.push({
       //   params: {
       //     ...router.app._route.params

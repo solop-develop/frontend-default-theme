@@ -24,8 +24,8 @@
     :value-format="formatSend"
     :type="typePicker"
     range-separator="-"
-    :start-placeholder="$t('components.dateStartPlaceholder')"
-    :end-placeholder="$t('components.dateEndPlaceholder')"
+    :start-placeholder="$t('component.date.startDate')"
+    :end-placeholder="$t('component.date.endDate')"
     unlink-panels
     :picker-options="pickerOptions"
     @change="preHandleChange"
@@ -37,14 +37,15 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// constants
+// Constants
 import { DATE_PLUS_TIME } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 
-// utils and helper methods
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { changeTimeZone } from '@/utils/ADempiere/formatValue/dateFormat'
 
 /**
@@ -61,19 +62,19 @@ export default {
     return {
       pickerOptionsDate: {
         shortcuts: [{
-          text: this.$t('components.date.Today'),
+          text: this.$t('component.date.today'),
           onClick(picker) {
             picker.$emit('pick', new Date())
           }
         }, {
-          text: this.$t('components.date.Yesterday'),
+          text: this.$t('component.date.yesterday'),
           onClick(picker) {
             const date = new Date()
             date.setTime(date.getTime() - 3600 * 1000 * 24)
             picker.$emit('pick', date)
           }
         }, {
-          text: this.$t('components.date.Week'),
+          text: this.$t('component.date.week'),
           onClick(picker) {
             const date = new Date()
             const monthEndDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
@@ -83,20 +84,20 @@ export default {
       },
       pickerOptionsDateRange: {
         shortcuts: [{
-          text: this.$t('components.date.Today'),
+          text: this.$t('component.date.today'),
           onClick(picker) {
             const currentDay = new Date()
             picker.$emit('pick', [currentDay, currentDay])
           }
         }, {
-          text: this.$t('components.date.Yesterday'),
+          text: this.$t('component.date.yesterday'),
           onClick(picker) {
             const start = new Date()
             start.setTime(start.getTime() - 3600 * 1000 * 24)
             picker.$emit('pick', [start, start])
           }
         }, {
-          text: this.$t('components.date.Week'),
+          text: this.$t('component.date.week'),
           onClick(picker) {
             const start_date = new Date()
             start_date.setHours(0, 0, 0, 0)
@@ -110,7 +111,7 @@ export default {
             picker.$emit('pick', [start_date, end_date])
           }
         }, {
-          text: this.$t('components.date.currentWeek'),
+          text: this.$t('component.date.currentWeek'),
           onClick(picker) {
             const start_date = new Date()
             start_date.setHours(0, 0, 0, 0)
@@ -124,7 +125,7 @@ export default {
             picker.$emit('pick', [start_date, end_date])
           }
         }, {
-          text: this.$t('components.date.LastMonth'),
+          text: this.$t('component.date.lastMonth'),
           onClick(picker) {
             const date = new Date()
             const monthEndDay = new Date(date.getFullYear(), date.getMonth(), 0)
@@ -132,7 +133,7 @@ export default {
             picker.$emit('pick', [monthStartDay, monthEndDay])
           }
         }, {
-          text: this.$t('components.date.CurrentMonth'),
+          text: this.$t('component.date.currentMonth'),
           onClick(picker) {
             const date = new Date()
             const monthEndDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
@@ -163,17 +164,8 @@ export default {
       }
       return picker
     },
-    cssClassStyle() {
-      let styleClass = ' custom-field-date '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-date '
     },
     isMultipleValues() {
       return this.metadata.isAdvancedQuery &&
@@ -184,13 +176,13 @@ export default {
      */
     formatView() {
       let format = ''
-      if (!this.isEmptyValue(this.metadata.vFormat)) {
+      if (!isEmptyValue(this.metadata.vFormat)) {
         format = this.metadata.vFormat
           .replace(/[Y]/gi, 'y')
           .replace(/[m]/gi, 'M')
           .replace(/[D]/gi, 'd')
       }
-      if (this.isEmptyValue(format)) {
+      if (isEmptyValue(format)) {
         format = 'yyyy-MM-dd'
       }
       if (this.typePicker.replace('range', '') === 'datetime') {
@@ -257,7 +249,7 @@ export default {
             if (typeof value !== 'object' && value !== undefined) {
               value = new Date(value)
             }
-            return this.containerManager.setCell({
+            this.containerManager.setCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
@@ -270,8 +262,8 @@ export default {
         startValue = value
 
         if (this.isRenderRange && !this.metadata.inTable && Array.isArray(value)) {
-          startValue = value[0]
-          endValue = value[1]
+          startValue = value.at(0)
+          endValue = value.at(1)
         }
 
         if (startValue === null) {
@@ -311,7 +303,7 @@ export default {
   methods: {
     parseValue(value) {
       // not return undefined to v-model
-      if (this.isEmptyValue(value)) {
+      if (isEmptyValue(value)) {
         if (this.isMultipleValues) {
           return []
         }
@@ -328,7 +320,7 @@ export default {
           })
         } else {
           const tempValue = []
-          if (!this.isEmptyValue(value)) {
+          if (!isEmptyValue(value)) {
             tempValue.push(value)
           }
           value = tempValue
@@ -345,17 +337,17 @@ export default {
       if (this.isRenderRange && !this.metadata.inTable) {
         let valueTo
         if (Array.isArray(value)) {
-          valueTo = value[1]
-          value = value[0]
+          valueTo = value.at(1)
+          value = value.at(0)
         }
         if (typeof valueTo === 'number') {
           valueTo = new Date(valueTo).toUTCString()
         }
-        if (this.isEmptyValue(valueTo)) {
+        if (isEmptyValue(valueTo)) {
           valueTo = undefined
         }
         value = [value, valueTo]
-        if (this.isEmptyValue(value[0]) || this.isEmptyValue(value[1])) {
+        if (isEmptyValue(value.at(0)) || isEmptyValue(value.at(1))) {
           value = []
         }
       }
@@ -376,8 +368,8 @@ export default {
       }
 
       if (this.isRenderRange && !this.metadata.inTable && Array.isArray(value)) {
-        startValue = value[0]
-        endValue = value[1]
+        startValue = value.at(0)
+        endValue = value.at(1)
       }
 
       if (startValue === null) {

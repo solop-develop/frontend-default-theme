@@ -9,22 +9,22 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <el-autocomplete
-    ref="displayBPartner"
+    ref="autocompleteGeneralInfo"
     v-model="displayedValue"
     v-bind="commonsProperties"
     value-key="name"
     clearable
     style="width: 100%;max-height: 60px;"
-    popper-class="custom-field-bpartner-info"
+    popper-class="custom-field-search-info"
     :trigger-on-focus="false"
     :fetch-suggestions="localSearch"
     :select-when-unmatched="true"
@@ -57,13 +57,14 @@
 </template>
 
 <script>
+import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
 import ButtonGeneralInfoSearch from './button.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -103,12 +104,15 @@ export default {
   },
 
   computed: {
-    // to recrods list overwrite
+    cssClassCustomField() {
+      return ' custom-field-search-info '
+    },
     uuidForm() {
       return this.metadata.containerUuid
     },
+    // to records list overwrite
     recordsList() {
-      return this.$store.getters.getGeneralInfoRecordsList({
+      return store.getters.getGeneralInfoRecordsList({
         containerUuid: this.uuidForm
       })
     }
@@ -160,7 +164,7 @@ export default {
 </script>
 
 <style lang="scss">
-.custom-field-bpartner-info {
+.custom-field-search-info {
   // button icon suffix
   .button-search {
     padding-left: 10px !important;
@@ -173,7 +177,7 @@ export default {
 }
 </style>
 <style lang="scss" scope>
-.custom-field-bpartner-info {
+.custom-field-search-info {
   // items of lust
   li {
     line-height: normal;

@@ -9,11 +9,11 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -34,7 +34,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             type="text"
             @click="openReference(reference)"
           >
-            {{ $t('table.ProcessActivity.zoomIn') }}
+            <i class="el-icon-zoom-in" />
+            {{ $t('page.processActivity.zoomIn') }}
           </el-button>
         </el-descriptions-item>
       </el-descriptions>
@@ -47,27 +48,16 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
-// components and mixins
-import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
-
-// constants
-import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
-
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
-import Filters from '@/utils/ADempiere/filters.js'
 
 export default defineComponent({
   name: 'ReferenceRecords',
-
-  components: {
-    DocumentStatusTag
-  },
 
   props: {
     recordUuid: {
@@ -88,33 +78,7 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
-    const currentRecordLogs = ref({ name: 'nada' })
-    const currentKey = ref(0)
-    const typeAction = ref(0)
-    const currentTabLogs = ref('0')
-
-    // use getter to reactive properties
-    const listLogs = computed(() => {
-      return store.getters.getRecordLogs
-    })
-
-    /**
-     * showkey
-     */
-    const showkey = (key, index) => {
-      if (key === currentKey.value && index === typeAction.value) {
-        currentKey.value = 1000
-      } else {
-        currentKey.value = key
-        typeAction.value = index
-      }
-    }
-
-    const validate = (list) => {
-      return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
-    }
-
+  setup(props) {
     const getterReferences = computed(() => {
       return store.getters.getStoredReferences({
         windowUuid: props.parentUuid,
@@ -124,32 +88,26 @@ export default defineComponent({
     })
 
     function openReference(referenceElement) {
-      if (!isEmptyValue(referenceElement.windowUuid)) {
-        const pairsValues = Filters.newInstance()
-          .setFiltersWithSQL(referenceElement.whereClause)
-          .getAsArray()
-        zoomIn({
-          uuid: referenceElement.windowUuid,
-          params: {
-            filters: pairsValues,
-            containerUuid: props.tabUuid
-          }
-        })
-        store.commit('setShowLogs', false)
+      if (isEmptyValue(referenceElement.windowUuid)) {
+        return
       }
+
+      zoomIn({
+        uuid: referenceElement.windowUuid,
+        params: {
+          containerUuid: props.tabUuid
+        },
+        query: {
+          referenceUuid: referenceElement.uuid
+        }
+      })
+      store.commit('setShowLogs', false)
     }
 
     return {
-      currentTabLogs,
-      currentRecordLogs,
-      typeAction,
-      currentKey,
-      listLogs,
-      // Comuted
+      // Computeds
       getterReferences,
-      // methods
-      validate,
-      showkey,
+      // Methods
       openReference
     }
   }
@@ -159,9 +117,5 @@ export default defineComponent({
 <style>
 .zoom-reference {
   text-align: center !important;
-}
-
-.scroll-attachment {
-  max-height: 80vh;
 }
 </style>

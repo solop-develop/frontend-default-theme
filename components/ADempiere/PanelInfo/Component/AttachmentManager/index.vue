@@ -21,55 +21,53 @@
     <div v-if="isEmptyValue(attachmentList)">
       <el-empty />
     </div>
-
-    <el-upload
-      ref="upload"
-      action="#"
-      list-type="picture-card"
-      :auto-upload="true"
-      :file-list="attachmentList"
-      :before-upload="beforeAvatarUpload"
-    >
-      <i slot="default" class="el-icon-plus" />
-      <div slot="file" slot-scope="{file}">
-        <el-image
-          class="image-card-attachment"
-          :src="file.image"
-          fit="contain"
-        >
-          <div slot="error" class="image-slot-error">
-            <h1 class="image-slot-error">
-              <b>
-                .{{ getExtensionFromFile(file.file_name) }}
-              </b>
-            </h1>
+    <el-row :gutter="20" style="margin-left: 0px; margin-right: 5px; text-align: end;">
+      <el-button v-if="isList" plain type="text" style="color: black;" @click="isList = !isList">
+        <b style="font-size: 28px;">
+          <svg-icon icon-class="grid-gallery" />
+        </b>
+      </el-button>
+      <el-button v-else plain type="text" style="color: black;" @click="isList = !isList">
+        <b style="font-size: 28px;">
+          <svg-icon icon-class="list-gallery" />
+        </b>
+      </el-button>
+    </el-row>
+    <el-row v-if="!isList" :gutter="20">
+      <el-col v-for="(file, key) in attachmentList" :key="key" :span="8">
+        <el-card shadow="hover" class="image-attachment">
+          <p style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"> {{ file.title }} </p>
+          <el-image
+            class="image-card-attachment"
+            :src="file.imageDate.uri"
+            fit="contain"
+            :preview-src-list="previewList"
+            style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;"
+          />
+          <el-button icon="el-icon-download" plain style="margin-bottom: 10px;" @click="handleDownload(file)" />
+          <el-button icon="el-icon-delete" plain style="margin-bottom: 10px;" @click="handleRemove(file)" />
+        </el-card>
+      </el-col>
+    </el-row>
+    <el-row v-else :gutter="20">
+      <el-col v-for="(file, key) in attachmentList" :key="key" :span="24">
+        <el-card shadow="hover" class="image-attachment">
+          <div style="float: left;width: 20%; height: 100px;">
+            <el-image
+              class="image-card-attachment"
+              :src="file.imageDate.uri"
+              fit="contain"
+              :preview-src-list="previewList"
+              style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;width: 150px;height: 100px;float: left;"
+            />
           </div>
-        </el-image>
+          <div style="float: left;padding-top: 5%;">
+            <span> {{ file.title }} </span>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
 
-        <span class="el-upload-list__item-actions">
-          <span
-            class="el-upload-list__item-preview"
-            @click="handlePictureCardPreview(file)"
-          >
-            <i class="el-icon-zoom-in" />
-          </span>
-          <span
-            v-if="!disabled"
-            class="el-upload-list__item-delete"
-            @click="handleDownload(file)"
-          >
-            <i class="el-icon-download" />
-          </span>
-          <span
-            v-if="!disabled"
-            class="el-upload-list__item-delete"
-            @click="handleRemove(file)"
-          >
-            <i class="el-icon-delete" />
-          </span>
-        </span>
-      </div>
-    </el-upload>
     <br>
 
     <span>
@@ -79,37 +77,13 @@
         :record-uuid="recordUuid"
       />
     </span>
-
-    <el-dialog
-      v-if="!isEmptyValue(dialogImageUrl.content_type)"
-      :visible.sync="dialogVisible"
-      :title="dialogImageUrl.file_name"
-      :append-to-body="true"
-      :show-close="true"
-    >
-      <span v-if="!isLoadeDialogFileUrl">
-        <img v-if="dialogImageUrl.content_type.includes('image')" width="100%" :src="dialogImageUrl.src" alt="">
-        <file-render
-          v-else
-          :format="'pdf'"
-          :content="dialogImageUrl.src"
-          :src="dialogImageUrl.src"
-          :mime-type="dialogImageUrl.content_type"
-          :name="dialogImageUrl.file_name"
-        />
-      </span>
-      <loading-view
-        v-else
-        key="attachment-loading"
-      />
-    </el-dialog>
   </span>
 </template>
 
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import axios from 'axios'
+// import axios from 'axios'
 import store from '@/store'
 
 // API Request Methods
@@ -121,9 +95,11 @@ import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import UploadResource from './uploadResource.vue'
 
 // Utils and Helper Methods
+import { requestResource } from '@/api/ADempiere/user-interface/component/resource.js'
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'AttachmentManager',
@@ -159,6 +135,7 @@ export default defineComponent({
     const disabled = ref(false)
     const pdfAttachment = ref([])
     const imageAttachment = ref([])
+    const isList = ref(false)
 
     /**
      * Computed
@@ -183,17 +160,23 @@ export default defineComponent({
           if (element.content_type.includes('image')) {
             return {
               ...element,
-              image: getImageFromSource(element)
+              title: element.file_name.replace(element.resource_uuid, ''),
+              imageDate: getImageFromSource(element)
             }
           }
           return {
             ...element,
-            image: converFile(element)
+            title: element.file_name.replace(element.resource_uuid, ''),
+            imageDate: converFile(element)
           }
         })
       }
     })
 
+    const previewList = computed(() => {
+      return attachmentList.value.map(file => file.imageDate.uri)
+    })
+    const imageKey = ref(0)
     /**
      * Methods
      */
@@ -211,40 +194,60 @@ export default defineComponent({
     }
 
     const handlePictureCardPreview = (file) => {
+      imageKey.value = attachmentList.value.findIndex(list => list.imageDate.uri === file.imageDate.uri)
       // if (file.content_type.includes('application/pdf')) {
       isLoadeDialogFileUrl.value = true
       dialogImageUrl.value = handleDownload(file, false)
       dialogVisible.value = true
-      //   return
-      // }
-      // dialogImageUrl.value = file
-      // dialogVisible.value = true
     }
     const handleDownload = async(file, isDownload = true) => {
-      if (isEmptyValue(file.url)) return
+      // if (isEmptyValue(file.url)) return
+      // file.url = URL.createObjectURL(file)
       let link
-      const urlImage = await axios.get(file.url.uri)
-        .then(response => {
-          const { data } = response
-          const blob = new Blob([Uint8Array.from(data.result.data)], {
-            type: 'application/pdf'
-          })
-          link = document.createElement('a')
-          link.href = window.URL.createObjectURL(blob)
-          link.download = file.file_name
-          if (isDownload) {
-            link.click()
-          }
-          dialogImageUrl.value = {
-            ...file,
-            src: link.href
-          }
-          isLoadeDialogFileUrl.value = false
-        })
-      return {
-        urlImage,
-        link
+      if (file.content_type.includes('image')) {
+        const imagen = await fetch(file.imageDate.uri)
+        const imagenblob = await imagen.blob()
+        const imageURL = URL.createObjectURL(imagenblob)
+        link = document.createElement('a')
+        link.href = imageURL
+        link.download = file.title
+        link.click()
+        return
       }
+      requestResource({
+        resourceUuid: file.resource_uuid
+      })
+        .then(response => {
+          console.log({ response })
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+      // const urlImage = await axios.get(file.imageDate. )
+      //   .then(response => {
+      //     const { data } = response
+        //     const blob = new Blob([Uint8Array.from(data)], {
+        //       type: file.content_type
+        //     })
+      //     link = document.createElement('a')
+      //     link.href = window.URL.createObjectURL(blob)
+      //     link.download = file.file_name
+      //     if (isDownload) {
+      //       link.click()
+      //     }
+      //     dialogImageUrl.value = {
+      //       ...file,
+      //       src: link.href
+      //     }
+      //     isLoadeDialogFileUrl.value = false
+      //   })
+      // return {
+      //   urlImage,
+      //   link
+      // }
     }
 
     const converFile = (image) => {
@@ -263,7 +266,9 @@ export default defineComponent({
           urlImage
           break
       }
-      return urlImage
+      return {
+        uri: urlImage
+      }
     }
 
     const beforeAvatarUpload = (file) => {
@@ -281,7 +286,8 @@ export default defineComponent({
         width: 900,
         height: 500
       })
-      return image.uri
+      // beforeAvatarUpload(file)
+      return image
     }
     const octetStream = (file) => {
       let urlImage
@@ -302,9 +308,12 @@ export default defineComponent({
       disabled,
       imageAttachment,
       pdfAttachment,
+      isList,
       // computed
       listImageAll,
       attachmentList,
+      imageKey,
+      previewList,
       // methods
       beforeAvatarUpload,
       converFile,
@@ -360,5 +369,24 @@ export default defineComponent({
   vertical-align: top;
   display: none;
   width: 100%;
+}
+</style>
+<style lang="scss">
+.image-attachment {
+  .el-card__body {
+    padding-top: 0px !important;
+    padding-right: 0px;
+    padding-bottom: 0px!important;
+    padding-left: 0px;
+    text-align: center;
+  }text-align: center;
+  .el-card:hover {
+    background-color: #eaf5fe;
+    border: 1px solid #36a3f7;
+  }
+}
+.image-attachment:hover {
+  background-color: #eaf5fe;
+  border: 1px solid #36a3f7;
 }
 </style>

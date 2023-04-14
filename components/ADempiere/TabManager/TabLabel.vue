@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,18 +9,18 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <span>
     <b
       v-if="isActiveCurrentTab"
-      style="width: 100% !important;color: #1890ff;font-size: 17px;height: 100% !important;margin: 0px;padding: 0px;height: 100% !important;"
+      style="width: 100% !important;color: #1890ff;font-size: 16px;height: 100% !important;margin: 0px;padding: 0px;height: 100% !important;"
     >
       |
     </b>
@@ -71,10 +71,13 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
 import store from '@/store'
-// components and mixins
+
+// Components and Mixins
 import LockRecord from '@theme/components/ADempiere/ContainerOptions/LockRecord/index.vue'
-// utils and helper methods
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
@@ -99,16 +102,16 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const tabMetadata = computed(() => {
-      return root.$store.getters.getStoredTab(
+      return store.getters.getStoredTab(
         props.parentUuid,
         props.containerUuid
       )
     })
 
     const windowMetadata = computed(() => {
-      return root.$store.getters.getStoredWindow(
+      return store.getters.getStoredWindow(
         props.parentUuid
       )
     })
@@ -136,7 +139,7 @@ export default defineComponent({
      */
     function changeShowedTab() {
       if (tabMetadata.value.isParentTab) {
-        root.$store.commit('changeWindowAttribute', {
+        store.commit('changeWindowAttribute', {
           uuid: props.parentUuid,
           attributeName: 'isShowedTabsParent',
           attributeValue: !windowMetadata.value.isShowedTabsParent
@@ -144,7 +147,7 @@ export default defineComponent({
         return
       }
 
-      root.$store.commit('changeWindowAttribute', {
+      store.commit('changeWindowAttribute', {
         uuid: props.parentUuid,
         attributeName: 'isShowedTabsChildren',
         attributeValue: !windowMetadata.value.isShowedTabsChildren

@@ -9,16 +9,16 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <el-autocomplete
-    ref="displayBPartner"
+    ref="autocompleteBPartner"
     v-model="displayedValue"
     v-bind="commonsProperties"
     value-key="name"
@@ -59,16 +59,16 @@
 </template>
 
 <script>
-// contants
-import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
-
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
 import businessPartnerMixin from './mixinBusinessPartner'
 import ButtonBusinessPartnersList from './buttonBusinessPartnersList.vue'
 
-// utils and helper methods
+// Constants
+import { TABLE_NAME } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -100,6 +100,9 @@ export default {
   },
 
   computed: {
+    cssClassCustomField() {
+      return ' custom-field-bpartner-info '
+    },
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid
@@ -118,14 +121,17 @@ export default {
     },
     searchFocus() {
       // if (this.recordsList.length <= 1) {
-      //   this.$refs.displayBPartner.close()
+      //   this.$refs.autocompleteBPartner.close()
       // } else {
-      //   this.$refs.displayBPartner.getData()
+      //   this.$refs.autocompleteBPartner.getData()
       // }
+      if (!isEmptyValue(this.displayedValue)) {
+        this.$refs.autocompleteBPartner.$el.firstElementChild.firstElementChild.select()
+      }
       this.setNewDisplayedValue()
     },
     keyPressField() {
-      if (!this.isEmptyValue(this.$refs['displayBPartner' + this.metadata.columnName])) {
+      if (!this.isEmptyValue(this.$refs['autocompleteBPartner' + this.metadata.columnName])) {
         this.remoteSearch(this.displayedValue, true)
       }
     },
@@ -139,6 +145,7 @@ export default {
 
       // prevent losing display value with focus
       this.controlDisplayed = this.generateDisplayedValue(recordSelected)
+      this.$refs.autocompleteBPartner.activated = false
     },
     remoteSearch(searchValue, isKeyEnterPress) {
       return new Promise(resolve => {

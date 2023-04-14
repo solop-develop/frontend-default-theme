@@ -9,20 +9,22 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// constants
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import store from '@/store'
+
+// Constants
+import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils.js'
 
-// utils and helpers methods
-import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+// Utils and Helper Methods
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
@@ -50,10 +52,15 @@ export default {
       return LOCATION_ADDRESS_FORM
     },
     countryId() {
-      return this.$store.getters.getValueOfField({
+      return store.getters.getValueOfField({
         containerUuid: this.uuidForm,
         columnName: 'C_Country_ID'
       })
+    },
+    currentCountryDefinition() {
+      return store.getters.getStoredCountryFromId({
+        id: this.countryId
+      }) || {}
     },
     blankValues() {
       return {
@@ -65,21 +72,16 @@ export default {
         [this.metadata.displayColumnName]: undefined
       }
     },
-    currentCountryDefinition() {
-      return this.$store.getters.getStoredCountryFromId({
-        id: this.countryId
-      })
-    },
     isShowedLocationForm: {
       get() {
-        return this.$store.getters.getIsShowedLocation
+        return store.getters.getIsShowedLocation
       },
       set(value) {
-        this.$store.commit('setShowedLocation', Boolean(value))
+        store.commit('setShowedLocation', Boolean(value))
       }
     },
     currentTab() {
-      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+      if (isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
         return {}
       }
       return this.containerManager.getPanel({
@@ -88,7 +90,9 @@ export default {
       })
     },
     currentRecord() {
-      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
+      return store.getters.getTabCurrentRow({
+        containerUuid: this.metadata.containerUuid
+      })
     }
   },
 
@@ -100,15 +104,20 @@ export default {
 
   methods: {
     clearValues() {
-      this.setValues({ values: this.blankValues })
+      this.setValues({
+        values: this.blankValues
+      })
 
-      this.$store.dispatch('clearValuesOnContainer', {
+      this.clearFormValues()
+    },
+    clearFormValues() {
+      store.dispatch('clearValuesOnContainer', {
         containerUuid: this.uuidForm
       })
     },
     setContainerInformation() {
-      if (!this.isEmptyValue(this.currentTab)) {
-        this.$store.dispatch('panelInfo', {
+      if (!isEmptyValue(this.currentTab)) {
+        store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord
         })
@@ -127,7 +136,7 @@ export default {
     generateDisplayedValue(entityValues) {
       let displayValue = ''
 
-      if (this.isEmptyValue(entityValues)) {
+      if (isEmptyValue(entityValues)) {
         return displayValue
       }
 
@@ -138,9 +147,9 @@ export default {
       }
 
       // TODO: Change with current country display sequence
-      let displaySequence = this.$store.getters.getDisplaySequence
+      let displaySequence = store.getters.getDisplaySequence
       const country = this.currentCountryDefinition
-      if (!this.isEmptyValue(country)) {
+      if (!isEmptyValue(country)) {
         displaySequence = country.displaySequence
       }
       const locationDisplayedSequence = getSequenceAsList(displaySequence)
@@ -167,10 +176,10 @@ export default {
       })
 
       const addDisplayValue = (value) => {
-        if (this.isEmptyValue(value)) {
+        if (isEmptyValue(value)) {
           value = ''
         }
-        if (!this.isEmptyValue(displayValue)) {
+        if (!isEmptyValue(displayValue)) {
           displayValue += ', ' + value
         } else {
           displayValue = value
@@ -190,11 +199,11 @@ export default {
         const displayColumnName = DISPLAY_COLUMN_PREFIX + columnName
 
         let currrentValue = ''
-        if (!this.isEmptyValue(entityValues[displayColumnName])) {
+        if (!isEmptyValue(entityValues[displayColumnName])) {
           currrentValue = entityValues[displayColumnName]
         }
 
-        if (this.isEmptyValue(currrentValue)) {
+        if (isEmptyValue(currrentValue)) {
           if (columnName === 'C_City_ID') {
             currrentValue = entityValues['City']
           }
@@ -202,14 +211,14 @@ export default {
             currrentValue = entityValues['RegionName']
           }
 
-          if (this.isEmptyValue(currrentValue)) {
-            currrentValue = this.$store.getters.getValueOfField({
+          if (isEmptyValue(currrentValue)) {
+            currrentValue = store.getters.getValueOfField({
               containerUuid: this.uuidForm,
               columnName: displayColumnName
             })
           }
         }
-        if (this.isEmptyValue(currrentValue)) {
+        if (isEmptyValue(currrentValue)) {
           currrentValue = entityValues[columnName]
         }
 

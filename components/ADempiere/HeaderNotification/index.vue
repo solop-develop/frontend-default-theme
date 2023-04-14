@@ -1,68 +1,85 @@
+<!--
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
+-->
+
 <template>
   <el-badge
-    :value="processNotifications.length"
-    :hidden="processNotifications.length === 0"
+    :value="total"
+    :hidden="total === 0"
     type="primary"
     class="item"
     style="vertical-align: baseline;"
   >
     <el-popover
+      ref="badgeNotifications"
       placement="bottom"
       width="400"
       trigger="click"
     >
-      <el-table
-        :data="processNotifications"
-        :highlight-current-row="true"
-        @cell-click="handleCurrentChange"
-      >
-        <el-table-column prop="name" :label="$t('navbar.badge.Notifications')" />
-
-        <el-table-column
-          fixed="right"
-          width="50"
+      <div class="badge-notifications-table">
+        <el-table
+          :data="processNotifications"
+          :highlight-current-row="true"
+          @cell-click="handleCurrentChange"
         >
-          <template slot="header">
-            <el-button
-              icon="el-icon-delete"
-              type="text"
-              @click.native.prevent="deleteAll()"
-            />
-          </template>
+          <el-table-column prop="name" :label="$t('navbar.badge.Notifications')" />
+          <el-table-column prop="quantity" :align="'right'" :label="$t('form.pos.tableProduct.quantity')" width="100" />
 
-          <template slot-scope="scope">
-            <el-button
-              icon="el-icon-close"
-              type="text"
-              size="small"
-              @click.native.prevent="deleteRow(scope.$index, processNotifications)"
-            />
-          </template>
-        </el-table-column>
+          <!-- <el-table-column
+            fixed="right"
+            width="50"
+          >
+            <template slot="header">
+              <el-button
+                icon="el-icon-delete"
+                type="text"
+                @click.native.prevent="deleteAll()"
+              />
+            </template>
 
-        <el-table-column
-          width="50"
-        >
-          <template slot="header">
-            <!-- <el-button"
-              type="text"
-              @click="handleCurrentChange()"
-            > -->
-            <svg-icon icon-class="tree-table" />
-            <!-- </el-button> -->
-          </template>
-          <template slot-scope="scope">
-            <el-button
-              type="text"
-              size="small"
-              style="color: black"
-              @click="openProcess(scope.$index, getRecordNotification)"
-            >
+            <template slot-scope="scope">
+              <el-button
+                icon="el-icon-close"
+                type="text"
+                size="small"
+                @click.native.prevent="deleteRow(scope.$index, processNotifications)"
+              />
+            </template>
+          </el-table-column>
+
+          <el-table-column
+            width="50"
+          >
+            <template slot="header">
               <svg-icon icon-class="tree-table" />
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+            <template slot-scope="scope">
+              <el-button
+                type="text"
+                size="small"
+                style="color: black"
+                @click="openProcess(scope.$index, getRecordNotification)"
+              >
+                <svg-icon icon-class="tree-table" />
+              </el-button>
+            </template>
+          </el-table-column> -->
+        </el-table>
+      </div>
 
       <el-button
         slot="reference"
@@ -75,84 +92,114 @@
 </template>
 
 <script>
-export default {
+import { defineComponent, ref, computed } from '@vue/composition-api'
+
+import router from '@/router'
+import store from '@/store'
+
+// Utils and Helper Methods
+import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { getToken } from '@/utils/auth'
+
+export default defineComponent({
   name: 'HeaderNotification',
 
-  data() {
-    return {
-      currentRow: null
-    }
-  },
-  computed: {
-    processNotifications() {
-      // TODO: Add process runs
-      return []
-      /*
-      return this.$store.getters.getNotificationProcess.map(item => {
-        if (item.typeActivity) {
-          return {
-            ...item,
-            name: item.name + ' ' + item.quantityActivities
-          }
+  setup() {
+    const badgeNotifications = ref(null)
+    // const show = ref(false)
+
+    const processNotifications = computed({
+      get() {
+        return store.getters.getListNotifiications
+      },
+      set(value) {
+        return value
+      }
+    })
+
+    const total = computed({
+      get() {
+        let count = 0
+        if (!isEmptyValue(processNotifications.value)) {
+          processNotifications.value.forEach(element => {
+            count += element.quantity
+          })
         }
-        return item
+        return count
+      },
+      set(value) {
+        return value
+      }
+    })
+
+    // function close() {
+    //   // this.$refs.badge && this.$refs.badge.blur()
+    //   show.value = false
+    // }
+
+    function handleCurrentChange(notification) {
+      if (notification.name === 'Solicitud' || notification.name === 'Request') {
+        router.push({
+          name: 'Issues'
+        }, () => {})
+        return
+      }
+      zoomIn({
+        uuid: notification.action_uuid
       })
-      */
+      badgeNotifications.value.showPopper = false
     }
-  },
-  watch: {
-    show(value) {
-      if (value) {
-        document.body.addEventListener('click', this.close)
-      } else {
-        document.body.removeEventListener('click', this.close)
-      }
-    }
-  },
-  methods: {
-    close() {
-      this.$refs.badge && this.$refs.badge.blur()
-      this.options = []
-      this.show = false
-    },
-    handleCurrentChange(notification, val, index, rows) {
-      if (!this.isEmptyValue(notification.typeActivity) && notification.typeActivity) {
-        return ''
-      }
 
-      if (val !== null) {
-        let options = {
-          name: 'ProcessActivity'
-        }
-        if (notification && notification.isReport && val.className !== 'procesActivity') {
-          options = {
-            name: 'Report Viewer',
-            params: {
-              reportUuid: notification.reportUuid,
-              instanceUuid: notification.instanceUuid,
-              fileName: notification.download
+    // function openProcess(index, rows) {
+    //   router.push({
+    //     name: '8e51c232-fb40-11e8-a479-7a0060f0aa01'
+    //   }, () => {})
+    //   deleteRow(index, processNotifications.value)
+    // }
+
+    // function deleteRow(index, rows) {
+    //   rows.splice(index, 1)
+    // }
+
+    // function deleteAll() {
+    //   // rows.splice(index, rows.lenght)
+    //   processNotifications.value.splice(0)
+    // }
+
+    function listActivities() {
+      total.value = 0
+      store.dispatch('findNotifications')
+        .finally(() => {
+          setTimeout(() => {
+            if (!isEmptyValue(getToken())) {
+              listActivities()
             }
-          }
-        }
+          }, 90000)
+        })
+    }
 
-        this.$router.push(options, () => {})
-      }
-    },
-    openProcess(index, rows) {
-      this.$router.push({
-        name: '8e51c232-fb40-11e8-a479-7a0060f0aa01'
-      }, () => {})
-      this.deleteRow(index, this.processNotifications)
-    },
-    deleteRow(index, rows) {
-      rows.splice(index, 1)
-    },
-    deleteAll() {
-      // rows.splice(index, rows.lenght)
-      this.processNotifications.splice(0)
+    // watch(show, (newValue, oldValue) => {
+    //   if (newValue) {
+    //     document.body.addEventListener('click', close)
+    //   } else {
+    //     document.body.removeEventListener('click', close)
+    //   }
+    // })
+
+    listActivities()
+
+    return {
+      badgeNotifications,
+      total,
+      processNotifications,
+      // methods
+      handleCurrentChange
+      // deleteAll,
+      // openProcess
     }
   }
-}
+})
 </script>
 
 <style>
@@ -163,4 +210,11 @@ export default {
     -webkit-transform: translateY(-50%) translateX(100%);
     transform: translateY(-50%) translateX(100%);
   }
+</style>
+<style lang="scss">
+.badge-notifications-table{
+  .el-table tr {
+    height: 35px;
+  }
+}
 </style>

@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -29,10 +29,10 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default {
@@ -43,12 +43,8 @@ export default {
   ],
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-yes-no '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-yes-no '
     }
   },
 

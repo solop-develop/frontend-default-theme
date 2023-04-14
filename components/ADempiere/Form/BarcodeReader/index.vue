@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez Elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -57,7 +57,7 @@
               <div class="product-price-base">
                 Precio Base
                 <span class="amount">
-                  {{ formatPrice(productPrice.priceBase, productPrice.currency.iSOCode) }}
+                  {{ formatPrice({ value: productPrice.priceBase, currency: productPrice.currency.iSOCode }) }}
                 </span>
               </div>
               <br><br><br>
@@ -65,13 +65,13 @@
               <div class="product-tax">
                 {{ productPrice.taxName }}
                 <span class="amount">
-                  {{ formatPrice(productPrice.taxAmt, productPrice.currency.iSOCode) }}
+                  {{ formatPrice({ value: productPrice.taxAmt, currency: productPrice.currency.iSOCode }) }}
                 </span>
               </div>
               <br><br><br>
 
               <div class="product-price amount">
-                {{ formatPrice(productPrice.grandTotal, productPrice.currency.iSOCode) }}
+                {{ formatPrice({ value: productPrice.grandTotal, currency: productPrice.currency.iSOCode }) }}
               </div>
             </el-col>
           </el-row>
@@ -98,7 +98,7 @@ import LoadingView from '@theme/components/ADempiere/LoadingView'
 import { requestImage } from '@/api/ADempiere/user-interface/component/resource.js'
 
 // utils and helper methods
-import { formatPercent, formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 import { buildImageFromArrayBuffer } from '@/utils/ADempiere/resource.js'
 
 export default {
@@ -186,7 +186,6 @@ export default {
     focusProductValue() {
       this.$refs.ProductValue[0].$children[0].$children[0].$children[1].$children[0].focus()
     },
-    formatPercent,
     formatPrice,
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {

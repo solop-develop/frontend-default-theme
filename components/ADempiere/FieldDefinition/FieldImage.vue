@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -13,7 +13,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -31,10 +31,10 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 
-// api request methods
+// API Request Methods
 import { getResource, updateResource } from '@/api/ADempiere/field/binary.js'
 
 export default {
@@ -63,12 +63,8 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-image '
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-image '
     }
   },
 

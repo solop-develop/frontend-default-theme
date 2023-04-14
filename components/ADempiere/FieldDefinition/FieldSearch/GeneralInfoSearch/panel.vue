@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -57,7 +57,7 @@
       border
       fit
       :max-height="300"
-      size="small"
+      size="mini"
       @current-change="handleCurrentChange"
       @row-dblclick="changeRecord"
     >
@@ -67,6 +67,7 @@
 
       <index-column
         :page-number="pageNumber"
+        :page-size="pageSize"
       />
 
       <el-table-column
@@ -91,7 +92,7 @@
     </el-table>
 
     <el-row :gutter="24" class="general-info-list-footer">
-      <el-col :span="18">
+      <el-col :span="14">
         <custom-pagination
           :total="generalInfoData.recordCount"
           :current-page="pageNumber"
@@ -99,14 +100,25 @@
           :handle-change-page="setPage"
           :records-page="recordsList.length"
           :selection="selection"
+          :handle-size-change="handleChangeSizePage"
         />
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="10">
         <samp style="float: right; paddint-top: 4px;">
+          <el-button
+            type="info"
+            class="button-base-icon"
+            plain
+            @click="clearFormValues(); getListGeneralInfoSearch();"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             size="small"
             @click="getListGeneralInfoSearch();"
@@ -114,6 +126,7 @@
 
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             size="small"
             @click="closeList(); clearValues();"
@@ -121,6 +134,7 @@
 
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="changeRecord()"
           />
@@ -131,21 +145,23 @@
 </template>
 
 <script>
-// constants
-import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/form/generalInfoSearch'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import store from '@/store'
 
-// components and mixins
+// Constants
+import { GENERAL_INFO_SEARCH_LIST_FORM } from '@/utils/ADempiere/dictionary/field/generalInfoSearch'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { OPERATOR_LIKE } from '@/utils/ADempiere/dataUtils'
+
+// Components and Mixins
 import fieldSearchMixin from '../mixinFieldSearch'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { containerManager as containerManagerForm } from '@/utils/ADempiere/dictionary/form'
-import { OPERATOR_LIKE } from '@/utils/ADempiere/dataUtils'
 
 export default {
   name: 'PanelGeneralInfoSearch',
@@ -235,25 +251,28 @@ export default {
       }
     },
     storedFieldsList() {
-      return this.$store.getters.getTableHeader({
+      return store.getters.getTableHeader({
         containerUuid: this.uuidForm
       })
     },
     fieldsListQueryCriteria() {
-      return this.$store.getters.getQueryFieldsList({
+      return store.getters.getQueryFieldsList({
         containerUuid: this.uuidForm
       })
     },
     isloadingTable() {
-      return this.isLoadingRecords && !this.isEmptyValue(this.storedFieldsList)
+      return this.isLoadingRecords && !isEmptyValue(this.storedFieldsList)
     },
     generalInfoData() {
-      return this.$store.getters.getGeneralInfoData({
+      return store.getters.getGeneralInfoData({
         containerUuid: this.uuidForm
       })
     },
     pageNumber() {
       return this.generalInfoData.pageNumber
+    },
+    pageSize() {
+      return this.generalInfoData.pageSize
     },
     isReadyFromGetData() {
       const { isLoaded } = this.generalInfoData
@@ -261,13 +280,13 @@ export default {
     },
     currentRow: {
       set(rowSelected) {
-        this.$store.commit('setGeneralInfoSelectedRow', {
+        store.commit('setGeneralInfoSelectedRow', {
           containerUuid: this.uuidForm,
           currentRow: rowSelected
         })
       },
       get() {
-        return this.$store.getters.getGeneralInfoCurrentRow({
+        return store.getters.getGeneralInfoCurrentRow({
           containerUuid: this.uuidForm
         })
       }
@@ -328,31 +347,31 @@ export default {
       }
     },
     closeList() {
-      this.$store.commit('setGeneralInfoShow', {
+      store.commit('setGeneralInfoShow', {
         containerUuid: this.uuidForm,
         show: false
       })
     },
     setPage(pageNumber) {
-      this.getListGeneralInfoSearch(pageNumber)
+      this.getListGeneralInfoSearch(pageNumber, this.pageSize)
     },
     subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
+      return store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          if (!this.isEmptyValue(mutation.payload.columnName) &&
-            !this.isEmptyValue(mutation.payload.value) &&
-            mutation.payload.containerUuid === this.uuidForm
-          ) {
-            this.getListGeneralInfoSearch()
+          if (mutation.payload.containerUuid === this.uuidForm) {
+            if (!isEmptyValue(mutation.payload.columnName) &&
+              !isEmptyValue(mutation.payload.value)) {
+              this.getListGeneralInfoSearch()
+            }
           }
         }
       })
     },
     setFieldsList() {
       this.isLoadingFields = true
-      const storedFieldsList = this.$store.getters.getTableHeader({ containerUuid: this.uuidForm })
+      const storedFieldsList = store.getters.getTableHeader({ containerUuid: this.uuidForm })
 
-      if (!this.isEmptyValue(storedFieldsList)) {
+      if (!isEmptyValue(storedFieldsList)) {
         this.isLoadingFields = false
         return
       }
@@ -365,8 +384,8 @@ export default {
         this.isLoadingFields = false
       })
     },
-    getListGeneralInfoSearch(pageNumber = 0) {
-      const values = this.$store.getters.getValuesView({
+    getListGeneralInfoSearch(pageNumber = 0, pageSize) {
+      const values = store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
       })
@@ -374,7 +393,7 @@ export default {
           if (attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX)) {
             return false
           }
-          return !this.isEmptyValue(attribute.value)
+          return !isEmptyValue(attribute.value)
         })
         .map(attribute => {
           if (attribute.value.startsWith('%') || attribute.value.endsWith('%')) {
@@ -399,7 +418,8 @@ export default {
           uuid: this.metadata.uuid,
           contextColumnNames: this.metadata.reference.contextColumnNames,
           filters: values,
-          pageNumber
+          pageNumber,
+          pageSize
         })
           .then(response => {
             if (isEmptyValue(response)) {
@@ -420,6 +440,9 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
+    },
+    handleChangeSizePage(pageSize) {
+      this.getListGeneralInfoSearch(1, pageSize)
     }
   }
 }
@@ -431,13 +454,6 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
-    }
-  }
-
-  .general-info-list-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
     }
   }
 }

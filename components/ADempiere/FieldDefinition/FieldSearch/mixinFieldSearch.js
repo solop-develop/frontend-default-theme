@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -19,15 +19,24 @@
 import lang from '@/lang'
 import store from '@/store'
 
-// constants
-import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
+// Constants
+import {
+  IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
 
-// utils and helper methods
+// Components and Mixins
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
+
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { formatField, trimPercentage } from '@/utils/ADempiere/valueFormat'
 
 export default {
   name: 'MixinFieldSearch',
+
+  mixins: [
+    fieldWithDisplayColumn
+  ],
 
   data() {
     return {
@@ -66,13 +75,13 @@ export default {
     },
     // implement to overwrite
     recordsList() {
-      return this.$store.getters.getGeneralInfoRecordsList({
+      return store.getters.getGeneralInfoRecordsList({
         containerUuid: this.uuidForm
       })
     },
     // includes list lookups and default values
     getStoredLookupsAndDefaultValues() {
-      const allOptions = this.$store.getters.getStoredLookupAll({
+      const allOptions = store.getters.getStoredLookupAll({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,
@@ -88,107 +97,8 @@ export default {
       return allOptions
     },
 
-    value: {
-      get() {
-        const { columnName, containerUuid, inTable } = this.metadata
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.getCell) {
-            return this.containerManager.getCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName
-            })
-          }
-        }
-
-        return store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName
-        })
-      },
-      set(value) {
-        const { columnName, containerUuid, inTable } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName,
-              value
-            })
-          }
-        }
-
-        // const option = this.findOption(value)
-        // // always update uuid
-        // this.uuidValue = option.uuid
-
-        store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName,
-          value
-        })
-        // update element column name
-        if (!this.metadata.isSameColumnElement) {
-          store.commit('updateValueOfField', {
-            parentUuid: this.metadata.parentUuid,
-            containerUuid,
-            columnName: this.metadata.elementName,
-            value
-          })
-        }
-      }
-    },
-    displayedValue: {
-      get() {
-        return store.getters.getValueOfField({
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        store.commit('updateValueOfField', {
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName,
-          value
-        })
-      }
-    },
-    uuidValue: {
-      get() {
-        if (this.metadata.inTable) {
-          return undefined
-        }
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
-        })
-      },
-      set(value) {
-        if (this.metadata.inTable) {
-          return undefined
-        }
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value
-        })
-      }
-    },
-
     storedIdentifierColumns() {
-      const listIdentifier = this.$store.getters.getIdentifier({
+      const listIdentifier = store.getters.getIdentifier({
         containerUuid: this.uuidForm
       })
       if (this.isEmptyValue(listIdentifier)) {
@@ -205,27 +115,25 @@ export default {
     }
   },
 
-  // created() {
-  //   this.unsubscribe = this.subscribeChanges()
-  // },
-
-  // beforeDestroy() {
-  //   this.unsubscribe()
-  // },
-
   methods: {
     clearValues() {
+      this.controlDisplayed = undefined
       this.setValues(this.blankValues)
     },
+    clearFormValues() {
+      store.dispatch('clearValuesOnContainer', {
+        containerUuid: this.uuidForm
+      })
+    },
     // subscribeChanges() {
-    //   return this.$store.subscribe((mutation, state) => {Q
+    //   return store.subscribe((mutation, state) => {Q
     //     if (mutation.type === 'updateValueOfField') {
     //       if (mutation.payload.containerUuid === this.metadata.containerUuid) {
     //         // add displayed value to persistence
     //         if (mutation.payload.columnName === this.metadata.columnName) {
     //           this.preHandleChange(mutation.payload.value)
 
-    //           this.$store.dispatch('notifyFieldChange', {
+    //           store.dispatch('notifyFieldChange', {
     //             containerUuid: this.metadata.containerUuid,
     //             containerManager: this.containerManager,
     //             field: this.metadata,
@@ -380,7 +288,7 @@ export default {
     },
 
     setValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName } = this.metadata
+      const { parentUuid, containerUuid, columnName, elementName, reference } = this.metadata
       const { UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
@@ -389,61 +297,31 @@ export default {
       if (isEmptyValue(value) && !this.metadata.isSameColumnElement) {
         value = rowData[elementName]
       }
-
-      // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value
-      })
-      // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: DISPLAY_COLUMN_PREFIX + columnName,
-        value: displayedValue
-      })
-      // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-        value: uuid
-      })
-
-      // set on element name, used by columns views aliases
-      if (!this.metadata.isSameColumnElement) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: displayedValue
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value: uuid
-        })
+      // when value is referneced as Account_ID -> C_ElementValue_ID, C_Currency_ID_To -> C_Currency_ID
+      if (isEmptyValue(value) && !isEmptyValue(reference) && !isEmptyValue(reference.tableName)) {
+        const referenceColumn = reference.tableName + IDENTIFIER_COLUMN_SUFFIX
+        value = rowData[referenceColumn]
       }
 
-      this.$store.dispatch('notifyFieldChange', {
-        containerUuid: this.metadata.containerUuid,
+      // set ID value
+      this.value = value
+      // set display column (name) value
+      this.displayedValue = displayedValue
+      // set UUID value
+      this.uuidValue = uuid
+
+      // no enable callouts or create/update record
+      if (this.metadata.isAdvancedQuery) {
+        return
+      }
+
+      store.dispatch('notifyFieldChange', {
+        parentUuid,
+        containerUuid,
         containerManager: this.containerManager,
         field: this.metadata,
-        columnName: this.metadata.columnName
+        columnName,
+        newValue: value
       })
     },
 
@@ -544,6 +422,7 @@ export default {
 
       // prevent losing display value with focus
       this.controlDisplayed = this.generateDisplayedValue(recordSelected)
+      this.$refs.autocompleteGeneralInfo.activated = false
     }
   }
 

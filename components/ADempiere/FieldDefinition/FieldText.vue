@@ -28,6 +28,7 @@
     :autofocus="metadata.inTable"
     :size="inputSize"
     show-word-limit
+    clearable
     @change="preHandleChange"
     @blur="focusLost"
     @focus="focusGained"
@@ -84,27 +85,11 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      const { cssClassName, displayType, inTable } = this.metadata
-      let styleClass = ''
-      if (!this.isEmptyValue(cssClassName)) {
-        styleClass += cssClassName
+    cssClassCustomField() {
+      if (this.metadata.displayType === TEXT.id) {
+        return ' custom-field-textarea '
       }
-
-      if (displayType === TEXT.id) {
-        styleClass += ' custom-field-textarea '
-      } else {
-        styleClass += ' custom-field-text '
-      }
-
-      if (inTable) {
-        styleClass += ' field-in-table '
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-      return styleClass
+      return ' custom-field-text '
     },
     // Only used when input type='TextArea'
     rows() {
@@ -161,6 +146,13 @@ export default {
   .el-textarea__inner {
     &.field-in-table {
       resize: none !important;
+    }
+  }
+
+  // does not superimpose the character counter on the input text
+  .el-textarea {
+    >.el-input__count {
+      line-height: 10px;
     }
   }
 </style>

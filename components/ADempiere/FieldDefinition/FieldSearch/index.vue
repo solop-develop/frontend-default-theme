@@ -94,6 +94,9 @@ export default {
         type: 'svg',
         class: 'search'
       }
+      if (this.isEmptyValue(this.metadata.reference)) {
+        return icon
+      }
       switch (this.metadata.reference.tableName) {
         case 'A_Asset':
           icon = {

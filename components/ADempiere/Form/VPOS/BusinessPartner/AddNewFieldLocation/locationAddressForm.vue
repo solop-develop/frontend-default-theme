@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -81,23 +81,23 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import mixinLocation from './mixinLocation.js'
 
-// constants
+// Constants
 import FieldsList from './fieldsList.js'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
-// api request methods
+// API Request Methods
 import {
   createLocationAddress,
   updateLocationAddress
 } from '@/api/ADempiere/field/location.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 
 /**
  * Location Address form to field

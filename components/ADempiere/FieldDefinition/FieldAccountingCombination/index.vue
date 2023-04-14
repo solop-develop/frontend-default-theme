@@ -9,21 +9,23 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <el-input
-    v-model="value"
+    v-model="displayedValue"
     v-bind="commonsProperties"
+    clearable
     type="text"
     :autofocus="metadata.inTable"
     show-word-limit
     @change="handleSelect"
+    @clear="clearValues"
     @blur="focusLost"
     @focus="setNewDisplayedValue"
     @keydown.native="keyPressed"
@@ -43,16 +45,16 @@
 </template>
 
 <script>
-// contants
-import { TABLE_NAME } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
+// Constants
+import { TABLE_NAME } from '@/utils/ADempiere/dictionary/field/accoutingCombination.js'
 
-// components and mixins
+// Components and Mixins
 import ButtonToList from './buttonToList.vue'
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldSearchMixin from '@theme/components/ADempiere/FieldDefinition/FieldSearch/mixinFieldSearch.js'
 import mixinAccountingCombination from './mixinAccountingCombination.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -84,24 +86,12 @@ export default {
   },
 
   computed: {
+    cssClassCustomField() {
+      return ' custom-field-accouting-combination '
+    },
     // to recrods list overwrite
     uuidForm() {
       return this.metadata.containerUuid
-    },
-    value: {
-      get() {
-        return this.$store.getters.getValueOfField({
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        this.$store.commit('updateValueOfField', {
-          containerUuid: this.metadata.containerUuid,
-          columnName: this.metadata.displayColumnName,
-          value
-        })
-      }
     }
   },
 

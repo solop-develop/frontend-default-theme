@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -18,6 +18,7 @@
 
 <template>
   <el-select
+    :key="componentKey"
     v-model="value"
     v-bind="commonsProperties"
     :filterable="true"
@@ -43,11 +44,12 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 /**
@@ -56,8 +58,7 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
  * - Table List
  * - Table Direct
  *
- * TODO: String values add single quotation marks 'value'
- * TODO: No blanck option enabled if is mandatory field
+ * TODO: String values add single quotation marks 'value' (see removeQuotationMark)
  * TODO: No includes default value into list on forms or field with dynamic validation (see default value City on location form)
  */
 export default {
@@ -65,24 +66,22 @@ export default {
 
   mixins: [
     fieldMixin,
+    fieldWithDisplayColumn,
     selectMixin
   ],
 
+  data() {
+    return {
+      componentKey: 0
+    }
+  },
+
   computed: {
-    cssClassStyle() {
+    cssClassCustomField() {
       let styleClass = ' custom-field-select '
       if (this.isSelectMultiple) {
         styleClass += ' custom-field-select-multiple '
       }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      if (!this.isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
       return styleClass
     },
 
@@ -125,7 +124,7 @@ export default {
         if (inTable) {
           // implement container manager row
           if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
+            this.containerManager.setCell({
               containerUuid,
               rowIndex: this.metadata.rowIndex,
               columnName,
@@ -145,7 +144,7 @@ export default {
           value
         })
         // update element column name
-        if (columnName !== this.metadata.elementName) {
+        if (!this.metadata.isSameColumnElement) {
           this.$store.commit('updateValueOfField', {
             parentUuid: this.metadata.parentUuid,
             containerUuid,
@@ -155,80 +154,8 @@ export default {
         }
       }
     },
-    uuidValue: {
-      get() {
-        if (this.metadata.inTable) {
-          return undefined
-        }
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + '_UUID'
-        })
-      },
-      set(value) {
-        if (this.metadata.inTable) {
-          return undefined
-        }
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // 'ColumnName'_UUID
-          columnName: this.metadata.columnName + '_UUID',
-          value
-        })
-      }
-    },
-    displayedValue: {
-      get() {
-        // DisplayColumn_'ColumnName'
-        const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.getCell) {
-            return this.containerManager.getCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName
-            })
-          }
-        }
-
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          columnName
-        })
-      },
-      set(value) {
-        const { displayColumnName, containerUuid, inTable } = this.metadata
-
-        // table records values
-        if (inTable) {
-          // implement container manager row
-          if (this.containerManager && this.containerManager.setCell) {
-            return this.containerManager.setCell({
-              containerUuid,
-              rowIndex: this.metadata.rowIndex,
-              columnName: displayColumnName,
-              value
-            })
-          }
-        }
-
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
-          value
-        })
-      }
-    },
     currentTab() {
-      if (this.isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
+      if (isEmptyValue(this.metadata.parentUuid) || !this.containerManager.getPanel) {
         return {}
       }
       return this.containerManager.getPanel({
@@ -237,7 +164,9 @@ export default {
       })
     },
     currentRecord() {
-      return this.$store.getters.getTabCurrentRow({ containerUuid: this.metadata.containerUuid })
+      return this.$store.getters.getTabCurrentRow({
+        containerUuid: this.metadata.containerUuid
+      })
     }
   },
 
@@ -246,7 +175,7 @@ export default {
       let value = this.value
       if (isMultiple) {
         const valueInArray = []
-        if (!this.isEmptyValue(value)) {
+        if (!isEmptyValue(value)) {
           valueInArray.push(value)
         }
         value = valueInArray
@@ -254,7 +183,7 @@ export default {
         if (Array.isArray(value)) {
           if (value.length) {
             // set first value
-            value = value[0]
+            value = value.at(0)
           } else {
             value = this.blankOption.value
           }
@@ -289,6 +218,9 @@ export default {
   },
 
   methods: {
+    forceRerender() {
+      this.componentKey += 1
+    },
     preHandleChange(value) {
       const { displayedValue } = this.findOption(value)
       this.displayedValue = displayedValue
@@ -298,7 +230,8 @@ export default {
       })
     },
     findOption(value) {
-      const option = this.optionsList.find(item => item.value === value)
+      // const option = this.optionsList.find(item => item.value === value)
+      const option = this.getStoredLookupAll.find(item => item.value === value)
       if (option && option.displayedValue) {
         return option
       }
@@ -309,7 +242,6 @@ export default {
       }
     },
     setDisplayedValue() {
-      this.optionsList = this.getStoredLookupAll
       const value = this.value
       // if empty clear all values
       if (isEmptyValue(value)) {
@@ -317,6 +249,9 @@ export default {
         this.uuidValue = undefined
         return
       }
+
+      this.optionsList = this.getStoredLookupAll
+      this.forceRerender()
 
       // find local list value
       const option = this.findOption(value)
@@ -328,7 +263,7 @@ export default {
         return
       }
 
-      // add to list if no exist (with callouts)
+      // add to list if no exist (with callouts, table record)
       // const displayedValue = this.displayedValue
       // if (!isEmptyValue(displayedValue)) {
       //   // verify if exists to add (in table)
@@ -343,6 +278,11 @@ export default {
       // request displayed value
       this.getValueOfLookup()
     },
+
+    // TODO: With remote and filter is enabled not working displayed value
+    // https://github.com/ElemeFE/element/issues/20706
+    // https://github.com/ElemeFE/element/issues/21287
+    // https://github.com/ElemeFE/element/issues/21465
     getValueOfLookup() {
       if (this.metadata.isAdvancedQuery && this.isSelectMultiple) {
         return
@@ -351,25 +291,20 @@ export default {
 
       this.displayedValue = undefined
       this.uuidValue = undefined
+      // this.setDefaultValue()
       this.getDefaultValueFromServer()
         .then(responseLookupItem => {
           // with value response update local component list
-          if (!this.isEmptyValue(responseLookupItem)) {
+          if (!isEmptyValue(responseLookupItem) && !isEmptyValue(responseLookupItem.value)) {
             this.value = responseLookupItem.value
             this.displayedValue = responseLookupItem.displayedValue
             this.uuidValue = responseLookupItem.uuid
-
-            // TODO: With remote and filter is enabled not working displayed value
-            // https://github.com/ElemeFE/element/issues/20706
-            // https://github.com/ElemeFE/element/issues/21287
-            // https://github.com/ElemeFE/element/issues/21465
-            this.optionsList = []
-            this.$nextTick(() => {
-              this.optionsList = this.getStoredLookupAll
-            })
           }
         })
         .finally(() => {
+          this.optionsList = this.getStoredLookupAll
+          this.forceRerender()
+
           this.isLoading = false
         })
     },
@@ -396,8 +331,8 @@ export default {
     },
     remoteSearch(searchQuery = '') {
       const results = this.localSearch(searchQuery)
-      if (this.isEmptyValue(searchQuery) ||
-        (!this.isEmptyValue(searchQuery) && (this.isEmptyValue(results) || results.length < 3))) {
+      if (isEmptyValue(searchQuery) ||
+        (!isEmptyValue(searchQuery) && (isEmptyValue(results) || results.length < 3))) {
         clearTimeout(this.timeOut)
         this.timeOut = setTimeout(() => {
           this.loadListFromServer(searchQuery)
@@ -408,7 +343,7 @@ export default {
       this.optionsList = results
     },
     localSearch(searchQuery = '') {
-      if (this.isEmptyValue(searchQuery)) {
+      if (isEmptyValue(searchQuery)) {
         return this.optionsList
       }
       return this.optionsList.filter(option => {
@@ -430,11 +365,11 @@ export default {
         searchValue: searchQuery,
         referenceUuid: this.metadata.reference.uuid,
         // app attributes
-        isAddBlankValue: true,
+        isAddBlankValue: !this.metadata.required,
         blankValue: this.blankOption.value
       })
         .then(responseLookupList => {
-          if (!this.isEmptyValue(responseLookupList)) {
+          if (!isEmptyValue(responseLookupList)) {
             this.optionsList = responseLookupList
           } else {
             this.optionsList = this.getStoredLookupAll
@@ -467,7 +402,7 @@ export default {
         })
     },
     setContainerInformation() {
-      if (!this.isEmptyValue(this.currentTab)) {
+      if (!isEmptyValue(this.currentTab)) {
         this.$store.dispatch('panelInfo', {
           currentTab: this.currentTab,
           currentRecord: this.currentRecord

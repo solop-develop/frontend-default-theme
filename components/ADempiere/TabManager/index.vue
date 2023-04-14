@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div>
+  <div class="tab-manager-container">
     <el-tabs
       ref="el-tabs-container"
       v-model="currentTab"
@@ -61,7 +61,6 @@
             :current-tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
             :actions-manager="actionsManager"
-            :references-manager="referencesManager"
             :convenience-options="additionalOptions"
             :style="'height: 100% !important;'"
           />
@@ -70,7 +69,7 @@
       </el-tab-pane>
     </el-tabs>
 
-    <div style="width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;">
+    <div :style="sizeBadgeRight">
       <el-button
         type="primary"
         size="mini"
@@ -102,13 +101,25 @@
           <i class="el-icon-zoom-in" />
         </el-button>
       </el-badge>
-      <el-badge v-show="showChatAvailable">
+      <el-badge v-show="showIssues" :value="countIssues" class="item" type="primary">
+        <el-button
+          v-show="showIssues"
+          type="primary"
+          size="mini"
+          circle
+          style="margin: 0px"
+          @click="openRecordLogs('getListIssues')"
+        >
+          <i class="el-icon-s-promotion" />
+        </el-button>
+      </el-badge>
+      <el-badge v-show="showChatAvailable" :value="countIsNote" class="item" type="primary">
         <el-button
           type="primary"
           size="mini"
           circle
           style="margin: 0px"
-          @click="openRecordLogs('listChats')"
+          @click="openRecordLogs('recordNotesTab')"
         >
           <svg-icon icon-class="message" />
         </el-button>
@@ -126,7 +137,7 @@
         <svg-icon icon-class="tab" style="margin-right: 10px;" />
         {{ $t('window.containerInfo.log.tab') }}
         <span style="color: #606266; font-weight: bold;">
-          {{ currentTabMetadata.name }}
+          {{ currentTabPanelInfo.name }}
         </span>
       </span>
 
@@ -161,9 +172,9 @@ import TabOptions from './TabOptions.vue'
 import { UUID } from '@/utils/ADempiere/constants/systemColumns.js'
 
 // API Request Methods
-import { requestListEntityChats } from '@/api/ADempiere/window'
+import { requestListEntityChats, existsChatsEntries, requestExistsReferences } from '@/api/ADempiere/window'
 import { requestExistsAttachment } from '@/api/ADempiere/user-interface/component/resource'
-import { requestExistsReferences } from '@/api/ADempiere/window'
+import { requestExistsIssues } from '@/api/ADempiere/user-interface/component/issue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -203,10 +214,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
-    },
     additionalOptions: {
       type: Object,
       default: () => ({})
@@ -233,9 +240,16 @@ export default defineComponent({
 
     const isDrawerWidth = computed(() => {
       if (isMobile.value) {
-        return '90%'
+        return '100%'
       }
-      return '50%'
+      return '55%'
+    })
+
+    const sizeBadgeRight = computed(() => {
+      if (isMobile.value) {
+        return 'width: 1%;height: 100%;position: fixed;right: 5%;top: 45%;z-index: 9;'
+      }
+      return 'width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;z-index: 9;'
     })
 
     const tabStyle = computed(() => {
@@ -263,6 +277,14 @@ export default defineComponent({
 
     const showReference = ref(false)
 
+    const showIssues = ref(false)
+
+    const countIssues = ref(0)
+
+    const showIsNote = ref(false)
+
+    const countIsNote = ref(0)
+
     const countReference = ref(0)
 
     // use getter to reactive properties
@@ -277,6 +299,23 @@ export default defineComponent({
     const isShowedTabs = computed(() => {
       const storedWindow = store.getters.getStoredWindow(props.parentUuid)
       return storedWindow.isShowedTabsParent
+    })
+
+    // Container Info
+    const containerInfo = computed(() => {
+      const inf = store.getters.getContainerInfo
+      if (inf) {
+        return inf
+      }
+      return {}
+    })
+
+    // Current Tab the Panel Info
+    const currentTabPanelInfo = computed(() => {
+      if (containerInfo.value.currentTab) {
+        return containerInfo.value.currentTab
+      }
+      return {}
     })
 
     const isShowedTableRecords = computed(() => {
@@ -448,15 +487,21 @@ export default defineComponent({
       const pageNumber = query.page
       if (query.filters) {
         filters = query.filters
-      } if (!isEmptyValue(query.action)) {
+      }
+      if (!isEmptyValue(query.action)) {
         filtersRecord = {
-          key: 'UUID',
+          columnName: UUID,
           value: query.action
         }
       }
-      if (
-        !isEmptyValue(routerParams.filters)
-      ) {
+      if (!isEmptyValue(query.recordId)) {
+        const storedTab = store.getters.getStoredTab(props.parentUuid, containerUuid)
+        filtersRecord = {
+          columnName: storedTab.keyColumn,
+          value: Number(query.recordId)
+        }
+      }
+      if (!isEmptyValue(routerParams.filters)) {
         filters = routerParams.filters
       }
 
@@ -465,6 +510,7 @@ export default defineComponent({
         tabUuid: routerParams.containerUuid,
         containerUuid,
         filters,
+        referenceUuid: query.referenceUuid,
         filtersRecord,
         pageNumber
       }).then(responseData => {
@@ -520,7 +566,8 @@ export default defineComponent({
         }, () => {})
       })
     }
-    if (isReadyFromGetData.value || (!isReadyFromGetData.value && !isEmptyValue(root.$route.params.filters))) {
+    if (isReadyFromGetData.value || (!isReadyFromGetData.value &&
+      (!isEmptyValue(root.$route.params.filters) || !isEmptyValue(root.$route.query.referenceUuid)))) {
       getData()
     }
     watch(currentRecordLogs, (newValue, oldValue) => {
@@ -550,6 +597,8 @@ export default defineComponent({
         chatAvailable()
         attachmentAvailable()
         getReferences()
+        getIssues()
+        getIsNotes()
       }
     })
 
@@ -592,6 +641,64 @@ export default defineComponent({
           return
           // const { referencesList } = responseReferences
           // showReference.value = !isEmptyValue(referencesList)
+        })
+        .catch(() => {})
+    }
+
+    /**
+     * Issuess
+     */
+
+    const getIssues = () => {
+      showIssues.value = false
+      if (isEmptyValue(currentTabTableName.value) ||
+        (isEmptyValue(currentRecordUuid.value) &&
+        (isEmptyValue(currentRecordId.value) || currentRecordId.value <= 0))) {
+        return
+      }
+      requestExistsIssues({
+        tableName: currentTabTableName.value,
+        recordUuid: currentRecordUuid.value,
+        recordId: currentRecordId.value
+      })
+        .then(responseReferences => {
+          if (responseReferences > 0) {
+            showIssues.value = true
+            countIssues.value = responseReferences
+            return
+          }
+          showIssues.value = false
+          return
+          // const { referencesList } = responseReferences
+          // showReference.value = !isEmptyValue(referencesList)
+        })
+        .catch(() => {})
+    }
+
+    /**
+     * Notes
+     */
+
+    const getIsNotes = () => {
+      showIsNote.value = false
+      // if (isEmptyValue(currentTabTableName.value) ||
+      //   (isEmptyValue(currentRecordUuid.value) &&
+      //   (isEmptyValue(currentRecordId.value) || currentRecordId.value <= 0))) {
+      //   return
+      // }
+      existsChatsEntries({
+        tableName: currentTabTableName.value,
+        recordUuid: currentRecordUuid.value,
+        recordId: currentRecordId.value
+      })
+        .then(responseReferences => {
+          if (responseReferences > 0) {
+            showIsNote.value = true
+            countIsNote.value = responseReferences
+            return
+          }
+          showIsNote.value = false
+          return
         })
         .catch(() => {})
     }
@@ -686,6 +793,8 @@ export default defineComponent({
     chatAvailable()
     attachmentAvailable()
     getReferences()
+    getIssues()
+    getIsNotes()
 
     return {
       tabUuid,
@@ -698,10 +807,15 @@ export default defineComponent({
       showChatAvailable,
       showAttachmentAvailable,
       showReference,
+      showIssues,
+      showIsNote,
+      countIssues,
       countReference,
+      countIsNote,
       // computed
       isMobile,
       isDrawerWidth,
+      sizeBadgeRight,
       isShowedTabs,
       isShowedTableRecords,
       currentTabTableName,
@@ -712,6 +826,8 @@ export default defineComponent({
       currentRecordUuid,
       currentRecordId,
       isWithChildsTab,
+      containerInfo,
+      currentTabPanelInfo,
       // methods
       handleClick,
       changeShowedRecords,
@@ -721,7 +837,9 @@ export default defineComponent({
       selectTab,
       chatAvailable,
       attachmentAvailable,
-      getReferences
+      getReferences,
+      getIssues,
+      getIsNotes
     }
   }
 
@@ -729,6 +847,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+// Tab Manager
+.tab-manager-container {
+  .el-badge__content.is-fixed {
+    right: 150% !important;
+  }
+}
+
 .drawer-panel-info {
   header.el-drawer__header {
     margin-bottom: 10px !important;

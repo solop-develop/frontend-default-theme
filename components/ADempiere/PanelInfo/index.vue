@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -17,12 +17,12 @@
 -->
 
 <template>
-  <el-container style="height: 100% !important;">
-    <el-main style="padding:0px; height: 100% !important;">
+  <el-container style="height: 100% !important;overflow: hidden;">
+    <el-main style="padding:0px; height: 100% !important;overflow: hidden;" class="tab-panel-info">
       <el-tabs
         v-model="nameTab"
         type="border-card"
-        style="height: 100% !important;"
+        class="tab-panel-info"
         @tab-click="handleClick"
       >
         <el-tab-pane name="getRecordLogs">
@@ -30,38 +30,42 @@
             <svg-icon icon-class="tree-table" />
             {{ $t('window.containerInfo.log.changeHistory') }}
           </span>
-          <el-scrollbar class="scroll-panel-info">
-            <el-descriptions :column="1">
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="table" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.tableName') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentTab.tableName }}
-                </span>
-              </el-descriptions-item>
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="user" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.recordID') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordId }}
-                </span>
-              </el-descriptions-item>
-              <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-                <template slot="label">
-                  <svg-icon icon-class="user" style="margin-right: 10px;" />
-                  {{ $t('window.containerInfo.log.recordUUID') }}
-                </template>
-                <span style="color: #606266; font-weight: bold;">
-                  {{ currentRecordUuid }}
-                </span>
-              </el-descriptions-item>
-            </el-descriptions>
-            <record-logs />
-          </el-scrollbar>
+          <loading-view
+            v-if="isLoadingRecordLogsList"
+            key="attachment-loading"
+          />
+          <!-- <el-scrollbar v-else class="scroll-panel-info"> -->
+          <el-descriptions :column="1">
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="table" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.tableName') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentTab.tableName }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="user" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.recordID') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentRecordId }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+              <template slot="label">
+                <svg-icon icon-class="user" style="margin-right: 10px;" />
+                {{ $t('window.containerInfo.log.recordUUID') }}
+              </template>
+              <span style="color: #606266; font-weight: bold;">
+                {{ currentRecordUuid }}
+              </span>
+            </el-descriptions-item>
+          </el-descriptions>
+          <record-logs style="overflow: auto" />
+          <!-- </el-scrollbar> -->
         </el-tab-pane>
 
         <el-tab-pane name="listReference">
@@ -69,7 +73,12 @@
             <i class="el-icon-zoom-in" />
             {{ $t('window.containerInfo.referenceRecords') }}
           </span>
+          <loading-view
+            v-if="isLoadingListReference"
+            key="listReference-loading"
+          />
           <reference-records
+            v-else
             :table-name="currentTab.tableName"
             :parent-uuid="currentTab.parentUuid"
             :record-uuid="currentRecordUuid"
@@ -82,7 +91,12 @@
             <i class="el-icon-paperclip" />
             {{ $t('window.containerInfo.attachment.label') }}
           </span>
+          <loading-view
+            v-if="isLoadingListAttachment"
+            key="attachment-loading"
+          />
           <attachment-manager
+            v-else
             :is-active-tab="'recordAttachmentTab' === nameTab"
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
@@ -90,14 +104,36 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="recordNotesTab" style="height: 100% !important;">
+        <el-tab-pane name="recordNotesTab" style="height: 95% !important;">
           <span slot="label">
             <svg-icon icon-class="message" />
             {{ $t('window.containerInfo.notes') }}
           </span>
+          <loading-view
+            v-if="isLoadingNotesRecord"
+            key="note-loading"
+          />
           <record-notes
+            v-else
             :table-name="allTabsList[0].tableName"
             :record-id="currentRecordId"
+          />
+        </el-tab-pane>
+
+        <el-tab-pane name="getListIssues" style="height: 95% !important;" class="tab-panel-info">
+          <span slot="label">
+            <svg-icon icon-class="guide" />
+            {{ $t('window.containerInfo.issues') }}
+          </span>
+          <loading-view
+            v-if="isLoadingIssuessRecord"
+            key="note-loading"
+          />
+          <record-issues
+            v-else
+            :table-name="allTabsList[0].tableName"
+            :record-id="currentRecordId"
+            class="tab-panel-info"
           />
         </el-tab-pane>
 
@@ -153,10 +189,12 @@ import store from '@/store'
 import Accounting from './Component/Accounting/index.vue'
 import AttachmentManager from './Component/AttachmentManager/index.vue'
 import RecordLogs from './Component/RecordLogs/index.vue'
+import recordIssues from './Component/RecordIssues/index.vue'
 import RecordNotes from './Component/RecordNotes/index.vue'
 import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import WorkflowLogs from './Component/workflowLogs/index.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // API Request Methods
 import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
@@ -173,9 +211,11 @@ export default defineComponent({
     AttachmentManager,
     RecordLogs,
     RecordNotes,
+    recordIssues,
     ReferenceRecords,
     StoreProduct,
-    WorkflowLogs
+    WorkflowLogs,
+    LoadingView
   },
 
   props: {
@@ -217,6 +257,7 @@ export default defineComponent({
     const tableName = ref('')
     const nameTab = ref('getRecordLogs')
     const recordsListStoreProduct = ref([])
+    const isLoadingListReference = ref(false)
 
     if (!isEmptyValue(props.defaultOpenedTab)) {
       nameTab.value = props.defaultOpenedTab
@@ -293,7 +334,7 @@ export default defineComponent({
 
     const isWorkflowLog = computed(() => {
       if (storedWindow.value) {
-        return storedWindow.value.windowType === 'T' && currentTab.value.isParentTab
+        return storedWindow.value.windowType === 'T' && storedWindow.value.windowType === 'SO' && storedWindow.value.windowType === 'PO' && storedWindow.value.windowType === 'FI' && storedWindow.value.windowType === 'MM' && currentTab.value.isParentTab
       }
       return false
     })
@@ -301,6 +342,36 @@ export default defineComponent({
     // Open Container the Info
     const showPanelInfo = computed(() => {
       return store.getters.getShowLogs
+    })
+
+    /**
+     * IsLoading Optiones Tabs
+     * @param {boolean} isLoadingNotesRecord
+     * @param {boolean} isLoadingListAttachment
+     * @param {boolean} isLoadingRecordLogsList
+     * @param {boolean} isLoadingIssuessRecord
+     */
+
+    // Loading Notes Register
+
+    const isLoadingNotesRecord = computed(() => {
+      return store.getters.getIsLoadListChat
+    })
+
+    // Loading Notes Register
+
+    const isLoadingListAttachment = computed(() => {
+      return store.getters.getIsLoadListAttachment
+    })
+
+    // Loading Record Logs List
+
+    const isLoadingRecordLogsList = computed(() => {
+      return store.getters.getIsLoadListRecordLogs
+    })
+
+    const isLoadingIssuessRecord = computed(() => {
+      return store.getters.getIsLoadListIssues
     })
 
     /**
@@ -332,6 +403,7 @@ export default defineComponent({
     }
 
     function handleClick(tab, event) {
+      let tabOptions = tab.name
       if (tab.name === 'accountingInformation') {
         return
       }
@@ -339,14 +411,15 @@ export default defineComponent({
         findListStoreProduct()
         return
       }
-      if (tab.name === language.t('window.containerInfo.attachment.label')) {
-        tab.name = 'recordAttachmentTab'
+      if (tab.name === 'recordAttachmentTab' || tab.name === language.t('window.containerInfo.attachment.label')) {
+        tabOptions = 'getAttachment'
       }
       if (tab.name === language.t('window.containerInfo.notes')) {
-        tab.name = 'recordNotesTab'
+        tabOptions = 'recordNotesTab'
       }
       if (tab.name === 'listReference') {
-        tab.name = 'listReference'
+        tabOptions = 'listReference'
+        isLoadingListReference.value = true
         store.dispatch('getReferencesFromServer', {
           tableName: currentTab.value.tableName,
           containerUuid: currentTab.value.containerUuid,
@@ -354,13 +427,15 @@ export default defineComponent({
           recordId: currentRecordId.value,
           recordUuid: currentRecordUuid.value
         })
+          .then(resp => {
+            isLoadingListReference.value = false
+          })
       }
-      if (isEmptyValue(props.containerManager[tab.name])) {
+      if (isEmptyValue(props.containerManager[tabOptions])) {
         return
       }
-
       nameTab.value = tab.name
-      props.containerManager[tab.name]({
+      props.containerManager[tabOptions]({
         tableName: currentTab.value.tableName,
         containerUuid: currentTab.value.containerUuid,
         parentUuid: currentTab.value.parentUuid,
@@ -401,7 +476,7 @@ export default defineComponent({
     })
 
     watch(showPanelInfo, (newValue, oldValue) => {
-      if (newValue && newValue !== oldValue) {
+      if (newValue) {
         handleClick({
           name: props.defaultOpenedTab
         })
@@ -411,6 +486,14 @@ export default defineComponent({
     watch(() => props.defaultOpenedTab, (newValue) => {
       nameTab.value = newValue
     })
+
+    if (showPanelInfo.value) {
+      handleClick({
+        name: props.defaultOpenedTab
+      })
+    }
+
+    store.dispatch('findListMailTemplates')
 
     findRecordLogs(props.allTabsList[parseInt(currentTabLogs.value)])
 
@@ -432,6 +515,12 @@ export default defineComponent({
       showPanelInfo,
       currentRecordUuid,
       currentRecordId,
+      // IsLoading
+      isLoadingNotesRecord,
+      isLoadingListAttachment,
+      isLoadingListReference,
+      isLoadingRecordLogsList,
+      isLoadingIssuessRecord,
       // methods
       showkey,
       findRecordLogs,
@@ -443,7 +532,15 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style lang="scss">
+.tab-panel-info {
+  height: 100% !important;
+  .el-tabs--border-card > .el-tabs__content {
+    height: 100% !important;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
 .scroll-panel-info {
   width: 100%;
   height: 800px;

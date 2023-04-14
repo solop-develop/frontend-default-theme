@@ -111,8 +111,12 @@ export default {
           return {
             name: serie.name,
             type: 'bar',
-            stack: 'vistors',
-            barWidth: '60%',
+            // stack: 'vistors',
+            stack: 'Ad',
+            emphasis: {
+              focus: 'series'
+            },
+            // barWidth: '60%',
             data: serie.data_set.map(set => set.value),
             animationDuration
           }
@@ -129,20 +133,21 @@ export default {
         toolbox: {
           // y: 'bottom',
           feature: {
-            magicType: {
-              type: ['stack', 'tiled']
-            },
-            dataView: {},
-            saveAsImage: {
-              pixelRatio: 2
-            }
+            show: true,
+            magicType: { show: true, type: ['stack'] },
+            dataView: { show: true, readOnly: true },
+            restore: { show: true },
+            saveAsImage: { show: true }
+            // magicType: {
+            //   type: ['stack', 'tiled']
+            // },
           }
         },
         grid: {
           top: 10,
-          left: '2%',
-          right: '2%',
-          bottom: '3%',
+          left: '0%',
+          right: '0%',
+          bottom: '0%',
           containLabel: true
         },
         xAxis: [{

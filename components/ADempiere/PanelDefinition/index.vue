@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -32,9 +32,8 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
-// import store from '@/store'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
@@ -59,7 +58,7 @@ export default defineComponent({
     },
     isFilterRecords: {
       type: Boolean,
-      default: true
+      default: false
     },
     isAdvancedQuery: {
       type: Boolean,
@@ -97,8 +96,16 @@ export default defineComponent({
     const componentRender = computed(() => {
       let panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/StandardPanel.vue')
 
-      if (!isEmptyValue(panelMetadata.value) && panelMetadata.value.isSortTab) {
-        panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')
+      if (!isEmptyValue(panelMetadata.value)) {
+        // render panel with dragable fields
+        if (panelMetadata.value.isEditSecuence) {
+          panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/DraggablePanel.vue')
+        }
+        if (panelMetadata.value.isSortTab) {
+          panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/SortPanel.vue')
+        } else if (panelMetadata.value.isHasTree) {
+          panelComponent = () => import('@theme/components/ADempiere/PanelDefinition/TreePanel.vue')
+        }
       }
 
       return panelComponent

@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -32,7 +32,10 @@
               :parent-uuid="parentUuid"
               :container-uuid="containerUuid"
               :container-manager="containerManagerLocation"
-              :metadata-field="fieldAttributes"
+              :metadata-field="{
+                ...fieldAttributes,
+                sizeCol: 24
+              }"
             />
           </el-col>
         </template>
@@ -82,10 +85,20 @@
           </el-collapse>
         </el-col>
 
-        <el-col v-show="!metadata.pos" :span="24" class="location-address-footer">
+        <el-col :span="24" class="location-address-footer">
           <samp style="float: right; padding-top: 4px;">
             <el-button
+              type="info"
+              class="button-base-icon"
+              plain
+              @click="clearFormValues();"
+            >
+              <svg-icon icon-class="layers-clear" />
+            </el-button>
+
+            <el-button
               :disabled="isLoadingFields"
+              class="button-base-icon"
               type="info"
               @click="openCoordinatesMap()"
             >
@@ -94,12 +107,14 @@
 
             <el-button
               type="danger"
+              class="button-base-icon"
               icon="el-icon-close"
               @click="cancelChanges"
             />
 
             <el-button
               :disabled="isLoadingFields"
+              class="button-base-icon"
               type="primary"
               icon="el-icon-check"
               @click="sendValuesToServer"
@@ -114,26 +129,35 @@
 <script>
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import mixinLocation from './mixinLocationAddress.js'
 
-// constants
+// Constants
 import FieldsList from './fieldsList.js'
-import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
-import { COLUMN_NAME, LOCATION_ADDRESS_FORM, URL_BASE_MAP } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import {
+  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
+import {
+  COLUMN_NAME, LOCATION_ADDRESS_FORM, MANDATORY_CHAR,
+  URL_BASE_MAP, COORDENATES_COLUMN_NAMES,
+  COLUMNNAME_City, COLUMNNAME_C_City_ID,
+  COLUMNNAME_RegionName, COLUMNNAME_C_Region_ID, COLUMNNAME_C_Country_ID
+} from '@/utils/ADempiere/dictionary/field/locationAddress'
+import { LOG_COLUMNS_NAME_LIST, UUID } from '@/utils/ADempiere/constants/systemColumns'
 
-// api request methods
+// API Request Methods
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
 import {
   createLocationAddress,
   updateLocationAddress
 } from '@/api/ADempiere/field/location.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { formatCoordinateByDecimal, getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { formatCoordinateByDecimal, getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 /**
@@ -147,7 +171,8 @@ export default {
   },
 
   mixins: [
-    mixinLocation
+    mixinLocation,
+    fieldWithDisplayColumn
   ],
 
   props: {
@@ -157,6 +182,10 @@ export default {
     },
     containerUuid: {
       type: String,
+      required: true
+    },
+    containerManager: {
+      type: Object,
       required: true
     },
     metadata: {
@@ -185,39 +214,57 @@ export default {
 
   computed: {
     fieldCoordination() {
-      return this.metadataList.filter(fields => fields.columnName === 'Latitude' ||
-        fields.columnName === 'Longitude' ||
-        fields.columnName === 'Altitude'
-      )
+      return this.metadataList.filter(fields => {
+        return COORDENATES_COLUMN_NAMES.includes(fields.columnName)
+      })
     },
     fieldDefaultLocation() {
-      return this.metadataList.filter(fields => fields.columnName !== 'Latitude' &&
-        fields.columnName !== 'Longitude' &&
-        fields.columnName !== 'Altitude'
-      )
+      return this.metadataList.filter(fields => {
+        return !COORDENATES_COLUMN_NAMES.includes(fields.columnName)
+      })
     },
     containerManagerLocation() {
       return {
         ...this.containerManager,
 
         getFieldsList({ containerUuid }) {
-          return store.getters.getFieldLocation
+          return store.getters.getFieldLocationAddress({
+            containerUuid
+          })
         },
 
         isReadOnlyField({ isReadOnly }) {
           return isReadOnly
+        },
+
+        isMandatoryField({ isMandatory }) {
+          if (isMandatory) {
+            return true
+          }
+          return false
+        },
+        isDisplayedField({ isDisplayed, columnName, containerUuid }) {
+          if (columnName === COLUMNNAME_City) {
+            const cityId = store.getters.getValueOfField({
+              containerUuid,
+              columnName: COLUMNNAME_C_City_ID
+            })
+            if (!isEmptyValue(cityId) && cityId > 0) {
+              return false
+            }
+          }
+          return isDisplayed
         }
       }
     },
-    fieldsListLocation() {
-      if (!this.isEmptyValue(this.$store.getters.getFieldLocation)) {
-        return this.$store.getters.getFieldLocation
-      }
-      return []
+    fieldsListLocationAddress() {
+      return this.$store.getters.getFieldLocationAddress({
+        containerUuid: this.uuidForm
+      })
     },
     locationId() {
       return this.$store.getters.getValueOfField({
-        parentUuid: this.metadata.parentUuid,
+        // parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         columnName: this.metadata.columnName
       })
@@ -246,16 +293,10 @@ export default {
     }
   },
 
-  created() {
-    this.unsubscribe = this.subscribeChanges()
-  },
-
   mounted() {
-    if (this.metadata.pos) {
-      this.fieldsList.forEach(element => {
-        element.containerUuid = this.metadata.containerUuid
-      })
-    }
+    this.unsubscribe()
+    this.unsubscribe = this.subscribeChanges()
+
     this.getLocation()
 
     clearTimeout(this.timeOutFields)
@@ -275,36 +316,52 @@ export default {
       }
     },
 
+    setDefaultValues() {
+      if (!isEmptyValue(this.locationId) && this.locationId > 0) {
+        return
+      }
+
+      const parsedDefaultValues = this.$store.getters.getParsedDefaultValues({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.uuidForm,
+        fieldsList: this.metadataList,
+        formatToReturn: 'object'
+      })
+      this.setValues({
+        values: parsedDefaultValues
+      })
+    },
+
     /**
      * Set values into form
      * TODO: Displayed value not wortking
      */
     setValues({ values }) {
-      // let cityName = values['DisplayColumn_C_City_ID']
+      // let cityName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_City_ID]
       // if (isEmptyValue(cityName)) {
-      //   cityName = values['City']
-      //   if (!isEmptyValue(values['C_City_ID']) && values['C_City_ID'] > 0) {
+      //   cityName = values[COLUMNNAME_City]
+      //   if (!isEmptyValue(values[COLUMNNAME_C_City_ID]) && values[COLUMNNAME_C_City_ID] > 0) {
       //     // get with default value
       //     cityName = undefined
       //   } else {
       //     // set with empty id
-      //     // values['C_City_ID'] = -1
+      //     // values[COLUMNNAME_C_City_ID] = -1
       //   }
       // }
 
-      // let regionName = values['DisplayColumn_C_Region_ID']
+      // let regionName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Region_ID]
       // if (isEmptyValue(regionName)) {
-      //   regionName = values['RegionName']
-      //   if (!isEmptyValue(values['C_Region_ID']) && values['C_Region_ID'] > 0) {
+      //   regionName = values[COLUMNNAME_RegionName]
+      //   if (!isEmptyValue(values[COLUMNNAME_C_Region_ID]) && values[COLUMNNAME_C_Region_ID] > 0) {
       //     // get with default value
       //     regionName = undefined
       //   } else {
       //     // set with empty id
-      //     // values['C_Region_ID'] = -1
+      //     // values[COLUMNNAME_C_Region_ID] = -1
       //   }
       // }
 
-      // let countryName = values['DisplayColumn_C_Region_ID']
+      // let countryName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Region_ID]
       // if (isEmptyValue(countryName)) {
       //   if (!isEmptyValue(this.currentCountryDefinition)) {
       //     countryName = this.currentCountryDefinition.name
@@ -344,7 +401,8 @@ export default {
         })
 
         baseUrlMap += this.generateDisplayedValue(values)
-        let countryName = values[DISPLAY_COLUMN_PREFIX + 'C_Country_ID']
+        // 'DisplayColumn_C_Country_ID'
+        let countryName = values[DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Country_ID]
         if (isEmptyValue(countryName)) {
           countryName = this.currentCountryDefinition.name
         }
@@ -363,7 +421,7 @@ export default {
         if (
           mutation.type === 'updateValueOfField' &&
           mutation.payload.containerUuid === this.uuidForm &&
-          mutation.payload.columnName === 'C_Country_ID'
+          mutation.payload.columnName === COLUMNNAME_C_Country_ID
         ) {
           // Get country definition to sequence fields and displayed value
           this.changeCaptureSequence(mutation.payload.value)
@@ -380,51 +438,88 @@ export default {
         id: countryId
       })
         .then(responseCountry => {
-          const { captureSequence, regionName } = responseCountry
+          const {
+            captureSequence, hasRegion, regionName, allowCitiesOutOfList
+          } = responseCountry
 
           // capture sequence by form fields
           const newSequence = getSequenceAsList(captureSequence)
-          let newFieldsList = this.fieldsListLocation
-            .map(item => {
-              if (!isEmptyValue(item.sequenceFields)) {
-                // is manage with capture sequence and displayed
-                if (newSequence.includes(item.sequenceFields)) {
+          const newFieldsList = this.fieldsListLocationAddress
+            .map((item, indexArray, arrayList) => {
+              if (isEmptyValue(item.sequenceFields)) {
+                // does not handle capture sequence, keeps the display of the definition in the field
+                return {
+                  ...item
+                }
+              }
+
+              // is manage with capture sequence and displayed
+              if (newSequence.includes(item.sequenceFields)) {
+                let index = newSequence.indexOf(item.sequenceFields)
+                index *= 10
+
+                let isMandatory = newSequence.includes(item.sequenceFields + MANDATORY_CHAR)
+                // country always is displayed and mandatory
+                if (item.columnName === COLUMNNAME_C_Country_ID) {
+                  isMandatory = true
+                }
+
+                // rename field title in region and hidden/showd if country has region
+                if (item.sequenceFields === 'R' && (captureSequence.includes('@R@') || captureSequence.includes('@R!@'))) {
                   return {
                     ...item,
-                    isDisplayed: true,
-                    index: newSequence.indexOf(item.sequenceFields)
+                    index,
+                    isDisplayed: hasRegion,
+                    isMandatory,
+                    name: !isEmptyValue(regionName) ? regionName : item.name
                   }
                 }
-                // is manage with capture sequence and not displayed
+                // show/hidden city text field
+                if (item.columnName === COLUMNNAME_City) {
+                  index++
+                  return {
+                    ...item,
+                    index,
+                    // displayed/hidden
+                    isDisplayed: allowCitiesOutOfList
+                  }
+                }
+
                 return {
                   ...item,
-                  isDisplayed: false
+                  isDisplayed: true,
+                  isMandatory,
+                  index
+                }
+              } else {
+                // country always is displayed and mandatory
+                if (item.columnName === COLUMNNAME_C_Country_ID || item.sequenceFields === 'CO') {
+                  if (!(captureSequence.includes('@CO@') || captureSequence.includes('@CO!@'))) {
+                    return {
+                      ...item,
+                      isDisplayed: true,
+                      isMandatory: true,
+                      index: arrayList.length * 10 // to last index
+                    }
+                  }
                 }
               }
-              // does not handle capture sequence, keeps the display of the definition in the field
+              // is manage with capture sequence and not displayed
               return {
-                ...item
+                ...item,
+                isDisplayed: false,
+                isMandatory: false
               }
             })
-            .filter(item => item.isDisplayed)
             .sort((itemA, itemB) => {
               return itemA.index - itemB.index
             })
 
-          // rename field title on region
-          if (captureSequence.includes('@R@') && !isEmptyValue(regionName)) {
-            newFieldsList = newFieldsList.map(field => {
-              if (field.sequenceFields === 'R') {
-                return {
-                  ...field,
-                  name: regionName
-                }
-              }
-              return field
-            })
-          }
-
           // set new order of fields
+          this.$store.commit('setFieldsListLocationAddress', {
+            containerUuid: this.uuidForm,
+            fieldsList: newFieldsList
+          })
           this.metadataList = newFieldsList
         })
         .catch(error => {
@@ -442,7 +537,7 @@ export default {
      * @param {object} values
      */
     setParentValues(rowData) {
-      const { parentUuid, containerUuid, columnName, elementName, displayColumnName } = this.metadata
+      const { containerUuid, columnName, elementName } = this.metadata
       const { UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
@@ -453,53 +548,19 @@ export default {
       }
 
       // set ID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName,
-        value: rowData[columnName]
-      })
+      this.value = value
       // set display column (name) value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        // DisplayColumn_'ColumnName'
-        columnName: displayColumnName,
-        value: displayedValue
-      })
+      this.displayedValue = displayedValue
       // set UUID value
-      this.$store.commit('updateValueOfField', {
-        parentUuid,
-        containerUuid,
-        columnName: columnName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-        value: uuid
-      })
+      this.uuidValue = uuid
 
-      // set on element name, used by columns views aliases
-      if (!this.metadata.isSameColumnElement) {
-        // set ID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName,
-          value
-        })
-        // set display column (name) value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: DISPLAY_COLUMN_PREFIX + elementName,
-          value: displayedValue
-        })
-        // set UUID value
-        this.$store.commit('updateValueOfField', {
-          parentUuid,
-          containerUuid,
-          columnName: elementName + UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX,
-          value: uuid
-        })
-      }
+      store.dispatch('notifyFieldChange', {
+        containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName,
+        newValue: value
+      })
     },
 
     /**
@@ -518,22 +579,22 @@ export default {
 
       const cityName = this.$store.getters.getValueOfField({
         containerUuid: this.containerUuid,
-        columnName: 'DisplayColumn_C_City_ID'
+        columnName: DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_City_ID // 'DisplayColumn_C_City_ID'
       })
       if (!this.isEmptyValue(cityName)) {
         attributesToServer.push({
-          columnName: 'City',
+          columnName: COLUMNNAME_City,
           value: cityName
         })
       }
 
       const regionName = this.$store.getters.getValueOfField({
         containerUuid: this.containerUuid,
-        columnName: 'DisplayColumn_C_Region_ID'
+        columnName: DISPLAY_COLUMN_PREFIX + COLUMNNAME_C_Region_ID // 'DisplayColumn_C_Region_ID'
       })
       if (!this.isEmptyValue(cityName)) {
         attributesToServer.push({
-          columnName: 'RegionName',
+          columnName: COLUMNNAME_RegionName,
           value: regionName
         })
       }
@@ -541,9 +602,24 @@ export default {
       return attributesToServer
     },
 
+    responseManager(responseLocation) {
+      // set form values
+      this.setValues({
+        values: responseLocation.attributes
+      })
+
+      // set field parent values
+      this.setParentValues(responseLocation.attributes)
+      this.isShowedLocationForm = false
+
+      return responseLocation.attributes
+    },
+
     sendValuesToServer() {
       const emptyMandatoryFields = this.$store.getters.getFieldsListEmptyMandatory({
         containerUuid: this.uuidForm,
+        fieldsList: this.fieldsListLocationAddress,
+        showedMethod: this.containerManagerLocation.isDisplayedField,
         formatReturn: 'name'
       })
 
@@ -562,61 +638,15 @@ export default {
         containerUuid: this.uuidForm
       })
       const attributesToServer = this.getAttributesToServer(attributes)
-
-      const updateLocation = (responseLocation) => {
-        // set form values
-        this.setValues({
-          values: responseLocation.attributes
+        .filter(attribute => {
+          return !LOG_COLUMNS_NAME_LIST.includes(attribute.columnName) &&
+            !attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+            !attribute.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)
         })
-
-        // set field parent values
-        this.setParentValues(responseLocation.attributes)
-        this.isShowedLocationForm = false
-
-        // set context values to form continer
-        this.$store.dispatch('updateValuesOfContainer', {
-          parentUuid: this.parentUuid,
-          containerUuid: this.uuidForm,
-          attributes
-        })
-
-        return responseLocation.attributes
-      }
 
       const locationId = this.locationId
       if (this.isEmptyValue(locationId) || locationId === 0) {
-        createLocationAddress({
-          attributesList: attributesToServer
-        })
-          .then(updateLocation)
-          .then(responseCreate => {
-            const {
-              parentUuid,
-              containerUuid,
-              columnName // 'C_Location_ID' by default
-            } = this.metadata
-
-            const recordUuid = this.$store.getters.getValueOfField({
-              parentUuid,
-              containerUuid,
-              columnName: 'UUID'
-            })
-
-            this.containerManager.actionPerformed({
-              containerUuid,
-              field: this.metadata,
-              value: responseCreate[columnName],
-              recordUuid
-            })
-          })
-          .catch(error => {
-            this.$message({
-              message: error.message,
-              isShowClose: true,
-              type: 'error'
-            })
-            console.warn(`Error create Location Address: ${error.message}. Code: ${error.code}.`)
-          })
+        this.createNewLocation(attributesToServer)
         // break to only create
         return
       }
@@ -624,7 +654,7 @@ export default {
         id: locationId,
         attributesList: attributesToServer
       })
-        .then(updateLocation)
+        .then(this.responseManager)
         .catch(error => {
           this.$message({
             message: error.message,
@@ -632,6 +662,46 @@ export default {
             type: 'error'
           })
           console.warn(`Error update Location Address: ${error.message}. Code: ${error.code}.`)
+        })
+    },
+
+    createNewLocation(attributesList) {
+      const {
+        parentUuid,
+        containerUuid,
+        columnName // 'C_Location_ID' by default
+      } = this.metadata
+
+      attributesList = attributesList
+        .filter(attribute => {
+          return !isEmptyValue(attribute.value)
+        })
+
+      createLocationAddress({
+        attributesList
+      })
+        .then(this.responseManager)
+        .then(responseCreate => {
+          const recordUuid = this.$store.getters.getValueOfField({
+            parentUuid,
+            containerUuid,
+            columnName: UUID
+          })
+
+          this.containerManager.actionPerformed({
+            containerUuid,
+            field: this.metadata,
+            value: responseCreate[columnName],
+            recordUuid
+          })
+        })
+        .catch(error => {
+          this.$message({
+            message: error.message,
+            isShowClose: true,
+            type: 'error'
+          })
+          console.warn(`Error create Location Address: ${error.message}. Code: ${error.code}.`)
         })
     },
 
@@ -646,6 +716,7 @@ export default {
       const id = this.locationId
       if (isEmptyValue(id)) {
         this.clearValues()
+        this.changeCaptureSequence(this.countryId)
         return
       }
 
@@ -660,7 +731,7 @@ export default {
             values: attributes
           })
 
-          const countryId = attributes['C_Country_ID']
+          const countryId = attributes[COLUMNNAME_C_Country_ID]
           this.changeCaptureSequence(countryId)
         })
         .catch(error => {
@@ -674,8 +745,8 @@ export default {
       this.isLoadingFields = true
       const listOfFields = []
 
-      if (!isEmptyValue(this.fieldsListLocation)) {
-        this.metadataList = this.fieldsListLocation
+      if (!isEmptyValue(this.fieldsListLocationAddress)) {
+        this.metadataList = this.fieldsListLocationAddress
         this.changeCaptureSequence(this.countryId)
         this.isLoadingFields = false
         return
@@ -695,11 +766,29 @@ export default {
           })
           .finally(() => {
             if (listOfFields.length === this.fieldsList.length) {
-              this.$store.commit('setFieldsListLocation', listOfFields)
+              const fieldsWithDependents = listOfFields
+              this.$store.commit('setFieldsListLocationAddress', {
+                containerUuid: this.uuidForm,
+                fieldsList: fieldsWithDependents
+              })
 
-              this.metadataList = listOfFields
+              this.$store.dispatch('addPanel', {
+                ...this.metadata,
+                isCustomForm: true,
+                containerUuid: this.uuidForm,
+                uuid: this.uuidForm,
+                isSetDefaultValues: false,
+                fieldsList: fieldsWithDependents
+              })
+
+              this.metadataList = fieldsWithDependents
               this.changeCaptureSequence(this.countryId)
+
               this.isLoadingFields = false
+
+              if (isEmptyValue(this.locationId) || this.locationId <= 0) {
+                this.setDefaultValues()
+              }
             }
           })
       })
@@ -722,16 +811,6 @@ export default {
   }
   .el-form-item--small.el-form-item {
     margin-bottom: 5px !important;
-  }
-
-  .location-address-footer {
-    button {
-      padding: 4px 8px;
-
-      i, svg {
-        font-size: 20px !important;
-      }
-    }
   }
 }
 </style>

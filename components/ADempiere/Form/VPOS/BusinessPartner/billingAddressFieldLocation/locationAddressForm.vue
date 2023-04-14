@@ -50,23 +50,23 @@
 </template>
 
 <script>
-// constants
-import fieldsList from '@theme/components/ADempiere/FieldDefinition/FieldLocation/fieldsList.js'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
-
-// components and mixins
+// Components and Mixins
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import mixinLocation from './mixinLocation.js'
 
-// api request methods
+// Constants
+import fieldsList from '@theme/components/ADempiere/FieldDefinition/FieldLocation/fieldsList.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+
+// API Request Methods
 import {
   createLocationAddress,
   updateLocationAddress
 } from '@/api/ADempiere/field/location.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { showNotification } from '@/utils/ADempiere/notification.js'
-import { getSequenceAsList } from '@/utils/ADempiere/dictionary/form/locationAddress'
+import { getSequenceAsList } from '@/utils/ADempiere/dictionary/field/locationAddress'
 
 /**
  * TODO: Add sequence fields by country selected

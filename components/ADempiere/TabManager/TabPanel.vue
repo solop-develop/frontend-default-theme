@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -24,30 +24,59 @@
         :container-manager="containerManager"
         :current-tab-uuid="currentTabUuid"
         :container-uuid="tabAttributes.uuid"
-        :tabs-list="tabsList"
         :tab-attributes="tabAttributes"
-        :references-manager="referencesManager"
         :adicionales-options="convenienceOptions"
         :is-child-tab="isChildTab"
+        :change-previous-record="changePreviousRecord"
+        :change-next-record="changeNextRecord"
+        :is-change-record="!isShowedTableRecords"
       />
 
       <filter-fields
+        v-if="isShowedTableRecords"
         v-bind="commonFilterFielsProperties"
         :parent-uuid="parentUuid"
         :container-uuid="tabAttributes.uuid"
         :fields-list="containerManager.getFieldsList({ parentUuid, containerUuid: tabAttributes.uuid })"
         :fields-to-hidden="containerManager.getFieldsToHidden"
         :is-filter-records="true"
-        :is-showed-table-records="false"
         :in-table="isShowedTableRecords"
         :container-manager="containerManager"
       />
+      <el-collapse
+        v-show="!isEmptyValue(batchEntry) && isShowedTableRecords"
+        v-model="activeNames"
+        accordion
+        style="margin-top: 5px;"
+      >
+        <el-collapse-item name="1">
+          <template slot="title">
+            {{ $t('table.dataTable.batchEntry') }}
+            <i class="header-icon el-icon-information" />
+          </template>
+          <el-form
+            label-position="top"
+            size="small"
+          >
+            <batch-entry
+              v-if="!isEmptyValue(batchEntry) && isShowedTableRecords && activeNames === '1'"
+              :parent-uuid="parentUuid"
+              :container-uuid="tabAttributes.uuid"
+              :container-manager="containerManager"
+              :field-list-batch-entry="batchEntry"
+              :table-name="tabAttributes.tableName"
+              :field-list-all="tableHeaders"
+            />
+          </el-form>
+        </el-collapse-item>
+      </el-collapse>
     </el-header>
 
-    <el-main class="tab-panel-body">
-      <div style="width: 100%;">
+    <el-main id="tab-panel-body" class="tab-panel-body">
+      <div style="width: 100%;height: 100%;">
         <default-table
           v-if="isShowedTableRecords"
+          id="default-table"
           key="default-table"
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
@@ -58,15 +87,6 @@
           :is-navigation="true"
         />
         <template v-else>
-          <!-- <span v-if="isMobile || isEmptyValue(tabAttributes.childTabs)"> -->
-          <!-- <panel-definition
-            v-if="tabAttributes.isParentTab"
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-          /> -->
           <panel-definition
             key="panel-definition"
             :parent-uuid="parentUuid"
@@ -74,18 +94,9 @@
             :container-manager="containerManager"
             :group-tab="tabAttributes.tabGroup"
             :style="overflowHeightScrooll"
+            :is-tab-panel="true"
+            :is-filter-records="true"
           />
-          <!-- </span> -->
-          <!-- <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
-            <panel-definition
-              key="panel-definition"
-              :parent-uuid="parentUuid"
-              :container-uuid="tabAttributes.uuid"
-              :container-manager="containerManager"
-              :group-tab="tabAttributes.tabGroup"
-              :style="overflowHeightScrooll"
-            />
-          </el-scrollbar> -->
         </template>
       </div>
     </el-main>
@@ -102,91 +113,23 @@
         :records-page="recordsWithFilter.length"
         :handle-change-page="handleChangePage"
         :handle-size-change="handleChangeSizePage"
-        :change-previous-record="changePreviousRecord"
-        :change-next-record="changeNextRecord"
-        :is-change-record="true"
       />
     </el-footer>
   </el-container>
-  <!-- <div>
-    <span v-if="!isShowedTableRecords">
-      <full-screen-container
-        style="float: right;"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-      />
-    </span>
-    <span style="display: grid;">
-      <tab-options
-        :parent-uuid="parentUuid"
-        :container-manager="containerManager"
-        :current-tab-uuid="currentTabUuid"
-        :tabs-list="tabsList"
-        :tab-attributes="tabAttributes"
-        :references-manager="referencesManager"
-        :adicionales-options="convenienceOptions"
-      />
-    </span>
-
-    <div style="width: 100%;">
-      <default-table
-        v-if="isShowedTableRecords"
-        key="default-table"
-        :parent-uuid="parentUuid"
-        :container-uuid="tabAttributes.uuid"
-        :container-manager="containerManager"
-        :header="tableHeaders"
-        :data-table="recordsList"
-        :panel-metadata="tabAttributes"
-        :is-navigation="true"
-      />
-      <template v-else>
-        <span v-if="isMobile || isEmptyValue(tabAttributes.childTabs)">
-          <panel-definition
-            v-if="tabAttributes.isParentTab"
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-          />
-          <panel-definition
-            v-else
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-            :style="overflowHeightScrooll"
-          />
-        </span>
-        <el-scrollbar v-else wrap-class="scroll-child" style="width: 100%;min-height: 339px;padding-bottom: 25px;">
-          <panel-definition
-            key="panel-definition"
-            :parent-uuid="parentUuid"
-            :container-uuid="tabAttributes.uuid"
-            :container-manager="containerManager"
-            :group-tab="tabAttributes.tabGroup"
-            :style="overflowHeightScrooll"
-          />
-        </el-scrollbar>
-      </template>
-    </div>
-  </div> -->
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 
-import language from '@/lang'
-import store from '@/store'
 import router from '@/router'
+import store from '@/store'
 
 // Components and Mixins
+import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEntry.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
-import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
+// import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabOptions from './TabOptions.vue'
 
@@ -199,10 +142,11 @@ export default defineComponent({
   components: {
     CustomPagination,
     DefaultTable,
-    FullScreenContainer,
+    FilterFields,
+    // FullScreenContainer,
     PanelDefinition,
     TabOptions,
-    FilterFields
+    BatchEntry
   },
 
   props: {
@@ -218,23 +162,11 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    tabsList: {
-      type: Array,
-      default: () => []
-    },
     tabAttributes: {
       type: Object,
       default: () => ({})
     },
-    actionsManager: {
-      type: Object,
-      default: () => ({})
-    },
     // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
-    },
     convenienceOptions: {
       type: Object,
       default: () => ({})
@@ -246,46 +178,24 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const activeNames = ref(['0'])
+
     const overflowHeightScrooll = computed(() => {
-      if (props.tabAttributes.isParentTab) {
-        if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
-          return 'max-height: 650px;'
-        }
-        return 'max-height: 300px;'
-      }
-      if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsChildren) {
-        return 'max-height: 500px !important;'
-      }
-      return 'max-height: 300px !important;'
-    })
-
-    const listAction = computed(() => {
-      return {
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabAttributes.uuid,
-        defaultActionName: language.t('actionMenu.createNewRecord'),
-        tableName: props.tabAttributes.tableName,
-        getActionList: () => {
-          return store.getters.getStoredActionsMenu({
-            containerUuid: props.tabAttributes.uuid
-          })
-        }
-      }
-    })
-
-    const isMobile = computed(() => {
-      return store.state.app.device === 'mobile'
+      return ''
+      // if (props.tabAttributes.isParentTab) {
+      //   if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsParent) {
+      //     return ''
+      //   }
+      //   return 'max-height: 300px;'
+      // }
+      // if (store.getters.getStoredWindow(props.parentUuid).isFullScreenTabsChildren) {
+      //   return ''
+      // }
+      // return 'max-height: 300px !important;'
     })
 
     const isShowedTableRecords = computed(() => {
-      return tabData.value.isShowedTableRecords
-    })
-
-    const tabData = computed(() => {
-      return store.getters.getStoredTab(
-        props.parentUuid,
-        props.tabAttributes.uuid
-      )
+      return currentTab.value.isShowedTableRecords
     })
 
     const currentTab = computed(() => {
@@ -300,23 +210,42 @@ export default defineComponent({
     })
 
     const styleHeadPanel = computed(() => {
-      return 'height: 76px'
+      if (isShowedTableRecords.value) {
+        if (!isEmptyValue(batchEntry.value)) {
+          // batch entry expand
+          if (activeNames.value === '1') {
+            return 'height: 200px'
+          }
+          // batch entry collapse
+          return 'height: 130px'
+        }
+        // multi record
+        return 'height: 78px'
+      }
+      // mono record
+      return 'height: 39px'
     })
 
     const styleFooterPanel = computed(() => {
       if (props.isChildTab) {
-        if (storedWindow.value.isFullScreenTabsChildren) {
-          return 'height: 10% !important'
-        }
-        return 'height: 20% !important'
+        // if (storedWindow.value.isFullScreenTabsChildren) {
+        return 'height: 100px !important'
+        // }
+        // return 'height: 20% !important'
       }
       return 'height: 36px'
     })
 
-    // const inf = store.getters.getContainerInfo
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.tabAttributes.uuid)
+    })
 
-    const list = store.getters.getTabRecordsList({ containerUuid: currentTab.value.containerUuid })
-    const currentRecord = list.find(row => row.UUID === store.getters.getUuidOfContainer(currentTab.value.containerUuid))
+    const list = store.getters.getTabRecordsList({
+      containerUuid: currentTab.value.containerUuid
+    })
+    const currentRecord = list.find(row => {
+      return row.UUID === recordUuid.value
+    })
     store.dispatch('panelInfo', {
       currentTab: currentTab.value,
       currentRecord
@@ -332,7 +261,7 @@ export default defineComponent({
     }
 
     const tableHeaders = computed(() => {
-      const panel = props.tabsList.find(tabs => tabs.uuid === props.currentTabUuid)
+      const panel = currentTab.value
       if (panel && panel.fieldsList) {
         return panel.fieldsList
       }
@@ -383,14 +312,10 @@ export default defineComponent({
       return selection.length
     })
 
-    const isWithChildsTab = computed(() => {
-      return store.getters.getStoredWindow(props.parentUuid).tabsListChild
-    })
-
     const commonFilterFielsProperties = computed(() => {
       if (isShowedTableRecords.value) {
         return {
-          filterManager: props.containerManager.changeTabTableShowedFromUser,
+          filterManager: props.containerManager.changeColumnShowedFromUser,
           showedManager: props.containerManager.isDisplayedColumn
         }
       }
@@ -400,15 +325,9 @@ export default defineComponent({
       }
     })
 
-    function changeShowedRecords() {
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isShowedTableRecords',
-        attributeNameControl: undefined,
-        attributeValue: !tabData.value.isShowedTableRecords,
-        parentUuid: props.parentUuid,
-        containerUuid: props.tabAttributes.uuid
-      })
-    }
+    const batchEntry = computed(() => {
+      return tableHeaders.value.filter(fieldItem => fieldItem.isQuickEntry)
+    })
 
     function handleChangePage(pageNumber) {
       props.containerManager.setPage({
@@ -421,8 +340,8 @@ export default defineComponent({
         name: root.$route.name,
         query: {
           ...root.$route.query,
-          page: tabData.value.isParentTab ? pageNumber : root.$route.query.page,
-          pageChild: !tabData.value.isParentTab ? pageNumber : root.$route.query.pageChild
+          page: currentTab.value.isParentTab ? pageNumber : root.$route.query.page,
+          pageChild: !currentTab.value.isParentTab ? pageNumber : root.$route.query.pageChild
         }
       }, () => {})
     }
@@ -443,8 +362,9 @@ export default defineComponent({
      * changePreviousRecord
      */
     function changePreviousRecord(recordPrevious) {
-      const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      const previosRecord = recordsWithFilter.value[posicionIndex - 1]
+      const recordId = previosRecord[props.tabAttributes.tableName + '_ID']
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
@@ -457,22 +377,24 @@ export default defineComponent({
         attributeNameControl: undefined,
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex - 1]
+        row: previosRecord
       })
 
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex - 1]
+        row: previosRecord
       })
+      setRecordPath(recordId)
     }
 
     /**
      * changePreviousRecord
      */
     function changeNextRecord(recordNext) {
-      const recordUuid = store.getters.getUuidOfContainer(props.currentTabUuid)
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      const nextRecord = recordsWithFilter.value[posicionIndex + 1]
+      const recordId = nextRecord[props.tabAttributes.tableName + '_ID']
       store.dispatch('changeTabAttribute', {
         attributeName: 'isShowedTableRecords',
         attributeNameControl: undefined,
@@ -485,28 +407,40 @@ export default defineComponent({
         attributeNameControl: undefined,
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex + 1]
+        row: nextRecord
       })
 
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.currentTabUuid,
-        row: recordsWithFilter.value[posicionIndex + 1]
+        row: nextRecord
       })
+
+      setRecordPath(recordId)
+    }
+
+    function setRecordPath(recordId) {
+      router.push({
+        query: {
+          ...root.$route.query,
+          recordId
+        },
+        params: {
+          ...root.$route.params,
+          recordId
+        }
+      }, () => {})
     }
 
     return {
       // computeds
       commonFilterFielsProperties,
-      listAction,
       recordsList,
       isShowedTableRecords,
       tableHeaders,
-      tabData,
-      isMobile,
       currentTab,
       overflowHeightScrooll,
-      isWithChildsTab,
+      recordUuid,
       // pagination
       styleHeadPanel,
       styleFooterPanel,
@@ -515,12 +449,14 @@ export default defineComponent({
       selectionsLength,
       recordsWithFilter,
       storedWindow,
+      batchEntry,
+      activeNames,
       // methods
       handleChangePage,
       handleChangeSizePage,
-      changeShowedRecords,
       changePreviousRecord,
-      changeNextRecord
+      changeNextRecord,
+      setRecordPath
     }
   }
 

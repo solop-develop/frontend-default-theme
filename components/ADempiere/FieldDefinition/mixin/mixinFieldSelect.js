@@ -9,19 +9,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// constants
+// Constants
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { convertBooleanToString } from '@/utils/ADempiere/formatValue/booleanFormat.js'
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { getTypeOfValue, isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default {
   name: 'MixinFieldSelect',
@@ -50,7 +50,6 @@ export default {
       return {
         // label with '' value is assumed to be undefined non-existent
         displayedValue: ' ',
-        id: undefined,
         uuid: undefined,
         value
       }
@@ -89,9 +88,10 @@ export default {
       // sets the value to blank when the lookupList or lookupItem have no
       // values, or if only lookupItem does have a value
       if (isEmptyValue(allOptions) || (!isEmptyValue(allOptions) &&
-        (!this.blankValues.includes(allOptions[0].value)))) {
+        (!this.blankValues.includes(allOptions.at().value)))) {
         allOptions.unshift(this.blankOption)
       }
+
       return allOptions
     }
   },
@@ -101,7 +101,7 @@ export default {
      @overwride
      */
     parseValue(value) {
-      if (typeof value === 'boolean') {
+      if (getTypeOfValue(value) === 'BOOLEAN') {
         // value ? 'Y' : 'N'
         value = convertBooleanToString(value)
       }

@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -32,26 +32,23 @@
           label-width="10px"
           @submit.native.prevent="notSubmitForm"
         >
-          <template
+          <field-definition
             v-for="(field) in sortFieldsListOrder"
-          >
-            <field-definition
-              :key="field.columnName"
-              :metadata-field="field"
-              :container-uuid="'Orders-List'"
-              :container-manager="{
-                ...containerManager,
-                getLookupList,
-                isDisplayedField,
-                isDisplayedDefault,
-                generalInfoSearch,
-                searchTableHeader,
-                isMandatoryField,
-                isReadOnlyField,
-                changeFieldShowedFromUser
-              }"
-            />
-          </template>
+            :key="field.columnName"
+            :metadata-field="field"
+            :container-uuid="'Orders-List'"
+            :container-manager="{
+              ...containerManager,
+              getLookupList,
+              isDisplayedField,
+              isDisplayedDefault,
+              generalInfoSearch,
+              searchTableHeader,
+              isMandatoryField,
+              isReadOnlyField,
+              changeFieldShowedFromUser
+            }"
+          />
         </el-form>
         <div
           v-else
@@ -70,7 +67,7 @@
       v-shortkey="shortsKey"
       v-loading="!ordersList.isLoaded || isLoadRecord"
       :data="sortTableOrderList"
-      border
+      :border="true"
       :empty-text="$t('form.byInvoice.emptyList')"
       fit
       highlight-current-row
@@ -108,7 +105,7 @@
         width="100"
       >
         <template slot="header">
-          {{ $t('table.ProcessActivity.Status') }}
+          {{ $t('page.processActivity.status') }}
           <el-button-group
             style="display: inline-grid;vertical-align: inherit;"
           >
@@ -255,18 +252,21 @@
           <el-button
             :loading="!ordersList.isLoaded || isLoadRecord"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             size="small"
             @click="loadOrdersList();"
           />
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             size="small"
             @click="clear"
           />
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             size="small"
             @click="selectionChangeOrder"
@@ -278,20 +278,22 @@
 </template>
 
 <script>
-// constants
+// Constants
 import fieldsListOrders from './fieldsListOrders.js'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import {
+  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
+} from '@/utils/ADempiere/dictionaryUtils'
 
-// components and mixins
+// Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import posMixin from '@theme/components/ADempiere/Form/VPOS/posMixin.js'
 
-// api request methods
+// API Request Methods
 import { holdOrder } from '@/api/ADempiere/form/point-of-sales.js'
 
-// utils and helper methods
+// Utils and Helper Methods
 import {
   getLookupList,
   isDisplayedField,
@@ -305,6 +307,7 @@ import {
 import {
   createFieldFromDictionary
 } from '@/utils/ADempiere/lookupFactory'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 
@@ -361,22 +364,22 @@ export default {
 
   computed: {
     heightTable() {
-      if (this.isEmptyValue(this.activeAccordion)) {
+      if (isEmptyValue(this.activeAccordion)) {
         return 600
       }
       return 350
     },
     highlightRow() {
-      if (!this.isEmptyValue(this.selectOrder)) {
+      if (!isEmptyValue(this.selectOrder)) {
         return true
       }
       return false
     },
     selectOrder() {
       const action = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
-      if (!this.isEmptyValue(this.ordersList.ordersList)) {
+      if (!isEmptyValue(this.ordersList.ordersList)) {
         const order = this.ordersList.ordersList.find(item => item.uuid === action)
-        if (!this.isEmptyValue(order)) {
+        if (!isEmptyValue(order)) {
           return order
         }
       }
@@ -397,7 +400,7 @@ export default {
     },
     sortTableOrderList: {
       get() {
-        if (this.isEmptyValue(this.ordersList.ordersList)) {
+        if (isEmptyValue(this.ordersList.ordersList)) {
           return []
         }
         return this.ordersList.ordersList
@@ -411,7 +414,7 @@ export default {
 
   watch: {
     showField(value) {
-      if (value && this.isEmptyValue(this.metadataList)) {
+      if (value && isEmptyValue(this.metadataList)) {
         this.setFieldsList()
       }
     },
@@ -455,10 +458,10 @@ export default {
     },
     sortDescendingTable(listDate, column, params) {
       return listDate.sort((element, item) => {
-        if ((!this.isEmptyValue(params) && element[column][params] > item[column][params]) || element[column] > item[column]) {
+        if ((!isEmptyValue(params) && element[column][params] > item[column][params]) || element[column] > item[column]) {
           return 1
         }
-        if ((!this.isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
+        if ((!isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
           return -1
         }
         return 0
@@ -466,10 +469,10 @@ export default {
     },
     sortAscendingTable(listDate, column, params) {
       return listDate.sort((element, item) => {
-        if ((!this.isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
+        if ((!isEmptyValue(params) && element[column][params] < item[column][params]) || (element[column] < item[column])) {
           return 1
         }
-        if ((!this.isEmptyValue(params) && element[column][params] > item[column][params]) || (element[column] > item[column])) {
+        if ((!isEmptyValue(params) && element[column][params] > item[column][params]) || (element[column] > item[column])) {
           return -1
         }
         return 0
@@ -488,7 +491,7 @@ export default {
     },
     loadOrdersList(pageNumber = 0) {
       const point = this.$store.getters.posAttributes.currentPointOfSales.uuid
-      if (!this.isEmptyValue(point)) {
+      if (!isEmptyValue(point)) {
         this.isLoadRecord = true
         this.$store.dispatch('listOrdersFromServer', {
           posUuid: point,
@@ -508,7 +511,7 @@ export default {
     selectionChangeOrder() {
       const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
       const currentOrder = this.$store.getters.posAttributes.currentPointOfSales.currentOrder
-      if (!this.isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
+      if (!isEmptyValue(this.changeOrder) && this.changeOrder.documentNo !== currentOrder.documentNo) {
         this.$store.state['pointOfSales/point/index'].conversionsList = []
         this.$store.dispatch('currentOrder', this.changeOrder)
         this.$store.dispatch('deleteAllCollectBox')
@@ -545,13 +548,14 @@ export default {
       this.clear()
     },
     clear() {
+      this.$store.commit('setDialogoComponent', false)
       this.$store.commit('showListOrders', false)
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField' &&
           !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
-          !mutation.payload.columnName.endsWith('_UUID') &&
+          !mutation.payload.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX) &&
           mutation.payload.containerUuid === this.metadata.containerUuid) {
           clearTimeout(this.timeOut)
           this.isLoadRecord = true
@@ -607,12 +611,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.orders-list-footer {
-  button {
-    padding: 4px 8px;
-    font-size: 24px;
-  }
-}
-</style>

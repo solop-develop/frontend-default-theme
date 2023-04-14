@@ -28,6 +28,7 @@
       name="file"
       :file-list="filesList"
       :data="additionalData"
+      :headers="additionalHeaders"
       :multiple="false"
       :before-upload="isValidUploadHandler"
       :on-success="loadedSucess"
@@ -41,12 +42,14 @@
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import lang from '@/lang'
+import store from '@/store'
 
 // Constants
 import { config } from '@/utils/ADempiere/config'
+import { BEARER_TYPE } from '@/utils/auth'
 
 // API Request Methods
 import {
@@ -55,7 +58,9 @@ import {
 } from '@/api/ADempiere/user-interface/component/resource'
 
 // Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
+import { getToken } from '@/utils/auth'
 
 export default defineComponent({
   name: 'UploadResource',
@@ -82,6 +87,18 @@ export default defineComponent({
     const filesList = ref([])
     const additionalData = ref({})
 
+    const additionalHeaders = computed(() => {
+      const token = getToken()
+      let bearerToken = token
+      // Json Web Token
+      if (!isEmptyValue(bearerToken) && !bearerToken.startsWith(BEARER_TYPE)) {
+        bearerToken = `${BEARER_TYPE} ${token}`
+      }
+      return {
+        Authorization: bearerToken
+      }
+    })
+
     function isValidUploadHandler(file) {
       return new Promise((resolve, reject) => {
         setResourceReference({
@@ -104,6 +121,11 @@ export default defineComponent({
           })
           reject(false)
         }).finally(() => {
+          store.dispatch('findAttachment', {
+            tableName: props.tableName,
+            recordId: props.recordId,
+            recordUuid: props.recordUuid
+          })
           // upload.value.uploadFiles = filesList.value
         })
       })
@@ -115,6 +137,7 @@ export default defineComponent({
 
     return {
       additionalData,
+      additionalHeaders,
       endPointUploadResource,
       filesList,
       upload,

@@ -24,79 +24,40 @@
     <el-dropdown
       v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
       split-button
+      style="margin-left: 10px;"
+      size="small"
       class="document-action"
-      @click="showClickActions = true"
+      @click="handleCommandActions(defaultDocumentAction.value);"
       @command="handleCommandActions"
     >
-      <el-popover
-        v-if="!isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
-        :value="showClickActions"
-        placement="top"
-        trigger="click"
-      >
-        <h3> {{ $t('workflow.changeDocumentAction') }} </h3>
+      {{ defaultDocumentAction.name }}
 
-        <el-steps :space="200" simple>
-          <el-step icon="el-icon-d-arrow-right">
-            <template slot="title">
-              <document-status-tag
-                key="document-status"
-                size="small"
-                :value="currentDocStatus"
-                :displayed-value="displayDocStatus.name"
-              />
-            </template>
-          </el-step>
-          <el-step icon="el-icon-d-arrow-right">
-            <template slot="title">
-              <document-status-tag
-                key="document-actions"
-                size="small"
-                :value="displayDocumentActions(selectDocActions).value"
-                :displayed-value="displayDocumentActions(selectDocActions).name"
-              />
-            </template>
-          </el-step>
-        </el-steps>
-
-        <div style="text-align: right; margin: 0">
-          <el-button size="mini" type="text" @click="showClickActions = false">
-            {{ $t('components.dialogCancelButton') }}
-          </el-button>
-          <el-button type="primary" size="mini" @click="sendAction()">
-            {{ $t('components.dialogConfirmButton') }}
-          </el-button>
-        </div>
-
-        <el-button
-          slot="reference"
-          plain
-          :loading="isDisabledDocument"
-          size="small"
-          style="padding: 0px;border: 0px;"
-          :type="tagRender(additionalOptions.currentDocument.value).type"
-          @click="handleClickdActions(additionalOptions.currentDocument.value)"
-        >
-          {{ additionalOptions.currentDocument.name }}
-        </el-button>
-      </el-popover>
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item
-          v-for="(documents, key) in additionalOptions.options"
+          v-for="(documentAction, key) in documentActionsList"
           :key="key"
-          :command="documents.value"
+          :divided="key > 0"
+          :command="documentAction.value"
         >
-          {{ documents.name }}
+          <document-status-tag
+            key="document-actions"
+            size="small"
+            :value="documentAction.value"
+          />
+          {{ documentAction.name }}
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
 
     <el-popover
-      v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
-      v-model="visible"
+      ref="popoverDocAction"
+      v-model="isVisibleDocAction"
+      trigger="click"
       placement="top"
     >
       <h3> {{ $t('workflow.changeDocumentAction') }} </h3>
+      {{ displayDocumentActions(selectDocActions).description }}
+      <br><br>
 
       <el-steps :space="200" simple>
         <el-step icon="el-icon-d-arrow-right">
@@ -122,14 +83,13 @@
       </el-steps>
 
       <div style="text-align: right; margin: 0">
-        <el-button size="mini" type="text" @click="visible = false">
+        <el-button size="mini" type="text" @click="isVisibleDocAction = false">
           {{ $t('components.dialogCancelButton') }}
         </el-button>
         <el-button type="primary" size="mini" @click="sendAction()">
           {{ $t('components.dialogConfirmButton') }}
         </el-button>
       </div>
-      <el-button slot="reference" type="text" />
     </el-popover>
 
     <!-- Current Status -->
@@ -188,9 +148,14 @@ export default defineComponent({
 
   setup(props) {
     const containerUuid = props.tabAttributes.uuid
-    const visible = ref(false)
+    const isVisibleDocAction = ref(false)
     const selectDocActions = ref('')
-    const showClickActions = ref(false)
+    const popoverDocAction = ref(null)
+    const emptyDocAction = {
+      name: '',
+      value: '',
+      description: ''
+    }
 
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
@@ -207,6 +172,14 @@ export default defineComponent({
       return props.tabAttributes
     })
 
+    const defaultDocumentAction = computed(() => {
+      return props.additionalOptions.currentDocument
+    })
+
+    const documentActionsList = computed(() => {
+      return props.additionalOptions.options
+    })
+
     const currentDocStatus = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
@@ -219,21 +192,18 @@ export default defineComponent({
       return props.tabAttributes.fieldsList.find(field => field.columnName === 'DocStatus')
     })
 
-    const listActions = computed(() => {
-      const list = store.getters.getWorkFlowActions({ containerUuid })
-      if (isEmptyValue(list)) {
-        return []
-      }
-      return list.options
-    })
-
     const displayDocStatus = computed(() => {
-      if (isEmptyValue(listActions.value)) {
-        return {
-          name: ''
+      let docStatus = {}
+      if (!isEmptyValue(documentActionsList.value)) {
+        docStatus = documentActionsList.value.find(docAction => docAction.value === currentDocStatus.value)
+      }
+      if (isEmptyValue(docStatus)) {
+        const list = store.getters.getWorkFlowActions({ containerUuid })
+        if (!isEmptyValue(list) && !isEmptyValue(list.options)) {
+          docStatus = list.options.find(docStatus => docStatus.value === currentDocStatus.value)
         }
       }
-      return listActions.value.find(docs => docs.value === currentDocStatus.value)
+      return docStatus || emptyDocAction
     })
 
     const isDisabledDocument = computed(() => {
@@ -247,33 +217,10 @@ export default defineComponent({
 
     function displayDocumentActions(nextStatus) {
       if (isEmptyValue(nextStatus)) {
-        return {
-          name: '',
-          value: ''
-        }
+        return emptyDocAction
       }
       const currentStatus = props.additionalOptions.options.find(docs => docs.value === nextStatus)
-      // if (isEmptyValue(currentStatus)) {
-      //   return {
-      //     name: '',
-      //     value: ''
-      //   }
-      // }
       return currentStatus
-    }
-
-    function handleClickdActions(docsAction) {
-      const info = {
-        fieldsList: props.containerManager.getFieldsList({
-          parentUuid: props.parentUuid,
-          containerUuid: containerUuid
-        }),
-        option: language.t('actionMenu.undo')
-      }
-
-      store.dispatch('fieldListInfo', { info })
-      selectDocActions.value = docsAction
-      showClickActions.value = true
     }
 
     function refreshCurrentRecord() {
@@ -293,24 +240,20 @@ export default defineComponent({
     }
 
     function sendAction(params) {
-      visible.value = false
-      showClickActions.value = false
-      store.dispatch('changeActionsDoc', {
+      isVisibleDocAction.value = false
+
+      store.dispatch('runDocumentAction', {
         tableName: props.tabAttributes.tableName,
-        uuid: recordUuid.value,
+        recordUuid: recordUuid.value,
         containerUuid,
         docAction: selectDocActions.value
       })
-        .then(response => {
-          refreshCurrentRecord()
-        })
         .catch(error => {
           console.warn(`Error Run Doc Action: ${error.message}. Code: ${error.code}.`)
         })
-
-      setTimeout(() => {
-        refreshCurrentRecord()
-      }, 700)
+        .finally(() => {
+          refreshCurrentRecord()
+        })
     }
 
     function handleCommandActions(params) {
@@ -324,23 +267,24 @@ export default defineComponent({
 
       store.dispatch('fieldListInfo', { info })
       selectDocActions.value = params
-      visible.value = true
+      isVisibleDocAction.value = true
     }
 
     return {
+      popoverDocAction,
       currentDocStatus,
       displayDocStatus,
-      listActions,
       docStatus,
       isDisabledDocument,
       recordUuid,
       selectDocActions,
-      showClickActions,
       getCurrentTab,
-      visible,
-      //
+      isVisibleDocAction,
+      // computed
+      defaultDocumentAction,
+      documentActionsList,
+      // methods
       displayDocumentActions,
-      handleClickdActions,
       handleCommandActions,
       sendAction,
       tagRender
@@ -348,18 +292,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.document-action-main {
-  .document-action {
-    > div.el-button-group {
-      height: 32px;
-      .el-button-group > .el-button:first-child,
-      .el-button-group > .el-button:not(:last-child) {
-        padding-left: 15px !important;
-        padding-right: 15px !important;
-      }
-    }
-  }
-}
-</style>

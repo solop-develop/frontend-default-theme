@@ -26,12 +26,12 @@
       :displayed-value="displayedValue"
     />
 
-    <progress-percentage
+    <!-- <progress-percentage
       v-else-if="isPercentageColumn"
       key="percentage-status"
       :value="cellValue"
       :displayed-value="displayedValue"
-    />
+    /> -->
 
     <p
       v-else-if="!isEmptyValue(displayedValue) && displayedValue.length >= 23"
@@ -122,9 +122,9 @@ export default defineComponent({
     const columnName = computed(() => {
       return props.fieldAttributes.columnName
     })
-    const elementName = computed(() => {
-      return props.fieldAttributes.elementName
-    })
+    // const elementName = computed(() => {
+    //   return props.fieldAttributes.elementName
+    // })
     const displayColumnName = computed(() => {
       return props.fieldAttributes.displayColumnName
     })
@@ -152,9 +152,9 @@ export default defineComponent({
       return classCss
     })
 
-    const isPercentageColumn = computed(() => {
-      return [columnName.value, elementName.value].includes('TaskStatus')
-    })
+    // const isPercentageColumn = computed(() => {
+    //   return [columnName.value, elementName.value].includes('TaskStatus')
+    // })
 
     function copyContent(value) {
       copyToClipboard({
@@ -167,7 +167,7 @@ export default defineComponent({
       columnName,
       displayColumnName,
       // data
-      isPercentageColumn,
+      // isPercentageColumn,
       TEXT_LONG,
       // computeds
       cellValue,

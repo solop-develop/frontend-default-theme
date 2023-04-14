@@ -9,27 +9,15 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <location-address-form
-    v-if="metadata.pos"
-    key="point-of-sales"
-    class="location-form"
-    :parent-metadata="metadata"
-    :parent-uuid="parentUuid"
-    :container-uuid="containerUuid"
-    :container-manager="containerManager"
-  />
-
   <el-popover
-    v-else
-    key="standard-location"
     ref="locationAddress"
     v-model="isShowedLocationForm"
     class="popover-location"
@@ -52,12 +40,14 @@
       type="text"
       style="width: 100%;"
       :disabled="isDisabled"
+      @click="setContextValues()"
     >
       <el-input
         v-model="displayedValueNotEdit"
         :class="cssClassStyle"
         clearable
         v-bind="commonsProperties"
+        readonly
         style="width: 100%;"
         @clear="clearValues"
       >
@@ -68,12 +58,13 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
 import mixinLocation from './mixinLocationAddress.js'
 import LocationAddressForm from './locationAddressForm.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -85,6 +76,7 @@ export default {
 
   mixins: [
     fieldMixin,
+    fieldWithDisplayColumn,
     mixinLocation
   ],
 
@@ -104,17 +96,8 @@ export default {
   },
 
   computed: {
-    cssClassStyle() {
-      let styleClass = ' custom-field-location '
-      if (!isEmptyValue(this.metadata.cssClassName)) {
-        styleClass += this.metadata.cssClassName
-      }
-
-      if (this.isEmptyRequired) {
-        styleClass += ' field-empty-required '
-      }
-
-      return styleClass
+    cssClassCustomField() {
+      return ' custom-field-location-address '
     },
     displayedValueNotEdit: {
       get() {
@@ -122,34 +105,6 @@ export default {
       },
       set(value) {
         // emty, dont edit
-      }
-    },
-    displayedValue: {
-      get() {
-        /**
-         * TODO: Add DisplayColumnName (to locator's and location's fields) in entities
-         * list response, to set value or empty value in fieldValue state when
-         * change records with dataTable.
-         */
-        if (isEmptyValue(this.value)) {
-          return undefined
-        }
-
-        return this.$store.getters.getValueOfFieldOnContainer({
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName
-        })
-      },
-      set(value) {
-        this.$store.commit('updateValueOfField', {
-          parentUuid: this.metadata.parentUuid,
-          containerUuid: this.metadata.containerUuid,
-          // DisplayColumn_'ColumnName'
-          columnName: this.metadata.displayColumnName,
-          value
-        })
       }
     },
     popoverPlacement() {
@@ -163,8 +118,8 @@ export default {
         this.displayedValue = undefined
       } else {
         if (newValue !== oldValue) {
-          this.displayedValue = undefined
-          this.setDefaultValue()
+          // this.displayedValue = undefined
+          // this.setDefaultValue()
         }
       }
     }
@@ -172,13 +127,30 @@ export default {
 
   methods: {
     clearValues() {
-      // TODO: Clear values into form
       this.value = undefined
       this.displayedValue = undefined
+      this.uuidValue = undefined
 
-      this.$store.dispatch('clearValuesOnContainer', {
-        containerUuid: this.uuidForm
+      this.clearFormValues()
+
+      this.$store.dispatch('notifyFieldChange', {
+        containerUuid: this.metadata.containerUuid,
+        containerManager: this.containerManager,
+        field: this.metadata,
+        columnName: this.metadata.columnName,
+        newValue: undefined
       })
+    },
+    setContextValues() {
+      if (this.isDisabled) {
+        return
+      }
+      const value = this.value
+      if (isEmptyValue(value) || value <= 0) {
+        // this.$store.dispatch('clearValuesOnContainer', {
+        //   containerUuid: this.uuidForm
+        // })
+      }
     }
   }
 }

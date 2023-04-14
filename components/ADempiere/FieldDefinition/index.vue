@@ -17,10 +17,10 @@
 -->
 
 <template>
-  <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'">
+  <div v-if="inTable">
+    <!-- TODO: This parent div tag is necessary for the edit in table to work -->
     <component
       :is="componentRender"
-      v-if="inTable"
       :id="field.panelType !== 'form' ? field.columnName : ''"
       key="is-table-template"
       class="in-table"
@@ -30,16 +30,19 @@
       :metadata="fieldAttributes"
       :in-table="true"
     />
+  </div>
 
-    <el-col
-      v-else-if="!inTable && isDisplayedField"
-      key="is-panel-template"
-      :xs="sizeField.xs"
-      :sm="sizeField.sm"
-      :md="sizeField.md"
-      :lg="sizeField.lg"
-      :xl="sizeField.xl"
-    >
+  <el-col
+    v-else-if="!inTable && isDisplayedField"
+    key="is-panel-template"
+    :xs="sizeField.xs"
+    :sm="sizeField.sm"
+    :md="sizeField.md"
+    :lg="sizeField.lg"
+    :xl="sizeField.xl"
+    :class="classPanelCol"
+  >
+    <div :class="isMobile ? 'field-definition-mobile' : 'field-definition'" :style="styleDraggable">
       <el-form-item :class="classFrom">
         <template slot="label">
           <field-options
@@ -60,8 +63,8 @@
           :metadata="fieldAttributes"
         />
       </el-form-item>
-    </el-col>
-  </div>
+    </div>
+  </el-col>
 </template>
 
 <script>
@@ -75,7 +78,6 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
-import { LOCATION_ADDRESS_FORM } from '@/utils/ADempiere/dictionary/form/locationAddress'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -121,6 +123,18 @@ export default {
     isAdvancedQuery: {
       type: Boolean,
       default: false
+    },
+    keyField: {
+      type: Number,
+      default: undefined
+    },
+    isDraggable: {
+      type: Boolean,
+      default: false
+    },
+    sizeCol: {
+      type: Number,
+      default: undefined
     }
   },
 
@@ -149,14 +163,14 @@ export default {
       })
     },
     sizeField() {
-      if (this.field.containerUuid === LOCATION_ADDRESS_FORM) {
+      if (!this.isEmptyValue(this.sizeCol)) {
         return {
           // ...this.field.size,
-          xs: 24,
-          sm: 24,
-          md: 24,
-          lg: 24,
-          xl: 24
+          xs: this.sizeCol,
+          sm: this.sizeCol,
+          md: this.sizeCol,
+          lg: this.sizeCol,
+          xl: this.sizeCol
         }
       }
       if (!this.field.isCustomField && DEFAULT_COLUMNS_PER_ROW >= 0 && !this.isMobile) {
@@ -284,6 +298,30 @@ export default {
         parentUuid: this.parentUuid,
         containerUuid: this.containerUuid
       })
+    },
+    classPanelCol() {
+      if (!isEmptyValue(this.containerManager.getPanel)) {
+        const panel = this.containerManager.getPanel({
+          parentUuid: this.parentUuid,
+          containerUuid: this.containerUuid
+        })
+        if (!this.isDraggable) {
+          return 'border: 1px solid #fff;border-radius: 5px;'
+        }
+        if (!isEmptyValue(panel) && panel.isEditSecuence) {
+          return 'dragable-field'
+        }
+      }
+      return ''
+    },
+    styleDraggable() {
+      if (!this.isDraggable) {
+        return ''
+      }
+      if (!isEmptyValue(this.field.isChangeSecuence) && this.field.isChangeSecuence) {
+        return 'border: 1px solid #a9a9ec;border-radius: 5px;'
+      }
+      return 'border: 1px solid #fff;border-radius: 5px;'
     }
   },
 
@@ -346,9 +384,7 @@ export default {
     max-height: 300px;
     min-height: 250px;
   }
-  .from-field {
-    max-height: 65px;
-  }
+
   .el-form-item {
     margin-bottom: 12px !important;
     margin-left: 10px;
@@ -408,5 +444,9 @@ export default {
       border-color: #f55 !important;
     }
   }
+}
+.dragable-field:active {
+  border-radius: 5px;
+  border: 3px solid blue;
 }
 </style>

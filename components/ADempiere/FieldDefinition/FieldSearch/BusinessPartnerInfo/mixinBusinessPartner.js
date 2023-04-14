@@ -9,14 +9,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// utils and helper methods
+import store from '@/store'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default {
@@ -54,7 +56,7 @@ export default {
       }
     },
     recordsList() {
-      return this.$store.getters.getBusinessPartnerRecordsList({
+      return store.getters.getBusinessPartnerRecordsList({
         containerUuid: this.uuidForm
       })
     }

@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -32,7 +32,7 @@
 
         <el-form
           label-position="top"
-          size="small"
+          size="mini"
           @submit.native.prevent="notSubmitForm"
         >
           <el-row>
@@ -57,7 +57,7 @@
       border
       fit
       :max-height="300"
-      size="small"
+      size="mini"
       @current-change="handleCurrentChange"
       @row-dblclick="changeBusinessPartner"
     >
@@ -67,6 +67,7 @@
 
       <index-column
         :page-number="pageNumber"
+        :page-size="pageSize"
       />
 
       <el-table-column
@@ -91,34 +92,47 @@
     </el-table>
 
     <el-row :gutter="24" class="business-partners-footer">
-      <el-col :span="18">
+      <el-col :span="14">
         <custom-pagination
-          :total="businessParnerData.recordCount"
+          :total="businessPartnerData.recordCount"
           :current-page="pageNumber"
           :container-manager="containerManagerBPList"
           :handle-change-page="setPage"
           :records-page="recordsList.length"
           :selection="selection"
+          :handle-size-change="handleChangeSizePage"
         />
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="10">
         <samp style="float: right; padding-top: 4px;">
+          <el-button
+            type="info"
+            class="button-base-icon"
+            plain
+            @click="clearFormValues(); searchBPartnerList();"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             @click="searchBPartnerList();"
           />
 
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="changeBusinessPartner()"
           />
@@ -129,11 +143,14 @@
 </template>
 
 <script>
-// constants
-import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/form/businessPartner/businessPartnerList'
-import fieldsList from './fieldsListSearch'
+import store from '@/store'
 
-// components and mixins
+// Constants
+import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
+import FIELDS_LIST from './fieldsListSearch'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+
+// Components and Mixins
 import businessPartnerMixin from './mixinBusinessPartner'
 import fieldSearchMixin from '../mixinFieldSearch'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
@@ -141,7 +158,7 @@ import CustomPagination from '@theme/components/ADempiere/DataTable/Components/C
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import {
   // createFieldFromDefinition,
@@ -191,7 +208,7 @@ export default {
   data() {
     return {
       activeAccordion: 'query-criteria',
-      fieldsList,
+      fieldsList: FIELDS_LIST,
       metadataList: [],
       timeOutRecords: null,
       isLoadingRecords: false,
@@ -242,27 +259,30 @@ export default {
         }
       })
     },
-    businessParnerData() {
-      return this.$store.getters.getBusinessPartnerData({
+    businessPartnerData() {
+      return store.getters.getBusinessPartnerData({
         containerUuid: this.uuidForm
       })
     },
     pageNumber() {
-      return this.businessParnerData.pageNumber
+      return this.businessPartnerData.pageNumber
+    },
+    pageSize() {
+      return this.businessPartnerData.pageSize
     },
     isReadyFromGetData() {
-      const { isLoaded } = this.businessParnerData
+      const { isLoaded } = this.businessPartnerData
       return !isLoaded && this.showPopover
     },
     currentRow: {
       set(rowSelected) {
-        this.$store.commit('setBusinessPartnerSelectedRow', {
+        store.commit('setBusinessPartnerSelectedRow', {
           containerUuid: this.uuidForm,
           currentRow: rowSelected
         })
       },
       get() {
-        return this.$store.getters.getBusinessPartnerCurrentRow({
+        return store.getters.getBusinessPartnerCurrentRow({
           containerUuid: this.uuidForm
         })
       }
@@ -338,16 +358,16 @@ export default {
       }
     },
     closeList() {
-      this.$store.commit('setBusinessPartnerShow', {
+      store.commit('setBusinessPartnerShow', {
         containerUuid: this.uuidForm,
         show: false
       })
     },
     setPage(pageNumber) {
-      this.searchBPartnerList(pageNumber)
+      this.searchBPartnerList(pageNumber, this.pageSize)
     },
     subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
+      return store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
           if (mutation.payload.containerUuid === this.uuidForm) {
             this.searchBPartnerList()
@@ -376,16 +396,22 @@ export default {
           })
       })
     },
-    searchBPartnerList(pageNumber = 0, isConvert = true) {
+    searchBPartnerList(pageNumber = 0, pageSize) {
       let parentUuid = this.metadata.parentUuid
       if (isEmptyValue(parentUuid)) {
         parentUuid = this.metadata.containerUuid
       }
 
-      const filters = this.$store.getters.getValuesView({
+      const filters = store.getters.getValuesView({
         containerUuid: this.uuidForm,
         format: 'array'
       })
+        .filter(attribute => {
+          if (attribute.columnName.startsWith(DISPLAY_COLUMN_PREFIX)) {
+            return false
+          }
+          return !isEmptyValue(attribute.value)
+        })
 
       this.isLoadingRecords = true
       clearTimeout(this.timeOutRecords)
@@ -398,7 +424,8 @@ export default {
           tableName: this.metadata.reference.tableName,
           uuid: this.metadata.uuid,
           filters,
-          pageNumber
+          pageNumber,
+          pageSize
         })
           .then(response => {
             if (isEmptyValue(response)) {
@@ -419,6 +446,9 @@ export default {
             this.isLoadingRecords = false
           })
       }, 500)
+    },
+    handleChangeSizePage(pageSize) {
+      this.searchBPartnerList(1, pageSize)
     }
   }
 }
@@ -430,13 +460,6 @@ export default {
     // space between quey criteria and table
     .el-collapse-item__content {
       padding-bottom: 0px !important;
-    }
-  }
-
-  .business-partners-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
     }
   }
 }

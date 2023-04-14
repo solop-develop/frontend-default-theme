@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +31,14 @@
         </b>
       </span>
     </el-button>
-
+    <change-record
+      :parent-uuid="parentUuid"
+      :container-uuid="currentTabUuid"
+      :container-manager="containerManager"
+      :change-previous-record="changePreviousRecord"
+      :change-next-record="changeNextRecord"
+      :is-change-record="isChangeRecord"
+    />
     <convenience-buttons
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
@@ -52,7 +59,6 @@
       :container-uuid="currentTabUuid"
       :container-manager="containerManager"
       :actions-manager="listAction"
-      :references-manager="referencesManager"
       style="float: right;"
     />
   </div>
@@ -68,14 +74,15 @@ import store from '@/store'
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
-
+import ChangeRecord from '@theme/components/ADempiere/DataTable/Components/ChangeRecord.vue'
 export default defineComponent({
   name: 'TabOptions',
 
   components: {
     ActionMenu,
     ConvenienceButtons,
-    FullScreenContainer
+    FullScreenContainer,
+    ChangeRecord
   },
 
   props: {
@@ -95,26 +102,30 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    tabsList: {
-      type: Array,
-      default: () => []
-    },
     tabAttributes: {
       type: Object,
       default: () => ({})
     },
-    actionsManager: {
-      type: Object,
-      default: () => ({})
-    },
     // used only window
-    referencesManager: {
-      type: Object,
-      default: () => ({})
-    },
     adicionalesOptions: {
       type: Object,
       default: () => ({})
+    },
+    isChangeRecord: {
+      type: Boolean,
+      required: false
+    },
+    changeNextRecord: {
+      type: Function,
+      default: (recordNext) => {
+        console.info('implement method Change to Next Record', recordNext)
+      }
+    },
+    changePreviousRecord: {
+      type: Function,
+      default: (recordPrevious) => {
+        console.info('implement method Change to Previous Record ', recordPrevious)
+      }
     }
   },
 

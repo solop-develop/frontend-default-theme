@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -71,7 +71,7 @@
       fit
       :height="200"
       :max-height="400"
-      size="small"
+      size="mini"
       @current-change="handleCurrentChange"
       @row-dblclick="changeRecord"
     >
@@ -121,18 +121,21 @@
           <el-button
             :loading="isLoadingRecords"
             type="success"
+            class="button-base-icon"
             icon="el-icon-refresh-right"
             @click="searchRecordsList();"
           />
 
           <el-button
             type="danger"
+            class="button-base-icon"
             icon="el-icon-close"
             @click="closeList(); clearValues();"
           />
 
           <el-button
             type="primary"
+            class="button-base-icon"
             icon="el-icon-check"
             @click="changeRecord()"
           />
@@ -143,19 +146,19 @@
 </template>
 
 <script>
-// constants
-import { ACCOUTING_COMBINATIONS_LIST_FORM, COLUMN_NAME } from '@/utils/ADempiere/dictionary/form/accoutingCombination'
+// Constants
+import { ACCOUTING_COMBINATIONS_LIST_FORM, COLUMN_NAME } from '@/utils/ADempiere/dictionary/field/accoutingCombination.js'
 import fieldsList from './fieldsList'
 import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } from '@/utils/ADempiere/dictionaryUtils'
 
-// components and mixins
+// Components and Mixins
 import mixinAccountingCombination from './mixinAccountingCombination.js'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { convertObjectToKeyValue } from '@/utils/ADempiere/valueFormat'
 import {
@@ -222,6 +225,12 @@ export default {
         return this.metadata.columnName + '_' + this.metadata.containerUuid
       }
       return ACCOUTING_COMBINATIONS_LIST_FORM
+    },
+    accoutingCombinationId() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: this.metadata.containerUuid,
+        columnName: this.metadata.columnName
+      })
     },
     title() {
       let title = this.metadata.panelName
@@ -321,13 +330,6 @@ export default {
     currentCombinations() {
       return this.$store.getters.getCurrentAccountCombinations({
         containerUuid: this.uuidForm
-      })
-    },
-
-    accoutingCombinationId() {
-      return this.$store.getters.getValueOfField({
-        containerUuid: this.metadata.containerUuid,
-        columnName: this.metadata.columnName
       })
     }
   },
@@ -462,20 +464,23 @@ export default {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'updateValueOfField') {
-          const { columnName } = mutation.payload
-          if (mutation.payload.containerUuid === this.uuidForm && !columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)) {
-            // not included in the query criteria filter
-            if (columnName === 'Alias') {
-              return
+          if (mutation.payload.containerUuid === this.uuidForm) {
+            const { columnName } = mutation.payload
+            if (!columnName.startsWith(DISPLAY_COLUMN_PREFIX) && !columnName.includes(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX)) {
+              // not included in the query criteria filter
+              if (columnName === 'Alias') {
+                return
+              }
+              // mandatory values
+              if (this.isEmptyValue(mutation.payload.value) && ['AD_Org_ID', 'Account_ID'].includes(columnName)) {
+                return
+              }
+              this.isLoadingRecords = true
+              clearTimeout(this.timeOutUpdate)
+              this.timeOutUpdate = setTimeout(() => {
+                this.searchRecordsList()
+              }, 1500)
             }
-            // mandatory values
-            if (this.isEmptyValue(mutation.payload.value) && ['AD_Org_ID', 'Account_ID'].includes(columnName)) {
-              return
-            }
-            clearTimeout(this.timeOutUpdate)
-            this.timeOutUpdate = setTimeout(() => {
-              this.searchRecordsList()
-            }, 1800)
           }
         }
       })
@@ -523,6 +528,7 @@ export default {
       clearTimeout(this.timeOutRecords)
       this.timeOutRecords = setTimeout(() => {
         // search on server
+        this.isLoadingRecords = true
         this.$store.dispatch('listAccountCombinations', {
           parentUuid: this.metadata.parentUuid,
           containerUuid: this.uuidForm,
@@ -567,13 +573,6 @@ export default {
       svg {
         font-size: 30px !important;
       }
-    }
-  }
-
-  .accouting-combintantions-footer {
-    button {
-      padding: 4px 8px;
-      font-size: 24px;
     }
   }
 }

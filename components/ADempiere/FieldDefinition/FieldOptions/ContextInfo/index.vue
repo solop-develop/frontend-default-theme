@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+ Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez esanchez@erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,19 +9,19 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <el-card class="field-option-card context-info">
     <div slot="header">
-      <span>
+      <span style="word-break: break-word;">
         {{ $t('field.field') }}
-        <b> {{ fieldAttributes.name }} </b>
+        <b>{{ fieldAttributes.name }}</b>
         ({{ fieldAttributes.id }}, {{ fieldAttributes.columnName }})
       </span>
     </div>
@@ -68,23 +68,26 @@
       </el-form>
     </el-scrollbar>
 
-    <template v-for="(zoomItem, index) in fieldAttributes.reference.zoomWindows">
+    <span v-for="(zoomItem, index) in fieldAttributes.reference.zoomWindows" :key="index">
       <el-button
         :key="index"
         type="text"
         @click="redirect({ window: zoomItem })"
       >
-        {{ $t('table.ProcessActivity.zoomIn') }}
+        {{ $t('page.processActivity.zoomIn') }}
         {{ zoomItem.name }}
       </el-button>
-    </template>
+    </span>
   </el-card>
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, onMounted } from '@vue/composition-api'
 
-// utils and helper methods
+import store from '@/store'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 import { parseContext } from '@/utils/ADempiere/contextUtils'
 
@@ -98,10 +101,10 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     const fieldValue = computed(() => {
       const { parentUuid, containerUuid, columnName } = props.fieldAttributes
-      return root.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfFieldOnContainer({
         parentUuid,
         containerUuid,
         columnName
@@ -109,60 +112,63 @@ export default defineComponent({
     })
 
     const messageText = computed(() => {
-      if (!root.isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
-        const contextInfo = root.$store.getters.getContextInfoField(props.fieldAttributes.contextInfo.uuid, props.fieldAttributes.contextInfo.sqlStatement)
-        if (!root.isEmptyValue(contextInfo)) {
-          return contextInfo.messageText
+      const { contextInfo } = props.fieldAttributes
+      if (!isEmptyValue(contextInfo.sqlStatement)) {
+        const storedContextInfo = store.getters.getContextInfoField(
+          contextInfo.uuid,
+          contextInfo.sqlStatement
+        )
+        if (!isEmptyValue(storedContextInfo)) {
+          return storedContextInfo.messageText || ''
         }
       }
       return ''
     })
 
     function redirect({ window }) {
+      // panel in mobile mode
+      store.commit('changeShowRigthPanel', false)
+
       const { columnName } = props.fieldAttributes
+
+      const filters = [{
+        columnName,
+        value: fieldValue.value
+      }]
 
       zoomIn({
         uuid: window.uuid,
         query: {
-          action: 'zoomIn',
-          columnName,
-          value: fieldValue.value
+          filters
+        },
+        params: {
+          filters
         }
       })
+    }
 
-      // panel in mobile mode
-      root.$store.commit('changeShowRigthPanel', false)
-      if (!root.isEmptyValue(root.$route.query.fieldColumnName)) {
-        root.$router.push({
-          name: root.$route.name,
-          query: {
-            ...root.$route.query,
-            typeAction: '',
-            fieldColumnName: ''
-          }
-        }, () => {})
+    onMounted(() => {
+      if (!isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
+        const sqlParse = parseContext({
+          parentUuid: props.fieldAttributes.parentUuid,
+          containerUuid: props.fieldAttributes.containerUuid,
+          value: props.fieldAttributes.contextInfo.sqlStatement,
+          isSQL: true,
+          isBooleanToString: true
+        })
+
+        store.dispatch('getContextInfoValueFromServer', {
+          id: props.fieldAttributes.contextInfo.id,
+          uuid: props.fieldAttributes.contextInfo.uuid,
+          query: sqlParse.query
+        })
       }
-    }
-
-    if (!root.isEmptyValue(props.fieldAttributes.contextInfo.sqlStatement)) {
-      const sqlParse = parseContext({
-        parentUuid: props.fieldAttributes.parentUuid,
-        containerUuid: props.fieldAttributes.containerUuid,
-        value: props.fieldAttributes.contextInfo.sqlStatement,
-        isBooleanToString: true
-      })
-
-      root.$store.dispatch('getContextInfoValueFromServer', {
-        contextInfoId: props.fieldAttributes.contextInfo.id,
-        contextInfoUuid: props.fieldAttributes.contextInfo.uuid,
-        sqlStatement: sqlParse.value
-      })
-    }
+    })
 
     return {
-      // computeds
+      // Computeds
       messageText,
-      // methods
+      // Methods
       redirect
     }
   }
