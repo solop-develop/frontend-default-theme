@@ -18,10 +18,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;">
-    <div style="height: 5% !important;">
+    <div style="height: 7% !important;">
       <el-steps :active="currentSetp" finish-status="success">
         <el-step
           v-for="(list, key) in stepList"
+          :key="key"
           :title="list.name"
         />
       </el-steps>
