@@ -313,7 +313,7 @@ export default defineComponent({
     }
 
     function setListTransactionTypes() {
-        if (!isEmptyValue(listTypeTransaction.value)) return
+      if (!isEmptyValue(listTypeTransaction.value)) return
       listTransactionTypes()
         .then(response => {
           const { records } = response
