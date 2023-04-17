@@ -95,6 +95,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :fetch-suggestions="querySearchAsync"
                   style="width: 100%;"
                   :disabled="isComplete"
+                  @focus="focusSuggestions"
                   @select="handleSelect"
                 >
                   <template slot="prefix">
@@ -552,6 +553,13 @@ export default defineComponent({
       })
     }
 
+    function focusSuggestions(params) {
+      if (refs.searchValue.suggestions.length  <= 1) {
+        refs.searchValue.suggestions = []
+        return
+      }
+    }
+
     /**
    * Watch
    */
@@ -594,6 +602,7 @@ export default defineComponent({
       processShipment,
       closeForm,
       clearForm,
+      focusSuggestions,
       refreshLine
     }
   }

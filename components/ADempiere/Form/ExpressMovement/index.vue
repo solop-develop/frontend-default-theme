@@ -106,6 +106,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :fetch-suggestions="querySearchAsync"
                   :disabled="isComplete"
                   style="width: 100%;"
+                  @focus="focusSuggestions"
                   @select="handleSelect"
                 >
                   <template slot="prefix">
@@ -556,6 +557,13 @@ export default defineComponent({
       store.dispatch('listLineMovement')
     }
 
+    function focusSuggestions(params) {
+      if (refs.searchValue.suggestions.length  <= 1) {
+        refs.searchValue.suggestions = []
+        return
+      }
+    }
+
     return {
       destinationWarehouseOptionsList,
       baseWarehouseOptionsList,
@@ -579,6 +587,7 @@ export default defineComponent({
       querySearchAsync,
       createFilter,
       handleSelect,
+      focusSuggestions,
       // Action Table
       deleteMovementLine,
       editQuantity,
