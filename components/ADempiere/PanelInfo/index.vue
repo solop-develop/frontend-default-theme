@@ -174,6 +174,13 @@
             :list="recordsListStoreProduct"
           />
         </el-tab-pane>
+        <el-tab-pane v-if="!isEmptyValue(showPanelDashboard)" name="listDashboard" style="height: 100% !important;">
+          <span slot="label">
+            <svg-icon icon-class="dashboard" style="font-size: 18px;" />
+            {{ $t('navbar.dashboard') }}
+          </span>
+          <record-dashboard />
+        </el-tab-pane>
       </el-tabs>
     </el-main>
   </el-container>
@@ -195,6 +202,7 @@ import ReferenceRecords from './Component/ReferenceRecords/index.vue'
 import StoreProduct from './Component/storeProduct/index.vue'
 import WorkflowLogs from './Component/workflowLogs/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import RecordDashboard from './Component/RecordDashboard/index.vue'
 
 // API Request Methods
 import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
@@ -215,6 +223,7 @@ export default defineComponent({
     ReferenceRecords,
     StoreProduct,
     WorkflowLogs,
+    RecordDashboard,
     LoadingView
   },
 
@@ -278,6 +287,10 @@ export default defineComponent({
      */
     const isLoadLogs = computed(() => {
       return store.state.utils.showRecordLogs
+    })
+
+    const showPanelDashboard = computed(() => {
+      return store.getters.getNumberDashboard
     })
 
     // Container Info
@@ -417,6 +430,19 @@ export default defineComponent({
       if (tab.name === language.t('window.containerInfo.notes')) {
         tabOptions = 'recordNotesTab'
       }
+      if (tab.name === 'listDashboard') {
+        const { currentTab } = store.getters.getContainerInfo
+        if (isEmptyValue(storedWindow.value.id) ||
+          (isEmptyValue(currentTab))) {
+          return
+        }
+        store.dispatch('listWindowDashboard', {
+          tabId: currentTab.id,
+          windowId: storedWindow.value.id,
+          recordId: currentRecordId.value,
+          tableName: currentTab.tableName
+        })
+      }
       if (tab.name === 'listReference') {
         tabOptions = 'listReference'
         isLoadingListReference.value = true
@@ -507,14 +533,15 @@ export default defineComponent({
       nameTab,
       recordsListStoreProduct,
       // Computed
-      isLoadLogs,
-      isWorkflowLog,
-      containerInfo,
       currentTab,
+      isLoadLogs,
       storeProduct,
       showPanelInfo,
-      currentRecordUuid,
+      containerInfo,
+      isWorkflowLog,
       currentRecordId,
+      currentRecordUuid,
+      showPanelDashboard,
       // IsLoading
       isLoadingNotesRecord,
       isLoadingListAttachment,

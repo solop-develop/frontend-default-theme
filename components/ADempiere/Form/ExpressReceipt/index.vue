@@ -554,7 +554,7 @@ export default defineComponent({
     }
 
     function focusSuggestions(params) {
-      if (refs.searchValue.suggestions.length  <= 1) {
+      if (refs.searchValue.suggestions.length <= 1) {
         refs.searchValue.suggestions = []
         return
       }

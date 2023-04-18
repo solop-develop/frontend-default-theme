@@ -101,6 +101,18 @@
           <i class="el-icon-zoom-in" />
         </el-button>
       </el-badge>
+      <el-badge v-show="showDashboard" :value="countDashboard" class="item" type="primary">
+        <el-button
+          v-show="showDashboard"
+          type="primary"
+          size="mini"
+          circle
+          style="margin: 0px"
+          @click="openRecordLogs('listDashboard')"
+        >
+          <svg-icon icon-class="dashboard" style="font-size: 18px;" />
+        </el-button>
+      </el-badge>
       <el-badge v-show="showIssues" :value="countIssues" class="item" type="primary">
         <el-button
           v-show="showIssues"
@@ -279,7 +291,11 @@ export default defineComponent({
 
     const showIssues = ref(false)
 
+    const showDashboard = ref(false)
+
     const countIssues = ref(0)
+
+    const countDashboard = ref(0)
 
     const showIsNote = ref(false)
 
@@ -599,6 +615,13 @@ export default defineComponent({
         getReferences()
         getIssues()
         getIsNotes()
+        getDashboard()
+      }
+    })
+
+    watch(containerInfo, (newValue, oldValue) => {
+      if (newValue !== oldValue && !isEmptyValue(newValue)) {
+        getDashboard()
       }
     })
 
@@ -759,6 +782,33 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Exists Charts
+     */
+    const getDashboard = (tab) => {
+      const storedWindow = store.getters.getStoredWindow(props.parentUuid)
+      const { currentTab } = store.getters.getContainerInfo
+      showDashboard.value = false
+      if (isEmptyValue(storedWindow.id) ||
+        (isEmptyValue(currentTab))) {
+        return
+      }
+      store.dispatch('isDashboard', {
+        tabId: currentTab.id,
+        windowId: storedWindow.id
+      })
+        .then(responseDashboard => {
+          if (responseDashboard > 0) {
+            showDashboard.value = true
+            countDashboard.value = responseDashboard
+            return
+          }
+          showDashboard.value = false
+          return
+        })
+        .catch(() => {})
+    }
+
     const tabMetadata = computed(() => {
       return store.getters.getStoredTab(
         props.parentUuid,
@@ -795,6 +845,7 @@ export default defineComponent({
     getReferences()
     getIssues()
     getIsNotes()
+    getDashboard()
 
     return {
       tabUuid,
@@ -809,7 +860,9 @@ export default defineComponent({
       showReference,
       showIssues,
       showIsNote,
+      showDashboard,
       countIssues,
+      countDashboard,
       countReference,
       countIsNote,
       // computed
@@ -839,7 +892,8 @@ export default defineComponent({
       attachmentAvailable,
       getReferences,
       getIssues,
-      getIsNotes
+      getIsNotes,
+      getDashboard
     }
   }
 
