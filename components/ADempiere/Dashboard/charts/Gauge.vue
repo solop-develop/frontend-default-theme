@@ -89,6 +89,21 @@ export default {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.showLoading()
+      if (!this.isEmptyValue(this.metadata.actions)) {
+        this.$store.dispatch('metrics', {
+          id: this.metadata.id,
+          tableName: this.metadata.tableName,
+          recordId: this.metadata.recordId,
+          recordUuid: this.metadata.recordUuid
+        })
+          .then(response => {
+            this.loadChartMetrics(response)
+          })
+          .catch(error => {
+            console.warn(`Error getting Metrics: ${error.message}. Code: ${error.code}.`)
+          })
+        return
+      }
       getMetrics({
         id: this.metadata.id
       })
