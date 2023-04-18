@@ -18,24 +18,54 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;height: 100% !important;">
-    <el-table
-      :data="tableData"
-      border
-      style="width: 100%"
-    >
-      <el-table-column
-        v-for="(header, key) in headers"
-        :key="key"
-        prop="id"
-        :label="header.label"
-      />
-    </el-table>
+    <el-card id="panel-top-search-criteria" class="panel-top-search-criteria">
+      <div style="width: 50%;">
+        <el-card style="padding: 5px 10px 5px 10px;">
+          <div slot="header" class="clearfix" style="text-align: center;">
+            <b> {{ 'Pagos' }} </b>
+          </div>
+          <el-table
+            :data="tableData"
+            border
+            style="min-height: 400px;width: 100%;"
+          >
+            <el-table-column
+              v-for="(header, key) in headers"
+              :key="key"
+              prop="id"
+              :width="header.width"
+              :label="header.label"
+            />
+          </el-table>
+        </el-card>
+      </div>
+      <div style="width: 50%;">
+        <el-card style="height: 100%;">
+          <div slot="header" class="clearfix" style="text-align: center;">
+            <b> {{ 'Facturas' }} </b>
+          </div>
+          <el-table
+            :data="tableData"
+            border
+            style="min-height: 400px;width: 100%;"
+          >
+            <el-table-column
+              v-for="(header, key) in headers"
+              :key="key"
+              prop="id"
+              :width="header.width"
+              :label="header.label"
+            />
+          </el-table>
+        </el-card>
+      </div>
+    </el-card>
     <el-card class="box-card">
-      <div slot="header" class="clearfix" style="text-align: center;">
+      <!-- <div slot="header" class="clearfix" style="text-align: center;">
         <b>
           {{ 'Detalles de los Pago' }}
         </b>
-      </div>
+      </div> -->
       <div id="description-payment" class="description-payment" style="display: flex;">
         <el-card
           class="box-card"
@@ -169,35 +199,43 @@ export default defineComponent({
     const headers = ref([
       {
         label: 'ID',
-        columnName: ''
+        columnName: '',
+        width: '50'
       },
       {
         label: 'Numero',
-        columnName: ''
+        columnName: '',
+        width: '130'
       },
       {
         label: 'Fecha',
-        columnName: ''
+        columnName: '',
+        width: '150'
       },
       {
         label: 'Total',
-        columnName: ''
+        columnName: '',
+        width: '150'
       },
       {
         label: 'Convertido',
-        columnName: ''
+        columnName: '',
+        width: '150'
       },
       {
         label: 'Pagado',
-        columnName: ''
+        columnName: '',
+        width: '150'
       },
       {
         label: 'Monto Asignado',
-        columnName: ''
+        columnName: '',
+        width: '150'
       },
       {
         label: 'Monto Abierto',
-        columnName: ''
+        columnName: '',
+        width: '150'
       }
     ])
 

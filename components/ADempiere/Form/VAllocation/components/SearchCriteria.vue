@@ -33,16 +33,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     style="width: 100%;"
                   >
                     <el-select
-                      v-model="businessPartners"
+                      v-model="businessPartnerId"
                       style="width: 100%;"
                       filterable
+                      clearable
+                      :filter-method="remoteSearchBusinessPartners"
                       @visible-change="findBusinessPartners"
                     >
                       <el-option
                         v-for="item in optionsBusinessPartners"
-                        :key="item.value"
+                        :key="item.id"
                         :label="item.label"
-                        :value="item.value"
+                        :value="item.id"
                       />
                     </el-select>
                   </el-form-item>
@@ -53,16 +55,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     style="width: 100%;"
                   >
                     <el-select
-                      v-model="organizations"
+                      v-model="organizationsId"
                       style="width: 100%;"
                       filterable
+                      clearable
+                      :filter-method="remoteSearchOrganizations"
                       @visible-change="findOrganizations"
                     >
                       <el-option
                         v-for="item in optionsOrganizations"
-                        :key="item.value"
+                        :key="item.id"
                         :label="item.label"
-                        :value="item.value"
+                        :value="item.id"
                       />
                     </el-select>
                   </el-form-item>
@@ -75,16 +79,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     style="width: 100%;"
                   >
                     <el-select
-                      v-model="currency"
+                      v-model="currencyId"
                       style="width: 100%;"
                       filterable
+                      clearable
+                      :filter-method="remoteSearchCurrencies"
                       @visible-change="findCurrencies"
                     >
                       <el-option
                         v-for="item in optionsCurrency"
-                        :key="item.value"
+                        :key="item.id"
                         :label="item.label"
-                        :value="item.value"
+                        :value="item.id"
                       />
                     </el-select>
                   </el-form-item>
@@ -95,7 +101,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     style="width: 100%;"
                   >
                     <el-date-picker
-                      v-model="value1"
+                      v-model="currentDate"
                       type="date"
                       style="width: 100%;"
                     />
@@ -167,7 +173,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
+import store from '@/store'
 // import lang from '@/lang'
 // components and mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
@@ -241,8 +248,8 @@ export default defineComponent({
 
     // Value the Select
 
-    const currentTypeTransaction = ref('')
-    const businessPartners = ref('')
+    // const currentTypeTransaction = ref('')
+    // const businessPartners = ref('')
     const organizations = ref('')
     const currency = ref('')
 
@@ -255,13 +262,80 @@ export default defineComponent({
     const listTypeTransaction = ref([])
 
     /**
+     * Computed
+     */
+
+    const businessPartnerId = computed({
+      // getter
+      get() {
+        const { businessPartnerId } = store.getters.getSearchFilter
+        return businessPartnerId
+      },
+      // setter
+      set(id) {
+        store.commit('setBusinessPartner', id)
+      }
+    })
+
+    const organizationsId = computed({
+      // getter
+      get() {
+        const { organizationsId } = store.getters.getSearchFilter
+        return organizationsId
+      },
+      // setter
+      set(id) {
+        store.commit('setOrganizations', id)
+      }
+    })
+
+    const currencyId = computed({
+      // getter
+      get() {
+        const { currencyId } = store.getters.getSearchFilter
+        return currencyId
+      },
+      // setter
+      set(id) {
+        store.commit('setCurrency', id)
+      }
+    })
+
+    const currentDate = computed({
+      // getter
+      get() {
+        const { date } = store.getters.getSearchFilter
+        return date
+      },
+      // setter
+      set(date) {
+        console.log({ date })
+        store.commit('setDate', date)
+      }
+    })
+
+    const currentTypeTransaction = computed({
+      // getter
+      get() {
+        const { transactionType } = store.getters.getSearchFilter
+        return transactionType
+      },
+      // setter
+      set(type) {
+        console.log({ type })
+        store.commit('setTransactionType', type)
+      }
+    })
+
+
+    /**
      * Methods
      */
 
-    function findBusinessPartners(isFind) {
+    function findBusinessPartners(isFind, searchValue) {
       if (!isFind) return
       listBusinessPartners({
-        searchValue: businessPartners.value
+        searchValue
       })
         .then(response => {
           const { records } = response
@@ -276,10 +350,10 @@ export default defineComponent({
         })
     }
 
-    function findOrganizations(isFind) {
+    function findOrganizations(isFind, searchValue) {
       if (!isFind) return
       listOrganizations({
-        searchValue: organizations.value
+        searchValue
       })
         .then(response => {
           const { records } = response
@@ -294,10 +368,10 @@ export default defineComponent({
         })
     }
 
-    function findCurrencies(isFind) {
+    function findCurrencies(isFind, searchValue) {
       if (!isFind) return
       listCurrencies({
-        searchValue: currency.value
+        searchValue
       })
         .then(response => {
           const { records } = response
@@ -310,6 +384,40 @@ export default defineComponent({
             }
           })
         })
+    }
+
+    function remoteSearchBusinessPartners(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsBusinessPartners.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findBusinessPartners(true, query)
+        }
+      }
+    }
+
+    function remoteSearchOrganizations(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsOrganizations.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findOrganizations(true, query)
+        }
+      }
+    }
+
+    function remoteSearchCurrencies(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsCurrency.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findCurrencies(true, query)
+        }
+      }
+    }
+
+    function findFilter(queryString) {
+      return (query) => {
+        const search = queryString.toLowerCase()
+        return query.label.toLowerCase().includes(search)
+      }
     }
 
     function setListTransactionTypes() {
@@ -355,15 +463,24 @@ export default defineComponent({
       optionsOrganizations,
       listTypeTransaction,
       optionsCurrency,
-      businessPartners,
+      // businessPartners,
       organizations,
       currency,
+      // Computed
+      businessPartnerId,
+      organizationsId,
+      currentDate,
+      currencyId,
       // Methods,
+      remoteSearchBusinessPartners,
+      remoteSearchOrganizations,
       setListTransactionTypes,
+      remoteSearchCurrencies,
       findBusinessPartners,
       findOrganizations,
       findCurrencies,
-      changeType
+      changeType,
+      findFilter
     }
   }
 })

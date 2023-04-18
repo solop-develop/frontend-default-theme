@@ -39,15 +39,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         <payments
           v-show="'payments' === stepList[currentSetp].key"
         />
-        <invoce
-          v-show="'invoce' === stepList[currentSetp].key"
-        />
         <summary v-show="'summary' === stepList[currentSetp].key" />
       </carousel>
     </div>
     <div style="height: 5% !important;text-align: end;">
       <el-button v-show="currentSetp > 0" type="danger" icon="el-icon-close" plain @click="currentSetp--" />
-      <el-button v-show="currentSetp < 3" type="primary" icon="el-icon-check" plain @click="currentSetp++" />
+      <el-button v-show="currentSetp < 2" type="primary" icon="el-icon-check" plain @click="nextStep" />
       <!-- <el-button type="success" icon="el-icon-message" plain /> -->
     </div>
   </div>
@@ -64,18 +61,7 @@ import SearchCriteria from './components/SearchCriteria'
 import Payments from './components/Payments'
 import Invoce from './components/Invoce'
 import Summary from './components/Summary'
-// import Invoices from './components/Invoices/index'
-// import Receipt from './components/Receipt/index'
-
-// Utils and Helper Methods
-// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-// import { showMessage } from '@/utils/ADempiere/notification'
-
-// API Request Methods
-// import {
-//   listPaymentSelection,
-//   paymentSelection
-// } from '@/api/ADempiere/form/VPayPrint.js'
+import store from '@/store'
 
 export default defineComponent({
   name: 'VAllocation',
@@ -109,14 +95,9 @@ export default defineComponent({
         key: 'searchCriteria'
       },
       {
-        name: 'Selección de Pagos',
+        name: 'Selección de Pagos y Factura',
         description: '',
         key: 'payments'
-      },
-      {
-        name: 'Selección de Factura',
-        description: '',
-        key: 'invoce'
       },
       {
         name: 'Resumen y Ajuste',
@@ -127,6 +108,14 @@ export default defineComponent({
 
     const currentSetp = ref(0)
 
+    function nextStep(step) {
+      console.log(currentSetp.value)
+      currentSetp.value++
+      if (stepList.value[currentSetp.value].key === 'payments') {
+        store.dispatch('findListPayment')
+      }
+    }
+
     /**
      * Methods
      */
@@ -135,8 +124,9 @@ export default defineComponent({
       // Const
       // Refs
       stepList,
-      currentSetp
+      currentSetp,
       // Methods
+      nextStep
     }
   }
 })
