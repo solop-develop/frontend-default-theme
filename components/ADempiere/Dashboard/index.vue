@@ -9,21 +9,26 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-card
-    v-if="!unsupportedDashboards.includes(dashboard.fileName)"
+    v-if="!unsupportedDashboards.includes(metadata.fileName)"
     style="height: auto;"
   >
     <div class="clearfix">
       <el-row :gutter="2">
         <el-col :span="main ? 22 : 23">
-          <el-button type="text" class="label-dashboard" @click="metadata.isCollapsible = !metadata.isCollapsible">
+          <el-button
+            type="text"
+            class="label-dashboard"
+            @click="metadata.isCollapsible = !metadata.isCollapsible"
+          >
             {{ labelDashboard }}
           </el-button>
         </el-col>
@@ -31,7 +36,11 @@
           <el-button type="text" icon="el-icon-files" @click="sendMain(metadata)" />
         </el-col>
         <el-col :span="1">
-          <el-button type="text" :icon="!metadata.isCollapsible ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="metadata.isCollapsible = !metadata.isCollapsible" />
+          <el-button
+            type="text"
+            :icon="!metadata.isCollapsible ? 'el-icon-arrow-down' : 'el-icon-arrow-up'"
+            @click="metadata.isCollapsible = !metadata.isCollapsible"
+          />
         </el-col>
       </el-row>
     </div>
@@ -39,7 +48,7 @@
       <div v-show="metadata.isCollapsible" class="dashboard-transitio">
         <component
           :is="renderDashboard"
-          :ref="dashboard.name"
+          :ref="metadata.name"
           :metadata="metadata"
           :height="'450px'"
         />
@@ -49,8 +58,17 @@
 </template>
 
 <script>
-export default {
-  name: 'Dashboard',
+import { defineComponent, computed } from '@vue/composition-api'
+
+import store from '@/store'
+
+// Utils and Helper Methods
+import { getChartComponent } from '@/utils/ADempiere/dictionary/dashboard'
+import { isEmptyValue } from '@/utils/ADempiere'
+
+export default defineComponent({
+  name: 'DashboardDefinition',
+
   props: {
     metadata: {
       type: Object,
@@ -65,96 +83,69 @@ export default {
       default: false
     }
   },
-  data() {
-    return {
-      dashboard: this.metadata,
-      unsupportedDashboards: ['activities', 'views', 'performance'],
-      activeDashboard: this.metadata.isOpenByDefault ? this.metadata.name : undefined
-    }
-  },
-  computed: {
+
+  setup(props) {
+    const unsupportedDashboards = ['views', 'performance']
+    const activeDashboard = props.metadata.isOpenByDefault ? props.metadata.name : undefined
+
     // load the component that is indicated in the attributes of received property
-    renderDashboard() {
-      // TODO: Add support to this list of currently unsupported dashboards
-      if (this.unsupportedDashboards.includes(this.metadata.fileName)) {
-        return
-      }
-      let dashboard
-      if (this.metadata.dashboardType === 'dashboard') {
-        switch (this.metadata.fileName) {
+    const renderDashboard = computed(() => {
+      // // TODO: Add support to this list of currently unsupported dashboards
+      // if (unsupportedDashboards.includes(props.metadata.fileName)) {
+      //   return
+      // }
+      let dashboard = () => import('@theme/components/ADempiere/Dashboard/UnsupportedDashboard')
+      if (props.metadata.dashboardType === 'dashboard') {
+        switch (props.metadata.fileName) {
+          case 'activities':
+            dashboard = () => import('@theme/components/ADempiere/Dashboard/activities')
+            break
+          case 'calendar':
+            dashboard = () => import('@theme/components/ADempiere/Dashboard/calendar')
+            break
+          case 'docstatus':
+            dashboard = () => import('@theme/components/ADempiere/Dashboard/docstatus')
+            break
           case 'recentItems':
             dashboard = () => import('@theme/components/ADempiere/Dashboard/recentItems')
             break
           case 'userfavorites':
             dashboard = () => import('@theme/components/ADempiere/Dashboard/userfavorites')
             break
-          case 'docstatus':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/docstatus')
-            break
           default:
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/calendar')
+            dashboard = () => import('@theme/components/ADempiere/Dashboard/UnsupportedDashboard')
             break
         }
-      } else {
-        switch (this.metadata.chartType) {
-          //  Bar Chart
-          case 'BC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/BarChart')
-            break
-          //  Area Chart
-          case 'AC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/AreaChart')
-            break
-          //  Line Chart
-          case 'LC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/LineChart')
-            break
-          //  Pie Chart
-          case 'PC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/PieChart')
-            break
-          //  Ring Chart
-          case 'RC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/PieChart')
-            break
-          //  Raddar Chart
-          case 'RA':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/RaddarChart')
-            break
-          //  Waterfall Chart
-          case 'WC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/WaterfallChart')
-            break
-          //  Basic Scatter Chart
-          case 'SC':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/Scatter')
-            break
-          //  Gauge
-          case 'GU':
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/Gauge')
-            break
-          default:
-            dashboard = () => import('@theme/components/ADempiere/Dashboard/charts/LineChart')
-            break
-        }
+      } else if (!isEmptyValue(props.metadata.chartType)) {
+        dashboard = getChartComponent(props.metadata.chartType)
       }
       return dashboard
       // return () => import(`@/components/ADempiere/Dashboard/${this.metadata.fileName}`)
-    },
-    labelDashboard() {
-      if (this.isEmptyValue(this.title)) {
-        return this.dashboard.name
+    })
+
+    const labelDashboard = computed(() => {
+      if (isEmptyValue(props.title)) {
+        return props.metadata.name
       }
-      return this.title
+      return props.title
+    })
+
+    function sendMain(dashboard) {
+      store.dispatch('mainDashboard', dashboard)
+      // this.$forceUpdate()
     }
-  },
-  methods: {
-    sendMain(dashboard) {
-      this.$store.dispatch('mainDashboard', dashboard)
-      this.$forceUpdate()
+
+    return {
+      unsupportedDashboards,
+      activeDashboard,
+      // computeds
+      renderDashboard,
+      labelDashboard,
+      // methods
+      sendMain
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -196,7 +187,7 @@ export default {
     padding-right: 2%;
     border-radius: 4px;
     text-align: center;
-    color: #fff;
+    // color: #fff;
     box-sizing: border-box;
     height: 500px;
     overflow: auto;
