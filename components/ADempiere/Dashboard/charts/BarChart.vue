@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -24,12 +24,17 @@
 import * as echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
+
+// API Request Methods
 import { getMetrics } from '@/api/ADempiere/dashboard/chart'
 
 const animationDuration = 6000
 
 export default {
+  name: 'BarChart',
+
   mixins: [resize],
+
   props: {
     className: {
       type: String,
@@ -48,17 +53,20 @@ export default {
       required: true
     }
   },
+
   data() {
     return {
       chart: null
     }
   },
+
   mounted() {
     this.unsubscribe = this.subscribeChanges()
     this.$nextTick(() => {
       this.getMetricsFromServer()
     })
   },
+
   beforeDestroy() {
     this.unsubscribe()
     if (!this.chart) {
@@ -67,6 +75,7 @@ export default {
     this.chart.dispose()
     this.chart = null
   },
+
   methods: {
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
