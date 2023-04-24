@@ -28,10 +28,14 @@ import resize from './mixins/resize'
 // API Request Methods
 import { getMetrics } from '@/api/ADempiere/dashboard/chart'
 
-const animationDuration = 6000
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { getContextAttributes } from '@/utils/ADempiere/contextUtils'
+
+const animationDuration = 2800
 
 export default {
-  name: 'BarChart',
+  name: 'CustomerChart',
 
   mixins: [resize],
 
@@ -46,7 +50,11 @@ export default {
     },
     height: {
       type: String,
-      default: '300px'
+      default: '350px'
+    },
+    autoResize: {
+      type: Boolean,
+      default: true
     },
     metadata: {
       type: Object,
@@ -59,11 +67,19 @@ export default {
       chart: null
     }
   },
+  watch: {
+    chartData: {
+      deep: true,
+      handler(val) {
+        this.setOptions(val)
+      }
+    }
+  },
 
   mounted() {
     this.unsubscribe = this.subscribeChanges()
     this.$nextTick(() => {
-      this.getMetricsFromServer()
+      this.initChart()
     })
   },
 
@@ -77,25 +93,30 @@ export default {
   },
 
   methods: {
+    getContextAttributes,
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'notifyDashboardRefresh') {
-          this.getMetricsFromServer()
+          this.initChart()
         }
       })
     },
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.showLoading()
-    },
-    getMetricsFromServer() {
-      this.initChart()
-      if (!this.isEmptyValue(this.metadata.actions)) {
+      if (!isEmptyValue(this.metadata.actions)) {
+        const contextAttributesList = getContextAttributes({
+          parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
+          containerUuid: this.$store.getters.getContainerInfo.currentTab.containerUuid,
+          contextColumnNames: this.metadata.context_column_names,
+          isBooleanToString: true
+        })
         this.$store.dispatch('metrics', {
           id: this.metadata.id,
           tableName: this.metadata.tableName,
           recordId: this.metadata.recordId,
-          recordUuid: this.metadata.recordUuid
+          recordUuid: this.metadata.recordUuid,
+          contextAttributes: contextAttributesList
         })
           .then(response => {
             this.loadChartMetrics(response)
@@ -112,16 +133,40 @@ export default {
           this.loadChartMetrics(metrics)
         })
         .catch(error => {
-          console.warn(`Error getting Bar Chart: ${error.message}. Code: ${error.code}.`)
+          console.warn(`Error getting Metrics: ${error.message}. Code: ${error.code}.`)
         })
     },
     loadChartMetrics(metrics) {
-      if (!this.chart) {
-        this.initChart()
+      if (!isEmptyValue(this.metadata.transformation_script)) {
+        const chartOption = new Function('data', this.metadata.transformation_script)
+        const script = chartOption(metrics)
+        const {
+          xAxis,
+          toolbox,
+          grid,
+          tooltip,
+          yAxis,
+          legend,
+          series
+        } = script
+        if (!isEmptyValue(series)) {
+          this.chart.setOption({
+            xAxis,
+            toolbox,
+            grid,
+            tooltip,
+            yAxis,
+            legend,
+            series
+          })
+          this.chart.hideLoading()
+          return
+        }
       }
       const xAxisValues = []
       let seriesToShow = []
-      if (!this.isEmptyValue(metrics.series)) {
+      let legendToShow = []
+      if (!isEmptyValue(metrics.series)) {
         if (metrics.series.length > 0) {
           metrics.series.forEach(serie => {
             serie.data_set.forEach(set => {
@@ -134,59 +179,72 @@ export default {
         seriesToShow = metrics.series.map(serie => {
           return {
             name: serie.name,
-            type: 'bar',
-            // stack: 'vistors',
-            stack: 'Ad',
-            emphasis: {
-              focus: 'series'
-            },
-            // barWidth: '60%',
+            stack: 'vistors',
             data: serie.data_set.map(set => set.value),
-            animationDuration
+            animationDuration,
+            smooth: true,
+            large: true,
+            type: 'line',
+            animationEasing: 'quadraticOut',
+            lineStyle: {
+              width: 2
+            },
+            areaStyle: {}
           }
         })
+        legendToShow = metrics.series.map(serie => serie.name)
       }
+
       this.chart.setOption({
-        tooltip: {
-          backgroundColor: '#FFF',
-          trigger: 'axis',
-          axisPointer: { // 坐标轴指示器，坐标轴触发有效
-            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+        xAxis: {
+          data: xAxisValues,
+          boundaryGap: false,
+          axisTick: {
+            show: false
+          },
+          silent: false,
+          splitLine: {
+            show: false
+          },
+          splitArea: {
+            show: false
           }
         },
         toolbox: {
           // y: 'bottom',
           feature: {
-            show: true,
-            magicType: { show: true, type: ['stack'] },
-            dataView: { show: true, readOnly: true },
-            restore: { show: true },
-            saveAsImage: { show: true }
-            // magicType: {
-            //   type: ['stack', 'tiled']
-            // },
+            magicType: {
+              type: ['stack', 'tiled']
+            },
+            dataView: {},
+            saveAsImage: {
+              pixelRatio: 2
+            }
           }
         },
         grid: {
-          top: 10,
-          left: '0%',
-          right: '0%',
-          bottom: '0%',
+          left: 10,
+          right: 10,
+          bottom: 20,
+          top: 30,
           containLabel: true
         },
-        xAxis: [{
-          type: 'category',
-          data: xAxisValues,
-          axisTick: {
-            alignWithLabel: true
-          }
-        }],
-        yAxis: [{
-          type: 'value',
+        tooltip: {
+          backgroundColor: '#FFF',
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross'
+          },
+          padding: [5, 10]
+        },
+        yAxis: {
           axisTick: {
             show: false
           }
-        }],
+        },
+        legend: {
+          data: legendToShow
+        },
         series: seriesToShow
       })
       this.chart.hideLoading()

@@ -64,7 +64,7 @@ import store from '@/store'
 
 // Utils and Helper Methods
 import { getChartComponent } from '@/utils/ADempiere/dictionary/dashboard'
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'DashboardDefinition',
@@ -117,7 +117,10 @@ export default defineComponent({
             break
         }
       } else if (!isEmptyValue(props.metadata.chartType)) {
-        dashboard = getChartComponent(props.metadata.chartType)
+        if (!isEmptyValue(props.metadata.transformation_script)) {
+          return () => import('@theme/components/ADempiere/Dashboard/charts/CustomerChart.vue')
+        }
+        dashboard = getChartComponent(props.metadata)
       }
       return dashboard
       // return () => import(`@/components/ADempiere/Dashboard/${this.metadata.fileName}`)
