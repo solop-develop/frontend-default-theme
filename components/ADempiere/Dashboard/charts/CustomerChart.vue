@@ -95,41 +95,31 @@ export default {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.showLoading()
-      console.log({ metadata: this.metadata })
-      // if (!this.isEmptyValue(this.metadata.actions)) {
-      //   const contextAttributesList = getContextAttributes({
-      //     parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
-      //     containerUuid: this.$store.getters.getContainerInfo.currentTab.containerUuid,
-      //     contextColumnNames: this.metadata.context_column_names,
-      //     isBooleanToString: true
-      //   })
-      //   this.$store.dispatch('metrics', {
-      //     id: this.metadata.id,
-      //     tableName: this.metadata.tableName,
-      //     recordId: this.metadata.recordId,
-      //     recordUuid: this.metadata.recordUuid,
-      //     contextAttributes: contextAttributesList
-      //     // : [
-      //     //   {
-      //     //     columnName: '',
-      //     //     value: store.getters.getValueOfField({
-      //     //       containerUuid: this.uuidForm,
-      //     //       columnName: ORGANIZATION
-      //     //     })
-      //     //   }
-      //     // ]
-      //   })
-      //     .then(response => {
-      //       console.log({ response })
-      //       this.loadChartMetrics(response)
-      //     })
-      //     .catch(error => {
-      //       console.warn(`Error getting Metrics: ${error.message}. Code: ${error.code}.`)
-      //     })
-      //   return
-      // }
+      if (!this.isEmptyValue(this.metadata.actions)) {
+        const contextAttributesList = getContextAttributes({
+          parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
+          containerUuid: this.$store.getters.getContainerInfo.currentTab.containerUuid,
+          contextColumnNames: this.metadata.context_column_names,
+          isBooleanToString: true
+        })
+        this.$store.dispatch('metrics', {
+          id: this.metadata.id,
+          tableName: this.metadata.tableName,
+          recordId: this.metadata.recordId,
+          recordUuid: this.metadata.recordUuid,
+          contextAttributes: contextAttributesList
+        })
+          .then(response => {
+            console.log({ response })
+            this.loadChartMetrics(response)
+          })
+          .catch(error => {
+            console.warn(`Error getting Metrics: ${error.message}. Code: ${error.code}.`)
+          })
+        return
+      }
       getMetrics({
-        id: 101
+        id: this.metadata.id
       })
         .then(metrics => {
           this.loadChartMetrics(metrics)
@@ -141,8 +131,7 @@ export default {
     loadChartMetrics(metrics) {
       if (!this.isEmptyValue(this.metadata.transformation_script)) {
         const chartOption = new Function('data', this.metadata.transformation_script)
-        const alo = chartOption(metrics)
-        console.log({ alo }, typeof alo)
+        const script = chartOption(metrics)
         const {
           xAxis,
           toolbox,
@@ -151,27 +140,21 @@ export default {
           yAxis,
           legend,
           series
-        } = alo
-        console.log({
-          xAxis,
-          toolbox,
-          grid,
-          tooltip,
-          yAxis,
-          legend,
-          series
-        })
-        // this.chart.setOption({
-        //   xAxis,
-        //   toolbox,
-        //   grid,
-        //   tooltip,
-        //   yAxis,
-        //   legend,
-        //   series
-        // })
-        // this.chart.hideLoading()
-        // return
+        } = script
+        if (!this.isEmptyValue(series)) {
+          console.log(series[0])
+          this.chart.setOption({
+            xAxis,
+            toolbox,
+            grid,
+            tooltip,
+            yAxis,
+            legend,
+            series
+          })
+          this.chart.hideLoading()
+          return
+        }
       }
       const xAxisValues = []
       let seriesToShow = []
@@ -204,58 +187,7 @@ export default {
         })
         legendToShow = metrics.series.map(serie => serie.name)
       }
-      console.log(2, {
-        xAxis: {
-          data: xAxisValues,
-          boundaryGap: false,
-          axisTick: {
-            show: false
-          },
-          silent: false,
-          splitLine: {
-            show: false
-          },
-          splitArea: {
-            show: false
-          }
-        },
-        toolbox: {
-          // y: 'bottom',
-          feature: {
-            magicType: {
-              type: ['stack', 'tiled']
-            },
-            dataView: {},
-            saveAsImage: {
-              pixelRatio: 2
-            }
-          }
-        },
-        grid: {
-          left: 10,
-          right: 10,
-          bottom: 20,
-          top: 30,
-          containLabel: true
-        },
-        tooltip: {
-          backgroundColor: '#FFF',
-          trigger: 'axis',
-          axisPointer: {
-            type: 'cross'
-          },
-          padding: [5, 10]
-        },
-        yAxis: {
-          axisTick: {
-            show: false
-          }
-        },
-        legend: {
-          data: legendToShow
-        },
-        series: seriesToShow
-      })
+
       this.chart.setOption({
         xAxis: {
           data: xAxisValues,
