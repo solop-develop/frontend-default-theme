@@ -64,7 +64,7 @@ import store from '@/store'
 
 // Utils and Helper Methods
 import { getChartComponent } from '@/utils/ADempiere/dictionary/dashboard'
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'DashboardDefinition',
