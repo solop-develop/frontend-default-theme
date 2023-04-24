@@ -9,31 +9,36 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
-  <!-- <div>
-    {{ 1231231 }}
-    <h1> akapela </h1> -->
   <div :class="className" :style="{height:height,width:width}" />
-  <!-- </div> -->
 </template>
 
 <script>
 import * as echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
+
+// API Request Methods
 import { getMetrics } from '@/api/ADempiere/dashboard/chart'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getContextAttributes } from '@/utils/ADempiere/contextUtils'
 
 const animationDuration = 2800
 
 export default {
+  name: 'CustomerChart',
+
   mixins: [resize],
+
   props: {
     className: {
       type: String,
@@ -56,6 +61,7 @@ export default {
       required: true
     }
   },
+
   data() {
     return {
       chart: null
@@ -69,12 +75,14 @@ export default {
       }
     }
   },
+
   mounted() {
     this.unsubscribe = this.subscribeChanges()
     this.$nextTick(() => {
       this.initChart()
     })
   },
+
   beforeDestroy() {
     this.unsubscribe()
     if (!this.chart) {
@@ -83,6 +91,7 @@ export default {
     this.chart.dispose()
     this.chart = null
   },
+
   methods: {
     getContextAttributes,
     subscribeChanges() {
@@ -95,7 +104,7 @@ export default {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.showLoading()
-      if (!this.isEmptyValue(this.metadata.actions)) {
+      if (!isEmptyValue(this.metadata.actions)) {
         const contextAttributesList = getContextAttributes({
           parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
           containerUuid: this.$store.getters.getContainerInfo.currentTab.containerUuid,
@@ -110,7 +119,6 @@ export default {
           contextAttributes: contextAttributesList
         })
           .then(response => {
-            console.log({ response })
             this.loadChartMetrics(response)
           })
           .catch(error => {
@@ -129,7 +137,7 @@ export default {
         })
     },
     loadChartMetrics(metrics) {
-      if (!this.isEmptyValue(this.metadata.transformation_script)) {
+      if (!isEmptyValue(this.metadata.transformation_script)) {
         const chartOption = new Function('data', this.metadata.transformation_script)
         const script = chartOption(metrics)
         const {
@@ -141,8 +149,7 @@ export default {
           legend,
           series
         } = script
-        if (!this.isEmptyValue(series)) {
-          console.log(series[0])
+        if (!isEmptyValue(series)) {
           this.chart.setOption({
             xAxis,
             toolbox,
@@ -159,7 +166,7 @@ export default {
       const xAxisValues = []
       let seriesToShow = []
       let legendToShow = []
-      if (!this.isEmptyValue(metrics.series)) {
+      if (!isEmptyValue(metrics.series)) {
         if (metrics.series.length > 0) {
           metrics.series.forEach(serie => {
             serie.data_set.forEach(set => {
