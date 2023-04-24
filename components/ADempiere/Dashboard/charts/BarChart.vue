@@ -105,7 +105,6 @@ export default {
           })
         return
       }
-      console.log({ qlq: this.metadata })
       getMetrics({
         id: this.metadata.id
       })
