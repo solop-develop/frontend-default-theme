@@ -30,7 +30,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             style="min-height: 400px;width: 100%;"
           >
             <el-table-column
-              v-for="(header, key) in headers"
+              v-for="(header, key) in headersInvoice"
               :key="key"
               prop="id"
               :width="header.width"
@@ -40,7 +40,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         </el-card>
       </div>
       <div style="width: 50%;">
-        <el-card style="height: 100%;">
+        <el-card style="padding: 5px 10px 5px 10px;">
           <div slot="header" class="clearfix" style="text-align: center;">
             <b> {{ 'Facturas' }} </b>
           </div>
@@ -50,7 +50,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             style="min-height: 400px;width: 100%;"
           >
             <el-table-column
-              v-for="(header, key) in headers"
+              v-for="(header, key) in headersInvoice"
               :key="key"
               prop="id"
               :width="header.width"
@@ -61,11 +61,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       </div>
     </el-card>
     <el-card class="box-card">
-      <!-- <div slot="header" class="clearfix" style="text-align: center;">
-        <b>
-          {{ 'Detalles de los Pago' }}
-        </b>
-      </div> -->
       <div id="description-payment" class="description-payment" style="display: flex;">
         <el-card
           class="box-card"
@@ -154,7 +149,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, ref } from '@vue/composition-api'
-// import lang from '@/lang'
+import lang from '@/lang'
 // components and mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
 // import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
@@ -196,46 +191,104 @@ export default defineComponent({
 
     const tableData = ref([])
 
-    const headers = ref([
+    const headersPayments = ref([
       {
-        label: 'ID',
+        label: lang.t('form.VAllocation.payment.table.date'),
         columnName: '',
-        width: '50'
+        width: '145'
       },
       {
-        label: 'Numero',
+        label: lang.t('form.VAllocation.payment.table.apAr'),
+        columnName: '',
+        width: '90'
+      },
+      {
+        label: lang.t('form.VAllocation.payment.table.organization'),
         columnName: '',
         width: '130'
       },
       {
-        label: 'Fecha',
+        label: lang.t('form.VAllocation.payment.table.documentNo'),
         columnName: '',
         width: '150'
       },
       {
-        label: 'Total',
+        label: lang.t('form.VAllocation.payment.table.description'),
         columnName: '',
         width: '150'
       },
       {
-        label: 'Convertido',
+        label: lang.t('form.VAllocation.payment.table.converted'),
         columnName: '',
         width: '150'
       },
       {
-        label: 'Pagado',
+        label: lang.t('form.VAllocation.payment.table.open'),
         columnName: '',
         width: '150'
       },
       {
-        label: 'Monto Asignado',
+        label: lang.t('form.VAllocation.payment.table.applied'),
+        columnName: '',
+        width: '150'
+      }
+    ])
+
+    const headersInvoice = ref([
+      {
+        label: lang.t('form.VAllocation.invoice.table.date'),
+        columnName: '',
+        width: '145'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.apAr'),
+        columnName: '',
+        width: '90'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.organization'),
+        columnName: '',
+        width: '130'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.documentNo'),
         columnName: '',
         width: '150'
       },
       {
-        label: 'Monto Abierto',
+        label: lang.t('form.VAllocation.invoice.table.description'),
         columnName: '',
         width: '150'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.converted'),
+        columnName: '',
+        width: '150'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.open'),
+        columnName: '',
+        width: '150'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.tradeDiscount'),
+        columnName: '',
+        width: '150'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.writeOff'),
+        columnName: '',
+        width: '150'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.applied'),
+        columnName: '',
+        width: '150'
+      },
+      {
+        label: lang.t('form.VAllocation.invoice.table.overUnderPay'),
+        columnName: '',
+        width: '200'
       }
     ])
 
@@ -247,7 +300,8 @@ export default defineComponent({
       // Const
       // Refs
       tableData,
-      headers
+      headersPayments,
+      headersInvoice
       // Methods
     }
   }

@@ -18,7 +18,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;">
-    <div style="height: 7% !important;">
+    <div style="height: 7% !important;padding: 0px 15px;">
       <el-steps :active="currentSetp" finish-status="success">
         <el-step
           v-for="(list, key) in stepList"
@@ -27,7 +27,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         />
       </el-steps>
     </div>
-    <div style="height: 80% !important;">
+    <div style="height: 80% !important;padding: 0px 15px;">
       <carousel
         :step-reference="metadata.fileName"
         :steps="stepList"
@@ -42,7 +42,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         <summary v-show="'summary' === stepList[currentSetp].key" />
       </carousel>
     </div>
-    <div style="height: 5% !important;text-align: end;">
+    <div style="height: 5% !important;text-align: end;padding: 0px 15px;">
       <el-button v-show="currentSetp > 0" type="danger" icon="el-icon-close" plain @click="currentSetp--" />
       <el-button v-show="currentSetp < 2" type="primary" icon="el-icon-check" plain @click="nextStep" />
       <!-- <el-button type="success" icon="el-icon-message" plain /> -->
@@ -52,7 +52,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, ref } from '@vue/composition-api'
-// import lang from '@/lang'
+import lang from '@/lang'
 // components and mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
 // import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
@@ -90,18 +90,17 @@ export default defineComponent({
 
     const stepList = ref([
       {
-        name: 'Selección de Criterio',
+        name: lang.t('form.VAllocation.step.searchCriteria'),
         description: '',
         key: 'searchCriteria'
       },
       {
-        name: 'Selección de Pagos y Factura',
+        name: lang.t('form.VAllocation.step.selectionPaymentsInvoice'),
         description: '',
         key: 'payments'
       },
       {
-        name: 'Resumen y Ajuste',
-        description: 'Resumen y Ajuste',
+        name: lang.t('form.VAllocation.step.summaryAndAdjustment'),
         key: 'summary'
       }
     ])

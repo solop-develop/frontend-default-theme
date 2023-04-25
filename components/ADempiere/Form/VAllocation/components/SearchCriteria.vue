@@ -29,7 +29,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-row :gutter="20">
                 <el-col :span="12">
                   <el-form-item
-                    label="Socio de Negocio"
+                    :label="$t('form.VAllocation.searchCriteria.businessPartner')"
                     style="width: 100%;"
                   >
                     <el-select
@@ -51,7 +51,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </el-col>
                 <el-col :span="12">
                   <el-form-item
-                    label="Organización"
+                    :label="$t('form.VAllocation.searchCriteria.organization')"
                     style="width: 100%;"
                   >
                     <el-select
@@ -75,7 +75,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-row :gutter="20">
                 <el-col :span="12">
                   <el-form-item
-                    label="Moneda"
+                    :label="$t('form.VAllocation.searchCriteria.currency')"
                     style="width: 100%;"
                   >
                     <el-select
@@ -97,7 +97,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </el-col>
                 <el-col :span="12">
                   <el-form-item
-                    label="Fecha"
+                    :label="$t('form.VAllocation.searchCriteria.date')"
                     style="width: 100%;"
                   >
                     <el-date-picker
@@ -114,7 +114,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         <div style="width: 50%;">
           <el-card style="height: 100%;">
             <div slot="header" class="clearfix" style="text-align: center;">
-              <b> {{ 'Tipo de Transacción' }} </b>
+              <b> {{ $t('form.VAllocation.searchCriteria.transactionType') }} </b>
             </div>
             <div style="padding: 10px !important;">
               <el-form
@@ -145,27 +145,27 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         <el-radio
           v-model="radioPanel3"
           :border="true"
-          label="Assignar desde Orden"
+          :label="$t('form.VAllocation.searchCriteria.option.assignFromOrder')"
         />
         <el-radio
           v-model="radioPanel3"
           :border="true"
-          label="Monto Completo"
+          :label="$t('form.VAllocation.searchCriteria.option.fullAmount')"
         />
         <el-radio
           v-model="radioPanel3"
           :border="true"
-          label="Auto-Asignar"
+          :label="$t('form.VAllocation.searchCriteria.option.autoAssign')"
         />
         <el-radio
           v-model="radioPanel2"
           :border="true"
-          label="Manual"
+          :label="$t('form.VAllocation.searchCriteria.option.manual')"
         />
         <el-radio
           v-model="radioPanel2"
           :border="true"
-          label="Cierre de Saldo"
+          :label="$t('form.VAllocation.searchCriteria.option.closingBalance')"
         />
       </p>
     </div>
@@ -217,25 +217,6 @@ export default defineComponent({
     /**
      * Refs
      */
-
-    const stepList = ref([
-      {
-        name: 'Selección de Criterio',
-        description: ''
-      },
-      {
-        name: 'Selección de Factura',
-        description: ''
-      },
-      {
-        name: 'Selección de Pagos',
-        description: ''
-      },
-      {
-        name: '',
-        description: 'Resumen y Ajuste'
-      }
-    ])
     const radioPanel2 = ref('')
     const radioPanel3 = ref('')
     const radioPanel4 = ref('')
@@ -449,7 +430,6 @@ export default defineComponent({
     return {
       // Const
       // Refs
-      stepList,
       currentSetp,
       radioPanel2,
       radioPanel3,
