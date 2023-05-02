@@ -1,0 +1,488 @@
+<!--
+ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https:www.gnu.org/licenses/>.
+-->
+
+<template>
+  <div style="display: contents;height: 100% !important;">
+    <div style="height: 100% !important;">
+      <el-card id="panel-top-search-criteria" class="panel-top-search-criteria">
+        <div style="width: 50%;">
+          <el-card style="padding: 5px 10px 5px 10px;">
+            <el-form
+              :inline="true"
+              label-position="top"
+            >
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item
+                    :label="$t('form.VAllocation.searchCriteria.businessPartner')"
+                    style="width: 100%;"
+                  >
+                    <el-select
+                      v-model="businessPartnerId"
+                      style="width: 100%;"
+                      filterable
+                      clearable
+                      :filter-method="remoteSearchBusinessPartners"
+                      @visible-change="findBusinessPartners"
+                    >
+                      <el-option
+                        v-for="item in optionsBusinessPartners"
+                        :key="item.id"
+                        :label="item.label"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item
+                    :label="$t('form.VAllocation.searchCriteria.organization')"
+                    style="width: 100%;"
+                  >
+                    <el-select
+                      v-model="organizationsId"
+                      style="width: 100%;"
+                      filterable
+                      clearable
+                      :filter-method="remoteSearchOrganizations"
+                      @visible-change="findOrganizations"
+                    >
+                      <el-option
+                        v-for="item in optionsOrganizations"
+                        :key="item.id"
+                        :label="item.label"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item
+                    :label="$t('form.VAllocation.searchCriteria.currency')"
+                    style="width: 100%;"
+                  >
+                    <el-select
+                      v-model="currencyId"
+                      style="width: 100%;"
+                      filterable
+                      clearable
+                      :filter-method="remoteSearchCurrencies"
+                      @visible-change="findCurrencies"
+                    >
+                      <el-option
+                        v-for="item in optionsCurrency"
+                        :key="item.id"
+                        :label="item.label"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item
+                    :label="$t('form.VAllocation.searchCriteria.date')"
+                    style="width: 100%;"
+                  >
+                    <el-date-picker
+                      v-model="currentDate"
+                      type="date"
+                      style="width: 100%;"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </el-card>
+        </div>
+        <div style="width: 50%;">
+          <el-card style="height: 100%;">
+            <div slot="header" class="clearfix" style="text-align: center;">
+              <b> {{ $t('form.VAllocation.searchCriteria.transactionType') }} </b>
+            </div>
+            <div style="padding: 10px !important;">
+              <el-form
+                :inline="true"
+                label-position="top"
+                class="demo-form-inline"
+                style="text-align: center;"
+              >
+                <el-form-item
+                  v-for="(type, index) in listTypeTransaction"
+                  :key="index"
+                  :label="type.DisplayColumn"
+                >
+                  <el-switch
+                    v-model="type.isSelect"
+                    active-color="#13ce66"
+                    inactive-color="#ff4949"
+                    style="padding: 0px 20px;margin: 0px 5px;"
+                    @change="changeType(type)"
+                  />
+                </el-form-item>
+              </el-form>
+            </div>
+          </el-card>
+        </div>
+      </el-card>
+      <p style="text-align: center;">
+        <el-radio
+          v-model="radioPanel3"
+          :border="true"
+          :label="$t('form.VAllocation.searchCriteria.option.assignFromOrder')"
+        />
+        <el-radio
+          v-model="radioPanel3"
+          :border="true"
+          :label="$t('form.VAllocation.searchCriteria.option.fullAmount')"
+        />
+        <el-radio
+          v-model="radioPanel3"
+          :border="true"
+          :label="$t('form.VAllocation.searchCriteria.option.autoAssign')"
+        />
+        <el-radio
+          v-model="radioPanel2"
+          :border="true"
+          :label="$t('form.VAllocation.searchCriteria.option.manual')"
+        />
+        <el-radio
+          v-model="radioPanel2"
+          :border="true"
+          :label="$t('form.VAllocation.searchCriteria.option.closingBalance')"
+        />
+      </p>
+    </div>
+  </div>
+</template>
+
+<script>
+import { defineComponent, ref, computed } from '@vue/composition-api'
+import store from '@/store'
+// import lang from '@/lang'
+// components and mixins
+import Carousel from '@theme/components/ADempiere/Carousel'
+// import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
+// import fieldsList from './fieldList.js'
+// import SearchCriteria from './components/SearchCriteria/'
+// import Invoices from './components/Invoices/index'
+// import Receipt from './components/Receipt/index'
+
+// Utils and Helper Methods
+// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+// import { showMessage } from '@/utils/ADempiere/notification'
+
+// API Request Methods
+import {
+  listTransactionTypes,
+  listBusinessPartners,
+  listOrganizations,
+  listCurrencies
+} from '@/api/ADempiere/form/VAllocation.js'
+import { isEmptyValue } from '@/utils/ADempiere'
+
+export default defineComponent({
+  name: 'SearchCriteria',
+
+  components: {
+    Carousel
+  },
+
+  props: {
+    metadata: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
+
+  setup(props, { root }) {
+    /**
+     * Refs
+     */
+    const radioPanel2 = ref('')
+    const radioPanel3 = ref('')
+    const radioPanel4 = ref('')
+
+    const value1 = ref('')
+
+    const options = ref([])
+
+    const currentSetp = ref(0)
+
+    // Value the Select
+
+    // const currentTypeTransaction = ref('')
+    // const businessPartners = ref('')
+    const organizations = ref('')
+    const currency = ref('')
+
+    // List Option the Select
+
+    const optionsBusinessPartners = ref([])
+    const optionsOrganizations = ref([])
+    const optionsCurrency = ref([])
+
+    const listTypeTransaction = ref([])
+
+    /**
+     * Computed
+     */
+
+    const businessPartnerId = computed({
+      // getter
+      get() {
+        const { businessPartnerId } = store.getters.getSearchFilter
+        return businessPartnerId
+      },
+      // setter
+      set(id) {
+        store.commit('setBusinessPartner', id)
+      }
+    })
+
+    const organizationsId = computed({
+      // getter
+      get() {
+        const { organizationId } = store.getters.getSearchFilter
+        return organizationId
+      },
+      // setter
+      set(id) {
+        store.commit('setOrganizations', id)
+      }
+    })
+
+    const currencyId = computed({
+      // getter
+      get() {
+        const { currencyId } = store.getters.getSearchFilter
+        return currencyId
+      },
+      // setter
+      set(id) {
+        store.commit('setCurrency', id)
+      }
+    })
+
+    const currentDate = computed({
+      // getter
+      get() {
+        const { date } = store.getters.getSearchFilter
+        return date
+      },
+      // setter
+      set(date) {
+        console.log({ date })
+        store.commit('setDate', date)
+      }
+    })
+
+    const currentTypeTransaction = computed({
+      // getter
+      get() {
+        const { transactionType } = store.getters.getSearchFilter
+        return transactionType
+      },
+      // setter
+      set(type) {
+        console.log({ type })
+        store.commit('setTransactionType', type)
+      }
+    })
+
+    /**
+     * Methods
+     */
+
+    function findBusinessPartners(isFind, searchValue) {
+      if (!isFind) return
+      listBusinessPartners({
+        searchValue
+      })
+        .then(response => {
+          const { records } = response
+          optionsBusinessPartners.value = records.map(business => {
+            // const { DisplayColumn } = business.values
+            // console.log({ DisplayColumn })
+            return {
+              ...business,
+              label: business.values.DisplayColumn
+            }
+          })
+        })
+    }
+
+    function findOrganizations(isFind, searchValue) {
+      if (!isFind) return
+      listOrganizations({
+        searchValue
+      })
+        .then(response => {
+          const { records } = response
+          optionsOrganizations.value = records.map(organizations => {
+            const { id, uuid, values } = organizations
+            return {
+              id,
+              uuid,
+              label: values.DisplayColumn
+            }
+          })
+        })
+    }
+
+    function findCurrencies(isFind, searchValue) {
+      if (!isFind) return
+      listCurrencies({
+        searchValue
+      })
+        .then(response => {
+          const { records } = response
+          optionsCurrency.value = records.map(currency => {
+            const { id, uuid, values } = currency
+            return {
+              id,
+              uuid,
+              label: values.DisplayColumn
+            }
+          })
+        })
+    }
+
+    function remoteSearchBusinessPartners(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsBusinessPartners.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findBusinessPartners(true, query)
+        }
+      }
+    }
+
+    function remoteSearchOrganizations(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsOrganizations.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findOrganizations(true, query)
+        }
+      }
+    }
+
+    function remoteSearchCurrencies(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsCurrency.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findCurrencies(true, query)
+        }
+      }
+    }
+
+    function findFilter(queryString) {
+      return (query) => {
+        const search = queryString.toLowerCase()
+        return query.label.toLowerCase().includes(search)
+      }
+    }
+
+    function setListTransactionTypes() {
+      if (!isEmptyValue(listTypeTransaction.value)) return
+      listTransactionTypes()
+        .then(response => {
+          const { records } = response
+          listTypeTransaction.value = records.map(type => {
+            const { KeyColumn, ValueColumn, DisplayColumn } = type.values
+            return {
+              ...type,
+              KeyColumn,
+              ValueColumn,
+              DisplayColumn,
+              isSelect: false
+            }
+          })
+        })
+    }
+
+    function changeType(params) {
+      currentTypeTransaction.value = params.ValueColumn
+      listTypeTransaction.value.forEach(type => {
+        type.isSelect = currentTypeTransaction.value === type.ValueColumn
+      })
+    }
+
+    setListTransactionTypes()
+
+    return {
+      // Const
+      // Refs
+      currentSetp,
+      radioPanel2,
+      radioPanel3,
+      radioPanel4,
+      value1,
+      options,
+      // List Option
+      optionsBusinessPartners,
+      currentTypeTransaction,
+      optionsOrganizations,
+      listTypeTransaction,
+      optionsCurrency,
+      // businessPartners,
+      organizations,
+      currency,
+      // Computed
+      businessPartnerId,
+      organizationsId,
+      currentDate,
+      currencyId,
+      // Methods,
+      remoteSearchBusinessPartners,
+      remoteSearchOrganizations,
+      setListTransactionTypes,
+      remoteSearchCurrencies,
+      findBusinessPartners,
+      findOrganizations,
+      findCurrencies,
+      changeType,
+      findFilter
+    }
+  }
+})
+</script>
+
+<style lang="scss">
+  .from-wf-panel {
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .el-input--medium .el-input__inner {
+    text-align: end;
+  }
+  .panel-top-search-criteria {
+    display: flex;
+    .el-card__body {
+      display: contents;
+      padding-top: 0px !important;
+      padding-right: 0px !important;
+      padding-bottom: 2px !important;
+      padding-left: 0px !important;
+      height: 100%!important;
+    }
+  }
+</style>

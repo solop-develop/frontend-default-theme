@@ -105,6 +105,9 @@ export default {
         case 'ExpressMovement':
           form = import('@theme/components/ADempiere/Form/ExpressMovement')
           break
+        case 'VAllocation':
+          form = import('@theme/components/ADempiere/Form/VAllocation')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
