@@ -366,19 +366,16 @@ export default defineComponent({
      */
 
     // Loading Notes Register
-
     const isLoadingNotesRecord = computed(() => {
       return store.getters.getIsLoadListChat
     })
 
     // Loading Notes Register
-
     const isLoadingListAttachment = computed(() => {
       return store.getters.getIsLoadListAttachment
     })
 
     // Loading Record Logs List
-
     const isLoadingRecordLogsList = computed(() => {
       return store.getters.getIsLoadListRecordLogs
     })
@@ -436,12 +433,18 @@ export default defineComponent({
           (isEmptyValue(currentTab))) {
           return
         }
-        store.dispatch('listWindowDashboard', {
+        const dashboardList = store.getters.getPanelDashboard({
           tabId: currentTab.id,
-          windowId: storedWindow.value.id,
-          recordId: currentRecordId.value,
-          tableName: currentTab.tableName
+          recordId: currentRecordId.value
         })
+        if (isEmptyValue(dashboardList)) {
+          store.dispatch('listWindowDashboard', {
+            tabId: currentTab.id,
+            windowId: storedWindow.value.id,
+            recordId: currentRecordId.value,
+            tableName: currentTab.tableName
+          })
+        }
       }
       if (tab.name === 'listReference') {
         tabOptions = 'listReference'
