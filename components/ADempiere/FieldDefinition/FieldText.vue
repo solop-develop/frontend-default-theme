@@ -141,6 +141,19 @@ export default {
   .custom-field-text {
     max-height: 36px;
   }
+  .el-input--medium {
+    .el-input__inner {
+      font-weight: 630;
+    }
+  }
+  .el-input.is-disabled {
+    .el-input__inner {
+      background-color: #dfe5f078;
+      border-color: #dfe4ed;
+      color: #76797e;
+      cursor: not-allowed;
+    }
+  }
 
   // indicates if the textarea is adjustable
   .el-textarea__inner {
