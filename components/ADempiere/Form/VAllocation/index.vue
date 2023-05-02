@@ -59,7 +59,6 @@ import lang from '@/lang'
 // import fieldsList from './fieldList.js'
 import SearchCriteria from './components/SearchCriteria'
 import Payments from './components/Payments'
-import Invoce from './components/Invoce'
 import Summary from './components/Summary'
 import store from '@/store'
 
@@ -69,7 +68,6 @@ export default defineComponent({
   components: {
     // Carousel,
     SearchCriteria,
-    Invoce,
     Payments,
     Summary
   },
