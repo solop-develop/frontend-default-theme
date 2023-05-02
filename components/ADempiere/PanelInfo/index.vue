@@ -436,12 +436,15 @@ export default defineComponent({
           (isEmptyValue(currentTab))) {
           return
         }
-        store.dispatch('listWindowDashboard', {
-          tabId: currentTab.id,
-          windowId: storedWindow.value.id,
-          recordId: currentRecordId.value,
-          tableName: currentTab.tableName
-        })
+        const dashboardList = store.getters.getPanelDashboard({ tabId: currentTab.id, recordId: currentRecordId.value })
+        if (isEmptyValue(dashboardList)) {
+          store.dispatch('listWindowDashboard', {
+            tabId: currentTab.id,
+            windowId: storedWindow.value.id,
+            recordId: currentRecordId.value,
+            tableName: currentTab.tableName
+          })
+        }
       }
       if (tab.name === 'listReference') {
         tabOptions = 'listReference'
