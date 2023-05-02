@@ -27,20 +27,20 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         />
       </el-steps>
     </div>
-    <div style="height: 80% !important;padding: 0px 15px;">
-      <carousel
+    <div style="height: 85% !important;padding: 0px 15px;">
+      <!-- <carousel
         :step-reference="metadata.fileName"
         :steps="stepList"
         :indicator="currentSetp"
-      >
-        <search-criteria
-          v-show="'searchCriteria' === stepList[currentSetp].key"
-        />
-        <payments
-          v-show="'payments' === stepList[currentSetp].key"
-        />
-        <summary v-show="'summary' === stepList[currentSetp].key" />
-      </carousel>
+      > -->
+      <search-criteria
+        v-show="'searchCriteria' === stepList[currentSetp].key"
+      />
+      <payments
+        v-show="'payments' === stepList[currentSetp].key"
+      />
+      <summary v-show="'summary' === stepList[currentSetp].key" />
+      <!-- </carousel> -->
     </div>
     <div style="height: 5% !important;text-align: end;padding: 0px 15px;">
       <el-button v-show="currentSetp > 0" type="danger" icon="el-icon-close" plain @click="currentSetp--" />
@@ -54,7 +54,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 import { defineComponent, ref } from '@vue/composition-api'
 import lang from '@/lang'
 // components and mixins
-import Carousel from '@theme/components/ADempiere/Carousel'
+// import Carousel from '@theme/components/ADempiere/Carousel'
 // import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 // import fieldsList from './fieldList.js'
 import SearchCriteria from './components/SearchCriteria'
@@ -67,7 +67,7 @@ export default defineComponent({
   name: 'VAllocation',
 
   components: {
-    Carousel,
+    // Carousel,
     SearchCriteria,
     Invoce,
     Payments,
@@ -112,6 +112,7 @@ export default defineComponent({
       currentSetp.value++
       if (stepList.value[currentSetp.value].key === 'payments') {
         store.dispatch('findListPayment')
+        store.dispatch('findListInvoices')
       }
     }
 

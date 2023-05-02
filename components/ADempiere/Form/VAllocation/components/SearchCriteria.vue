@@ -261,8 +261,8 @@ export default defineComponent({
     const organizationsId = computed({
       // getter
       get() {
-        const { organizationsId } = store.getters.getSearchFilter
-        return organizationsId
+        const { organizationId } = store.getters.getSearchFilter
+        return organizationId
       },
       // setter
       set(id) {

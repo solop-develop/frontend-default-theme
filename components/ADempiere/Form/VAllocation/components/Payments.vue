@@ -18,162 +18,206 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;height: 100% !important;">
-    <el-card id="panel-top-search-criteria" class="panel-top-search-criteria">
-      <div style="width: 50%;">
-        <el-card style="padding: 5px 10px 5px 10px;">
-          <div slot="header" class="clearfix" style="text-align: center;">
-            <b> {{ 'Pagos' }} </b>
-          </div>
-          <el-table
-            :data="tableData"
-            border
-            style="min-height: 400px;width: 100%;"
-          >
-            <el-table-column
-              v-for="(header, key) in headersInvoice"
-              :key="key"
-              prop="id"
-              :width="header.width"
-              :label="header.label"
-            />
-          </el-table>
-        </el-card>
-      </div>
-      <div style="width: 50%;">
-        <el-card style="padding: 5px 10px 5px 10px;">
-          <div slot="header" class="clearfix" style="text-align: center;">
-            <b> {{ 'Facturas' }} </b>
-          </div>
-          <el-table
-            :data="tableData"
-            border
-            style="min-height: 400px;width: 100%;"
-          >
-            <el-table-column
-              v-for="(header, key) in headersInvoice"
-              :key="key"
-              prop="id"
-              :width="header.width"
-              :label="header.label"
-            />
-          </el-table>
-        </el-card>
-      </div>
-    </el-card>
-    <el-card class="box-card">
-      <div id="description-payment" class="description-payment" style="display: flex;">
-        <el-card
-          class="box-card"
-          style="width: 50%;float: left;"
-        >
-          <div>
-            <el-form
-              :inline="true"
-              label-position="left"
-              style="padding: 10px !important;"
+    <div style="height: 89% !important;">
+      <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;">
+        <div style="width: 50%;t: 100%;">
+          <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
+            <div slot="header" class="clearfix" style="text-align: center;">
+              <b> {{ $t('form.VAllocation.payment.title') }} </b>
+            </div>
+            <el-table
+              id="listPaymentsTable"
+              ref="listPaymentsTable"
+              :data="listPayments"
+              border
+              style="width: 100%;height: 90%;"
+              @select="handleSelectionPayments"
             >
-              <el-col :span="24">
-                <el-form-item
-                  label="Cantidad de Registro:"
-                >
-                  <b>
-                    5
-                  </b>
-                </el-form-item>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item
-                  label="Total Factura:"
-                >
-                  <b>
-                    8.506,23
-                  </b>
-                </el-form-item>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item
-                  label="Convertido:"
-                >
-                  <b>
-                    530,63
-                  </b>
-                </el-form-item>
-              </el-col>
-            </el-form>
-          </div>
-        </el-card>
-        <el-card
-          class="box-card"
-          style="width: 50%;float: right;"
-        >
-          <div>
-            <el-form
-              :inline="true"
-              label-position="left"
-              style="padding: 10px !important;"
+              <el-table-column
+                type="selection"
+                width="40"
+              />
+              <el-table-column
+                v-for="(header, key) in headersPayments"
+                :key="key"
+                :align="header.align"
+                :width="header.width"
+                :label="header.label"
+              >
+                <template slot-scope="scope">
+                  <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
+                    {{ scope.row[header.columnName].name }}
+                  </span>
+                  <span v-else-if="header.columnName === 'applied'">
+                    <el-input-number
+                      v-model="scope.row[header.columnName]"
+                      controls-position="right"
+                    />
+                  </span>
+                  <span v-else>
+                    {{ scope.row[header.columnName] }}
+                  </span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+        <div style="width: 50%;height: 100%;">
+          <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
+            <div slot="header" class="clearfix" style="text-align: center;">
+              <b> {{ $t('form.VAllocation.invoice.title') }} </b>
+            </div>
+            <!-- {{ listInvoces }} -->
+            <el-table
+              id="listInvocesTable"
+              ref="listInvocesTable"
+              :data="listInvoces"
+              border
+              style="width: 100%;height: 90%;"
+              @select="handleSelectionInvoces"
             >
-              <el-col :span="24">
-                <el-form-item
-                  label="Pagado:"
-                >
-                  <b>
-                    350,63
-                  </b>
-                </el-form-item>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item
-                  label="Asignado:"
-                >
-                  <b>
-                    170,00
-                  </b>
-                </el-form-item>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item
-                  label="Monto Abierto:"
-                >
-                  <b>
-                    10,00
-                  </b>
-                </el-form-item>
-              </el-col>
-            </el-form>
-          </div>
-        </el-card>
-      </div>
-    </el-card>
+              <el-table-column
+                type="selection"
+                width="40"
+              />
+              <el-table-column
+                v-for="(header, key) in headersInvoice"
+                :key="key"
+                prop="id"
+                :align="header.align"
+                :width="header.width"
+                :label="header.label"
+              >
+                <template slot-scope="scope">
+                  <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
+                    {{ scope.row[header.columnName].name }}
+                  </span>
+                  <span v-else-if="header.columnName === 'writeOff'">
+                    <el-input-number
+                      v-model="scope.row[header.columnName]"
+                      controls-position="right"
+                    />
+                  </span>
+                  <span v-else-if="header.columnName === 'applied'">
+                    <el-input-number
+                      v-model="scope.row[header.columnName]"
+                      controls-position="right"
+                    />
+                  </span>
+                  <span v-else>
+                    {{ scope.row[header.columnName] }}
+                  </span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+      </el-card>
+    </div>
+    <div>
+      <el-card class="box-card">
+        <div id="description-payment" class="description-payment">
+          <el-card
+            class="box-card"
+          >
+            <div>
+              <el-form
+                :inline="true"
+                label-position="left"
+                style="padding: 10px !important;"
+              >
+                <el-col :span="6">
+                  <el-form-item
+                    :label="$t('form.VAllocation.description.difference')"
+                  >
+                    <el-tag>
+                      <b style="text-align: right; font-size: 19px">
+                        {{ difference }}
+                      </b>
+                    </el-tag>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item
+                    :label="$t('form.VAllocation.description.charge')"
+                  >
+                    <el-select
+                      v-model="charges"
+                      style="width: 100%;"
+                      filterable
+                      clearable
+                      :filter-method="remoteSearchCharges"
+                      @visible-change="findCharges"
+                    >
+                      <el-option
+                        v-for="item in optionsCharges"
+                        :key="item.id"
+                        :label="item.label"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item
+                    :label="$t('form.VAllocation.description.organization')"
+                  >
+                    <el-select
+                      v-model="organizationsId"
+                      style="width: 100%;"
+                      filterable
+                      clearable
+                      :filter-method="remoteSearchOrganizations"
+                      @visible-change="findOrganizations"
+                    >
+                      <el-option
+                        v-for="item in optionsOrganizations"
+                        :key="item.id"
+                        :label="item.label"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item
+                    :label="$t('form.VAllocation.description.description')"
+                  >
+                    <el-input
+                      v-model="description"
+                      type="textarea"
+                      :autosize="{ minRows: 2, maxRows: 4}"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-form>
+            </div>
+          </el-card>
+        </div>
+      </el-card>
+    </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
-import lang from '@/lang'
+import { defineComponent, ref, computed } from '@vue/composition-api'
+// import lang from '@/lang'
+import store from '@/store'
+
 // components and mixins
-import Carousel from '@theme/components/ADempiere/Carousel'
-// import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-// import fieldsList from './fieldList.js'
-// import SearchCriteria from './components/SearchCriteria/'
-// import Invoices from './components/Invoices/index'
-// import Receipt from './components/Receipt/index'
+import headersInvoice from './headersInvoice.js'
+import headersPayments from './headersPayments.js'
 
 // Utils and Helper Methods
-// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-// import { showMessage } from '@/utils/ADempiere/notification'
-
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 // API Request Methods
-// import {
-//   listPaymentSelection,
-//   paymentSelection
-// } from '@/api/ADempiere/form/VPayPrint.js'
+import {
+  listCharges,
+  listTransactionOrganizations
+} from '@/api/ADempiere/form/VAllocation.js'
 
 export default defineComponent({
   name: 'Payments',
-
-  components: {
-    Carousel
-  },
 
   props: {
     metadata: {
@@ -189,120 +233,224 @@ export default defineComponent({
      * Refs
      */
 
+    const optionsOrganizations = ref([])
+    const listPaymentsTable = ref(null)
+    const listInvocesTable = ref(null)
+    const optionsCharges = ref([])
+    const organizationsId = ref('')
+    const description = ref('')
     const tableData = ref([])
+    const charges = ref('')
 
-    const headersPayments = ref([
-      {
-        label: lang.t('form.VAllocation.payment.table.date'),
-        columnName: '',
-        width: '145'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.apAr'),
-        columnName: '',
-        width: '90'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.organization'),
-        columnName: '',
-        width: '130'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.documentNo'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.description'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.converted'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.open'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.payment.table.applied'),
-        columnName: '',
-        width: '150'
-      }
-    ])
+    /**
+     * computed
+     */
 
-    const headersInvoice = ref([
-      {
-        label: lang.t('form.VAllocation.invoice.table.date'),
-        columnName: '',
-        width: '145'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.apAr'),
-        columnName: '',
-        width: '90'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.organization'),
-        columnName: '',
-        width: '130'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.documentNo'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.description'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.converted'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.open'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.tradeDiscount'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.writeOff'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.applied'),
-        columnName: '',
-        width: '150'
-      },
-      {
-        label: lang.t('form.VAllocation.invoice.table.overUnderPay'),
-        columnName: '',
-        width: '200'
+    const selectListPayments = computed(() => {
+      return store.getters.getSelectListPayments
+    })
+
+    const selectListInvoces = computed(() => {
+      return store.getters.getSelectListInvoces
+    })
+
+    const difference = computed(() => {
+      // const sumPayments = selectListInvoces.value.map(list => list.applied)
+      if (!isEmptyValue(selectListPayments.value) && !isEmptyValue(selectListInvoces.value)) {
+        const sumPaymentsApplied = selectListPayments.value.map(list => list.applied)
+        const sumPayments = sumPaymentsApplied.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+        const sumInvocesApplied = selectListInvoces.value.map(list => list.applied)
+        const sumInvoces = sumInvocesApplied.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+        const array3 = [sumInvoces, sumPayments]
+        const alo = array3.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+        return alo
+      } else if (!isEmptyValue(selectListPayments.value)) {
+        const sumPayments = selectListPayments.value.map(list => list.applied)
+        return sumPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+      } else if (!isEmptyValue(selectListInvoces.value)) {
+        const sumPayments = selectListInvoces.value.map(list => list.applied)
+        return sumPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+        // return 2
       }
-    ])
+      return 0
+    })
+
+    const listPayments = computed(() => {
+      return store.getters.getListVAllocation.payments
+    })
+
+    const listInvoces = computed(() => {
+      return store.getters.getListVAllocation.invoce
+    })
 
     /**
      * Methods
      */
+
+    function findCharges(isFind, searchValue) {
+      if (!isFind) return
+      listCharges({
+        searchValue
+      })
+        .then(response => {
+          const { records } = response
+          optionsCharges.value = records.map(currency => {
+            const { id, uuid, values } = currency
+            return {
+              id,
+              uuid,
+              label: values.DisplayColumn
+            }
+          })
+        })
+    }
+
+    function remoteSearchCharges(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsCharges.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findCharges(true, query)
+        }
+      }
+    }
+
+    function findFilter(queryString) {
+      return (query) => {
+        const search = queryString.toLowerCase()
+        return query.label.toLowerCase().includes(search)
+      }
+    }
+
+    function remoteSearchOrganizations(query) {
+      if (!isEmptyValue(query) && query.length > 2) {
+        const result = optionsOrganizations.value.filter(findFilter(query))
+        if (isEmptyValue(result)) {
+          findOrganizations(true, query)
+        }
+      }
+    }
+
+    function findOrganizations(isFind, searchValue) {
+      if (!isFind) return
+      listTransactionOrganizations({
+        searchValue
+      })
+        .then(response => {
+          const { records } = response
+          optionsOrganizations.value = records.map(organizations => {
+            const { id, uuid, values } = organizations
+            return {
+              id,
+              uuid,
+              label: values.DisplayColumn
+            }
+          })
+        })
+    }
+
+    function handleSelectionPayments(select, row) {
+      toggleSelectionPayments(row)
+      const { isSelect, applied, open_amount } = row
+      const totalApplied = (applied === 0) ? open_amount : applied
+      row.isSelect = !isSelect
+      row.applied = totalApplied
+      store.commit('setListPayments', listPayments.value)
+    }
+
+    function handleSelectionInvoces(select, row) {
+      const { isSelect, applied, open_amount } = row
+      toggleSelectionInvoce(row)
+      const totalApplied = (applied === 0) ? open_amount : applied
+      const existTypeTranstation = selectListPayments.value.filter(payment => payment.transaction_type.value === row.transaction_type.value)
+      const all = (totalApplied < 0) ? -(totalApplied) : -(totalApplied)
+      console.log(selectListPayments.value, { existTypeTranstation })
+      if (!isEmptyValue(selectListPayments.value) && !isEmptyValue(existTypeTranstation)) {
+        console.log({ all })
+      }
+      row.isSelect = !isSelect
+      row.applied = all
+      store.commit('setListInvoces', listInvoces.value)
+    }
+
+    function toggleSelectionInvoce(invoce) {
+      const paymentsTypetransaction = selectListPayments.value.filter(payment => payment.transaction_type.value === invoce.transaction_type.value)
+      const appliedPayments = paymentsTypetransaction.map(payment => payment.applied)
+      const sumPayments = appliedPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+        return valorAnterior + valorActual
+      })
+      const appliedPay = sumPayments - invoce.open_amount
+      console.log({ selectListPayments: selectListPayments.value, invoce, paymentsTypetransaction, appliedPayments, appliedPay })
+    }
+
+    function toggleSelectionPayments(payment) {
+      const invocesTypetransaction = selectListInvoces.value.filter(list => list.transaction_type.value === payment.transaction_type.value)
+      const appliedPayments = invocesTypetransaction.map(payment => payment.applied)
+      const sumPayments = appliedPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+        return valorAnterior + valorActual
+      })
+      const appliedPay = sumPayments - payment.open_amount
+      console.log({ selectListPayments: selectListPayments.value, payment, invocesTypetransaction, appliedPayments, appliedPay })
+    }
+    // toggleSelection([currentRow])
+    // console.log(listInvocesTable.value)
+
+    // function toggleSelection(array, ref) {
+    //   if (isEmptyValue(ref.value)) return
+    //   console.log({ array, ref }, ref.value)
+    //   console.log({ data: ref.value.data })
+    //   ref.value.data.forEach(attribute => {
+    //     if (attribute.isSelect) {
+    //       ref.value.toggleRowSelection(attribute)
+    //     }
+    //   })
+    // }
+
+    // onUpdated(() => {
+    //   toggleSelection(selectListPayments.value, listPaymentsTable)
+    //   toggleSelection(selectListInvoces.value, listInvocesTable)
+    //   console.log(listPaymentsTable.value)
+    // })
 
     return {
       // Const
       // Refs
       tableData,
       headersPayments,
-      headersInvoice
+      headersInvoice,
+      optionsCharges,
+      charges,
+      organizationsId,
+      optionsOrganizations,
+      listInvocesTable,
+      listPaymentsTable,
+      description,
+      // Computed
+      listPayments,
+      listInvoces,
+      difference,
+      selectListPayments,
+      selectListInvoces,
       // Methods
+      remoteSearchOrganizations,
+      handleSelectionPayments,
+      handleSelectionInvoces,
+      toggleSelectionPayments,
+      toggleSelectionInvoce,
+      remoteSearchCharges,
+      findOrganizations,
+      // toggleSelection,
+      findCharges,
+      findFilter
     }
   }
 })
@@ -328,4 +476,10 @@ export default defineComponent({
       height: 100%!important;
     }
   }
+</style>
+<style>
+.el-table--scrollable-x .el-table__body-wrapper {
+  height: 90%;
+  overflow-x: auto;
+}
 </style>
