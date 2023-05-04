@@ -30,12 +30,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 import router from '@/router'
-// import store from '@/store'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 // Utils and Helper Methods
-// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { camelizeObjectKeys } from '@/utils/ADempiere/transformObject.js'
 import { getFieldTemplate } from '@/utils/ADempiere/lookupFactory.js'
+// constants
+import { DEFAULT_SIZE, YES_NO } from '@/utils/ADempiere/references.js'
 import {
   evalutateTypeField
 } from '@/utils/ADempiere/dictionaryUtils.js'
@@ -59,29 +59,32 @@ export default defineComponent({
   },
 
   setup(props) {
+    /**
+     * Const
+     */
+    const size = DEFAULT_SIZE
+
+    /**
+     * Computed
+     */
     const containerUuid = computed(() => {
       const currentRoute = router.app._route
       return currentRoute.meta.uuid + 'Parameters' + props.dashboardId
     })
+
+    const field = computed(() => {
+      return camelizeObjectKeys(props.metadata)
+    })
+
     const fieldParameters = computed(() => {
       return getFieldTemplate({
-        ...camelizeObjectKeys(props.metadata),
+        ...field.value,
         containerUuid: containerUuid.value,
-        size: {
-          lg: 6,
-          md: 8,
-          sm: 12,
-          xl: 6,
-          xs: 24
-        },
+        size,
+        columnNameTo: isRange(field.value),
+        isAdvancedQuery: isBoolean(field.value),
         overwriteDefinition: {
-          size: {
-            lg: 6,
-            md: 8,
-            sm: 12,
-            xl: 6,
-            xs: 24
-          }
+          size
         }
       })
     })
@@ -97,14 +100,33 @@ export default defineComponent({
         setDefaultValues: () => {}
       }
     })
+
+    /**
+     * Methods
+     */
+
+    function isBoolean(field) {
+      const { displayType } = field
+      return displayType === YES_NO.id
+    }
+
+    function isRange(field) {
+      if (field.isRange) return field.columnName + '_To'
+      return ''
+    }
+
     return {
+      // Computed
+      containerManagerList,
       fieldParameters,
       containerUuid,
-      containerManagerList,
-      // methods
-      getFieldTemplate,
+      field,
+      // Methods
       camelizeObjectKeys,
-      evalutateTypeField
+      evalutateTypeField,
+      getFieldTemplate,
+      isBoolean,
+      isRange
     }
   }
 })

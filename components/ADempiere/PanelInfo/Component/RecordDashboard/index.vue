@@ -49,7 +49,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     v-for="(params, key) in dashboardAttributes.parameters"
                     :key="key"
                   >
-                    <el-form :inline="true" label-position="top">
+                    <el-form
+                      :inline="true"
+                      label-position="top"
+                      @submit.native.prevent="notSubmitForm"
+                    >
                       <parameters
                         :key="key"
                         :metadata="params"
