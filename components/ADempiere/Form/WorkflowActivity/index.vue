@@ -164,7 +164,10 @@
   </div>
   <el-container v-else style="height: 100% !important;">
     <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 30% !important; width: 100% !important;' : 'height: 10%!important; width: 100% !important;'">
-      <el-card :style="!collapse ? 'height: 100% !important; width: 50% !important;float: left;' : 'height: 100%;width: 50% !important;float: left;'">
+      <el-card
+        class="headerTable"
+        :style="!collapse ? 'height: 100% !important; width: 50% !important;float: left;' : 'height: 100%;width: 50% !important;float: left;'"
+      >
         <div slot="header">
           <span> {{ $t('form.workflowActivity.title') }} </span>
           <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="collapse = !collapse" />
@@ -175,7 +178,7 @@
           v-loading="isLoadActivity"
           :data="activityList"
           highlight-current-row
-          style="width: 100%;height: 70% !important;"
+          style="width: 100%;height: 80%"
           border
           height="60% !important"
           @current-change="handleCurrentChange"
@@ -199,7 +202,7 @@
           :records-page="activityList.length"
         />
       </el-card>
-      <el-card id="logsWorkflow" class="box-card" :style="collapse2 ? 'height: 100%; width: 50% !important;float: right;' : 'height: 20%; width: 50% !important;float: right;'">
+      <el-card id="logsWorkflow" class="headerLogs" :style="collapse2 ? 'height: 100%; width: 50% !important;float: right;' : 'height: 20%; width: 50% !important;float: right;'">
         <div slot="header" class="clearfix">
           {{ $t('field.logsField') }}
           <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse2 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse2 = !collapse2)" />
@@ -371,9 +374,9 @@ export default {
       workflowTranstitionsList: [],
       workflowTableDefinition: [
         {
-          columnName: 'workflow.name',
-          name: this.$t('page.processActivity.name'),
-          isNumeric: false
+          columnName: 'node.priority',
+          name: this.$t('form.workflowActivity.table.priority'),
+          isNumeric: true
         },
         {
           columnName: 'node.name',
@@ -381,8 +384,8 @@ export default {
           isNumeric: false
         },
         {
-          columnName: 'node.description',
-          name: this.$t('page.processActivity.description'),
+          columnName: 'summary',
+          name: this.$t('report.summary'),
           isNumeric: false
         }
       ],
@@ -431,7 +434,7 @@ export default {
     },
     isStyleFooter() {
       if (this.isMobile) return 'height: auto;padding-left: 1%;padding-right: 1%;'
-      return 'height: auto;padding-bottom: 100px;padding-top: 0%;padding-left: 1%;padding-right: 1%;'
+      return 'height: auto;padding-bottom: 30px;padding-top: 0%;padding-left: 1%;padding-right: 1%;'
     },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
@@ -445,8 +448,17 @@ export default {
     },
     activityList() {
       const list = this.$store.getters.getActivity
+      console.log({ list })
       if (!this.isEmptyValue(list)) {
-        return list.filter(activity => !this.isEmptyValue(activity.uuid))
+        const alo = list.map(a => {
+          const index = a.workflow_process.text_message.search(':')
+          const qlq = a.workflow_process.text_message.slice(0, index)
+          return {
+            ...a,
+            summary: a.zoom_windows[0].description + ' ' + qlq
+          }
+        })
+        return alo.filter(activity => !this.isEmptyValue(activity.uuid))
       }
       return []
     },
@@ -728,5 +740,35 @@ export default {
   -webkit-transition: 0.3s;
   transition: 0.3s;
   display: block;
+}
+.headerTable {
+  .el-card {
+    border-radius: 4px;
+    border: 1px solid #e6ebf5;
+    background-color: #FFFFFF;
+    overflow: hidden;
+    color: #303133;
+    -webkit-transition: 0.3s;
+    transition: 0.3s;
+    display: block;
+  }
+  .el-card__body {
+    height: 80% !important;
+  }
+}
+.headerLogs {
+  .el-card {
+    border-radius: 4px;
+    border: 1px solid #e6ebf5;
+    background-color: #FFFFFF;
+    overflow: hidden;
+    color: #303133;
+    -webkit-transition: 0.3s;
+    transition: 0.3s;
+    display: block;
+  }
+  .el-card__body {
+    height: 95% !important;
+  }
 }
 </style>
