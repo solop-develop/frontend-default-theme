@@ -499,7 +499,9 @@ export default {
       // currentActivity.node.action_name === 'USER_CHOICE'
     },
     isStyleFooter() {
-      if (this.isMobile) return 'height: auto;padding-left: 1%;padding-right: 1%;'
+      if (this.isMobile) {
+        return 'height: auto;padding-left: 1%;padding-right: 1%;'
+      }
       return 'height: auto;padding-bottom: 30px;padding-top: 0%;padding-left: 1%;padding-right: 1%;'
     },
     isMobile() {
