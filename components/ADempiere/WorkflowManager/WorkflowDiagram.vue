@@ -189,7 +189,7 @@ export default {
       }
 
       const offsetTop = this.$el.getBoundingClientRect().top
-      const top = event.clientY - offsetTop + 450
+      const top = event.clientY - offsetTop + 350
       topContextualMenu.value = top
       showedInfo.value = true
     }
