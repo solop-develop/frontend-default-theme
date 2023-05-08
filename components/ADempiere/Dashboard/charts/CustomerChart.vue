@@ -116,7 +116,8 @@ export default {
           tableName: this.metadata.tableName,
           recordId: this.metadata.recordId,
           recordUuid: this.metadata.recordUuid,
-          contextAttributes: contextAttributesList
+          contextAttributes: contextAttributesList,
+          filters: this.metadata.filter
         })
           .then(response => {
             this.loadChartMetrics(response)

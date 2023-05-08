@@ -17,7 +17,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <template>
   <div class="main-express-receipt">
     <el-card shadow="never">
-      {{ data }}
       <el-row
         v-for="(dashboardAttributes, index) in list"
         :key="index"
@@ -32,11 +31,48 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           :xl="{ span: 24 }"
           style="padding-right:8px;margin-bottom:2px;"
         >
-          <dashboard
-            :metadata="dashboardAttributes"
-            :title="dashboardAttributes.name"
-            :main="true"
-          />
+          <el-collapse accordion>
+            <el-collapse-item name="1">
+              <template slot="title">
+                <span style="font-size: 18px">
+                  {{ dashboardAttributes.name }} <svg-icon icon-class="chart" />
+                </span>
+              </template>
+              <el-collapse v-if="!isEmptyValue(dashboardAttributes.parameters)" accordion>
+                <el-collapse-item name="1">
+                  <template slot="title">
+                    <span style="font-size: 18px">
+                      {{ $t('component.dashboard.unsupported.parameters') }} <svg-icon icon-class="filter" />
+                    </span>
+                  </template>
+                  <span
+                    v-for="(params, key) in dashboardAttributes.parameters"
+                    :key="key"
+                  >
+                    <el-form
+                      :inline="true"
+                      label-position="top"
+                      @submit.native.prevent="notSubmitForm"
+                    >
+                      <parameters
+                        :key="key"
+                        :metadata="params"
+                        :dashboard-id="dashboardAttributes.id"
+                      />
+                    </el-form>
+                  </span>
+                </el-collapse-item>
+              </el-collapse>
+              <chart
+                :metadata="{
+                  ...dashboardAttributes,
+                  filter: parameters
+                }"
+                :title="''"
+                :main="false"
+              />
+            </el-collapse-item>
+          </el-collapse>
         </el-col>
       </el-row>
     </el-card>
@@ -53,6 +89,7 @@ import {
 
 // import lang from '@/lang'
 import store from '@/store'
+import router from '@/router'
 // import router from '@/router'
 
 // Api Request Methods
@@ -61,16 +98,18 @@ import store from '@/store'
 // } from '@/api/ADempiere/form/expresMovement.js'
 
 // Component and Mixin
-import Dashboard from '@theme/components/ADempiere/Dashboard/index.vue'
+import chart from './component/chart.vue'
+import Parameters from './component/Parameters.vue'
 // Utils and Helper Methods
-// import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere'
 // import { showMessage } from '@/utils/ADempiere/notification'
 // import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'RecordDashboard',
   components: {
-    Dashboard
+    chart,
+    Parameters
   },
   setup(props, { root, refs }) {
     /**
@@ -83,6 +122,24 @@ export default defineComponent({
     const list = computed(() => {
       return store.getters.getListDashboard
     })
+
+    const parameters = computed(() => {
+      // const { parameters } = list.value
+      const currentRoute = router.app._route
+      const values = store.getters.getValuesView({
+        containerUuid: currentRoute.meta.uuid + 'Parameters',
+        format: 'array'
+      }).map(params => {
+        return {
+          ...params,
+          key: params.columnName
+        }
+      })
+      const paramsList = values.filter(params => !isEmptyValue(params.key) &&
+        !isEmptyValue(params.value) &&
+        !isEmptyValue(params.columnName))
+      return paramsList
+    })
     /**
     * Methods
     */
@@ -91,7 +148,8 @@ export default defineComponent({
       // Refs
       data,
       // Computed
-      list
+      list,
+      parameters
       // Methods
     }
   }
