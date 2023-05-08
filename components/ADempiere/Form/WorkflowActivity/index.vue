@@ -515,15 +515,15 @@ export default {
     activityList() {
       const list = this.$store.getters.getActivity
       if (!this.isEmptyValue(list)) {
-        const alo = list.map(a => {
-          const index = a.workflow_process.text_message.search(':')
-          const qlq = a.workflow_process.text_message.slice(0, index)
+        const workflowList = list.map(nodo => {
+          const index = nodo.workflow_process.text_message.search(':')
+          const summaryText = nodo.workflow_process.text_message.slice(0, index)
           return {
-            ...a,
-            summary: a.zoom_windows[0].description + ' ' + qlq
+            ...nodo,
+            summary: nodo.zoom_windows[0].description + ' ' + summaryText
           }
         })
-        return alo.filter(activity => !this.isEmptyValue(activity.uuid))
+        return workflowList.filter(activity => !this.isEmptyValue(activity.uuid))
       }
       return []
     },
