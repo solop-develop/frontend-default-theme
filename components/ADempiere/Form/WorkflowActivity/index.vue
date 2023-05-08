@@ -514,7 +514,6 @@ export default {
     },
     activityList() {
       const list = this.$store.getters.getActivity
-      console.log({ list })
       if (!this.isEmptyValue(list)) {
         const alo = list.map(a => {
           const index = a.workflow_process.text_message.search(':')
