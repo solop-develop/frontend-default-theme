@@ -190,6 +190,7 @@
             :label="workflowColumn.name"
             :align="workflowColumn.isNumeric ? 'right' : 'left'"
             :prop="workflowColumn.columnName"
+            :width="workflowColumn.width"
           />
         </el-table>
         <custom-pagination
@@ -223,7 +224,7 @@
     <el-main class="main" style="padding-left: 1%;padding-right: 1%;">
       <el-container style="height: 100%;">
         <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
-          <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%' : 'height: 20%'">
+          <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 65%' : 'height: 10%'">
             <div slot="header" class="clearfix">
               {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
               <!-- {{ 'Diagrama del Flujo de Trabajo' }} -->
@@ -239,11 +240,73 @@
               :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
             />
           </el-card>
+          <el-card id="logsWorkflow" class="box-card" style="padding-left: 1%;padding-right: 1%;overflow: auto;">
+            <el-form v-show="!isEmptyValue(currentActivity)" :inline="true" class="demo-form-inline">
+              <el-row :gutter="24">
+                <el-col :span="8" style="text-align: center;">
+                  <el-form-item label="Reenviar">
+                    <el-switch v-model="chooseOption" @change="changeOption" />
+                  </el-form-item>
+                </el-col>
+
+                <el-col v-show="isValidateUserChoice" :span="8" style="text-align: center;">
+                  <el-form-item :label="$t('form.workflowActivity.filtersSearch.approve')">
+                    <el-switch v-model="isProved" />
+                  </el-form-item>
+                </el-col>
+
+                <el-col v-show="chooseOption" :span="8" style="text-align: center;">
+                  <el-form-item :label="$t('form.workflowActivity.filtersSearch.user')">
+                    <el-select
+                      v-if="chooseOption"
+                      v-model="userId"
+                      @visible-change="findSalesReps"
+                    >
+                      <el-option
+                        v-for="item in listSalesReps"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+
+            <v-md-editor v-model="message" />
+
+            <el-button
+              type="primary"
+              class="button-base-icon"
+              icon="el-icon-check"
+              style="float: right;"
+              @click="sendOPeration()"
+            />
+            <el-button
+              type="primary"
+              icon="el-icon-zoom-in"
+              :alt="$t('page.processActivity.zoomIn')"
+              plain
+              style="float: right; margin-right: 5px; margin-left: 0px;"
+              class="button-base-icon"
+              @click="zoomRecord(currentActivity)"
+            />
+            <el-button
+              type="info"
+              class="button-base-icon"
+              plain
+              style="float: right; margin-right: 5px;"
+              @click="clearMessage()"
+            >
+              <svg-icon icon-class="layers-clear" />
+            </el-button>
+          </el-card>
         </el-main>
       </el-container>
     </el-main>
 
-    <el-footer :style="isStyleFooter">
+    <!-- <el-footer :style="isStyleFooter">
       <el-card id="logsWorkflow" class="box-card" style="padding-left: 1%;padding-right: 1%;overflow: auto;">
         <el-form v-show="!isEmptyValue(currentActivity)" :inline="true" class="demo-form-inline">
           <el-row :gutter="24">
@@ -306,7 +369,7 @@
           <svg-icon icon-class="layers-clear" />
         </el-button>
       </el-card>
-    </el-footer>
+    </el-footer> -->
   </el-container>
 </template>
 
@@ -376,17 +439,20 @@ export default {
         {
           columnName: 'node.priority',
           name: this.$t('form.workflowActivity.table.priority'),
-          isNumeric: true
+          isNumeric: true,
+          width: 250
         },
         {
           columnName: 'node.name',
           name: this.$t('form.workflowActivity.table.node'),
-          isNumeric: false
+          isNumeric: false,
+          width: 'auto'
         },
         {
           columnName: 'summary',
           name: this.$t('report.summary'),
-          isNumeric: false
+          isNumeric: false,
+          width: 'auto'
         }
       ],
       currentSalesReps: '',
