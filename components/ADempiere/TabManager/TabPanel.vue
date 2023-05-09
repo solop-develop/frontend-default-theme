@@ -246,10 +246,13 @@ export default defineComponent({
     const currentRecord = list.find(row => {
       return row.UUID === recordUuid.value
     })
-    store.dispatch('panelInfo', {
-      currentTab: currentTab.value,
-      currentRecord
-    })
+
+    if (currentTab.value.isParentTab) {
+      store.dispatch('panelInfo', {
+        currentTab: currentTab.value,
+        currentRecord
+      })
+    }
 
     if (props.tabAttributes.isParentTab) {
       store.dispatch('changeTabAttribute', {
