@@ -28,21 +28,21 @@
       id="multipleTable"
       ref="multipleTable"
       v-loading="!isLoadingDataTale"
-      :border="true"
+      :data="recordsWithFilter"
       :height="sizeViewTable"
+      highlight-current-row
       :row-key="keyColumn"
       reserve-selection
-      highlight-current-row
-      :data="recordsWithFilter"
+      :border="true"
       size="small"
-      :element-loading-text="$t('notifications.loading')"
       element-loading-background="rgba(255, 255, 255, 0.8)"
+      :element-loading-text="$t('notifications.loading')"
       :row-class-name="tableRowClassName"
-      @row-click="handleRowClick"
       @row-dblclick="handleRowDblClick"
-      @cell-click="handleCellClick"
-      @select="handleSelection"
       @select-all="handleSelectionAll"
+      @cell-click="handleCellClick"
+      @row-click="handleRowClick"
+      @select="handleSelection"
     >
       <!-- column with the checkbox -->
       <el-table-column
@@ -92,15 +92,23 @@
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, onUpdated, onBeforeMount, ref, watch } from '@vue/composition-api'
+import {
+  defineComponent,
+  onBeforeMount,
+  onMounted,
+  onUpdated,
+  computed,
+  watch,
+  ref
+} from '@vue/composition-api'
 
 import store from '@/store'
 
 // Components and Mixins
-import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
-import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
-import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
+import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
+import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
+import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // Utils and Helper Methods
@@ -110,9 +118,9 @@ export default defineComponent({
   name: 'WindowsTable',
 
   components: {
-    CellEditInfo,
     ColumnsDisplayOption,
     FullScreenContainer,
+    CellEditInfo,
     LoadingView
   },
 
@@ -163,7 +171,21 @@ export default defineComponent({
   },
 
   setup(props) {
+
+    const attributeName = 'isShowedTableRecords'
+    
+    const action = 'changeTabAttribute'
+
+    /**
+     * Refs
+     * isChangeOptions
+     * multipleTable
+     * heightTable
+     * heightSize
+     */
+    
     const multipleTable = ref(null)
+
 
     const {
       storedWindow
@@ -178,6 +200,22 @@ export default defineComponent({
     const panelMain = document.getElementById('mainWindowDataTable')
     const heightSize = ref()
     const currentRowSelect = ref({})
+
+    /**
+    * Computed
+    * currentTabChildren
+    * isLoadingDataTale
+    * recordsWithFilter
+    * currentRowSelect
+    * selectionsList
+    * sizeViewTable
+    * currentOption
+    * defaultSize
+    * headerList
+    * keyColumn
+    * isMobile
+    * tabData
+    */
 
     const isLoadingDataTale = computed(() => {
       return store.getters.getIsLoadedTabRecord({
@@ -197,26 +235,18 @@ export default defineComponent({
     })
 
     const headerList = computed(() => {
-      // const showMinimalistView = store.getters.getTableOption(props.containerUuid)
-      // if (lang.t('table.dataTable.showMinimalistView') === showMinimalistView) {
       return props.header.filter(fieldItem => {
-        // validate with container manager
         if (props.containerManager.isDisplayedColumn(fieldItem)) {
           const isMandatoryGenerated = props.containerManager.isMandatoryColumn(fieldItem)
           const isDisplayedDefault = props.containerManager.isDisplayedDefaultTable({
             ...fieldItem,
             isMandatory: isMandatoryGenerated
           })
-          // madatory, not parent column and without default value to window, mandatory or with default value to others
           if (isDisplayedDefault) {
             return true
           }
-          // showed by user
           return fieldItem.isShowedTableFromUser
         }
-
-        //     fieldItem.displayType !== BUTTON.id &&
-        //     tableColumnDataType(fieldItem, currentOption.value) &&
         return false
       })
     })
@@ -281,12 +311,99 @@ export default defineComponent({
       return 'auto'
     })
 
+    const recordsWithFilter = computed(() => {
+      if (props.containerManager && props.containerManager.getRecordsList) {
+        return props.containerManager.getRecordsList({
+          containerUuid: props.containerUuid
+        })
+      }
+      return props.dataTable
+    })
+
+    const currentTabChildren = computed(() => {
+      const currentTab = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+      if (!isEmptyValue(currentTab) && !currentTab.isParentTab) {
+        const record = store.getters.getTabCurrentRow({
+          containerUuid: props.containerUuid
+        })
+        return record
+      }
+      return {}
+    })
+
+    /**
+     * Methods
+     * handleSelectionAll 
+     * handleRowDblClick
+     * tableRowClassName
+     * handleRowDblClick
+     * toggleSelection
+     * handleCellClick
+     * handleRowClick
+     * adjustSize
+     * changeTable
+     * loadSelect
+     * loadHeight
+     */
+
+    /**
+     * Handle Selection All
+     * @param {object} selections 
+     */
+
+    function handleSelectionAll(selections) {
+      props.containerManager.setSelection({
+        containerUuid: props.containerUuid,
+        recordsSelected: selections
+      })
+    }
+
+    /**
+     * To confirm edit record row
+     * @param {object} row
+     * @param {string} column
+     */
+     function handleRowDblClick(row, column) {
+      // disable edit mode
+
+      const currentTab = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+
+      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      if (recordUuid !== row.UUID && currentTab.isParentTab) {
+        // props.containerManager.seekRecord({
+        //   parentUuid: props.parentUuid,
+        //   containerUuid: props.containerUuid,
+        //   row
+        // })
+        props.containerManager.setSelection({
+          containerUuid: props.containerUuid,
+          recordsSelected: []
+        })
+      }
+      changeTable(false)
+
+      if (props.containerManager.confirmRowChanges && row.isSelectedRow && row.isEditRow) {
+        row.isEditRow = false
+        props.containerManager.confirmRowChanges({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          row
+        })
+      }
+    }
+
     /**
      * Select record row
      * @param {object} row
      * @param {string} column
      */
-    function handleRowClick(row, column, event) {
+     function handleRowClick(row, column, event) {
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
@@ -311,13 +428,7 @@ export default defineComponent({
       })
 
       if (isMobile.value) {
-        store.dispatch('changeTabAttribute', {
-          attributeName: 'isShowedTableRecords',
-          attributeNameControl: undefined,
-          attributeValue: false,
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
+        changeTable(false)
       }
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
@@ -327,85 +438,29 @@ export default defineComponent({
     }
 
     /**
-     * To confirm edit record row
-     * @param {object} row
-     * @param {string} column
+     * Table Row Class Name
+     * @param {object} params 
      */
-    function handleRowDblClick(row, column, event) {
-      // disable edit mode
 
-      const currentTab = store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
-
+    function tableRowClassName(params) {
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      if (recordUuid !== row.UUID && currentTab.isParentTab) {
-        // props.containerManager.seekRecord({
-        //   parentUuid: props.parentUuid,
-        //   containerUuid: props.containerUuid,
-        //   row
-        // })
-        props.containerManager.setSelection({
-          containerUuid: props.containerUuid,
-          recordsSelected: []
-        })
+      if (params.row.UUID === recordUuid && isEmptyValue(currentRowSelect.value)) {
+        return 'success-row'
       }
-
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isShowedTableRecords',
-        attributeNameControl: undefined,
-        attributeValue: false,
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-
-      if (props.containerManager.confirmRowChanges && row.isSelectedRow && row.isEditRow) {
-        row.isEditRow = false
-        props.containerManager.confirmRowChanges({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
-          row
-        })
-      }
+      return ''
     }
 
-    // get table data
-    const recordsWithFilter = computed(() => {
-      if (props.containerManager && props.containerManager.getRecordsList) {
-        return props.containerManager.getRecordsList({
-          containerUuid: props.containerUuid
-        })
-      }
-      return props.dataTable
-    })
-
-    const currentTabChildren = computed(() => {
-      const currentTab = store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
-      if (!isEmptyValue(currentTab) && !currentTab.isParentTab) {
-        const record = store.getters.getTabCurrentRow({
-          containerUuid: props.containerUuid
-        })
-        return record
-      }
-      return {}
-    })
+    /**
+     * Handle Selection
+     * @param {array} selections 
+     * @param {object} rowSelected 
+     */
 
     function handleSelection(selections, rowSelected) {
       let index = 0
       rowSelected.isSelectedRow = !rowSelected.isSelectedRow
       rowSelected.rowSelectedIndex = index++
       rowSelected.isEditRow = rowSelected.isSelectedRow // edit record if is selected
-      props.containerManager.setSelection({
-        containerUuid: props.containerUuid,
-        recordsSelected: selections
-      })
-    }
-
-    function handleSelectionAll(selections) {
       props.containerManager.setSelection({
         containerUuid: props.containerUuid,
         recordsSelected: selections
@@ -429,46 +484,15 @@ export default defineComponent({
       }
     }
 
-    function tableRowClassName(params) {
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      if (params.row.UUID === recordUuid && isEmptyValue(currentRowSelect.value)) {
-        return 'success-row'
-      }
-      return ''
-    }
-
-    function adjustSize() {
-      if (!isEmptyValue(panelMain) && !isEmptyValue(panelMain.clientHeight)) {
-        const size = parseInt(panelMain.clientHeight) / 2
-        if (recordsWithFilter.value.length < 5) {
-          heightTable.value = 'auto'
-          return
-        }
-        heightTable.value = size
-      }
-    }
-
-    function loadSelect() {
-      clearTimeout(timeOut.value)
-      timeOut.value = setTimeout(() => {
-        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList.value)) {
-          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-          props.containerManager.setSelection({
-            containerUuid: props.containerUuid,
-            recordsSelected: [currentRow]
-          })
-          toggleSelection([currentRow])
-        }
-        if (!isEmptyValue(selectionsList.value)) {
-          toggleSelection(selectionsList.value)
-        }
-      }, 100)
-    }
-
+    /**
+     * Handle Cell Click
+     * @param {object} row 
+     * @param {object} column 
+     * @param {object} cell 
+     * @param {*} event 
+     */
     function handleCellClick(row, column, cell, event) {
       if (column.type === 'selection') {
-        // does not make the row editable if the checkbox is selected
         return
       }
 
@@ -497,6 +521,75 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Adjust Size
+     */
+
+    function adjustSize() {
+      if (!isEmptyValue(panelMain) && !isEmptyValue(panelMain.clientHeight)) {
+        const size = parseInt(panelMain.clientHeight) / 2
+        if (recordsWithFilter.value.length < 5) {
+          heightTable.value = 'auto'
+          return
+        }
+        heightTable.value = size
+      }
+    }
+
+    /**
+     * Change Table
+     * @param {boolean} change 
+     */
+
+    function changeTable(change) {
+      store.dispatch(action, {
+        attributeName: attributeName,
+        attributeNameControl: undefined,
+        attributeValue: change,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+    }
+
+    /**
+     * Load Select
+     */
+
+    function loadSelect() {
+      clearTimeout(timeOut.value)
+      timeOut.value = setTimeout(() => {
+        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList.value)) {
+          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+          props.containerManager.setSelection({
+            containerUuid: props.containerUuid,
+            recordsSelected: [currentRow]
+          })
+          toggleSelection([currentRow])
+        }
+        if (!isEmptyValue(selectionsList.value)) {
+          toggleSelection(selectionsList.value)
+        }
+      }, 100)
+    }
+
+    /**
+     * Load Height
+     * @param {boolean} newValue 
+     */
+
+    function loadHeight(newValue) {
+      setTimeout(() => {
+        changeTable(newValue)
+      }, 90)
+    }
+
+    /**
+     * Watch - watch works directly on a ref
+     * @param newValue - New Assessed Property value
+     * @param oldValue - Old Assessed Property value
+     */
+
     watch(currentTabChildren, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         loadSelect()
@@ -517,6 +610,7 @@ export default defineComponent({
         toggleSelection(selectionsList.value)
         return
       }
+      changeTable(!newValue)
       if (newValue) {
         const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
         let currentRow
@@ -528,6 +622,7 @@ export default defineComponent({
         }
         currentRowSelect.value = currentRow
         toggleSelection([currentRow])
+        loadHeight(newValue)
       }
     })
 
@@ -559,8 +654,12 @@ export default defineComponent({
       loadSelect()
     })
 
+    /**
+     * Mounted 
+     * Registers a callback to be called after the component has been mounted
+     */
+
     onMounted(() => {
-      // adjustSize()
       if (props.isTableSelection) {
         if (!isEmptyValue(selectionsList.value)) {
           toggleSelection(selectionsList.value)
@@ -585,31 +684,33 @@ export default defineComponent({
 
     return {
       // Refs
-      multipleTable,
       isChangeOptions,
+      multipleTable,
       heightTable,
       heightSize,
       // Computeds
-      headerList,
+      currentTabChildren,
       isLoadingDataTale,
       recordsWithFilter,
-      currentOption,
-      keyColumn,
-      tabData,
-      defaultSize,
-      sizeViewTable,
-      isMobile,
       currentRowSelect,
-      currentTabChildren,
       selectionsList,
+      sizeViewTable,
+      currentOption,
+      defaultSize,
+      headerList,
+      keyColumn,
+      isMobile,
+      tabData,
       // Methods
-      adjustSize,
+      handleSelectionAll,
       tableRowClassName,
-      handleRowClick,
       handleRowDblClick,
       handleSelection,
-      handleSelectionAll,
-      handleCellClick
+      handleCellClick,
+      handleRowClick,
+      changeTable,
+      adjustSize,
+      loadHeight
     }
   }
 })
