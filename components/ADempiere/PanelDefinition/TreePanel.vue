@@ -28,15 +28,19 @@
           suffix-icon="el-icon-search"
         />
 
+        <!-- draggable
+        :allow-drop="allowDrop"
+        :allow-drag="allowDrag" -->
         <el-tree
           ref="treePanel"
-          :data="nodesList"
+          :data="storedTreeNodes"
           :props="defaultProps"
           node-key="record_uuid"
           :filter-node-method="filterNode"
           highlight-current
           :default-expanded-keys="expandedTree"
           @node-click="handleNodeClick"
+          @node-drag-end="handleDragEnd"
         />
       </div>
     </el-col>
@@ -75,7 +79,6 @@ import router from '@/router'
 import store from '@/store'
 
 // API Request Methods
-import { requestListTreeNodes } from '@/api/ADempiere/user-interface/component/tree-trab'
 import { getEntity } from '@/api/ADempiere/user-interface/persistence'
 
 // Constants
@@ -117,9 +120,19 @@ export default defineComponent({
 
   setup(props) {
     const treePanel = ref(null)
-    const nodesList = ref([])
     const filterValue = ref('')
     const nodeName = 'name'
+
+    const storedTreeNodes = computed({
+      set(newNodes) {
+        console.log('newNodes', newNodes)
+      },
+      get() {
+        return store.getters.getStoredTreeNodes({
+          containerUuid: props.containerUuid
+        }).recordsList
+      }
+    })
 
     const defaultProps = {
       children: 'childs',
@@ -182,6 +195,15 @@ export default defineComponent({
 
     function handleNodeClick(nodeData) {
       setRecord(nodeData.record_uuid)
+    }
+
+    function handleDragEnd(draggingNode, dropNode, dropType, ev) {
+      console.log('tree drag end: ', {
+        draggingNode,
+        dropNode,
+        dropType,
+        ev
+      })
     }
 
     async function getRowValues(recordUuid) {
@@ -278,11 +300,10 @@ export default defineComponent({
     }
 
     function loadData() {
-      requestListTreeNodes({
-        tableName: panelMetadata.value.tableName,
-        elementId: elementId.value
-      }).then(response => {
-        nodesList.value = response.recordsList
+      store.dispatch('getTreeNodesFromServer', {
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+        // nodeId
       }).finally(() => {
         treePanel.value.setCurrentKey(recordUuid.value)
       })
@@ -295,13 +316,16 @@ export default defineComponent({
       return data[nodeName].toLowerCase().indexOf(value.toLowerCase()) !== -1
     }
 
-    loadData()
+    // loadData()
+    setTimeout(() => {
+      treePanel.value.setCurrentKey(recordUuid.value)
+    }, 500)
 
     return {
       treePanel,
       filterValue,
       defaultProps,
-      nodesList,
+      storedTreeNodes,
       // computeds
       elementId,
       expandedTree,
@@ -309,6 +333,7 @@ export default defineComponent({
       recordUuid,
       // methods
       handleNodeClick,
+      handleDragEnd,
       filterNode
     }
   }
