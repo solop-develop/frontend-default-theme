@@ -303,7 +303,7 @@ export default defineComponent({
    * Computed
    */
     const listProdcut = computed(() => {
-      return store.getters.getListProduct
+      return store.getters.getListProductShipment
     })
     const productdeliveryList = computed(() => {
       return store.getters.getListShipmentLines
