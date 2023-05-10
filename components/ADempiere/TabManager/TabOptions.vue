@@ -21,10 +21,11 @@
     <el-button
       plain
       size="small"
-      type="text"
+      type="primary"
+      style="margin-right: 2px;"
       @click="changeShowedRecords"
     >
-      <span style="padding: 10px;">
+      <span style="padding: 0px;">
         <svg-icon icon-class="table" />
         <b v-show="!isMobile">
           {{ label }}

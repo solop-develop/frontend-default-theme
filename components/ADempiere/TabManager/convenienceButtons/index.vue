@@ -26,7 +26,11 @@
       class="new-record-button"
       @click="newRecord()"
     >
-      {{ $t('actionMenu.new') }}
+      <!-- {{ $t('actionMenu.new') }} -->
+      <svg-icon icon-class="newRecord" />
+      <span v-if="!isMobile">
+        {{ $t('actionMenu.new') }}
+      </span>
     </el-button>
 
     <el-button
@@ -37,7 +41,10 @@
       class="undo-changes-button"
       @click="undoChanges()"
     >
-      {{ $t('actionMenu.undo') }}
+      <span v-if="!isMobile">
+        {{ $t('actionMenu.undo') }}
+      </span>
+      <svg-icon icon-class="undo" />
     </el-button>
 
     <el-button
@@ -48,7 +55,11 @@
       class="undo-changes-button"
       @click="refreshCurrentRecord()"
     >
-      {{ $t('actionMenu.refresh') }}
+      <!-- {{ $t('actionMenu.refresh') }} -->
+      <span v-if="!isMobile">
+        {{ $t('actionMenu.refresh') }}
+      </span>
+      <svg-icon icon-class="refresh" />
     </el-button>
 
     <el-popover
@@ -94,7 +105,11 @@
         class="delete-record-button"
         @click="focusConfirmDelete()"
       >
-        {{ $t('actionMenu.delete') }}
+        <span v-if="!isMobile">
+          {{ $t('actionMenu.delete') }}
+        </span>
+        <svg-icon icon-class="delete" />
+        <!-- {{ $t('actionMenu.delete') }} -->
       </el-button>
     </el-popover>
 
@@ -108,7 +123,11 @@
       class="undo-changes-button"
       @click="saveChanges()"
     >
-      {{ $t('actionMenu.save') }}
+      <!-- {{ $t('actionMenu.save') }} -->
+      <span v-if="!isMobile">
+        {{ $t('actionMenu.delete') }}
+      </span>
+      <svg-icon icon-class="save-AD" />
     </el-button>
 
     <document-action
@@ -184,6 +203,10 @@ export default defineComponent({
     })
     const recordParentTab = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
+    })
+
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
     })
 
     const listOfRecordsToDeleted = computed(() => {
@@ -481,6 +504,7 @@ export default defineComponent({
       isVisibleConfirmDelete,
       isSaveRecordLoading,
       // computed
+      isMobile,
       recordUuid,
       selectionsRecords,
       isCreateRecord,
