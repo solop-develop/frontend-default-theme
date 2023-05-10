@@ -27,10 +27,10 @@
       @click="newRecord()"
     >
       <!-- {{ $t('actionMenu.new') }} -->
-      <svg-icon icon-class="newRecord" />
       <span v-if="!isMobile">
         {{ $t('actionMenu.new') }}
       </span>
+      <svg-icon icon-class="newRecord" />
     </el-button>
 
     <el-button
@@ -125,7 +125,7 @@
     >
       <!-- {{ $t('actionMenu.save') }} -->
       <span v-if="!isMobile">
-        {{ $t('actionMenu.delete') }}
+        {{ $t('actionMenu.save') }}
       </span>
       <svg-icon icon-class="save-AD" />
     </el-button>
