@@ -41,21 +41,45 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 v-for="(header, key) in headersPayments"
                 :key="key"
                 :align="header.align"
-                :width="header.width"
+                :min-width="isCellInput(header) ? '225' : '125'"
                 :label="header.label"
               >
                 <template slot-scope="scope">
                   <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
                     {{ scope.row[header.columnName].name }}
                   </span>
-                  <span v-else-if="header.columnName === 'applied'">
+                  <span v-else-if="isCellInput(header)">
                     <el-input-number
                       v-model="scope.row[header.columnName]"
                       controls-position="right"
                     />
                   </span>
                   <span v-else>
-                    {{ scope.row[header.columnName] }}
+                    <p
+                      v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
+                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                    >
+                      {{ scope.row[header.columnName] }}
+                    </p>
+                    <p
+                      v-else
+                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                    >
+                      <el-popover
+                        placement="top-start"
+                        trigger="hover"
+                        width="300"
+                      >
+                        {{ scope.row[header.columnName] }}
+                        <p
+                          slot="reference"
+                          type="text"
+                          style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                        >
+                          {{ scope.row[header.columnName] }}
+                        </p>
+                      </el-popover>
+                    </p>
                   </span>
                 </template>
               </el-table-column>
@@ -85,27 +109,45 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 :key="key"
                 prop="id"
                 :align="header.align"
-                :width="header.width"
+                :min-width="isCellInput(header) ? '225' : '125'"
                 :label="header.label"
               >
                 <template slot-scope="scope">
                   <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
                     {{ scope.row[header.columnName].name }}
                   </span>
-                  <span v-else-if="header.columnName === 'writeOff'">
-                    <el-input-number
-                      v-model="scope.row[header.columnName]"
-                      controls-position="right"
-                    />
-                  </span>
-                  <span v-else-if="header.columnName === 'applied'">
+                  <span v-else-if="isCellInput(header)">
                     <el-input-number
                       v-model="scope.row[header.columnName]"
                       controls-position="right"
                     />
                   </span>
                   <span v-else>
-                    {{ scope.row[header.columnName] }}
+                    <p
+                      v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
+                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                    >
+                      {{ scope.row[header.columnName] }}
+                    </p>
+                    <p
+                      v-else
+                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                    >
+                      <el-popover
+                        placement="top-start"
+                        trigger="hover"
+                        width="300"
+                      >
+                        {{ scope.row[header.columnName] }}
+                        <p
+                          slot="reference"
+                          type="text"
+                          style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                        >
+                          {{ scope.row[header.columnName] }}
+                        </p>
+                      </el-popover>
+                    </p>
                   </span>
                 </template>
               </el-table-column>
@@ -401,25 +443,20 @@ export default defineComponent({
       const appliedPay = sumPayments - payment.open_amount
       console.log({ selectListPayments: selectListPayments.value, payment, invocesTypetransaction, appliedPayments, appliedPay })
     }
-    // toggleSelection([currentRow])
-    // console.log(listInvocesTable.value)
 
-    // function toggleSelection(array, ref) {
-    //   if (isEmptyValue(ref.value)) return
-    //   console.log({ array, ref }, ref.value)
-    //   console.log({ data: ref.value.data })
-    //   ref.value.data.forEach(attribute => {
-    //     if (attribute.isSelect) {
-    //       ref.value.toggleRowSelection(attribute)
-    //     }
-    //   })
-    // }
-
-    // onUpdated(() => {
-    //   toggleSelection(selectListPayments.value, listPaymentsTable)
-    //   toggleSelection(selectListInvoces.value, listInvocesTable)
-    //   console.log(listPaymentsTable.value)
-    // })
+    function isCellInput(cell) {
+      const { columnName } = cell
+      let isInput = false
+      switch (columnName) {
+        case 'writeOff':
+          isInput = true
+          break
+        case 'applied':
+          isInput = true
+          break
+      }
+      return isInput
+    }
 
     return {
       // Const
@@ -449,6 +486,7 @@ export default defineComponent({
       remoteSearchCharges,
       findOrganizations,
       // toggleSelection,
+      isCellInput,
       findCharges,
       findFilter
     }
@@ -475,6 +513,15 @@ export default defineComponent({
       padding-left: 0px !important;
       height: 100%!important;
     }
+  }
+  .el-table .cell {
+    word-break: break-all;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 12px;
   }
 </style>
 <style>
