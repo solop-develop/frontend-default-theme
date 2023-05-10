@@ -26,10 +26,10 @@
       @click="changeShowedRecords"
     >
       <span style="padding: 0px;">
-        <svg-icon icon-class="table" />
         <b v-show="!isMobile">
           {{ label }}
         </b>
+        <svg-icon icon-class="table" />
       </span>
     </el-button>
     <change-record
