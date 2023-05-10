@@ -71,6 +71,19 @@
 
     <div :style="sizeBadgeRight">
       <el-button
+        v-if="isMobile"
+        plain
+        size="medium"
+        type="primary"
+        circle
+        @click="openRecordLogs('getRecordLogs')"
+      >
+        <i
+          class="el-icon-arrow-left"
+        />
+      </el-button>
+      <el-button
+        v-else
         type="primary"
         size="mini"
         circle
@@ -80,7 +93,7 @@
       </el-button>
 
       <el-button
-        v-show="showAttachmentAvailable"
+        v-show="showAttachmentAvailable && !isMobile"
         type="primary"
         size="mini"
         circle
@@ -89,7 +102,7 @@
       >
         <i class="el-icon-paperclip" />
       </el-button>
-      <el-badge v-show="showReference" :value="countReference" class="item" type="primary">
+      <el-badge v-show="showReference && !isMobile" :value="countReference" class="item" type="primary">
         <el-button
           v-show="showReference"
           type="primary"
@@ -101,7 +114,7 @@
           <i class="el-icon-zoom-in" />
         </el-button>
       </el-badge>
-      <el-badge v-show="showDashboard" :value="countDashboard" class="item" type="primary">
+      <el-badge v-show="showDashboard && !isMobile" :value="countDashboard" class="item" type="primary">
         <el-button
           v-show="showDashboard"
           type="primary"
@@ -113,7 +126,7 @@
           <svg-icon icon-class="dashboard" style="font-size: 18px;" />
         </el-button>
       </el-badge>
-      <el-badge v-show="showIssues" :value="countIssues" class="item" type="primary">
+      <el-badge v-show="showIssues && !isMobile" :value="countIssues" class="item" type="primary">
         <el-button
           v-show="showIssues"
           type="primary"
@@ -125,7 +138,7 @@
           <i class="el-icon-s-promotion" />
         </el-button>
       </el-badge>
-      <el-badge v-show="showChatAvailable" :value="countIsNote" class="item" type="primary">
+      <el-badge v-show="showChatAvailable && !isMobile" :value="countIsNote" class="item" type="primary">
         <el-button
           type="primary"
           size="mini"
@@ -259,7 +272,7 @@ export default defineComponent({
 
     const sizeBadgeRight = computed(() => {
       if (isMobile.value) {
-        return 'width: 1%;height: 100%;position: fixed;right: 5%;top: 45%;z-index: 9;'
+        return 'width: 5%;height: 100%;position: fixed;right: 5%;top: 45%;z-index: 9;'
       }
       return 'width: 1%;height: 100%;position: fixed;right: 1%;top: 45%;z-index: 9;'
     })

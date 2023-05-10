@@ -23,19 +23,26 @@
       plain
       size="small"
       :disabled="disableNextRecord"
+      style="margin-right: 3px;"
       @click="changePreviousRecord()"
     >
-      {{ $t('table.dataTable.previousRecord') }}
+      <i class="el-icon-arrow-up" />
+      <span v-if="!isMobile">
+        {{ $t('table.dataTable.previousRecord') }}
+      </span>
     </el-button>
     <el-button
       type="primary"
       plain
       size="small"
       :disabled="disablePreviousRecord"
-      style="margin-right: 10px;"
+      style="margin-right: 3px;margin-left: 0px"
       @click="changeNextRecord()"
     >
-      {{ $t('table.dataTable.nextRecord') }}
+      <i class="el-icon-arrow-down" />
+      <span v-if="!isMobile">
+        {{ $t('table.dataTable.nextRecord') }}
+      </span>
     </el-button>
   </span>
 </template>
