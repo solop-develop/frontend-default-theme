@@ -169,13 +169,9 @@ export default defineComponent({
       default: false
     }
   },
-
   setup(props) {
-
     const attributeName = 'isShowedTableRecords'
-    
     const action = 'changeTabAttribute'
-
     /**
      * Refs
      * isChangeOptions
@@ -183,10 +179,7 @@ export default defineComponent({
      * heightTable
      * heightSize
      */
-    
     const multipleTable = ref(null)
-
-
     const {
       storedWindow
     } = useFullScreenContainer({
@@ -336,7 +329,7 @@ export default defineComponent({
 
     /**
      * Methods
-     * handleSelectionAll 
+     * handleSelectionAll
      * handleRowDblClick
      * tableRowClassName
      * handleRowDblClick
@@ -351,7 +344,7 @@ export default defineComponent({
 
     /**
      * Handle Selection All
-     * @param {object} selections 
+     * @param {object} selections
      */
 
     function handleSelectionAll(selections) {
@@ -366,7 +359,7 @@ export default defineComponent({
      * @param {object} row
      * @param {string} column
      */
-     function handleRowDblClick(row, column) {
+    function handleRowDblClick(row, column) {
       // disable edit mode
 
       const currentTab = store.getters.getStoredTab(
@@ -403,7 +396,7 @@ export default defineComponent({
      * @param {object} row
      * @param {string} column
      */
-     function handleRowClick(row, column, event) {
+    function handleRowClick(row, column, event) {
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
@@ -439,7 +432,7 @@ export default defineComponent({
 
     /**
      * Table Row Class Name
-     * @param {object} params 
+     * @param {object} params
      */
 
     function tableRowClassName(params) {
@@ -452,8 +445,8 @@ export default defineComponent({
 
     /**
      * Handle Selection
-     * @param {array} selections 
-     * @param {object} rowSelected 
+     * @param {array} selections
+     * @param {object} rowSelected
      */
 
     function handleSelection(selections, rowSelected) {
@@ -486,10 +479,10 @@ export default defineComponent({
 
     /**
      * Handle Cell Click
-     * @param {object} row 
-     * @param {object} column 
-     * @param {object} cell 
-     * @param {*} event 
+     * @param {object} row
+     * @param {object} column
+     * @param {object} cell
+     * @param {*} event
      */
     function handleCellClick(row, column, cell, event) {
       if (column.type === 'selection') {
@@ -538,7 +531,7 @@ export default defineComponent({
 
     /**
      * Change Table
-     * @param {boolean} change 
+     * @param {boolean} change
      */
 
     function changeTable(change) {
@@ -575,7 +568,7 @@ export default defineComponent({
 
     /**
      * Load Height
-     * @param {boolean} newValue 
+     * @param {boolean} newValue
      */
 
     function loadHeight(newValue) {
@@ -655,7 +648,7 @@ export default defineComponent({
     })
 
     /**
-     * Mounted 
+     * Mounted
      * Registers a callback to be called after the component has been mounted
      */
 
