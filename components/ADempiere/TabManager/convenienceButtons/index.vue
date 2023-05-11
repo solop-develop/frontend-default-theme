@@ -26,11 +26,10 @@
       class="new-record-button"
       @click="newRecord()"
     >
-      <!-- {{ $t('actionMenu.new') }} -->
+      <svg-icon icon-class="newRecord" />
       <span v-if="!isMobile">
         {{ $t('actionMenu.new') }}
       </span>
-      <svg-icon icon-class="newRecord" />
     </el-button>
 
     <el-button
@@ -41,10 +40,10 @@
       class="undo-changes-button"
       @click="undoChanges()"
     >
+      <svg-icon icon-class="undo" />
       <span v-if="!isMobile">
         {{ $t('actionMenu.undo') }}
       </span>
-      <svg-icon icon-class="undo" />
     </el-button>
 
     <el-button
@@ -55,11 +54,10 @@
       class="undo-changes-button"
       @click="refreshCurrentRecord()"
     >
-      <!-- {{ $t('actionMenu.refresh') }} -->
+      <svg-icon icon-class="refresh" />
       <span v-if="!isMobile">
         {{ $t('actionMenu.refresh') }}
       </span>
-      <svg-icon icon-class="refresh" />
     </el-button>
 
     <el-popover
@@ -105,11 +103,10 @@
         class="delete-record-button"
         @click="focusConfirmDelete()"
       >
+        <svg-icon icon-class="delete" />
         <span v-if="!isMobile">
           {{ $t('actionMenu.delete') }}
         </span>
-        <svg-icon icon-class="delete" />
-        <!-- {{ $t('actionMenu.delete') }} -->
       </el-button>
     </el-popover>
 
@@ -123,11 +120,10 @@
       class="undo-changes-button"
       @click="saveChanges()"
     >
-      <!-- {{ $t('actionMenu.save') }} -->
+      <svg-icon icon-class="save-AD" />
       <span v-if="!isMobile">
         {{ $t('actionMenu.save') }}
       </span>
-      <svg-icon icon-class="save-AD" />
     </el-button>
 
     <document-action

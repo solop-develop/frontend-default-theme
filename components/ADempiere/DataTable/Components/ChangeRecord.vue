@@ -26,10 +26,10 @@
       style="margin-right: 3px;"
       @click="changePreviousRecord()"
     >
+      <i class="el-icon-arrow-up" />
       <span v-if="!isMobile">
         {{ $t('table.dataTable.previousRecord') }}
       </span>
-      <i class="el-icon-arrow-up" />
     </el-button>
     <el-button
       type="primary"
@@ -39,25 +39,27 @@
       style="margin-right: 3px;margin-left: 0px"
       @click="changeNextRecord()"
     >
+      <i class="el-icon-arrow-down" />
       <span v-if="!isMobile">
         {{ $t('table.dataTable.nextRecord') }}
       </span>
-      <i class="el-icon-arrow-down" />
     </el-button>
   </span>
 </template>
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
 import store from '@/store'
-// constants
+
+// Constants
 import { ROWS_OF_RECORDS_BY_PAGE, NUMBER_RECORDS_PER_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
-  name: 'CustomPagination',
+  name: 'ChangeRecord',
 
   props: {
     parentUuid: {
