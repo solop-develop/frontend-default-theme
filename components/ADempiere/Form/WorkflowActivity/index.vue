@@ -446,7 +446,7 @@ export default {
           columnName: 'node.name',
           name: this.$t('form.workflowActivity.table.node'),
           isNumeric: false,
-          width: 'auto'
+          width: 250
         },
         {
           columnName: 'summary',
