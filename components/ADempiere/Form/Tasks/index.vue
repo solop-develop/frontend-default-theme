@@ -159,7 +159,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-table-column type="expand">
                   <template slot-scope="props">
                     <p v-if="isEmptyValue(props.row.output)" style="text-align: center;">
-                      <el-empty :image-size="250" />
+                      <el-empty :image-size="90" style="margin: 0px;padding: 0px;" />
                     </p>
                     <!-- <p v-else> -->
                     <div v-else id="code" style="background: #282c34;color: #fff;padding: 15px">
