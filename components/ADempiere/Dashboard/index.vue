@@ -18,7 +18,7 @@
 
 <template>
   <el-card
-    v-if="!unsupportedDashboards.includes(metadata.fileName)"
+    v-if="!UNSUPPORTED_DASHBOARDS.includes(metadata.fileName)"
     style="height: auto;"
   >
     <div class="clearfix">
@@ -62,6 +62,9 @@ import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
 
+// Constants
+import { UNSUPPORTED_DASHBOARDS } from '@/utils/ADempiere/dictionary/dashboard'
+
 // Utils and Helper Methods
 import { getChartComponent } from '@/utils/ADempiere/dictionary/dashboard'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -85,13 +88,12 @@ export default defineComponent({
   },
 
   setup(props) {
-    const unsupportedDashboards = ['views', 'performance']
     const activeDashboard = props.metadata.isOpenByDefault ? props.metadata.name : undefined
 
     // load the component that is indicated in the attributes of received property
     const renderDashboard = computed(() => {
       // // TODO: Add support to this list of currently unsupported dashboards
-      // if (unsupportedDashboards.includes(props.metadata.fileName)) {
+      // if (UNSUPPORTED_DASHBOARDS.includes(props.metadata.fileName)) {
       //   return
       // }
       let dashboard = () => import('@theme/components/ADempiere/Dashboard/UnsupportedDashboard')
@@ -139,7 +141,7 @@ export default defineComponent({
     }
 
     return {
-      unsupportedDashboards,
+      UNSUPPORTED_DASHBOARDS,
       activeDashboard,
       // computeds
       renderDashboard,
