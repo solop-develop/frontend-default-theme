@@ -49,15 +49,17 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
 import store from '@/store'
-// constants
+
+// Constants
 import { ROWS_OF_RECORDS_BY_PAGE, NUMBER_RECORDS_PER_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
-  name: 'CustomPagination',
+  name: 'ChangeRecord',
 
   props: {
     parentUuid: {

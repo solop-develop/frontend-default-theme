@@ -76,6 +76,7 @@ import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons/index.vue'
 import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import ChangeRecord from '@theme/components/ADempiere/DataTable/Components/ChangeRecord.vue'
+
 export default defineComponent({
   name: 'TabOptions',
 
