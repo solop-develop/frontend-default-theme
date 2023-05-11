@@ -17,15 +17,25 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <template>
   <div style="height: 85vh">
     <el-card class="box-card" style="margin: 0px 5px;padding: 10px 15px;">
-      <h1 style="margin-left: 10px;">
-        {{ $t('form.tasks.title') }}
-      </h1>
+      <div slot="header" class="clearfix">
+        <h1 style="width: 200px;padding: 0px;margin: 0px 10px;display: contents;">
+          {{ $t('form.tasks.title') }}
+        </h1>
+        <el-button
+          type="primary"
+          icon="el-icon-refresh-left"
+          class="button-base-icon"
+          :disabled="isRun"
+          style="float: right;"
+          @click="restoreJob()"
+        />
+      </div>
       <el-card class="box-card" style="margin: 0px 10px;padding: : 0px 10px;">
         <el-table
           v-if="isEmptyValue(currentJob)"
           :data="list"
           style="width: 100%"
-          @cell-click="SelectJobs"
+          @cell-dblclick="SelectJobs"
         >
           <el-table-column
             v-for="(header, key) in headerList"
@@ -44,12 +54,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </template>
           </el-table-column>
           <el-table-column
-            label="Operaciones"
+            :label="$t('form.tasks.table.options')"
             width="200"
           >
             <template slot-scope="scope">
               <el-button
-                type="primary"
+                type="success"
                 class="button-base-icon"
                 :loading="isRun"
                 :disabled="isRun"
@@ -83,6 +93,14 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-button>
             <el-button
               type="primary"
+              icon="el-icon-refresh-left"
+              class="button-base-icon"
+              style="float: right;"
+              :disabled="isRun"
+              @click="restoreJob(currentJob)"
+            />
+            <el-button
+              type="info"
               class="button-base-icon"
               style="float: right;font-size: 26px;"
               @click="currentJob = {}"
@@ -141,9 +159,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-table-column type="expand">
                   <template slot-scope="props">
                     <p v-if="isEmptyValue(props.row.output)" style="text-align: center;">
-                      <el-empty :image-size="50" />
+                      <el-empty :image-size="250" />
                     </p>
-                    <p v-else>{{ props.row.output }}</p>
+                    <!-- <p v-else> -->
+                    <div v-else id="code" style="background: #282c34;color: #fff;padding: 15px">
+                      {{ $t('form.tasks.empty') }}
+                    </div>
+                    <!-- </p> -->
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -185,6 +207,7 @@ import headerList from './headerList.js'
 import {
   // resumen,
   run,
+  restore,
   listJobs,
   executions
 } from '@/api/ADempiere/form/Tasks.js'
@@ -215,7 +238,6 @@ export default defineComponent({
      */
 
     function SelectJobs(row, column, event) {
-      console.log({ row, column })
       if (column.label === 'Operaciones') return
       currentJob.value = row
     }
@@ -231,7 +253,6 @@ export default defineComponent({
     }
 
     function selectTabs(tab) {
-      console.log({ tab })
       const { name } = tab
       if (name === 'executionsJobs') executionsJobs(currentJob.value.id)
     }
@@ -263,7 +284,6 @@ export default defineComponent({
       })
         .then(response => {
           Jobs()
-          console.log({ response }, 'run')
           isRun.value = false
         })
         .catch(error => {
@@ -271,6 +291,19 @@ export default defineComponent({
           isRun.value = false
         })
     }
+
+    function restoreJob() {
+      restore()
+        .then(response => {
+          Jobs()
+          isRun.value = false
+        })
+        .catch(error => {
+          console.warn({ error })
+          isRun.value = false
+        })
+    }
+
     Jobs()
     /**
      * Action Panel Footer
@@ -290,6 +323,7 @@ export default defineComponent({
       isRun,
       list,
       // Methods
+      restoreJob,
       SelectJobs,
       selectTabs,
       runJob,
