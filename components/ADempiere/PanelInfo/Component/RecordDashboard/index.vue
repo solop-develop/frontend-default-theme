@@ -35,14 +35,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <el-collapse-item name="1">
               <template slot="title">
                 <span style="font-size: 18px">
-                  {{ dashboardAttributes.name }} <svg-icon icon-class="chart" />
+                  <svg-icon icon-class="chart" />
+                  {{ dashboardAttributes.name }}
                 </span>
               </template>
               <el-collapse v-if="!isEmptyValue(dashboardAttributes.parameters)" accordion>
                 <el-collapse-item name="1">
                   <template slot="title">
                     <span style="font-size: 18px">
-                      {{ $t('component.dashboard.unsupported.parameters') }} <svg-icon icon-class="filter" />
+                      <svg-icon icon-class="filter" />
+                      {{ $t('component.dashboard.parameters') }}
                     </span>
                   </template>
                   <span
@@ -87,31 +89,25 @@ import {
   // computed
 } from '@vue/composition-api'
 
-// import lang from '@/lang'
 import store from '@/store'
 import router from '@/router'
-// import router from '@/router'
-
-// Api Request Methods
-// import {
-//   listWarehouses
-// } from '@/api/ADempiere/form/expresMovement.js'
 
 // Component and Mixin
 import chart from './component/chart.vue'
 import Parameters from './component/Parameters.vue'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
-// import { showMessage } from '@/utils/ADempiere/notification'
-// import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'RecordDashboard',
+
   components: {
     chart,
     Parameters
   },
-  setup(props, { root, refs }) {
+
+  setup() {
     /**
     * Ref
     */

@@ -29,19 +29,24 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
 import router from '@/router'
+
+// Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
+
+// Constants
+import { DEFAULT_SIZE, YES_NO } from '@/utils/ADempiere/references.js'
+
 // Utils and Helper Methods
 import { camelizeObjectKeys } from '@/utils/ADempiere/transformObject.js'
 import { getFieldTemplate } from '@/utils/ADempiere/lookupFactory.js'
-// constants
-import { DEFAULT_SIZE, YES_NO } from '@/utils/ADempiere/references.js'
 import {
   evalutateTypeField
 } from '@/utils/ADempiere/dictionaryUtils.js'
 
 export default defineComponent({
-  name: 'Parameters',
+  name: 'DashboardParameters',
 
   components: {
     FieldDefinition
@@ -105,13 +110,14 @@ export default defineComponent({
      * Methods
      */
 
-    function isBoolean(field) {
-      const { displayType } = field
+    function isBoolean({ displayType }) {
       return displayType === YES_NO.id
     }
 
-    function isRange(field) {
-      if (field.isRange) return field.columnName + '_To'
+    function isRange({ isRange, columnName }) {
+      if (isRange) {
+        return columnName + '_To'
+      }
       return ''
     }
 
