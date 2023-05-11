@@ -86,13 +86,12 @@ import {
   defineComponent,
   ref,
   computed
-  // computed
 } from '@vue/composition-api'
 
 import store from '@/store'
 import router from '@/router'
 
-// Component and Mixin
+// Components and Mixins
 import chart from './component/chart.vue'
 import Parameters from './component/Parameters.vue'
 
