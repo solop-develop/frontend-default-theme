@@ -440,13 +440,13 @@ export default {
           columnName: 'node.priority',
           name: this.$t('form.workflowActivity.table.priority'),
           isNumeric: true,
-          width: 250
+          width: 90
         },
         {
           columnName: 'node.name',
           name: this.$t('form.workflowActivity.table.node'),
           isNumeric: false,
-          width: 'auto'
+          width: 250
         },
         {
           columnName: 'summary',

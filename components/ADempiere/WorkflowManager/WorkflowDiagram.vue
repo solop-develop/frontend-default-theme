@@ -67,7 +67,7 @@
         :style="{ position: 'absolute', zIndex: '9999', padding: '10px', left: leftContextualMenu + 'px', top: topContextualMenu + 'px', width: '40% !important;' }"
       >
         <el-collapse
-          accordion
+          v-model="activeCollapse"
           style="padding: 0px;"
         >
           <el-collapse-item name="1" style="padding: 0px;">
@@ -169,6 +169,7 @@ export default {
     const nodeLogs = ref([])
     const topContextualMenu = ref(0)
     const leftContextualMenu = ref(0)
+    const activeCollapse = '1'
 
     function closeNodeInfo() {
       showedInfo.value = false
@@ -203,6 +204,7 @@ export default {
     })
 
     return {
+      activeCollapse,
       showedInfo,
       infoNode,
       nodeLogs,
