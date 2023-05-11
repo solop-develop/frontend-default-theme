@@ -108,6 +108,9 @@ export default {
         case 'VAllocation':
           form = import('@theme/components/ADempiere/Form/VAllocation')
           break
+        case 'tasks':
+          form = import('@theme/components/ADempiere/Form/Tasks')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
