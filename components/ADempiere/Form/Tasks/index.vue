@@ -27,7 +27,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           class="button-base-icon"
           :disabled="isRun"
           style="float: right;"
-          @click="restoreJob()"
+          @click="Jobs"
         />
       </div>
       <el-card class="box-card" style="margin: 0px 10px;padding: : 0px 10px;">
@@ -67,12 +67,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               >
                 <svg-icon v-if="!isRun" icon-class="run" />
               </el-button>
-              <el-button
-                type="danger"
-                icon="el-icon-delete"
-                class="button-base-icon"
-                :disabled="true"
-              />
             </template>
           </el-table-column>
         </el-table>
@@ -97,7 +91,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               class="button-base-icon"
               style="float: right;"
               :disabled="isRun"
-              @click="restoreJob(currentJob)"
+              @click="Jobs"
             />
             <el-button
               type="info"
@@ -150,22 +144,33 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-tab-pane>
             <el-tab-pane :label="$t('form.tasks.executions')" name="executionsJobs">
               <el-table
+                v-loading="isRun"
                 :data="executionsLogs"
                 lazy
-                v-loading="isRun"
                 style="width: 100%"
                 height="60vh"
               >
-                <el-table-column type="expand">
+                <el-table-column
+                  type="expand"
+                >
                   <template slot-scope="props">
-                    <p v-if="isEmptyValue(props.row.output)" style="text-align: center;">
-                      <el-empty :image-size="90" style="margin: 0px;padding: 0px;" />
-                    </p>
-                    <!-- <p v-else> -->
-                    <div v-else id="code" style="background: #282c34;color: #fff;padding: 15px">
-                      {{ $t('form.tasks.empty') }}
-                    </div>
-                    <!-- </p> -->
+                    <!-- {{ props.row.logs }} -->
+                    <el-form v-if="!isEmptyValue(props.row.logs)" label-position="top">
+                      <el-form-item v-if="!isEmptyValue(props.row.logs.summary)" :label="$t('page.processActivity.logs')" style="margin-bottom: 0;">
+                        {{ props.row.logs.summary }}
+                      </el-form-item>
+                      <el-scrollbar v-if="!isEmptyValue(props.row.logs.logs)" wrap-class="popover-scroll">
+                        <el-descriptions class="margin-top" title="Logs" :column="1" border>
+                            <el-descriptions-item
+                              v-for="(item, index) in props.row.logs.logs"
+                              :key="index"
+                              :label="item.record_id"
+                            >
+                              {{ item.log }}
+                            </el-descriptions-item>
+                          </el-descriptions>
+                      </el-scrollbar>
+                    </el-form>
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -214,7 +219,6 @@ import {
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
-// import { showMessage } from '@/utils/ADempiere/notification'
 import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
@@ -264,10 +268,15 @@ export default defineComponent({
         .then(response => {
           if (isEmptyValue(response)) return []
           executionsLogs.value = response.map(list => {
+            const { output, started_at, finished_at } = list
+            const index = output.search('{"id"')
+            const result = output.slice(index, output.length)
+            const logs = (result.length > 5) ? JSON.parse(result) : {}
             return {
               ...list,
-              startDate: dateTimeFormats(list.started_at, 'YYYY-MM-DD \ HH:MM:SS'),
-              finishedDate: dateTimeFormats(list.finished_at, 'YYYY-MM-DD \ HH:MM:SS')
+              startDate: dateTimeFormats(started_at, 'YYYY-MM-DD \ HH:MM:SS'),
+              finishedDate: dateTimeFormats(finished_at, 'YYYY-MM-DD \ HH:MM:SS'),
+              logs
             }
           })
         })
@@ -305,12 +314,6 @@ export default defineComponent({
     }
 
     Jobs()
-    /**
-     * Action Panel Footer
-     */
-    /**
-     * Watch
-     */
     return {
       // Refs
       executionsLogs,
