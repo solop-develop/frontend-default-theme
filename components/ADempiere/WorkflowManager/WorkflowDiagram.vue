@@ -124,6 +124,7 @@
 <script>
 import { ref, computed, watch } from '@vue/composition-api'
 
+import store from '@/store'
 // Components and Mixins
 import VueWorkflowChart from 'vue-workflow-chart'
 
@@ -178,7 +179,7 @@ export default {
     function onLabelClicked(id) {
       infoNode.value = props.nodeList.find(node => node.id === id)
       nodeLogs.value = props.workflowLogs.filter(node => node.node_uuid === infoNode.value.id)
-      const menuMinWidth = 105
+      const menuMinWidth = isMobile.value ? 0 : 105
       const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
       const offsetWidth = this.$el.offsetWidth // container width
       const maxLeft = offsetWidth - menuMinWidth // left boundary
@@ -189,14 +190,25 @@ export default {
         leftContextualMenu.value = maxLeft
       }
 
+      const menutTop = isMobile.value ? 50 : 350
+
       const offsetTop = this.$el.getBoundingClientRect().top
-      const top = event.clientY - offsetTop + 350
+      const top = event.clientY - offsetTop + menutTop
       topContextualMenu.value = top
       showedInfo.value = true
     }
 
     const watchNode = computed(() => {
       return props.nodeList
+    })
+
+    const widthDetails = computed(() => {
+      if (isMobile.value) return 80
+      return 40
+    })
+
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
     })
 
     watch(watchNode, (newValue, oldValue) => {
@@ -210,6 +222,8 @@ export default {
       nodeLogs,
       topContextualMenu,
       leftContextualMenu,
+      widthDetails,
+      isMobile,
       // methods
       closeNodeInfo,
       onLabelClicked,
