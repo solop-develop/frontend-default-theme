@@ -14,6 +14,11 @@ on:
       - README.md
       - README.es.md
 
+  pull_request:
+    paths-ignore:
+      - README.md
+      - README.es.md
+
 jobs:
 
   # Publish docker image in Github Container Registry to application
