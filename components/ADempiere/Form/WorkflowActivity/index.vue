@@ -77,7 +77,7 @@
                 </el-timeline>
               </el-card>
             </el-header>
-            <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
+            <!-- <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
               <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
                 <div slot="header" class="clearfix">
                   {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
@@ -93,8 +93,44 @@
                   :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
                 />
               </el-card>
-            </el-main>
+            </el-main> -->
           </el-container>
+          <el-button
+            style="right: 0%;margin-right: 0px;position: absolute;top: 50%;"
+            type="primary"
+            circle
+            @click="isDiagram = !isDiagram"
+          >
+            <i class="el-icon-arrow-left" style="font-size: 18px;" />
+          </el-button>
+          <el-drawer
+            title="I am the title"
+            :visible.sync="isDiagram"
+            :with-header="false"
+            :show-close="true"
+            size="100%"
+          >
+            <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
+              <div slot="header" class="clearfix">
+                {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
+                <!-- <el-button style="float: right; margin-right: 10px;" type="text" @click="isDiagram = !isDiagram">
+                  <i class="el-icon-close" style="font-size: 18px;" />
+                </el-button> -->
+                <el-button style="float: right; padding: 3px 0" type="text" @click="isDiagram = !isDiagram">
+                  <i class="el-icon-close" style="font-size: 18px;" />
+                </el-button>
+              </div>
+              <workflow-diagram
+                v-if="(!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity))"
+                :node-transition-list="workflowTranstitionsList"
+                :node-list="workflowStatesList"
+                :current-node="currentNode"
+                :orientation="isMobile ? 'vertical' : 'horizontal'"
+                :workflow-logs="listProcessWorkflow"
+                :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
+              />
+            </el-card>
+          </el-drawer>
         </el-main>
       </el-container>
     </div>
@@ -305,71 +341,6 @@
         </el-main>
       </el-container>
     </el-main>
-
-    <!-- <el-footer :style="isStyleFooter">
-      <el-card id="logsWorkflow" class="box-card" style="padding-left: 1%;padding-right: 1%;overflow: auto;">
-        <el-form v-show="!isEmptyValue(currentActivity)" :inline="true" class="demo-form-inline">
-          <el-row :gutter="24">
-            <el-col :span="8" style="text-align: center;">
-              <el-form-item label="Reenviar">
-                <el-switch v-model="chooseOption" @change="changeOption" />
-              </el-form-item>
-            </el-col>
-
-            <el-col v-show="isValidateUserChoice" :span="8" style="text-align: center;">
-              <el-form-item :label="$t('form.workflowActivity.filtersSearch.approve')">
-                <el-switch v-model="isProved" />
-              </el-form-item>
-            </el-col>
-
-            <el-col v-show="chooseOption" :span="8" style="text-align: center;">
-              <el-form-item :label="$t('form.workflowActivity.filtersSearch.user')">
-                <el-select
-                  v-if="chooseOption"
-                  v-model="userId"
-                  @visible-change="findSalesReps"
-                >
-                  <el-option
-                    v-for="item in listSalesReps"
-                    :key="item.id"
-                    :label="item.name"
-                    :value="item.id"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-
-        <v-md-editor v-model="message" />
-
-        <el-button
-          type="primary"
-          class="button-base-icon"
-          icon="el-icon-check"
-          style="float: right;"
-          @click="sendOPeration()"
-        />
-        <el-button
-          type="primary"
-          icon="el-icon-zoom-in"
-          :alt="$t('page.processActivity.zoomIn')"
-          plain
-          style="float: right; margin-right: 5px; margin-left: 0px;"
-          class="button-base-icon"
-          @click="zoomRecord(currentActivity)"
-        />
-        <el-button
-          type="info"
-          class="button-base-icon"
-          plain
-          style="float: right; margin-right: 5px;"
-          @click="clearMessage()"
-        >
-          <svg-icon icon-class="layers-clear" />
-        </el-button>
-      </el-card>
-    </el-footer> -->
   </el-container>
 </template>
 
@@ -426,6 +397,7 @@ export default {
   data() {
     return {
       fieldsList,
+      isDiagram: false,
       collapse: false,
       currentNode: [{
         classname: 'delete',
