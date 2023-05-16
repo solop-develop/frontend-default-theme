@@ -33,10 +33,15 @@
     "tasksfile": "^5.1.1"
   },
   "devDependencies": {
-    "@vue/cli-service": "4.5.13"
+    "@babel/core": "7.12.13",
+    "@babel/eslint-parser": "7.12.13",
+    "eslint": "7.19.0",
+    "eslint-plugin-vue": "6.2.2"
   },
   "scripts": {
-    "ci": "yarn install --frozen-lockfile"
+    "ci": "yarn install --frozen-lockfile",
+    "lint": "eslint --ext .js,.vue components scripts",
+    "test:ci": "yarn lint"
   },
   "homepage": "https://github.com/erpcya/adv-default-theme#readme"
 }
