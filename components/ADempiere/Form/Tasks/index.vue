@@ -27,7 +27,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           class="button-base-icon"
           :disabled="isRun"
           style="float: right;"
-          @click="Jobs"
+          @click="getListJobs"
         />
       </div>
       <el-card class="box-card" style="margin: 0px 10px;padding: : 0px 10px;">
@@ -35,7 +35,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           v-if="isEmptyValue(currentJob)"
           :data="list"
           style="width: 100%"
-          @cell-dblclick="SelectJobs"
+          @cell-dblclick="selectJobs"
         >
           <el-table-column
             v-for="(header, key) in headerList"
@@ -91,7 +91,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               class="button-base-icon"
               style="float: right;"
               :disabled="isRun"
-              @click="Jobs"
+              @click="getListJobs"
             />
             <el-button
               type="info"
@@ -161,14 +161,14 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       </el-form-item>
                       <el-scrollbar v-if="!isEmptyValue(props.row.logs.logs)" wrap-class="popover-scroll">
                         <el-descriptions class="margin-top" title="Logs" :column="1" border>
-                            <el-descriptions-item
-                              v-for="(item, index) in props.row.logs.logs"
-                              :key="index"
-                              :label="item.record_id"
-                            >
-                              {{ item.log }}
-                            </el-descriptions-item>
-                          </el-descriptions>
+                          <el-descriptions-item
+                            v-for="(item, index) in props.row.logs.logs"
+                            :key="index"
+                            :label="item.record_id"
+                          >
+                            {{ item.log }}
+                          </el-descriptions-item>
+                        </el-descriptions>
                       </el-scrollbar>
                     </el-form>
                   </template>
@@ -210,7 +210,6 @@ import headerList from './headerList.js'
 
 // Api Request Methods
 import {
-  // resumen,
   run,
   restore,
   listJobs,
@@ -224,7 +223,7 @@ import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 export default defineComponent({
   name: 'Tasks',
 
-  setup(props, { root, refs }) {
+  setup() {
     /**
      * Ref
      */
@@ -234,19 +233,18 @@ export default defineComponent({
     const currentJob = ref({})
     const executionsLogs = ref([])
     const nameTab = ref('summaryJobs')
-    /**
-     * Computed
-     */
+
     /**
      * Methods
      */
-
-    function SelectJobs(row, column, event) {
-      if (column.label === 'Operaciones') return
+    function selectJobs(row, column, event) {
+      if (column.label === 'Operaciones') {
+        return
+      }
       currentJob.value = row
     }
 
-    function Jobs() {
+    function getListJobs() {
       listJobs()
         .then(response => {
           if (!isEmptyValue(response)) list.value = response
@@ -258,7 +256,9 @@ export default defineComponent({
 
     function selectTabs(tab) {
       const { name } = tab
-      if (name === 'executionsJobs') executionsJobs(currentJob.value.id)
+      if (name === 'executionsJobs') {
+        executionsJobs(currentJob.value.id)
+      }
     }
 
     function executionsJobs(id) {
@@ -292,7 +292,7 @@ export default defineComponent({
         id
       })
         .then(response => {
-          Jobs()
+          getListJobs()
           isRun.value = false
         })
         .catch(error => {
@@ -304,7 +304,7 @@ export default defineComponent({
     function restoreJob() {
       restore()
         .then(response => {
-          Jobs()
+          getListJobs()
           isRun.value = false
         })
         .catch(error => {
@@ -313,7 +313,8 @@ export default defineComponent({
         })
     }
 
-    Jobs()
+    getListJobs()
+
     return {
       // Refs
       executionsLogs,
@@ -327,10 +328,10 @@ export default defineComponent({
       list,
       // Methods
       restoreJob,
-      SelectJobs,
+      selectJobs,
       selectTabs,
       runJob,
-      Jobs
+      getListJobs
     }
   }
 })
