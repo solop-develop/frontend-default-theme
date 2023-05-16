@@ -125,10 +125,11 @@
 import { ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
+
 // Components and Mixins
 import VueWorkflowChart from 'vue-workflow-chart'
 
-// Utils and helper Methods
+// Utils and Helper Methods
 import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default {
@@ -203,7 +204,9 @@ export default {
     })
 
     const widthDetails = computed(() => {
-      if (isMobile.value) return 80
+      if (isMobile.value) {
+        return 80
+      }
       return 40
     })
 
