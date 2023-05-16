@@ -1,6 +1,6 @@
 const { sh } = require('tasksfile')
 const config = require('../../../../config/default.json')
-const localConfig = require('../../../../config/local.json')
+// const localConfig = require('../../../../config/local.json')
 
 /**
  * Change view directory ADempiere

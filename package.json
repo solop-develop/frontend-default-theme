@@ -40,7 +40,7 @@
   },
   "scripts": {
     "ci": "yarn install --frozen-lockfile",
-    "lint": "eslint --ext .js,.vue components scripts",
+    "lint": "eslint --ext .js,.vue build components scripts",
     "test:ci": "yarn lint"
   },
   "homepage": "https://github.com/erpcya/adv-default-theme#readme"
