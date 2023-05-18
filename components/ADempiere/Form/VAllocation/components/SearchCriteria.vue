@@ -117,23 +117,25 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <b> {{ $t('form.VAllocation.searchCriteria.transactionType') }} </b>
             </div>
             <div style="padding: 10px !important;">
+              <br>
+              <br>
+              <br>
               <el-form
                 :inline="true"
                 label-position="top"
                 class="demo-form-inline"
                 style="text-align: center;"
               >
-                <el-form-item
-                  v-for="(type, index) in listTypeTransaction"
-                  :key="index"
-                  :label="type.DisplayColumn"
-                >
-                  <el-switch
-                    v-model="type.isSelect"
-                    active-color="#13ce66"
-                    inactive-color="#ff4949"
-                    style="padding: 0px 20px;margin: 0px 5px;"
-                    @change="changeType(type)"
+                <el-form-item>
+                  <el-checkbox
+                    v-model="receivablesOnly"
+                    :label="labelReceivablesOnly"
+                    border
+                  />
+                  <el-checkbox
+                    v-model="payablesOnly"
+                    :label="labelPayablesOnly"
+                    border
                   />
                 </el-form-item>
               </el-form>
@@ -173,20 +175,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import {
+  defineComponent,
+  computed,
+  watch,
+  ref
+} from '@vue/composition-api'
 import store from '@/store'
-// import lang from '@/lang'
 // components and mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
-// import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-// import fieldsList from './fieldList.js'
-// import SearchCriteria from './components/SearchCriteria/'
-// import Invoices from './components/Invoices/index'
-// import Receipt from './components/Receipt/index'
-
-// Utils and Helper Methods
-// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-// import { showMessage } from '@/utils/ADempiere/notification'
 
 // API Request Methods
 import {
@@ -221,6 +218,9 @@ export default defineComponent({
     const radioPanel3 = ref('')
     const radioPanel4 = ref('')
 
+    const receivablesOnly = ref('')
+    const payablesOnly = ref('')
+
     const value1 = ref('')
 
     const options = ref([])
@@ -245,6 +245,23 @@ export default defineComponent({
     /**
      * Computed
      */
+
+    const labelReceivablesOnly = computed(() => {
+      if (isEmptyValue(listTypeTransaction.value)) return ''
+      return listTypeTransaction.value.find(transaction => transaction.KeyColumn === 'R').DisplayColumn
+    })
+
+    const labelPayablesOnly = computed(() => {
+      if (isEmptyValue(listTypeTransaction.value)) return ''
+      return listTypeTransaction.value.find(transaction => transaction.KeyColumn === 'P').DisplayColumn
+    })
+
+    const receivablesPayables = computed(() => {
+      if (receivablesOnly.value && payablesOnly.value) return 'A'
+      if (receivablesOnly.value) return 'R'
+      if (payablesOnly.value) return 'P'
+      return ''
+    })
 
     const businessPartnerId = computed({
       // getter
@@ -303,8 +320,7 @@ export default defineComponent({
       },
       // setter
       set(type) {
-        console.log({ type })
-        store.commit('setTransactionType', type)
+        return store.commit('setTransactionType', type)
       }
     })
 
@@ -425,17 +441,28 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Wacht
+     */
+
+     watch(receivablesPayables, (newValue, oldValue) => {
+      currentTypeTransaction.value = newValue
+    })
+
     setListTransactionTypes()
 
     return {
       // Const
       // Refs
+      receivablesOnly,
+      payablesOnly,
       currentSetp,
       radioPanel2,
       radioPanel3,
       radioPanel4,
       value1,
       options,
+      receivablesPayables,
       // List Option
       optionsBusinessPartners,
       currentTypeTransaction,
@@ -446,6 +473,8 @@ export default defineComponent({
       organizations,
       currency,
       // Computed
+      labelReceivablesOnly,
+      labelPayablesOnly,
       businessPartnerId,
       organizationsId,
       currentDate,
