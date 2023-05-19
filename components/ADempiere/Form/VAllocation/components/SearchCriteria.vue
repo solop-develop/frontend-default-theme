@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
@@ -182,7 +182,8 @@ import {
   ref
 } from '@vue/composition-api'
 import store from '@/store'
-// components and mixins
+
+// Components and Mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
 
 // API Request Methods
@@ -192,6 +193,8 @@ import {
   listOrganizations,
   listCurrencies
 } from '@/api/ADempiere/form/VAllocation.js'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
@@ -247,19 +250,29 @@ export default defineComponent({
      */
 
     const labelReceivablesOnly = computed(() => {
-      if (isEmptyValue(listTypeTransaction.value)) return ''
+      if (isEmptyValue(listTypeTransaction.value)) {
+        return ''
+      }
       return listTypeTransaction.value.find(transaction => transaction.KeyColumn === 'R').DisplayColumn
     })
 
     const labelPayablesOnly = computed(() => {
-      if (isEmptyValue(listTypeTransaction.value)) return ''
+      if (isEmptyValue(listTypeTransaction.value)) {
+        return ''
+      }
       return listTypeTransaction.value.find(transaction => transaction.KeyColumn === 'P').DisplayColumn
     })
 
     const receivablesPayables = computed(() => {
-      if (receivablesOnly.value && payablesOnly.value) return 'A'
-      if (receivablesOnly.value) return 'R'
-      if (payablesOnly.value) return 'P'
+      if (receivablesOnly.value && payablesOnly.value) {
+        return 'A'
+      }
+      if (receivablesOnly.value) {
+        return 'R'
+      }
+      if (payablesOnly.value) {
+        return 'P'
+      }
       return ''
     })
 
