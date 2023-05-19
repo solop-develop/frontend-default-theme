@@ -21,24 +21,60 @@
 </template>
 
 <script>
-export default {
-  computed: {
-    language() {
-      return this.$store.getters.language
-    }
-  },
-  methods: {
-    handleSetLanguage(lang) {
+import { defineComponent, computed } from '@vue/composition-api'
+
+import store from '@/store'
+import router from '@/router'
+
+// Utils and Helper Methods
+import { showMessage } from '@/utils/ADempiere/notification'
+
+export default defineComponent({
+  name: 'SearchCriteria',
+
+  setup(props, { root }) {
+    /**
+     * Const
+     */
+    const currentRoute = router.app._route
+    /**
+    * Computed
+    */
+
+    const language = computed(() => {
+      return store.getters.language
+    })
+
+    /**
+     * Methods
+     */
+    function handleSetLanguage(lang) {
       this.$i18n.locale = lang
-      this.$store.dispatch('app/setLanguage', lang)
-      if (this.$route.path !== '/login') {
-        location.reload()
-      }
-      this.$message({
-        message: 'Switch Language Success',
-        type: 'success'
-      })
+      store.dispatch('app/setLanguage', lang)
+        .then(response => {
+          const { path } = currentRoute
+          if (path !== '/login') {
+            location.reload()
+          }
+          showMessage({
+            message: 'Switch Language Success',
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+    }
+
+    return {
+      // Computed
+      language,
+      // Methods
+      handleSetLanguage
     }
   }
-}
+})
 </script>
