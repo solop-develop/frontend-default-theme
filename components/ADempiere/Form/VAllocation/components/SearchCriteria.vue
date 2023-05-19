@@ -445,7 +445,7 @@ export default defineComponent({
      * Wacht
      */
 
-     watch(receivablesPayables, (newValue, oldValue) => {
+    watch(receivablesPayables, (newValue, oldValue) => {
       currentTypeTransaction.value = newValue
     })
 
