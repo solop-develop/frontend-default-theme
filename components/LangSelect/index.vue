@@ -22,13 +22,16 @@
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
+
 import store from '@/store'
 import router from '@/router'
+
 // Utils and Helper Methods
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default defineComponent({
   name: 'SearchCriteria',
+
   setup(props, { root }) {
     /**
      * Const
@@ -41,16 +44,18 @@ export default defineComponent({
     const language = computed(() => {
       return store.getters.language
     })
+
     /**
      * Methods
      */
-
     function handleSetLanguage(lang) {
       this.$i18n.locale = lang
       store.dispatch('app/setLanguage', lang)
         .then(response => {
           const { path } = currentRoute
-          if (path !== '/login') location.reload()
+          if (path !== '/login') {
+            location.reload()
+          }
           showMessage({
             message: 'Switch Language Success',
             type: 'success'
