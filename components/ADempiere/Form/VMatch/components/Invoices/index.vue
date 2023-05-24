@@ -51,6 +51,7 @@
           style="margin-top: 10px;"
         />
       </el-tabs>
+
       <el-tabs type="border-card">
         <el-tab-pane :label="matchedToLabel">
           <el-checkbox
@@ -138,14 +139,20 @@ import {
 } from '@vue/composition-api'
 import store from '@/store'
 
+// Components and Utils
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import labelTable from '@theme/components/ADempiere/Form/VMatch/labelTable.js'
+
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
+
 export default defineComponent({
   name: 'Invoices',
+
   components: {
     CustomPagination
   },
+
   setup(props, { root }) {
     /**
      * Refs
