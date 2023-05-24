@@ -32,18 +32,11 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           v-if="currentSetp === 1"
           :metadata="metadata"
         />
-        <!-- <hr>
-        <automatic-match v-if="currentSetp === 1" />
-        <hr> -->
         <manual-match v-if="currentSetp === 2" />
         <automatic-match
           v-else-if="currentSetp === 3"
           :title="label"
         />
-        <!-- <automatic-match
-          v-else-if="currentSetp === 4"
-          :title="label"
-        /> -->
       </transition>
     </div>
     <div style="height: 5% !important;text-align: end;">

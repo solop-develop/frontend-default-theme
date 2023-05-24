@@ -15,42 +15,170 @@
 -->
 <template>
   <el-form
-    v-if="!isEmptyValue(listMetadata)"
     label-position="top"
     class="from-main"
     @submit.native.prevent="notSubmitForm"
   >
     <el-form-item>
-      <el-row>
-        <el-col v-for="(field, index) in listMetadata" :key="index" :span="6">
-          <field-definition
-            :key="index"
-            :container-uuid="metadata.containerUuid"
-            :metadata-field="field"
-            :container-manager="{
-              isDisplayedField,
-              generalInfoSearch,
-              searchTableHeader,
-              isMandatoryField,
-              isReadOnlyField,
-              isDisplayedDefault,
-              getSearchInfoList
-            }"
-          />
+      <el-row :gutter="24">
+        <el-col :span="6">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.searchCriteria.assignFrom') }}
+            </template>
+            <el-select
+              v-model="assignFrom"
+              placeholder="Please Select"
+              style="width: 100%;"
+              filterable
+              clearable
+              @change="changeAssignFrom"
+              @visible-change="listTypesFrom"
+            >
+              <el-option
+                v-for="item in assignFromList"
+                :key="item.ValueColumn"
+                :label="item.DisplayColumn"
+                :value="item.ValueColumn"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.searchCriteria.assignTo') }}
+            </template>
+            <el-select
+              v-model="assignUp"
+              placeholder="Please Select"
+              style="width: 100%;"
+              filterable
+              clearable
+              @visible-change="listTypesUp"
+            >
+              <el-option
+                v-for="item in assignUpList"
+                :key="item.ValueColumn"
+                :label="item.DisplayColumn"
+                :value="item.ValueColumn"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.searchCriteria.searchMode') }}
+            </template>
+            <el-select
+              v-model="searchMode"
+              placeholder="Please Select"
+              style="width: 100%;"
+              filterable
+              clearable
+              @visible-change="listModes"
+            >
+              <el-option
+                v-for="item in searchModeList"
+                :key="item.ValueColumn"
+                :label="item.DisplayColumn"
+                :value="item.ValueColumn"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.searchCriteria.businessPartner') }}
+            </template>
+            <el-select
+              v-model="businessPartner"
+              placeholder="Please Select"
+              style="width: 100%;"
+              filterable
+              clearable
+              @visible-change="listBPartner"
+            >
+              <el-option
+                v-for="item in businessPartnerList"
+                :key="item.KeyColumn"
+                :label="item.DisplayColumn"
+                :value="item.KeyColumn"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.searchCriteria.product') }}
+            </template>
+            <el-select
+              v-model="product"
+              placeholder="Please Select"
+              style="width: 100%;"
+              filterable
+              clearable
+              @visible-change="findProduct"
+            >
+              <el-option
+                v-for="item in productList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item
+            :label="$t('form.match.searchCriteria.dateFrom')"
+            style="width: 100%;"
+          >
+            <el-date-picker
+              v-model="dateFrom"
+              type="date"
+              style="width: 100%;"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item
+            :label="$t('form.match.searchCriteria.dateTo')"
+            style="width: 100%;"
+          >
+            <el-date-picker
+              v-model="dateto"
+              type="date"
+              style="width: 100%;"
+            />
+          </el-form-item>
         </el-col>
       </el-row>
     </el-form-item>
   </el-form>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api'
+<script>
+import {
+  defineComponent,
+  computed,
+  ref
+} from '@vue/composition-api'
+// Api Request Methods
+import {
+  listVendors,
+  listProduct,
+  listSearchModes,
+  listMatchesTypes,
+  listMatchesTypesTo
+} from '@/api/ADempiere/form/VMatch.js'
 import store from '@/store'
 // Components
-import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
-// Function
 import { isEmptyValue } from '@/utils/ADempiere'
-import { isHiddenField } from '@/utils/ADempiere/references'
+import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
 
 export default defineComponent({
   name: 'SearchCriteria',
@@ -77,94 +205,246 @@ export default defineComponent({
   },
   setup(props, { root }) {
     /**
+     * Refs
+     */
+    const businessPartnerList = ref([])
+
+    const productList = ref([])
+
+    /**
     * Computed
     */
 
-    const listMetadata = computed(() => {
-      return props.fieldsList
+    const assignFrom = computed({
+      // getter
+      get() {
+        const { matchFromType } = store.getters.getCriteriaVMatch
+        return matchFromType
+      },
+      // setter
+      set(id) {
+        const displayAssignFrom = assignFromList.value.find(from => from.ValueColumn === id)
+        if (!isEmptyValue(displayAssignFrom)) {
+          store.commit('setLabelAssignFrom', displayAssignFrom)
+        }
+        store.commit('setMatchFromType', id)
+      }
+    })
+
+    const assignUp = computed({
+      // getter
+      get() {
+        const { matchToType } = store.getters.getCriteriaVMatch
+        return matchToType
+      },
+      // setter
+      set(id) {
+        const displayAssignTo = assignUpList.value.find(from => from.ValueColumn === id)
+        if (!isEmptyValue(displayAssignTo)) {
+          store.commit('setLabelAssignTo', displayAssignTo)
+        }
+        store.commit('setMatchToType', id)
+      }
+    })
+
+    const searchMode = computed({
+      // getter
+      get() {
+        const { matchMode } = store.getters.getCriteriaVMatch
+        return matchMode
+      },
+      // setter
+      set(id) {
+        store.commit('setMatchMode', id)
+      }
+    })
+
+    const businessPartner = computed({
+      // getter
+      get() {
+        const { vendorId } = store.getters.getCriteriaVMatch
+        return vendorId
+      },
+      // setter
+      set(id) {
+        store.commit('setVendorId', id)
+      }
+    })
+
+    const product = computed({
+      // getter
+      get() {
+        const { productId } = store.getters.getCriteriaVMatch
+        return productId
+      },
+      // setter
+      set(id) {
+        store.commit('setProductId', id)
+      }
+    })
+
+    const dateto = computed({
+      // getter
+      get() {
+        const { dateto } = store.getters.getCriteriaVMatch
+        return dateto
+      },
+      // setter
+      set(id) {
+        store.commit('setDateto', id)
+      }
+    })
+
+    const dateFrom = computed({
+      // getter
+      get() {
+        const { dateFrom } = store.getters.getCriteriaVMatch
+        return dateFrom
+      },
+      // setter
+      set(id) {
+        store.commit('setDateFrom', id)
+      }
+    })
+
+    const assignFromList = computed({
+      // getter
+      get() {
+        return store.getters.getAssignFromList
+      },
+      // setter
+      set(list) {
+        store.commit('setAssignFromList', list)
+      }
+    })
+
+    const assignUpList = computed({
+      // getter
+      get() {
+        return store.getters.getAssignUpList
+      },
+      // setter
+      set(list) {
+        store.commit('setAssignUpList', list)
+      }
+    })
+
+    const searchModeList = computed({
+      // getter
+      get() {
+        return store.getters.getSearchModeList
+      },
+      // setter
+      set(list) {
+        store.commit('setSearchModeList', list)
+      }
     })
     /**
      * Methods
      */
-
-    function isMandatoryField({ isMandatory, isMandatoryFromLogic }) {
-      return isMandatory || isMandatoryFromLogic
-    }
-
-    function isDisplayedDefault({ isMandatory }) {
-      return true
-    }
-
-    function isDisplayedField({ displayType, isActive, isDisplayed }) {
-      // button field not showed
-      if (isHiddenField(displayType)) {
-        return false
-      }
-      // verify if field is active
-      return isActive && isDisplayed
-    }
-
-    function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
-      return isQueryCriteria && isReadOnlyFromLogic
-    }
-
-    function generalInfoSearch({
-      containerUuid,
-      contextColumnNames,
-      filters,
-      uuid,
-      searchValue,
-      tableName,
-      columnName,
-      pageNumber
-    }) {
-      return store.dispatch('findGeneralInfo', {
-        containerUuid,
-        contextColumnNames,
-        filters,
-        // fieldUuid: uuid,
-        searchValue,
-        tableName,
-        columnName,
-        pageNumber
+    function listTypesFrom(isFind) {
+      if (!isFind && !isEmptyValue(assignFromList.value)) return
+      listMatchesTypes({
+        searchValue: assignFrom.value
       })
+        .then(response => {
+          const { records } = response
+          const list = records
+          assignFromList.value = list.map(type => {
+            const { values } = type
+            return values
+          })
+        })
     }
 
-    function searchTableHeader({
-      containerUuid,
-      tableName
-    }) {
-      return store.dispatch('searchTableHeader', {
-        containerUuid,
-        tableName
+    function listTypesUp(isFind) {
+      if (!isFind && !isEmptyValue(assignUpList.value)) return
+      listMatchesTypesTo({
+        searchValue: assignUp.value,
+        matchFromType: assignFrom.value
       })
+        .then(response => {
+          const { records } = response
+          const list = records
+          assignUpList.value = list.map(type => {
+            const { values } = type
+            return values
+          })
+        })
     }
 
-    function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
-      return store.dispatch('searchInfoList', {
-        parentUuid,
-        containerUuid,
-        contextColumnNames,
-        fieldUuid: uuid,
-        tableName,
-        columnName,
-        filters,
-        searchValue,
-        pageNumber,
-        pageSize
+    function listModes(isFind) {
+      if (!isFind || !isEmptyValue(searchModeList.value)) return
+      listSearchModes({
+        searchValue: searchMode.value
       })
+        .then(response => {
+          const { records } = response
+          const list = records
+          searchModeList.value = list.map(type => {
+            const { values } = type
+            return values
+          })
+        })
+    }
+
+    function listBPartner(isFind) {
+      if (!isFind) return
+      listVendors({})
+        .then(response => {
+          const { records } = response
+          const list = records
+          businessPartnerList.value = list.map(type => {
+            const { values } = type
+            return values
+          })
+        })
+    }
+
+    function findProduct(isFind) {
+      if (!isFind) return
+      listProduct({})
+        .then(response => {
+          const { records } = response
+          const list = records
+          productList.value = list.map(type => {
+            const { id, name } = type
+            return {
+              id,
+              name
+            }
+          })
+        })
+    }
+
+    function changeAssignFrom() {
+      assignUp.value = []
+      assignUpList.value = []
+      return
     }
 
     return {
-      listMetadata,
-      isDisplayedField,
-      generalInfoSearch,
-      searchTableHeader,
-      isMandatoryField,
-      isReadOnlyField,
-      isDisplayedDefault,
-      getSearchInfoList,
-      isEmptyValue
+      // Refs
+      assignFrom,
+      assignFromList,
+      assignUp,
+      assignUpList,
+      searchMode,
+      searchModeList,
+      businessPartner,
+      businessPartnerList,
+      product,
+      productList,
+      dateto,
+      dateFrom,
+      // COmputed
+      // Methods
+      changeAssignFrom,
+      listTypesFrom,
+      listBPartner,
+      findProduct,
+      listTypesUp,
+      listModes
     }
   }
 })
