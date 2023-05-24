@@ -55,8 +55,7 @@
         <el-tab-pane :label="matchedToLabel">
           <el-checkbox
             v-model="isSameQuantity"
-            :disabled="isEmptyValue(isValidateSelectFrom)"
-            label="Misma Cantidad"
+            :label="$t('form.match.filtersSearch.sameQuantity')"
             border
             style="margin-top: 10px;margin-bottom: 10px;"
           />
@@ -95,7 +94,39 @@
         </el-tab-pane>
       </el-tabs>
     </div>
-    <slot name="footer" />
+    <el-form
+      label-position="top"
+      class="from-main"
+      @submit.native.prevent="notSubmitForm"
+    >
+      <el-row :gutter="24">
+        <el-col :span="8">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.field.toAssigned') }}
+            </template>
+            <el-input-number v-model="toAssigned" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.field.assigning') }}
+            </template>
+            <el-input-number v-model="assigning" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item class="front-item-receipt">
+            <template slot="label" style="width: 450px;">
+              {{ $t('form.match.field.difference') }}
+            </template>
+            <el-input-number v-model="difference" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <slot name="footer" style="margin-top: 10px !important;" />
   </div>
 </template>
 
@@ -103,7 +134,7 @@
 import {
   defineComponent,
   computed,
-  ref
+  watch
 } from '@vue/composition-api'
 import store from '@/store'
 
@@ -120,10 +151,21 @@ export default defineComponent({
      * Refs
      */
     const selectInvoice = 'selectedInvoceMatch'
-    const isSameQuantity = ref(false)
+    // const isSameQuantity = ref(false)
     /**
      * Computed
      */
+
+    const isSameQuantity = computed({
+      // getter
+      get() {
+        return false
+      },
+      // setter
+      set(id) {
+        return id
+      }
+    })
     const matchFromList = computed(() => {
       const { list } = store.getters.getMatchFromList
       return list
@@ -158,6 +200,23 @@ export default defineComponent({
 
     const isValidateSelectFrom = computed(() => {
       return store.getters.getSelecteAssignFrom
+    })
+
+    const toAssigned = computed(() => {
+      const toAssigned = store.getters.getSelecteAssignFrom
+      if (isEmptyValue(toAssigned)) return 0
+      return toAssigned.quantity
+    })
+
+    const assigning = computed(() => {
+      const assigning = store.getters.getSelecteAssignTo
+      if (isEmptyValue(assigning)) return 0
+      return assigning.quantity
+    })
+
+    const difference = computed(() => {
+      const result = assigning.value - toAssigned.value
+      return result
     })
 
     /**
@@ -197,19 +256,43 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Watch
+     */
+    watch(isSameQuantity, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        const {
+          id,
+          vendorId,
+          productId
+        } = store.getters.getSelecteAssignFrom
+        store.dispatch('findListMatchedTo', {
+          id,
+          vendorId,
+          productId,
+          isSameQuantity: isSameQuantity.value
+        })
+      }
+    })
+
     labelTable
     return {
+      // Import
+      labelTable,
+      // Computed
+      isValidateSelectFrom,
+      matchFromListLoading,
+      matchToListLoading,
+      matchedFromLabel,
+      selectedInvoice,
+      matchedToLabel,
       isSameQuantity,
+      selectInvoice,
       matchFromList,
       matchToList,
-      selectInvoice,
-      selectedInvoice,
-      matchedFromLabel,
-      matchedToLabel,
-      labelTable,
-      isValidateSelectFrom,
-      matchToListLoading,
-      matchFromListLoading,
+      difference,
+      toAssigned,
+      assigning,
       // Methods
       handleCurrentChangeFrom,
       handleCurrentChangeTo

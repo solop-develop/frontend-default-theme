@@ -24,12 +24,11 @@
         <el-col :span="6">
           <el-form-item class="front-item-receipt">
             <template slot="label" style="width: 450px;">
-              <!-- {{ $t('form.expressMovement.field.documentNo') }} -->
-              {{ 'Asignar Desde' }}
+              {{ $t('form.match.searchCriteria.assignFrom') }}
             </template>
             <el-select
               v-model="assignFrom"
-              placeholder="Please Select Warehouse Base"
+              placeholder="Please Select"
               style="width: 100%;"
               filterable
               clearable
@@ -48,12 +47,11 @@
         <el-col :span="6">
           <el-form-item class="front-item-receipt">
             <template slot="label" style="width: 450px;">
-              <!-- {{ $t('form.expressMovement.field.documentNo') }} -->
-              {{ 'Asignar Hasta' }}
+              {{ $t('form.match.searchCriteria.assignTo') }}
             </template>
             <el-select
               v-model="assignUp"
-              placeholder="Please Select Warehouse Base"
+              placeholder="Please Select"
               style="width: 100%;"
               filterable
               clearable
@@ -71,12 +69,11 @@
         <el-col :span="6">
           <el-form-item class="front-item-receipt">
             <template slot="label" style="width: 450px;">
-              <!-- {{ $t('form.expressMovement.field.documentNo') }} -->
-              {{ 'Modo de Búsqueda' }}
+              {{ $t('form.match.searchCriteria.searchMode') }}
             </template>
             <el-select
               v-model="searchMode"
-              placeholder="Please Select Warehouse Base"
+              placeholder="Please Select"
               style="width: 100%;"
               filterable
               clearable
@@ -94,12 +91,11 @@
         <el-col :span="6">
           <el-form-item class="front-item-receipt">
             <template slot="label" style="width: 450px;">
-              <!-- {{ $t('form.expressMovement.field.documentNo') }} -->
-              {{ 'Socio de Negocio' }}
+              {{ $t('form.match.searchCriteria.businessPartner') }}
             </template>
             <el-select
               v-model="businessPartner"
-              placeholder="Please Select Warehouse Base"
+              placeholder="Please Select"
               style="width: 100%;"
               filterable
               clearable
@@ -117,12 +113,11 @@
         <el-col :span="6">
           <el-form-item class="front-item-receipt">
             <template slot="label" style="width: 450px;">
-              <!-- {{ $t('form.expressMovement.field.documentNo') }} -->
-              {{ 'Product' }}
+              {{ $t('form.match.searchCriteria.product') }}
             </template>
             <el-select
               v-model="product"
-              placeholder="Please Select Warehouse Base"
+              placeholder="Please Select"
               style="width: 100%;"
               filterable
               clearable
@@ -139,7 +134,7 @@
         </el-col>
         <el-col :span="6">
           <el-form-item
-            label="Fecha desde"
+            :label="$t('form.match.searchCriteria.dateFrom')"
             style="width: 100%;"
           >
             <el-date-picker
@@ -151,7 +146,7 @@
         </el-col>
         <el-col :span="6">
           <el-form-item
-            label="Fecha Hasta"
+            :label="$t('form.match.searchCriteria.dateTo')"
             style="width: 100%;"
           >
             <el-date-picker
