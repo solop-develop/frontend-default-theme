@@ -107,15 +107,13 @@ import {
 } from '@vue/composition-api'
 import store from '@/store'
 
-import tableFrom from '../tableFrom'
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import labelTable from '@theme/components/ADempiere/Form/VMatch/labelTable.js'
 import { isEmptyValue } from '@/utils/ADempiere'
 export default defineComponent({
   name: 'Invoices',
   components: {
-    CustomPagination,
-    tableFrom
+    CustomPagination
   },
   setup(props, { root }) {
     /**
@@ -204,7 +202,6 @@ export default defineComponent({
       isSameQuantity,
       matchFromList,
       matchToList,
-      tableFrom,
       selectInvoice,
       selectedInvoice,
       matchedFromLabel,
