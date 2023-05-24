@@ -19,7 +19,7 @@ import language from '@/lang'
 
 export default [
   {
-    columnName: 'nrDocument',
+    columnName: 'documentNo',
     label: language.t('form.match.table.nrDocument'),
     isNumeric: false,
     size: '150'
@@ -31,19 +31,19 @@ export default [
     size: '150'
   },
   {
-    columnName: 'C_BPartner_ID',
+    columnName: 'vendorName',
     label: language.t('form.pos.order.BusinessPartnerCreate.businessPartner'),
     isNumeric: false,
     size: '200'
   },
   {
-    columnName: 'noLínea',
+    columnName: 'lineNo',
     label: language.t('form.pos.order.numberLines'),
     isNumeric: true,
     size: '150'
   },
   {
-    columnName: 'product',
+    columnName: 'productName',
     label: language.t('form.pos.tableProduct.product'),
     isNumeric: true,
     size: '150'
@@ -55,7 +55,7 @@ export default [
     size: '150'
   },
   {
-    columnName: 'assigned',
+    columnName: 'matchedQuantity',
     label: language.t('form.match.field.assigning'),
     isNumeric: true,
     size: '150'

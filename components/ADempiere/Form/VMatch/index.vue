@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
  Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez esanchez@erpya.com www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -26,12 +26,7 @@
         />
       </el-steps>
     </el-header>
-    <carousel
-      :step-reference="metadata.fileName"
-      :steps="step"
-      :indicator="active"
-      style="display: contents;height: -webkit-fill-available;"
-    >
+    <transition name="el-fade-in-linear">
       <search-criteria
         v-if="active === 0"
         :fields-list="fieldsList"
@@ -39,32 +34,30 @@
       />
       <invoices
         v-if="active === 1"
-      />
-      <receipt
-        v-if="active === 2"
-      />
-    </carousel>
-    <div :class="styleFooter">
-      <el-button type="primary" :icon="iconStep" style="float: right;" @click="next" />
+      >
+        <template v-slot:footer>
+          <el-button type="primary" icon="el-icon-check" style="float: right;" :disabled="validateProcess" @click="sendAssignment" />
+          <el-button v-show="active > 0" type="danger" icon="el-icon-close" style="float: right;margin-right: 10px;" @click="prev" />
+        </template>
+      </invoices>
+    </transition>
+    <div v-if="active === 0" :class="styleFooter">
+      <el-button type="primary" icon="el-icon-check" style="float: right;" :disabled="validateNextStep" @click="next" />
       <el-button v-show="active > 0" type="danger" icon="el-icon-close" style="float: right;margin-right: 10px;" @click="prev" />
     </div>
   </el-container>
 </template>
 
 <script>
-import Carousel from '@theme/components/ADempiere/Carousel'
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 import fieldsList from './fieldList.js'
 import SearchCriteria from './components/SearchCriteria/'
 import Invoices from './components/Invoices/index'
-import Receipt from './components/Receipt/index'
 export default {
   name: 'VMatch',
   components: {
-    Carousel,
     SearchCriteria,
-    Invoices,
-    Receipt
+    Invoices
   },
   mixins: [
     formMixin
@@ -102,12 +95,7 @@ export default {
           description: this.$t('form.match.description.searchCriteria')
         },
         {
-          name: this.$t('form.match.title.invoice'),
-          description: this.$t('form.match.description.invoice')
-        },
-        {
-          name: this.$t('form.match.title.deliveryReceipt'),
-          description: this.$t('form.match.description.deliveryReceipt')
+          name: 'Match'
         }
       ]
     },
@@ -118,7 +106,12 @@ export default {
       })
     },
     selectedInvoice() {
+      const label = this.$store.getters.getSelectedInvoceMatch
+      if (this.isEmptyValue(label)) return this.$t('form.match.title.invoice')
       return this.$store.getters.getSelectedInvoceMatch
+    },
+    matchedFromLabel() {
+      return this.$store.getters.getLabelAssignFrom
     },
     selectedReceipts() {
       return this.$store.getters.getSelectedReceiptsMatch
@@ -129,6 +122,19 @@ export default {
         return 'el-icon-s-tools'
       }
       return 'el-icon-check'
+    },
+    validateNextStep() {
+      const {
+        matchFromType,
+        matchToType,
+        matchMode
+      } = this.$store.getters.getCriteriaVMatch
+      return this.isEmptyValue(matchFromType) || this.isEmptyValue(matchToType) || this.isEmptyValue(matchMode)
+    },
+    validateProcess() {
+      const selectFrom = this.$store.getters.getSelecteAssignFrom
+      const selectTo = this.$store.getters.getSelecteAssignTo
+      return this.isEmptyValue(this.validateNextStep) || this.isEmptyValue(selectFrom) || this.isEmptyValue(selectTo)
     }
   },
   watch: {
@@ -152,17 +158,17 @@ export default {
       } else {
         this.sendAssignment(this.businessPartnerUuid)
       }
+      if (this.active === 1) {
+        this.$store.dispatch('findListMatchedFrom', {})
+        this.$store.commit('setMatchedTo', [])
+      }
+      if (this.active === 2) this.$store.dispatch('sendProcess', {})
     },
     prev() {
       this.active--
     },
     sendAssignment(businessPartnerUuid) {
-      this.$store.dispatch('processAssignment', {
-        businessPartnerUuid,
-        receiptUuid: this.selectedReceipts,
-        invoceUuid: this.selectedInvoice,
-        formUuid: this.$route.meta.uuid
-      })
+      this.$store.dispatch('sendProcess', {})
     }
   }
 }
@@ -213,5 +219,17 @@ export default {
     padding-right: 20px;
     padding-bottom: 20px;
     padding-left: 20px;
-}
+  }
+  .transition-box {
+    margin-bottom: 10px;
+    width: 200px;
+    height: 100px;
+    border-radius: 4px;
+    background-color: #409EFF;
+    text-align: center;
+    color: #fff;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    margin-right: 20px;
+  }
 </style>

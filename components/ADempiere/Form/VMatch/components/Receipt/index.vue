@@ -14,169 +14,73 @@
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <div>
-    <el-tabs v-if="!isEmptyValue(selectedInvoice)" type="border-card">
-      <el-tab-pane :label="$t('form.match.title.invoice')">
-        <table-from
-          :label="labelTable"
-          :records-data="selectedInvoice"
-          :selection="selectedInvoice"
-          :is-selection="true"
-        />
-      </el-tab-pane>
-    </el-tabs>
-    <el-tabs type="border-card">
-      <el-tab-pane :label="$t('form.match.title.deliveryReceipt')">
-        <br>
-        <el-row>
-          <template
-            v-for="(option, index) in filtersSearch"
-          >
-            <el-col :key="index" :span="4">
-              <el-checkbox v-model="option.value" :label="option.label" />
-            </el-col>
-          </template>
-        </el-row>
-        <br>
-        <table-from
-          :ref-table="ref"
-          :label="labelTable"
-          :records-data="receiptsList"
-          :selection="selectedReceipts"
-          :add-selection="selectReceipt"
-          :multi-selection="true"
-        />
-      </el-tab-pane>
-    </el-tabs>
-    <el-form
-      :inline="true"
-      label-position="top"
-      class="demo-form-inline"
-      @submit.native.prevent="notSubmitForm"
-    >
-      <template
-        v-for="(item, index) in field"
+  <el-tabs type="border-card">
+    <el-tab-pane :label="$t('form.match.title.invoice')">
+      <el-table
+        :data="invoiceList"
+        :border="true"
+        class="table-import"
+        style="height: 100% !important;width: 100% !important;"
       >
-        <el-form-item :key="index" :label="item.label" style="width: 30%;text-align: center;">
-          <el-input-number v-model="item.value" :controls="false" disabled />
-        </el-form-item>
-      </template>
-    </el-form>
-  </div>
+        <el-table-column
+          type="selection"
+          :align="'center'"
+          width="55"
+        />
+        <el-table-column
+          v-for="(fieldAttributes, key) in labelTable"
+          :key="key"
+          :column-key="fieldAttributes.columnName"
+          :prop="fieldAttributes.columnName"
+          :label="fieldAttributes.label"
+          :min-width="fieldAttributes.width"
+          :align="fieldAttributes.align"
+        />
+      </el-table>
+    </el-tab-pane>
+  </el-tabs>
 </template>
 
 <script>
-// components and mixins
+import {
+  defineComponent,
+  computed,
+  ref
+} from '@vue/composition-api'
+import store from '@/store'
+
 import tableFrom from '../tableFrom'
-
-// constants
 import labelTable from '@theme/components/ADempiere/Form/VMatch/labelTable.js'
-
-export default {
-  name: 'VMatchReceipt',
-
+export default defineComponent({
+  name: 'Invoices',
   components: {
     tableFrom
   },
+  setup(props, { root }) {
+    /**
+     * Refs
+     */
+    const selectInvoice = 'selectedInvoceMatch'
+    /**
+     * Computed
+     */
+    const invoiceList = computed(() => {
+      const list = store.getters.getMatchToList
+      return list
+    })
 
-  data() {
+    const selectedInvoice = computed(() => {
+      return [  ]
+    })
+
+    labelTable
     return {
-      labelTable,
-      key: 0,
-      field: [
-        {
-          label: this.$t('form.match.field.toAssigned'),
-          value: 0
-        },
-        {
-          label: this.$t('form.match.field.assigning'),
-          value: 0
-        },
-        {
-          label: this.$t('form.match.field.difference'),
-          value: 0
-        }
-      ],
-      filtersSearch: [
-        {
-          label: this.$t('form.match.filtersSearch.sameBusinessPartner'),
-          columnName: 'C_BPartner_ID',
-          value: false
-        },
-        {
-          label: this.$t('form.match.filtersSearch.sameProduct'),
-          columnName: 'product',
-          value: false
-        },
-        {
-          label: this.$t('form.match.filtersSearch.sameQuantity'),
-          columnName: 'quantity',
-          value: false
-        }
-      ],
-      ref: 'Receipt',
-      selectReceipt: 'selectedelectedReceiptsMatch'
-    }
-  },
-  computed: {
-    receiptsList() {
-      let receipts = this.$store.getters.getInvoiceMatch
-      this.filtersSearch.forEach(filter => {
-        if (filter.value) {
-          receipts = this.filterBills(receipts, filter)
-        }
-      })
-      return receipts
-    },
-    selectedInvoice() {
-      return this.$store.getters.getSelectedInvoceMatch
-    },
-    selectedReceipts() {
-      return this.$store.getters.getSelectedReceiptsMatch
-    }
-  },
-  watch: {
-    selectedReceipts(value) {
-      this.assignmentSummary({
-        toAssigned: this.field[this.key],
-        assigning: this.field[1],
-        difference: this.field[2],
-        quantity: this.selectedInvoice[this.key].quantity
-      })
-    }
-  },
-  mounted() {
-    if (!this.isEmptyValue(this.selectedInvoice)) {
-      this.assignmentSummary({
-        toAssigned: this.field[this.key],
-        assigning: this.field[1],
-        difference: this.field[2],
-        quantity: this.selectedInvoice[this.key].quantity
-      })
-    }
-  },
-  methods: {
-    sumQuantity(cash) {
-      let sum = 0
-      if (cash) {
-        cash.forEach((pay) => {
-          sum += pay.quantity
-        })
-      }
-      return sum
-    },
-    filterBills(recordList, element) {
-      return recordList.filter(record => {
-        if (record[element.columnName] === this.selectedInvoice[this.key][element.columnName]) {
-          return record
-        }
-      })
-    },
-    assignmentSummary({ toAssigned, assigning, difference, quantity }) {
-      toAssigned.value = quantity
-      assigning.value = this.sumQuantity(this.selectedReceipts)
-      difference.value = toAssigned.value - this.sumQuantity(this.selectedReceipts)
+      invoiceList,
+      tableFrom,
+      selectInvoice,
+      selectedInvoice,
+      labelTable
     }
   }
-}
+})
 </script>

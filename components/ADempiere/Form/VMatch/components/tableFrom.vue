@@ -31,13 +31,12 @@
       @select-all="handleSelectionChange"
       @current-change="handleCurrentChange"
     >
-      <el-table-column
+      <!-- <el-table-column
         v-if="multiSelection"
         type="selection"
         width="50"
-      />
+      /> -->
       <el-table-column
-        v-else
         :type="multiSelection ? 'selection' : ''"
         width="50"
       >

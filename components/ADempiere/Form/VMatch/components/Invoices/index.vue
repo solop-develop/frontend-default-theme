@@ -14,42 +14,209 @@
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <el-tabs type="border-card">
-    <el-tab-pane :label="$t('form.match.title.invoice')">
-      <table-from
-        :ref-table="ref"
-        :label="labelTable"
-        :records-data="invoiceList"
-        :selection="selectedInvoice"
-        :add-selection="selectInvoice"
-        :is-selection="true"
-      />
-    </el-tab-pane>
-  </el-tabs>
+  <div>
+    <div>
+      <el-tabs type="border-card">
+        <el-tab-pane :label="matchedFromLabel">
+          <el-table
+            v-loading="matchFromListLoading"
+            :data="matchFromList"
+            :border="true"
+            height="300px"
+            class="table-import"
+            style="height: 100% !important;width: 100% !important;"
+            @current-change="handleCurrentChangeFrom"
+          >
+            <el-table-column
+              :align="'center'"
+              width="55"
+            >
+              <template slot-scope="scope">
+                <i v-if="scope.row.isSelection" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
+              </template>
+            </el-table-column>
+            <el-table-column
+              v-for="(fieldAttributes, key) in labelTable"
+              :key="key"
+              :column-key="fieldAttributes.columnName"
+              :prop="fieldAttributes.columnName"
+              :label="fieldAttributes.label"
+              :min-width="fieldAttributes.width"
+              :align="fieldAttributes.align"
+            />
+          </el-table>
+        </el-tab-pane>
+        <custom-pagination
+          :total="matchFromList.length"
+          style="margin-top: 10px;"
+        />
+      </el-tabs>
+      <el-tabs type="border-card">
+        <el-tab-pane :label="matchedToLabel">
+          <el-checkbox
+            v-model="isSameQuantity"
+            :disabled="isEmptyValue(isValidateSelectFrom)"
+            label="Misma Cantidad"
+            border
+            style="margin-top: 10px;margin-bottom: 10px;"
+          />
+          <el-table
+            v-loading="matchToListLoading"
+            :data="matchToList"
+            :border="true"
+            height="250px"
+            class="table-import"
+            :empty-text="'Por Favro Selecione una' + ' ' + matchedFromLabel"
+            style="height: 100% !important;width: 100% !important;"
+            @current-change="handleCurrentChangeTo"
+          >
+            <el-table-column
+              :align="'center'"
+              width="55"
+            >
+              <template slot-scope="scope">
+                <i v-if="scope.row.isSelection" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
+              </template>
+            </el-table-column>
+            <el-table-column
+              v-for="(fieldAttributes, key) in labelTable"
+              :key="key"
+              :column-key="fieldAttributes.columnName"
+              :prop="fieldAttributes.columnName"
+              :label="fieldAttributes.label"
+              :min-width="fieldAttributes.width"
+              :align="fieldAttributes.align"
+            />
+          </el-table>
+          <custom-pagination
+            :total="matchToList.length"
+            style="margin-top: 10px;"
+          />
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+    <slot name="footer" />
+  </div>
 </template>
 
 <script>
+import {
+  defineComponent,
+  computed,
+  ref
+} from '@vue/composition-api'
+import store from '@/store'
+
 import tableFrom from '../tableFrom'
+import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import labelTable from '@theme/components/ADempiere/Form/VMatch/labelTable.js'
-export default {
+import { isEmptyValue } from '@/utils/ADempiere'
+export default defineComponent({
   name: 'Invoices',
   components: {
+    CustomPagination,
     tableFrom
   },
-  data() {
-    return {
-      labelTable,
-      ref: 'Match',
-      selectInvoice: 'selectedInvoceMatch'
+  setup(props, { root }) {
+    /**
+     * Refs
+     */
+    const selectInvoice = 'selectedInvoceMatch'
+    const isSameQuantity = ref(false)
+    /**
+     * Computed
+     */
+    const matchFromList = computed(() => {
+      const { list } = store.getters.getMatchFromList
+      return list
+    })
+
+    const selectedInvoice = computed(() => {
+      return []
+    })
+
+    const matchToList = computed(() => {
+      const { list } = store.getters.getMatchToList
+      return list
+    })
+
+    const matchToListLoading = computed(() => {
+      const { isLoading } = store.getters.getMatchToList
+      return isLoading
+    })
+
+    const matchFromListLoading = computed(() => {
+      const { isLoading } = store.getters.getMatchFromList
+      return isLoading
+    })
+
+    const matchedFromLabel = computed(() => {
+      return store.getters.getLabelAssignFrom
+    })
+
+    const matchedToLabel = computed(() => {
+      return store.getters.getLabelAssignTo
+    })
+
+    const isValidateSelectFrom = computed(() => {
+      return store.getters.getSelecteAssignFrom
+    })
+
+    /**
+     * Methods
+     */
+    function handleCurrentChangeFrom(row) {
+      if (isEmptyValue(row)) return
+      row.isSelection = !row.isSelection
+      const {
+        id,
+        vendorId,
+        productId
+      } = row
+      const list = matchFromList.value.filter(from => from.id !== row.id)
+      store.dispatch('findListMatchedTo', {
+        id,
+        vendorId,
+        productId,
+        isSameQuantity: isSameQuantity.value
+      })
+      store.commit('setSelecteAssignFrom', row)
+      cleanSelection(list)
     }
-  },
-  computed: {
-    invoiceList() {
-      return this.$store.getters.getInvoiceMatch
-    },
-    selectedInvoice() {
-      return this.$store.getters.getSelectedInvoceMatch
+
+    function handleCurrentChangeTo(row) {
+      if (isEmptyValue(row)) return
+      row.isSelection = !row.isSelection
+      const list = matchToList.value.filter(from => from.id !== row.id)
+      store.commit('setSelecteAssignTo', row)
+      cleanSelection(list)
+    }
+
+    function cleanSelection(list) {
+      if (isEmptyValue(list)) return
+      list.forEach(element => {
+        element.isSelection = false
+      })
+    }
+
+    labelTable
+    return {
+      isSameQuantity,
+      matchFromList,
+      matchToList,
+      tableFrom,
+      selectInvoice,
+      selectedInvoice,
+      matchedFromLabel,
+      matchedToLabel,
+      labelTable,
+      isValidateSelectFrom,
+      matchToListLoading,
+      matchFromListLoading,
+      // Methods
+      handleCurrentChangeFrom,
+      handleCurrentChangeTo
     }
   }
-}
+})
 </script>
