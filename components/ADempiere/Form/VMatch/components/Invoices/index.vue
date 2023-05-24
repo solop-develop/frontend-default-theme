@@ -106,7 +106,7 @@
             <template slot="label" style="width: 450px;">
               {{ $t('form.match.field.toAssigned') }}
             </template>
-            <el-input-number v-model="toAssigned" disabled />
+            <el-input-number v-model="toAssigned" disabled controls-position="right" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -114,7 +114,7 @@
             <template slot="label" style="width: 450px;">
               {{ $t('form.match.field.assigning') }}
             </template>
-            <el-input-number v-model="assigning" disabled />
+            <el-input-number v-model="assigning" disabled controls-position="right" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -122,7 +122,7 @@
             <template slot="label" style="width: 450px;">
               {{ $t('form.match.field.difference') }}
             </template>
-            <el-input-number v-model="difference" disabled />
+            <el-input-number v-model="difference" disabled controls-position="right" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -307,3 +307,10 @@ export default defineComponent({
   }
 })
 </script>
+<style lang="scss">
+.el-input.is-disabled {
+  .el-input__inner {
+    text-align-last: end !important;
+  }
+}
+</style>

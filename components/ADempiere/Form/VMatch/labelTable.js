@@ -40,7 +40,8 @@ export default [
     columnName: 'lineNo',
     label: language.t('form.pos.order.numberLines'),
     isNumeric: true,
-    size: '150'
+    size: '150',
+    align: 'right'
   },
   {
     columnName: 'productName',
