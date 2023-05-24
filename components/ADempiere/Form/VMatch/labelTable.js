@@ -52,12 +52,14 @@ export default [
     columnName: 'quantity',
     label: language.t('form.pos.tableProduct.quantity'),
     isNumeric: true,
-    size: '150'
+    size: '150',
+    align: 'right'
   },
   {
     columnName: 'matchedQuantity',
     label: language.t('form.match.field.assigning'),
     isNumeric: true,
-    size: '150'
+    size: '150',
+    align: 'right'
   }
 ]
