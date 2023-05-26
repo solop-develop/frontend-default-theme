@@ -911,7 +911,6 @@ export default defineComponent({
       })
         .then(response => {
           const {
-            name,
             output,
             mime_type,
             output_stream
