@@ -147,7 +147,16 @@ export default defineComponent({
   },
 
   setup(props) {
+    /**
+     * Const
+     */
+
     const containerUuid = props.tabAttributes.uuid
+
+    /**
+     * Ref
+     */
+
     const isVisibleDocAction = ref(false)
     const selectDocActions = ref('')
     const popoverDocAction = ref(null)
@@ -157,6 +166,9 @@ export default defineComponent({
       description: ''
     }
 
+    /**
+     * Computed
+     */
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
     })
@@ -215,12 +227,29 @@ export default defineComponent({
       return convertStringToBoolean(processing)
     })
 
+    /**
+     * Methods
+     */
+
     function displayDocumentActions(nextStatus) {
-      if (isEmptyValue(nextStatus)) {
-        return emptyDocAction
-      }
+      if (isEmptyValue(nextStatus))  return emptyDocAction
       const currentStatus = props.additionalOptions.options.find(docs => docs.value === nextStatus)
+      if (isEmptyValue(currentStatus))  return defaultDocumentAction.value
       return currentStatus
+    }
+
+    function handleCommandActions(params) {
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.undo')
+      }
+
+      store.dispatch('fieldListInfo', { info })
+      selectDocActions.value = params
+      isVisibleDocAction.value = true
     }
 
     function refreshCurrentRecord() {
@@ -239,14 +268,14 @@ export default defineComponent({
       store.dispatch('fieldListInfo', { info })
     }
 
-    function sendAction(params) {
+    function sendAction() {
       isVisibleDocAction.value = false
-
       store.dispatch('runDocumentAction', {
         tableName: props.tabAttributes.tableName,
         recordUuid: recordUuid.value,
         containerUuid,
-        docAction: selectDocActions.value
+        docAction: selectDocActions.value,
+        description: message()
       })
         .catch(error => {
           console.warn(`Error Run Doc Action: ${error.message}. Code: ${error.code}.`)
@@ -256,38 +285,33 @@ export default defineComponent({
         })
     }
 
-    function handleCommandActions(params) {
-      const info = {
-        fieldsList: props.containerManager.getFieldsList({
-          parentUuid: props.parentUuid,
-          containerUuid: containerUuid
-        }),
-        option: language.t('actionMenu.undo')
-      }
-
-      store.dispatch('fieldListInfo', { info })
-      selectDocActions.value = params
-      isVisibleDocAction.value = true
+    function message() {
+      const selectActions = documentActionsList.value.find(action => action.value === selectDocActions.value)
+      if (isEmptyValue(selectActions)) return defaultDocumentAction.value
+      return selectActions.description
     }
 
     return {
+      // Ref
+      emptyDocAction,
       popoverDocAction,
+      selectDocActions,
+      isVisibleDocAction,
+      // Computed
+      docStatus,
+      recordUuid,
+      getCurrentTab,
       currentDocStatus,
       displayDocStatus,
-      docStatus,
       isDisabledDocument,
-      recordUuid,
-      selectDocActions,
-      getCurrentTab,
-      isVisibleDocAction,
-      // computed
-      defaultDocumentAction,
       documentActionsList,
-      // methods
+      defaultDocumentAction,
+      // Methods
       displayDocumentActions,
       handleCommandActions,
       sendAction,
-      tagRender
+      tagRender,
+      message
     }
   }
 })
