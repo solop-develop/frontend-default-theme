@@ -143,6 +143,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <el-select
                               v-model="currentStatus"
                               filterable
+                              :disabled="isEmptyValue(currentRequestTypes)"
                               @visible-change="findStatus"
                               @change="exitPopover('newStatus')"
                             >
@@ -373,6 +374,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                               <el-select
                                 v-model="currentStatus"
                                 filterable
+                                :disabled="isEmptyValue(currentRequestTypes)"
                                 @visible-change="findStatus"
                                 @change="updateIssuesStatus"
                               >
@@ -776,6 +778,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <el-select
                               v-model="currentStatus"
                               filterable
+                              :disabled="isEmptyValue(currentRequestTypes)"
                               @visible-change="findStatus"
                               @change="exitPopover('newStatus')"
                             >
@@ -1081,6 +1084,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                               <el-select
                                 v-model="currentStatus"
                                 filterable
+                                :disabled="isEmptyValue(currentRequestTypes)"
                                 @visible-change="findStatus"
                                 @change="updateIssuesStatus"
                               >

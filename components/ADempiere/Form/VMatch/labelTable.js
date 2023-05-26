@@ -22,7 +22,7 @@ export default [
     columnName: 'documentNo',
     label: language.t('form.match.table.nrDocument'),
     isNumeric: false,
-    size: '150'
+    size: '250'
   },
   {
     columnName: 'date',
