@@ -54,11 +54,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     v-show="!isEmptyValue(currentPaymentSelection)"
                     v-model="paymentRule"
                     filterable
+                    clare
                     @visible-change="findListPaymentRueles"
                   >
                     <el-option
-                      v-for="(item, key) in listPaymentRules"
-                      :key="key"
+                      v-for="item in listPaymentRules"
+                      :key="item.id"
                       :label="item.displayColumn"
                       :value="item.id"
                     />
@@ -69,9 +70,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-form-item
                   :label="$t('VPayPrint.nextSequence')"
                 >
-                  <el-input
-                    v-show="!isEmptyValue(currentBalance)"
+                  <el-input-number
+                    v-show="!isEmptyValue(paymentRule)"
                     v-model="documentNumberSequence"
+                    controls-position="right"
                   />
                 </el-form-item>
               </el-col>
@@ -145,7 +147,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         plain
                         type="info"
                         :loading="isLoadPrint"
-                        :disabled="(isLoadPrint || isEmptyValue(dataLot))"
+                        :disabled="(isLoadPrint || isEmptyValue(dataLot) || isEmptyValue(paymentRule))"
                         style="margin: 0px 5px 0px 5px;"
                       >
                         <span v-show="!isLoadPrint">
@@ -179,7 +181,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         plain
                         type="primary"
                         :loading="isLoadExport"
-                        :disabled="(isLoadExport || isEmptyValue(dataLot))"
+                        :disabled="(isLoadPrint || isEmptyValue(dataLot) || isEmptyValue(paymentRule))"
                         style="margin: 0px 5px 0px 5px;"
                       >
                         <span v-show="!isLoadExport">
@@ -213,7 +215,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         plain
                         type="success"
                         :loading="isLoadProcess"
-                        :disabled="(isLoadProcess || isEmptyValue(dataLot))"
+                        :disabled="(isLoadPrint || isEmptyValue(dataLot) || isEmptyValue(paymentRule))"
                         style="margin: 0px 5px 0px 5px;"
                       >
                         <span v-show="!isLoadProcess">
@@ -508,6 +510,56 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         </el-table>
       </div>
     </div>
+    <el-drawer
+      :visible.sync="isShowExportPayment"
+      :with-header="true"
+      :before-close="handleClose"
+      :size="'80%'"
+      :show-close="true"
+      :title="dataExportPayment.name"
+    >
+      <file-render
+        :format="dataExportPayment.format"
+        :content="dataExportPayment.content"
+        :name="dataExportPayment.name"
+        :mime-type="dataExportPayment.mimeType"
+        :stream="dataExportPayment.stream"
+        :src="dataExportPayment.src"
+        style="height: 90% !important;"
+      />
+
+      <el-popover
+        ref="confirmToPrint"
+        :title="dataExportPayment.message"
+        placement="top"
+        trigger="click"
+      >
+        <el-button
+          style="float:right;margin-left: 10px;"
+          type="primary"
+          icon="el-icon-check"
+          @click="runFieldRender(dataExportPayment.mimeType)"
+        />
+        <el-button
+          style="float: right;"
+          type="danger"
+          icon="el-icon-close"
+          @click="closeProcess('confirmToPrint')"
+        />
+        <el-button
+          slot="reference"
+          type="primary"
+          style="float: right;margin-right: 10px;margin-top: 10px;"
+          icon="el-icon-check"
+        />
+      </el-popover>
+      <el-button
+        type="danger"
+        icon="el-icon-close"
+        style="float: right;margin-right: 10px;margin-top: 10px;"
+        @click="isShowExportPayment = false"
+      />
+    </el-drawer>
   </el-row>
 </template>
 
@@ -519,7 +571,7 @@ import store from '@/store'
 
 // Components and Mixins
 import IndexColumn from '@theme/components/ADempiere/DataTable/Components/IndexColumn.vue'
-
+import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -541,15 +593,21 @@ import {
   documentSequence,
   // Button Panel Processes
   print,
+  process,
+  confirmPrint,
   exportPayment,
-  process
+  printRemittance
 } from '@/api/ADempiere/form/VPayPrint.js'
+import {
+  buildLinkHref
+} from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
   name: 'VPayPrint',
 
   components: {
-    IndexColumn
+    IndexColumn,
+    FileRender
   },
 
   props: {
@@ -633,7 +691,13 @@ export default defineComponent({
     // Values Left Pane Search Filter
     const currentPaymentSelection = ref('')
     const paymentRule = ref('')
-    const documentNumberSequence = ref('')
+    const currentPaymentRule = computed(() => {
+      if (isEmptyValue(paymentRule.value)) return ''
+      if (isEmptyValue(listPaymentRules.value)) return ''
+      const { valueColumn } = listPaymentRules.value.find(value => value.id === paymentRule.value)
+      return valueColumn
+    })
+    const documentNumberSequence = ref(null)
 
     // List Option Select -> (Left Pane Search Filter)
     const listPaymentRules = ref([])
@@ -659,8 +723,14 @@ export default defineComponent({
 
     // Refs Popover
     const processOnLine = ref()
+    const confirmToPrint = ref()
     const printProcess = ref()
     const exportProcess = ref()
+
+    // Drawer
+
+    const isShowExportPayment = ref(false)
+    const dataExportPayment = ref({})
 
     /**
      * Computed
@@ -744,7 +814,8 @@ export default defineComponent({
             return {
               ...rulesPay,
               displayColumn: rulesPay.values.DisplayColumn,
-              keyColumn: rulesPay.values.KeyColumn
+              keyColumn: rulesPay.values.KeyColumn,
+              valueColumn: rulesPay.values.ValueColumn
             }
           })
         })
@@ -791,6 +862,12 @@ export default defineComponent({
         .then(responseTable => {
           dataLot.value = responseTable.records
         })
+        .catch(error => {
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
     }
 
     // Bottom Panel Button Panel / Form Options (Process Payment Selecction And PrintPayment And toExport)
@@ -798,8 +875,9 @@ export default defineComponent({
       isLoadProcess.value = true
       process({
         paymentSelectionId: currentPaymentSelection.value,
-        paymentRuleId: paymentRule.value,
-        documentNo: documentNumberSequence.value
+        paymentRuleId: currentPaymentRule.value,
+        documentNo: documentNumberSequence.value,
+        bankAccountId: currentBankAccountId.value
       })
         .then(response => {
           isLoadProcess.value = false
@@ -807,6 +885,11 @@ export default defineComponent({
           showMessage({
             message: 'OK',
             type: 'success'
+          })
+          listTable({
+            paymentSelectionId: currentPaymentSelection.value,
+            paymentRuleId: currentPaymentRule.value,
+            banckAccountId: currentBankAccountId.value
           })
         })
         .catch(error => {
@@ -822,11 +905,36 @@ export default defineComponent({
       isLoadPrint.value = true
       print({
         paymentSelectionId: currentPaymentSelection.value,
-        paymentRuleId: paymentRule.value,
-        documentNo: documentNumberSequence.value
+        paymentRuleId: currentPaymentRule.value,
+        documentNo: documentNumberSequence.value,
+        bankAccountId: currentBankAccountId.value
       })
         .then(response => {
+          const {
+            output,
+            mime_type,
+            output_stream
+          } = response.report_output
+          let link = {
+            href: undefined,
+            download: undefined
+          }
+          link = buildLinkHref({
+            name: lang.t('VPayPrint.buttons.print'),
+            outputStream: output_stream,
+            mimeType: mime_type
+          })
+          dataExportPayment.value = {
+            content: output,
+            format: 'pdf',
+            mimeType: mime_type,
+            name: lang.t('VPayPrint.buttons.print'),
+            stream: output_stream,
+            src: link.href,
+            message: lang.t('VPayPrint.message.printRemittanceMessage')
+          }
           isLoadPrint.value = false
+          isShowExportPayment.value = true
           showMessage({
             message: 'OK',
             type: 'success'
@@ -845,11 +953,35 @@ export default defineComponent({
       isLoadExport.value = true
       exportPayment({
         paymentSelectionId: currentPaymentSelection.value,
-        paymentRuleId: paymentRule.value,
-        documentNo: documentNumberSequence.value
+        paymentRuleId: currentPaymentRule.value,
+        documentNo: documentNumberSequence.value,
+        bankAccountId: currentBankAccountId.value
       })
         .then(response => {
+          const {
+            output,
+            output_stream
+          } = response.report_output
+          let link = {
+            href: undefined,
+            download: undefined
+          }
+          link = buildLinkHref({
+            fileName: lang.t('VPayPrint.buttons.toExport'),
+            outputStream: output_stream,
+            mimeType: 'text/plain'
+          })
+          dataExportPayment.value = {
+            content: output,
+            format: 'txt',
+            mimeType: 'text/plain',
+            name: lang.t('VPayPrint.buttons.toExport'),
+            stream: output_stream,
+            src: link.href,
+            message: lang.t('VPayPrint.message.confirmPrintMessage')
+          }
           isLoadExport.value = false
+          isShowExportPayment.value = true
           showMessage({
             message: 'OK',
             type: 'success'
@@ -904,19 +1036,76 @@ export default defineComponent({
       refs[namePopover].showPopper = false
     }
 
+    function handleClose() {
+      isShowExportPayment.value = false
+    }
+
+    function sendPrint() {
+      confirmPrint({
+        paymentSelectionId: currentPaymentSelection.value,
+        paymentRuleId: currentPaymentRule.value,
+        documentNo: documentNumberSequence.value,
+        bankAccountId: currentBankAccountId.value
+      })
+        .then(response => {
+          showMessage({
+            message: 'OK',
+            type: 'success'
+          })
+          listTable({
+            paymentSelectionId: currentPaymentSelection.value,
+            paymentRuleId: currentPaymentRule.value,
+            banckAccountId: currentBankAccountId.value
+          })
+        })
+        .catch(error => {
+          isLoadExport.value = false
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
+    function sendPrintRemittance() {
+      printRemittance({
+        paymentSelectionId: currentPaymentSelection.value,
+        paymentRuleId: currentPaymentRule.value,
+        documentNo: documentNumberSequence.value,
+        bankAccountId: currentBankAccountId.value
+      })
+        .then(response => {
+          showMessage({
+            message: 'OK',
+            type: 'success'
+          })
+          listTable({
+            paymentSelectionId: currentPaymentSelection.value,
+            paymentRuleId: currentPaymentRule.value,
+            banckAccountId: currentBankAccountId.value
+          })
+        })
+        .catch(error => {
+          isLoadExport.value = false
+          showMessage({
+            message: error,
+            type: 'error'
+          })
+        })
+    }
+
+    function runFieldRender(mimeType) {
+      if (mimeType === 'pdf') return sendPrintRemittance()
+      return sendPrint()
+    }
+
     /**
      * Watch
      */
     watch(currentPaymentSelection, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
-        listTable({
-          paymentSelectionId: newValue,
-          paymentRuleId: paymentRule.value
-        })
-        setDocument({
-          paymentSelectionId: newValue,
-          paymentRuleId: paymentRule.value
-        })
+        paymentRule.value = ''
+        dataLot.value = []
       }
     })
 
@@ -924,14 +1113,20 @@ export default defineComponent({
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         listTable({
           paymentSelectionId: currentPaymentSelection.value,
-          paymentRuleId: newValue,
+          paymentRuleId: currentPaymentRule.value,
           banckAccountId: currentBankAccountId.value
         })
         setDocument({
           paymentSelectionId: currentPaymentSelection.value,
-          paymentRuleId: newValue,
+          paymentRuleId: currentPaymentRule.value,
           banckAccountId: currentBankAccountId.value
         })
+      }
+    })
+
+    watch(isShowExportPayment, (newValue, oldValue) => {
+      if (!newValue) {
+        dataExportPayment.value = {}
       }
     })
 
@@ -957,25 +1152,34 @@ export default defineComponent({
       // Refs --> related to message dialog and behavior. (actionMessageProcessOnLine, processOnLine, printProcess, exportProcess)
       actionMessageProcessOnLine,
       processOnLine,
+      confirmToPrint,
       printProcess,
       exportProcess,
+      // Drawer
+      isShowExportPayment,
+      dataExportPayment,
       // Computed
       isMobile,
       styleMobile,
+      currentPaymentRule,
       // Methods
       findListPaymentSelection,
+      paymentRuleTranslation,
       findListPaymentRueles,
       setPaymentSelection,
-      listTable,
-      setDocument,
+      sendPrintRemittance,
       processPayment,
-      toExport,
-      printPayment,
       formatQuantity,
-      formatPrice,
-      paymentRuleTranslation,
+      runFieldRender,
+      printPayment,
       checkProcess,
-      closeProcess
+      closeProcess,
+      setDocument,
+      formatPrice,
+      handleClose,
+      listTable,
+      sendPrint,
+      toExport
     }
   }
 })
@@ -996,6 +1200,11 @@ export default defineComponent({
     display: inline-block;
     text-align: left;
     padding: 0px;
+  }
+}
+.el-input {
+  .el-input__inner {
+    text-align-last: end !important;
   }
 }
 </style>
