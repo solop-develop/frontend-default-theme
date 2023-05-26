@@ -236,8 +236,8 @@ export default defineComponent({
      */
 
     function displayDocumentActions(nextStatus) {
-      if (isEmptyValue(nextStatus)) return {
-        emptyDocAction
+      if (isEmptyValue(nextStatus)) {
+        return emptyDocAction
       }
       const currentStatus = props.additionalOptions.options.find(docs => {
         return docs.value === nextStatus
