@@ -111,7 +111,7 @@ import store from '@/store'
 import DocumentStatus from '@theme/components/ADempiere/TabManager/convenienceButtons/documentStatus.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
-// Utils and Melper Methods
+// Utils and Helper Methods
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
@@ -150,13 +150,11 @@ export default defineComponent({
     /**
      * Const
      */
-
     const containerUuid = props.tabAttributes.uuid
 
     /**
      * Ref
      */
-
     const isVisibleDocAction = ref(false)
     const selectDocActions = ref('')
     const popoverDocAction = ref(null)
@@ -201,18 +199,24 @@ export default defineComponent({
     })
 
     const docStatus = computed(() => {
-      return props.tabAttributes.fieldsList.find(field => field.columnName === 'DocStatus')
+      return props.tabAttributes.fieldsList.find(field => {
+        return field.columnName === 'DocStatus'
+      })
     })
 
     const displayDocStatus = computed(() => {
       let docStatus = {}
       if (!isEmptyValue(documentActionsList.value)) {
-        docStatus = documentActionsList.value.find(docAction => docAction.value === currentDocStatus.value)
+        docStatus = documentActionsList.value.find(docAction => {
+          return docAction.value === currentDocStatus.value
+        })
       }
       if (isEmptyValue(docStatus)) {
         const list = store.getters.getWorkFlowActions({ containerUuid })
         if (!isEmptyValue(list) && !isEmptyValue(list.options)) {
-          docStatus = list.options.find(docStatus => docStatus.value === currentDocStatus.value)
+          docStatus = list.options.find(docStatus => {
+            return docStatus.value === currentDocStatus.value
+          })
         }
       }
       return docStatus || emptyDocAction
@@ -233,8 +237,12 @@ export default defineComponent({
 
     function displayDocumentActions(nextStatus) {
       if (isEmptyValue(nextStatus)) return emptyDocAction
-      const currentStatus = props.additionalOptions.options.find(docs => docs.value === nextStatus)
-      if (isEmptyValue(currentStatus)) return defaultDocumentAction.value
+      const currentStatus = props.additionalOptions.options.find(docs => {
+        return docs.value === nextStatus
+      })
+      if (isEmptyValue(currentStatus)) {
+        return defaultDocumentAction.value
+      }
       return currentStatus
     }
 
@@ -286,8 +294,12 @@ export default defineComponent({
     }
 
     function message() {
-      const selectActions = documentActionsList.value.find(action => action.value === selectDocActions.value)
-      if (isEmptyValue(selectActions)) return defaultDocumentAction.value
+      const selectActions = documentActionsList.value.find(action => {
+        return action.value === selectDocActions.value
+      })
+      if (isEmptyValue(selectActions)) {
+        return defaultDocumentAction.value
+      }
       return selectActions.description
     }
 
