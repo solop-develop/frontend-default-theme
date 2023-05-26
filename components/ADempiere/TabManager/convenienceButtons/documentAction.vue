@@ -111,7 +111,7 @@ import store from '@/store'
 import DocumentStatus from '@theme/components/ADempiere/TabManager/convenienceButtons/documentStatus.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
-// Utils and Melper Methods
+// Utils and Helper Methods
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
@@ -147,7 +147,14 @@ export default defineComponent({
   },
 
   setup(props) {
+    /**
+     * Const
+     */
     const containerUuid = props.tabAttributes.uuid
+
+    /**
+     * Ref
+     */
     const isVisibleDocAction = ref(false)
     const selectDocActions = ref('')
     const popoverDocAction = ref(null)
@@ -157,6 +164,9 @@ export default defineComponent({
       description: ''
     }
 
+    /**
+     * Computed
+     */
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
     })
@@ -189,18 +199,24 @@ export default defineComponent({
     })
 
     const docStatus = computed(() => {
-      return props.tabAttributes.fieldsList.find(field => field.columnName === 'DocStatus')
+      return props.tabAttributes.fieldsList.find(field => {
+        return field.columnName === 'DocStatus'
+      })
     })
 
     const displayDocStatus = computed(() => {
       let docStatus = {}
       if (!isEmptyValue(documentActionsList.value)) {
-        docStatus = documentActionsList.value.find(docAction => docAction.value === currentDocStatus.value)
+        docStatus = documentActionsList.value.find(docAction => {
+          return docAction.value === currentDocStatus.value
+        })
       }
       if (isEmptyValue(docStatus)) {
         const list = store.getters.getWorkFlowActions({ containerUuid })
         if (!isEmptyValue(list) && !isEmptyValue(list.options)) {
-          docStatus = list.options.find(docStatus => docStatus.value === currentDocStatus.value)
+          docStatus = list.options.find(docStatus => {
+            return docStatus.value === currentDocStatus.value
+          })
         }
       }
       return docStatus || emptyDocAction
@@ -215,12 +231,35 @@ export default defineComponent({
       return convertStringToBoolean(processing)
     })
 
+    /**
+     * Methods
+     */
+
     function displayDocumentActions(nextStatus) {
       if (isEmptyValue(nextStatus)) {
         return emptyDocAction
       }
-      const currentStatus = props.additionalOptions.options.find(docs => docs.value === nextStatus)
+      const currentStatus = props.additionalOptions.options.find(docs => {
+        return docs.value === nextStatus
+      })
+      if (isEmptyValue(currentStatus)) {
+        return defaultDocumentAction.value
+      }
       return currentStatus
+    }
+
+    function handleCommandActions(params) {
+      const info = {
+        fieldsList: props.containerManager.getFieldsList({
+          parentUuid: props.parentUuid,
+          containerUuid: containerUuid
+        }),
+        option: language.t('actionMenu.undo')
+      }
+
+      store.dispatch('fieldListInfo', { info })
+      selectDocActions.value = params
+      isVisibleDocAction.value = true
     }
 
     function refreshCurrentRecord() {
@@ -239,14 +278,14 @@ export default defineComponent({
       store.dispatch('fieldListInfo', { info })
     }
 
-    function sendAction(params) {
+    function sendAction() {
       isVisibleDocAction.value = false
-
       store.dispatch('runDocumentAction', {
         tableName: props.tabAttributes.tableName,
         recordUuid: recordUuid.value,
         containerUuid,
-        docAction: selectDocActions.value
+        docAction: selectDocActions.value,
+        description: message()
       })
         .catch(error => {
           console.warn(`Error Run Doc Action: ${error.message}. Code: ${error.code}.`)
@@ -256,38 +295,37 @@ export default defineComponent({
         })
     }
 
-    function handleCommandActions(params) {
-      const info = {
-        fieldsList: props.containerManager.getFieldsList({
-          parentUuid: props.parentUuid,
-          containerUuid: containerUuid
-        }),
-        option: language.t('actionMenu.undo')
+    function message() {
+      const selectActions = documentActionsList.value.find(action => {
+        return action.value === selectDocActions.value
+      })
+      if (isEmptyValue(selectActions)) {
+        return defaultDocumentAction.value
       }
-
-      store.dispatch('fieldListInfo', { info })
-      selectDocActions.value = params
-      isVisibleDocAction.value = true
+      return selectActions.description
     }
 
     return {
+      // Ref
+      emptyDocAction,
       popoverDocAction,
+      selectDocActions,
+      isVisibleDocAction,
+      // Computed
+      docStatus,
+      recordUuid,
+      getCurrentTab,
       currentDocStatus,
       displayDocStatus,
-      docStatus,
       isDisabledDocument,
-      recordUuid,
-      selectDocActions,
-      getCurrentTab,
-      isVisibleDocAction,
-      // computed
-      defaultDocumentAction,
       documentActionsList,
-      // methods
+      defaultDocumentAction,
+      // Methods
       displayDocumentActions,
       handleCommandActions,
       sendAction,
-      tagRender
+      tagRender,
+      message
     }
   }
 })
