@@ -14,15 +14,15 @@
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <div>
-    <div>
+  <div style="padding: 10px;">
+    <div style="height: 70vh;">
       <el-tabs type="border-card">
         <el-tab-pane :label="matchedFromLabel">
           <el-table
             v-loading="matchFromListLoading"
             :data="matchFromList"
             :border="true"
-            height="300px"
+            height="200px"
             class="table-import"
             style="height: 100% !important;width: 100% !important;"
             @current-change="handleCurrentChangeFrom"
@@ -64,7 +64,7 @@
             v-loading="matchToListLoading"
             :data="matchToList"
             :border="true"
-            height="250px"
+            height="200px"
             class="table-import"
             :empty-text="'Por Favro Selecione una' + ' ' + matchedFromLabel"
             style="height: 100% !important;width: 100% !important;"
@@ -98,36 +98,67 @@
     <el-form
       label-position="top"
       class="from-main"
+      style="padding-right: 10px;padding-left: 10px;"
       @submit.native.prevent="notSubmitForm"
     >
       <el-row :gutter="24">
-        <el-col :span="8">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.field.toAssigned') }}
-            </template>
-            <el-input-number v-model="toAssigned" disabled controls-position="right" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.field.assigning') }}
-            </template>
-            <el-input-number v-model="assigning" disabled controls-position="right" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.field.difference') }}
-            </template>
-            <el-input-number v-model="difference" disabled controls-position="right" />
-          </el-form-item>
-        </el-col>
+        <el-card shadow="hover">
+          <el-col
+            :span="6"
+            style="text-align: center;"
+          >
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.field.toAssigned') }}
+              </template>
+              <el-input-number
+                v-model="toAssignedField"
+                disabled
+                controls-position="right"
+                style="width: 100% !important;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col
+            :span="6"
+            style="text-align: center;"
+          >
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.field.assigning') }}
+              </template>
+              <el-input-number
+                v-model="assigningField"
+                disabled
+                controls-position="right"
+                style="width: 100% !important;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col
+            :span="6"
+            style="text-align: center;"
+          >
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.field.difference') }}
+              </template>
+              <el-input-number
+                v-model="differenceField"
+                disabled
+                controls-position="right"
+                style="width: 100% !important;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6" style="text-align: center;padding-top: 40px !important;">
+            <el-form-item class="front-item-receipt">
+              <slot name="footer" style="margin-top: 10px !important;" />
+            </el-form-item>
+          </el-col>
+        </el-card>
       </el-row>
     </el-form>
-    <slot name="footer" style="margin-top: 10px !important;" />
   </div>
 </template>
 
@@ -135,7 +166,8 @@
 import {
   defineComponent,
   computed,
-  watch
+  watch,
+  ref
 } from '@vue/composition-api'
 import store from '@/store'
 
@@ -158,21 +190,13 @@ export default defineComponent({
      * Refs
      */
     const selectInvoice = 'selectedInvoceMatch'
-    // const isSameQuantity = ref(false)
+    const isSameQuantity = ref(false)
+    const toAssignedField = ref(0)
+    const assigningField = ref(0)
+    const differenceField = ref(0)
     /**
      * Computed
      */
-
-    const isSameQuantity = computed({
-      // getter
-      get() {
-        return false
-      },
-      // setter
-      set(id) {
-        return id
-      }
-    })
     const matchFromList = computed(() => {
       const { list } = store.getters.getMatchFromList
       return list
@@ -225,6 +249,12 @@ export default defineComponent({
       const result = assigning.value - toAssigned.value
       return result
     })
+
+    // Set Value
+
+    toAssignedField.value = toAssigned.value
+    assigningField.value = assigning.value
+    differenceField.value = difference.value
 
     /**
      * Methods
@@ -282,8 +312,30 @@ export default defineComponent({
       }
     })
 
+    watch(toAssigned, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        toAssignedField.value = newValue
+      }
+    })
+
+    watch(assigning, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        assigningField.value = newValue
+      }
+    })
+
+    watch(difference, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        differenceField.value = newValue
+      }
+    })
+
     labelTable
     return {
+      // Ref
+      differenceField,
+      toAssignedField,
+      assigningField,
       // Import
       labelTable,
       // Computed

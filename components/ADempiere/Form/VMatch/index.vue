@@ -36,8 +36,8 @@
         v-if="active === 1"
       >
         <template v-slot:footer>
-          <el-button type="primary" icon="el-icon-check" style="float: right;" :disabled="validateProcess" @click="sendAssignment" />
-          <el-button v-show="active > 0" type="danger" icon="el-icon-close" style="float: right;margin-right: 10px;" @click="prev" />
+          <el-button v-show="active > 0" type="danger" icon="el-icon-close" @click="prev" />
+          <el-button type="primary" icon="el-icon-check" :disabled="validateProcess" @click="sendAssignment" />
         </template>
       </invoices>
     </transition>

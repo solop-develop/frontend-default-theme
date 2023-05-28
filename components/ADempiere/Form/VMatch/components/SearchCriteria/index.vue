@@ -14,151 +14,156 @@
  along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 <template>
-  <el-form
-    label-position="top"
-    class="from-main"
-    @submit.native.prevent="notSubmitForm"
+  <el-card
+    shadow="hover"
+    class="main-search-criteria"
   >
-    <el-form-item>
-      <el-row :gutter="24">
-        <el-col :span="6">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.searchCriteria.assignFrom') }}
-            </template>
-            <el-select
-              v-model="assignFrom"
-              placeholder="Please Select"
+    <el-form
+      label-position="top"
+      class="from-main"
+      @submit.native.prevent="notSubmitForm"
+    >
+      <el-form-item>
+        <el-row :gutter="24">
+          <el-col :span="6">
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.searchCriteria.assignFrom') }}
+              </template>
+              <el-select
+                v-model="assignFrom"
+                placeholder="Please Select"
+                style="width: 100%;"
+                filterable
+                clearable
+                @change="changeAssignFrom"
+                @visible-change="listTypesFrom"
+              >
+                <el-option
+                  v-for="item in assignFromList"
+                  :key="item.ValueColumn"
+                  :label="item.DisplayColumn"
+                  :value="item.ValueColumn"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.searchCriteria.assignTo') }}
+              </template>
+              <el-select
+                v-model="assignUp"
+                placeholder="Please Select"
+                style="width: 100%;"
+                filterable
+                clearable
+                @visible-change="listTypesUp"
+              >
+                <el-option
+                  v-for="item in assignUpList"
+                  :key="item.ValueColumn"
+                  :label="item.DisplayColumn"
+                  :value="item.ValueColumn"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.searchCriteria.searchMode') }}
+              </template>
+              <el-select
+                v-model="searchMode"
+                placeholder="Please Select"
+                style="width: 100%;"
+                filterable
+                clearable
+                @visible-change="listModes"
+              >
+                <el-option
+                  v-for="item in searchModeList"
+                  :key="item.ValueColumn"
+                  :label="item.DisplayColumn"
+                  :value="item.ValueColumn"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.searchCriteria.businessPartner') }}
+              </template>
+              <el-select
+                v-model="businessPartner"
+                placeholder="Please Select"
+                style="width: 100%;"
+                filterable
+                clearable
+                @visible-change="listBPartner"
+              >
+                <el-option
+                  v-for="item in businessPartnerList"
+                  :key="item.KeyColumn"
+                  :label="item.DisplayColumn"
+                  :value="item.KeyColumn"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item class="front-item-receipt">
+              <template slot="label" style="width: 450px;">
+                {{ $t('form.match.searchCriteria.product') }}
+              </template>
+              <el-select
+                v-model="product"
+                placeholder="Please Select"
+                style="width: 100%;"
+                filterable
+                clearable
+                @visible-change="findProduct"
+              >
+                <el-option
+                  v-for="item in productList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item
+              :label="$t('form.match.searchCriteria.dateFrom')"
               style="width: 100%;"
-              filterable
-              clearable
-              @change="changeAssignFrom"
-              @visible-change="listTypesFrom"
             >
-              <el-option
-                v-for="item in assignFromList"
-                :key="item.ValueColumn"
-                :label="item.DisplayColumn"
-                :value="item.ValueColumn"
+              <el-date-picker
+                v-model="dateFrom"
+                type="date"
+                style="width: 100%;"
               />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.searchCriteria.assignTo') }}
-            </template>
-            <el-select
-              v-model="assignUp"
-              placeholder="Please Select"
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item
+              :label="$t('form.match.searchCriteria.dateTo')"
               style="width: 100%;"
-              filterable
-              clearable
-              @visible-change="listTypesUp"
             >
-              <el-option
-                v-for="item in assignUpList"
-                :key="item.ValueColumn"
-                :label="item.DisplayColumn"
-                :value="item.ValueColumn"
+              <el-date-picker
+                v-model="dateto"
+                type="date"
+                style="width: 100%;"
               />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.searchCriteria.searchMode') }}
-            </template>
-            <el-select
-              v-model="searchMode"
-              placeholder="Please Select"
-              style="width: 100%;"
-              filterable
-              clearable
-              @visible-change="listModes"
-            >
-              <el-option
-                v-for="item in searchModeList"
-                :key="item.ValueColumn"
-                :label="item.DisplayColumn"
-                :value="item.ValueColumn"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.searchCriteria.businessPartner') }}
-            </template>
-            <el-select
-              v-model="businessPartner"
-              placeholder="Please Select"
-              style="width: 100%;"
-              filterable
-              clearable
-              @visible-change="listBPartner"
-            >
-              <el-option
-                v-for="item in businessPartnerList"
-                :key="item.KeyColumn"
-                :label="item.DisplayColumn"
-                :value="item.KeyColumn"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item class="front-item-receipt">
-            <template slot="label" style="width: 450px;">
-              {{ $t('form.match.searchCriteria.product') }}
-            </template>
-            <el-select
-              v-model="product"
-              placeholder="Please Select"
-              style="width: 100%;"
-              filterable
-              clearable
-              @visible-change="findProduct"
-            >
-              <el-option
-                v-for="item in productList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item
-            :label="$t('form.match.searchCriteria.dateFrom')"
-            style="width: 100%;"
-          >
-            <el-date-picker
-              v-model="dateFrom"
-              type="date"
-              style="width: 100%;"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item
-            :label="$t('form.match.searchCriteria.dateTo')"
-            style="width: 100%;"
-          >
-            <el-date-picker
-              v-model="dateto"
-              type="date"
-              style="width: 100%;"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form-item>
-  </el-form>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form-item>
+    </el-form>
+  </el-card>
 </template>
 
 <script>
@@ -449,3 +454,11 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+.main-search-criteria {
+  /* margin-left: 10px; */
+  margin: 10px;
+  padding: 10px;
+}
+</style>
