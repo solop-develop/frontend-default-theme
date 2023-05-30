@@ -19,15 +19,19 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   <div style="height: 100% !important;">
     <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100% !important;">
       <el-table
-        v-loading="loading"
-        :data="tableData"
+        v-loading="matchingMovements.isLoading"
+        :data="matchingMovements.list"
+        empty-text="Sin Coincidencia Automática "
         :border="true"
-        element-loading-text="Loading..."
+        element-loading-text="Loading....."
         element-loading-spinner="el-icon-loading"
         element-loading-background="rgba(0, 0, 0, 0.2)"
       >
+        <p slot="empty" style="width: 100%;">
+          <el-empty description="Sin Coincidencia Automática" />
+        </p>
         <el-table-column
-          :label="title"
+          label="Coincidencia Automática"
           :align="'center'"
         >
           <el-table-column
@@ -42,15 +46,25 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             :label="fieldAttributes.label"
             :min-width="fieldAttributes.width"
             :align="fieldAttributes.align"
-          />
+          >
+            <template slot-scope="scope">
+              <span v-if="fieldAttributes.columnName === 'is_receipt'">
+                <i v-if="scope.row[fieldAttributes.columnName]" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
+              </span>
+              <span v-else>
+                {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
+              </span>
+            </template>
+          </el-table-column>
         </el-table-column>
       </el-table>
     </el-card>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
+<script>
+import { defineComponent, computed, ref } from '@vue/composition-api'
+import store from '@/store'
 
 export default defineComponent({
   name: 'AutomaticMatch',
@@ -69,7 +83,9 @@ export default defineComponent({
     * Refs
     */
 
-    const tableData = ref([])
+    const matchingMovements = computed(() => {
+      return store.getters.getListMatchingMovements
+    })
     const headerTable = ref([
       {
         label: 'Transaction Date',
@@ -133,9 +149,29 @@ export default defineComponent({
       }
     ])
 
+    function displayDataColumn(data, column) {
+      let display
+      switch (column) {
+        case 'business_partner':
+          display = data.business_partner.name
+          break
+        case 'tender_type':
+          display = data.tender_type.name
+          break
+        case 'currency':
+          display = data.currency.iso_code
+          break
+        default:
+          display = data[column]
+          break
+      }
+      return display
+    }
+
     return {
-      tableData,
-      headerTable
+      matchingMovements,
+      headerTable,
+      displayDataColumn
     }
   }
 })

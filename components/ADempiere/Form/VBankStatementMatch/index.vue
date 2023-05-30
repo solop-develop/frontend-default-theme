@@ -46,7 +46,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         class="button-base-icon"
         icon="el-icon-arrow-right"
         plain
-        :disabled="isNext"
+        :disabled="isNext || validate"
         style="float: right;"
         @click="currentSetp++"
       />
@@ -74,6 +74,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 <script>
 import { defineComponent, ref, computed } from '@vue/composition-api'
 import lang from '@/lang'
+import store from '@/store'
+import { isEmptyValue } from '@/utils/ADempiere'
 import SearchCriteria from './SearchCriteria.vue'
 import AutomaticMatch from './AutomaticMatch.vue'
 import ManualMatch from './ManualMatch.vue'
@@ -135,13 +137,19 @@ export default defineComponent({
       return ''
     })
 
+    const validate = computed(() => {
+      const { matchMode, bankAccounts } = store.getters.getCriteriaVBankStatement
+        return isEmptyValue(bankAccounts.id) || isEmptyValue(matchMode.value)
+    })
+
     return {
       stepList,
       currentSetp,
       isBack,
       isNext,
       label,
-      initialSept
+      initialSept,
+      validate
     }
   }
 })

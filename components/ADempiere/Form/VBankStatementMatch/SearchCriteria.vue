@@ -27,51 +27,54 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           :label="$t('VBankStatementMatch.field.bankAccount')"
           class="form-item-criteria"
         >
-          <field-definition
-            :metadata-field="bankAccount"
-            :container-uuid="metadata.containerUuid"
-            :container-manager="{
-              isDisplayedField,
-              generalInfoSearch,
-              searchTableHeader,
-              isMandatoryField,
-              isReadOnlyField,
-              isDisplayedDefault,
-              getSearchInfoList,
-              getLookupList
-            }"
-            :in-table="true"
-          />
+          <el-select
+            v-model="bankAccount.id"
+            filterable
+            clearable
+            @visible-change="listBankAccount"
+          >
+            <el-option
+              v-for="item in bankAccount.list"
+              :key="item.KeyColumn"
+              :label="item.DisplayColumn"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item
           :label="$t('VBankStatementMatch.field.businessPartner')"
           class="form-item-criteria"
         >
-          <field-definition
-            :metadata-field="bPartner"
-            :container-uuid="metadata.containerUuid"
-            :container-manager="{
-              isDisplayedField,
-              generalInfoSearch,
-              searchTableHeader,
-              isMandatoryField,
-              isReadOnlyField,
-              isDisplayedDefault,
-              getSearchInfoList
-            }"
-            :in-table="true"
-          />
+          <el-select
+            v-model="businessPartner.id"
+            filterable
+            clearable
+            @visible-change="listBPartners"
+          >
+            <el-option
+              v-for="item in businessPartner.list"
+              :key="item.KeyColumn"
+              :label="item.DisplayColumn"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item
           :label="$t('VBankStatementMatch.field.totalPayment')"
           class="form-item-criteria"
         >
           <el-card shadow="never">
-            <el-input-number v-model="totalPayment" controls-position="right" />
+            <el-input-number
+              v-model="paymentAmountTo"
+              controls-position="right"
+            />
             <b style="color: #80808078;margin-left: 5px;margin-right: 5px;font-weight: 999;">
               {{ '─' }}
             </b>
-            <el-input-number v-model="totalPayment1" controls-position="right" />
+            <el-input-number
+              v-model="paymentAmountFrom"
+              controls-position="right"
+            />
           </el-card>
         </el-form-item>
         <el-form-item
@@ -92,20 +95,26 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           :label="$t('VBankStatementMatch.field.searchMode')"
           class="form-item-criteria"
         >
-          <el-select v-model="modeSearch" placeholder="Select">
+          <el-select
+            v-model="matchMode.value"
+            filterable
+            clearable
+            @visible-change="listMatchMode"
+          >
             <el-option
-              v-for="item in modeSearchOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              v-for="item in matchMode.list"
+              :key="item.ValueColumn"
+              :label="item.DisplayColumn"
+              :value="item.ValueColumn"
             />
           </el-select>
           <el-button
             type="primary"
-            icon="el-icon-zoom-in"
+            icon="el-icon-refresh-right"
             plain
             style="float: right; margin-left: 5px;"
             class="button-base-icon"
+            :disabled="isEmptyValue(bankAccount.id) || isEmptyValue(matchMode.value)"
             @click="searchMatch"
           />
         </el-form-item>
@@ -120,20 +129,21 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
-import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
-import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
+<script>
+import { defineComponent, computed, ref } from '@vue/composition-api'
+// import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
+// import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 // import { isHiddenField } from '@/utils/ADempiere/references'
 import AutomaticMatch from './AutomaticMatch.vue'
 import store from '@/store'
-import lang from '@/lang'
-import { isDisplayedField } from './containerManagerFrom.ts'
+// import lang from '@/lang'
+// import { isDisplayedField } from './containerManagerFrom.ts'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'SearchCriteria',
   components: {
-    FieldDefinition,
+    // FieldDefinition,
     AutomaticMatch
     // FieldSearch
   },
@@ -162,210 +172,143 @@ export default defineComponent({
     * Refs
     */
 
-    const bankAccount = ref({ componentPath: 'FieldSelect' })
-
-    const bPartner = ref({ componentPath: 'FieldSearch' })
-
-    const totalPayment = ref(0)
-
-    const totalPayment1 = ref(0)
-
-    const transactionDate = ref('')
-
-    const modeSearch = ref('')
-
-    const modeSearchOptions = ref([
-      {
-        label: lang.t('VBankStatementMatch.field.selectNotMatched'),
-        value: 0
-      },
-      {
-        label: lang.t('VBankStatementMatch.field.selectMatched'),
-        value: 1
-      }
-    ])
-
-    const isShowTable = ref(false)
-
     const isPanelFooter = ref(false)
 
-    /**
-     * Methods
-     */
-
-    function isMandatoryField({ isMandatory, isMandatoryFromLogic }) {
-      return isMandatory || isMandatoryFromLogic
-    }
-
-    function isDisplayedDefault({ isMandatory }) {
-      return true
-    }
-
-    // function isDisplayedField({ displayType, isActive, isDisplayed, isDisplayedFromLogic }) {
-    //   // button field not showed
-    //   if (isHiddenField(displayType)) {
-    //     return false
-    //   }
-    //   // verify if field is active
-    //   return isActive && isDisplayed
-    // }
-
-    function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
-      return isQueryCriteria && isReadOnlyFromLogic
-    }
-
-    function generalInfoSearch({
-      containerUuid,
-      contextColumnNames,
-      filters,
-      uuid,
-      searchValue,
-      tableName,
-      columnName,
-      pageNumber
-    }) {
-      return store.dispatch('findGeneralInfo', {
-        containerUuid,
-        contextColumnNames,
-        filters,
-        // fieldUuid: uuid,
-        searchValue,
-        tableName,
-        columnName,
-        pageNumber
-      })
-    }
-
-    function searchTableHeader({
-      containerUuid,
-      tableName
-    }) {
-      return store.dispatch('searchTableHeader', {
-        containerUuid,
-        tableName
-      })
-    }
-
-    function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
-      return store.dispatch('searchInfoList', {
-        parentUuid,
-        containerUuid,
-        contextColumnNames,
-        fieldUuid: uuid,
-        tableName,
-        columnName,
-        filters,
-        searchValue,
-        pageNumber,
-        pageSize
-      })
-    }
-
-    function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, searchValue, isAddBlankValue, blankValue }) {
-      return store.dispatch('getLookupListFromServer', {
-        parentUuid,
-        containerUuid,
-        contextColumnNames,
-        columnName,
-        searchValue,
-        tableName: 'C_BankStatement',
-        // app attributes
-        isAddBlankValue,
-        blankValue
-      })
-    }
-
-    function createField() {
-      createFieldFromDictionary({
-        containerUuid: props.metadata.containerUuid,
-        uuid: '',
-        elementUuid: '',
-        elementColumnName: '',
-        tableName: '',
-        columnName: '',
-        overwriteDefinition: {
-          containerUuid: props.metadata.containerUuid
-        },
-        columnUuid: props.columnUuid
-      })
-        .then(response => {
-          bPartner.value = response
-        }).catch(error => {
-          console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
+    const bankAccount = computed({
+      // getter
+      get() {
+        const { bankAccounts } = store.getters.getCriteriaVBankStatement
+        return bankAccounts
+      },
+      // setter
+      set(id) {
+        store.commit('updateAttributeCriteria', {
+          attribute: 'id',
+          criteria: 'bankAccounts',
+          value: id
         })
+      }
+    })
+
+    const businessPartner = computed({
+      // getter
+      get() {
+        const { businessPartner } = store.getters.getCriteriaVBankStatement
+        return businessPartner
+      },
+      // setter
+      set(id) {
+        store.commit('updateAttributeCriteria', {
+          attribute: 'id',
+          criteria: 'businessPartner',
+          value: id
+        })
+      }
+    })
+
+    const paymentAmountTo = computed({
+      // getter
+      get() {
+        const { paymentAmount } = store.getters.getCriteriaVBankStatement
+        return paymentAmount.to
+      },
+      // setter
+      set(value) {
+        store.commit('updateAttributeCriteria', {
+          attribute: 'to',
+          criteria: 'paymentAmount',
+          value
+        })
+      }
+    })
+
+    const paymentAmountFrom = computed({
+      // getter
+      get() {
+        const { paymentAmount } = store.getters.getCriteriaVBankStatement
+        return paymentAmount.from
+      },
+      // setter
+      set(value) {
+        store.commit('updateAttributeCriteria', {
+          attribute: 'from',
+          criteria: 'paymentAmount',
+          value
+        })
+      }
+    })
+
+    const matchMode = computed({
+      // getter
+      get() {
+        const { matchMode } = store.getters.getCriteriaVBankStatement
+        return matchMode
+      },
+      // setter
+      set(value) {
+        store.commit('updateAttributeCriteria', {
+          attribute: 'value',
+          criteria: 'matchMode',
+          value
+        })
+      }
+    })
+
+    const transactionDate = computed({
+      // getter
+      get() {
+        const { transactionDate } = store.getters.getCriteriaVBankStatement
+        if (isEmptyValue(transactionDate.to) && isEmptyValue(transactionDate.from)) return ''
+        return [transactionDate.to, transactionDate.from]
+      },
+      // setter
+      set(value) {
+        store.commit('updateAttributeCriteria', {
+          attribute: 'to',
+          criteria: 'transactionDate',
+          value: value[0]
+        })
+        store.commit('updateAttributeCriteria', {
+          attribute: 'from',
+          criteria: 'transactionDate',
+          value: value[1]
+        })
+      }
+    })
+
+    function listBankAccount(isFind) {
+      if (!isFind || !isEmptyValue(bankAccount.value.list)) return
+      store.dispatch('listBankAccount', {})
     }
 
-    function createFieldAccount() {
-      createFieldFromDictionary({
-        containerUuid: props.metadata.containerUuid,
-        uuid: '',
-        elementUuid: '',
-        elementColumnName: '',
-        tableName: '',
-        columnName: '',
-        overwriteDefinition: {
-          containerUuid: props.metadata.containerUuid
-        },
-        columnUuid: '8c104566-fb40-11e8-a479-7a0060f0aa01'
-      })
-        .then(response => {
-          bankAccount.value = response
-        }).catch(error => {
-          console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
-        })
+    function listBPartners(isFind) {
+      if (!isFind || !isEmptyValue(businessPartner.value.list)) return
+      store.dispatch('listBusinessPartner', {})
+    }
+
+    function listMatchMode(isFind) {
+      if (!isFind || !isEmptyValue(matchMode.value.list)) return
+      store.dispatch('listMatchMode', {})
     }
 
     function searchMatch() {
-      const bankAccountId = store.getters.getValueOfFieldOnContainer({
-        parentUuid: bankAccount.value.parentUuid,
-        containerUuid: bankAccount.value.containerUuid,
-        columnName: bankAccount.value.columnName
-      })
-      const businessPartnerId = store.getters.getValueOfFieldOnContainer({
-        parentUuid: bPartner.value.parentUuid,
-        containerUuid: bPartner.value.containerUuid,
-        columnName: bPartner.value.columnName
-      })
-      store.dispatch('searchMatch', {
-        bankAccountId,
-        dateFrom: transactionDate.value[0],
-        dateTo: transactionDate.value[1],
-        businessPartnerId,
-        paymentAmountFrom: totalPayment.value,
-        paymentAmountTo: totalPayment1.value,
-        matchMode: modeSearch.value
-      })
       isPanelFooter.value = true
-      setTimeout(() => {
-        // isPanelFooter.value = false
-        isShowTable.value = true
-      }, 3000)
+      store.dispatch('searchListPayments', {})
+      store.dispatch('searchListImportedBankMovements', {})
+      store.dispatch('searchListMatchingMovements', {})
     }
 
-    createField()
-    createFieldAccount()
-
     return {
-      bankAccount,
-      bPartner,
-      totalPayment,
-      totalPayment1,
-      transactionDate,
-      modeSearch,
-      modeSearchOptions,
-      isShowTable,
       isPanelFooter,
-      createField,
-      createFieldAccount,
-      isMandatoryField,
-      isDisplayedField,
-      // isHiddenField,
-      isReadOnlyField,
-      generalInfoSearch,
-      searchTableHeader,
-      getSearchInfoList,
-      getLookupList,
-      isDisplayedDefault,
+      bankAccount,
+      businessPartner,
+      paymentAmountTo,
+      paymentAmountFrom,
+      transactionDate,
+      matchMode,
+      listBankAccount,
+      listBPartners,
+      listMatchMode,
       searchMatch
     }
   }
@@ -387,6 +330,11 @@ export default defineComponent({
   }
   .el-form--inline .el-form-item {
     margin: 0px;
+  }
+}
+.el-input {
+  .el-input__inner {
+    text-align-last: end !important;
   }
 }
 </style>
