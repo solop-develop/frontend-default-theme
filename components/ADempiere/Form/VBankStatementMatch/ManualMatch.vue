@@ -217,16 +217,16 @@ export default defineComponent({
       switch (column) {
         case 'business_partner':
           display = data.business_partner.name
-          break;
+          break
         case 'tender_type':
           display = data.tender_type.name
-          break;
+          break
         case 'currency':
           display = data.currency.iso_code
-          break;
+          break
         default:
           display = data[column]
-          break;
+          break
       }
       return display
     }

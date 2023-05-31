@@ -139,7 +139,7 @@ export default defineComponent({
 
     const validate = computed(() => {
       const { matchMode, bankAccounts } = store.getters.getCriteriaVBankStatement
-        return isEmptyValue(bankAccounts.id) || isEmptyValue(matchMode.value)
+      return isEmptyValue(bankAccounts.id) || isEmptyValue(matchMode.value)
     })
 
     return {

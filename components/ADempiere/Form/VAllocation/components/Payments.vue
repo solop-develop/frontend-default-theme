@@ -358,12 +358,6 @@ export default defineComponent({
       //     amount: a.amount
       //   }
       // })
-      const baru = list.map(a => a.amount)
-      const alo = baru.reduce((valorAnterior, valorActual, indice, vector) => {
-        const epale = -((valorAnterior) + (valorActual))
-        // console.log({ ...epale, valorAnterior })
-        return epale
-      })
       const qlq = list.reduce((valorAnterior, valorActual, indice, vector) => {
         if (valorAnterior.transactionType === 'P' && valorActual.transactionType === 'P') {
           const amount = valorAnterior.amount - valorActual.amount
