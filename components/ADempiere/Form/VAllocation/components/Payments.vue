@@ -170,7 +170,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 label-position="left"
                 style="padding: 10px !important;"
               >
-                <el-col :span="6">
+                <el-col :span="4">
                   <el-form-item
                     :label="$t('form.VAllocation.description.difference')"
                   >
@@ -181,7 +181,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </el-tag>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
+                  <el-form-item
+                    :label="$t('form.VAllocation.searchCriteria.date')"
+                  >
+                    <el-date-picker
+                      v-model="currentDateProcess"
+                      type="date"
+                      style="width: 100%;"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="5">
                   <el-form-item
                     :label="$t('form.VAllocation.description.charge')"
                   >
@@ -202,12 +213,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
                   <el-form-item
                     :label="$t('form.VAllocation.description.organization')"
                   >
                     <el-select
-                      v-model="organizationsId"
+                      v-model="transactionOrganizationId"
                       style="width: 100%;"
                       filterable
                       clearable
@@ -223,7 +234,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
                   <el-form-item
                     :label="$t('form.VAllocation.description.description')"
                   >
@@ -281,10 +292,10 @@ export default defineComponent({
     const listPaymentsTable = ref(null)
     const listInvocesTable = ref(null)
     const optionsCharges = ref([])
-    const organizationsId = ref('')
-    const description = ref('')
+    // const transactionOrganizationId = ref('')
+    // const description = ref('')
     const tableData = ref([])
-    const charges = ref('')
+    // const charges = ref('')
 
     /**
      * computed
@@ -381,7 +392,76 @@ export default defineComponent({
         }
       })
       if (isEmptyValue(result)) return 0
+      store.commit('setProcess', {
+        attribute: 'totalDifference',
+        value: result.amount
+      })
       return result.amount
+    })
+
+    const currentDateProcess = computed({
+      // getter
+      get() {
+        const { date } = store.getters.getProcess
+        // return date
+        return date
+      },
+      // setter
+      set(value) {
+        store.commit('setProcess', {
+          attribute: 'date',
+          value
+        })
+      }
+    })
+
+    const charges = computed({
+      // getter
+      get() {
+        const { chargeId } = store.getters.getProcess
+        // return date
+        return chargeId
+      },
+      // setter
+      set(value) {
+        console.log({ value })
+        store.commit('setProcess', {
+          attribute: 'chargeId',
+          value
+        })
+      }
+    })
+
+    const description = computed({
+      // getter
+      get() {
+        const { description } = store.getters.getProcess
+        // return date
+        return description
+      },
+      // setter
+      set(value) {
+        store.commit('setProcess', {
+          attribute: 'description',
+          value
+        })
+      }
+    })
+
+    const transactionOrganizationId = computed({
+      // getter
+      get() {
+        const { transactionOrganizationId } = store.getters.getProcess
+        // return date
+        return transactionOrganizationId
+      },
+      // setter
+      set(value) {
+        store.commit('setProcess', {
+          attribute: 'transactionOrganizationId',
+          value
+        })
+      }
     })
 
     /**
@@ -535,7 +615,7 @@ export default defineComponent({
       headersInvoice,
       optionsCharges,
       charges,
-      organizationsId,
+      transactionOrganizationId,
       optionsOrganizations,
       listInvocesTable,
       listPaymentsTable,
@@ -547,6 +627,7 @@ export default defineComponent({
       selectListPayments,
       selectListInvoces,
       listDifference,
+      currentDateProcess,
       // Methods
       handleSelectionPaymentsAll,
       handleSelectionInvocesAll,
