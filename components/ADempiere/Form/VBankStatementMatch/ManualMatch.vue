@@ -9,12 +9,13 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <div style="height: 100% !important;">
     <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100% !important;">
@@ -40,11 +41,19 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               v-for="(fieldAttributes, key) in headerTableImported"
               :key="key"
               :column-key="fieldAttributes.columnName"
-              :prop="fieldAttributes.columnName"
               :label="fieldAttributes.label"
               :min-width="fieldAttributes.width"
               :align="fieldAttributes.align"
-            />
+            >
+              <template slot-scope="scope">
+                <span v-if="fieldAttributes.columnName === 'is_receipt'">
+                  <i v-if="scope.row[fieldAttributes.columnName]" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
+                </span>
+                <span v-else>
+                  {{ scope.row[fieldAttributes.columnName] }}
+                </span>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </div>
@@ -58,21 +67,33 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           <el-table
             :data="systemPayments"
             :border="true"
+            @current-change="handleSelectPayment"
           >
             <el-table-column
-              type="selection"
               :align="'center'"
-              width="35"
-            />
+              width="55"
+            >
+              <template slot-scope="scope">
+                <i v-if="scope.row.isSelection" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
+              </template>
+            </el-table-column>
             <el-table-column
               v-for="(fieldAttributes, key) in headerTableSystem"
               :key="key"
               :column-key="fieldAttributes.columnName"
-              :prop="fieldAttributes.columnName"
               :label="fieldAttributes.label"
               :min-width="fieldAttributes.width"
               :align="fieldAttributes.align"
-            />
+            >
+              <template slot-scope="scope">
+                <span v-if="fieldAttributes.columnName === 'is_receipt'">
+                  <i v-if="scope.row[fieldAttributes.columnName]" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
+                </span>
+                <span v-else>
+                  {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
+                </span>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </div>
@@ -80,17 +101,24 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
+<script>
+import { defineComponent, computed, ref } from '@vue/composition-api'
+
+import store from '@/store'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'ManualMatch',
+
   setup(props, { root }) {
     /**
     * Refs
     */
-
-    const systemPayments = ref([])
+    const systemPayments = computed(() => {
+      return store.getters.getListPaymentsVBankStatement
+    })
     const headerTableSystem = ref([
       {
         label: 'Fecha de la Transacción',
@@ -100,25 +128,25 @@ export default defineComponent({
       },
       {
         label: 'Cobros',
-        columnName: 'receipt',
-        align: 'left',
+        columnName: 'is_receipt',
+        align: 'center',
         width: '100'
       },
       {
         label: 'Document No',
-        columnName: 'documentNo',
+        columnName: 'document_no',
         align: 'left',
         width: '150'
       },
       {
         label: 'Socio del Negocio',
-        columnName: 'businessPartner',
+        columnName: 'business_partner',
         align: 'left',
         width: '180'
       },
       {
         label: 'Tipo de Pago',
-        columnName: 'tenderType',
+        columnName: 'tender_type',
         align: 'left',
         width: '150'
       },
@@ -130,7 +158,7 @@ export default defineComponent({
       },
       {
         label: 'Cantidad',
-        columnName: 'quantity',
+        columnName: 'amount',
         align: 'right',
         width: '120'
       },
@@ -188,11 +216,52 @@ export default defineComponent({
       }
     ])
 
+    function displayDataColumn(data, column) {
+      let display
+      switch (column) {
+        case 'business_partner':
+          display = data.business_partner.name
+          break
+        case 'tender_type':
+          display = data.tender_type.name
+          break
+        case 'currency':
+          display = data.currency.iso_code
+          break
+        default:
+          display = data[column]
+          break
+      }
+      return display
+    }
+
+    function handleSelectPayment(row) {
+      if (isEmptyValue(row)) return
+      row.isSelection = !row.isSelection
+      const list = systemPayments.value.filter(from => from.id !== row.id)
+      store.commit('updateAttributeCriteria', {
+        attribute: 'select',
+        criteria: 'paymentList',
+        value: row
+      })
+      cleanSelection(list)
+    }
+
+    function cleanSelection(list) {
+      if (isEmptyValue(list)) return
+      list.forEach(element => {
+        element.isSelection = false
+      })
+    }
+
     return {
       systemPayments,
       headerTableSystem,
       importedMovements,
-      headerTableImported
+      headerTableImported,
+      displayDataColumn,
+      handleSelectPayment,
+      cleanSelection
     }
   }
 })
@@ -229,5 +298,4 @@ export default defineComponent({
     height: 85% !important;
   }
 }
-
 </style>

@@ -32,6 +32,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               border
               style="width: 100%;height: 90%;"
               @select="handleSelectionPayments"
+              @select-all="handleSelectionPaymentsAll"
             >
               <el-table-column
                 type="selection"
@@ -99,6 +100,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               border
               style="width: 100%;height: 90%;"
               @select="handleSelectionInvoces"
+              @select-all="handleSelectionInvocesAll"
             >
               <el-table-column
                 type="selection"
@@ -168,18 +170,29 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 label-position="left"
                 style="padding: 10px !important;"
               >
-                <el-col :span="6">
+                <el-col :span="4">
                   <el-form-item
                     :label="$t('form.VAllocation.description.difference')"
                   >
                     <el-tag>
                       <b style="text-align: right; font-size: 19px">
-                        {{ difference }}
+                        {{ listDifference }}
                       </b>
                     </el-tag>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
+                  <el-form-item
+                    :label="$t('form.VAllocation.searchCriteria.date')"
+                  >
+                    <el-date-picker
+                      v-model="currentDateProcess"
+                      type="date"
+                      style="width: 100%;"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="5">
                   <el-form-item
                     :label="$t('form.VAllocation.description.charge')"
                   >
@@ -200,12 +213,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
                   <el-form-item
                     :label="$t('form.VAllocation.description.organization')"
                   >
                     <el-select
-                      v-model="organizationsId"
+                      v-model="transactionOrganizationId"
                       style="width: 100%;"
                       filterable
                       clearable
@@ -221,7 +234,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
                   <el-form-item
                     :label="$t('form.VAllocation.description.description')"
                   >
@@ -279,10 +292,10 @@ export default defineComponent({
     const listPaymentsTable = ref(null)
     const listInvocesTable = ref(null)
     const optionsCharges = ref([])
-    const organizationsId = ref('')
-    const description = ref('')
+    // const transactionOrganizationId = ref('')
+    // const description = ref('')
     const tableData = ref([])
-    const charges = ref('')
+    // const charges = ref('')
 
     /**
      * computed
@@ -296,35 +309,45 @@ export default defineComponent({
       return store.getters.getSelectListInvoces
     })
 
-    const difference = computed(() => {
-      // const sumPayments = selectListInvoces.value.map(list => list.applied)
-      if (!isEmptyValue(selectListPayments.value) && !isEmptyValue(selectListInvoces.value)) {
-        const sumPaymentsApplied = selectListPayments.value.map(list => list.applied)
-        const sumPayments = sumPaymentsApplied.reduce((valorAnterior, valorActual, indice, vector) => {
-          return valorAnterior + valorActual
-        })
-        const sumInvocesApplied = selectListInvoces.value.map(list => list.applied)
-        const sumInvoces = sumInvocesApplied.reduce((valorAnterior, valorActual, indice, vector) => {
-          return valorAnterior + valorActual
-        })
-        const array3 = [sumInvoces, sumPayments]
-        const alo = array3.reduce((valorAnterior, valorActual, indice, vector) => {
-          return valorAnterior + valorActual
-        })
-        return alo
-      } else if (!isEmptyValue(selectListPayments.value)) {
-        const sumPayments = selectListPayments.value.map(list => list.applied)
-        return sumPayments.reduce((valorAnterior, valorActual, indice, vector) => {
-          return valorAnterior + valorActual
-        })
-      } else if (!isEmptyValue(selectListInvoces.value)) {
-        const sumPayments = selectListInvoces.value.map(list => list.applied)
-        return sumPayments.reduce((valorAnterior, valorActual, indice, vector) => {
-          return valorAnterior + valorActual
-        })
-        // return 2
+    const difference = computed({
+      // getter
+      get() {
+        if (!isEmptyValue(selectListPayments.value) && !isEmptyValue(selectListInvoces.value)) {
+          const sumPaymentsApplied = selectListPayments.value.map(list => list.applied)
+          const sumPayments = sumPaymentsApplied.reduce((valorAnterior, valorActual, indice, vector) => {
+            return valorAnterior + valorActual
+          })
+          const sumInvocesApplied = selectListInvoces.value.map(list => list.applied)
+          const sumInvoces = sumInvocesApplied.reduce((valorAnterior, valorActual, indice, vector) => {
+            return valorAnterior + valorActual
+          })
+          const array3 = [sumInvoces, sumPayments]
+          const result = array3.reduce((valorAnterior, valorActual, indice, vector) => {
+            return valorAnterior + valorActual
+          })
+          return result
+        } else if (!isEmptyValue(selectListPayments.value)) {
+          const sumPayments = selectListPayments.value.map(list => {
+            return {
+              transactionType: list.transaction_type,
+              amount: list.applied
+            }
+          })
+          return sumPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+            return valorAnterior.amount + valorActual.amount
+          })
+        } else if (!isEmptyValue(selectListInvoces.value)) {
+          const sumPayments = selectListInvoces.value.map(list => list.applied)
+          return sumPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+            return valorAnterior + valorActual
+          })
+        }
+        return 0
+      },
+      // setter
+      set(value) {
+        return value
       }
-      return 0
     })
 
     const listPayments = computed(() => {
@@ -333,6 +356,112 @@ export default defineComponent({
 
     const listInvoces = computed(() => {
       return store.getters.getListVAllocation.invoce
+    })
+
+    const listDifference = computed(() => {
+      const list = store.getters.getListDifference
+      if (isEmptyValue(list)) return 0
+      const result = list.reduce((valorAnterior, valorActual, indice, vector) => {
+        if (valorAnterior.transactionType === 'P' && valorActual.transactionType === 'P') {
+          const amount = valorAnterior.amount - valorActual.amount
+          return {
+            transactionType: valorAnterior.transactionType,
+            amount
+          }
+        }
+        if (valorAnterior.transactionType === 'P' && valorActual.transactionType === 'R') {
+          const amount = +(valorAnterior.amount - valorActual.amount)
+          return {
+            transactionType: valorAnterior.transactionType,
+            amount
+          }
+        }
+        if (valorAnterior.transactionType === 'R' && valorActual.transactionType === 'P') {
+          const amount = +(valorAnterior.amount - valorActual.amount)
+          return {
+            transactionType: valorAnterior.transactionType,
+            amount
+          }
+        }
+        if (valorAnterior.transactionType === 'R' && valorActual.transactionType === 'R') {
+          const amount = valorAnterior.amount - valorActual.amount
+          return {
+            transactionType: valorActual.transactionType,
+            amount
+          }
+        }
+      })
+      if (isEmptyValue(result)) return 0
+      store.commit('setProcess', {
+        attribute: 'totalDifference',
+        value: result.amount
+      })
+      return result.amount
+    })
+
+    const currentDateProcess = computed({
+      // getter
+      get() {
+        const { date } = store.getters.getProcess
+        // return date
+        return date
+      },
+      // setter
+      set(value) {
+        store.commit('setProcess', {
+          attribute: 'date',
+          value
+        })
+      }
+    })
+
+    const charges = computed({
+      // getter
+      get() {
+        const { chargeId } = store.getters.getProcess
+        // return date
+        return chargeId
+      },
+      // setter
+      set(value) {
+        console.log({ value })
+        store.commit('setProcess', {
+          attribute: 'chargeId',
+          value
+        })
+      }
+    })
+
+    const description = computed({
+      // getter
+      get() {
+        const { description } = store.getters.getProcess
+        // return date
+        return description
+      },
+      // setter
+      set(value) {
+        store.commit('setProcess', {
+          attribute: 'description',
+          value
+        })
+      }
+    })
+
+    const transactionOrganizationId = computed({
+      // getter
+      get() {
+        const { transactionOrganizationId } = store.getters.getProcess
+        // return date
+        return transactionOrganizationId
+      },
+      // setter
+      set(value) {
+        store.commit('setProcess', {
+          attribute: 'transactionOrganizationId',
+          value
+        })
+      }
     })
 
     /**
@@ -400,48 +529,68 @@ export default defineComponent({
         })
     }
 
-    function handleSelectionPayments(select, row) {
-      toggleSelectionPayments(row)
+    function handleSelectionPayments(selection, row) {
       const { isSelect, applied, open_amount } = row
       const totalApplied = (applied === 0) ? open_amount : applied
       row.isSelect = !isSelect
       row.applied = totalApplied
       store.commit('setListPayments', listPayments.value)
+      store.commit('setSelectListPayments', selection)
+      store.commit('setListSelectPayments', selection)
+      toggleSelectionPayments(row)
     }
 
-    function handleSelectionInvoces(select, row) {
+    function handleSelectionInvoces(selection, row) {
       const { isSelect, applied, open_amount } = row
       toggleSelectionInvoce(row)
       const totalApplied = (applied === 0) ? open_amount : applied
-      const existTypeTranstation = selectListPayments.value.filter(payment => payment.transaction_type.value === row.transaction_type.value)
       const all = (totalApplied < 0) ? -(totalApplied) : -(totalApplied)
-      console.log(selectListPayments.value, { existTypeTranstation })
-      if (!isEmptyValue(selectListPayments.value) && !isEmptyValue(existTypeTranstation)) {
-        console.log({ all })
-      }
       row.isSelect = !isSelect
       row.applied = all
+      store.commit('setDiference', { row })
+      store.commit('setListSelectInvoices', selection)
       store.commit('setListInvoces', listInvoces.value)
     }
 
+    function handleSelectionInvocesAll(selection, row) {
+      const data = selection.map(list => {
+        const result = (list.applied === 0) ? list.open_amount : list.applied
+        return {
+          ...list,
+          applied: result
+        }
+      })
+      store.commit('setListSelectInvoices', data)
+    }
+
+    function handleSelectionPaymentsAll(selection, row) {
+      store.commit('setListSelectPayments', selection)
+    }
+
     function toggleSelectionInvoce(invoce) {
+      let sumPayments
       const paymentsTypetransaction = selectListPayments.value.filter(payment => payment.transaction_type.value === invoce.transaction_type.value)
       const appliedPayments = paymentsTypetransaction.map(payment => payment.applied)
-      const sumPayments = appliedPayments.reduce((valorAnterior, valorActual, indice, vector) => {
-        return valorAnterior + valorActual
-      })
+      if (!isEmptyValue(sumPayments)) {
+        sumPayments = appliedPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+      }
       const appliedPay = sumPayments - invoce.open_amount
-      console.log({ selectListPayments: selectListPayments.value, invoce, paymentsTypetransaction, appliedPayments, appliedPay })
+      return appliedPay
     }
 
     function toggleSelectionPayments(payment) {
+      let sumPayments
       const invocesTypetransaction = selectListInvoces.value.filter(list => list.transaction_type.value === payment.transaction_type.value)
       const appliedPayments = invocesTypetransaction.map(payment => payment.applied)
-      const sumPayments = appliedPayments.reduce((valorAnterior, valorActual, indice, vector) => {
-        return valorAnterior + valorActual
-      })
+      if (!isEmptyValue(sumPayments)) {
+        sumPayments = appliedPayments.reduce((valorAnterior, valorActual, indice, vector) => {
+          return valorAnterior + valorActual
+        })
+      }
       const appliedPay = sumPayments - payment.open_amount
-      console.log({ selectListPayments: selectListPayments.value, payment, invocesTypetransaction, appliedPayments, appliedPay })
+      return appliedPay
     }
 
     function isCellInput(cell) {
@@ -466,7 +615,7 @@ export default defineComponent({
       headersInvoice,
       optionsCharges,
       charges,
-      organizationsId,
+      transactionOrganizationId,
       optionsOrganizations,
       listInvocesTable,
       listPaymentsTable,
@@ -477,7 +626,11 @@ export default defineComponent({
       difference,
       selectListPayments,
       selectListInvoces,
+      listDifference,
+      currentDateProcess,
       // Methods
+      handleSelectionPaymentsAll,
+      handleSelectionInvocesAll,
       remoteSearchOrganizations,
       handleSelectionPayments,
       handleSelectionInvoces,

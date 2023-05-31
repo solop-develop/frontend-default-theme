@@ -28,39 +28,30 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       </el-steps>
     </div>
     <div style="height: 85% !important;padding: 0px 15px;">
-      <!-- <carousel
-        :step-reference="metadata.fileName"
-        :steps="stepList"
-        :indicator="currentSetp"
-      > -->
       <search-criteria
         v-show="'searchCriteria' === stepList[currentSetp].key"
       />
       <payments
         v-show="'payments' === stepList[currentSetp].key"
       />
-      <summary v-show="'summary' === stepList[currentSetp].key" />
-      <!-- </carousel> -->
     </div>
     <div style="height: 5% !important;text-align: end;padding: 0px 15px;">
       <el-button v-show="currentSetp > 0" type="danger" icon="el-icon-close" plain @click="currentSetp--" />
-      <el-button v-show="currentSetp < 2" type="primary" icon="el-icon-check" plain @click="nextStep" />
-      <!-- <el-button type="success" icon="el-icon-message" plain /> -->
+      <el-button v-show="currentSetp < 2" type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 import lang from '@/lang'
 // components and mixins
-// import Carousel from '@theme/components/ADempiere/Carousel'
-// import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
-// import fieldsList from './fieldList.js'
 import SearchCriteria from './components/SearchCriteria'
 import Payments from './components/Payments'
 import Summary from './components/Summary'
 import store from '@/store'
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'VAllocation',
@@ -96,19 +87,31 @@ export default defineComponent({
         name: lang.t('form.VAllocation.step.selectionPaymentsInvoice'),
         description: '',
         key: 'payments'
-      },
-      {
-        name: lang.t('form.VAllocation.step.summaryAndAdjustment'),
-        key: 'summary'
       }
     ])
 
     const currentSetp = ref(0)
 
+    const isDisabledProcess = computed(() => {
+      const {
+        date,
+        chargeId,
+        transactionOrganizationId
+      } = store.getters.getProcess
+      return (currentSetp.value > 0) &&
+        (
+          isEmptyValue(date) ||
+          isEmptyValue(chargeId) ||
+          isEmptyValue(transactionOrganizationId)
+        )
+    })
+
     function nextStep(step) {
-      console.log(currentSetp.value)
       currentSetp.value++
-      if (stepList.value[currentSetp.value].key === 'payments') {
+      if (currentSetp.value > 1) {
+        store.dispatch('processSend')
+      }
+      if (!isEmptyValue(stepList.value[currentSetp.value]) && stepList.value[currentSetp.value].key === 'payments') {
         store.dispatch('findListPayment')
         store.dispatch('findListInvoices')
       }
@@ -123,6 +126,8 @@ export default defineComponent({
       // Refs
       stepList,
       currentSetp,
+      // Computed
+      isDisabledProcess,
       // Methods
       nextStep
     }
