@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com, Elsio Sanchez elsiosanche@gmail.com www.erpya.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -8,10 +8,10 @@
  (at your option) any later version.
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -60,10 +60,10 @@ import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
-// utils and helper methods
+// Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 export default defineComponent({
@@ -141,7 +141,10 @@ export default defineComponent({
     const isDisabledDone = computed(() => {
       if (storedModalDialog.value.isDisabledDone) {
         return Boolean(
-          storedModalDialog.value.isDisabledDone()
+          storedModalDialog.value.isDisabledDone({
+            parentUuid: props.parentUuid,
+            containerUuid: props.containerUuid
+          })
         )
       }
       return false
@@ -155,7 +158,10 @@ export default defineComponent({
 
     const loadModal = () => {
       if (!isEmptyValue(storedModalDialog.value.beforeOpen)) {
-        storedModalDialog.value.beforeOpen()
+        storedModalDialog.value.beforeOpen({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
       }
 
       storedModalDialog.value.loadData()
@@ -181,7 +187,10 @@ export default defineComponent({
     const doneButton = () => {
       closeDialog()
       // call custom function to done
-      storedModalDialog.value.doneMethod()
+      storedModalDialog.value.doneMethod({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
       props.confirmAction()
     }
     if (isShowed.effect && isShowed.value) {
