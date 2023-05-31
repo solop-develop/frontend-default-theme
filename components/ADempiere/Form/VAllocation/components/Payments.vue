@@ -311,10 +311,10 @@ export default defineComponent({
             return valorAnterior + valorActual
           })
           const array3 = [sumInvoces, sumPayments]
-          const alo = array3.reduce((valorAnterior, valorActual, indice, vector) => {
+          const result = array3.reduce((valorAnterior, valorActual, indice, vector) => {
             return valorAnterior + valorActual
           })
-          return alo
+          return result
         } else if (!isEmptyValue(selectListPayments.value)) {
           const sumPayments = selectListPayments.value.map(list => {
             return {
@@ -350,15 +350,7 @@ export default defineComponent({
     const listDifference = computed(() => {
       const list = store.getters.getListDifference
       if (isEmptyValue(list)) return 0
-      // console.log({ list })
-      // const alo = list.map(a => {
-      //   return {
-      //     ...a,
-      //     transactionType: a.transactionType,
-      //     amount: a.amount
-      //   }
-      // })
-      const qlq = list.reduce((valorAnterior, valorActual, indice, vector) => {
+      const result = list.reduce((valorAnterior, valorActual, indice, vector) => {
         if (valorAnterior.transactionType === 'P' && valorActual.transactionType === 'P') {
           const amount = valorAnterior.amount - valorActual.amount
           return {
@@ -388,9 +380,8 @@ export default defineComponent({
           }
         }
       })
-      // console.log(alo, list, '|', qlq.amount)
-      if (isEmptyValue(qlq)) return 0
-      return qlq.amount
+      if (isEmptyValue(result)) return 0
+      return result.amount
     })
 
     /**
@@ -482,16 +473,14 @@ export default defineComponent({
     }
 
     function handleSelectionInvocesAll(selection, row) {
-      const qlq = selection.map(list => {
-        const alo = (list.applied === 0) ? list.open_amount : list.applied
-        // console.log({ alo }, listDifference.value)
+      const data = selection.map(list => {
+        const result = (list.applied === 0) ? list.open_amount : list.applied
         return {
           ...list,
-          applied: alo
+          applied: result
         }
       })
-      // console.log({ qlq })
-      store.commit('setListSelectInvoices', qlq)
+      store.commit('setListSelectInvoices', data)
     }
 
     function handleSelectionPaymentsAll(selection, row) {
