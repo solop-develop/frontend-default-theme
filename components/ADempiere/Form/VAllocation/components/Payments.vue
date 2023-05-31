@@ -350,7 +350,7 @@ export default defineComponent({
     const listDifference = computed(() => {
       const list = store.getters.getListDifference
       if (isEmptyValue(list)) return 0
-      console.log({ list })
+      // console.log({ list })
       // const alo = list.map(a => {
       //   return {
       //     ...a,
@@ -361,7 +361,7 @@ export default defineComponent({
       const baru = list.map(a => a.amount)
       const alo = baru.reduce((valorAnterior, valorActual, indice, vector) => {
         const epale = -((valorAnterior) + (valorActual))
-        console.log({ ...epale, valorAnterior })
+        // console.log({ ...epale, valorAnterior })
         return epale
       })
       const qlq = list.reduce((valorAnterior, valorActual, indice, vector) => {
@@ -394,7 +394,7 @@ export default defineComponent({
           }
         }
       })
-      console.log(alo, list, '|', qlq.amount)
+      // console.log(alo, list, '|', qlq.amount)
       if (isEmptyValue(qlq)) return 0
       return qlq.amount
     })
@@ -490,13 +490,13 @@ export default defineComponent({
     function handleSelectionInvocesAll(selection, row) {
       const qlq = selection.map(list => {
         const alo = (list.applied === 0) ? list.open_amount : list.applied
-        console.log({ alo }, listDifference.value)
+        // console.log({ alo }, listDifference.value)
         return {
           ...list,
           applied: alo
         }
       })
-      console.log({ qlq })
+      // console.log({ qlq })
       store.commit('setListSelectInvoices', qlq)
     }
 
