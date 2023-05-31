@@ -220,7 +220,7 @@ export default defineComponent({
     })
 
     const isCreateNew = computed(() => {
-      return Boolean(root.$route.query.action === 'create-new')
+      return isEmptyValue(store.getters.getUuidOfContainer(currentTabMetadata.value.firstTabUuid))
     })
 
     function isDisabledTab(key) {
