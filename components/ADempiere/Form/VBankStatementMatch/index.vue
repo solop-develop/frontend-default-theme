@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
 Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,12 +9,13 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https:www.gnu.org/licenses/>.
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <div style="height: -webkit-fill-available;">
     <div style="height: 10% !important;">
@@ -73,19 +74,27 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, ref, computed } from '@vue/composition-api'
+
 import lang from '@/lang'
 import store from '@/store'
-import { isEmptyValue } from '@/utils/ADempiere'
+
+// Components and Mixins
 import SearchCriteria from './SearchCriteria.vue'
 import AutomaticMatch from './AutomaticMatch.vue'
 import ManualMatch from './ManualMatch.vue'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere'
+
 export default defineComponent({
   name: 'VBankStatementMatch',
+
   components: {
     SearchCriteria,
     AutomaticMatch,
     ManualMatch
   },
+
   props: {
     metadata: {
       type: Object,
@@ -94,6 +103,7 @@ export default defineComponent({
       }
     }
   },
+
   setup(props, { root }) {
     /**
     * Refs
@@ -119,7 +129,6 @@ export default defineComponent({
     /**
     * Computed
     */
-
     const isBack = computed(() => {
       return currentSetp.value === 1
     })
