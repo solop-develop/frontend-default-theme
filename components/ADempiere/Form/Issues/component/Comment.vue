@@ -247,7 +247,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <svg-icon icon-class="calendar" style="font-size: 16px;" />
                             {{ $t('issues.nextActionDate') + ': ' }}
                             <i v-if="!isEmptyValue(newDateNextAction)">
-                              {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                              {{ formatDate({
+                                value: newDateNextAction
+                              }) }}
                             </i>
                           </b>
                         </el-button>
@@ -478,7 +480,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                               <svg-icon icon-class="calendar" style="font-size: 16px;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
                               <i v-if="currentIssues.date_next_action > 0">
-                                {{ translateDateByLong(currentIssues.date_next_action) }}
+                                {{ formatDate({
+                                  value: currentIssues.date_next_action
+                                }) }}
                               </i>
                             </b>
                           </el-button>
@@ -882,7 +886,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <svg-icon icon-class="calendar" style="font-size: 16px;" />
                             {{ $t('issues.nextActionDate') + ': ' }}
                             <i v-if="!isEmptyValue(newDateNextAction)">
-                              {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                              {{ formatDate({
+                                value: newDateNextAction
+                              }) }}
                             </i>
                           </b>
                         </el-button>
@@ -1188,7 +1194,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                               <svg-icon icon-class="calendar" style="font-size: 16px;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
                               <i v-if="currentIssues.date_next_action > 0">
-                                {{ translateDateByLong(currentIssues.date_next_action) }}
+                                {{ formatDate({
+                                  value: currentIssues.date_next_action
+                                }) }}
                               </i>
                             </b>
                           </el-button>

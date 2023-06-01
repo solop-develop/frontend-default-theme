@@ -141,7 +141,9 @@
                               </b>
                             </template>
                             <span v-if="scope.row.date_next_action > 0">
-                              {{ translateDateByLong(scope.row.date_next_action) }}
+                              {{ formatDate({
+                                value: scope.row.date_next_action
+                              }) }}
                             </span>
                           </el-descriptions-item>
                         </el-descriptions>
@@ -161,7 +163,9 @@
                                 {{ $t('issues.nextActionDate') + ': ' }}
                               </b>
                               <span v-if="scope.row.date_next_action > 0">
-                                {{ translateDateByLong(scope.row.date_next_action) }}
+                                {{ formatDate({
+                                  value: scope.row.date_next_action
+                                }) }}
                               </span>
                             </i>
                           </p>
@@ -247,7 +251,7 @@ import RecordTime from './recordTime.vue'
 import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
 
 // Utils and Helper Methods
-import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
+import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 
 export default defineComponent({
@@ -370,7 +374,6 @@ export default defineComponent({
     return {
       message,
       listIssues,
-      translateDateByLong,
       //
       priority,
       typeRequest,
@@ -382,6 +385,7 @@ export default defineComponent({
       // methods
       dueTypeColor,
       dueTypeColorDescription,
+      formatDate,
       selectIssue,
       newIssues,
       loadIssues,
