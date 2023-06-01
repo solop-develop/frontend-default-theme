@@ -100,6 +100,7 @@ export default defineComponent({
     })
 
     function nextStep(step) {
+      if (currentSetp > 2) return
       currentSetp.value++
       if (currentSetp.value > 1) {
         store.dispatch('processSend')
