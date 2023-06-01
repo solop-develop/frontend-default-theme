@@ -246,7 +246,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <i style="font-size: 12px;color: #82848a;">
                               {{ $t('issues.nextActionDate') + ': ' }}
                               <span v-if="!isEmptyValue(newDateNextAction)">
-                                {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                                {{ formatDate({
+                                  value: newDateNextAction
+                                }) }}
                               </span>
                             </i>
                           </el-button>
@@ -271,7 +273,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <b>
                               {{ $t('issues.nextActionDate') + ': ' }}
                               <i v-if="!isEmptyValue(newDateNextAction)" style="font-size: 11px !important;">
-                                {{ translateDateByLong(Date.parse(newDateNextAction)) }}
+                                {{ formatDate({
+                                  value: newDateNextAction
+                                }) }}
                               </i>
                             </b>
                           </el-button>
@@ -565,7 +569,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           </el-form>
                           <el-button slot="reference" plain size="mini" type="text" style="margin: 0px;font-size: 15px;color: black;">
                             <i style="font-size: 12px;color: #82848a;">
-                              {{ $t('issues.nextActionDate') + ': ' }} {{ translateDateByLong(currentIssues.date_next_action) }}
+                              {{ $t('issues.nextActionDate') + ': ' }}
+                              {{ formatDate({
+                                value: currentIssues.date_next_action
+                              }) }}
                             </i>
                           </el-button>
                         </el-popover>
@@ -590,7 +597,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                               <svg-icon icon-class="user" style="font-size: 13px !important;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
                               <i v-if="currentIssues.date_next_action > 0" style="font-size: 11px !important;">
-                                {{ translateDateByLong(currentIssues.date_next_action) }}
+                                {{ formatDate({
+                                  value: currentIssues.date_next_action
+                                }) }}
                               </i>
                             </b>
                           </el-button>
