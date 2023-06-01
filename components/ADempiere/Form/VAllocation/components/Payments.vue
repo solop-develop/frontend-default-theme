@@ -424,7 +424,6 @@ export default defineComponent({
       },
       // setter
       set(value) {
-        console.log({ value })
         store.commit('setProcess', {
           attribute: 'chargeId',
           value

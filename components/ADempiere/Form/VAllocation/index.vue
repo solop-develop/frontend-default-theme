@@ -94,19 +94,13 @@ export default defineComponent({
 
     const isDisabledProcess = computed(() => {
       const {
-        date,
-        chargeId,
-        transactionOrganizationId
-      } = store.getters.getProcess
-      return (currentSetp.value > 0) &&
-        (
-          isEmptyValue(date) ||
-          isEmptyValue(chargeId) ||
-          isEmptyValue(transactionOrganizationId)
-        )
+        businessPartnerId
+      } = store.getters.getSearchFilter
+      return (currentSetp.value > 0) && isEmptyValue(businessPartnerId)
     })
 
     function nextStep(step) {
+      if (currentSetp > 2) return
       currentSetp.value++
       if (currentSetp.value > 1) {
         store.dispatch('processSend')

@@ -320,7 +320,6 @@ export default defineComponent({
       },
       // setter
       set(date) {
-        console.log({ date })
         store.commit('setDate', date)
       }
     })
@@ -350,7 +349,6 @@ export default defineComponent({
           const { records } = response
           optionsBusinessPartners.value = records.map(business => {
             // const { DisplayColumn } = business.values
-            // console.log({ DisplayColumn })
             return {
               ...business,
               label: business.values.DisplayColumn
