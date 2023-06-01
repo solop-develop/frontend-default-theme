@@ -45,11 +45,14 @@
                   <b>
                     {{ $t('issues.expirationType') }}
                   </b>
-                  <el-tag :style="dueTypeColorDescription(scope.row)">
+                  <el-tag :style="{ color: dueTypeColor(scope.row), margin: '0px' }">
                     {{ scope.row.due_type.name }}
                   </el-tag>
                   <b slot="reference" style="font-size: 30px;padding-top: 10px;padding-left: 5px;padding-right: 5px;">
-                    <svg-icon icon-class="issues" :style="dueTypeColor(scope.row)" />
+                    <svg-icon
+                      icon-class="issues"
+                      :style="{ color: dueTypeColor(scope.row), margin: '20px 0px 0px 0px' }"
+                    />
                   </b>
                 </el-popover>
 
@@ -129,7 +132,7 @@
                                 {{ $t('issues.expirationType') }}
                               </b>
                             </template>
-                            <el-tag :style="dueTypeColorDescription(scope.row)">
+                            <el-tag :style="{ color: dueTypeColor(scope.row), margin: '0px' }">
                               {{ scope.row.due_type.name }}
                             </el-tag>
                           </el-descriptions-item>
@@ -311,33 +314,13 @@ export default defineComponent({
     function dueTypeColor(issue) {
       const { due_type } = issue
       const { value } = due_type
-      const margin = '20px 0px 0px 0px'
       let color = '#3fb950'
       if (value === '5') {
         color = 'orange'
       } else if (value === '3') {
         color = '#ff2121'
       }
-      return {
-        color,
-        margin
-      }
-    }
-
-    function dueTypeColorDescription(issue) {
-      const { due_type } = issue
-      const { value } = due_type
-      const margin = '0px'
-      let color = '#3fb950'
-      if (value === '5') {
-        color = 'orange'
-      } else if (value === '3') {
-        color = '#ff2121'
-      }
-      return {
-        color,
-        margin
-      }
+      return color
     }
 
     function selectIssue(issue) {
@@ -384,7 +367,6 @@ export default defineComponent({
       isShowTitleForm,
       // methods
       dueTypeColor,
-      dueTypeColorDescription,
       formatDate,
       selectIssue,
       newIssues,
