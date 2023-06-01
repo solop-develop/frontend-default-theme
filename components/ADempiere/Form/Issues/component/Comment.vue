@@ -19,6 +19,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <template>
   <span>
     <el-container style="height: 90vh">
+      <!-- {{ $store.getters['settings/getFixedHeader'] }} -->
       <el-header v-if="isMobile" ref="scrollIssues" height="70%" style="overflow: auto;padding: 0px;">
         <el-card v-if="isEmptyValue(currentIssues) || isPanelNewRequest" class="comments-card" style="height: auto;padding: 0px;">
           <div slot="header" class="clearfix">
@@ -1205,106 +1206,206 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </i>
         </el-card>
         <br>
-        <!-- <el-scrollbar ref="scrollTimeLineTabComments" wrap-class="scroll-timeline-from"> -->
-        <el-timeline v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest" style="padding-left: 15px;padding-right: 15px;">
-          <el-timeline-item
-            v-for="(comment, index) in listComments"
-            :key="index"
-            type="primary"
-            :timestamp="translateDateByLong(comment.created)"
-            style="margin-left: 10px;"
-          >
-            <span v-if="comment.issue_comment_type === 1">
-              <svg-icon icon-class="user" />
-              <b>
-                {{ comment.user_name }}
-              </b>
-              {{ logDisplayLanguaje(true, false) }}
-              <b>
-                {{ labelDisplayChange(comment, true) }}
-              </b>
-              <span v-show="!isEmptyValue(labelDisplayChange(comment, false, true))">
-                {{ logDisplayLanguaje(false, true) }}
+        <el-scrollbar v-if="getFixedHeader" ref="scrollTimeLineTabComments" wrap-class="scroll-timeline-from">
+          <el-timeline v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest" style="padding-left: 15px;padding-right: 15px;">
+            <el-timeline-item
+              v-for="(comment, index) in listComments"
+              :key="index"
+              type="primary"
+              :timestamp="translateDateByLong(comment.created)"
+              style="margin-left: 10px;"
+            >
+              <span v-if="comment.issue_comment_type === 1">
+                <svg-icon icon-class="user" />
+                <b>
+                  {{ comment.user_name }}
+                </b>
+                {{ logDisplayLanguaje(true, false) }}
+                <b>
+                  {{ labelDisplayChange(comment, true) }}
+                </b>
+                <span v-show="!isEmptyValue(labelDisplayChange(comment, false, true))">
+                  {{ logDisplayLanguaje(false, true) }}
+                </span>
+                <b>
+                  {{ labelDisplayChange(comment, false, true) }}
+                </b>
               </span>
-              <b>
-                {{ labelDisplayChange(comment, false, true) }}
-              </b>
-            </span>
-            <el-card v-else class="list-comments">
-              <div slot="header" class="list-comments-clearfix">
-                <span>
-                  <svg-icon icon-class="user" /> {{ comment.user_name }}
-                </span>
-                <el-dropdown trigger="click" style="float: right" @command="handleCommand">
-                  <span class="el-dropdown-link">
-                    <el-button type="text" size="mini" style="color: black;">
-                      <b>
-                        <svg-icon icon-class="more-vertical" />
-                      </b>
-                    </el-button>
+              <el-card v-else class="list-comments">
+                <div slot="header" class="list-comments-clearfix">
+                  <span>
+                    <svg-icon icon-class="user" /> {{ comment.user_name }}
                   </span>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item icon="el-icon-edit" :disabled="validateUser(comment)" :command="{comment, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
-                    <el-dropdown-item icon="el-icon-delete" :disabled="validateUser(comment)" :command="{comment, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </div>
-              <div>
-                <!-- <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" /> -->
-                <v-md-preview v-if="!comment.isEdit" :text="comment.result" class="previwer-disable" style="padding: 0px" />
-                <span v-else>
-                  <el-card v-if="commentUpdatePreview" shadow="never">
-                    <el-scrollbar wrap-class="scroll-previwer-disable">
-                      <v-md-preview :text="commentUpdate" class="previwer-disable" style="padding: 0px" height="150px" />
-                    </el-scrollbar>
-                    <!-- <v-md-preview v-if="commentUpdate" :text="comment.result" class="previwer-disable" style="padding: 0px" /> -->
-                    <!-- <div v-markdown="commentUpdate" class="output" /> -->
-                  </el-card>
-                  <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
-                  <v-md-editor
-                    v-else
-                    v-model="commentUpdate"
-                    height="150px"
-                    left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
-                    :toolbar="listOption"
-                    right-toolbar="sync-scroll fullscreen"
-                    mode="edit"
-                  />
-                  <el-button
-                    type="primary"
-                    icon="el-icon-check"
-                    class="button-base-icon"
-                    style="float: right; margin: 10px;"
-                    @click="updateComment(comment)"
-                  />
-                  <el-button
-                    type="danger"
-                    icon="el-icon-close"
-                    class="button-base-icon"
-                    style="float: right; margin-top: 10px;"
-                    @click="comment.isEdit = !comment.isEdit"
-                  />
-                  <el-button
-                    type="info"
-                    plain
-                    class="button-base-icon"
-                    style="float: right; margin-top: 10px;"
-                    @click="commentUpdate = ''"
-                  >
-                    <svg-icon icon-class="layers-clear" />
-                  </el-button>
-                  <el-checkbox
-                    v-model="commentUpdatePreview"
-                    :label="$t('issues.preview')"
-                    :border="true"
-                    style="float: right; margin-top: 10px;"
-                  />
+                  <el-dropdown trigger="click" style="float: right" @command="handleCommand">
+                    <span class="el-dropdown-link">
+                      <el-button type="text" size="mini" style="color: black;">
+                        <b>
+                          <svg-icon icon-class="more-vertical" />
+                        </b>
+                      </el-button>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item icon="el-icon-edit" :disabled="validateUser(comment)" :command="{comment, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
+                      <el-dropdown-item icon="el-icon-delete" :disabled="validateUser(comment)" :command="{comment, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </div>
+                <div>
+                  <!-- <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" /> -->
+                  <v-md-preview v-if="!comment.isEdit" :text="comment.result" class="previwer-disable" style="padding: 0px" />
+                  <span v-else>
+                    <el-card v-if="commentUpdatePreview" shadow="never">
+                      <el-scrollbar wrap-class="scroll-previwer-disable">
+                        <v-md-preview :text="commentUpdate" class="previwer-disable" style="padding: 0px" height="150px" />
+                      </el-scrollbar>
+                      <!-- <v-md-preview v-if="commentUpdate" :text="comment.result" class="previwer-disable" style="padding: 0px" /> -->
+                      <!-- <div v-markdown="commentUpdate" class="output" /> -->
+                    </el-card>
+                    <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
+                    <v-md-editor
+                      v-else
+                      v-model="commentUpdate"
+                      height="150px"
+                      left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
+                      :toolbar="listOption"
+                      right-toolbar="sync-scroll fullscreen"
+                      mode="edit"
+                    />
+                    <el-button
+                      type="primary"
+                      icon="el-icon-check"
+                      class="button-base-icon"
+                      style="float: right; margin: 10px;"
+                      @click="updateComment(comment)"
+                    />
+                    <el-button
+                      type="danger"
+                      icon="el-icon-close"
+                      class="button-base-icon"
+                      style="float: right; margin-top: 10px;"
+                      @click="comment.isEdit = !comment.isEdit"
+                    />
+                    <el-button
+                      type="info"
+                      plain
+                      class="button-base-icon"
+                      style="float: right; margin-top: 10px;"
+                      @click="commentUpdate = ''"
+                    >
+                      <svg-icon icon-class="layers-clear" />
+                    </el-button>
+                    <el-checkbox
+                      v-model="commentUpdatePreview"
+                      :label="$t('issues.preview')"
+                      :border="true"
+                      style="float: right; margin-top: 10px;"
+                    />
+                  </span>
+                </div>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </el-scrollbar>
+        <span v-else>
+          <el-timeline v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest" style="padding-left: 15px;padding-right: 15px;">
+            <el-timeline-item
+              v-for="(comment, index) in listComments"
+              :key="index"
+              type="primary"
+              :timestamp="translateDateByLong(comment.created)"
+              style="margin-left: 10px;"
+            >
+              <span v-if="comment.issue_comment_type === 1">
+                <svg-icon icon-class="user" />
+                <b>
+                  {{ comment.user_name }}
+                </b>
+                {{ logDisplayLanguaje(true, false) }}
+                <b>
+                  {{ labelDisplayChange(comment, true) }}
+                </b>
+                <span v-show="!isEmptyValue(labelDisplayChange(comment, false, true))">
+                  {{ logDisplayLanguaje(false, true) }}
                 </span>
-              </div>
-            </el-card>
-          </el-timeline-item>
-        </el-timeline>
-        <!-- </el-scrollbar> -->
+                <b>
+                  {{ labelDisplayChange(comment, false, true) }}
+                </b>
+              </span>
+              <el-card v-else class="list-comments">
+                <div slot="header" class="list-comments-clearfix">
+                  <span>
+                    <svg-icon icon-class="user" /> {{ comment.user_name }}
+                  </span>
+                  <el-dropdown trigger="click" style="float: right" @command="handleCommand">
+                    <span class="el-dropdown-link">
+                      <el-button type="text" size="mini" style="color: black;">
+                        <b>
+                          <svg-icon icon-class="more-vertical" />
+                        </b>
+                      </el-button>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item icon="el-icon-edit" :disabled="validateUser(comment)" :command="{comment, option:'edit'}"> {{ $t('issues.edit') }} </el-dropdown-item>
+                      <el-dropdown-item icon="el-icon-delete" :disabled="validateUser(comment)" :command="{comment, option:'delete'}"> {{ $t('issues.delete') }} </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </div>
+                <div>
+                  <!-- <div v-if="!comment.isEdit" v-markdown="comment.result" class="output" /> -->
+                  <v-md-preview v-if="!comment.isEdit" :text="comment.result" class="previwer-disable" style="padding: 0px" />
+                  <span v-else>
+                    <el-card v-if="commentUpdatePreview" shadow="never">
+                      <el-scrollbar wrap-class="scroll-previwer-disable">
+                        <v-md-preview :text="commentUpdate" class="previwer-disable" style="padding: 0px" height="150px" />
+                      </el-scrollbar>
+                      <!-- <v-md-preview v-if="commentUpdate" :text="comment.result" class="previwer-disable" style="padding: 0px" /> -->
+                      <!-- <div v-markdown="commentUpdate" class="output" /> -->
+                    </el-card>
+                    <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
+                    <v-md-editor
+                      v-else
+                      v-model="commentUpdate"
+                      height="150px"
+                      left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code save | emoji listMailTemplates"
+                      :toolbar="listOption"
+                      right-toolbar="sync-scroll fullscreen"
+                      mode="edit"
+                    />
+                    <el-button
+                      type="primary"
+                      icon="el-icon-check"
+                      class="button-base-icon"
+                      style="float: right; margin: 10px;"
+                      @click="updateComment(comment)"
+                    />
+                    <el-button
+                      type="danger"
+                      icon="el-icon-close"
+                      class="button-base-icon"
+                      style="float: right; margin-top: 10px;"
+                      @click="comment.isEdit = !comment.isEdit"
+                    />
+                    <el-button
+                      type="info"
+                      plain
+                      class="button-base-icon"
+                      style="float: right; margin-top: 10px;"
+                      @click="commentUpdate = ''"
+                    >
+                      <svg-icon icon-class="layers-clear" />
+                    </el-button>
+                    <el-checkbox
+                      v-model="commentUpdatePreview"
+                      :label="$t('issues.preview')"
+                      :border="true"
+                      style="float: right; margin-top: 10px;"
+                    />
+                  </span>
+                </div>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </span>
       </el-header>
       <el-main height="auto" style="height: auto;overflow: auto;padding: 0px 0px 30px !important;">
         <div v-if="!isEmptyValue(currentIssues) && !isPanelNewRequest">
@@ -1542,6 +1643,10 @@ export default defineComponent({
         return listStatuses.value.find(list => list.id === currentStatus.value)
       }
       return ''
+    })
+
+    const getFixedHeader = computed(() => {
+      return store.getters['settings/getFixedHeader']
     })
 
     function findSalesReps(isVisible) {
@@ -2024,6 +2129,7 @@ export default defineComponent({
       currentStatusLabel,
       isShowTitleForm,
       isPanelNewRequest,
+      getFixedHeader,
       listOption,
       isMobile,
       userId,
@@ -2107,8 +2213,11 @@ export default defineComponent({
 .scroll-comments {
   max-height: 320px;
 }
+.scroll-comments-fixed-header {
+  max-height: 320px;
+}
 .scroll-timeline-from {
-  max-height: 280px;
+  max-height: 240px;
 }
 .scroll-previwer-disable {
   max-height: 160px;

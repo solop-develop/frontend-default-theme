@@ -360,9 +360,11 @@ export default defineComponent({
 })
 </script>
 <style lang="scss">
-.el-input.is-disabled {
-  .el-input__inner {
-    text-align-last: end !important;
+.el-input-number {
+  .el-input.is-disabled {
+    .el-input__inner {
+      text-align-last: end !important;
+    }
   }
 }
 </style>
