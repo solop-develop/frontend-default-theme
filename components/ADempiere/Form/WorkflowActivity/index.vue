@@ -77,23 +77,6 @@
                 </el-timeline>
               </el-card>
             </el-header>
-            <!-- <el-main v-if="!isEmptyValue(currentActivity)" :style="isMobile ? 'overflow: auto;padding: 0px;' : 'overflow: auto;padding: 0px;'">
-              <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
-                <div slot="header" class="clearfix">
-                  {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
-                  <el-button style="float: right; padding: 3px 0" type="text" :icon="collapse3 ? 'el-icon-arrow-down' : 'el-icon-arrow-up'" @click="(collapse3 = !collapse3)" />
-                </div>
-                <workflow-diagram
-                  v-if="(!isEmptyValue(workflowStatesList) && !isEmptyValue(currentActivity) && collapse3)"
-                  :node-transition-list="workflowTranstitionsList"
-                  :node-list="workflowStatesList"
-                  :current-node="currentNode"
-                  :orientation="isMobile ? 'vertical' : 'horizontal'"
-                  :workflow-logs="listProcessWorkflow"
-                  :style="isMobile ? 'height: 100% !important;overflow: auto;' : 'height: 100% !important;'"
-                />
-              </el-card>
-            </el-main> -->
           </el-container>
           <el-button
             style="right: 0%;margin-right: 0px;position: absolute;top: 50%;"
@@ -113,9 +96,6 @@
             <el-card id="logsWorkflow" class="box-card" :style="collapse3 ? 'height: 100%;display: contents;' : 'height: 20%'">
               <div slot="header" class="clearfix">
                 {{ $t('form.workflowActivity.filtersSearch.workFlowDiagram') }}
-                <!-- <el-button style="float: right; margin-right: 10px;" type="text" @click="isDiagram = !isDiagram">
-                  <i class="el-icon-close" style="font-size: 18px;" />
-                </el-button> -->
                 <el-button style="float: right; padding: 3px 0" type="text" @click="isDiagram = !isDiagram">
                   <i class="el-icon-close" style="font-size: 18px;" />
                 </el-button>
