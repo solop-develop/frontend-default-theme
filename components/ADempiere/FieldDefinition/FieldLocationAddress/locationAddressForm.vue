@@ -145,7 +145,7 @@ import {
   COLUMNNAME_City, COLUMNNAME_C_City_ID,
   COLUMNNAME_RegionName, COLUMNNAME_C_Region_ID, COLUMNNAME_C_Country_ID
 } from '@/utils/ADempiere/dictionary/field/locationAddress'
-import { LOG_COLUMNS_NAME_LIST, UUID } from '@/utils/ADempiere/constants/systemColumns'
+import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
 // API Request Methods
 import { getLocationAddress } from '@/api/ADempiere/field/location.js'
@@ -537,15 +537,15 @@ export default {
      * @param {object} values
      */
     setParentValues(rowData) {
-      const { containerUuid, columnName, elementName } = this.metadata
-      const { UUID: uuid } = rowData
+      const { containerUuid, columnName } = this.metadata
+      const { C_Location_ID: value, UUID: uuid } = rowData
 
       const displayedValue = this.generateDisplayedValue(rowData)
 
-      let value = rowData[columnName]
-      if (isEmptyValue(value) && !this.metadata.isSameColumnElement) {
-        value = rowData[elementName]
-      }
+      // let value = rowData[columnName]
+      // if (isEmptyValue(value) && !this.metadata.isSameColumnElement) {
+      //   value = rowData[elementName]
+      // }
 
       // set ID value
       this.value = value
@@ -666,11 +666,11 @@ export default {
     },
 
     createNewLocation(attributesList) {
-      const {
-        parentUuid,
-        containerUuid,
-        columnName // 'C_Location_ID' by default
-      } = this.metadata
+      // const {
+      //   parentUuid,
+      //   containerUuid
+      //   // columnName // 'C_Location_ID' by default
+      // } = this.metadata
 
       attributesList = attributesList
         .filter(attribute => {
@@ -682,18 +682,19 @@ export default {
       })
         .then(this.responseManager)
         .then(responseCreate => {
-          const recordUuid = this.$store.getters.getValueOfField({
-            parentUuid,
-            containerUuid,
-            columnName: UUID
-          })
-
-          this.containerManager.actionPerformed({
-            containerUuid,
-            field: this.metadata,
-            value: responseCreate[columnName],
-            recordUuid
-          })
+          // TODO:
+          // const recordUuid = this.$store.getters.getValueOfField({
+          //   parentUuid,
+          //   containerUuid,
+          //   columnName: UUID
+          // })
+          //
+          // this.containerManager.actionPerformed({
+          //   containerUuid,
+          //   field: this.metadata,
+          //   value: responseCreate[columnName],
+          //   recordUuid
+          // })
         })
         .catch(error => {
           this.$message({

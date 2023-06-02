@@ -485,6 +485,10 @@ export default defineComponent({
 
 <style lang="scss">
 .multipleTableBrowser {
+  height: 85%;
+  .el-table {
+    height: 100% !important;
+  }
   .el-table .success-row {
     background: #e8f4ff;
   }
