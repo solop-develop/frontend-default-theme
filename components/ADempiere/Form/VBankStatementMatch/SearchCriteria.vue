@@ -332,9 +332,4 @@ export default defineComponent({
     margin: 0px;
   }
 }
-.el-input {
-  .el-input__inner {
-    text-align-last: end !important;
-  }
-}
 </style>

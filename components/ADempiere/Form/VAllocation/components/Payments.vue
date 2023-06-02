@@ -652,8 +652,10 @@ export default defineComponent({
     padding-left: 20px;
     padding-right: 20px;
   }
-  .el-input--medium .el-input__inner {
-    text-align: end;
+  .el-input-number {
+    .el-input--medium .el-input__inner {
+      text-align: end;
+    }
   }
   .panel-top-search-criteria {
     display: flex;

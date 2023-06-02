@@ -1202,9 +1202,11 @@ export default defineComponent({
     padding: 0px;
   }
 }
-.el-input {
-  .el-input__inner {
-    text-align-last: end !important;
+.el-input-number {
+  .el-input {
+    .el-input__inner {
+      text-align-last: end !important;
+    }
   }
 }
 </style>
