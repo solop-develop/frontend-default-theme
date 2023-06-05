@@ -1,7 +1,7 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Leonel Matos lmatos@erpya.com www.erpya.com
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -46,7 +46,7 @@ import {
 } from '@/utils/ADempiere/dictionaryUtils.js'
 
 export default defineComponent({
-  name: 'DashboardParameters',
+  name: 'ChartParameter',
 
   components: {
     FieldDefinition
