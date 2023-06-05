@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
 Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
   <div class="main-express-receipt">
     <el-card shadow="never">
       <el-row
-        v-for="(dashboardAttributes, index) in list"
+        v-for="(dashboardAttributes, index) in dashboardsList"
         :key="index"
         :gutter="24"
       >
@@ -56,7 +56,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       label-position="top"
                       @submit.native.prevent="notSubmitForm"
                     >
-                      <parameters
+                      <chart-parameter
                         :key="key"
                         :metadata="params"
                         :dashboard-id="dashboardAttributes.id"
@@ -65,7 +65,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   </span>
                 </el-collapse-item>
               </el-collapse>
-              <chart
+              <chart-metrics
                 :metadata="{
                   ...dashboardAttributes,
                   filter: parameters
@@ -92,8 +92,8 @@ import store from '@/store'
 import router from '@/router'
 
 // Components and Mixins
-import chart from './component/chart.vue'
-import Parameters from './component/Parameters.vue'
+import ChartMetrics from './component/chart.vue'
+import ChartParameter from './component/Parameters.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
@@ -102,8 +102,8 @@ export default defineComponent({
   name: 'RecordDashboard',
 
   components: {
-    chart,
-    Parameters
+    ChartMetrics,
+    ChartParameter
   },
 
   setup() {
@@ -111,15 +111,15 @@ export default defineComponent({
     * Ref
     */
     const data = ref('Data')
+
     /**
     * Computed
     */
-    const list = computed(() => {
+    const dashboardsList = computed(() => {
       return store.getters.getListDashboard
     })
 
     const parameters = computed(() => {
-      // const { parameters } = list.value
       const currentRoute = router.app._route
       const values = store.getters.getValuesView({
         containerUuid: currentRoute.meta.uuid + 'Parameters',
@@ -130,22 +130,21 @@ export default defineComponent({
           key: params.columnName
         }
       })
-      const paramsList = values.filter(params => !isEmptyValue(params.key) &&
-        !isEmptyValue(params.value) &&
-        !isEmptyValue(params.columnName))
+      const paramsList = values.filter(params => {
+        return !isEmptyValue(params.key) &&
+          !isEmptyValue(params.value) &&
+          !isEmptyValue(params.columnName)
+      })
+
       return paramsList
     })
-    /**
-    * Methods
-    */
 
     return {
       // Refs
       data,
       // Computed
-      list,
+      dashboardsList,
       parameters
-      // Methods
     }
   }
 })
