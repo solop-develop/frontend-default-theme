@@ -30,6 +30,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+import store from '@/store'
 import router from '@/router'
 
 // Components and Mixins
@@ -78,7 +79,9 @@ export default defineComponent({
     })
 
     const field = computed(() => {
-      return camelizeObjectKeys(props.metadata)
+      const metadata = camelizeObjectKeys(props.metadata)
+      metadata.reference = camelizeObjectKeys(props.metadata.reference)
+      return metadata
     })
 
     const fieldParameters = computed(() => {
@@ -93,6 +96,21 @@ export default defineComponent({
         }
       })
     })
+
+    function getLookupList({ parentUuid, containerUuid, contextColumnNames, columnName, tableName, searchValue, isAddBlankValue, referenceUuid, reference, blankValue }) {
+      return store.dispatch('getLookupListFromServer', {
+        parentUuid,
+        containerUuid,
+        contextColumnNames,
+        tableName,
+        columnName,
+        searchValue,
+        referenceUuid,
+        // app attributes
+        isAddBlankValue,
+        blankValue
+      })
+    }
     const containerManagerList = computed(() => {
       return {
         actionPerformed: () => {},
@@ -102,7 +120,8 @@ export default defineComponent({
         isReadOnlyColumn: ({ field, row }) => { return true },
         isMandatoryField: () => { return false },
         isReadOnlyField: () => { return false },
-        setDefaultValues: () => {}
+        setDefaultValues: () => {},
+        getLookupList
       }
     })
 
