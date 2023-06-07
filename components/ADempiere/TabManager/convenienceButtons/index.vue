@@ -141,6 +141,7 @@ import Vue from 'vue'
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 import language from '@/lang'
 
 // Components and Mixins
@@ -154,7 +155,10 @@ import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns
 import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
-  createNewRecord, refreshRecord, deleteRecord, undoChange
+  createNewRecord,
+  refreshRecord,
+  deleteRecord,
+  undoChange
 } from '@/utils/ADempiere/dictionary/window'
 
 export default defineComponent({
@@ -193,6 +197,8 @@ export default defineComponent({
     const isVisibleConfirmDelete = ref(false)
     const buttonConfirmDelete = ref(null)
     const isSaveRecordLoading = ref(false)
+
+    const currentRoute = router.app._route
 
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
@@ -440,6 +446,12 @@ export default defineComponent({
         recordUuid: recordUuid.value
       })
         .then(response => {
+          const {
+            name,
+            query,
+            params
+          } = currentRoute
+          const { id } = response
           // refresh parent tab on document window
           if (!props.tabAttributes.isParentTab) {
             const { windowType } = store.getters.getStoredWindow(props.parentUuid)
@@ -451,6 +463,19 @@ export default defineComponent({
               })
             }
           }
+
+          router.replace({
+            name,
+            query: {
+              ...query,
+              recordId: id,
+              filters: []
+            },
+            params: {
+              ...params,
+              filters: []
+            }
+          }, () => {})
         })
         .catch(error => {
           console.error('Error saving record', error.message)
