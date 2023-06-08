@@ -145,6 +145,7 @@
                     {{ action.description }}
                   </template>
                 </p>
+                <br v-if="indexSpace(index, actionsList.length)">
               </div>
             </div>
           </el-dropdown-item>
@@ -281,6 +282,14 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Index Space
+     */
+
+    function indexSpace(index, menuList) {
+      return index === (menuList - 1)
+    }
+
     return {
       size,
       actionsList,
@@ -288,6 +297,7 @@ export default defineComponent({
       isWithDefaultAction,
       // methods
       runAction,
+      indexSpace,
       runDefaultAction
     }
   }
@@ -317,7 +327,7 @@ export default defineComponent({
 }
 
 .scroll-child {
-  // max-height: 300px;
+  // max-height: 30px;
   overflow-x: hidden;
 }
 .el-dropdown .el-button-group {
