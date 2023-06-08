@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
+import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -102,6 +102,19 @@ export default defineComponent({
       return GENERAL_INFO_SEARCH_LIST_FORM
     })
 
+    const fieldsListQuery = computed(() => {
+      const fieldsLis = store.getters.getQueryFieldsList({
+        containerUuid: uuidForm.value
+      })
+      if (isEmptyValue(fieldsLis)) return fieldsLis
+      return fieldsLis.map(header => {
+        return {
+          columnName: header.columnName,
+          value: undefined
+        }
+      })
+    })
+
     const showedPopoverGeneralInfoPanel = computed({
       get() {
         return store.getters.getGeneralInfoShow({
@@ -116,11 +129,41 @@ export default defineComponent({
       }
     })
 
+    function getHeader() {
+      props.containerManager.generalInfoSearch({
+        containerUuid: uuidForm.value,
+        parentUuid: props.parentMetadata.parentUuid,
+        tableName: props.parentMetadata.reference.tableName,
+        columnName: props.parentMetadata.columnName,
+        uuid: props.parentMetadata.uuid,
+        contextColumnNames: props.parentMetadata.reference.contextColumnNames
+      })
+    }
+    getHeader()
+
+    /**
+     * Wacht
+     */
+
+    watch(fieldsListQuery, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue)) {
+        store.commit('updateValuesOfContainer', {
+          containerUuid: uuidForm.value,
+          attributes: newValue
+        })
+      }
+    })
+
+    // getHeader()
+
     return {
       generalSearchListPopover,
       // computeds
       uuidForm,
-      showedPopoverGeneralInfoPanel
+      showedPopoverGeneralInfoPanel,
+      fieldsListQuery,
+      // Methods
+      getHeader
     }
   }
 })
