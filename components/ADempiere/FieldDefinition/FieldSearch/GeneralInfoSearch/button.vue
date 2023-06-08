@@ -103,11 +103,13 @@ export default defineComponent({
     })
 
     const fieldsListQuery = computed(() => {
-      const fieldsLis = store.getters.getQueryFieldsList({
+      const fieldsList = store.getters.getQueryFieldsList({
         containerUuid: uuidForm.value
       })
-      if (isEmptyValue(fieldsLis)) return fieldsLis
-      return fieldsLis.map(header => {
+      if (isEmptyValue(fieldsList)) {
+        return []
+      }
+      return fieldsList.map(header => {
         return {
           columnName: header.columnName,
           value: undefined
