@@ -18,7 +18,7 @@
 
 <template>
   <div v-if="isMobile" style="height: 100%">
-    <div style="height: 75% !important;">
+    <div style="height: 65% !important;">
       <el-container style="height: 100% !important;">
         <el-header id="WorkflowActivity" class="header" :style="!collapse ? 'height: 60% !important; width: 100% !important;' : 'height: 10%!important; width: 100% !important;'">
           <el-card :style="!collapse ? 'height: 100% !important; width: 100% !important;float: left;' : 'height: 100%;width: 100% !important;float: left;'">
