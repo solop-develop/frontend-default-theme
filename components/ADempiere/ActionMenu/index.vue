@@ -70,7 +70,7 @@
             <div class="contents">
               <div class="auxiliary-menu-icon">
                 <svg-icon
-                  v-if="action.isSvgIcon"
+                  v-if="action.isSvgIcon || action.svg === true"
                   :icon-class="action.icon"
                   style="font-size: 18"
                 />
