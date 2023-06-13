@@ -98,7 +98,7 @@ export default defineComponent({
         attributeValue: operator,
         field: props.metadataField
       })
-      }
+    }
 
     return {
       // Computed

@@ -280,7 +280,7 @@ export default defineComponent({
             if (
               Array.isArray(contextValue.value)
             ) {
-              condition.values = contextValue.value  
+              condition.values = contextValue.value
             } else {
               condition.value = contextValue.value
             }

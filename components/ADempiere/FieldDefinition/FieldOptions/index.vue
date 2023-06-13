@@ -130,7 +130,7 @@ import LabelPopoverOption from './LabelPopoverOption.vue'
 import {
   // calculatorOptionItem,
   infoOptionItem, logsOptionItem, hideThisField,
-  optionsListStandad, optionsListAdvancedQuery,
+  optionsListStandad,
   documentStatusOptionItem, translateOptionItem,
   refreshLookup, zoomInOptionItem
 } from '@theme/components/ADempiere/FieldDefinition/FieldOptions/fieldOptionsList.js'
@@ -272,10 +272,6 @@ export default defineComponent({
         (field.isParent || !field.required || !isEmptyValue(field.defaultValue))
       ) {
         menuOptions.push(hideThisField)
-      }
-      // infoOption, operatorOption
-      if (field.isAdvancedQuery) {
-        return menuOptions.concat(optionsListAdvancedQuery)
       }
 
       if (field.isTranslatedField) {
