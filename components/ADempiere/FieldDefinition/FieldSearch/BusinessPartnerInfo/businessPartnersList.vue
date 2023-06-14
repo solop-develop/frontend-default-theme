@@ -286,6 +286,16 @@ export default {
           containerUuid: this.uuidForm
         })
       }
+    },
+    isSOTrx() {
+      return this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        columnName: 'IsSOTrx'
+      })
+    },
+    oldFilter() {
+      return this.$store.getters.getFilterList({ containerUuid: this.uuidForm })
     }
   },
 
@@ -307,7 +317,12 @@ export default {
 
   created() {
     this.unsubscribe = this.subscribeChanges()
-
+    if (
+      !isEmptyValue(this.oldFilter) &&
+      this.oldFilter !== this.isSOTrx
+    ) {
+      this.searchBPartnerList()
+    }
     if (this.isReadyFromGetData) {
       this.searchBPartnerList()
     }
@@ -428,6 +443,10 @@ export default {
           pageSize
         })
           .then(response => {
+            this.$store.commit('setFiltersList', {
+              containerUuid: this.uuidForm,
+              isSOTrx: this.isSOTrx
+            })
             if (isEmptyValue(response)) {
               this.$message({
                 type: 'warning',
