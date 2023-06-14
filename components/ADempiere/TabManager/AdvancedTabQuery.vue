@@ -30,7 +30,7 @@
         slot="append"
         v-model="isShowedAdvancedQuery"
         placement="bottom"
-        :width="isMobile ? 'auto' : '800'"
+        :width="isMobile ? 'auto' : '950'"
         trigger="click"
         class="advanced-query-popover"
       >
@@ -277,7 +277,13 @@ export default defineComponent({
               condition.value = contextValue.value
             }
           } else {
-            condition.value = contextValue.value
+            if (
+              Array.isArray(contextValue.value)
+            ) {
+              condition.values = contextValue.value
+            } else {
+              condition.value = contextValue.value
+            }
           }
 
           filters[columnName] = {

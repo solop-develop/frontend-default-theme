@@ -52,9 +52,26 @@
             :record-uuid="recordUuid"
           />
         </template>
-
+        <div
+          v-if="field.isAdvancedQuery"
+          style="display: flex;"
+        >
+          <component
+            :is="componentRender"
+            :id="field.panelType !== 'form' ? field.columnName : ''"
+            :ref="field.columnName"
+            :parent-uuid="parentUuid"
+            :container-uuid="containerUuid"
+            :container-manager="containerManager"
+            :metadata="fieldAttributes"
+          />
+          <condition
+            :metadata-field="field"
+          />
+        </div>
         <component
           :is="componentRender"
+          v-else
           :id="field.panelType !== 'form' ? field.columnName : ''"
           :ref="field.columnName"
           :parent-uuid="parentUuid"
@@ -72,6 +89,7 @@ import store from '@/store'
 
 // Components and Mixins
 import FieldOptions from '@theme/components/ADempiere/FieldDefinition/FieldOptions/index.vue'
+import condition from '@theme/components/ADempiere/FieldDefinition/condition'
 
 // Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
@@ -91,6 +109,7 @@ export default {
   name: 'FieldDefinition',
 
   components: {
+    condition,
     FieldOptions
   },
 
