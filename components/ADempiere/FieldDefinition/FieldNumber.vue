@@ -72,6 +72,7 @@ import { INPUT_NUMBER_PATTERN } from '@/utils/ADempiere/formatValue/numberFormat
 import { isDecimalField } from '@/utils/ADempiere/references.js'
 import { formatNumber } from '@/utils/ADempiere/formatValue/numberFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere'
 
 export default {
   name: 'FieldNumber',
@@ -148,7 +149,34 @@ export default {
         })
       }
     },
+    currencyDocument() {
+      const columnName = DISPLAY_COLUMN_PREFIX + 'C_Currency_ID'
+      // table records values
+      if (this.metadata.inTable) {
+        // implement container manager row
+        if (this.metadata.containerManager && this.metadata.containerManager.getCell) {
+          const currentValue = this.metadata.containerManager.getCell({
+            containerUuid: this.metadata.containerUuid,
+            rowIndex: this.metadata.rowIndex,
+            columnName
+          })
+          if (!isEmptyValue(currentValue)) {
+            return currentValue
+          }
+        }
+      }
+
+      return this.$store.getters.getValueOfFieldOnContainer({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        columnName
+      })
+    },
     currencyCode() {
+      const documentCurrency = this.currencyDocument
+      if (!isEmptyValue(documentCurrency)) {
+        return documentCurrency
+      }
       const currencyIsoCode = store.getters.getCurrencyCode
       if (!isEmptyValue(this.metadata.labelCurrency)) {
         if (this.metadata.labelCurrency !== currencyIsoCode) {
