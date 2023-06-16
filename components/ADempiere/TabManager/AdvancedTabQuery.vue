@@ -194,8 +194,8 @@ export default defineComponent({
         isMandatoryField({ isMandatory }) {
           return false
         },
-        isReadOnlyField({ isReadOnly }) {
-          return false
+        isReadOnlyField({ isReadOnly, operator }) {
+          return operator === 'NULL'
         },
         getFieldsToHidden({ parentUuid, containerUuid }) {
           const fieldsListTab = store.getters.getStoredFieldsFromTab(parentUuid, containerUuid)

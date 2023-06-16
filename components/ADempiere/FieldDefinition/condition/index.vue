@@ -25,14 +25,14 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     :class="{ 'action-container': true, 'without-defualt-action': true }"
     @command="handleOperator"
   >
-    {{ operator }}
+    {{ $t('operators.' + operator) }}
     <el-dropdown-menu slot="dropdown">
       <el-dropdown-item
         v-for="(operator, index) in operatorList"
         :key="index"
         :command="operator"
       >
-        {{ operator }}
+        {{ $t('operators.' + operator) }}
       </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
