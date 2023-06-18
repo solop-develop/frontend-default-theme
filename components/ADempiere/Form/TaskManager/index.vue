@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
 Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -214,14 +214,14 @@ import {
   restore,
   listJobs,
   executions
-} from '@/api/ADempiere/form/Tasks.js'
+} from '@/api/ADempiere/form/TaskManager.js'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
-  name: 'Tasks',
+  name: 'TaskManager',
 
   setup() {
     /**
