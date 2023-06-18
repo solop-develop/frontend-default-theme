@@ -108,8 +108,9 @@ export default {
         case 'VAllocation':
           form = import('@theme/components/ADempiere/Form/VAllocation')
           break
-        case 'tasks':
-          form = import('@theme/components/ADempiere/Form/Tasks')
+        case 'TaskManager':
+        case 'org.spin.eca46.form.TaskManager':
+          form = import('@theme/components/ADempiere/Form/TaskManager')
           break
         default:
           form = import('@/views/ADempiere/Unsupported')
