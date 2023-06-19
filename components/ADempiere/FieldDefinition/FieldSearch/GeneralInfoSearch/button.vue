@@ -117,6 +117,12 @@ export default defineComponent({
       })
     })
 
+    const listHeader = computed(() => {
+      return store.getters.getQueryFieldsList({
+        containerUuid: uuidForm.value
+      })
+    })
+
     const showedPopoverGeneralInfoPanel = computed({
       get() {
         return store.getters.getGeneralInfoShow({
@@ -132,6 +138,7 @@ export default defineComponent({
     })
 
     function getHeader() {
+      if (!isEmptyValue(listHeader.value)) return
       props.containerManager.generalInfoSearch({
         containerUuid: uuidForm.value,
         parentUuid: props.parentMetadata.parentUuid,
@@ -164,6 +171,7 @@ export default defineComponent({
       uuidForm,
       showedPopoverGeneralInfoPanel,
       fieldsListQuery,
+      listHeader,
       // Methods
       getHeader
     }
