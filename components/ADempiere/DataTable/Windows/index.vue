@@ -18,7 +18,7 @@
 
 <template>
   <div
-    v-if="!isChangeOptions"
+    v-if="!isChangeOptions && isLoadingDataTale"
     id="mainWindowDataTable"
     class="multipleTableWindow"
     :onLoad="adjustSize()"
@@ -603,7 +603,7 @@ export default defineComponent({
         toggleSelection(selectionsList.value)
         return
       }
-      changeTable(!newValue)
+      // changeTable(!newValue)
       if (newValue) {
         const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
         let currentRow
