@@ -160,7 +160,7 @@ export default defineComponent({
     const valueActionDocument = ref(value.value)
 
     const withoutRecord = computed(() => {
-      if (isEmptyValue(recordUuid.value) || 'create-new' === recordUuid.value) {
+      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new') {
         return true
       }
       return false
