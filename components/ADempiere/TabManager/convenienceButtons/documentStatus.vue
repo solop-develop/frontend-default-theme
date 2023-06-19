@@ -19,10 +19,17 @@
 <template>
   <el-popover
     v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
+    v-model="isShowedStatus"
     trigger="click"
     width="900"
   >
-    <el-descriptions :title="$t('workflow.documentStatus')" direction="vertical" :column="2" border>
+    <el-descriptions
+      v-if="isShowedStatus"
+      :title="$t('workflow.documentStatus')"
+      direction="vertical"
+      :column="2"
+      border
+    >
       <template slot="extra">
         <document-status-tag
           key="document-status"
@@ -34,6 +41,8 @@
       <el-descriptions-item :label="$t('workflow.documentActions')">
         <workflow-status-bar
           :container-uuid="containerUuid"
+          :table-name="tableName"
+          :record-uuid="recordUuid"
         />
       </el-descriptions-item>
     </el-descriptions>
@@ -59,7 +68,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -91,10 +100,16 @@ export default defineComponent({
     containerUuid: {
       type: String,
       required: false
+    },
+    tableName: {
+      type: String,
+      required: true
     }
   },
 
   setup(props) {
+    const isShowedStatus = ref(false)
+
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(props.containerUuid)
     })
@@ -108,6 +123,7 @@ export default defineComponent({
     })
 
     const displayDocStatus = computed(() => {
+      // find from context
       const displayValue = store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
@@ -117,19 +133,20 @@ export default defineComponent({
         return displayValue
       }
 
-      // const documentActionsList = store.getters.getWorkFlowActions({
-      //   containerUuid: props.containerUuid
-      // })
-      // if (isEmptyValue(documentActionsList)) {
-      //   return []
-      // }
-      // const documentAction = documentActionsList.options.find(docAction => {
-      //   return docAction.value = currentDocStatus.value
-      // })
-      // console.log(documentAction, documentActionsList)
-      // if (!isEmptyValue(documentAction)) {
-      //   return documentAction.name
-      // }
+      // find form document statuese list
+      const documentStatusesList = store.getters.getStoredDocumentStatusesList({
+        tableName: props.tableName,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatus.value
+      })
+      if (!isEmptyValue(documentStatusesList)) {
+        const documentStatus = documentStatusesList.find(docStatus => {
+          return docStatus === currentDocStatus.value
+        })
+        if (!isEmptyValue(documentStatus)) {
+          return documentStatus.name
+        }
+      }
       return ''
     })
 
@@ -139,6 +156,7 @@ export default defineComponent({
     })
 
     return {
+      isShowedStatus,
       currentDocStatus,
       displayDocStatus,
       recordUuid,

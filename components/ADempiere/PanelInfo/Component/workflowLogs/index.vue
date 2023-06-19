@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@
 
 <template>
   <span>
-    <workflow-status-bar :container-uuid="containerUuid" />
+    <workflow-status-bar
+      :container-uuid="containerUuid"
+    />
 
     <el-timeline v-if="!isEmptyValue(listLogs.list)">
       <el-timeline-item
@@ -82,18 +84,13 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
-// Constants
-import { DOCUMENT_STATUS_COLUMNS_LIST } from '@/utils/ADempiere/constants/systemColumns'
-
 // Components and Mixins
-import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import WorkflowStatusBar from '@theme/components/ADempiere/WorkflowManager/WorkflowStatusBar.vue'
 
 export default defineComponent({
   name: 'WorkflowLog',
 
   components: {
-    DocumentStatusTag,
     WorkflowStatusBar
   },
 
@@ -128,17 +125,12 @@ export default defineComponent({
       }
     }
 
-    const validate = (list) => {
-      return DOCUMENT_STATUS_COLUMNS_LIST.includes(list.columnName)
-    }
-
     return {
       currentTabLogs,
       typeAction,
       currentKey,
       listLogs,
-      // methods
-      validate,
+      // Methods
       showkey
     }
   }

@@ -18,19 +18,19 @@
 
 <template>
   <span
-    v-if="tabAttributes.isParentTab && !isEmptyValue(additionalOptions)"
+    v-if="tabAttributes.isDocument"
     class="document-action-main"
   >
     <el-dropdown
-      v-if="tabAttributes.isParentTab && !getCurrentTab.isShowedTableRecords && !isEmptyValue(recordUuid) && !isEmptyValue(additionalOptions) && !isEmptyValue(additionalOptions.options)"
+      v-if="isRunableDocumentAction"
       split-button
       style="margin-left: 10px;"
       size="small"
       class="document-action"
-      @click="handleCommandActions(defaultDocumentAction.value);"
+      @click="handleCommandActions(defaultValue);"
       @command="handleCommandActions"
     >
-      {{ defaultDocumentAction.name }}
+      {{ defaultName }}
 
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item
@@ -65,8 +65,8 @@
             <document-status-tag
               key="document-status"
               size="small"
-              :value="currentDocStatus"
-              :displayed-value="displayDocStatus.name"
+              :value="currentDocStatusValue"
+              :displayed-value="currentDocStatusDisplayedValue"
             />
           </template>
         </el-step>
@@ -96,16 +96,21 @@
     <document-status
       :parent-uuid="parentUuid"
       :container-uuid="tabAttributes.uuid"
+      :table-name="tabAttributes.tableName"
       style="position: absolute; right: 7%;"
     />
   </span>
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
+import { defineComponent, computed, ref, watch } from '@vue/composition-api'
 
 import language from '@/lang'
 import store from '@/store'
+
+// Constants
+import { DOCUMENT_ACTION, DOCUMENT_STATUS, PROCESSING } from '@/utils/ADempiere/constants/systemColumns'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
 import DocumentStatus from '@theme/components/ADempiere/TabManager/convenienceButtons/documentStatus.vue'
@@ -117,7 +122,6 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
   refreshRecord
 } from '@/utils/ADempiere/dictionary/window'
-import { tagRender } from '@/utils/ADempiere/dictionary/workflow'
 
 export default defineComponent({
   name: 'DocumentAction',
@@ -137,10 +141,6 @@ export default defineComponent({
       required: true
     },
     tabAttributes: {
-      type: Object,
-      default: () => ({})
-    },
-    additionalOptions: {
       type: Object,
       default: () => ({})
     }
@@ -171,6 +171,14 @@ export default defineComponent({
       return store.getters.getUuidOfContainer(containerUuid)
     })
 
+    const currentDocStatusValue = computed(() => {
+      return store.getters.getValueOfFieldOnContainer({
+        parentUuid: props.parentUuid,
+        containerUuid,
+        columnName: DOCUMENT_STATUS
+      })
+    })
+
     const getCurrentTab = computed(() => {
       const tab = store.getters.getStoredTab(
         props.parentUuid,
@@ -183,52 +191,106 @@ export default defineComponent({
     })
 
     const defaultDocumentAction = computed(() => {
-      return props.additionalOptions.currentDocument
+      return store.getters.getStoredDefaultDocumentAction({
+        tableName: props.tabAttributes.tableName,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatusValue.value
+      })
+    })
+
+    const defaultName = computed(() => {
+      if (isEmptyValue(defaultDocumentAction.value)) {
+        return ''
+      }
+      return defaultDocumentAction.value.name
+    })
+
+    const defaultValue = computed(() => {
+      if (isEmptyValue(defaultDocumentAction.value)) {
+        return store.getters.getValueOfFieldOnContainer({
+          containerUuid: props.tabAttributes.uuid,
+          columnName: DOCUMENT_ACTION
+        })
+      }
+      return defaultDocumentAction.value.value
+    })
+
+    const documentStatusesList = computed(() => {
+      return store.getters.getStoredDocumentStatusesList({
+        tableName: props.tabAttributes.tableName,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatusValue.value
+      })
     })
 
     const documentActionsList = computed(() => {
-      return props.additionalOptions.options
+      return store.getters.getStoredDocumentActionsList({
+        tableName: props.tabAttributes.tableName,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatusValue.value
+      })
     })
 
-    const currentDocStatus = computed(() => {
-      return store.getters.getValueOfFieldOnContainer({
-        parentUuid: props.parentUuid,
+    const currentDocStatusDisplayedValue = computed(() => {
+      const displayedValue = store.getters.getValueOfFieldOnContainer({
         containerUuid,
-        columnName: 'DocStatus'
+        columnName: DISPLAY_COLUMN_PREFIX + DOCUMENT_STATUS
       })
-    })
-
-    const docStatus = computed(() => {
-      return props.tabAttributes.fieldsList.find(field => {
-        return field.columnName === 'DocStatus'
-      })
-    })
-
-    const displayDocStatus = computed(() => {
-      let docStatus = {}
-      if (!isEmptyValue(documentActionsList.value)) {
-        docStatus = documentActionsList.value.find(docAction => {
-          return docAction.value === currentDocStatus.value
-        })
+      if (!isEmptyValue(displayedValue)) {
+        return displayedValue
       }
-      if (isEmptyValue(docStatus)) {
-        const list = store.getters.getWorkFlowActions({ containerUuid })
-        if (!isEmptyValue(list) && !isEmptyValue(list.options)) {
-          docStatus = list.options.find(docStatus => {
-            return docStatus.value === currentDocStatus.value
-          })
+      const value = currentDocStatusValue.value
+      if (!isEmptyValue(documentActionsList.value)) {
+        const documentAction = documentActionsList.value.find(docAction => {
+          return docAction.value === value
+        })
+        if (!isEmptyValue(documentAction)) {
+          return documentAction.name
         }
       }
-      return docStatus || emptyDocAction
+      if (!isEmptyValue(documentStatusesList.value)) {
+        const docuemntStatus = documentStatusesList.value.find(docStatus => {
+          return docStatus.value === value
+        })
+        if (!isEmptyValue(docuemntStatus)) {
+          return docuemntStatus.name
+        }
+      }
+      return ''
     })
 
     const isDisabledDocument = computed(() => {
       const processing = store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
         containerUuid,
-        columnName: 'Processing'
+        columnName: PROCESSING
       })
       return convertStringToBoolean(processing)
+    })
+
+    const isRunableDocumentAction = computed(() => {
+      if (isDisabledDocument.value) {
+        // workflow is runing on server
+        return false
+      }
+      if (getCurrentTab.value.isShowedTableRecords) {
+        // table as multi record
+        return false
+      }
+      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new') {
+        // default values as new record
+        return false
+      }
+      const isEmptyDocAction = isEmptyValue(defaultDocumentAction.value)
+      if (isEmptyDocAction) {
+        // get list first
+        return false
+      }
+      if (!isEmptyDocAction && isEmptyValue(documentActionsList.value)) {
+        // document is closed
+        return false
+      }
+      return true
     })
 
     /**
@@ -239,13 +301,14 @@ export default defineComponent({
       if (isEmptyValue(nextStatus)) {
         return emptyDocAction
       }
-      const currentStatus = props.additionalOptions.options.find(docs => {
+
+      const currentStatus = documentActionsList.value.find(docs => {
         return docs.value === nextStatus
       })
-      if (isEmptyValue(currentStatus)) {
-        return defaultDocumentAction.value
+      if (!isEmptyValue(currentStatus)) {
+        return currentStatus
       }
-      return currentStatus
+      return defaultDocumentAction.value
     }
 
     function handleCommandActions(params) {
@@ -305,6 +368,41 @@ export default defineComponent({
       return selectActions.description
     }
 
+    const timeOut = ref(null)
+    function loadDocumentActions() {
+      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new') {
+        return
+      }
+      clearTimeout(timeOut.value)
+      timeOut.value = setTimeout(() => {
+        store.dispatch('getDocumentActionsListFromServer', {
+          tableName: props.tabAttributes.tableName,
+          recordUuid: recordUuid.value,
+          documentStatus: currentDocStatusValue.value
+        })
+      }, 200)
+    }
+
+    watch(recordUuid, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (isEmptyValue(defaultDocumentAction.value)) {
+          loadDocumentActions()
+        }
+      }
+    })
+
+    watch(currentDocStatusValue, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (isEmptyValue(defaultDocumentAction.value)) {
+          loadDocumentActions()
+        }
+      }
+    })
+
+    // if (isEmptyValue(defaultDocumentAction.value)) {
+    //   loadDocumentActions()
+    // }
+
     return {
       // Ref
       emptyDocAction,
@@ -312,19 +410,20 @@ export default defineComponent({
       selectDocActions,
       isVisibleDocAction,
       // Computed
-      docStatus,
       recordUuid,
       getCurrentTab,
-      currentDocStatus,
-      displayDocStatus,
+      isRunableDocumentAction,
+      currentDocStatusValue,
+      currentDocStatusDisplayedValue,
       isDisabledDocument,
       documentActionsList,
       defaultDocumentAction,
+      defaultName,
+      defaultValue,
       // Methods
       displayDocumentActions,
       handleCommandActions,
       sendAction,
-      tagRender,
       message
     }
   }

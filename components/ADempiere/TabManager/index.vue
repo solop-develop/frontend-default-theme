@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -61,7 +61,6 @@
             :current-tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
             :actions-manager="actionsManager"
-            :convenience-options="additionalOptions"
             :style="'height: 100% !important;'"
           />
         </div>
@@ -167,6 +166,7 @@
       </span>
 
       <panel-info
+        v-if="showContainerInfo"
         :all-tabs-list="allTabsList"
         :show-container-info="showContainerInfo"
         :container-manager="containerManager"
@@ -239,10 +239,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    additionalOptions: {
-      type: Object,
-      default: () => ({})
-    },
     isAccountingInfo: {
       type: Boolean,
       default: false

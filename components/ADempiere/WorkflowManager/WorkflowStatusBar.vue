@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 <template>
   <el-steps :active="indexStepActions" :space="500" align-center finish-status="success">
     <el-step
-      v-for="(actions, key) in documentActionsList"
+      v-for="(actions, key) in documentStatuesList"
       :key="key"
       :title="actions.name"
     />
@@ -48,6 +48,14 @@ export default defineComponent({
   },
 
   setup(props) {
+    const tableName = computed(() => {
+      return store.getters.getStoredTableNameByTab(props.containerUuid)
+    })
+
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.containerUuid)
+    })
+
     const currentDocStatus = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
         containerUuid: props.containerUuid,
@@ -55,28 +63,34 @@ export default defineComponent({
       })
     })
 
-    const documentActionsList = computed(() => {
-      const list = store.getters.getWorkFlowActions({
-        containerUuid: props.containerUuid
+    const documentStatuesList = computed(() => {
+      return store.getters.getStoredDocumentStatusesList({
+        tableName: tableName.value,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatus.value
       })
-      if (isEmptyValue(list)) {
-        return []
-      }
-      return list.options
     })
 
     const indexStepActions = computed(() => {
-      if (isEmptyValue(documentActionsList.value)) {
+      if (isEmptyValue(documentStatuesList.value)) {
         return 0
       }
-      return documentActionsList.value.findIndex(docs => {
+      return documentStatuesList.value.findIndex(docs => {
         return docs.value === currentDocStatus.value
       })
     })
 
+    if (isEmptyValue(documentStatuesList.value)) {
+      store.dispatch('getDocumentStatusesListFromServer', {
+        tableName: tableName.value,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatus.value
+      })
+    }
+
     return {
       currentDocStatus,
-      documentActionsList,
+      documentStatuesList,
       indexStepActions
     }
   }
