@@ -37,7 +37,7 @@
       :content="openSequenceTab.name"
       placement="top"
     >
-      <el-button  
+      <el-button
         type="text"
         style="margin-left: 0px;"
         @click="sequenceTab "
