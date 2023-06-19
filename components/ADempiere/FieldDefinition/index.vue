@@ -301,7 +301,7 @@ export default {
     },
 
     isSelectCreated() {
-      return this.field.isAdvancedQuery &&
+      return (this.field.isAdvancedQuery || this.field.isQueryCriteria) &&
         OPERATORS_MULTIPLE_VALUES.includes(this.field.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(this.field.componentPath)
     },

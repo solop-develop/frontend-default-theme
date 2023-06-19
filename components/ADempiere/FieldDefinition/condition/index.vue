@@ -103,6 +103,7 @@ export default defineComponent({
         field: props.metadataField
       })
     }
+    console.log({ operatorList })
 
     return {
       // Computed

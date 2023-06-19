@@ -37,7 +37,7 @@ export default {
 
   computed: {
     isSelectMultiple() {
-      return this.metadata.isAdvancedQuery &&
+      return (this.metadata.isAdvancedQuery || this.metadata.isQueryCriteria) &&
         OPERATORS_MULTIPLE_VALUES.includes(this.metadata.operator)
     },
 
