@@ -19,7 +19,7 @@
 <template>
   <span v-show="(isChangeRecord)">
     <el-button
-      type="primary"
+      type="info"
       plain
       size="small"
       :disabled="disableNextRecord"
@@ -32,7 +32,7 @@
       </span>
     </el-button>
     <el-button
-      type="primary"
+      type="info"
       plain
       size="small"
       :disabled="disablePreviousRecord"
