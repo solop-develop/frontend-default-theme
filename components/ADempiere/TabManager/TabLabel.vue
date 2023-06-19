@@ -32,7 +32,22 @@
       :table-name="tabMetadata.tableName"
       :tab-name="tabMetadata.name"
     />
-
+    <el-tooltip
+      v-if="isExistSecuence"
+      :content="openSequenceTab.name"
+      placement="top"
+    >
+      <el-button
+        type="text"
+        style="margin-left: 0px;"
+        @click="sequenceTab "
+      >
+        <i
+          :class="openSequenceTab.icon"
+          style="font-size: 15px; color: black;"
+        />
+      </el-button>
+    </el-tooltip>
     <!-- <el-tooltip
       :content="$t('window.gridToggle')"
       placement="top"
@@ -134,6 +149,18 @@ export default defineComponent({
       return false
     })
 
+    const openSequenceTab = computed(() => {
+      const listAction = store.getters.getStoredActionsMenu({
+        containerUuid: props.containerUuid
+      })
+      if (isEmptyValue(listAction)) return []
+      return listAction.find(list => list.actionName === 'openSequenceTab')
+    })
+
+    const isExistSecuence = computed(() => {
+      return !isEmptyValue(openSequenceTab.value)
+    })
+
     /**
      * Change if tabsList is collapse
      */
@@ -154,14 +181,25 @@ export default defineComponent({
       })
     }
 
+    function sequenceTab(params) {
+      openSequenceTab.value.openSequenceTab({
+        uuid: openSequenceTab.value.uuid,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+    }
+
     return {
       // Data
       tabMetadata,
       // computed
       isActiveCurrentTab,
       classActiveTab,
+      isExistSecuence,
+      openSequenceTab,
       // Methods
-      changeShowedTab
+      changeShowedTab,
+      sequenceTab
     }
   }
 })
