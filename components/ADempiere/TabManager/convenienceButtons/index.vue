@@ -36,7 +36,7 @@
       v-if="isUndoChanges"
       plain
       size="small"
-      type="info"
+      type="warning"
       class="undo-changes-button"
       @click="undoChanges()"
     >
