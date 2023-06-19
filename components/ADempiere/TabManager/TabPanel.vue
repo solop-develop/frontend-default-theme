@@ -25,7 +25,6 @@
         :current-tab-uuid="currentTabUuid"
         :container-uuid="tabAttributes.uuid"
         :tab-attributes="tabAttributes"
-        :adicionales-options="convenienceOptions"
         :is-child-tab="isChildTab"
         :change-previous-record="changePreviousRecord"
         :change-next-record="changeNextRecord"
@@ -167,10 +166,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    convenienceOptions: {
-      type: Object,
-      default: () => ({})
-    },
     isChildTab: {
       type: Boolean,
       default: false

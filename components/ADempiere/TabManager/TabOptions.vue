@@ -45,7 +45,6 @@
       :container-uuid="currentTabUuid"
       :container-manager="containerManager"
       :tab-attributes="tabAttributes"
-      :additional-options="adicionalesOptions"
       style="display: contents;"
     />
 
@@ -109,10 +108,6 @@ export default defineComponent({
       default: () => ({})
     },
     // used only window
-    adicionalesOptions: {
-      type: Object,
-      default: () => ({})
-    },
     isChangeRecord: {
       type: Boolean,
       required: false

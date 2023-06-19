@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,10 @@
         class="tab-panel-info"
         @tab-click="handleClick"
       >
-        <el-tab-pane name="getRecordLogs">
+        <el-tab-pane
+          name="getRecordLogs"
+          lazy
+        >
           <span slot="label">
             <svg-icon icon-class="tree-table" />
             {{ $t('window.containerInfo.log.changeHistory') }}
@@ -68,7 +71,7 @@
           <!-- </el-scrollbar> -->
         </el-tab-pane>
 
-        <el-tab-pane name="listReference">
+        <el-tab-pane name="listReference" lazy>
           <span slot="label">
             <i class="el-icon-zoom-in" />
             {{ $t('window.containerInfo.referenceRecords') }}
@@ -86,7 +89,7 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="recordAttachmentTab">
+        <el-tab-pane name="recordAttachmentTab" lazy>
           <span slot="label">
             <i class="el-icon-paperclip" />
             {{ $t('window.containerInfo.attachment.label') }}
@@ -104,7 +107,7 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="recordNotesTab" style="height: 95% !important;">
+        <el-tab-pane name="recordNotesTab" lazy style="height: 95% !important;">
           <span slot="label">
             <svg-icon icon-class="message" />
             {{ $t('window.containerInfo.notes') }}
@@ -120,7 +123,7 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane name="getListIssues" style="height: 95% !important;" class="tab-panel-info">
+        <el-tab-pane name="getListIssues" lazy style="height: 95% !important;" class="tab-panel-info">
           <span slot="label">
             <svg-icon icon-class="guide" />
             {{ $t('window.containerInfo.issues') }}
@@ -140,6 +143,7 @@
         <el-tab-pane
           v-if="isWorkflowLog"
           name="searchWorkflowHistory"
+          lazy
           style="height: 100% !important;"
         >
           <span slot="label">
@@ -151,7 +155,12 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane v-if="isAccountingInfo" name="accountingInformation" style="height: 100% !important;">
+        <el-tab-pane
+          v-if="isAccountingInfo"
+          name="accountingInformation"
+          lazy
+          style="height: 100% !important;"
+        >
           <span slot="label">
             <svg-icon icon-class="balance" style="font-size: 18px;" />
             {{ $t('window.containerInfo.accountingInformation.title') }}
@@ -165,7 +174,12 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane v-if="!isEmptyValue(storeProduct)" name="listProductStorage" style="height: 100% !important;">
+        <el-tab-pane
+          v-if="!isEmptyValue(storeProduct)"
+          name="listProductStorage"
+          lazy
+          style="height: 100% !important;"
+        >
           <span slot="label">
             <svg-icon icon-class="warehouse" style="font-size: 18px;" />
             {{ $t('listStoreProduct.title') }}
@@ -174,7 +188,12 @@
             :list="recordsListStoreProduct"
           />
         </el-tab-pane>
-        <el-tab-pane v-if="!isEmptyValue(showPanelDashboard)" name="listDashboard" style="height: 100% !important;">
+        <el-tab-pane
+          v-if="!isEmptyValue(showPanelDashboard)"
+          name="listDashboard"
+          lazy
+          style="height: 100% !important;"
+        >
           <span slot="label">
             <svg-icon icon-class="dashboard" style="font-size: 18px;" />
             {{ $t('navbar.dashboard') }}
@@ -347,7 +366,7 @@ export default defineComponent({
 
     const isWorkflowLog = computed(() => {
       if (storedWindow.value) {
-        const isWorkflow = ['T', 'SO', 'PO', 'FI', 'MM']
+        const isWorkflow = ['T', 'SO', 'PO', 'FI', 'MM', 'GL']
         return isWorkflow.includes(storedWindow.value.windowType) && currentTab.value.isParentTab
       }
       return false

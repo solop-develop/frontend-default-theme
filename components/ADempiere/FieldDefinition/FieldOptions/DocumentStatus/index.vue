@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -36,8 +36,9 @@
           size="mini"
           class="custom-select-document-status"
           :popper-append-to-body="true"
+          :disabled="!isRunableDocumentAction"
           @change="documentActionChange"
-          @visible-change="listActionDocument"
+          @visible-change="loadDocumentActions"
         >
           <!-- Current selected docuemnt status -->
           <el-option
@@ -59,7 +60,7 @@
 
           <!-- Available document status -->
           <el-option
-            v-for="(item, key) in listDocumentActions"
+            v-for="(item, key) in documentActionsList"
             :key="key"
             :label="item.name"
             :value="item.value"
@@ -107,11 +108,15 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 
 import store from '@/store'
 
+// Constants
+import { PROCESSING } from '@/utils/ADempiere/constants/systemColumns'
+
 // Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 import {
   refreshRecord
 } from '@/utils/ADempiere/dictionary/window'
@@ -155,28 +160,71 @@ export default defineComponent({
     const valueActionDocument = ref(value.value)
 
     const withoutRecord = computed(() => {
-      // TODO: Validate with record attribute
-      if (isEmptyValue(root.$route.query.action) ||
-        ['create-new', 'reference', 'advancedQuery', 'criteria'].includes(root.$route.query.action)) {
+      if (isEmptyValue(recordUuid.value) || 'create-new' === recordUuid.value) {
         return true
       }
       return false
     })
 
-    const documentActions = computed(() => {
-      return store.getters.getListDocumentActions
+    const defaultDocumentAction = computed(() => {
+      const { tabTableName } = props.fieldAttributes
+      return store.getters.getStoredDefaultDocumentAction({
+        tableName: tabTableName,
+        recordUuid: recordUuid.value,
+        documentStatus: value.value
+      })
     })
 
-    const listDocumentActions = computed(() => {
-      return documentActions.value.documentActionsList
+    const documentActionsList = computed(() => {
+      const { tabTableName } = props.fieldAttributes
+      return store.getters.getStoredDocumentActionsList({
+        tableName: tabTableName,
+        recordUuid: recordUuid.value,
+        documentStatus: value.value
+      })
     })
 
     const currentActionNode = computed(() => {
-      return listDocumentActions.value.find(element => {
+      return documentActionsList.value.find(element => {
         if (element.value === valueActionDocument.value) {
           return element
         }
       })
+    })
+
+    const isDisabledDocument = computed(() => {
+      const { parentUuid, containerUuid } = props.fieldAttributes
+      const processing = store.getters.getValueOfFieldOnContainer({
+        parentUuid,
+        containerUuid,
+        columnName: PROCESSING
+      })
+      return convertStringToBoolean(processing)
+    })
+
+    const isRunableDocumentAction = computed(() => {
+      if (isDisabledDocument.value) {
+        // workflow is runing on server
+        return false
+      }
+      // if (getCurrentTab.value.isShowedTableRecords) {
+      //   // table as multi record
+      //   return false
+      // }
+      if (withoutRecord.value) {
+        // default values as new record
+        return false
+      }
+      const isEmptyDocAction = isEmptyValue(defaultDocumentAction.value)
+      if (isEmptyDocAction) {
+        // get list first
+        return false
+      }
+      if (!isEmptyDocAction && isEmptyValue(documentActionsList.value)) {
+        // document is closed
+        return false
+      }
+      return true
     })
 
     const labelDocumentActions = computed(() => {
@@ -186,22 +234,30 @@ export default defineComponent({
       return currentActionNode.value.name
     })
 
-    function listActionDocument(isShowList) {
+    const timeOut = ref(null)
+    function loadDocumentActions(isShowList) {
       if (!isShowList) {
         return
       }
-      if (!withoutRecord.value && root.$route.query.action !== documentActions.value.recordUuid) {
-        const tableName = props.fieldAttributes.tabTableName
-
-        store.dispatch('listDocumentActionStatus', {
-          recordUuid: root.$route.query.action,
-          tableName,
-          recordId: root.$route.params.recordId
-        })
+      if (!withoutRecord.value) {
+        if (isEmptyValue(defaultDocumentAction.value)) {
+          clearTimeout(timeOut.value)
+          timeOut.value = setTimeout(() => {
+            const { tabTableName } = props.fieldAttributes
+            store.dispatch('getDocumentActionsListFromServer', {
+              tableName: tabTableName,
+              recordUuid: recordUuid.value,
+              documentStatus: value.value
+            })
+          }, 200)
+        }
       }
     }
 
-    function documentActionChange(value) {
+    function documentActionChange(docActionValue) {
+      if (docActionValue === value.value) {
+        return
+      }
       const { tabTableName: tableName, containerUuid } = props.fieldAttributes
 
       store.commit('setShowFieldOption', false)
@@ -209,7 +265,7 @@ export default defineComponent({
       store.dispatch('runDocumentAction', {
         tableName,
         recordUuid: recordUuid.value,
-        docAction: value,
+        docAction: docActionValue,
         containerUuid
       }).finally(() => {
         refreshRecord.refreshRecord({
@@ -221,14 +277,14 @@ export default defineComponent({
 
     return {
       valueActionDocument,
-      // computeds
+      // Computeds
       value,
       displayedValue,
       labelDocumentActions,
-      listDocumentActions,
-      withoutRecord,
-      // methods
-      listActionDocument,
+      documentActionsList,
+      isRunableDocumentAction,
+      // Methods
+      loadDocumentActions,
       documentActionChange
     }
   }

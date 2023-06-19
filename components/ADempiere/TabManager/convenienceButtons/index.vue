@@ -127,10 +127,10 @@
     </el-button>
 
     <document-action
+      v-if="tabAttributes.isDocument"
       :parent-uuid="parentUuid"
       :container-manager="containerManager"
       :tab-attributes="tabAttributes"
-      :additional-options="additionalOptions"
     />
 
   </div>
@@ -183,10 +183,6 @@ export default defineComponent({
       default: ''
     },
     tabAttributes: {
-      type: Object,
-      default: () => ({})
-    },
-    additionalOptions: {
       type: Object,
       default: () => ({})
     }
