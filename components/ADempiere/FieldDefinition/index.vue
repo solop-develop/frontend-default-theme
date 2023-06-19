@@ -53,7 +53,7 @@
           />
         </template>
         <div
-          v-if="field.isAdvancedQuery"
+          v-if="isOperatior"
           style="display: flex;"
         >
           <component
@@ -67,6 +67,7 @@
           />
           <condition
             :metadata-field="field"
+            :style="styleOperator"
           />
         </div>
         <component
@@ -341,6 +342,26 @@ export default {
         return 'border: 1px solid #a9a9ec;border-radius: 5px;'
       }
       return 'border: 1px solid #fff;border-radius: 5px;'
+    },
+    isOperatior() {
+      const isBrowser = this.$route.meta.type === 'browser'
+      const {
+        isAdvancedQuery,
+        isQueryCriteria
+      } = this.field
+      if (
+        !this.isEmptyValue(isAdvancedQuery) &&
+        isAdvancedQuery ||
+        (
+          isBrowser &&
+          isQueryCriteria
+        )
+      ) return true
+      return false
+    },
+    styleOperator() {
+      if (this.field.componentPath === 'FieldYesNo') return 'padding-left: 80px'
+      return ''
     }
   },
 
