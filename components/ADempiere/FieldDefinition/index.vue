@@ -360,7 +360,7 @@ export default {
       return false
     },
     styleOperator() {
-      if (this.field.componentPath === 'FieldYesNo') return 'padding-left: 80px'
+      // if (this.field.componentPath === 'FieldYesNo') return 'padding-left: 80px'
       return ''
     }
   },

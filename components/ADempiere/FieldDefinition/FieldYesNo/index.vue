@@ -51,7 +51,7 @@ export default {
 
   computed: {
     yesNoComponentRender() {
-      if (this.metadata.isAdvancedQuery) {
+      if (this.metadata.isAdvancedQuery || this.metadata.isQueryCriteria) {
         return () => import('@theme/components/ADempiere/FieldDefinition/FieldYesNo/AdvancedQueryTemplate.vue')
       }
       return () => import('@theme/components/ADempiere/FieldDefinition/FieldYesNo/DefaultTemplate.vue')
