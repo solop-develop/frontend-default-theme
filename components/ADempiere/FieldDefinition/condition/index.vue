@@ -31,6 +31,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         v-for="(operator, index) in operatorList"
         :key="index"
         :command="operator"
+        :disabled="isDisableOperator(operator)"
       >
         {{ $t('operators.' + operator) }}
       </el-dropdown-item>
@@ -104,12 +105,20 @@ export default defineComponent({
       })
     }
 
+    function isDisableOperator(operator) {
+      if (props.metadataField.isMandatory) {
+        return ['NULL', 'NOT_NULL'].includes(operator)
+      }
+      return false
+    }
+
     return {
       // Computed
       operator,
       operatorList,
       // Methods
-      handleOperator
+      handleOperator,
+      isDisableOperator
     }
   }
 })
