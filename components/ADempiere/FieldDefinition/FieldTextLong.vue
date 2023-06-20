@@ -88,7 +88,7 @@ export default {
           containerUuid,
           columnName
         })
-        
+
         if (this.isEmptyValue(valueEditor)) return ''
         return valueEditor
       },
@@ -125,7 +125,7 @@ export default {
         }
         this.preHandleChange(newValue)
       }
-    },
+    }
   }
 }
 </script>
