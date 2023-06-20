@@ -35,7 +35,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           v-if="isEmptyValue(currentJob)"
           :data="list"
           style="width: 100%"
-          @cell-dblclick="selectJobs"
         >
           <el-table-column
             v-for="(header, key) in headerList"
@@ -62,10 +61,21 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 type="success"
                 class="button-base-icon"
                 :loading="isRun"
+                plain
                 :disabled="isRun"
                 @click="runJob(scope.row)"
               >
                 <svg-icon v-if="!isRun" icon-class="run" />
+              </el-button>
+              <el-button
+                type="info"
+                class="button-base-icon"
+                :loading="isRun"
+                plain
+                :disabled="isRun"
+                @click="selectJobs(scope.row)"
+              >
+                <svg-icon v-if="!isRun" icon-class="details" />
               </el-button>
             </template>
           </el-table-column>
@@ -79,6 +89,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               type="success"
               class="button-base-icon"
               :loading="isRun"
+              plain
               :disabled="isRun"
               style="float: right;font-size: 26px;margin-left: 10px;"
               @click="runJob(currentJob)"
@@ -89,13 +100,23 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               type="primary"
               icon="el-icon-refresh-left"
               class="button-base-icon"
+              plain
               style="float: right;"
               :disabled="isRun"
               @click="getListJobs"
             />
             <el-button
+              class="button-base-icon"
+              plain
+              style="float: right;font-size: 26px;"
+              @click="copyOutput(currentJob.executor_config)"
+            >
+              <svg-icon icon-class="clipboard" />
+            </el-button>
+            <el-button
               type="info"
               class="button-base-icon"
+              plain
               style="float: right;font-size: 26px;"
               @click="currentJob = {}"
             >
@@ -219,6 +240,8 @@ import {
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
+import { showMessage } from '@/utils/ADempiere/notification'
+import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 
 export default defineComponent({
   name: 'TaskManager',
@@ -238,18 +261,29 @@ export default defineComponent({
      * Methods
      */
     function selectJobs(row, column, event) {
-      if (column.label === 'Operaciones') {
-        return
-      }
+      // if (column.label === 'Operaciones') {
+      //   return
+      // }
       currentJob.value = row
     }
 
     function getListJobs() {
       listJobs()
         .then(response => {
+          const message = response.status
+          if (['Error', 'failed', 'error'].includes(message)) {
+            showMessage({
+              message: response.status,
+              type: 'error'
+            })
+          }
           if (!isEmptyValue(response)) list.value = response
         })
         .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
           console.warn({ error })
         })
     }
@@ -282,6 +316,10 @@ export default defineComponent({
         })
         .catch(error => {
           console.warn({ error })
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
         })
     }
 
@@ -292,11 +330,22 @@ export default defineComponent({
         id
       })
         .then(response => {
+          const message = response.status
+          if (['Error', 'failed', 'error'].includes(message)) {
+            showMessage({
+              message: response.status,
+              type: 'error'
+            })
+          }
           getListJobs()
           isRun.value = false
         })
         .catch(error => {
           console.warn({ error })
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
           isRun.value = false
         })
     }
@@ -309,8 +358,19 @@ export default defineComponent({
         })
         .catch(error => {
           console.warn({ error })
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
           isRun.value = false
         })
+    }
+
+    function copyOutput(text) {
+      copyToClipboard({
+        text: JSON.stringify(text),
+        isShowMessage: true
+      })
     }
 
     getListJobs()
@@ -331,6 +391,7 @@ export default defineComponent({
       selectJobs,
       selectTabs,
       runJob,
+      copyOutput,
       getListJobs
     }
   }
