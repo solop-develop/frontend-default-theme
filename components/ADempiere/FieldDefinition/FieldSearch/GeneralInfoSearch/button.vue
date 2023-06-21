@@ -139,13 +139,9 @@ export default defineComponent({
 
     function getHeader() {
       if (!isEmptyValue(listHeader.value)) return
-      props.containerManager.generalInfoSearch({
+      store.dispatch('searchTableHeader', {
         containerUuid: uuidForm.value,
-        parentUuid: props.parentMetadata.parentUuid,
-        tableName: props.parentMetadata.reference.tableName,
-        columnName: props.parentMetadata.columnName,
-        uuid: props.parentMetadata.uuid,
-        contextColumnNames: props.parentMetadata.reference.contextColumnNames
+        tableName: props.parentMetadata.reference.tableName
       })
     }
     getHeader()
