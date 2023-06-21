@@ -416,6 +416,10 @@ export default defineComponent({
       store.dispatch('setReportDefaultValues', {
         containerUuid: props.containerUuid
       })
+      const { reportViewUuid, printFormatUuid, reportType } = defaultParams.value
+      reportAsViewValue.value = reportViewUuid
+      reportAsPrintFormatValue.value = printFormatUuid
+      reportTypeFormatValue.value = reportType
     }
 
     /**

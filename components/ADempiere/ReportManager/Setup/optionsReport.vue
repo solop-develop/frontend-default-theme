@@ -99,6 +99,15 @@
       <el-col :span="24">
         <samp class="report-setup-footer">
           <el-button
+            plain
+            type="info"
+            class="button-base-icon"
+            style="font-size: 25px;"
+            @click="actionClear()"
+          >
+            <svg-icon icon-class="layers-clear" />
+          </el-button>
+          <el-button
             type="danger"
             class="button-base-icon"
             icon="el-icon-close"
@@ -238,9 +247,7 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         value: false
       })
-      reportAsViewValue.value = ''
-      reportAsPrintFormatValue.value = ''
-      reportTypeFormatValue.value = ''
+      actionClear()
     }
 
     function runReport() {
@@ -252,6 +259,12 @@ export default defineComponent({
         containerUuid: props.containerUuid,
         value: false
       })
+    }
+
+    function actionClear(params) {
+      reportAsViewValue.value = ''
+      reportAsPrintFormatValue.value = ''
+      reportTypeFormatValue.value = ''
     }
 
     watch(reportAsViewValue, (newValue) => {
@@ -287,6 +300,7 @@ export default defineComponent({
       show2,
       // methods
       handleClose,
+      actionClear,
       runReport
     }
   }
