@@ -365,9 +365,8 @@ export default defineComponent({
     })
 
     const isWorkflowLog = computed(() => {
-      if (storedWindow.value) {
-        const isWorkflow = ['T', 'SO', 'PO', 'FI', 'MM', 'GL']
-        return isWorkflow.includes(storedWindow.value.windowType) && currentTab.value.isParentTab
+      if (currentTab.value) {
+        return currentTab.value.isDocument
       }
       return false
     })
