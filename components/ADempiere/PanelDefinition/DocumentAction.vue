@@ -65,7 +65,6 @@
 
 <script>
 import store from '@/store'
-import router from '@/router'
 import {
   defineComponent,
   computed,
@@ -115,8 +114,7 @@ export default defineComponent({
     })
 
     const tableName = computed(() => {
-      const { tableName } = store.getters.getStoredTab(router.app._route.meta.uuid, props.parentUuid)
-      return tableName
+      return store.getters.getStoredTableNameByTab(props.parentUuid)
     })
 
     const storedModalDialog = computed(() => {
