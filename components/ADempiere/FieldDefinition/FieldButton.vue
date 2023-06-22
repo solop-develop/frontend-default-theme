@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -58,7 +58,8 @@ import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinF
 import {
   runProcessOfWindow,
   generateReportOfWindow,
-  openBrowserAssociated
+  openBrowserAssociated,
+  openDocumentAction
 } from '@/utils/ADempiere/dictionary/window.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
@@ -76,10 +77,13 @@ export default {
 
   computed: {
     isDisabledButton() {
-      return this.metadata.readonly || !this.emptyValue
+      return this.metadata.readonly || this.isDisableAction
+    },
+    isDisableAction() {
+      return this.actionAssociated.isEnabled && !this.actionAssociated.isEnabled()
     },
     emptyValue() {
-      return typeof this.value !== 'number' || isEmptyValue(this.value) || this.value <= 0
+      return isEmptyValue(this.value) || this.value <= 0
     },
     displayedValue() {
       if (this.emptyValue) {
@@ -111,38 +115,88 @@ export default {
       return this.metadata.name + ': ' + this.value
     },
     iconProps() {
-      if (this.emptyValue && !isEmptyValue(this.metadata.process)) {
-        if (this.metadata.process.isReport || this.metadata.process.jasperReport) {
-          return {
-            is: 'i',
-            class: 'el-icon-data-analysis'
-          }
-        }
-
-        if (this.metadata.process.browserUuid) {
-          return {
-            is: 'svg-icon',
-            'icon-class': 'search'
-          }
-        }
-
-        if (this.metadata.process.workflowUuid) {
-          return {
-            is: 'svg-icon',
-            'icon-class': 'example'
-          }
-        }
-
-        // is process
+      return {
+        is: this.actionAssociated.is,
+        class: this.actionAssociated.class,
+        'icon-class': this.actionAssociated['icon-class']
+      }
+    },
+    actionAssociated() {
+      // button without process associated
+      if (isEmptyValue(this.metadata.process)) {
         return {
-          is: 'i',
-          'class': 'el-icon-setting'
+          is: 'span',
+          start: () => {
+            return
+          },
+          isEnabled: () => {
+            return true
+          }
         }
       }
 
-      // button without process associated
+      if (this.metadata.process.isReport) {
+        return {
+          is: 'i',
+          class: 'el-icon-data-analysis',
+          start: generateReportOfWindow.generateReportOfWindow({
+            parentUuid: this.parentUuid,
+            containerUuid: this.containerUuid,
+            uuid: this.metadata.process.uuid
+          }),
+          isEnabled: () => generateReportOfWindow.enabled({
+            parentUuid: this.parentUuid,
+            containerUuid: this.containerUuid
+          })
+        }
+      }
+
+      if (this.metadata.process.browserUuid) {
+        return {
+          is: 'svg-icon',
+          'icon-class': 'search',
+          start: () => openBrowserAssociated.openBrowserAssociated({
+            parentUuid: this.parentUuid,
+            containerUuid: this.containerUuid,
+            uuid: this.metadata.process.uuid,
+            browserUuid: this.metadata.process.browserUuid
+          }),
+          isEnabled: () => generateReportOfWindow.enabled({
+            parentUuid: this.parentUuid,
+            containerUuid: this.containerUuid
+          })
+        }
+      }
+
+      if (this.metadata.process.workflowUuid) {
+        return {
+          is: 'svg-icon',
+          'icon-class': 'example',
+          start: () => openDocumentAction.openDocumentAction({
+            parentUuid: this.parentUuid,
+            containerUuid: this.containerUuid,
+            uuid: this.metadata.process.uuid
+          }),
+          isEnabled: () => openDocumentAction.enabled({
+            parentUuid: this.parentUuid,
+            containerUuid: this.containerUuid
+          })
+        }
+      }
+
+      // is process
       return {
-        is: 'span'
+        is: 'i',
+        'class': 'el-icon-setting',
+        start: () => runProcessOfWindow.runProcessOfWindow({
+          parentUuid: this.parentUuid,
+          containerUuid: this.containerUuid,
+          uuid: this.metadata.process.uuid
+        }),
+        isEnabled: () => generateReportOfWindow.enabled({
+          parentUuid: this.parentUuid,
+          containerUuid: this.containerUuid
+        })
       }
     }
   },
@@ -162,34 +216,7 @@ export default {
 
   methods: {
     startProcess() {
-      if (this.isEmptyValue(this.metadata.process)) {
-        return
-      }
-
-      if (this.metadata.process.isReport || this.metadata.process.jasperReport) {
-        generateReportOfWindow.generateReportOfWindow({
-          parentUuid: this.parentUuid,
-          containerUuid: this.containerUuid,
-          uuid: this.metadata.process.uuid
-        })
-        return
-      }
-
-      if (this.metadata.process.browserUuid) {
-        openBrowserAssociated.openBrowserAssociated({
-          parentUuid: this.parentUuid,
-          containerUuid: this.containerUuid,
-          uuid: this.metadata.process.uuid,
-          browserUuid: this.metadata.process.browserUuid
-        })
-        return
-      }
-
-      runProcessOfWindow.runProcessOfWindow({
-        parentUuid: this.parentUuid,
-        containerUuid: this.containerUuid,
-        uuid: this.metadata.process.uuid
-      })
+      this.actionAssociated.start()
     }
   }
 }

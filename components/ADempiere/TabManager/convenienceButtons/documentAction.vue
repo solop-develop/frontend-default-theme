@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
     class="document-action-main"
   >
     <el-dropdown
-      v-if="isRunableDocumentAction"
+      v-if="isEnableRunDocumentAction"
       split-button
       style="margin-left: 10px;"
       size="small"
@@ -109,7 +109,7 @@ import language from '@/lang'
 import store from '@/store'
 
 // Constants
-import { DOCUMENT_ACTION, DOCUMENT_STATUS, PROCESSING } from '@/utils/ADempiere/constants/systemColumns'
+import { DOCUMENT_ACTION, DOCUMENT_STATUS } from '@/utils/ADempiere/constants/systemColumns'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
@@ -117,11 +117,11 @@ import DocumentStatus from '@theme/components/ADempiere/TabManager/convenienceBu
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
 // Utils and Helper Methods
-import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
   refreshRecord
 } from '@/utils/ADempiere/dictionary/window'
+import { isRunableDocumentAction } from '@/utils/ADempiere/dictionary/workflow'
 
 export default defineComponent({
   name: 'DocumentAction',
@@ -259,28 +259,20 @@ export default defineComponent({
       return ''
     })
 
-    const isDisabledDocument = computed(() => {
-      const processing = store.getters.getValueOfFieldOnContainer({
+    const isEnableRunDocumentAction = computed(() => {
+      const isEnabled = isRunableDocumentAction({
         parentUuid: props.parentUuid,
-        containerUuid,
-        columnName: PROCESSING
+        containerUuid
       })
-      return convertStringToBoolean(processing)
-    })
+      if (!isEnabled) {
+        return false
+      }
 
-    const isRunableDocumentAction = computed(() => {
-      if (isDisabledDocument.value) {
-        // workflow is runing on server
-        return false
-      }
-      if (getCurrentTab.value.isShowedTableRecords) {
-        // table as multi record
-        return false
-      }
-      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'create-new') {
-        // default values as new record
-        return false
-      }
+      // const docAction = defaultValue.value
+      // // is None action
+      // if (docAction === '--') {
+      //   return true
+      // }
       const isEmptyDocAction = isEmptyValue(defaultDocumentAction.value)
       if (isEmptyDocAction) {
         // get list first
@@ -412,10 +404,9 @@ export default defineComponent({
       // Computed
       recordUuid,
       getCurrentTab,
-      isRunableDocumentAction,
+      isEnableRunDocumentAction,
       currentDocStatusValue,
       currentDocStatusDisplayedValue,
-      isDisabledDocument,
       documentActionsList,
       defaultDocumentAction,
       defaultName,
