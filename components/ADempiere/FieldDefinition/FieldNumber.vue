@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -67,12 +67,12 @@ import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinF
 
 // Constants
 import { INPUT_NUMBER_PATTERN } from '@/utils/ADempiere/formatValue/numberFormat.js'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Utils and Helper Methods
 import { isDecimalField } from '@/utils/ADempiere/references.js'
 import { formatNumber } from '@/utils/ADempiere/formatValue/numberFormat.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere'
 
 export default {
   name: 'FieldNumber',
@@ -83,9 +83,7 @@ export default {
 
   data() {
     return {
-      showControls: true,
       isFocus: false,
-      operation: '',
       valueToDisplay: '',
       isShowed: false
     }
@@ -166,24 +164,25 @@ export default {
         }
       }
 
-      return this.$store.getters.getValueOfFieldOnContainer({
+      return store.getters.getValueOfField({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         columnName
       })
     },
     currencyCode() {
+      if (!isEmptyValue(this.metadata.labelCurrency)) {
+        return this.metadata.labelCurrency
+      }
       const documentCurrency = this.currencyDocument
       if (!isEmptyValue(documentCurrency)) {
         return documentCurrency
       }
       const currencyIsoCode = store.getters.getCurrencyCode
-      if (!isEmptyValue(this.metadata.labelCurrency)) {
-        if (this.metadata.labelCurrency !== currencyIsoCode) {
-          return this.metadata.labelCurrency
-        }
+      if (!isEmptyValue(currencyIsoCode)) {
+        return currencyIsoCode
       }
-      return currencyIsoCode
+      return undefined
     },
     shortcutKeys() {
       const alphabet = {
@@ -275,7 +274,6 @@ export default {
     width: 100% !important; /* ADempiere Custom */
   }
 </style>
-
 <style lang="scss">
 .custom-field-number {
   &.el-input-number, &.el-input {
