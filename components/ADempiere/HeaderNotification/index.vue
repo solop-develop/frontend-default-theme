@@ -175,7 +175,7 @@ export default defineComponent({
             if (!isEmptyValue(getToken())) {
               listActivities()
             }
-          }, 900000)
+          }, 90000)
         })
     }
 
