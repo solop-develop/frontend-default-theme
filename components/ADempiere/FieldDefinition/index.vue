@@ -65,7 +65,7 @@
             :container-manager="containerManager"
             :metadata="fieldAttributes"
           />
-          <condition
+          <field-operator
             :metadata-field="field"
             :style="styleOperator"
           />
@@ -90,7 +90,7 @@ import store from '@/store'
 
 // Components and Mixins
 import FieldOptions from '@theme/components/ADempiere/FieldDefinition/FieldOptions/index.vue'
-import condition from '@theme/components/ADempiere/FieldDefinition/condition'
+import FieldOperator from '@theme/components/ADempiere/FieldDefinition/FieldOperator'
 
 // Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
@@ -110,7 +110,7 @@ export default {
   name: 'FieldDefinition',
 
   components: {
-    condition,
+    FieldOperator,
     FieldOptions
   },
 
