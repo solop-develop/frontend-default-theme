@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -42,14 +42,16 @@ import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinF
 
 // Constants
 import { DATE_PLUS_TIME } from '@/utils/ADempiere/references'
-import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
+import {
+  MULTIPLE_VALUES_OPERATORS_LIST, RANGE_VALUE_OPERATORS_LIST
+} from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { changeTimeZone } from '@/utils/ADempiere/formatValue/dateFormat'
 
 /**
- * TODO: Improves set values into store and set in vales in component
+ * TODO: Improves set values into store and set in vales in component when change operators
  */
 export default {
   name: 'FieldDate',
@@ -147,7 +149,10 @@ export default {
 
   computed: {
     isRenderRange() {
-      return this.metadata.isRange || this.metadata.isAdvancedQuery
+      if (!isEmptyValue(this.metadata.operator)) {
+        return RANGE_VALUE_OPERATORS_LIST.includes(this.metadata.operator)
+      }
+      return this.metadata.isRange
     },
     typePicker() {
       let picker = 'date'
@@ -168,8 +173,8 @@ export default {
       return ' custom-field-date '
     },
     isMultipleValues() {
-      return this.metadata.isAdvancedQuery &&
-        OPERATORS_MULTIPLE_VALUES.includes(this.metadata.operator)
+      return !isEmptyValue(this.metadata.operator) &&
+        MULTIPLE_VALUES_OPERATORS_LIST.includes(this.metadata.operator)
     },
     /**
      * Parse the date format to be compatible with element-ui
@@ -226,6 +231,13 @@ export default {
           containerUuid,
           columnName
         })
+        if (this.isMultipleValues) {
+          // List with elements in Date not working
+          // if (!isEmptyValue(value)) {
+          //   return value.map(val => new Date(val))
+          // }
+          return value
+        }
         if (!this.isRenderRange) {
           return this.parseValue(value)
         }

@@ -1,6 +1,6 @@
 /**
  * ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- * Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ * Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  * Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import store from '@/store'
+
 // Constants
-import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
+import { MULTIPLE_VALUES_OPERATORS_LIST } from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
 import { convertBooleanToString } from '@/utils/ADempiere/formatValue/booleanFormat.js'
@@ -38,7 +40,7 @@ export default {
   computed: {
     isSelectMultiple() {
       return (this.metadata.isAdvancedQuery || this.metadata.isQueryCriteria) &&
-        OPERATORS_MULTIPLE_VALUES.includes(this.metadata.operator)
+      MULTIPLE_VALUES_OPERATORS_LIST.includes(this.metadata.operator)
     },
 
     blankOption() {
@@ -60,7 +62,7 @@ export default {
       }
 
       // add blanck option in firts element on list
-      return this.$store.getters.getStoredLookupList({
+      return store.getters.getStoredLookupList({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,
@@ -72,7 +74,7 @@ export default {
       })
     },
     getStoredLookupAll() {
-      const allOptions = this.$store.getters.getStoredLookupAll({
+      const allOptions = store.getters.getStoredLookupAll({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
         contextColumnNames: this.metadata.reference.contextColumnNames,

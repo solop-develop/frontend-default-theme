@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ import FieldOptions from '@theme/components/ADempiere/FieldDefinition/FieldOptio
 // Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
-import { OPERATORS_MULTIPLE_VALUES } from '@/utils/ADempiere/dataUtils'
+import { MULTIPLE_VALUES_OPERATORS_LIST } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
 
 // Utils and Helper Methods
@@ -261,7 +261,7 @@ export default defineComponent({
 
     const isSelectCreated = computed(() => {
       return props.isAdvancedQuery &&
-        OPERATORS_MULTIPLE_VALUES.includes(field.value.operator) &&
+        MULTIPLE_VALUES_OPERATORS_LIST.includes(field.value.operator) &&
         !['FieldBinary', 'FieldDate', 'FieldSelect', 'FieldYesNo'].includes(field.value.componentPath)
     })
 

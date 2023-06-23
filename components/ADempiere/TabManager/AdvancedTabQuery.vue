@@ -1,7 +1,8 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -109,6 +110,9 @@ import TitleAndHelp from '@theme/components/ADempiere/TitleAndHelp/index.vue'
 import {
   IS_ADVANCED_QUERY
 } from '@/utils/ADempiere/dictionaryUtils'
+import {
+  IGNORE_VALUE_OPERATORS_LIST, MULTIPLE_VALUES_OPERATORS_LIST, RANGE_VALUE_OPERATORS_LIST
+} from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -195,7 +199,7 @@ export default defineComponent({
           return false
         },
         isReadOnlyField({ isReadOnly, operator }) {
-          return operator === 'NULL'
+          return IGNORE_VALUE_OPERATORS_LIST.includes(operator)
         },
         getFieldsToHidden({ parentUuid, containerUuid }) {
           const fieldsListTab = store.getters.getStoredFieldsFromTab(parentUuid, containerUuid)
@@ -240,58 +244,61 @@ export default defineComponent({
     }
 
     function getFilters() {
-      const values = store.getters.getValuesView({
-        containerUuid: props.containerUuid + IS_ADVANCED_QUERY,
-        isOnlyWithValue: true
-      })
-
       const filters = {}
-      if (!isEmptyValue(values)) {
-        const fieldsList = panelAdvancedQuery.value.fieldsList
-        values.forEach(contextValue => {
-          const field = fieldsList.find(fieldItem => {
-            return fieldItem.columnName === contextValue.columnName ||
-              fieldItem.columnNameTo === contextValue.columnName
-          })
+      const fieldsList = panelAdvancedQuery.value.fieldsList.filter(field => {
+        // hidden of search criteria
+        return field.isShowedFromUser
+      })
+      fieldsList.forEach(field => {
+        // default operator
+        const { columnName, operator } = field
 
-          // hidden of search criteria
-          if (isEmptyValue(field)) {
+        let value, valueTo, values
+
+        const contextValue = store.getters.getValueOfFieldOnContainer({
+          containerUuid: props.containerUuid + IS_ADVANCED_QUERY,
+          columnName: columnName
+        })
+        if (!IGNORE_VALUE_OPERATORS_LIST.includes(operator)) {
+          if (isEmptyValue(contextValue)) {
             return
           }
-          if (!field.isShowedFromUser) {
-            return
-          }
-          // default operator
-          const { columnName, operator } = field
-
-          const condition = {
-            columnName,
-            operator
-          }
-
           // TODO: Improve conditions
           if (FIELDS_DATE.includes(field.displayType)) {
-            if (field.columnNameTo === contextValue.columnName) {
-              condition.valueTo = contextValue.value
+            if (MULTIPLE_VALUES_OPERATORS_LIST.includes(operator)) {
+              values = contextValue
+            } else if (RANGE_VALUE_OPERATORS_LIST.includes(operator)) {
+              if (Array.isArray(contextValue)) {
+                value = contextValue.at(0)
+                valueTo = contextValue.at(1)
+              } else {
+                value = contextValue
+                valueTo = store.getters.getValueOfFieldOnContainer({
+                  containerUuid: props.containerUuid + IS_ADVANCED_QUERY,
+                  columnName: field.columnNameTo
+                })
+              }
             } else {
-              condition.value = contextValue.value
+              value = contextValue
             }
           } else {
-            if (
-              Array.isArray(contextValue.value)
-            ) {
-              condition.values = contextValue.value
+            if (Array.isArray(contextValue)) {
+              values = contextValue
             } else {
-              condition.value = contextValue.value
+              value = contextValue
             }
           }
+        }
 
-          filters[columnName] = {
-            ...filters[columnName] || {},
-            ...condition
-          }
-        })
-      }
+        filters[columnName] = {
+          ...filters[columnName] || {},
+          columnName,
+          operator,
+          value,
+          valueTo,
+          values
+        }
+      })
 
       return Object.values(filters)
     }
