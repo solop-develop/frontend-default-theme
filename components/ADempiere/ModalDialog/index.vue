@@ -164,7 +164,10 @@ export default defineComponent({
         })
       }
 
-      storedModalDialog.value.loadData()
+      storedModalDialog.value.loadData({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
         .finally(() => {
           isLoaded.value = true
         })
