@@ -77,7 +77,7 @@ export default {
 
   computed: {
     isDisabledButton() {
-      return this.metadata.readonly || this.isDisableAction
+      return (this.metadata.readonly || this.isDisableAction) && this.metadata.columnName !== 'Posted'
     },
     isDisableAction() {
       return this.actionAssociated.isEnabled && !this.actionAssociated.isEnabled()
@@ -86,7 +86,7 @@ export default {
       return isEmptyValue(this.value) || this.value <= 0
     },
     displayedValue() {
-      if (this.emptyValue) {
+      if (this.emptyValue || this.metadata.columnName === 'Posted') {
         return this.metadata.name
       }
 
@@ -122,6 +122,20 @@ export default {
       }
     },
     actionAssociated() {
+      // is Post
+      if (this.metadata.columnName === 'Posted') {
+        return {
+          is: 'svg-icon',
+          'icon-class': 'balance',
+          start: () => {
+            this.$store.commit('setDefaultOpenedTab', 'accountingInformation')
+            this.$store.dispatch('showLogs', {
+              show: true
+            })
+          },
+          isEnabled: () => true
+        }
+      }
       // button without process associated
       if (isEmptyValue(this.metadata.process)) {
         return {

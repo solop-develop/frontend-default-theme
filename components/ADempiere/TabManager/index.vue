@@ -173,7 +173,7 @@
         :current-record="currentRecordLogs"
         :tab-uuid="tabUuid"
         :is-accounting-info="isAccountingInfo"
-        :default-opened-tab="openPanelInfo"
+        :default-opened-tab="defaultNameTab"
       />
     </el-drawer>
   </div>
@@ -353,6 +353,10 @@ export default defineComponent({
 
     const isWithChildsTab = computed(() => {
       return store.getters.getStoredWindow(props.parentUuid).tabsListChild
+    })
+
+    const defaultNameTab = computed(() => {
+      return store.getters.getDefaultOpenedTab
     })
 
     function isDisabledTab(key) {
@@ -638,8 +642,8 @@ export default defineComponent({
      * List Change History
      */
     const openRecordLogs = (options) => {
-      if (typeof options === 'string') {
-        openPanelInfo.value = options
+      if (!isEmptyValue(options) && typeof options === 'string') {
+        store.commit('setDefaultOpenedTab', options)
       }
       store.dispatch('showLogs', {
         show: !showContainerInfo.value
@@ -874,6 +878,7 @@ export default defineComponent({
       countDashboard,
       countReference,
       countIsNote,
+      defaultNameTab,
       // computed
       isMobile,
       isDrawerWidth,

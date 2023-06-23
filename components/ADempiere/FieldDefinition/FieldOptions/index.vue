@@ -34,6 +34,7 @@
         :label="metadata.name"
         :is-field-only="metadata.isFieldOnly"
         :is-mobile="true"
+        :is-button="isButton"
       />
       <el-dropdown-menu slot="dropdown" :tabindex="tabIndex">
         <template
@@ -69,6 +70,7 @@
             :is-mandatory="metadata.required"
             :label="metadata.name"
             :is-field-only="metadata.isFieldOnly"
+            :is-button="isButton"
           />
         </template>
 
@@ -112,6 +114,7 @@
         :is-mandatory="metadata.required"
         :label="metadata.name"
         :is-field-only="metadata.isFieldOnly"
+        :is-button="isButton"
       />
     </span>
   </div>
@@ -171,6 +174,10 @@ export default defineComponent({
       set(isShow) {
         store.commit('setShowFieldOption', isShow)
       }
+    })
+
+    const isButton = computed(() => {
+      return props.metadata.componentPath === 'FieldButton'
     })
 
     const showPopoverPath = ref(false)
@@ -433,6 +440,7 @@ export default defineComponent({
     return {
       popoverOption,
       tabIndex,
+      isButton,
       // computed
       currentFieldOption,
       isMobile,

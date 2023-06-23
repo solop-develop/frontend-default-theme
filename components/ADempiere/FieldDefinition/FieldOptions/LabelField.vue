@@ -6,7 +6,7 @@
 
     <span v-if="isMandatory" :style="'color: #f34b4b'"> * </span>
 
-    <i :class="cssClassName" />
+    <i :class="cssClassName" :style="iconStyle" />
   </div>
 </template>
 
@@ -28,6 +28,10 @@ export default defineComponent({
     isFieldOnly: {
       type: Boolean,
       default: false
+    },
+    isButton: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -42,6 +46,8 @@ export default defineComponent({
         displayStyle = 'display: flex; width: auto;'
       }
 
+      if (props.isButton) return displayStyle + ' margin-left: 3px;color: transparent;'
+
       return displayStyle + ' margin-left: 3px;'
     })
 
@@ -53,9 +59,15 @@ export default defineComponent({
       return iconClass + 'icon-desktop'
     })
 
+    const iconStyle = computed(() => {
+      if (props.isButton) return 'color: transparent;'
+      return ''
+    })
+
     return {
       cssClassName,
-      labelStyle
+      labelStyle,
+      iconStyle
     }
   }
 })
