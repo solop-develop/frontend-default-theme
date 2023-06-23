@@ -44,11 +44,13 @@
       <el-button
         type="danger"
         icon="el-icon-close"
+        class="button-base-icon"
         @click="cancelButton"
       />
       <el-button
         type="primary"
         icon="el-icon-check"
+        class="button-base-icon"
         :disabled="isDisabledDone"
         @click="doneButton"
       />

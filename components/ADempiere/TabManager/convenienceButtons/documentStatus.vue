@@ -21,7 +21,7 @@
     v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
     v-model="isShowedStatus"
     trigger="click"
-    width="900"
+    width="700"
   >
     <el-descriptions
       v-if="isShowedStatus"
@@ -41,8 +41,7 @@
       <el-descriptions-item :label="$t('workflow.documentActions')">
         <workflow-status-bar
           :container-uuid="containerUuid"
-          :table-name="tableName"
-          :record-uuid="recordUuid"
+          :space="100"
         />
       </el-descriptions-item>
     </el-descriptions>
