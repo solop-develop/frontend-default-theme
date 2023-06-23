@@ -251,7 +251,7 @@ export default defineComponent({
       })
       fieldsList.forEach(field => {
         // default operator
-        const { columnName, operator } = field
+        const { columnName, operator, valueType } = field
 
         let value, valueTo, values
 
@@ -296,7 +296,8 @@ export default defineComponent({
           operator,
           value,
           valueTo,
-          values
+          values,
+          valueType
         }
       })
 
