@@ -18,31 +18,47 @@
 <template>
   <div>
     <h3> {{ $t('workflow.changeDocumentAction') }} </h3>
-    <b v-if="!isEmptyValue(documentAction)">
+    <span v-if="!isEmptyValue(documentAction)" class="justify-text">
       {{ documentAction.description }}
-    </b>
+    </span>
+    <br><br>
+
     <el-steps :space="200" simple>
       <el-step icon="el-icon-d-arrow-right">
         <template slot="title">
-          <el-tag
-            :type="tagStatus(currentDocumentAction).type"
-            :effect="tagStatus(currentDocumentAction).effect"
-            disable-transitions
-          >
-            {{ currentDocumentAction }}
-          </el-tag>
+          <document-status-tag
+            size="medium"
+            class="tag-status"
+            :value="documentStatusValue"
+            :displayed-value="documentStatusDisplayedValue"
+          />
         </template>
       </el-step>
+
       <el-step icon="el-icon-d-arrow-right">
         <template slot="title">
+          <!-- <document-status-tag
+            size="medium"
+            class="tag-status"
+            :value="documentStatusValue"
+            :displayed-value="documentStatusDisplayedValue"
+          /> -->
           <el-select
-            v-model="documentActionLabel"
-            @change="changeNextDocumentAction"
+            v-model="nextDocumentAction"
+            value-key="value"
+            size="large"
           >
+            <template v-if="documentAction" slot="prefix">
+              <span class="el-input__icon" style="margin-left: 3px;">
+                {{ documentAction.value }}
+              </span>
+            </template>
+
             <el-option
               v-for="(item, key) in documentActionsList"
               :key="key"
-              :value="item.name"
+              :value="item.value"
+              :label="item.name"
               class="custom-option-document-status"
             >
               <div style="width: 100%;">
@@ -66,18 +82,17 @@
 
 <script>
 import store from '@/store'
-import {
-  defineComponent,
-  computed,
-  watch,
-  ref
-} from '@vue/composition-api'
+
+import { defineComponent, computed } from '@vue/composition-api'
 
 // Component and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
+// Constants
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { DOCUMENT_STATUS } from '@/utils/ADempiere/constants/systemColumns'
+
 // Utils and Helper Methods
-import { tagRender } from '@/utils/ADempiere/dictionary/workflow'
 import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
@@ -103,13 +118,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    // Ref
-
-    const documentAction = ref('')
-    const documentActionLabel = ref('')
-
     // Computed
-
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(props.parentUuid)
     })
@@ -118,29 +127,7 @@ export default defineComponent({
       return store.getters.getStoredTableNameByTab(props.parentUuid)
     })
 
-    const storedModalDialog = computed(() => {
-      return store.getters.getModalDialogManager({
-        containerUuid: props.containerUuid
-      })
-    })
-
-    const nextDocumentAction = computed(() => {
-      return store.getters.getValueOfFieldOnContainer({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
-        columnName: 'DocAction'
-      })
-    })
-
-    const documentActionsList = computed(() => {
-      return store.getters.getStoredDocumentActionsList({
-        tableName: tableName.value,
-        recordUuid: recordUuid.value,
-        documentStatus: currentDocumentAction.value
-      })
-    })
-
-    const currentDocumentAction = computed(() => {
+    const documentStatusValue = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
@@ -148,68 +135,79 @@ export default defineComponent({
       })
     })
 
-    // Set Value
-
-    documentActionLabel.value = documentActionsList.value.find(action => action.value === nextDocumentAction.value).name
-    documentAction.value = documentActionsList.value.find(action => action.value === nextDocumentAction.value)
-
-    /**
-     * Tag Status
-     * @param {String} value
-     */
-    function tagStatus(value) {
-      return tagRender(value)
-    }
-
-    /**
-     * Change Next Document Action
-     * @param {String} newAction
-     */
-
-    function changeNextDocumentAction(newAction) {
-      const documentValue = currentAction(documentActionsList.value, newAction).value
-      store.commit('updateValueOfField', {
-        containerUuid: props.containerUuid,
-        columnName: 'DocAction',
-        value: documentValue
+    const documentStatusDisplayedValue = computed(() => {
+      // find from context
+      const displayValue = store.getters.getValueOfFieldOnContainer({
+        parentUuid: props.parentUuid,
+        containerUuid: props.parentUuid,
+        columnName: DISPLAY_COLUMN_PREFIX + DOCUMENT_STATUS
       })
-    }
+      if (!isEmptyValue(displayValue)) {
+        return displayValue
+      }
 
-    /**
-     * Current Action
-     * @param {Array} list
-     * @param {String} newValue
-     */
-
-    function currentAction(list, newValue) {
-      return list.find(action => {
-        if (action.name === newValue) {
-          return action
+      const currentValue = documentStatusValue.value
+      // find form document statuese list
+      const documentStatusesList = store.getters.getStoredDocumentStatusesList({
+        tableName: props.tableName,
+        recordUuid: recordUuid.value,
+        documentStatus: currentValue
+      })
+      if (!isEmptyValue(documentStatusesList)) {
+        const documentStatus = documentStatusesList.find(docStatus => {
+          return docStatus === currentValue
+        })
+        if (!isEmptyValue(documentStatus)) {
+          return documentStatus.name
         }
-      })
-    }
+      }
+      return currentValue
+    })
 
-    watch(documentActionLabel, (newValue, oldValue) => {
-      if (!isEmptyValue(newValue) && newValue !== oldValue) {
-        documentAction.value = currentAction(documentActionsList.value, newValue)
+    const nextDocumentAction = computed({
+      set(newValue) {
+        store.commit('updateValueOfField', {
+          containerUuid: props.containerUuid,
+          columnName: 'DocAction',
+          value: newValue
+        })
+      },
+      get() {
+        return store.getters.getValueOfFieldOnContainer({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          columnName: 'DocAction'
+        })
       }
     })
 
+    const documentActionsList = computed(() => {
+      return store.getters.getStoredDocumentActionsList({
+        tableName: tableName.value,
+        recordUuid: recordUuid.value,
+        documentStatus: documentStatusValue.value
+      })
+    })
+
+    // Set Value
+    const documentAction = computed(() => {
+      const currentVale = nextDocumentAction.value
+      return documentActionsList.value.find(action => {
+        if (action.value === currentVale) {
+          return action
+        }
+      })
+    })
+
     return {
-      // Ref
-      documentAction,
-      documentActionLabel,
       // Computed
       tableName,
       recordUuid,
-      storedModalDialog,
       nextDocumentAction,
+      documentAction,
       documentActionsList,
-      currentDocumentAction,
-      // Methods
-      tagStatus,
-      currentAction,
-      changeNextDocumentAction
+      documentStatusValue,
+      documentStatusDisplayedValue
     }
   }
 })

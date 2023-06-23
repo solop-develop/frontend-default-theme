@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-steps :active="indexStepActions" :space="500" align-center finish-status="success">
+  <el-steps :active="indexStepActions" :space="space" align-center finish-status="success">
     <el-step
       v-for="(actions, key) in documentStatuesList"
       :key="key"
@@ -44,6 +44,10 @@ export default defineComponent({
     containerUuid: {
       type: String,
       required: true
+    },
+    space: {
+      type: Number,
+      defaul: 500
     }
   },
 
