@@ -307,8 +307,7 @@ export default {
     },
 
     isOnlyField() {
-      return this.field.isFieldOnly ||
-        this.field.componentPath === 'FieldButton'
+      return this.field.isFieldOnly
     },
     currentTab() {
       if (this.isEmptyValue(this.parentUuid) || !this.containerManager.getPanel) {
@@ -335,6 +334,9 @@ export default {
       return ''
     },
     styleDraggable() {
+      if (this.field.componentPath === 'FieldButton') {
+        return 'text-align: center !important;'
+      }
       if (!this.isDraggable) {
         return ''
       }

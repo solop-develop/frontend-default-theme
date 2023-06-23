@@ -170,7 +170,7 @@
             :container-uuid="currentTab.containerUuid"
             :table-name="currentTab.tableName"
             :record-id="currentRecordId"
-            :record-uuid="recordUuid"
+            :record-uuid="currentRecordUuid"
           />
         </el-tab-pane>
 
@@ -229,6 +229,7 @@ import { listProductStorage } from '@/api/ADempiere/form/storeProduct.js'
 // Utils and Helper Methods
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { isEmptyValue } from '@/utils/ADempiere'
+import { isDisplayedField } from '@/utils/ADempiere/dictionary/window.js'
 
 export default defineComponent({
   name: 'ContainerInfo',
@@ -266,10 +267,6 @@ export default defineComponent({
     tabUuid: {
       type: String,
       default: ''
-    },
-    isAccountingInfo: {
-      type: Boolean,
-      default: false
     },
     defaultOpenedTab: {
       type: String,
@@ -401,6 +398,15 @@ export default defineComponent({
 
     const isLoadingIssuessRecord = computed(() => {
       return store.getters.getIsLoadListIssues
+    })
+
+    const isAccountingInfo = computed(() => {
+      const { currentTab } = store.getters.getContainerInfo
+      const { fieldsList } = currentTab
+      if (isEmptyValue(fieldsList)) return false
+      const isPostedField = fieldsList.find(field => field.columnName === 'Posted')
+      if (isEmptyValue(isPostedField)) return false
+      return isDisplayedField({ ...isPostedField })
     })
 
     /**
@@ -562,6 +568,7 @@ export default defineComponent({
       containerInfo,
       isWorkflowLog,
       currentRecordId,
+      isAccountingInfo,
       currentRecordUuid,
       showPanelDashboard,
       // IsLoading

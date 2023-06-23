@@ -339,6 +339,7 @@ export default defineComponent({
     if (!isLoadingFields.value) {
       setFieldsList({})
     }
+    findAccountingFacts(accoutingFilters.value)
 
     return {
       // ref
