@@ -21,7 +21,7 @@
     v-if="!isEmptyValue(recordUuid) && !isEmptyValue(currentDocStatus) && !isEmptyValue(displayDocStatus)"
     v-model="isShowedStatus"
     trigger="click"
-    width="700"
+    :width="withPopover"
   >
     <el-descriptions
       v-if="isShowedStatus"
@@ -121,6 +121,15 @@ export default defineComponent({
       })
     })
 
+    // find form document statuese list
+    const documentStatusesList = computed(() => {
+      return store.getters.getStoredDocumentStatusesList({
+        tableName: props.tableName,
+        recordUuid: recordUuid.value,
+        documentStatus: currentDocStatus.value
+      })
+    })
+
     const displayDocStatus = computed(() => {
       // find from context
       const displayValue = store.getters.getValueOfFieldOnContainer({
@@ -132,14 +141,8 @@ export default defineComponent({
         return displayValue
       }
 
-      // find form document statuese list
-      const documentStatusesList = store.getters.getStoredDocumentStatusesList({
-        tableName: props.tableName,
-        recordUuid: recordUuid.value,
-        documentStatus: currentDocStatus.value
-      })
-      if (!isEmptyValue(documentStatusesList)) {
-        const documentStatus = documentStatusesList.find(docStatus => {
+      if (!isEmptyValue(documentStatusesList.value)) {
+        const documentStatus = documentStatusesList.value.find(docStatus => {
           return docStatus === currentDocStatus.value
         })
         if (!isEmptyValue(documentStatus)) {
@@ -154,11 +157,26 @@ export default defineComponent({
       return type
     })
 
+    const withPopover = computed(() => {
+      if (!isEmptyValue(documentStatusesList.value)) {
+        return documentStatusesList.value.length * 100
+      }
+      return 400
+    })
+
+    // watch(withPopover, (newValue, oldValue) => {
+    //   if (!isSameValues(newValue, oldValue)) {
+    //     const instance = getCurrentInstance()
+    //     instance.proxy.forceUpdate()
+    //   }
+    // })
+
     return {
       isShowedStatus,
       currentDocStatus,
       displayDocStatus,
       recordUuid,
+      withPopover,
       tagStatusType
     }
   }
