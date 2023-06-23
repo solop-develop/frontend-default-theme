@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
 Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,14 +23,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     :split-button="true"
     type="primary"
     :class="{ 'action-container': true, 'without-defualt-action': true }"
+    trigger="click"
     @command="handleOperator"
   >
-    {{ $t('operators.' + operator) }}
+    {{ $t('operators.' + currentOperatorValue) }}
     <el-dropdown-menu slot="dropdown">
       <el-dropdown-item
         v-for="(operator, index) in operatorList"
         :key="index"
         :command="operator"
+        :class="{ 'is-current': operator === currentOperatorValue}"
         :disabled="isDisableOperator(operator)"
       >
         {{ $t('operators.' + operator) }}
@@ -49,11 +51,11 @@ import {
 
 // Constants
 import {
-  FIELD_OPERATORS_LIST
+  FIELD_OPERATORS_LIST, IGNORE_VALUE_OPERATORS_LIST
 } from '@/utils/ADempiere/dataUtils'
 
 export default defineComponent({
-  name: 'Condition',
+  name: 'ComparisonOperator',
 
   props: {
     metadataField: {
@@ -62,11 +64,11 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     /**
      * Computed
      */
-    const operator = computed(() => {
+    const currentOperatorValue = computed(() => {
       return props.metadataField.operator
     })
     const operatorList = computed(() => {
@@ -107,14 +109,14 @@ export default defineComponent({
 
     function isDisableOperator(operator) {
       if (props.metadataField.isMandatory) {
-        return ['NULL', 'NOT_NULL'].includes(operator)
+        return IGNORE_VALUE_OPERATORS_LIST.includes(operator)
       }
       return false
     }
 
     return {
       // Computed
-      operator,
+      currentOperatorValue,
       operatorList,
       // Methods
       handleOperator,
@@ -123,3 +125,12 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.el-dropdown-menu__item {
+  &.is-current {
+    font-weight: bold;
+    color: #1890ff;
+  }
+}
+</style>
