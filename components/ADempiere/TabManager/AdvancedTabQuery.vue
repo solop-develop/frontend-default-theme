@@ -308,8 +308,10 @@ export default defineComponent({
       const filters = getFilters()
 
       const query = Object.assign({}, root.$route.query)
-      delete query.filters
-      router.replace({ query })
+      if (!isEmptyValue(query) && !isEmptyValue(query.filters)) {
+        delete query.filters
+        router.replace({ query })
+      }
 
       isLoadingSearch.value = true
       store.dispatch('getEntities', {
