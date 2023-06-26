@@ -60,9 +60,13 @@
           <svg-icon :icon-class="iconColumn(4)" />
           {{ $t('fieldDisplayOptions.Show4Columns') }}
         </el-dropdown-item>
-        <el-dropdown-item v-if="!isMobile" :command="'secuencia'">
+        <el-dropdown-item v-if="!isMobile" :command="'secuence'">
           <i class="el-icon-sort" />
           {{ sequenceOptionLabel }}
+        </el-dropdown-item>
+        <el-dropdown-item v-if="!isMobile && isShowExitSequence" :command="'exitSecuence'">
+          <svg-icon icon-class="logout" />
+          {{ $t('component.sequenceSort.exitNewSequence') }}
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
@@ -330,6 +334,10 @@ export default defineComponent({
       return language.t('component.sequenceSort.modifyFieldSequence')
     })
 
+    const isShowExitSequence = computed(() => {
+      return sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')
+    })
+
     function iconColumn(column) {
       if (column === currentColumnSize.value) {
         return 'eye-open'
@@ -465,7 +473,7 @@ export default defineComponent({
 
     const handleCommand = (command) => {
       let fieldsShowed = []
-      if (command === 'secuencia') {
+      if (command === 'secuence') {
         if (sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
           fieldsShowed = fieldsListAvailable.value
           const { isEditSecuence } = props.containerManager.getPanel({
@@ -479,6 +487,11 @@ export default defineComponent({
           isSaveNewSequence.value = true
           return
         }
+      }
+      if (command === 'exitSecuence') {
+        toggleDraggablePanel(false)
+        // isLoadingSaveCustomization.value = false
+        return
       }
       if (typeof command === 'number') {
         store.dispatch('changeSizeField', {
@@ -539,6 +552,7 @@ export default defineComponent({
       isHiddenFieldsList,
       currentColumnSize,
       isMobile,
+      isShowExitSequence,
       sequenceOptionLabel,
       isShowSequence,
       // methods
