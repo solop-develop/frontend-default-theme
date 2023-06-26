@@ -409,9 +409,7 @@ export default defineComponent({
       if (isEmptyValue(fieldsList)) {
         return false
       }
-      const isPostedField = fieldsList.find(field => {
-        field.columnName === 'Posted'
-      })
+      const isPostedField = fieldsList.find(field => field.columnName === 'Posted')
       if (isEmptyValue(isPostedField)) {
         return false
       }
