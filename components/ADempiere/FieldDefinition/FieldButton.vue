@@ -44,7 +44,7 @@
     >
       <!-- eslint-disable-next-line -->
       <component v-bind="iconProps" />
-      {{ displayedValue }}
+      {{ parsedDisplayedRender }}
     </el-button>
   </el-button-group>
 </template>
@@ -53,6 +53,7 @@
 // Components and Mixins
 import ContextInfo from '@theme/components/ADempiere/FieldDefinition/FieldOptions/ContextInfo'
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldMixinDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixinWithDisplayColumn.js'
 
 // Utils and Helpers Methods
 import {
@@ -61,7 +62,8 @@ import {
   openBrowserAssociated,
   openDocumentAction
 } from '@/utils/ADempiere/dictionary/window.js'
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
+import { getContextAttributes, generateContextKey } from '@/utils/ADempiere/contextUtils'
 
 // TODO: Add displayed value
 export default {
@@ -72,43 +74,25 @@ export default {
   },
 
   mixins: [
-    fieldMixin
+    fieldMixin,
+    fieldMixinDisplayColumn
   ],
 
   computed: {
     isDisabledButton() {
-      return (this.metadata.readonly || this.isDisableAction) && this.metadata.columnName !== 'Posted'
+      return (this.metadata.readonly || this.isDisableAction) && !['Posted', 'Record_ID'].includes(this.metadata.columnName)
     },
     isDisableAction() {
       return this.actionAssociated.isEnabled && !this.actionAssociated.isEnabled()
     },
     emptyValue() {
-      return isEmptyValue(this.value) || this.value <= 0
+      return isEmptyValue(this.value) || this.value < 0
     },
-    displayedValue() {
+    parsedDisplayedRender() {
       if (this.emptyValue || this.metadata.columnName === 'Posted') {
         return this.metadata.name
       }
-
-      // DisplayColumn_'ColumnName'
-      const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
-      // table records values
-      if (inTable) {
-        // implement container manager row
-        if (this.containerManager && this.containerManager.getCell) {
-          return this.containerManager.getCell({
-            containerUuid,
-            rowIndex: this.metadata.rowIndex,
-            columnName
-          })
-        }
-      }
-
-      const displayValue = this.$store.getters.getValueOfFieldOnContainer({
-        parentUuid: this.metadata.parentUuid,
-        containerUuid,
-        columnName
-      })
+      const displayValue = this.displayedValue
       if (!isEmptyValue(displayValue)) {
         return this.metadata.name + ': ' + displayValue
       }
@@ -212,21 +196,38 @@ export default {
           containerUuid: this.containerUuid
         })
       }
+    },
+    contextAttributes() {
+      const contextAttributesList = getContextAttributes({
+        parentUuid: this.metadata.parentUuid,
+        containerUuid: this.metadata.containerUuid,
+        contextColumnNames: this.metadata.contextColumnNames,
+        keyName: 'key'
+      })
+      return generateContextKey(contextAttributesList, 'key')
     }
   },
 
-  // beforeMount() {
-  //   if (this.metadata.displayed) {
-  //     const value = this.value
-  //     console.log(value, !this.isEmptyValue(this.displayedValue), this.displayedValue)
-  //     if (!this.emptyValue && typeof this.value === 'number') {
-  //       if (this.isEmptyValue(this.displayedValue)) {
-  //         // request lookup
-  //         this.getDefaultValueFromServer()
-  //       }
-  //     }
-  //   }
-  // },
+  watch: {
+    contextAttributes(newValue, oldValue) {
+      if (this.metadata.columnName === 'Record_ID' && !isSameValues(newValue, oldValue)) {
+        if (!isEmptyValue(newValue)) {
+          this.setDefaultValue()
+        }
+      }
+    }
+  },
+
+  beforeMount() {
+    if (this.metadata.displayed && this.metadata.columnName === 'Record_ID') {
+      if (!this.emptyValue && typeof this.value === 'number') {
+        if (isEmptyValue(this.displayedValue)) {
+          // request lookup
+          this.getDefaultValueFromServer()
+        }
+      }
+    }
+  },
 
   methods: {
     startProcess() {
