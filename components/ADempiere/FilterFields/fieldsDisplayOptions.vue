@@ -60,11 +60,11 @@
           <svg-icon :icon-class="iconColumn(4)" />
           {{ $t('fieldDisplayOptions.Show4Columns') }}
         </el-dropdown-item>
-        <el-dropdown-item v-if="!isMobile" :command="'secuencia'">
+        <el-dropdown-item v-if="!isMobile" :command="'secuence'">
           <i class="el-icon-sort" />
           {{ sequenceOptionLabel }}
         </el-dropdown-item>
-        <el-dropdown-item v-if="!isMobile && isShowExitSequence" :command="'existSequence'">
+        <el-dropdown-item v-if="!isMobile && isShowExitSequence" :command="'exitSecuence'">
           <svg-icon icon-class="logout" />
           {{ $t('component.sequenceSort.exitNewSequence') }}
         </el-dropdown-item>
@@ -473,7 +473,7 @@ export default defineComponent({
 
     const handleCommand = (command) => {
       let fieldsShowed = []
-      if (command === 'secuencia') {
+      if (command === 'secuence') {
         if (sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
           fieldsShowed = fieldsListAvailable.value
           const { isEditSecuence } = props.containerManager.getPanel({
@@ -488,7 +488,7 @@ export default defineComponent({
           return
         }
       }
-      if (command === 'existSequence') {
+      if (command === 'exitSecuence') {
         toggleDraggablePanel(false)
         // isLoadingSaveCustomization.value = false
         return
