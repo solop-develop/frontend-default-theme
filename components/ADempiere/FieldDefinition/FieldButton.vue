@@ -89,7 +89,7 @@ export default {
       return isEmptyValue(this.value) || this.value < 0
     },
     parsedDisplayedRender() {
-      if (this.emptyValue) {
+      if (this.emptyValue || this.metadata.columnName === 'Posted') {
         return this.metadata.name
       }
       const displayValue = this.displayedValue
