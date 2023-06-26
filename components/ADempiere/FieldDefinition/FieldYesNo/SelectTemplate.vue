@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -43,7 +43,7 @@ import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinF
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
 
 export default {
-  name: 'FieldYesNoAdvancedQuery',
+  name: 'FieldYesNoSelect',
 
   mixins: [
     fieldMixin
@@ -73,7 +73,7 @@ export default {
 
   computed: {
     cssClassCustomField() {
-      return ' custom-field-yes-no-advanced-query '
+      return ' custom-field-yes-no-select '
     }
   },
 
@@ -87,7 +87,7 @@ export default {
 </script>
 
 <style scoped>
-  .custom-field-yes-no-advanced-query {
+  .custom-field-yes-no-select {
     max-height: 34px;
     width: 100%;
   }
