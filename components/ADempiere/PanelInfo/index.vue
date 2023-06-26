@@ -402,11 +402,22 @@ export default defineComponent({
 
     const isAccountingInfo = computed(() => {
       const { currentTab } = store.getters.getContainerInfo
+      if (!currentTab.isDocument) {
+        return false
+      }
       const { fieldsList } = currentTab
-      if (isEmptyValue(fieldsList)) return false
-      const isPostedField = fieldsList.find(field => field.columnName === 'Posted')
-      if (isEmptyValue(isPostedField)) return false
-      return isDisplayedField({ ...isPostedField })
+      if (isEmptyValue(fieldsList)) {
+        return false
+      }
+      const isPostedField = fieldsList.find(field => {
+        field.columnName === 'Posted'
+      })
+      if (isEmptyValue(isPostedField)) {
+        return false
+      }
+      return isDisplayedField({
+        ...isPostedField
+      })
     })
 
     /**
