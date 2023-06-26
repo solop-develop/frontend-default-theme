@@ -68,6 +68,10 @@
           <svg-icon icon-class="logout" />
           {{ $t('component.sequenceSort.exitNewSequence') }}
         </el-dropdown-item>
+        <el-dropdown-item v-if="!isMobile && isUndo" :command="'undo'">
+          <svg-icon icon-class="undo" />
+          {{ $t('component.sequenceSort.undoCustomization') }}
+        </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
 
@@ -180,6 +184,7 @@
 import { computed, defineComponent, nextTick, onMounted, ref, watch } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 import language from '@/lang'
 
 // Utils and Helper Methods
@@ -282,6 +287,12 @@ export default defineComponent({
     // enabled showed optionals with value and mandatory fields
     const isShowFieldsWithValue = computed(() => {
       return props.availableFieldsWithValue.length > 0
+    })
+
+    const isUndo = computed(() => {
+      const newFieldsListSecuence = props.newFieldsListSecuence.map(field => field.sequence)
+      const fieldsCustomization = props.fieldsCustomization.map(field => field.sequence)
+      return JSON.stringify(newFieldsListSecuence) !== JSON.stringify(fieldsCustomization)
     })
 
     // enabled hidden optionals fields (only mandatory))
@@ -493,6 +504,13 @@ export default defineComponent({
         // isLoadingSaveCustomization.value = false
         return
       }
+      if (command === 'undo') {
+        const currentRoute = router.app.$route
+        router.replace({
+          path: '/redirect' + currentRoute.fullPath
+        })
+        return
+      }
       if (typeof command === 'number') {
         store.dispatch('changeSizeField', {
           parentUuid: props.parentUuid,
@@ -555,6 +573,7 @@ export default defineComponent({
       isShowExitSequence,
       sequenceOptionLabel,
       isShowSequence,
+      isUndo,
       // methods
       saveCustomization,
       closeModalDialog,
