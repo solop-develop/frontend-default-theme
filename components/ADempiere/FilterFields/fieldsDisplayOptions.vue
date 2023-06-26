@@ -64,7 +64,7 @@
           <i class="el-icon-sort" />
           {{ sequenceOptionLabel }}
         </el-dropdown-item>
-        <el-dropdown-item v-if="!isMobile && isShowExitSequence" :command="'exitSecuencia'">
+        <el-dropdown-item v-if="!isMobile && isShowExitSequence" :command="'existSequence'">
           <svg-icon icon-class="logout" />
           {{ $t('component.sequenceSort.exitNewSequence') }}
         </el-dropdown-item>
@@ -488,7 +488,7 @@ export default defineComponent({
           return
         }
       }
-      if (command === 'exitSecuencia') {
+      if (command === 'existSequence') {
         toggleDraggablePanel(false)
         // isLoadingSaveCustomization.value = false
         return
