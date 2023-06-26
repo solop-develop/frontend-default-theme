@@ -64,6 +64,10 @@
           <i class="el-icon-sort" />
           {{ sequenceOptionLabel }}
         </el-dropdown-item>
+        <el-dropdown-item v-if="!isMobile && isShowExitSequence" :command="'exitSecuencia'">
+          <svg-icon icon-class="logout" />
+          {{ $t('component.sequenceSort.exitNewSequence') }}
+        </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
 
@@ -330,6 +334,10 @@ export default defineComponent({
       return language.t('component.sequenceSort.modifyFieldSequence')
     })
 
+    const isShowExitSequence = computed(() => {
+      return sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')
+    })
+
     function iconColumn(column) {
       if (column === currentColumnSize.value) {
         return 'eye-open'
@@ -480,6 +488,11 @@ export default defineComponent({
           return
         }
       }
+      if (command === 'exitSecuencia') {
+        toggleDraggablePanel(false)
+        // isLoadingSaveCustomization.value = false
+        return
+      }
       if (typeof command === 'number') {
         store.dispatch('changeSizeField', {
           parentUuid: props.parentUuid,
@@ -539,6 +552,7 @@ export default defineComponent({
       isHiddenFieldsList,
       currentColumnSize,
       isMobile,
+      isShowExitSequence,
       sequenceOptionLabel,
       isShowSequence,
       // methods
