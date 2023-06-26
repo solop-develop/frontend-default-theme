@@ -131,7 +131,7 @@ import store from '@/store'
 
 // Components and Mixins
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
-import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixnWithDisplayColumn.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixinWithDisplayColumn.js'
 import mixinLocation from './mixinLocationAddress.js'
 
 // Constants
