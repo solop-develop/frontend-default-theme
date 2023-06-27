@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@
               {{ $t('form.workflowActivity.filtersSearch.user') }}
             </el-radio>
           </template>
-          <el-select
+          <el-selectAMARGURA
             v-model="currentUser"
             :placeholder="$t('form.workflowActivity.filtersSearch.user')"
             :disabled="levelType !== 0"
@@ -201,11 +201,13 @@ import {
 import store from '@/store'
 import router from '@/router'
 import language from '@/lang'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { evaluateDefaultFieldShowed } from '@/utils/ADempiere/dictionary/window.js'
 import { generatePanelAndFields } from '@/utils/ADempiere/dictionary/panel.js'
+
 // API Request Methods
 import {
   requestListUsers,
@@ -259,14 +261,12 @@ export default defineComponent({
     /**
      * Const
      */
-
     const parentUuid = props.parentUuid
     const containerUuid = props.containerUuid
 
     /**
      * Computed
      */
-
     const panel = computed(() => {
       return props.containerManager.getPanel({
         parentUuid,
@@ -411,7 +411,6 @@ export default defineComponent({
      * Icon Column
      * @param {String} column
      */
-
     function iconColumn(column) {
       if (column === currentColumnSize.value) {
         return 'eye-open'
@@ -423,7 +422,6 @@ export default defineComponent({
      * Toggle Draggable Panel
      * @param {Boolean} isDragAndDrop
      */
-
     function toggleDraggablePanel(isDragAndDrop = false) {
       props.containerManager.changePanelAttribute({
         parentUuid,
@@ -436,7 +434,6 @@ export default defineComponent({
     /**
      * Close Modal Dialog
      */
-
     function closeModalDialog() {
       isSaveNewSequence.value = false
     }
@@ -445,7 +442,6 @@ export default defineComponent({
      * Available Users List
      * @param {Boolean} isShowList
      */
-
     function getAvailableUsersList(isShowList) {
       if (!isShowList) {
         return
@@ -473,7 +469,6 @@ export default defineComponent({
      * Available Roles List
      * @param {Boolean} isShowList
      */
-
     function getAvailableRolesList(isShowList) {
       if (!isShowList) {
         return
@@ -501,7 +496,6 @@ export default defineComponent({
      * Available Customizations List
      * @param {Boolean} isShowList
      */
-
     function getAvailableCustomizationsList(isShowList) {
       if (!isShowList) {
         return
@@ -528,7 +522,6 @@ export default defineComponent({
     /**
      * Save Customization
      */
-
     function saveCustomization() {
       let levelId
       if (levelType.value === 0) {
@@ -577,7 +570,6 @@ export default defineComponent({
      * Handle Command
      * @param {String} command
      */
-
     const handleCommand = (command) => {
       let fieldsShowed = []
       if (command === 'secuence') {
