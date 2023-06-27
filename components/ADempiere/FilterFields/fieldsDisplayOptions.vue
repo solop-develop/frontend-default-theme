@@ -94,7 +94,7 @@
               {{ $t('form.workflowActivity.filtersSearch.user') }}
             </el-radio>
           </template>
-          <el-selectAMARGURA
+          <el-select
             v-model="currentUser"
             :placeholder="$t('form.workflowActivity.filtersSearch.user')"
             :disabled="levelType !== 0"
