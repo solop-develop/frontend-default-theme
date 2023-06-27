@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 <template>
   <span>
+    <!-- Show Options -->
     <el-dropdown trigger="click" class="fields-display-options" size="small" @command="handleCommand">
       <span class="el-dropdown-link">
         <svg-icon icon-class="list" />
@@ -38,6 +39,13 @@
         >
           <svg-icon icon-class="component" />
           {{ $t('fieldDisplayOptions.showFieldsWithValue') }}
+        </el-dropdown-item>
+
+        <el-dropdown-item
+          command="showDefaultField"
+        >
+          <svg-icon icon-class="component" />
+          {{ $t('fieldDisplayOptions.showDefaultField') }}
         </el-dropdown-item>
 
         <el-dropdown-item
@@ -74,7 +82,7 @@
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-
+    <!-- Panel User Customization -->
     <el-dialog
       :title="$t('component.sequenceSort.saveNewSequence')"
       :visible.sync="isSaveNewSequence"
@@ -86,7 +94,7 @@
               {{ $t('form.workflowActivity.filtersSearch.user') }}
             </el-radio>
           </template>
-          <el-select
+          <el-selectAMARGURA
             v-model="currentUser"
             :placeholder="$t('form.workflowActivity.filtersSearch.user')"
             :disabled="levelType !== 0"
@@ -181,7 +189,14 @@
 </template>
 
 <script>
-import { computed, defineComponent, nextTick, onMounted, ref, watch } from '@vue/composition-api'
+import {
+  defineComponent,
+  onMounted,
+  computed,
+  nextTick,
+  watch,
+  ref
+} from '@vue/composition-api'
 
 import store from '@/store'
 import router from '@/router'
@@ -190,6 +205,8 @@ import language from '@/lang'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
+import { evaluateDefaultFieldShowed } from '@/utils/ADempiere/dictionary/window.js'
+import { generatePanelAndFields } from '@/utils/ADempiere/dictionary/panel.js'
 
 // API Request Methods
 import {
@@ -241,22 +258,33 @@ export default defineComponent({
   },
 
   setup(props) {
-    const isSaveNewSequence = ref(false)
+    /**
+     * Const
+     */
+    const parentUuid = props.parentUuid
+    const containerUuid = props.containerUuid
+
+    /**
+     * Computed
+     */
+    const panel = computed(() => {
+      return props.containerManager.getPanel({
+        parentUuid,
+        containerUuid
+      })
+    })
 
     const isLoadingSaveCustomization = computed({
       set(newValue) {
         props.containerManager.changePanelAttribute({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
+          parentUuid,
+          containerUuid,
           attributeName: 'isLoadedFieldsList',
           attributeValue: !newValue
         })
       },
       get() {
-        const { isLoadedFieldsList } = props.containerManager.getPanel({
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid
-        })
+        const { isLoadedFieldsList } = panel.value
         return !isLoadedFieldsList
       }
     })
@@ -268,15 +296,6 @@ export default defineComponent({
     const currentSessionUserId = computed(() => {
       return store.getters['user/userInfo'].id
     })
-
-    const currentUser = ref(currentSessionUserId.value)
-    const currentRole = ref(currentSessionRoleId.value)
-    const customizationLevel = ref('')
-    const levelType = ref(0)
-
-    const availableUsersList = ref([])
-    const availableRolesList = ref([])
-    const availableCustomizationsLeveList = ref([])
 
     // enabled showed optionals and mandatory fields
     const isShowFields = computed(() => {
@@ -314,7 +333,7 @@ export default defineComponent({
     })
 
     const currentColumnSize = computed(() => {
-      return store.getters.getSizeColumn({ containerUuid: props.containerUuid })
+      return store.getters.getSizeColumn({ containerUuid })
     })
 
     const isMobile = computed(() => {
@@ -322,23 +341,15 @@ export default defineComponent({
     })
 
     const isShowSequence = computed(() => {
-      const panel = props.containerManager.getPanel({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-      if (!isEmptyValue(panel)) {
-        const { isEditSecuence } = panel
+      if (!isEmptyValue(panel.value)) {
+        const { isEditSecuence } = panel.value
         return Boolean(isEditSecuence)
       }
       return false
     })
 
     const sequenceOptionLabel = computed(() => {
-      const panel = props.containerManager.getPanel({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-      const { isEditSecuence } = panel
+      const { isEditSecuence } = panel.value
       if (!isEmptyValue(isEditSecuence) && isEditSecuence) {
         return language.t('component.sequenceSort.saveNewSequence')
       }
@@ -349,6 +360,57 @@ export default defineComponent({
       return sequenceOptionLabel.value === language.t('component.sequenceSort.saveNewSequence')
     })
 
+    const panelDefault = computed(() => {
+      return generatePanelAndFields({
+        containerUuid,
+        panelMetadata: {
+          ...panel.value,
+          fields: panel.value.fieldsList
+        },
+        fieldOverwrite: {
+          isShowedFromUser: false
+        },
+        sortField: 'seqNoGrid',
+        evaluateDefaultFieldShowed
+      })
+    })
+
+    /**
+     * Ref
+     * @param {Number} levelType
+     * @param {Number} currentUser
+     * @param {Number} currentRole
+     * @param {Array} availableUsersList
+     * @param {Array} availableRolesList
+     * @param {Boolean} isSaveNewSequence
+     * @param {String} customizationLevel
+     * @param {Array} availableCustomizationsLeveList
+     */
+    const levelType = ref(0)
+    const currentUser = ref(currentSessionUserId.value)
+    const currentRole = ref(currentSessionRoleId.value)
+    const availableUsersList = ref([])
+    const availableRolesList = ref([])
+    const isSaveNewSequence = ref(false)
+    const customizationLevel = ref('')
+    const availableCustomizationsLeveList = ref([])
+
+    /**
+     * Methods
+     * iconColumn
+     * handleCommand
+     * closeModalDialog
+     * saveCustomization
+     * toggleDraggablePanel
+     * getAvailableUsersList
+     * getAvailableRolesList
+     * getAvailableCustomizationsList
+     */
+
+    /**
+     * Icon Column
+     * @param {String} column
+     */
     function iconColumn(column) {
       if (column === currentColumnSize.value) {
         return 'eye-open'
@@ -356,19 +418,30 @@ export default defineComponent({
       return 'eye'
     }
 
+    /**
+     * Toggle Draggable Panel
+     * @param {Boolean} isDragAndDrop
+     */
     function toggleDraggablePanel(isDragAndDrop = false) {
       props.containerManager.changePanelAttribute({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
+        parentUuid,
+        containerUuid,
         attributeName: 'isEditSecuence',
         attributeValue: isDragAndDrop
       })
     }
 
-    function closeModalDialog(params) {
+    /**
+     * Close Modal Dialog
+     */
+    function closeModalDialog() {
       isSaveNewSequence.value = false
     }
 
+    /**
+     * Available Users List
+     * @param {Boolean} isShowList
+     */
     function getAvailableUsersList(isShowList) {
       if (!isShowList) {
         return
@@ -392,6 +465,10 @@ export default defineComponent({
         })
     }
 
+    /**
+     * Available Roles List
+     * @param {Boolean} isShowList
+     */
     function getAvailableRolesList(isShowList) {
       if (!isShowList) {
         return
@@ -415,6 +492,10 @@ export default defineComponent({
         })
     }
 
+    /**
+     * Available Customizations List
+     * @param {Boolean} isShowList
+     */
     function getAvailableCustomizationsList(isShowList) {
       if (!isShowList) {
         return
@@ -438,6 +519,9 @@ export default defineComponent({
         })
     }
 
+    /**
+     * Save Customization
+     */
     function saveCustomization() {
       let levelId
       if (levelType.value === 0) {
@@ -458,8 +542,8 @@ export default defineComponent({
       })
         .then(response => {
           props.containerManager.changePanelAttribute({
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid,
+            parentUuid,
+            containerUuid,
             attributeName: 'fieldsList',
             attributeValue: props.newFieldsListSecuence
           })
@@ -482,15 +566,16 @@ export default defineComponent({
       closeModalDialog()
     }
 
+    /**
+     * Handle Command
+     * @param {String} command
+     */
     const handleCommand = (command) => {
       let fieldsShowed = []
       if (command === 'secuence') {
         if (sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
           fieldsShowed = fieldsListAvailable.value
-          const { isEditSecuence } = props.containerManager.getPanel({
-            parentUuid: props.parentUuid,
-            containerUuid: props.containerUuid
-          })
+          const { isEditSecuence } = panel.value
           toggleDraggablePanel(!isEditSecuence)
           return
         }
@@ -513,8 +598,8 @@ export default defineComponent({
       }
       if (typeof command === 'number') {
         store.dispatch('changeSizeField', {
-          parentUuid: props.parentUuid,
-          containerUuid: props.containerUuid,
+          parentUuid,
+          containerUuid,
           sizeField: command
         })
         return
@@ -522,14 +607,20 @@ export default defineComponent({
       if (command === 'showAll') {
         fieldsShowed = fieldsListAvailable.value
       }
+      if (command === 'showDefaultField') {
+        const { fieldsList } = panelDefault.value
+        fieldsShowed = fieldsList
+          .filter(field => field.isDisplayed && field.isShowedFromUser)
+          .map(field => field.columnName)
+      }
       if (command === 'showWithValue') {
         fieldsShowed = fieldsListAvailableWithValue.value
       }
 
       props.filterManager({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid,
+        containerUuid,
         fieldsShowed,
+        parentUuid,
         fieldsList: props.availableFields
       })
     }
@@ -552,37 +643,39 @@ export default defineComponent({
     })
 
     return {
-      // ref
-      isSaveNewSequence,
-      isLoadingSaveCustomization,
+      // Ref
+      levelType,
       currentUser,
       currentRole,
+      isSaveNewSequence,
       customizationLevel,
-      levelType,
       availableUsersList,
       availableRolesList,
+      isLoadingSaveCustomization,
       availableCustomizationsLeveList,
-      // computeds
-      currentSessionRoleId,
-      currentSessionUserId,
-      isShowFields,
+      // Computeds
       isShowFieldsWithValue,
-      isHiddenFieldsList,
-      currentColumnSize,
-      isMobile,
-      isShowExitSequence,
+      currentSessionUserId,
+      currentSessionRoleId,
       sequenceOptionLabel,
+      isHiddenFieldsList,
+      isShowExitSequence,
+      currentColumnSize,
       isShowSequence,
+      isShowFields,
+      panelDefault,
+      isMobile,
       isUndo,
-      // methods
-      saveCustomization,
-      closeModalDialog,
-      handleCommand,
+      panel,
+      // Methods
       iconColumn,
+      handleCommand,
+      closeModalDialog,
+      saveCustomization,
+      toggleDraggablePanel,
       getAvailableUsersList,
       getAvailableRolesList,
-      getAvailableCustomizationsList,
-      toggleDraggablePanel
+      getAvailableCustomizationsList
     }
   }
 })
