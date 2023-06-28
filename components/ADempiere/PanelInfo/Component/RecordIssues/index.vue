@@ -17,7 +17,9 @@
 -->
 
 <template>
-  <span>
+  <span
+    v-if="!isLoading"
+  >
     <el-container style="height: 100% !important;">
       <el-main style="overflow: auto;padding: 0px;">
         <!-- {{ !isEmptyValue(currentIssues) }} {{ !isNewIssues }} -->
@@ -242,6 +244,10 @@
       </el-main>
     </el-container>
   </span>
+  <loading-view
+    v-else
+    key="Record-Issues-Loading"
+  />
 </template>
 
 <script>
@@ -254,6 +260,7 @@ import store from '@/store'
 // Components and Mixins
 import Comment from './component/Comment.vue'
 import RecordTime from '@theme/components/ADempiere/Form/Issues/recordTime.vue'
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 
 // Constants
 import { REQUEST_WINDOW_UUID } from '@/utils/ADempiere/dictionary/form/Issues.js'
@@ -268,7 +275,8 @@ export default defineComponent({
   components: {
     // Editor
     Comment,
-    RecordTime
+    RecordTime,
+    LoadingView
   },
 
   props: {
@@ -279,6 +287,10 @@ export default defineComponent({
     recordId: {
       type: Number,
       required: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
 
