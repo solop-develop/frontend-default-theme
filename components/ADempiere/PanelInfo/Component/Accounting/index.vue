@@ -38,11 +38,52 @@
         </el-form>
       </el-card>
     </el-header>
-
     <el-main>
       <el-card
         style="padding: 20px;"
       >
+        <el-dropdown
+          trigger="click"
+          class="fields-display-accounting"
+          @command="handleDisplayColumn"
+        >
+          <span class="el-dropdown-link">
+            <svg-icon icon-class="list" />
+          </span>
+
+          <el-dropdown-menu slot="dropdown" style="max-width: 300px;">
+            <el-dropdown-item
+              command="showMinimalistView"
+            >
+              <svg-icon :icon-class="showMinimalistView ? 'eye-open' : 'eye'" />
+              {{ $t('table.dataTable.showMinimalistView') }} {{ showMinimalistView }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              command="displayDocumentInformation"
+            >
+              <svg-icon :icon-class="displayDocumentInformation ? 'eye-open' : 'eye'" />
+              {{ 'Mostrar Información de Documento' }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              command="displaySourceInformation"
+            >
+              <svg-icon :icon-class="displaySourceInformation ? 'eye-open' : 'eye'" />
+              {{ 'Mostrar Información Fuente' }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              command="displayQuantity"
+            >
+              <svg-icon :icon-class="displayQuantity ? 'eye-open' : 'eye'" />
+              {{ 'Mostrar Cantidad' }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              command="displayAll"
+            >
+              <svg-icon :icon-class="showAllColumns ? 'eye-open' : 'eye'" />
+              {{ $t('table.dataTable.showAllColumns') }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
         <el-table
           v-loading="isLoadingDataTable"
           :data="tableData"
@@ -54,15 +95,15 @@
           <el-table-column
             type="index"
             label="#"
-            min-width="30"
-            header-align="center"
+            width="35"
+            header-align="left"
           />
           <el-table-column
-            v-for="(head, key) in heardList"
+            v-for="(head, key) in headerAccounting"
             :key="key"
             :label="head.label"
             :align="head.align"
-            min-width="170"
+            :min-width="head.width"
             header-align="center"
           >
             <template slot-scope="scope">
@@ -72,6 +113,14 @@
         </el-table>
 
         <div style="margin-top: 10px;">
+          <el-button
+            :loading="isLoadingDataTable"
+            type="success"
+            class="button-base-icon"
+            icon="el-icon-refresh-right"
+            style="margin-top: 10px;float: right;"
+            @click="refreshAccount"
+          />
           <el-button
             type="primary"
             plain
@@ -159,6 +208,13 @@ export default defineComponent({
     const isLoadingRePost = ref(false)
     const force = ref(false)
 
+    const displayDocumentInformation = ref(false)
+    const displaySourceInformation = ref(false)
+    const displayQuantity = ref(false)
+    const showAllColumns = ref(false)
+    const showMinimalistView = ref(true)
+    const isLoadingTable = ref(false)
+
     // Computed
     const uuidForm = computed(() => {
       return ACCOUTING_FACT_FORM + '_' + props.containerUuid
@@ -193,6 +249,42 @@ export default defineComponent({
 
     const showContainerInfo = computed(() => {
       return store.getters.getShowLogs
+    })
+
+    const headerAccounting = computed(() => {
+      let header = []
+      if (showAllColumns.value) return heardList
+      if (showMinimalistView.value) return heardList.filter(list => list.default)
+      switch (true) {
+        case (displayDocumentInformation.value && displaySourceInformation.value && !displayQuantity.value):
+          header = heardList.filter(list => list.default || list.displayDocumentInformation || list.displaySourceInformation)
+          break
+        case (displayDocumentInformation.value && displayQuantity.value && !displaySourceInformation.value):
+          header = heardList.filter(list => list.default || list.displayDocumentInformation || list.displayQuantity)
+          break
+        case (displaySourceInformation.value && displayQuantity.value && !displayDocumentInformation.value):
+          header = heardList.filter(list => list.default || list.displaySourceInformation || list.displayQuantity)
+          break
+        case (displaySourceInformation.value && displayQuantity.value && displayDocumentInformation.value):
+          header = heardList.filter(list => list.default || list.displaySourceInformation || list.displayQuantity)
+          break
+        case (!displayDocumentInformation.value && !displayQuantity.value && !displaySourceInformation.value):
+          header = heardList.filter(list => list.default || list.displayDocumentInformation)
+          break
+        case (displayDocumentInformation.value && !displayQuantity.value && !displaySourceInformation.value):
+          header = heardList.filter(list => list.default || list.displayDocumentInformation)
+          break
+        case (displaySourceInformation.value && !displayDocumentInformation.value && !displayQuantity.value):
+          header = heardList.filter(list => list.default || list.displaySourceInformation)
+          break
+        case (displayQuantity.value && !displaySourceInformation.value && !displayDocumentInformation.value):
+          header = heardList.filter(list => list.default || list.displayQuantity)
+          break
+        case (!displaySourceInformation.value && !displayQuantity.value && !displayDocumentInformation.value):
+          header = heardList.filter(list => list.default)
+          break
+      }
+      return header
     })
 
     // Function
@@ -319,6 +411,52 @@ export default defineComponent({
         })
     }
 
+    function handleDisplayColumn(displayColumn) {
+      isLoadingDataTable.value = true
+      setTimeout(() => {
+        isLoadingDataTable.value = false
+      }, 1000)
+      if (displayColumn === 'displayAll') {
+        showAllColumns.value = true
+        displayDocumentInformation.value = false
+        displaySourceInformation.value = false
+        displayQuantity.value = false
+        showMinimalistView.value = false
+        return
+      }
+      if (displayColumn === 'showMinimalistView') {
+        displayDocumentInformation.value = false
+        displaySourceInformation.value = false
+        displayQuantity.value = false
+        showAllColumns.value = false
+        showMinimalistView.value = true
+        return
+      }
+      switch (displayColumn) {
+        case 'displayDocumentInformation':
+          // displaySourceInformation.value = false
+          // displayQuantity.value = false
+          showAllColumns.value = false
+          showMinimalistView.value = false
+          displayDocumentInformation.value = !displayDocumentInformation.value
+          break
+        case 'displaySourceInformation':
+          displaySourceInformation.value = !displaySourceInformation.value
+          // displayDocumentInformation.value = false
+          // displayQuantity.value = false
+          showAllColumns.value = false
+          showMinimalistView.value = false
+          break
+        case 'displayQuantity':
+          // displayDocumentInformation.value = false
+          // displaySourceInformation.value = false
+          showAllColumns.value = false
+          showMinimalistView.value = false
+          displayQuantity.value = !displayQuantity.value
+          break
+      }
+    }
+
     if (isEmptyValue(accoutingSchemaId.value)) {
       const globalAccoutingSchemaId = computed(() => {
         return store.getters.getSessionContext({
@@ -339,6 +477,10 @@ export default defineComponent({
     if (!isLoadingFields.value) {
       setFieldsList({})
     }
+
+    function refreshAccount() {
+      findAccountingFacts(accoutingFilters.value)
+    }
     findAccountingFacts(accoutingFilters.value)
 
     return {
@@ -348,12 +490,21 @@ export default defineComponent({
       isLoadingDataTable,
       isLoadingRePost,
       metadataList,
+      isLoadingTable,
       force,
+      //
+      displayDocumentInformation,
+      displaySourceInformation,
+      displayQuantity,
+      showMinimalistView,
+      showAllColumns,
+      //
       containerManager: {
         ...containerManagerForm,
         getDefaultValue: containerManagerWindow.getDefaultValue
       },
       heardList,
+      headerAccounting,
       // computed
       accoutingSchemaId,
       uuidForm,
@@ -362,9 +513,22 @@ export default defineComponent({
       setFieldsList,
       clearData,
       findAccountingFacts,
-      rePost
+      refreshAccount,
+      rePost,
+      handleDisplayColumn
     }
   }
 
 })
 </script>
+
+<style scoped lang="scss">
+.fields-display-accounting {
+  float: right  ;
+  position: relative;
+  color: #606266;
+  font-size: 16px;
+  /* float: right; */
+  padding-left: 5px;
+}
+</style>

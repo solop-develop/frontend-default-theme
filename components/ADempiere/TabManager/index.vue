@@ -263,7 +263,7 @@ export default defineComponent({
       if (isMobile.value) {
         return '100%'
       }
-      return '55%'
+      return '65%'
     })
 
     const sizeBadgeRight = computed(() => {
