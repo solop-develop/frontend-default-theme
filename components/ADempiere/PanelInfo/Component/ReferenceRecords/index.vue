@@ -17,7 +17,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <span>
+  <span
+    v-if="!isLoading"
+  >
     <el-card v-if="!isEmptyValue(getterReferences)" style="padding: 10px;">
       <el-descriptions
         :column="1"
@@ -45,19 +47,28 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       <el-empty />
     </div>
   </span>
+  <loading-view
+    v-else
+    key="Reference-Records-Loading"
+  />
 </template>
 
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
-
+// Component and Mixins
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
 
 export default defineComponent({
   name: 'ReferenceRecords',
+
+  components: {
+    LoadingView
+  },
 
   props: {
     recordUuid: {
@@ -75,10 +86,15 @@ export default defineComponent({
     tabUuid: {
       type: String,
       default: () => ''
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
 
   setup(props) {
+    // Computeds
     const getterReferences = computed(() => {
       return store.getters.getStoredReferences({
         windowUuid: props.parentUuid,
@@ -86,6 +102,13 @@ export default defineComponent({
         recordUuid: props.recordUuid
       })
     })
+
+    // Methods
+
+    /**
+     * Open Reference
+     * @param {Object} referenceElement
+     */
 
     function openReference(referenceElement) {
       if (isEmptyValue(referenceElement.windowUuid)) {

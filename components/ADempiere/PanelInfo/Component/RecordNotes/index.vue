@@ -17,91 +17,96 @@
 -->
 
 <template>
-  <span>
-    <el-container style="height: 100% !important;">
-      <el-main style="overflow: auto;padding-left: 10px;padding-right: 10px;">
-        <el-empty v-if="isEmptyValue(listChats)" style="height: 600px;" />
-        <!-- <el-scrollbar v-else class="scroll-chats"> -->
-        <el-timeline v-else style="padding-left: 0px">
-          <el-timeline-item
-            v-for="(chat, key) in listChats"
-            :key="key"
-            :timestamp="translateDateByLong(chat.logDate)"
-            type="primary"
-            placement="top"
-            style="padding-top: 0px;padding-bottom: 0px;"
-          >
-            <el-card v-if="!isEmptyValue(chat.userName)" shadow="always" class="list-notes-previwer">
-              <div slot="header" class="clearfix">
-                <span style="color: #606266; font-weight: bold;">
-                  {{ $t('window.containerInfo.log.updatedBy') }} <b>: </b>{{ chat.userName }} <i class="el-icon-user-solid" />
-                </span>
-              </div>
-              <el-scrollbar wrap-class="scroll-previwer-list-note">
-                <v-md-preview :text="chat.characterData" class="previwer-disable" style="padding: 0px" height="150px" />
-              </el-scrollbar>
-            </el-card>
-          </el-timeline-item>
-        </el-timeline>
-      </el-main>
-
-      <el-footer style="height: auto;padding: 5px;">
-        <el-card shadow="never" class="is-add-new-comments">
-          <div slot="header">
-            {{ $t('window.containerInfo.logWorkflow.addNote') }}
-          </div>
-          <div class="editor-container">
-            <el-scrollbar v-if="isShowPreviwer" wrap-class="scroll-previwer-note">
-              <v-md-preview :text="message" class="previwer-disable" style="padding: 0px" height="150px" />
+  <el-container
+    v-if="!isLoading"
+    style="height: 89vh;"
+  >
+    <el-main>
+      <el-empty v-if="isEmptyValue(listChats)" style="height: 600px;" />
+      <el-timeline v-else style="padding-left: 0px">
+        <el-timeline-item
+          v-for="(chat, key) in listChats"
+          :key="key"
+          :timestamp="translateDateByLong(chat.logDate)"
+          type="primary"
+          placement="top"
+          style="padding-top: 0px;padding-bottom: 0px;"
+        >
+          <el-card v-if="!isEmptyValue(chat.userName)" shadow="always" class="list-notes-previwer">
+            <div slot="header" class="clearfix">
+              <span style="color: #606266; font-weight: bold;">
+                {{ $t('window.containerInfo.log.updatedBy') }} <b>: </b>{{ chat.userName }} <i class="el-icon-user-solid" />
+              </span>
+            </div>
+            <el-scrollbar wrap-class="scroll-previwer-list-note">
+              <v-md-preview :text="chat.characterData" class="previwer-disable" style="padding: 0px" height="150px" />
             </el-scrollbar>
-            <v-md-editor
-              v-else
-              v-model="message"
-              left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code | emoji listMailTemplates"
-              :toolbar="listOption"
-              right-toolbar="sync-scroll fullscreen"
-              mode="edit"
-              height="150px"
-              :placeholder="$t('window.containerInfo.logWorkflow.addNote')"
-            />
-          </div>
-          <el-button
-            type="primary"
-            icon="el-icon-check"
-            class="button-base-icon"
-            style="float: right;margin: 10px;"
-            :disabled="isEmptyValue(message)"
-            @click="sendComment"
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
+    </el-main>
+    <el-footer
+      height="auto"
+    >
+      <el-card shadow="never" class="is-add-new-comments">
+        <div slot="header">
+          {{ $t('window.containerInfo.logWorkflow.addNote') }}
+        </div>
+        <div class="editor-container">
+          <el-scrollbar v-if="isShowPreviwer" wrap-class="scroll-previwer-note">
+            <v-md-preview :text="message" class="previwer-disable" style="padding: 0px" height="150px" />
+          </el-scrollbar>
+          <v-md-editor
+            v-else
+            v-model="message"
+            left-toolbar="undo redo clear h bold italic strikethrough quote ul ol table hr link image code | emoji listMailTemplates"
+            :toolbar="listOption"
+            right-toolbar="sync-scroll fullscreen"
+            mode="edit"
+            height="150px"
+            :placeholder="$t('window.containerInfo.logWorkflow.addNote')"
           />
-          <el-button
-            type="danger"
-            icon="el-icon-close"
-            class="button-base-icon"
-            style="float: right;margin-top: 10px;"
-            @click="closeNote"
-          />
-          <el-button
-            type="info"
-            plain
-            style="float: right; margin-top: 10px;"
-            class="button-base-icon"
-            :disabled="isEmptyValue(message)"
-            @click="message = ''"
-          >
-            <svg-icon icon-class="layers-clear" />
-          </el-button>
-          <el-checkbox
-            v-model="isShowPreviwer"
-            :label="$t('issues.preview')"
-            class="button-base-icon"
-            :border="true"
-            :disabled="isEmptyValue(message)"
-            style="float: right;margin-top: 10px;"
-          />
-        </el-card>
-      </el-footer>
-    </el-container>
-  </span>
+        </div>
+        <el-button
+          type="primary"
+          icon="el-icon-check"
+          class="button-base-icon"
+          style="float: right;margin: 10px;"
+          :disabled="isEmptyValue(message)"
+          @click="sendComment"
+        />
+        <el-button
+          type="danger"
+          icon="el-icon-close"
+          class="button-base-icon"
+          style="float: right;margin-top: 10px;"
+          @click="closeNote"
+        />
+        <el-button
+          type="info"
+          plain
+          style="float: right; margin-top: 10px;"
+          class="button-base-icon"
+          :disabled="isEmptyValue(message)"
+          @click="message = ''"
+        >
+          <svg-icon icon-class="layers-clear" />
+        </el-button>
+        <el-checkbox
+          v-model="isShowPreviwer"
+          :label="$t('issues.preview')"
+          class="button-base-icon"
+          :border="true"
+          :disabled="isEmptyValue(message)"
+          style="float: right;margin-top: 10px;"
+        />
+      </el-card>
+    </el-footer>
+  </el-container>
+  <loading-view
+    v-else
+    key="note-loading"
+  />
 </template>
 
 <script>
@@ -112,6 +117,9 @@ import {
 import lang from '@/lang'
 import store from '@/store'
 
+// Components
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -119,6 +127,10 @@ import { translateDateByLong } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'RecordNotes',
+
+  components: {
+    LoadingView
+  },
 
   props: {
     tableName: {
@@ -128,12 +140,20 @@ export default defineComponent({
     recordId: {
       type: Number,
       required: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
 
   setup(props) {
+    // Ref
+
     const message = ref('')
     const isShowPreviwer = ref(false)
+
+    // Computed
 
     const listChats = computed(() => {
       return store.getters.getChatEntries
@@ -142,6 +162,12 @@ export default defineComponent({
     const listOption = computed(() => {
       return store.getters.getListMailTemplates
     })
+
+    // Methods
+
+    /**
+     * Send Comment
+     */
 
     function sendComment() {
       if (isEmptyValue(message.value)) {
@@ -161,11 +187,19 @@ export default defineComponent({
         })
     }
 
+    /**
+     * Close Note
+     */
+
     function closeNote() {
       store.dispatch('showLogs', {
         show: false
       })
     }
+
+    /**
+     * Load List Mail
+     */
 
     function loadListMail() {
       store.dispatch('findListMailTemplates')
@@ -174,12 +208,15 @@ export default defineComponent({
     loadListMail()
 
     return {
+      // Ref
       message,
+      isShowPreviwer,
+      // Computed
       listChats,
       listOption,
-      isShowPreviwer,
-      sendComment,
+      // Methods
       closeNote,
+      sendComment,
       loadListMail,
       translateDateByLong
     }
@@ -212,7 +249,7 @@ export default defineComponent({
   max-height: 120px;
 }
 .scroll-previwer-list-note {
-  max-height: 100px;
+  max-height: 150px;
 }
 .github-markdown-body {
   padding: 10px;

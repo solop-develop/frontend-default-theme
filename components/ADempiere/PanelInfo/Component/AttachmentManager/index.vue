@@ -17,7 +17,9 @@
 -->
 
 <template>
-  <span>
+  <span
+    v-if="!isLoading"
+  >
     <div v-if="isEmptyValue(attachmentList)">
       <el-empty />
     </div>
@@ -78,6 +80,10 @@
       />
     </span>
   </span>
+  <loading-view
+    v-else
+    key="Attachment-Manager-Loading"
+  />
 </template>
 
 <script>
@@ -122,13 +128,15 @@ export default defineComponent({
     recordUuid: {
       type: String,
       default: ''
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
 
   setup() {
-    /**
-     * Refs
-     */
+    // Ref
     const dialogImageUrl = ref('')
     const isLoadeDialogFileUrl = ref(false)
     const dialogVisible = ref(false)
@@ -137,9 +145,7 @@ export default defineComponent({
     const imageAttachment = ref([])
     const isList = ref(false)
 
-    /**
-     * Computed
-     */
+    // Computed
     const listImageAll = computed(() => {
       if (imageAttachment.value) {
         return imageAttachment.value.concat(pdfAttachment.value)
@@ -177,9 +183,13 @@ export default defineComponent({
       return attachmentList.value.map(file => file.imageDate.uri)
     })
     const imageKey = ref(0)
+    // Methods
+
     /**
-     * Methods
+     * Handle Remove
+     * @param {Object} file
      */
+
     const handleRemove = (file) => {
       deleteResourceReference({
         resourceUuid: file.resource_uuid,
@@ -193,6 +203,11 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Handle Picture Card Preview
+     * @param {Object} file
+     */
+
     const handlePictureCardPreview = (file) => {
       imageKey.value = attachmentList.value.findIndex(list => list.imageDate.uri === file.imageDate.uri)
       // if (file.content_type.includes('application/pdf')) {
@@ -200,6 +215,13 @@ export default defineComponent({
       dialogImageUrl.value = handleDownload(file, false)
       dialogVisible.value = true
     }
+
+    /**
+     * Handle Download
+     * @param {Object} file
+     * @param {Boolean} isDownload
+     */
+
     const handleDownload = async(file, isDownload = true) => {
       // if (isEmptyValue(file.url)) return
       // file.url = URL.createObjectURL(file)
@@ -250,6 +272,11 @@ export default defineComponent({
       // }
     }
 
+    /**
+     * Conver File
+     * @param {Object} image
+     */
+
     const converFile = (image) => {
       let urlImage
       switch (image.content_type) {
@@ -271,6 +298,11 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Before Avatar Upload
+     * @param {Object} file
+     */
+
     const beforeAvatarUpload = (file) => {
       listImageAll.value.push({
         name: file.name,
@@ -280,6 +312,12 @@ export default defineComponent({
         url: URL.createObjectURL(file)
       })
     }
+
+    /**
+     * Image From Source
+     * @param {Object} file
+     */
+
     const getImageFromSource = (file) => {
       const image = getImagePath({
         file: file.file_name,
@@ -289,6 +327,12 @@ export default defineComponent({
       // beforeAvatarUpload(file)
       return image
     }
+
+    /**
+     * Octet Stream
+     * @param {Object} file
+     */
+
     const octetStream = (file) => {
       let urlImage
       if (file.file_name.includes('.xlsx')) {
@@ -302,6 +346,7 @@ export default defineComponent({
     }
 
     return {
+      // Ref
       dialogImageUrl,
       isLoadeDialogFileUrl,
       dialogVisible,
@@ -309,18 +354,18 @@ export default defineComponent({
       imageAttachment,
       pdfAttachment,
       isList,
-      // computed
+      // Computed
       listImageAll,
       attachmentList,
       imageKey,
       previewList,
-      // methods
+      // Methods
       beforeAvatarUpload,
       converFile,
       handleRemove,
       handlePictureCardPreview,
       handleDownload,
-      // image
+      // Image
       getImageFromSource,
       octetStream,
       getExtensionFromFile

@@ -25,181 +25,34 @@
         class="tab-panel-info"
         @tab-click="handleClick"
       >
-        <el-tab-pane
-          name="getRecordLogs"
-          lazy
+        <template
+          v-for="(tab, index) in listInfoPanel"
         >
-          <span slot="label">
-            <svg-icon icon-class="tree-table" />
-            {{ $t('window.containerInfo.log.changeHistory') }}
-          </span>
-          <loading-view
-            v-if="isLoadingRecordLogsList"
-            key="attachment-loading"
-          />
-          <!-- <el-scrollbar v-else class="scroll-panel-info"> -->
-          <el-descriptions :column="1">
-            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-              <template slot="label">
-                <svg-icon icon-class="table" style="margin-right: 10px;" />
-                {{ $t('window.containerInfo.log.tableName') }}
-              </template>
-              <span style="color: #606266; font-weight: bold;">
-                {{ currentTab.tableName }}
-              </span>
-            </el-descriptions-item>
-            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-              <template slot="label">
-                <svg-icon icon-class="user" style="margin-right: 10px;" />
-                {{ $t('window.containerInfo.log.recordID') }}
-              </template>
-              <span style="color: #606266; font-weight: bold;">
-                {{ currentRecordId }}
-              </span>
-            </el-descriptions-item>
-            <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
-              <template slot="label">
-                <svg-icon icon-class="user" style="margin-right: 10px;" />
-                {{ $t('window.containerInfo.log.recordUUID') }}
-              </template>
-              <span style="color: #606266; font-weight: bold;">
-                {{ currentRecordUuid }}
-              </span>
-            </el-descriptions-item>
-          </el-descriptions>
-          <record-logs style="overflow: auto" />
-          <!-- </el-scrollbar> -->
-        </el-tab-pane>
-
-        <el-tab-pane name="listReference" lazy>
-          <span slot="label">
-            <i class="el-icon-zoom-in" />
-            {{ $t('window.containerInfo.referenceRecords') }}
-          </span>
-          <loading-view
-            v-if="isLoadingListReference"
-            key="listReference-loading"
-          />
-          <reference-records
-            v-else
-            :table-name="currentTab.tableName"
-            :parent-uuid="currentTab.parentUuid"
-            :record-uuid="currentRecordUuid"
-            :tab-uuid="currentTab.uuid"
-          />
-        </el-tab-pane>
-
-        <el-tab-pane name="recordAttachmentTab" lazy>
-          <span slot="label">
-            <i class="el-icon-paperclip" />
-            {{ $t('window.containerInfo.attachment.label') }}
-          </span>
-          <loading-view
-            v-if="isLoadingListAttachment"
-            key="attachment-loading"
-          />
-          <attachment-manager
-            v-else
-            :is-active-tab="'recordAttachmentTab' === nameTab"
-            :table-name="allTabsList[0].tableName"
-            :record-id="currentRecordId"
-            :record-uuid="currentRecordUuid"
-          />
-        </el-tab-pane>
-
-        <el-tab-pane name="recordNotesTab" lazy style="height: 95% !important;">
-          <span slot="label">
-            <svg-icon icon-class="message" />
-            {{ $t('window.containerInfo.notes') }}
-          </span>
-          <loading-view
-            v-if="isLoadingNotesRecord"
-            key="note-loading"
-          />
-          <record-notes
-            v-else
-            :table-name="allTabsList[0].tableName"
-            :record-id="currentRecordId"
-          />
-        </el-tab-pane>
-
-        <el-tab-pane name="getListIssues" lazy style="height: 95% !important;" class="tab-panel-info">
-          <span slot="label">
-            <svg-icon icon-class="guide" />
-            {{ $t('window.containerInfo.issues') }}
-          </span>
-          <loading-view
-            v-if="isLoadingIssuessRecord"
-            key="note-loading"
-          />
-          <record-issues
-            v-else
-            :table-name="allTabsList[0].tableName"
-            :record-id="currentRecordId"
-            class="tab-panel-info"
-          />
-        </el-tab-pane>
-
-        <el-tab-pane
-          v-if="isWorkflowLog"
-          name="searchWorkflowHistory"
-          lazy
-          style="height: 100% !important;"
-        >
-          <span slot="label">
-            <svg-icon icon-class="tree-table" />
-            {{ $t('window.containerInfo.workflowLog') }}
-          </span>
-          <workflow-logs
-            :container-uuid="currentTab.containerUuid"
-          />
-        </el-tab-pane>
-
-        <el-tab-pane
-          v-if="isAccountingInfo"
-          name="accountingInformation"
-          lazy
-          style="height: 100% !important;"
-        >
-          <span slot="label">
-            <svg-icon icon-class="balance" style="font-size: 18px;" />
-            {{ $t('window.containerInfo.accountingInformation.title') }}
-          </span>
-          <accounting
-            :container-manager="containerManager"
-            :container-uuid="currentTab.containerUuid"
-            :table-name="currentTab.tableName"
-            :record-id="currentRecordId"
-            :record-uuid="currentRecordUuid"
-          />
-        </el-tab-pane>
-
-        <el-tab-pane
-          v-if="!isEmptyValue(storeProduct)"
-          name="listProductStorage"
-          lazy
-          style="height: 100% !important;"
-        >
-          <span slot="label">
-            <svg-icon icon-class="warehouse" style="font-size: 18px;" />
-            {{ $t('listStoreProduct.title') }}
-          </span>
-          <store-product
-            :list="recordsListStoreProduct"
-          />
-        </el-tab-pane>
-        <el-tab-pane
-          v-if="!isEmptyValue(showPanelDashboard)"
-          name="listDashboard"
-          lazy
-          style="height: 100% !important;"
-        >
-          <span slot="label">
-            <svg-icon icon-class="dashboard" style="font-size: 18px;" />
-            {{ $t('navbar.dashboard') }}
-          </span>
-          <record-dashboard />
-        </el-tab-pane>
+          <el-tab-pane
+            v-if="tab.show"
+            :key="index"
+            :name="tab.name"
+            lazy
+          >
+            <span slot="label">
+              <svg-icon v-if="tab.svg" :icon-class="tab.iconClass" />
+              <i v-else :class="tab.iconClass" />
+              {{ tab.title }}
+            </span>
+            <component
+              :is="tab.component"
+              :container-uuid="currentTab.containerUuid"
+              :table-name="allTabsList[0].tableName"
+              :container-manager="containerManager"
+              :parent-uuid="currentTab.parentUuid"
+              :record-uuid="currentRecordUuid"
+              :list="recordsListStoreProduct"
+              :record-id="currentRecordId"
+              :tab-uuid="currentTab.uuid"
+              :is-loading="tab.isLoading"
+            />
+          </el-tab-pane>
+        </template>
       </el-tabs>
     </el-main>
   </el-container>
@@ -289,6 +142,94 @@ export default defineComponent({
     }
 
     // use getter to reactive properties
+
+    // Computed
+
+    const listInfoPanel = computed(() => {
+      return [
+        {
+          name: 'getRecordLogs',
+          title: language.t('window.containerInfo.log.changeHistory'),
+          show: true,
+          svg: true,
+          iconClass: 'tree-table',
+          isLoading: isLoadingRecordLogsList.value,
+          component: () => import('./Component/RecordLogs/index.vue')
+        },
+        {
+          name: 'listReference',
+          title: language.t('window.containerInfo.referenceRecords'),
+          show: true,
+          svg: false,
+          isLoading: isLoadingListReference.value,
+          iconClass: 'el-icon-zoom-in',
+          component: () => import('./Component/ReferenceRecords/index.vue')
+        },
+        {
+          name: 'recordAttachmentTab',
+          title: language.t('window.containerInfo.attachment.label'),
+          show: true,
+          svg: false,
+          isLoading: isLoadingListAttachment.value,
+          iconClass: 'el-icon-paperclip',
+          component: () => import('./Component/AttachmentManager/index.vue')
+        },
+        {
+          name: 'recordNotesTab',
+          title: language.t('window.containerInfo.notes'),
+          show: true,
+          svg: true,
+          iconClass: 'message',
+          isLoading: isLoadingNotesRecord.value,
+          component: () => import('./Component/RecordNotes/index.vue')
+        },
+        {
+          name: 'getListIssues',
+          title: language.t('window.containerInfo.issues'),
+          show: true,
+          svg: true,
+          iconClass: 'guide',
+          isLoading: isLoadingIssuessRecord.value,
+          component: () => import('./Component/RecordIssues/index.vue')
+        },
+        {
+          name: 'searchWorkflowHistory',
+          show: isWorkflowLog.value,
+          title: language.t('window.containerInfo.workflowLog'),
+          svg: true,
+          iconClass: 'tree-table',
+          isLoading: false,
+          component: () => import('./Component/workflowLogs/index.vue')
+        },
+        {
+          name: 'accountingInformation',
+          show: isAccountingInfo.value,
+          title: language.t('window.containerInfo.accountingInformation.title'),
+          svg: true,
+          isLoading: false,
+          iconClass: 'balance',
+          component: () => import('./Component/Accounting/index.vue')
+        },
+        {
+          name: 'listProductStorage',
+          show: !isEmptyValue(storeProduct.value),
+          title: language.t('listStoreProduct.title'),
+          svg: true,
+          isLoading: false,
+          iconClass: 'warehouse',
+          component: () => import('./Component/storeProduct/index.vue')
+        },
+        {
+          name: 'listDashboard',
+          show: !isEmptyValue(showPanelDashboard.value),
+          title: language.t('navbar.dashboard'),
+          svg: true,
+          isLoading: false,
+          iconClass: 'dashboard',
+          component: () => import('./Component/RecordDashboard/index.vue')
+        }
+      ]
+    })
 
     /**
      * Computed
@@ -576,6 +517,7 @@ export default defineComponent({
       showPanelInfo,
       containerInfo,
       isWorkflowLog,
+      listInfoPanel,
       currentRecordId,
       isAccountingInfo,
       currentRecordUuid,

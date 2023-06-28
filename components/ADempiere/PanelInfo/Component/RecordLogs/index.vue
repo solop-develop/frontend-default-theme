@@ -17,7 +17,38 @@
 -->
 
 <template>
-  <span>
+  <span
+    v-if="!isLoading"
+  >
+    <el-descriptions :column="1">
+      <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+        <template slot="label">
+          <svg-icon icon-class="table" style="margin-right: 10px;" />
+          {{ $t('window.containerInfo.log.tableName') }}
+        </template>
+        <span style="color: #606266; font-weight: bold;">
+          {{ tableName }}
+        </span>
+      </el-descriptions-item>
+      <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+        <template slot="label">
+          <svg-icon icon-class="user" style="margin-right: 10px;" />
+          {{ $t('window.containerInfo.log.recordID') }}
+        </template>
+        <span style="color: #606266; font-weight: bold;">
+          {{ recordId }}
+        </span>
+      </el-descriptions-item>
+      <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
+        <template slot="label">
+          <svg-icon icon-class="user" style="margin-right: 10px;" />
+          {{ $t('window.containerInfo.log.recordUUID') }}
+        </template>
+        <span style="color: #606266; font-weight: bold;">
+          {{ recordUuid }}
+        </span>
+      </el-descriptions-item>
+    </el-descriptions>
     <el-timeline v-if="!isEmptyValue(listLogs.entityLogsList)">
       <el-timeline-item
         v-for="(entityLogs, keys) in listLogs.entityLogsList"
@@ -109,6 +140,10 @@
       <el-empty />
     </div>
   </span>
+  <loading-view
+    v-else
+    key="Record-Logs-Loading"
+  />
 </template>
 
 <script>
@@ -117,6 +152,7 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 
 // Components and Mixins
+import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
 // Utils and Helper Methods
@@ -127,7 +163,27 @@ export default defineComponent({
   name: 'RecordLogs',
 
   components: {
-    DocumentStatusTag
+    DocumentStatusTag,
+    LoadingView
+  },
+
+  props: {
+    tableName: {
+      type: String,
+      default: ''
+    },
+    recordId: {
+      type: Number,
+      required: false
+    },
+    recordUuid: {
+      type: String,
+      default: ''
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
   },
 
   setup() {
