@@ -26,6 +26,7 @@
       split-button
       style="margin-left: 10px;"
       size="small"
+      trigger="click"
       class="document-action"
       @click="handleCommandActions(defaultValue);"
       @command="handleCommandActions"
