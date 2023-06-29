@@ -82,13 +82,19 @@
         </el-step>
       </el-steps>
 
-      <div style="text-align: right; margin: 0">
-        <el-button size="mini" type="text" @click="isVisibleDocAction = false">
-          {{ $t('components.dialogCancelButton') }}
-        </el-button>
-        <el-button type="primary" size="mini" @click="sendAction()">
-          {{ $t('components.dialogConfirmButton') }}
-        </el-button>
+      <div style="text-align: right; margin-top: 10px">
+        <el-button
+            type="danger"
+            class="button-base-icon"
+            icon="el-icon-close"
+            @click="isVisibleDocAction = false"
+          />
+          <el-button
+            type="primary"
+            class="button-base-icon"
+            icon="el-icon-check"
+            @click="sendAction()"
+          />
       </div>
     </el-popover>
 
