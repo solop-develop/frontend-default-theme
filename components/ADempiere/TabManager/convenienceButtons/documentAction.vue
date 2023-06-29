@@ -44,8 +44,9 @@
             key="document-actions"
             size="small"
             :value="documentAction.value"
+            :displayed-value="documentAction.name"
           />
-          {{ documentAction.name }}
+          <!-- {{ documentAction.name }} -->
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
@@ -85,17 +86,17 @@
 
       <div style="text-align: right; margin-top: 10px">
         <el-button
-            type="danger"
-            class="button-base-icon"
-            icon="el-icon-close"
-            @click="isVisibleDocAction = false"
-          />
-          <el-button
-            type="primary"
-            class="button-base-icon"
-            icon="el-icon-check"
-            @click="sendAction()"
-          />
+          type="danger"
+          class="button-base-icon"
+          icon="el-icon-close"
+          @click="isVisibleDocAction = false"
+        />
+        <el-button
+          type="primary"
+          class="button-base-icon"
+          icon="el-icon-check"
+          @click="sendAction()"
+        />
       </div>
     </el-popover>
 
@@ -104,7 +105,7 @@
       :parent-uuid="parentUuid"
       :container-uuid="tabAttributes.uuid"
       :table-name="tabAttributes.tableName"
-      style="position: absolute; right: 7%;"
+      style="padding-left: 5px;"
     />
   </span>
 </template>

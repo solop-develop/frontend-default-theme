@@ -34,7 +34,6 @@
         <document-status-tag
           key="document-status"
           size="small"
-          :value="currentDocStatus"
           :displayed-value="displayDocStatus"
         />
       </template>
@@ -61,7 +60,6 @@
     key="document-status"
     size="small"
     class="document-status-tag-empty"
-    :value="currentDocStatus"
     :displayed-value="displayDocStatus"
   />
 </template>
