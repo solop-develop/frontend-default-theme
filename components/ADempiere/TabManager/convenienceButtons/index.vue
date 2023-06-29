@@ -131,7 +131,16 @@
       :parent-uuid="parentUuid"
       :container-manager="containerManager"
       :tab-attributes="tabAttributes"
+      :fields-list="fieldsListPanelInfo"
     />
+
+    <!-- <advanced-tab-query
+      :parent-uuid="parentUuid"
+      :container-uuid="tabAttributes.uuid"
+      :fields-list="fieldsListPanelInfo"
+      :container-manager="containerManager"
+      style="float: right;"
+    /> -->
 
   </div>
 </template>
@@ -145,6 +154,7 @@ import router from '@/router'
 import language from '@/lang'
 
 // Components and Mixins
+// import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import DocumentAction from '@theme/components/ADempiere/TabManager/convenienceButtons/documentAction.vue'
 
@@ -165,6 +175,7 @@ export default defineComponent({
   name: 'ConvenienceButtons',
 
   components: {
+    // AdvancedTabQuery,
     CellDisplayInfo,
     DocumentAction
   },
@@ -301,6 +312,13 @@ export default defineComponent({
         parentUuid: props.parentUuid,
         tabParentIndex: props.tabAttributes.tabParentIndex,
         containerUuid
+      })
+    })
+
+    const fieldsListPanelInfo = computed(() => {
+      return props.containerManager.getFieldsList({
+        parentUuid: props.parentUuid,
+        containerUuid: containerUuid
       })
     })
 
@@ -536,6 +554,7 @@ export default defineComponent({
       isDisableOptionsTabChild,
       recordParentTab,
       isSaveRecord,
+      fieldsListPanelInfo,
       listOfRecordsToDeleted,
       // methods
       newRecord,

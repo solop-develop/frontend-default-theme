@@ -22,7 +22,7 @@
     id="panelOptionsBar"
     class="panel-options-bar"
   >
-    <span
+    <!-- <span
       id="LeftPanelSearchOptions"
       class="left-panel-search-options"
     >
@@ -33,7 +33,7 @@
         :container-manager="containerManager"
         style="float: left;"
       />
-    </span>
+    </span> -->
 
     <span
       id="RightPanelFieldOptions"
@@ -48,7 +48,7 @@
         value-key="key"
         :size="size"
         :popper-append-to-body="true"
-        style="min-width: 250px;max-width: 300px;"
+        style="min-width: 295px;max-width: 300px;"
       >
         <el-option
           v-for="(item, key) in fieldsListAvailable"
@@ -401,8 +401,9 @@ export default defineComponent({
 └──> Right Panel Field Options
 */
 .panel-options-bar {
-  width: 99% !important;
-  display: flex;
+  width: 100% !important;
+  // display: flex;
+  text-align: right;
 }
 .left-panel-search-options {
   width: inherit;

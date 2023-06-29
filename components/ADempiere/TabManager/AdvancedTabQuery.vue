@@ -18,7 +18,7 @@
 -->
 
 <template>
-  <span class="advanced-query-container" :style="styleIconSvg">
+  <span v-if="!isMobile" class="advanced-query-container" :style="styleIconSvg">
     <el-input
       v-model="valueToSearch"
       clearable
@@ -182,7 +182,7 @@ export default defineComponent({
       if (isShowedTableRecords.value) {
         return 'float: right;display: flex;margin-top: 2px;width: 100%;'
       }
-      return 'float: right;display: flex;margin-top: 2px;width: 100%; padding-right: 5px;'
+      return 'position: absolute; right: 70px;display: inline-block;margin-top: 2px;padding-right: 5px;'
     })
 
     const containerManagerAdvancedQuery = computed(() => {
