@@ -50,23 +50,23 @@ export default [
   },
   {
     // Transaction Date
-    label: 'Fecha de la Transacción',
-    columnName: 'dateTrans',
+    label: language.t('accounting.transactionDate'),
+    columnName: 'DateTrx',
     align: 'left',
     displaySourceInformation: true,
     width: 180
   },
   {
     // Currency
-    label: 'Moneda',
-    columnName: 'currency',
+    label: language.t('accounting.currency'),
+    columnName: 'DisplayColumn_C_Currency_ID',
     align: 'left',
     displaySourceInformation: true,
     width: 80
   },
   {
     // Debit Source
-    label: 'Débito Fuente',
+    label: language.t('accounting.debitSource'),
     columnName: 'AmtAcctDr',
     align: 'right',
     displaySourceInformation: true,
@@ -74,7 +74,7 @@ export default [
   },
   {
     // Debit Source
-    label: 'Crédito Fuente',
+    label: language.t('accounting.creditSource'),
     columnName: 'AmtSourceCr',
     align: 'right',
     displaySourceInformation: true,
@@ -82,8 +82,8 @@ export default [
   },
   {
     // Rate
-    label: 'Tasa',
-    columnName: 'rate',
+    label: language.t('accounting.rate'),
+    columnName: 'C_Tax_ID',
     align: 'right',
     displaySourceInformation: true,
     width: 80
@@ -119,14 +119,6 @@ export default [
     align: 'center',
     default: true,
     width: 85
-  },
-  {
-    // Organization of the Tans
-    label: 'Organizacion de la Tans',
-    columnName: 'DateAcct',
-    align: 'center',
-    default: true,
-    width: 180
   },
   {
     // Accounting date
@@ -176,17 +168,17 @@ export default [
   },
   {
     // Description
-    label: 'Descripción',
-    columnName: 'description',
+    label: language.t('accounting.description'),
+    columnName: 'Description',
     align: 'left',
     displayDocumentInformation: true,
     width: 100
   },
   {
     // Type of application
-    label: 'Tipo de Aplicación',
-    columnName: 'type_application',
-    align: 'right',
+    label: language.t('accounting.typeApplication'),
+    columnName: 'DisplayColumn_PostingType',
+    align: 'left',
     default: true,
     width: 145
   }

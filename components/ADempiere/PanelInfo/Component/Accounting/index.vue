@@ -23,6 +23,36 @@
         <el-divider content-position="left">
           {{ $t('window.containerInfo.accountingInformation.selection') }}
         </el-divider>
+        <!-- <el-form
+          ref="form-express-receipt"
+          label-position="top"
+          class="field-from"
+          size="small"
+          inline
+        >
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-form-item
+                :label="$t('Esquema Contable')"
+                class="front-item-receipt"
+              >
+                <el-select
+                  v-model="warehouseBase"
+                  style="width: 100%;"
+                  filterable
+                  @visible-change="listBaseWarehouse"
+                >
+                  <el-option
+                    v-for="item in baseWarehouseOptionsList"
+                    :key="item.id"
+                    :label="item.label"
+                    :value="item.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form> -->
         <el-form
           label-position="top"
           size="small"
@@ -159,7 +189,11 @@ import {
 
 import {
   requestAccountingFacts,
-  requestStartRePost
+  requestStartRePost,
+  // List Select
+  // listAccoutingSchemasRequest,
+  // listOrganizationsRequest,
+  // listPostingTypesRequest
 } from '@/api/ADempiere/form/accouting.js'
 
 // utils and helper methods
@@ -234,6 +268,13 @@ export default defineComponent({
           columnName: 'C_AcctSchema_ID'
         })
       }
+    })
+
+    const postingTypeId = computed(() => {
+      return store.getters.getValueOfField({
+        containerUuid: uuidForm.value,
+        columnName: 'PostingType'
+      })
     })
 
     const accoutingFilters = computed(() => {
@@ -326,6 +367,7 @@ export default defineComponent({
       isLoadingDataTable.value = true
       requestAccountingFacts({
         accoutingSchemaId: accoutingSchemaId.value,
+        postingType: postingTypeId.value,
         accoutingSchemaUuid,
         tableName: props.tableName,
         recordId: props.recordId,
