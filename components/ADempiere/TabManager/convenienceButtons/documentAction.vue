@@ -108,13 +108,6 @@
       style="padding-left: 5px;"
     />
 
-    <advanced-tab-query
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-      :fields-list="fieldsList"
-      :container-manager="containerManager"
-    />
-
   </span>
 </template>
 
@@ -129,7 +122,6 @@ import { DOCUMENT_ACTION, DOCUMENT_STATUS } from '@/utils/ADempiere/constants/sy
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
-import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 import DocumentStatus from '@theme/components/ADempiere/TabManager/convenienceButtons/documentStatus.vue'
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 
@@ -145,7 +137,6 @@ export default defineComponent({
 
   components: {
     DocumentStatus,
-    AdvancedTabQuery,
     DocumentStatusTag
   },
 

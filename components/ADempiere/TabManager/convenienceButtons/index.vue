@@ -134,13 +134,13 @@
       :fields-list="fieldsListPanelInfo"
     />
 
-    <!-- <advanced-tab-query
+    <advanced-tab-query
       :parent-uuid="parentUuid"
       :container-uuid="tabAttributes.uuid"
       :fields-list="fieldsListPanelInfo"
       :container-manager="containerManager"
       style="float: right;"
-    /> -->
+    />
 
   </div>
 </template>
@@ -157,7 +157,7 @@ import language from '@/lang'
 // import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import DocumentAction from '@theme/components/ADempiere/TabManager/convenienceButtons/documentAction.vue'
-
+import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 // Constants
 import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
@@ -175,7 +175,7 @@ export default defineComponent({
   name: 'ConvenienceButtons',
 
   components: {
-    // AdvancedTabQuery,
+    AdvancedTabQuery,
     CellDisplayInfo,
     DocumentAction
   },
