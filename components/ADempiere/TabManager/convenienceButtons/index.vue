@@ -18,19 +18,10 @@
 
 <template>
   <div v-show="isDisableOptionsTabChild" class="convenience-buttons-main">
-    <el-button
-      v-if="isCreateRecord"
-      plain
-      size="small"
-      type="success"
-      class="new-record-button"
-      @click="newRecord()"
-    >
-      <svg-icon icon-class="newRecord" />
-      <span v-if="!isMobile">
-        {{ $t('actionMenu.new') }}
-      </span>
-    </el-button>
+    <new-record-button
+      :parent-uuid="parentUuid"
+      :container-uuid="tabAttributes.uuid"
+    />
 
     <el-button
       v-if="isUndoChanges"
@@ -147,6 +138,7 @@ import language from '@/lang'
 // Components and Mixins
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import DocumentAction from '@theme/components/ADempiere/TabManager/convenienceButtons/documentAction.vue'
+import NewRecordButton from '@theme/components/ADempiere/TabManager/convenienceButtons/NewRecordButton.vue'
 
 // Constants
 import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
@@ -155,7 +147,6 @@ import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns
 import { showMessage } from '@/utils/ADempiere/notification'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
-  createNewRecord,
   refreshRecord,
   deleteRecord,
   undoChange
@@ -166,7 +157,8 @@ export default defineComponent({
 
   components: {
     CellDisplayInfo,
-    DocumentAction
+    DocumentAction,
+    NewRecordButton
   },
 
   props: {
@@ -199,9 +191,6 @@ export default defineComponent({
     const recordUuid = computed(() => {
       return store.getters.getUuidOfContainer(containerUuid)
     })
-    const recordParentTab = computed(() => {
-      return store.getters.getUuidOfContainer(containerUuid)
-    })
 
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
@@ -230,27 +219,8 @@ export default defineComponent({
       return true
     })
 
-    const isSecondaryParentTab = computed(() => {
-      return !isEmptyValue(props.tabAttributes.tabParentIndex) && props.tabAttributes.tabParentIndex > 0
-    })
-
     const selectionsRecords = computed(() => {
       return props.containerManager.getSelection({
-        containerUuid
-      })
-    })
-
-    const isCreateRecord = computed(() => {
-      if (isSecondaryParentTab.value) {
-        return false
-      }
-      if (isExistsChanges.value) {
-        return false
-      }
-
-      return createNewRecord.enabled({
-        parentUuid: props.parentUuid,
-        tabParentIndex: props.tabAttributes.tabParentIndex,
         containerUuid
       })
     })
@@ -324,26 +294,6 @@ export default defineComponent({
       }
       return props.tabAttributes
     })
-
-    function newRecord() {
-      createNewRecord.createNewRecord({
-        parentUuid: props.parentUuid,
-        containerUuid
-      })
-
-      store.dispatch('panelInfo', {
-        currentTab: props.tabAttributes,
-        currentRecord: recordParentTab.value
-      })
-      const info = {
-        fieldsList: props.containerManager.getFieldsList({
-          parentUuid: props.parentUuid,
-          containerUuid: containerUuid
-        }),
-        option: language.t('actionMenu.new')
-      }
-      store.dispatch('fieldListInfo', { info })
-    }
 
     function refreshCurrentRecord() {
       refreshRecord.refreshRecord({
@@ -527,18 +477,15 @@ export default defineComponent({
       isMobile,
       recordUuid,
       selectionsRecords,
-      isCreateRecord,
       isExistsChanges,
       isDeleteRecord,
       isRefreshRecord,
       isUndoChanges,
       getCurrentTab,
       isDisableOptionsTabChild,
-      recordParentTab,
       isSaveRecord,
       listOfRecordsToDeleted,
       // methods
-      newRecord,
       deleteCurrentRecord,
       focusConfirmDelete,
       refreshCurrentRecord,
