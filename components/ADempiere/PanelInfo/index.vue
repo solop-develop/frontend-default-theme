@@ -33,6 +33,7 @@
             :key="index"
             :name="tab.name"
             lazy
+            style="height: -webkit-fill-available;"
           >
             <span slot="label">
               <svg-icon v-if="tab.svg" :icon-class="tab.iconClass" />
@@ -50,6 +51,7 @@
               :record-id="currentRecordId"
               :tab-uuid="currentTab.uuid"
               :is-loading="tab.isLoading"
+              style="height: -webkit-fill-available;"
             />
           </el-tab-pane>
         </template>

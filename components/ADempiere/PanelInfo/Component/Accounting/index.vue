@@ -17,13 +17,14 @@
 -->
 
 <template>
-  <el-container>
-    <el-header style="height: 40% !important;">
+  <!-- <el-container> -->
+  <div style="height: 98% !important;overflow: auto;">
+    <div style="height: 15% !important;padding: 0px;">
       <el-card class="box-card">
         <el-divider content-position="left">
           {{ $t('window.containerInfo.accountingInformation.selection') }}
         </el-divider>
-        <!-- <el-form
+        <el-form
           ref="form-express-receipt"
           label-position="top"
           class="field-from"
@@ -37,40 +38,47 @@
                 class="front-item-receipt"
               >
                 <el-select
-                  v-model="warehouseBase"
+                  v-model="accoutingSchemas"
                   style="width: 100%;"
                   filterable
-                  @visible-change="listBaseWarehouse"
+                  @visible-change="listAccoutingSchemas"
                 >
                   <el-option
-                    v-for="item in baseWarehouseOptionsList"
-                    :key="item.id"
-                    :label="item.label"
-                    :value="item.id"
+                    v-for="item in listAccouting"
+                    :key="item.KeyColumn"
+                    :label="item.DisplayColumn"
+                    :value="item.KeyColumn"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item
+                :label="$t('Tipo de Aplicación')"
+                class="front-item-receipt"
+              >
+                <el-select
+                  v-model="postingType"
+                  style="width: 100%;"
+                  filterable
+                  @visible-change="listPostingTypes"
+                >
+                  <el-option
+                    v-for="item in listPosting"
+                    :key="item.KeyColumn"
+                    :label="item.DisplayColumn"
+                    :value="item.KeyColumn"
                   />
                 </el-select>
               </el-form-item>
             </el-col>
           </el-row>
-        </el-form> -->
-        <el-form
-          label-position="top"
-          size="small"
-          @submit.native.prevent="notSubmitForm"
-        >
-          <field-definition
-            v-for="(field) in metadataList"
-            :key="field.columnName"
-            :metadata-field="field"
-            :container-uuid="uuidForm"
-            :container-manager="containerManager"
-          />
         </el-form>
       </el-card>
-    </el-header>
-    <el-main>
-      <el-card
-        style="padding: 20px;"
+    </div>
+    <div style="padding: 0px;height: 75% !important;">
+      <div
+        style="padding: 10px;height: -webkit-fill-available;"
       >
         <el-dropdown
           trigger="click"
@@ -120,7 +128,7 @@
           :element-loading-text="$t('notifications.loading')"
           element-loading-background="rgba(255, 255, 255, 0.8)"
           border
-          height="68vh"
+          style="height: 98%;"
         >
           <el-table-column
             type="index"
@@ -141,35 +149,45 @@
             </template>
           </el-table-column>
         </el-table>
-
-        <div style="margin-top: 10px;">
-          <el-button
-            :loading="isLoadingDataTable"
-            type="success"
-            class="button-base-icon"
-            icon="el-icon-refresh-right"
-            style="margin-top: 10px;float: right;"
-            @click="refreshAccount"
-          />
-          <el-button
-            type="primary"
-            plain
-            style="margin-right: 10px; !important"
-            :loading="isLoadingRePost"
-            :disabled="isLoadingRePost"
-            @click="rePost"
-          >
-            {{ $t('accounting.rePosAccounting') }}
-          </el-button>
-          <el-checkbox
-            v-model="force"
-          >
-            {{ $t('accounting.force') }}
-          </el-checkbox>
-        </div>
-      </el-card>
-    </el-main>
-  </el-container>
+      </div>
+    </div>
+    <div style="height: 6% !important;">
+      <div style="margin-top: 10px;">
+        <el-button
+          :loading="isLoadingDataTable"
+          type="success"
+          class="button-base-icon"
+          icon="el-icon-refresh-right"
+          style="margin-top: 10px;float: right;"
+          @click="refreshAccount"
+        />
+        <el-button
+          plain
+          type="primary"
+          class="button-base-icon"
+          icon="el-icon-download"
+          style="margin-top: 10px;margin-right: 10px;float: right;"
+          @click="exportAccounting"
+        />
+        <el-button
+          type="primary"
+          plain
+          style="margin-right: 10px; !important"
+          :loading="isLoadingRePost"
+          :disabled="isLoadingRePost"
+          @click="rePost"
+        >
+          {{ $t('accounting.rePosAccounting') }}
+        </el-button>
+        <el-checkbox
+          v-model="force"
+        >
+          {{ $t('accounting.force') }}
+        </el-checkbox>
+      </div>
+    </div>
+  </div>
+  <!-- </el-container> -->
 </template>
 
 <script>
@@ -189,11 +207,11 @@ import {
 
 import {
   requestAccountingFacts,
-  requestStartRePost
+  requestStartRePost,
   // List Select
-  // listAccoutingSchemasRequest,
+  listAccoutingSchemasRequest,
   // listOrganizationsRequest,
-  // listPostingTypesRequest
+  listPostingTypesRequest
 } from '@/api/ADempiere/form/accouting.js'
 
 // utils and helper methods
@@ -201,7 +219,8 @@ import { DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX } fr
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { showMessage } from '@/utils/ADempiere/notification'
-
+import { parseTime } from '@/utils'
+import { exportFileFromJson } from '@/utils/ADempiere/exportUtil.js'
 export default defineComponent({
   name: 'AccountingFact',
 
@@ -249,32 +268,15 @@ export default defineComponent({
     const showMinimalistView = ref(true)
     const isLoadingTable = ref(false)
 
+    const accoutingSchemas = ref('')
+    const listAccouting = ref('')
+
+    const postingType = ref('')
+    const listPosting = ref([])
+
     // Computed
     const uuidForm = computed(() => {
       return ACCOUTING_FACT_FORM + '_' + props.containerUuid
-    })
-
-    const accoutingSchemaId = computed({
-      set(value) {
-        store.commit('updateValueOfField', {
-          containerUuid: uuidForm.value,
-          columnName: 'C_AcctSchema_ID',
-          value: value
-        })
-      },
-      get() {
-        return store.getters.getValueOfField({
-          containerUuid: uuidForm.value,
-          columnName: 'C_AcctSchema_ID'
-        })
-      }
-    })
-
-    const postingTypeId = computed(() => {
-      return store.getters.getValueOfField({
-        containerUuid: uuidForm.value,
-        columnName: 'PostingType'
-      })
     })
 
     const accoutingFilters = computed(() => {
@@ -330,6 +332,45 @@ export default defineComponent({
 
     // Function
 
+    function listAccoutingSchemas(isFind) {
+      if (!isFind) return
+      listAccoutingSchemasRequest({
+        searchValue: accoutingSchemas.value
+      })
+        .then(response => {
+          const { records } = response
+          // let list = records
+          listAccouting.value = records
+          listAccouting.value = records.map(list => {
+            const { KeyColumn, UUID, DisplayColumn } = list.values
+            return {
+              UUID,
+              KeyColumn,
+              DisplayColumn
+            }
+          })
+        })
+    }
+
+    function listPostingTypes(isFind) {
+      if (!isFind) return
+      listPostingTypesRequest({
+        searchValue: postingType.value
+      })
+        .then(response => {
+          const { records } = response
+          // let list = records
+          listPosting.value = records.map(list => {
+            const { KeyColumn, UUID, DisplayColumn } = list.values
+            return {
+              UUID,
+              KeyColumn,
+              DisplayColumn
+            }
+          })
+        })
+    }
+
     function setFieldsList() {
       const list = []
       fieldsList.forEach(element => {
@@ -350,8 +391,8 @@ export default defineComponent({
       })
     }
 
-    function findAccountingFacts(filters) {
-      if (isEmptyValue(accoutingSchemaId.value)) {
+    function findAccountingFacts() {
+      if (isEmptyValue(accoutingSchemas.value)) {
         // showMessage({
         //   message: lang.t('notifications.mandatoryFieldMissing') + 'C_AcctSchema_ID',
         //   type: 'info'
@@ -366,13 +407,13 @@ export default defineComponent({
 
       isLoadingDataTable.value = true
       requestAccountingFacts({
-        accoutingSchemaId: accoutingSchemaId.value,
-        postingType: postingTypeId.value,
+        accoutingSchemaId: accoutingSchemas.value,
+        postingType: postingType.value,
         accoutingSchemaUuid,
         tableName: props.tableName,
         recordId: props.recordId,
         recordUuid: props.recordUuid,
-        filters
+        filters: []
       })
         .then(response => {
           const recordsList = response.recordsList.map(record => {
@@ -499,17 +540,43 @@ export default defineComponent({
       }
     }
 
-    if (isEmptyValue(accoutingSchemaId.value)) {
+    function exportAccounting() {
+      const fileName = listAccouting.value.find(list => list.KeyColumn === accoutingSchemas.value).DisplayColumn
+      console.log({ fileName })
+      exportFileFromJson({
+        header: headerAccounting.value.map(a => a.label),
+        data: formatJson(headerAccounting.value.map(a => a.columnName), tableData.value),
+        fileName,
+        bookType: 'xlsx'
+      })
+    }
+
+    function formatJson(filterVal, jsonData) {
+      console.log({ filterVal, jsonData })
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'timestamp') {
+          return parseTime(v[j])
+        } else {
+          return v[j]
+        }
+      }))
+    }
+
+    if (isEmptyValue(accoutingSchemas.value)) {
       const globalAccoutingSchemaId = computed(() => {
         return store.getters.getSessionContext({
           columnName: '$C_AcctSchema_ID'
         })
       })
-      accoutingSchemaId.value = globalAccoutingSchemaId.value
+      listAccoutingSchemas(true)
+      accoutingSchemas.value = globalAccoutingSchemaId.value
     }
 
     // Watch
-    watch(accoutingFilters, (newValue) => {
+    watch(accoutingSchemas, (newValue) => {
+      findAccountingFacts(newValue)
+    })
+    watch(postingType, (newValue) => {
       findAccountingFacts(newValue)
     })
     watch(showContainerInfo, (newValue) => {
@@ -534,6 +601,10 @@ export default defineComponent({
       metadataList,
       isLoadingTable,
       force,
+      accoutingSchemas,
+      listAccouting,
+      postingType,
+      listPosting,
       //
       displayDocumentInformation,
       displaySourceInformation,
@@ -548,7 +619,6 @@ export default defineComponent({
       heardList,
       headerAccounting,
       // computed
-      accoutingSchemaId,
       uuidForm,
       showContainerInfo,
       // methods
@@ -557,7 +627,10 @@ export default defineComponent({
       findAccountingFacts,
       refreshAccount,
       rePost,
-      handleDisplayColumn
+      handleDisplayColumn,
+      listAccoutingSchemas,
+      listPostingTypes,
+      exportAccounting
     }
   }
 
