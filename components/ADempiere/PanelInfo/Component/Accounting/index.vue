@@ -542,7 +542,6 @@ export default defineComponent({
 
     function exportAccounting() {
       const fileName = listAccouting.value.find(list => list.KeyColumn === accoutingSchemas.value).DisplayColumn
-      console.log({ fileName })
       exportFileFromJson({
         header: headerAccounting.value.map(a => a.label),
         data: formatJson(headerAccounting.value.map(a => a.columnName), tableData.value),
@@ -552,7 +551,6 @@ export default defineComponent({
     }
 
     function formatJson(filterVal, jsonData) {
-      console.log({ filterVal, jsonData })
       return jsonData.map(v => filterVal.map(j => {
         if (j === 'timestamp') {
           return parseTime(v[j])
