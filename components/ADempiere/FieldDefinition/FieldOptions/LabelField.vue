@@ -1,10 +1,29 @@
+<!--
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Leonel Matos lmatos@erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
+-->
+
 <template>
   <div v-if="!isFieldOnly" :style="labelStyle" class="label-field">
-    <span>
+    <span class="field-title-name">
       {{ label }}
     </span>
 
-    <span v-if="isMandatory" :style="'color: #f34b4b'"> * </span>
+    <span v-if="isMandatory" style="color: #f34b4b"> * </span>
 
     <i :class="cssClassName" :style="iconStyle" />
   </div>
@@ -82,6 +101,13 @@ export default defineComponent({
 </style>
 <style lang="scss" scoped>
 .label-field {
+  .field-title-name {
+    color: #909399 !important;
+    &:hover {
+      color: #303133 !important;
+    }
+  }
+
   .el-icon-info {
     font-size: 11px;
     color: #008fd3;

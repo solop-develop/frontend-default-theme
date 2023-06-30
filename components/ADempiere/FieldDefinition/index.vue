@@ -418,6 +418,15 @@ export default {
 </script>
 
 <style lang="scss">
+.field-definition-mobile {
+  /**
+   * Reduce the spacing between the form element and its label
+   */
+   .el-form-item__label {
+    padding-bottom: 0px !important;
+  }
+}
+
 .field-definition {
   /**
    * Separation between elements (item) of the form
