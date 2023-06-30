@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
       size="mini"
       hide-on-click
       trigger="click"
-      :style="'text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width:' + labelStyle + '%'"
+      :style="'text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%'"
       @command="handleCommand"
       @click="false"
     >
@@ -239,7 +239,7 @@ export default defineComponent({
       } else if (props.metadata.name.length >= 20) {
         return '50'
       }
-      return '110'
+      return '100'
     })
 
     /**
@@ -467,6 +467,8 @@ export default defineComponent({
 
 <style lang="scss">
 .field-options {
+  max-height: 30px !important;
+
   &.el-menu--horizontal,
   .el-menu--horizontal {
     // transparent background color of the field label
