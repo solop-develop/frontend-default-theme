@@ -21,7 +21,7 @@
     :key="componentKey"
     v-model="value"
     v-bind="commonsProperties"
-    :filterable="true"
+    :filterable="isFiltrable"
     :loading="isLoading"
     value-key="value"
     clearable
@@ -48,6 +48,9 @@
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixinWithDisplayColumn.js'
 import selectMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinFieldSelect.js'
+
+// Constants
+import { LIST } from '@/utils/ADempiere/references'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -83,6 +86,15 @@ export default {
         styleClass += ' custom-field-select-multiple '
       }
       return styleClass
+    },
+
+    isFiltrable() {
+      if (this.isMobile) {
+        if (LIST.id === this.metadata.displayType) {
+          return false
+        }
+      }
+      return true
     },
 
     isWithSearchValue() {
