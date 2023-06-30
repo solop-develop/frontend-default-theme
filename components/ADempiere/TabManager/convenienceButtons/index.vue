@@ -124,6 +124,13 @@
       :tab-attributes="tabAttributes"
     />
 
+    <advanced-tab-query
+      :parent-uuid="parentUuid"
+      :container-uuid="tabAttributes.uuid"
+      :container-manager="containerManager"
+      style="float: right;"
+    />
+
   </div>
 </template>
 
@@ -136,6 +143,7 @@ import router from '@/router'
 import language from '@/lang'
 
 // Components and Mixins
+import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import DocumentAction from '@theme/components/ADempiere/TabManager/convenienceButtons/documentAction.vue'
 import NewRecordButton from '@theme/components/ADempiere/TabManager/convenienceButtons/NewRecordButton.vue'
@@ -156,6 +164,7 @@ export default defineComponent({
   name: 'ConvenienceButtons',
 
   components: {
+    AdvancedTabQuery,
     CellDisplayInfo,
     DocumentAction,
     NewRecordButton

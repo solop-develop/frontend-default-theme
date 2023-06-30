@@ -107,6 +107,7 @@
       :table-name="tabAttributes.tableName"
       style="padding-left: 5px;"
     />
+
   </span>
 </template>
 

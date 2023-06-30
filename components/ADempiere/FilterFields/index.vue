@@ -22,7 +22,7 @@
     id="panelOptionsBar"
     class="panel-options-bar"
   >
-    <span
+    <!-- <span
       id="LeftPanelSearchOptions"
       class="left-panel-search-options"
     >
@@ -33,11 +33,11 @@
         :container-manager="containerManager"
         style="float: left;"
       />
-    </span>
+    </span> -->
 
     <span
       id="RightPanelFieldOptions"
-      class="right-panel-field-options"
+      :class="isClassOptions"
     >
       <el-select
         v-model="fieldsListShowed"
@@ -48,7 +48,7 @@
         value-key="key"
         :size="size"
         :popper-append-to-body="true"
-        style="min-width: 250px;max-width: 300px;"
+        style="min-width: 295px;max-width: 300px;"
       >
         <el-option
           v-for="(item, key) in fieldsListAvailable"
@@ -211,6 +211,15 @@ export default defineComponent({
       return 'form-filter-fields'
     })
 
+    const isClassOptions = computed(() => {
+      const { isShowedTableRecords } = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+      if (isShowedTableRecords) return 'right-panel-field-options-table'
+      return 'right-panel-field-options'
+    })
+
     const showedAttibute = computed(() => {
       if (props.inTable) {
         return 'isShowedTableFromUser'
@@ -299,6 +308,7 @@ export default defineComponent({
       fieldsListAvailable,
       fieldsListAvailableWithValue,
       showedAttibute,
+      isClassOptions,
       // methods
       changeShowed
     }
@@ -401,13 +411,20 @@ export default defineComponent({
 └──> Right Panel Field Options
 */
 .panel-options-bar {
-  width: 99% !important;
-  display: flex;
+  width: 100% !important;
+  // display: flex;
+  text-align: right;
 }
 .left-panel-search-options {
   width: inherit;
 }
+.right-panel-field-options-table {
+  position: absolute;
+  right: 0%;
+  display: block;
+}
 .right-panel-field-options {
-  display: contents;
+  display: block;
+  margin-bottom: 10px;
 }
 </style>

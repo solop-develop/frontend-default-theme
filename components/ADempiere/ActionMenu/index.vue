@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <div class="auxiliary-menu auxiliary-menu-mobile">
+  <div :class="isClassOptions">
     <!-- actions or process on container -->
     <el-dropdown
       v-if="!isEmptyValue(actionsManager)"
@@ -255,6 +255,15 @@ export default defineComponent({
       return lang.t('actionMenu.runProcess')
     })
 
+    const isClassOptions = computed(() => {
+      const { isShowedTableRecords } = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+      if (isShowedTableRecords) return 'auxiliary-menu auxiliary-menu-mobile-table'
+      return 'auxiliary-menu auxiliary-menu-mobile'
+    })
+
     /**
      * Run default action with last parameters
      */
@@ -293,6 +302,7 @@ export default defineComponent({
     return {
       size,
       actionsList,
+      isClassOptions,
       defaultActionName,
       isWithDefaultAction,
       // methods
@@ -324,6 +334,13 @@ export default defineComponent({
   right: 0%;
   top: 0;
   display: flex;
+}
+
+.auxiliary-menu-mobile-table {
+  height: 39px !important;
+  position: absolute;
+  right: 28px;
+  top: 5px;
 }
 
 .scroll-child {
