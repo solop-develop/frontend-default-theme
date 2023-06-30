@@ -48,11 +48,11 @@
             value-key="value"
             size="large"
           >
-            <template v-if="documentAction" slot="prefix">
+            <!-- <template v-if="documentAction" slot="prefix">
               <span class="el-input__icon" style="margin-left: 3px;">
                 {{ documentAction.value }}
               </span>
-            </template>
+            </template> -->
 
             <el-option
               v-for="(item, key) in documentActionsList"
@@ -62,14 +62,14 @@
               class="custom-option-document-status"
             >
               <div style="width: 100%;">
-                <span class="displayed-value">
+                <!-- <span class="displayed-value">
                   {{ item.name }}
-                </span>
+                </span> -->
                 <document-status-tag
                   size="medium"
                   class="tag-status"
                   :value="item.value"
-                  :displayed-value="item.value"
+                  :displayed-value="item.name"
                 />
               </div>
             </el-option>
