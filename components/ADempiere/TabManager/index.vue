@@ -42,6 +42,7 @@
           :is-active-tab="tabAttributes.uuid === tabUuid"
           :parent-uuid="parentUuid"
           :container-uuid="tabAttributes.uuid"
+          :container-manager="containerManager"
         />
         <!-- Close table when clicking on group of fields -->
         <!-- <div
@@ -58,7 +59,7 @@
             :container-manager="containerManager"
             :tabs-list="tabsList"
             :all-tabs-list="allTabsList"
-            :current-tab-uuid="tabUuid"
+            :tab-uuid="tabUuid"
             :tab-attributes="tabAttributes"
             :actions-manager="actionsManager"
             :style="'height: 100% !important;'"
@@ -182,6 +183,7 @@
 <script>
 import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
+import language from '@/lang'
 import router from '@/router'
 import store from '@/store'
 
@@ -190,7 +192,7 @@ import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
 import PanelInfo from '../PanelInfo/index.vue'
-import TabPanel from './TabPanel.vue'
+import TabPanel from '@theme/components/ADempiere/TabManager/TabPanel/index.vue'
 import TabOptions from './TabOptions.vue'
 
 // Constants
@@ -280,6 +282,11 @@ export default defineComponent({
       //     overflow: 'auto'
       //   }
       // }
+      if (store.state.app.device === 'mobile') {
+        return {
+          height: '100% !important'
+        }
+      }
       return {
         height: '100% !important',
         overflow: 'auto'

@@ -156,6 +156,7 @@ export default defineComponent({
     })
 
     const withPopover = computed(() => {
+      if (store.state.app.device === 'mobile') return 'auto'
       if (!isEmptyValue(documentStatusesList.value)) {
         return documentStatusesList.value.length * 100
       }
