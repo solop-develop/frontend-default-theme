@@ -37,7 +37,7 @@
 
     <span
       id="RightPanelFieldOptions"
-      class="right-panel-field-options"
+      :class="isClassOptions"
     >
       <el-select
         v-model="fieldsListShowed"
@@ -211,6 +211,15 @@ export default defineComponent({
       return 'form-filter-fields'
     })
 
+    const isClassOptions = computed(() => {
+      const { isShowedTableRecords } = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+      if (isShowedTableRecords) return 'right-panel-field-options-table'
+      return 'right-panel-field-options'
+    })
+
     const showedAttibute = computed(() => {
       if (props.inTable) {
         return 'isShowedTableFromUser'
@@ -299,6 +308,7 @@ export default defineComponent({
       fieldsListAvailable,
       fieldsListAvailableWithValue,
       showedAttibute,
+      isClassOptions,
       // methods
       changeShowed
     }
@@ -408,7 +418,13 @@ export default defineComponent({
 .left-panel-search-options {
   width: inherit;
 }
+.right-panel-field-options-table {
+  position: absolute;
+  right: 0%;
+  display: block;
+}
 .right-panel-field-options {
-  display: contents;
+  display: block;
+  margin-bottom: 10px;
 }
 </style>

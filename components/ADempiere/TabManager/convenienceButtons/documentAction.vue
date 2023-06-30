@@ -152,10 +152,6 @@ export default defineComponent({
     tabAttributes: {
       type: Object,
       default: () => ({})
-    },
-    fieldsList: {
-      type: Array,
-      default: []
     }
   },
 
