@@ -111,12 +111,11 @@ import {
   IS_ADVANCED_QUERY
 } from '@/utils/ADempiere/dictionaryUtils'
 import {
-  IGNORE_VALUE_OPERATORS_LIST, MULTIPLE_VALUES_OPERATORS_LIST, RANGE_VALUE_OPERATORS_LIST
+  IGNORE_VALUE_OPERATORS_LIST
 } from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
-import { FIELDS_DATE } from '@/utils/ADempiere/references'
 
 export default defineComponent({
   name: 'AdvancedTabQuerySearch',
@@ -243,69 +242,11 @@ export default defineComponent({
         })
     }
 
-    function getFilters() {
-      const filters = {}
-      const fieldsList = panelAdvancedQuery.value.fieldsList.filter(field => {
-        // hidden of search criteria
-        return field.isShowedFromUser
-      })
-      fieldsList.forEach(field => {
-        // default operator
-        const { columnName, operator, valueType } = field
-
-        let value, valueTo, values
-
-        const contextValue = store.getters.getValueOfFieldOnContainer({
-          containerUuid: props.containerUuid + IS_ADVANCED_QUERY,
-          columnName: columnName
-        })
-        if (!IGNORE_VALUE_OPERATORS_LIST.includes(operator)) {
-          if (isEmptyValue(contextValue)) {
-            return
-          }
-          // TODO: Improve conditions
-          if (FIELDS_DATE.includes(field.displayType)) {
-            if (MULTIPLE_VALUES_OPERATORS_LIST.includes(operator)) {
-              values = contextValue
-            } else if (RANGE_VALUE_OPERATORS_LIST.includes(operator)) {
-              if (Array.isArray(contextValue)) {
-                value = contextValue.at(0)
-                valueTo = contextValue.at(1)
-              } else {
-                value = contextValue
-                valueTo = store.getters.getValueOfFieldOnContainer({
-                  containerUuid: props.containerUuid + IS_ADVANCED_QUERY,
-                  columnName: field.columnNameTo
-                })
-              }
-            } else {
-              value = contextValue
-            }
-          } else {
-            if (Array.isArray(contextValue)) {
-              values = contextValue
-            } else {
-              value = contextValue
-            }
-          }
-        }
-
-        filters[columnName] = {
-          ...filters[columnName] || {},
-          columnName,
-          operator,
-          value,
-          valueTo,
-          values,
-          valueType
-        }
-      })
-
-      return Object.values(filters)
-    }
-
     function searchRecords(params) {
-      const filters = getFilters()
+      const filters = store.getters.getTabDataFilters({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
 
       const query = Object.assign({}, root.$route.query)
       if (!isEmptyValue(query) && !isEmptyValue(query.filters)) {
