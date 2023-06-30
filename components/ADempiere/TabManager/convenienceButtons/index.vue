@@ -143,11 +143,11 @@ import router from '@/router'
 import language from '@/lang'
 
 // Components and Mixins
-// import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
+import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import DocumentAction from '@theme/components/ADempiere/TabManager/convenienceButtons/documentAction.vue'
 import NewRecordButton from '@theme/components/ADempiere/TabManager/convenienceButtons/NewRecordButton.vue'
-import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
+
 // Constants
 import { LOG_COLUMNS_NAME_LIST } from '@/utils/ADempiere/constants/systemColumns'
 
