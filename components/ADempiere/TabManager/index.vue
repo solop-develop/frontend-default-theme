@@ -183,7 +183,6 @@
 <script>
 import { defineComponent, computed, watch, ref } from '@vue/composition-api'
 
-import language from '@/lang'
 import router from '@/router'
 import store from '@/store'
 
