@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-steps :active="indexStepActions" :space="space" align-center finish-status="success">
+  <el-steps :active="indexStepActions" :direction="direction" :space="space" align-center finish-status="success">
     <el-step
       v-for="(actions, key) in documentStatuesList"
       :key="key"
@@ -83,6 +83,10 @@ export default defineComponent({
         return docs.value === currentDocStatus.value
       })
     })
+    const direction = computed(() => {
+      if (store.state.app.device === 'mobile') return 'vertical'
+      return 'horizontal'
+    })
 
     if (isEmptyValue(documentStatuesList.value)) {
       store.dispatch('getDocumentStatusesListFromServer', {
@@ -93,6 +97,7 @@ export default defineComponent({
     }
 
     return {
+      direction,
       currentDocStatus,
       documentStatuesList,
       indexStepActions

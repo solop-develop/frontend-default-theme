@@ -128,7 +128,7 @@ import store from '@/store'
 // components and mixins
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import TabLabel from '@theme/components/ADempiere/TabManager/TabLabel.vue'
-import TabPanel from './TabPanel.vue'
+import TabPanel from '@theme/components/ADempiere/TabManager/TabPanel/index.vue'
 import TabOptions from './TabOptions.vue'
 
 // constants
@@ -183,6 +183,11 @@ export default defineComponent({
 
     const tabStyle = computed(() => {
       // height tab content
+      if (store.state.app.device === 'mobile') {
+        return {
+          height: '100% !important'
+        }
+      }
       return {
         height: '100% !important',
         overflow: 'auto'
