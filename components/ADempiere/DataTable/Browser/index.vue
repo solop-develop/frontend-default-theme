@@ -1,7 +1,8 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -53,6 +54,7 @@
       :element-loading-text="$t('notifications.loading')"
       element-loading-background="rgba(255, 255, 255, 0.8)"
       :row-class-name="tableRowClassName"
+      @cell-click="handleCellClick"
       @row-click="handleRowClick"
       @row-dblclick="handleRowDblClick"
       @select="handleSelection"
@@ -180,12 +182,12 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const panelMain = document.getElementById('mainBrowseDataTable')
     const multipleTable = ref(null)
 
     const heightTable = ref()
     const timeOut = ref(null)
     const isChangeOptions = ref(false)
-    const panelMain = document.getElementById('mainBrowseDataTable')
     const heightSize = ref()
     const currentRowSelect = ref({})
 
@@ -249,6 +251,15 @@ export default defineComponent({
       return store.state.app.device === 'mobile'
     })
 
+    const selectionsList = computed(() => {
+      if (props.containerManager.getSelection) {
+        return props.containerManager.getSelection({
+          containerUuid: props.containerUuid
+        })
+      }
+      return []
+    })
+
     const recordsLength = computed(() => {
       if (props.containerManager.getRecordCount) {
         return props.containerManager.getRecordCount({
@@ -283,6 +294,9 @@ export default defineComponent({
      * @param {string} column
      */
     function handleRowClick(row, column, event) {
+      if (column.type === 'selection') {
+        return
+      }
       if (row.isSelectedRow) {
         // enable edit mode
         row.isEditRow = true
@@ -350,13 +364,11 @@ export default defineComponent({
       rowSelected.isSelectedRow = !rowSelected.isSelectedRow
       rowSelected.rowSelectedIndex = index++
       rowSelected.isEditRow = rowSelected.isSelectedRow // edit record if is selected
-      props.containerManager.setSelection({
-        containerUuid: props.containerUuid,
-        recordsSelected: selections
-      })
+
+      handleSelectionAll(selections)
     }
 
-    function handleSelectionAll(selections) {
+    function handleSelectionAll(selections = []) {
       props.containerManager.setSelection({
         containerUuid: props.containerUuid,
         recordsSelected: selections
@@ -371,12 +383,34 @@ export default defineComponent({
       if (isEmptyValue(multipleTable.value)) {
         return
       }
+      multipleTable.value.clearSelection()
       if (!isEmptyValue(rows)) {
         rows.forEach(row => {
-          multipleTable.value.toggleRowSelection(row)
+          multipleTable.value.toggleRowSelection(row, true)
         })
-      } else {
-        multipleTable.value.clearSelection()
+      }
+    }
+
+    /**
+     * Handle Cell Click
+     * @param {object} row
+     * @param {object} column
+     * @param {object} cell
+     * @param {*} event
+     */
+    function handleCellClick(row, column, cell, event) {
+      if (column.type === 'selection') {
+        let currentSelection = selectionsList.value
+        row.isSelectedRow = !row.isSelectedRow
+        row.isEditRow = row.isSelectedRow
+        if (row.isSelectedRow) {
+          currentSelection.push(row)
+        } else {
+          currentSelection = currentSelection.filter(rowSelected => row[keyColumn.value] !== rowSelected[keyColumn.value])
+        }
+        handleSelectionAll(currentSelection)
+        toggleSelection(currentSelection)
+        return
       }
     }
 
@@ -403,14 +437,14 @@ export default defineComponent({
       adjustSize()
     }
 
-    function loadSelect() {
+    function loadSelection() {
+      if (!props.isTableSelection) {
+        return
+      }
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
-        const selectionsList = props.containerManager.getSelection({
-          containerUuid: props.containerUuid
-        })
-        toggleSelection(selectionsList)
-      }, 1000)
+        toggleSelection(selectionsList.value)
+      }, 100)
     }
 
     watch(currentOption, (newValue, oldValue) => {
@@ -426,25 +460,13 @@ export default defineComponent({
         !isEmptyValue(main.clientHeight)) {
         heightSize.value = main.clientHeight
       }
-      // const selectionsList = props.containerManager.getSelection({
-      //   containerUuid: props.containerUuid
-      // })
-      // if (!isEmptyValue(selectionsList)) {
-      //   loadSelect()
-      // }
+      // loadSelection()
     })
 
     onMounted(() => {
       // adjustSize()
       // setTableHeight()
-      if (props.isTableSelection) {
-        const selectionsList = props.containerManager.getSelection({
-          containerUuid: props.containerUuid
-        })
-        if (!isEmptyValue(selectionsList)) {
-          toggleSelection(selectionsList)
-        }
-      }
+      loadSelection()
     })
 
     return {
@@ -474,9 +496,10 @@ export default defineComponent({
       handleChangePage,
       handleRowClick,
       handleRowDblClick,
+      handleCellClick,
       handleSelection,
       handleSelectionAll,
-      loadSelect,
+      loadSelection,
       handleChangeSizePage
     }
   }
