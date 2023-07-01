@@ -1,7 +1,8 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -172,13 +173,7 @@ export default defineComponent({
   setup(props) {
     const attributeName = 'isShowedTableRecords'
     const action = 'changeTabAttribute'
-    /**
-     * Refs
-     * isChangeOptions
-     * multipleTable
-     * heightTable
-     * heightSize
-     */
+
     const multipleTable = ref(null)
     const {
       storedWindow
@@ -193,22 +188,6 @@ export default defineComponent({
     const panelMain = document.getElementById('mainWindowDataTable')
     const heightSize = ref()
     const currentRowSelect = ref({})
-
-    /**
-    * Computed
-    * currentTabChildren
-    * isLoadingDataTale
-    * recordsWithFilter
-    * currentRowSelect
-    * selectionsList
-    * sizeViewTable
-    * currentOption
-    * defaultSize
-    * headerList
-    * keyColumn
-    * isMobile
-    * tabData
-    */
 
     const isLoadingDataTale = computed(() => {
       return store.getters.getIsLoadedTabRecord({
@@ -548,7 +527,7 @@ export default defineComponent({
             // set first record
             currentRow = recordsWithFilter.value.at(0)
           }
-          
+
           // enable edit mode
           currentRow.isEditRow = true
           currentRow.isSelectedRow = true
