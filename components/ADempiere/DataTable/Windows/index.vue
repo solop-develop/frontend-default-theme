@@ -1,7 +1,8 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -172,13 +173,7 @@ export default defineComponent({
   setup(props) {
     const attributeName = 'isShowedTableRecords'
     const action = 'changeTabAttribute'
-    /**
-     * Refs
-     * isChangeOptions
-     * multipleTable
-     * heightTable
-     * heightSize
-     */
+
     const multipleTable = ref(null)
     const {
       storedWindow
@@ -193,22 +188,6 @@ export default defineComponent({
     const panelMain = document.getElementById('mainWindowDataTable')
     const heightSize = ref()
     const currentRowSelect = ref({})
-
-    /**
-    * Computed
-    * currentTabChildren
-    * isLoadingDataTale
-    * recordsWithFilter
-    * currentRowSelect
-    * selectionsList
-    * sizeViewTable
-    * currentOption
-    * defaultSize
-    * headerList
-    * keyColumn
-    * isMobile
-    * tabData
-    */
 
     const isLoadingDataTale = computed(() => {
       return store.getters.getIsLoadedTabRecord({
@@ -328,26 +307,10 @@ export default defineComponent({
     })
 
     /**
-     * Methods
-     * handleSelectionAll
-     * handleRowDblClick
-     * tableRowClassName
-     * handleRowDblClick
-     * toggleSelection
-     * handleCellClick
-     * handleRowClick
-     * adjustSize
-     * changeTable
-     * loadSelect
-     * loadHeight
-     */
-
-    /**
      * Handle Selection All
      * @param {object} selections
      */
-
-    function handleSelectionAll(selections) {
+    function handleSelectionAll(selections = []) {
       props.containerManager.setSelection({
         containerUuid: props.containerUuid,
         recordsSelected: selections
@@ -374,10 +337,7 @@ export default defineComponent({
         //   containerUuid: props.containerUuid,
         //   row
         // })
-        props.containerManager.setSelection({
-          containerUuid: props.containerUuid,
-          recordsSelected: []
-        })
+        handleSelectionAll([])
       }
       changeTable(false)
 
@@ -397,20 +357,16 @@ export default defineComponent({
      * @param {string} column
      */
     function handleRowClick(row, column, event) {
-      if (row.isSelectedRow) {
-        // enable edit mode
-        row.isEditRow = true
-      }
       currentRowSelect.value = row
-      if (row.isNewRow) {
+      if (row.isNewRow || column.type === 'selection') {
         return
       }
 
-      toggleSelection()
-      props.containerManager.setSelection({
-        containerUuid: props.containerUuid,
-        recordsSelected: [row]
-      })
+      // enable edit mode
+      row.isEditRow = true
+      row.isSelectedRow = true
+
+      handleSelectionAll([row])
       toggleSelection([row])
       store.dispatch('changeTabAttribute', {
         attributeName: 'currentRowSelect',
@@ -434,7 +390,6 @@ export default defineComponent({
      * Table Row Class Name
      * @param {object} params
      */
-
     function tableRowClassName(params) {
       const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
       if (params.row.UUID === recordUuid && isEmptyValue(currentRowSelect.value)) {
@@ -448,29 +403,26 @@ export default defineComponent({
      * @param {array} selections
      * @param {object} rowSelected
      */
-
     function handleSelection(selections, rowSelected) {
       let index = 0
       rowSelected.isSelectedRow = !rowSelected.isSelectedRow
       rowSelected.rowSelectedIndex = index++
       rowSelected.isEditRow = rowSelected.isSelectedRow // edit record if is selected
-      props.containerManager.setSelection({
-        containerUuid: props.containerUuid,
-        recordsSelected: selections
-      })
+
+      handleSelectionAll(selections)
     }
 
     /**
      * Select or unselect rows
      * USE ONLY MOUNTED
      */
-    function toggleSelection(rows) {
+    function toggleSelection(rows = []) {
       if (isEmptyValue(multipleTable.value)) {
         return
       }
       if (!isEmptyValue(rows)) {
         rows.forEach(row => {
-          multipleTable.value.toggleRowSelection(row)
+          multipleTable.value.toggleRowSelection(row, true)
         })
       } else {
         multipleTable.value.clearSelection()
@@ -486,6 +438,16 @@ export default defineComponent({
      */
     function handleCellClick(row, column, cell, event) {
       if (column.type === 'selection') {
+        let currentSelection = selectionsList.value
+        row.isSelectedRow = !row.isSelectedRow
+        row.isEditRow = row.isSelectedRow
+        if (row.isSelectedRow) {
+          currentSelection.push(row)
+        } else {
+          currentSelection = currentSelection.filter(rowSelected => row.UUID !== rowSelected.UUID)
+        }
+        handleSelectionAll(currentSelection)
+        toggleSelection(currentSelection)
         return
       }
 
@@ -503,6 +465,7 @@ export default defineComponent({
           element.isEditRow = false
         })
         row.isEditRow = true
+        row.isSelectedRow = true
         if (!isEmptyValue(currentRowEdit) && !isEmptyValue(currentRowEdit.UUID)) {
           props.containerManager.exitEditMode({
             parentUuid: props.parentUuid,
@@ -517,7 +480,6 @@ export default defineComponent({
     /**
      * Adjust Size
      */
-
     function adjustSize() {
       if (!isEmptyValue(panelMain) && !isEmptyValue(panelMain.clientHeight)) {
         const size = parseInt(panelMain.clientHeight) / 2
@@ -533,7 +495,6 @@ export default defineComponent({
      * Change Table
      * @param {boolean} change
      */
-
     function changeTable(change) {
       store.dispatch(action, {
         attributeName: attributeName,
@@ -545,23 +506,38 @@ export default defineComponent({
     }
 
     /**
-     * Load Select
+     * Load Selection
      */
-
-    function loadSelect() {
+    function loadSelection() {
+      if (!props.isTableSelection) {
+        return
+      }
       clearTimeout(timeOut.value)
       timeOut.value = setTimeout(() => {
-        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-        if (!isEmptyValue(recordsWithFilter.value) && !isEmptyValue(recordUuid) && isEmptyValue(selectionsList.value)) {
-          const currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-          props.containerManager.setSelection({
-            containerUuid: props.containerUuid,
-            recordsSelected: [currentRow]
-          })
-          toggleSelection([currentRow])
-        }
         if (!isEmptyValue(selectionsList.value)) {
+          // set current selection
           toggleSelection(selectionsList.value)
+        } else if (!isEmptyValue(recordsWithFilter.value)) {
+          let currentRow = {}
+          // set current record
+          const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+          if (!isEmptyValue(recordUuid)) {
+            currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
+          } else {
+            // set first record
+            currentRow = recordsWithFilter.value.at(0)
+          }
+
+          // enable edit mode
+          currentRow.isEditRow = true
+          currentRow.isSelectedRow = true
+
+          currentRowSelect.value = currentRow
+          handleSelectionAll([currentRow])
+          toggleSelection([currentRow])
+        } else {
+          // clear selection
+          toggleSelection()
         }
       }, 100)
     }
@@ -585,7 +561,7 @@ export default defineComponent({
 
     watch(currentTabChildren, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
-        loadSelect()
+        loadSelection()
       }
     })
 
@@ -634,7 +610,7 @@ export default defineComponent({
       }
 
       if (!isEmptyValue(selectionsList.value)) {
-        loadSelect()
+        loadSelection()
       }
     })
 
@@ -644,35 +620,15 @@ export default defineComponent({
         !isEmptyValue(main.clientHeight)) {
         heightSize.value = main.clientHeight
       }
-      loadSelect()
+      // loadSelection()
     })
 
     /**
      * Mounted
      * Registers a callback to be called after the component has been mounted
      */
-
     onMounted(() => {
-      if (props.isTableSelection) {
-        if (!isEmptyValue(selectionsList.value)) {
-          toggleSelection(selectionsList.value)
-        } else if (!isEmptyValue(recordsWithFilter.value)) {
-          const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-          let currentRow
-          if (!isEmptyValue(recordUuid)) {
-            currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-          }
-          if (isEmptyValue(currentRow)) {
-            currentRow = recordsWithFilter.value.at()
-          }
-          currentRowSelect.value = currentRow
-          props.containerManager.setSelection({
-            containerUuid: props.containerUuid,
-            recordsSelected: [currentRow]
-          })
-          toggleSelection([currentRow])
-        }
-      }
+      loadSelection()
     })
 
     return {
