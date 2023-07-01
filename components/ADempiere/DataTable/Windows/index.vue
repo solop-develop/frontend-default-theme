@@ -106,11 +106,10 @@ import {
 import store from '@/store'
 
 // Components and Mixins
-import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
-import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
-import ColumnsDisplayOption from '@theme/components/ADempiere/DataTable/Components/ColumnsDisplayOption'
 import CellEditInfo from '@theme/components/ADempiere/DataTable/Components/CellEditInfo.vue'
+import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
+import useFullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer/useFullScreenContainer'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -119,9 +118,8 @@ export default defineComponent({
   name: 'WindowsTable',
 
   components: {
-    ColumnsDisplayOption,
-    FullScreenContainer,
     CellEditInfo,
+    FullScreenContainer,
     LoadingView
   },
 
@@ -170,6 +168,7 @@ export default defineComponent({
       default: false
     }
   },
+
   setup(props) {
     const attributeName = 'isShowedTableRecords'
     const action = 'changeTabAttribute'
@@ -420,12 +419,11 @@ export default defineComponent({
       if (isEmptyValue(multipleTable.value)) {
         return
       }
+      multipleTable.value.clearSelection()
       if (!isEmptyValue(rows)) {
         rows.forEach(row => {
           multipleTable.value.toggleRowSelection(row, true)
         })
-      } else {
-        multipleTable.value.clearSelection()
       }
     }
 
@@ -581,17 +579,8 @@ export default defineComponent({
       }
       // changeTable(!newValue)
       if (newValue) {
-        const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-        let currentRow
-        if (!isEmptyValue(recordUuid)) {
-          currentRow = recordsWithFilter.value.find(row => row.UUID === recordUuid)
-        }
-        if (isEmptyValue(currentRow)) {
-          currentRow = recordsWithFilter.value.at()
-        }
-        currentRowSelect.value = currentRow
-        toggleSelection([currentRow])
         loadHeight(newValue)
+        loadSelection()
       }
     })
 
