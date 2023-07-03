@@ -296,7 +296,7 @@ export default {
     // https://github.com/ElemeFE/element/issues/21287
     // https://github.com/ElemeFE/element/issues/21465
     getValueOfLookup() {
-      if (this.metadata.isAdvancedQuery && this.isSelectMultiple) {
+      if (this.isSelectMultiple) {
         return
       }
       this.isLoading = true

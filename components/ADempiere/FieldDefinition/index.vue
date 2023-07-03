@@ -67,6 +67,7 @@
           />
           <comparison-operator
             :metadata-field="field"
+            :container-manager="containerManager"
             :style="styleOperator"
           />
         </div>

@@ -61,6 +61,10 @@ export default defineComponent({
     metadataField: {
       type: Object,
       default: () => ({})
+    },
+    containerManager: {
+      type: Object,
+      default: () => ({})
     }
   },
 
@@ -91,7 +95,8 @@ export default defineComponent({
     function handleOperator(operator) {
       const {
         columnName,
-        containerUuid
+        containerUuid,
+        parentUuid
       } = props.metadataField
       store.commit('updateValueOfField', {
         containerUuid,
@@ -104,6 +109,15 @@ export default defineComponent({
         attributeName: 'operator',
         attributeValue: operator,
         field: props.metadataField
+      })
+
+      store.dispatch('notifyFieldChange', {
+        parentUuid,
+        containerUuid,
+        containerManager: props.containerManager,
+        field: props.metadataField,
+        columnName,
+        newValue: undefined
       })
     }
 
