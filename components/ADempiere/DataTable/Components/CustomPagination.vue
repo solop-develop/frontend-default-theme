@@ -25,12 +25,12 @@
         :current-page="currentPage"
         :page-sizes="NUMBER_RECORDS_PER_PAGE"
         :page-size="currentPageSize"
-        :total="total"
         style="float: right;"
         @size-change="handleSizeChange"
         @current-change="handleChangePage"
       >
         <span class="selections-number">
+          {{ currentIndex + '/ ' + total }}
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
             <span v-show="isShowedTableRecords">
               {{ $t('table.dataTable.selected') }}: {{ selection }}
@@ -171,6 +171,14 @@ export default defineComponent({
       return []
     })
 
+    const currentIndex = computed(() => {
+      const list = props.containerManager.getRecordsList({
+        containerUuid: props.containerUuid
+      })
+      if (isEmptyValue(list)) return 0
+      return list.findIndex(row => row.UUID === store.getters.getUuidOfContainer(props.containerUuid))
+    })
+
     return {
       // Computed
       isSelection,
@@ -181,6 +189,7 @@ export default defineComponent({
       disableNextRecord,
       recordsWithFilter,
       disablePreviousRecord,
+      currentIndex,
       // Import
       NUMBER_RECORDS_PER_PAGE
     }
