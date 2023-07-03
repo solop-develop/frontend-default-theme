@@ -38,18 +38,21 @@
       </el-descriptions-item>
     </el-descriptions>
 
-    <div style="text-align: right; margin: 0">
-      <el-button size="mini" type="text" @click="isVisibleConfirmDelete = false">
-        {{ $t('window.cancel') }}
-      </el-button>
+    <div
+      style="text-align: right; margin: 0;margin-top: 5px;"
+    >
       <el-button
-        ref="buttonConfirmDelete"
+        type="danger"
+        class="button-base-icon"
+        icon="el-icon-close"
+        @click="isVisibleConfirmDelete = false"
+      />
+      <el-button
         type="primary"
-        size="mini"
+        class="button-base-icon"
+        icon="el-icon-check"
         @click="deleteCurrentRecord()"
-      >
-        {{ $t('window.confirm') }}
-      </el-button>
+      />
     </div>
 
     <el-button
