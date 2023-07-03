@@ -30,7 +30,9 @@
         @current-change="handleChangePage"
       >
         <span class="selections-number">
-          {{ currentIndex + '/ ' + total }}
+          <span style="padding-top: 5px;">
+            {{ currentIndex + '/ ' + total }}
+          </span>
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
             <span v-show="isShowedTableRecords">
               {{ $t('table.dataTable.selected') }}: {{ selection }}
