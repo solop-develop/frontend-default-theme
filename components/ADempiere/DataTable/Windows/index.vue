@@ -30,7 +30,6 @@
       ref="multipleTable"
       v-loading="!isLoadingDataTale"
       :data="recordsWithFilter"
-      :height="sizeViewTable"
       highlight-current-row
       :row-key="keyColumn"
       reserve-selection
