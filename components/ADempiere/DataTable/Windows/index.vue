@@ -374,9 +374,9 @@ export default defineComponent({
         containerUuid: props.containerUuid
       })
 
-      if (isMobile.value) {
-        changeTable(false)
-      }
+      // if (isMobile.value) {
+      //   changeTable(false)
+      // }
       props.containerManager.seekRecord({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid,
