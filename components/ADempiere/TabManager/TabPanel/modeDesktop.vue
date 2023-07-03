@@ -218,7 +218,7 @@ export default defineComponent({
         return 'height: 78px'
       }
       // mono record
-      return 'height: 39px'
+      return 'height: 40px'
     })
 
     const styleFooterPanel = computed(() => {
@@ -480,7 +480,7 @@ export default defineComponent({
 
 <style>
 .el-tabs--border-card > .el-tabs__content {
-  padding: 15px;
+  /* padding: 15px; */
   overflow: auto;
   height: 92%;
   padding-top: 5px;

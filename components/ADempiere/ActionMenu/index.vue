@@ -39,7 +39,7 @@
 
       <el-dropdown-menu slot="dropdown" class="action-dropdown-menu">
         <el-dropdown-item
-          v-if="isEmptyValue(actionsList)"
+          v-if="isEmptyValue(allList)"
           key="withoutActions"
           style="min-height: 26px"
         >
@@ -52,7 +52,7 @@
 
         <el-scrollbar v-else key="withActions" wrap-class="scroll-child">
           <el-dropdown-item
-            v-for="(action, index) in actionsList"
+            v-for="(action, index) in allList"
             v-show="!action.displayed || (action.displayed && action.displayed({
               parentUuid,
               containerUuid
@@ -145,7 +145,7 @@
                     {{ action.description }}
                   </template>
                 </p>
-                <br v-if="indexSpace(index, actionsList.length)">
+                <br v-if="indexSpace(index, allList.length)">
               </div>
             </div>
           </el-dropdown-item>
@@ -188,11 +188,14 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const currentTab = computed(() => {
+      return store.getters.getContainerInfo.currentTab
+    })
+
     const {
-      parentUuid,
       containerUuid,
       tableName
-    } = props.actionsManager
+    } = currentTab.value
 
     const isMobile = computed(() => {
       return store.getters.device === 'mobile'
@@ -256,12 +259,37 @@ export default defineComponent({
     })
 
     const isClassOptions = computed(() => {
-      const { isShowedTableRecords } = store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      )
-      if (isShowedTableRecords) return 'auxiliary-menu auxiliary-menu-mobile-table'
+      // const { isShowedTableRecords } = store.getters.getStoredTab(
+      //   props.parentUuid,
+      //   props.containerUuid
+      // )
+      // if (isShowedTableRecords) return 'auxiliary-menu auxiliary-menu-mobile-table'
       return 'auxiliary-menu auxiliary-menu-mobile'
+    })
+
+    const allList = computed(() => {
+      if (
+        isMobile.value &&
+        props.actionsManager &&
+        props.actionsManager.getActionList
+      ) {
+        const list = props.actionsManager.getActionList()
+        if (list.length > 5) {
+          const options = list.filter((current, index, array) => index < 5)
+          options.push({
+            actionName: 'Moreoptions',
+            enabled: () => {
+              return true
+            },
+            icon: 'el-icon-more',
+            name: lang.t('actionMenu.moreOptions'),
+            svg: false,
+            type: 'options'
+          })
+          return options
+        }
+      }
+      return actionsList.value
     })
 
     /**
@@ -279,15 +307,17 @@ export default defineComponent({
      */
     function runAction(action) {
       const { actionName } = action
+      if (actionName === 'Moreoptions') return store.commit('setShowMenuMobile', true)
       action[actionName]({
         root,
-        parentUuid,
-        containerUuid,
-        tableName,
+        parentUuid: currentTab.value.parentUuid,
+        containerUuid: currentTab.value.containerUuid,
+        tableName: currentTab.value.tableName,
         instanceUuid,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
-        uuid: action.uuid
+        uuid: action.uuid,
+        currentTab: currentTab.value
       })
     }
 
@@ -301,7 +331,9 @@ export default defineComponent({
 
     return {
       size,
+      isMobile,
       actionsList,
+      allList,
       isClassOptions,
       defaultActionName,
       isWithDefaultAction,

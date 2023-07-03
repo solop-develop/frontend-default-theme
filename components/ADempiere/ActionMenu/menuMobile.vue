@@ -18,57 +18,57 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div :class="isClassOptions">
-    <!-- actions or process on container -->
-    <el-dropdown
-      v-if="!isEmptyValue(actionsManager)"
-      :hide-on-click="true"
-      :size="size"
-      :split-button="isWithDefaultAction"
-      type="primary"
-      trigger="click"
-      :class="{ 'action-container': true, 'without-defualt-action': !isWithDefaultAction }"
-      @command="runAction"
-      @click="runDefaultAction"
+    <el-menu
+      default-active="2"
+      class="el-menu-vertical-demo"
+      style="display: block;width: -webkit-fill-available;"
+      @select="runAction"
     >
-      <template v-if="isWithDefaultAction">
-        {{ defaultActionName }}
-      </template>
-      <el-button v-else type="primary" plain :size="size">
-        <svg-icon icon-class="more-vertical" />
-      </el-button>
-
-      <el-dropdown-menu slot="dropdown" class="action-dropdown-menu">
-        <el-dropdown-item
-          v-if="isEmptyValue(actionsList)"
-          key="withoutActions"
-          style="min-height: 26px"
-        >
-          <span class="contents">
-            <b class="label">
-              {{ $t('actionMenu.withoutActions') }}
-            </b>
-          </span>
-        </el-dropdown-item>
-
-        <el-scrollbar v-else key="withActions" wrap-class="scroll-child">
-          <el-dropdown-item
-            v-for="(action, index) in actionsList"
-            v-show="!action.displayed || (action.displayed && action.displayed({
-              parentUuid,
-              containerUuid
-            }))"
+      <span
+        v-for="(action, index) in actionsList"
+        :key="index"
+      >
+        <span v-if="isEmptyValue(action.childs)">
+          <el-menu-item
             :key="index"
-            :command="action"
+            :index="action.actionName"
             :disabled="!action.enabled({
               root: $root,
               parentUuid,
               containerUuid,
               containerManager
             })"
-            :divided="true"
           >
-            <div class="contents">
-              <div class="auxiliary-menu-icon">
+            <b>
+              <svg-icon
+                v-if="action.isSvgIcon || action.svg === true"
+                :icon-class="action.icon"
+                style="font-size: 18"
+              />
+              <i
+                v-else
+                :class="action.icon"
+                style="font-size: 18"
+              />
+            </b>
+            <b class="label">
+              {{ action.name }}
+            </b>
+          </el-menu-item>
+        </span>
+        <span v-else>
+          <el-submenu
+            :index="action.actionName"
+            style="padding-left: 20px;"
+            :disabled="!action.enabled({
+              root: $root,
+              parentUuid,
+              containerUuid,
+              containerManager
+            })"
+          >
+            <template slot="title">
+              <b>
                 <svg-icon
                   v-if="action.isSvgIcon || action.svg === true"
                   :icon-class="action.icon"
@@ -79,79 +79,37 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :class="action.icon"
                   style="font-size: 18"
                 />
-              </div>
-
-              <!-- for print format -->
-              <el-dropdown v-if="!isEmptyValue(action.childs)">
-                <span>
-                  <b class="label">
-                    {{ action.name }}
-                  </b>
-                  <i class="el-icon-arrow-down" style="float: right;" />
-                  <p class="description">
-                    <template v-if="isEmptyValue(action.description)">
-                      {{ $t('data.noDescription') }}
-                    </template>
-                    <template v-else>
-                      {{ action.description }}
-                    </template>
-                  </p>
-                </span>
-
-                <el-dropdown-menu
-                  slot="dropdown"
-                  @command="runAction"
-                >
-                  <el-scrollbar wrap-class="scroll-child">
-                    <el-dropdown-item
-                      v-for="(actionChild, key) in action.childs"
-                      :key="key"
-                      :command="actionChild"
-                      :divided="true"
-                    >
-                      <div @click="runAction(actionChild)">
-                        <span class="contents">
-                          <b class="label">
-                            {{ actionChild.name }}
-                          </b>
-                        </span>
-
-                        <p class="description">
-                          <template v-if="isEmptyValue(actionChild.description)">
-                            {{ $t('data.noDescription') }}
-                          </template>
-                          <template v-else>
-                            {{ actionChild.description }}
-                          </template>
-                        </p>
-                      </div>
-                    </el-dropdown-item>
-                  </el-scrollbar>
-                </el-dropdown-menu>
-              </el-dropdown>
-
-              <div v-else>
-                <span class="contents">
-                  <b class="label">
-                    {{ action.name }}
-                  </b>
-                </span>
-
-                <p class="description">
-                  <template v-if="isEmptyValue(action.description)">
-                    {{ $t('data.noDescription') }}
-                  </template>
-                  <template v-else>
-                    {{ action.description }}
-                  </template>
-                </p>
-                <br v-if="indexSpace(index, actionsList.length)">
-              </div>
-            </div>
-          </el-dropdown-item>
-        </el-scrollbar>
-      </el-dropdown-menu>
-    </el-dropdown>
+              </b>
+              <b class="label">
+                {{ action.name }}
+              </b>
+            </template>
+            <el-menu-item
+              v-for="(actionChild, key) in action.childs"
+              :key="key"
+              :index="action.actionName"
+              style="padding-left: 15px;"
+            >
+              <b>
+                <svg-icon
+                  v-if="actionChild.isSvgIcon || actionChild.svg === true"
+                  :icon-class="actionChild.icon"
+                  style="font-size: 18"
+                />
+                <i
+                  v-else
+                  :class="actionChild.icon"
+                  style="font-size: 18"
+                />
+              </b>
+              <b class="label">
+                {{ actionChild.name }}
+              </b>
+            </el-menu-item>
+          </el-submenu>
+        </span>
+      </span>
+    </el-menu>
   </div>
 </template>
 
@@ -165,7 +123,7 @@ import store from '@/store'
 import { isEmptyValue, getTypeOfValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
-  name: 'MenuActions',
+  name: 'menuMobile',
 
   props: {
     parentUuid: {
@@ -188,11 +146,14 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const currentTab = computed(() => {
+      return store.getters.getContainerInfo.currentTab
+    })
+
     const {
-      parentUuid,
       containerUuid,
       tableName
-    } = props.actionsManager
+    } = currentTab.value
 
     const isMobile = computed(() => {
       return store.getters.device === 'mobile'
@@ -278,21 +239,24 @@ export default defineComponent({
      * @param {object} action
      */
     function runAction(action) {
-      const { actionName } = action
-      action[actionName]({
+      const currentAction = actionsList.value.find(list => list.actionName === action)
+      const { actionName } = currentAction
+      currentAction[actionName]({
         root,
-        parentUuid,
-        containerUuid,
-        tableName,
+        parentUuid: currentTab.value.parentUuid,
+        containerUuid: currentTab.value.containerUuid,
+        tableName: currentTab.value.tableName,
         instanceUuid,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
-        uuid: action.uuid
+        uuid: action.uuid,
+        currentTab: currentTab.value
       })
+      store.commit('setShowMenuMobile', false)
     }
 
     /**
-     * Index Space
+     * Index SpactabAttributese
      */
 
     function indexSpace(index, menuList) {
@@ -300,7 +264,10 @@ export default defineComponent({
     }
 
     return {
+      currentTab,
+      //
       size,
+      isMobile,
       actionsList,
       isClassOptions,
       defaultActionName,

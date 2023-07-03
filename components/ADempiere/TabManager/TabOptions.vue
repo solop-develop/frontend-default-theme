@@ -48,19 +48,37 @@
       style="display: contents;"
     />
 
-    <full-screen-container
+    <!-- <full-screen-container
       style="float: right;"
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
-    />
+    /> -->
 
     <action-menu
       :parent-uuid="parentUuid"
-      :container-uuid="currentTabUuid"
+      :container-uuid="$store.getters.getContainerInfo.currentTab.containerUuid"
       :container-manager="containerManager"
       :actions-manager="listAction"
       style="float: right;"
     />
+    <el-drawer
+      :visible.sync="showMenuMobile"
+      :with-header="true"
+      size="100%"
+      class="drawer-panel-info"
+    >
+      <span slot="title">
+        <span style="color: #606266; font-weight: bold;">
+          {{ $t('actionMenu.menu') }} {{ $store.getters.getContainerInfo.currentTab.name }}
+        </span>
+      </span>
+      <menu-mobile
+        :parent-uuid="parentUuid"
+        :container-uuid="$store.getters.getContainerInfo.currentTab.containerUuid"
+        :container-manager="containerManager"
+        :actions-manager="listAction"
+      />
+    </el-drawer>
   </div>
 </template>
 
@@ -72,9 +90,12 @@ import store from '@/store'
 
 // Components and Mixins
 import ActionMenu from '@theme/components/ADempiere/ActionMenu/index.vue'
+import menuMobile from '@theme/components/ADempiere/ActionMenu/menuMobile.vue'
 import ConvenienceButtons from '@theme/components/ADempiere/TabManager/convenienceButtons/index.vue'
-import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
+// import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import ChangeRecord from '@theme/components/ADempiere/DataTable/Components/ChangeRecord.vue'
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'TabOptions',
@@ -82,8 +103,9 @@ export default defineComponent({
   components: {
     ActionMenu,
     ConvenienceButtons,
-    FullScreenContainer,
-    ChangeRecord
+    // FullScreenContainer,
+    ChangeRecord,
+    menuMobile
   },
 
   props: {
@@ -128,15 +150,16 @@ export default defineComponent({
 
   setup(props) {
     const listAction = computed(() => {
+      const tab = store.getters.getContainerInfo.currentTab
       return {
         parentUuid: props.parentUuid,
-        containerUuid: props.tabAttributes.uuid,
+        containerUuid: isEmptyValue(tab) ? props.tabAttributes.uuid : tab.containerUuid,
         defaultActionName: language.t('actionMenu.createNewRecord'),
-        tableName: props.tabAttributes.tableName,
+        tableName: isEmptyValue(tab) ? props.tabAttributes.tableName : tab.tableName,
         withoutDefaulAction: true,
         getActionList: () => {
           return store.getters.getStoredActionsMenu({
-            containerUuid: props.tabAttributes.uuid
+            containerUuid: isEmptyValue(tab) ? props.tabAttributes.uuid : tab.containerUuid
           })
         }
       }
@@ -162,6 +185,17 @@ export default defineComponent({
         return language.t('window.toggleSingle')
       }
       return language.t('window.multiRecord')
+    })
+
+    const showMenuMobile = computed({
+      // getter
+      get() {
+        return store.getters.getShowMenuMobile
+      },
+      // setter
+      set(newValue) {
+        store.commit('setShowMenuMobile', newValue)
+      }
     })
 
     function changeShowedRecords() {
@@ -196,10 +230,11 @@ export default defineComponent({
 
     return {
       // computed
+      label,
       isMobile,
       listAction,
       isShowedTableRecords,
-      label,
+      showMenuMobile,
       // methods
       changeShowedRecords
     }
