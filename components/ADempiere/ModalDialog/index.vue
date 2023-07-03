@@ -16,6 +16,7 @@
 
 <template>
   <el-dialog
+    v-if="!isMobile"
     class="modal-dialog"
     :visible="isShowed"
     @close="closeDialog"
@@ -56,6 +57,51 @@
       />
     </span>
   </el-dialog>
+  <el-drawer
+    v-else
+    :visible.sync="isShowed"
+    :with-header="true"
+    :before-close="closeDialog"
+    size="100%"
+    class="drawer-panel-info"
+  >
+    <span slot="title">
+      <span style="color: #606266; font-weight: bold;">
+        {{ title }}
+      </span>
+    </span>
+    <div style="height: 92%;">
+      <span v-if="isLoaded">
+        <component
+          :is="componentRender"
+          :parent-uuid="parentUuid"
+          :container-uuid="containerUuid"
+          :container-manager="containerManagerModalDialog"
+          :is-filter-records="false"
+        />
+      </span>
+      <loading-view
+        v-else
+        key="form-loading"
+      />
+    </div>
+
+    <div style="float: right;padding-right: 10px;">
+      <el-button
+        type="danger"
+        icon="el-icon-close"
+        class="button-base-icon"
+        @click="cancelButton"
+      />
+      <el-button
+        type="primary"
+        icon="el-icon-check"
+        class="button-base-icon"
+        :disabled="isDisabledDone"
+        @click="doneButton"
+      />
+    </div>
+  </el-drawer>
 </template>
 <script>
 import { defineComponent, ref, computed, watch } from '@vue/composition-api'
@@ -140,6 +186,10 @@ export default defineComponent({
       return storedModalDialog.value.componentPath
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     const isDisabledDone = computed(() => {
       if (storedModalDialog.value.isDisabledDone) {
         return Boolean(
@@ -210,6 +260,7 @@ export default defineComponent({
       isDisabledDone,
       isLoaded,
       isShowed,
+      isMobile,
       title,
       // methods
       cancelButton,
