@@ -130,7 +130,7 @@ export default defineComponent({
     /**
      * changePreviousRecord
      */
-     function changePreviousRecord() {
+    function changePreviousRecord() {
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
       const previosRecord = recordsWithFilter.value[posicionIndex - 1]
       const recordId = previosRecord[tableName.value + '_ID']
