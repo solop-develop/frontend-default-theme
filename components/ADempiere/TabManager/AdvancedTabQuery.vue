@@ -18,13 +18,14 @@
 -->
 
 <template>
-  <span v-if="!isMobile" class="advanced-query-container" :style="styleIconSvg">
+  <span class="advanced-query-container" :style="styleIconSvg">
     <el-input
       v-model="valueToSearch"
       clearable
       :placeholder="$t('components.searchRecord')"
       size="small"
       class="input-search"
+      style="padding-right: 6px;"
       @input="handleChangeSearch"
     >
       <el-popover
@@ -178,6 +179,9 @@ export default defineComponent({
     })
 
     const styleIconSvg = computed(() => {
+      if (isMobile.value) {
+        return ''
+      }
       if (isShowedTableRecords.value) {
         return 'position: absolute;right: 66px;display: inline-block;padding-right: 5px;float: right;width: 293px;'
       }
@@ -321,7 +325,7 @@ export default defineComponent({
     padding-top: 9px !important;
 
     svg {
-      font-size: 27px !important;
+      font-size: 25px !important;
     }
   }
 }

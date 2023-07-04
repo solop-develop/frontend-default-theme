@@ -31,6 +31,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         :is-change-record="!isShowedTableRecords"
       />
 
+      <div v-if="isMobile" class="mobile">
+        <advanced-tab-query
+          :parent-uuid="parentUuid"
+          :container-uuid="currentTabUuid"
+          :container-manager="containerManager"
+          class="advanced-tab-query-mobile"
+        />
+      </div>
+
       <filter-fields
         v-if="isShowedTableRecords"
         v-bind="commonFilterFielsProperties"
@@ -132,6 +141,7 @@ import BatchEntry from '@theme/components/ADempiere/DataTable/Components/BatchEn
 import CustomPagination from '@theme/components/ADempiere/DataTable/Components/CustomPagination.vue'
 import DefaultTable from '@theme/components/ADempiere/DataTable/index.vue'
 import FilterFields from '@theme/components/ADempiere/FilterFields/index.vue'
+import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
 // import FullScreenContainer from '@theme/components/ADempiere/ContainerOptions/FullScreenContainer'
 import PanelDefinition from '@theme/components/ADempiere/PanelDefinition/index.vue'
 import TabOptions from '@theme/components/ADempiere/TabManager/TabOptions.vue'
@@ -146,6 +156,7 @@ export default defineComponent({
     CustomPagination,
     DefaultTable,
     FilterFields,
+    AdvancedTabQuery,
     // FullScreenContainer,
     PanelDefinition,
     TabOptions,
@@ -218,11 +229,15 @@ export default defineComponent({
           // batch entry collapse
           return 'height: 130px'
         }
+        if (currentTab.value.isDocument) return 'height: 120px;padding: 0px 5px;'
         // multi record
-        return 'height: 78px'
+        return 'height: 110px; margin-left: 0px;margin-right: 0px;padding-right: 5px;padding-left: 5px;'
+      }
+      if (currentTab.value.isDocument) {
+        return 'height: 110px; margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;'
       }
       // mono record
-      return 'height: 39px; margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;'
+      return 'height: 80px; margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;'
     })
 
     const styleFooterPanel = computed(() => {
@@ -434,8 +449,13 @@ export default defineComponent({
       }, () => {})
     }
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     return {
       // computeds
+      isMobile,
       commonFilterFielsProperties,
       recordsList,
       isShowedTableRecords,
@@ -475,9 +495,6 @@ export default defineComponent({
     .el-scrollbar__bar {
       bottom: 0px;
     }
-    // .el-scrollbar__wrap {
-    //   height: 49px;
-    // }
   }
 }
 </style>
@@ -491,5 +508,19 @@ export default defineComponent({
   padding-right: 5px;
   padding-bottom: 0px;
   padding-left: 5px;
+}
+.el-tabs__nav-next, .el-tabs__nav-prev {
+  position: absolute;
+  cursor: pointer;
+  line-height: 44px;
+  font-size: 25px;
+  color: #909399;
+  width: 7%;
+  text-align: center;
+}
+.el-tabs__nav-wrap.is-scrollable {
+  padding: 0 30px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 </style>

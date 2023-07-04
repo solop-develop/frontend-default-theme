@@ -103,6 +103,7 @@ export default defineComponent({
   components: {
     ActionMenu,
     ConvenienceButtons,
+    // AdvancedTabQuery,
     // FullScreenContainer,
     ChangeRecord,
     menuMobile

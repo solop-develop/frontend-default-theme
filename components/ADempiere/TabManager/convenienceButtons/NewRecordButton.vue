@@ -38,7 +38,7 @@
     size="small"
     trigger="click"
     class="new-record-button"
-    style="margin-left: 8px; padding-right: 9px;"
+    :style="isMobile ? 'margin-left: 1px; padding-right: 4px' : 'margin-left: 8px; padding-right: 9px;'"
     @click="handleCommandActions('newEmptyRecord');"
     @command="handleCommandActions"
   >
