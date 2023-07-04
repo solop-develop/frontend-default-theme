@@ -16,7 +16,7 @@
 
 <template>
   <div class="content-excel" style="height: -webkit-fill-available;">
-    <el-container class="sub-content-excel" style="height: -webkit-fill-available;">
+    <el-container class="sub-content-excel" style="height: -webkit-fill-available;width: 100%">
       <el-main style="padding: 0;">
         <download-file
           :format="format"
