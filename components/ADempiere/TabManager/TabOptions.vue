@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -32,14 +32,14 @@
         </b>
       </span>
     </el-button>
+
     <change-record
       :parent-uuid="parentUuid"
-      :container-uuid="currentTabUuid"
+      :container-uuid="tabAttributes.uuid"
       :container-manager="containerManager"
-      :change-previous-record="changePreviousRecord"
-      :change-next-record="changeNextRecord"
       :is-change-record="isChangeRecord"
     />
+
     <convenience-buttons
       :parent-uuid="parentUuid"
       :container-uuid="currentTabUuid"
@@ -134,18 +134,6 @@ export default defineComponent({
     isChangeRecord: {
       type: Boolean,
       required: false
-    },
-    changeNextRecord: {
-      type: Function,
-      default: (recordNext) => {
-        console.info('implement method Change to Next Record', recordNext)
-      }
-    },
-    changePreviousRecord: {
-      type: Function,
-      default: (recordPrevious) => {
-        console.info('implement method Change to Previous Record ', recordPrevious)
-      }
     }
   },
 
