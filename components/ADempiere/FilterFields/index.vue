@@ -201,15 +201,15 @@ export default defineComponent({
       )
       if (isShowedTableRecords) {
         if (isDocumentTab.value) {
-          return 'right-panel-field-options-table-mobile'  
+          return 'right-panel-field-options-table-mobile'
         }
         return 'right-panel-field-options-table-mobile'
       }
       if (isDocumentTab.value) {
-        return 'right-panel-field-options-mobile'  
+        return 'right-panel-field-options-mobile'
       }
       if (isMobile.value) {
-        return 'right-panel-field-options-mobile'  
+        return 'right-panel-field-options-mobile'
       }
       return 'right-panel-field-options'
     })
