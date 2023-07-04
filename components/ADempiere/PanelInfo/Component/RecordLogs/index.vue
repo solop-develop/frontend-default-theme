@@ -27,7 +27,7 @@
           {{ $t('window.containerInfo.log.tableName') }}
         </template>
         <span style="color: #606266; font-weight: bold;">
-          {{ tableName }}
+          {{ getTableName }}
         </span>
       </el-descriptions-item>
       <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -168,6 +168,10 @@ export default defineComponent({
   },
 
   props: {
+    containerUuid: {
+      type: String,
+      required: false
+    },
     tableName: {
       type: String,
       default: ''
@@ -186,7 +190,7 @@ export default defineComponent({
     }
   },
 
-  setup() {
+  setup(props) {
     const currentRecordLogs = ref({ name: '' })
     const currentKey = ref(0)
     const typeAction = ref(0)
@@ -212,9 +216,15 @@ export default defineComponent({
       return isDocumentStatus({ columnName: changeLog.columnName })
     }
 
+    const getTableName = computed(() => {
+      // const { currentTab } = store.getters.getContainerInfo
+      return store.getters.getStoredTableNameByTab(props.containerUuid)
+    })
+
     return {
       currentTabLogs,
       currentRecordLogs,
+      getTableName,
       typeAction,
       currentKey,
       listLogs,
