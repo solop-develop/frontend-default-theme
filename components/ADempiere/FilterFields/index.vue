@@ -22,18 +22,6 @@
     id="panelOptionsBar"
     class="panel-options-bar"
   >
-    <!-- <span
-      id="LeftPanelSearchOptions"
-      class="left-panel-search-options"
-    >
-      <advanced-tab-query
-        :parent-uuid="parentUuid"
-        :container-uuid="containerUuid"
-        :fields-list="fieldsList"
-        :container-manager="containerManager"
-        style="float: left;"
-      />
-    </span> -->
 
     <span
       id="RightPanelFieldOptions"
@@ -79,52 +67,47 @@
   </el-row>
 
   <el-row v-else :gutter="20">
-    <el-col :span="24">
-      <el-form :class="cssClass" style="float: right;">
-        <el-form-item>
-          <template v-if="!isEmptyValue(groupField)" slot="label">
-            {{ groupField }}
-          </template>
+    <span
+      id="RightPanelFieldOptionsMobile"
+      :class="isClassOptions"
+    >
+      <el-select
+        v-model="fieldsListShowed"
+        :filterable="!isMobile"
+        :placeholder="$t('components.filterableItems')"
+        multiple
+        collapse-tags
+        value-key="key"
+        :size="size"
+        :popper-append-to-body="true"
+        style="width: 91%;"
+      >
+        <el-option
+          v-for="(item, key) in fieldsListAvailable"
+          :key="key"
+          :label="item.name"
+          :value="item.columnName"
+        />
+      </el-select>
 
-          <el-select
-            v-model="fieldsListShowed"
-            :filterable="!isMobile"
-            :placeholder="$t('components.filterableItems')"
-            multiple
-            collapse-tags
-            value-key="key"
-            :size="size"
-            :popper-append-to-body="true"
-            style="min-width: 250px;max-width: 300px;"
-          >
-            <el-option
-              v-for="(item, key) in fieldsListAvailable"
-              :key="key"
-              :label="item.name"
-              :value="item.columnName"
-            />
-          </el-select>
-
-          <columns-display-option
-            v-if="inTable"
-            :parent-uuid="parentUuid"
-            :container-uuid="containerUuid"
-          />
-          <fields-display-option
-            v-else
-            :parent-uuid="parentUuid"
-            :container-uuid="containerUuid"
-            :available-fields="fieldsListAvailable"
-            :available-fields-with-value="fieldsListAvailableWithValue"
-            :showed-fields="fieldsListShowed"
-            :filter-manager="filterManager"
-            :container-manager="containerManager"
-            :new-fields-list-secuence="newFieldsListSecuence"
-            :fields-customization="fieldsCustomization"
-          />
-        </el-form-item>
-      </el-form>
-    </el-col>
+      <columns-display-option
+        v-if="inTable"
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+      />
+      <fields-display-option
+        v-else
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :available-fields="fieldsListAvailable"
+        :available-fields-with-value="fieldsListAvailableWithValue"
+        :showed-fields="fieldsListShowed"
+        :filter-manager="filterManager"
+        :container-manager="containerManager"
+        :new-fields-list-secuence="newFieldsListSecuence"
+        :fields-customization="fieldsCustomization"
+      />
+    </span>
   </el-row>
 </template>
 
@@ -216,7 +199,18 @@ export default defineComponent({
         props.parentUuid,
         props.containerUuid
       )
-      if (isShowedTableRecords) return 'right-panel-field-options-table'
+      if (isShowedTableRecords) {
+        if (isDocumentTab.value) {
+          return 'right-panel-field-options-table-mobile'
+        }
+        return 'right-panel-field-options-table-mobile'
+      }
+      if (isDocumentTab.value) {
+        return 'right-panel-field-options-mobile'
+      }
+      if (isMobile.value) {
+        return 'right-panel-field-options-mobile'
+      }
       return 'right-panel-field-options'
     })
 
@@ -229,6 +223,14 @@ export default defineComponent({
 
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
+    })
+
+    const isDocumentTab = computed(() => {
+      const { isDocument, isParentTab } = store.getters.getStoredTab(
+        props.parentUuid,
+        props.containerUuid
+      )
+      return isDocument && isParentTab
     })
 
     const fieldsListAvailable = computed(() => {
@@ -309,6 +311,7 @@ export default defineComponent({
       fieldsListAvailableWithValue,
       showedAttibute,
       isClassOptions,
+      isDocumentTab,
       // methods
       changeShowed
     }
@@ -424,8 +427,21 @@ export default defineComponent({
   margin-top: 5px;
   display: block;
 }
+.right-panel-field-options-table-mobile {
+  display: block;
+  margin-left: 10px;
+  padding: 0px;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
 .right-panel-field-options {
   display: block;
+  margin-bottom: 10px;
+}
+.right-panel-field-options-mobile {
+  display: block;
+  margin-left: 10px;
+  padding: 0px;
   margin-bottom: 10px;
 }
 </style>

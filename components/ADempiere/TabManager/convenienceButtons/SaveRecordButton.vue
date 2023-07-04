@@ -24,6 +24,7 @@
     type="primary"
     :loading="isSaveRecordLoading"
     :disabled="isSaveRecordLoading"
+    :style="isMobile ? 'margin-left: 1px;padding-right: 6px;' : 'margin-left: 8px; padding-right: 9px;'"
     class="undo-changes-button"
     @click="saveChanges()"
   >

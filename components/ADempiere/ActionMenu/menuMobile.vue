@@ -43,12 +43,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <svg-icon
                 v-if="action.isSvgIcon || action.svg === true"
                 :icon-class="action.icon"
-                style="font-size: 18"
+                style="font-size: 18;color: black;"
               />
               <i
                 v-else
                 :class="action.icon"
-                style="font-size: 18"
+                style="font-size: 18;color: black;"
               />
             </b>
             <b class="label">
@@ -394,6 +394,7 @@ export default defineComponent({
       border-color: #1890ff;
       color: #FFFFFF;
     }
+    // background: #c4cbd1;
   }
 }
 </style>

@@ -49,8 +49,13 @@
       :container-manager="containerManager"
       :tab-attributes="tabAttributes"
     />
-
+    <!-- <span v-if="isMobile">
+      <div>
+        {{ 46546456 }}
+      </div>
+    </span> -->
     <advanced-tab-query
+      v-if="!isMobile"
       :parent-uuid="parentUuid"
       :container-uuid="tabAttributes.uuid"
       :container-manager="containerManager"
@@ -134,6 +139,10 @@ export default defineComponent({
       return props.tabAttributes
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     function openLog() {
       const list = store.getters.getTabRecordsList({ containerUuid })
       const currentRecord = list.find(row => row.UUID === recordUuid.value)
@@ -167,6 +176,7 @@ export default defineComponent({
 
     return {
       // computed
+      isMobile,
       recordUuid,
       getCurrentTab,
       isDisableOptionsTabChild,
@@ -182,8 +192,8 @@ export default defineComponent({
 .convenience-buttons-main {
   display: contents;
   .delete-record-container {
-    padding-left: 9px;
-    padding-right: 9px;
+    padding-left: 4px;
+    padding-right: 4px;
   }
   .el-button {
     padding-left: 9px;

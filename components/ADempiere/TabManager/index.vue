@@ -269,18 +269,12 @@ export default defineComponent({
 
     const sizeBadgeRight = computed(() => {
       if (isMobile.value) {
-        return 'width: 0%;height: 100%;position: absolute;right: 10%;top: 45%;z-index: 9;'
+        return 'width: 0%;height: 100%;position: fixed;right: 8.5%;top: 50%;z-index: 9;'
       }
       return 'width: 0%;height: 100%;position: absolute;right: 2%;top: 45%;z-index: 9;'
     })
 
     const tabStyle = computed(() => {
-      // height tab content
-      // if (currentTabMetadata.value.isShowedTableRecords) {
-      //   return {
-      //     overflow: 'auto'
-      //   }
-      // }
       if (store.state.app.device === 'mobile') {
         return {
           height: '100% !important'

@@ -24,7 +24,7 @@
     <el-dropdown
       v-if="isEnableRunDocumentAction"
       split-button
-      style="margin-left: 10px;"
+      :style="isMobile ? 'margin-left: 1px;margin-right: 4px' : 'margin-left: 10px;'"
       size="small"
       trigger="click"
       class="document-action"
@@ -105,7 +105,7 @@
       :parent-uuid="parentUuid"
       :container-uuid="tabAttributes.uuid"
       :table-name="tabAttributes.tableName"
-      style="padding-left: 5px;"
+      :style="isMobile ? 'padding-left: 0px;' : 'padding-left: 5px;'"
     />
 
   </span>
@@ -294,6 +294,10 @@ export default defineComponent({
       return true
     })
 
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
     /**
      * Methods
      */
@@ -411,6 +415,7 @@ export default defineComponent({
       selectDocActions,
       isVisibleDocAction,
       // Computed
+      isMobile,
       recordUuid,
       getCurrentTab,
       isEnableRunDocumentAction,
