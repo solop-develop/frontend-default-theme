@@ -27,7 +27,7 @@
           {{ $t('window.containerInfo.log.tableName') }}
         </template>
         <span style="color: #606266; font-weight: bold;">
-          {{ tableName }}
+          {{ getTableName }}
         </span>
       </el-descriptions-item>
       <el-descriptions-item label-style="{ color: #606266; font-weight: bold; }">
@@ -212,9 +212,16 @@ export default defineComponent({
       return isDocumentStatus({ columnName: changeLog.columnName })
     }
 
+    const getTableName = computed(() => {
+      const { currentTab } = store.getters.getContainerInfo
+      const { tableName } = currentTab
+      return tableName
+    })
+
     return {
       currentTabLogs,
       currentRecordLogs,
+      getTableName,
       typeAction,
       currentKey,
       listLogs,
