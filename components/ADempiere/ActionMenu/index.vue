@@ -160,6 +160,7 @@ import { computed, defineComponent } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
+import router from '@/router'
 
 // Utils and Helper Methods
 import { isEmptyValue, getTypeOfValue } from '@/utils/ADempiere/valueUtils'
@@ -189,6 +190,8 @@ export default defineComponent({
 
   setup(props, { root }) {
     const currentTab = computed(() => {
+      const currentRoute = router.app._route
+      if (currentRoute.meta.type !== 'window') return props.actionsManager
       return store.getters.getContainerInfo.currentTab
     })
 
