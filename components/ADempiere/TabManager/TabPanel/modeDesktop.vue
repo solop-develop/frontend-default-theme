@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
 Contributor(s): Elsio Sanchez elsiosanches@gmail.com www.erpya.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,8 +26,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         :container-uuid="tabAttributes.uuid"
         :tab-attributes="tabAttributes"
         :is-child-tab="isChildTab"
-        :change-previous-record="changePreviousRecord"
-        :change-next-record="changeNextRecord"
         :is-change-record="!isShowedTableRecords"
       />
 
@@ -157,10 +155,6 @@ export default defineComponent({
       type: Object,
       required: true
     },
-    currentTabUuid: {
-      type: String,
-      default: ''
-    },
     tabAttributes: {
       type: Object,
       default: () => ({})
@@ -174,6 +168,8 @@ export default defineComponent({
 
   setup(props, { root }) {
     const activeNames = ref(['0'])
+
+    const currentTabUuid = props.tabAttributes.uuid
 
     const overflowHeightScrooll = computed(() => {
       return ''
@@ -356,81 +352,8 @@ export default defineComponent({
       })
     }
 
-    /**
-     * changePreviousRecord
-     */
-    function changePreviousRecord(recordPrevious) {
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
-      const previosRecord = recordsWithFilter.value[posicionIndex - 1]
-      const recordId = previosRecord[props.tabAttributes.tableName + '_ID']
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isShowedTableRecords',
-        attributeNameControl: undefined,
-        attributeValue: false,
-        parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid
-      })
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'currentRowSelect',
-        attributeNameControl: undefined,
-        parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid,
-        row: previosRecord
-      })
-
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid,
-        row: previosRecord
-      })
-      setRecordPath(recordId)
-    }
-
-    /**
-     * changePreviousRecord
-     */
-    function changeNextRecord(recordNext) {
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
-      const nextRecord = recordsWithFilter.value[posicionIndex + 1]
-      const recordId = nextRecord[props.tabAttributes.tableName + '_ID']
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'isShowedTableRecords',
-        attributeNameControl: undefined,
-        attributeValue: false,
-        parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid
-      })
-      store.dispatch('changeTabAttribute', {
-        attributeName: 'currentRowSelect',
-        attributeNameControl: undefined,
-        parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid,
-        row: nextRecord
-      })
-
-      props.containerManager.seekRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.currentTabUuid,
-        row: nextRecord
-      })
-
-      setRecordPath(recordId)
-    }
-
-    function setRecordPath(recordId) {
-      router.push({
-        query: {
-          ...root.$route.query,
-          recordId
-        },
-        params: {
-          ...root.$route.params,
-          recordId
-        }
-      }, () => {})
-    }
-
     return {
+      currentTabUuid,
       // computeds
       commonFilterFielsProperties,
       recordsList,
@@ -451,10 +374,7 @@ export default defineComponent({
       activeNames,
       // methods
       handleChangePage,
-      handleChangeSizePage,
-      changePreviousRecord,
-      changeNextRecord,
-      setRecordPath
+      handleChangeSizePage
     }
   }
 

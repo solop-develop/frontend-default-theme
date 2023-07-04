@@ -1,7 +1,7 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -27,10 +27,8 @@
       @click="changePreviousRecord()"
     >
       <i class="el-icon-arrow-up" />
-      <span v-if="!isMobile">
-        {{ $t('table.dataTable.previousRecord') }}
-      </span>
     </el-button>
+
     <el-button
       type="info"
       plain
@@ -40,9 +38,6 @@
       @click="changeNextRecord()"
     >
       <i class="el-icon-arrow-down" />
-      <span v-if="!isMobile">
-        {{ $t('table.dataTable.nextRecord') }}
-      </span>
     </el-button>
   </span>
 </template>
@@ -50,10 +45,8 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
+import router from '@/router'
 import store from '@/store'
-
-// Constants
-import { ROWS_OF_RECORDS_BY_PAGE, NUMBER_RECORDS_PER_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -74,98 +67,41 @@ export default defineComponent({
       type: Object,
       required: false
     },
-    currentPage: {
-      type: Number,
-      default: 1
-    },
-    selection: {
-      type: Number,
-      default: undefined
-    },
-    pageSize: {
-      type: Number,
-      default: ROWS_OF_RECORDS_BY_PAGE
-    },
-    recordsPage: {
-      type: Number,
-      default: 1
-    },
-    total: {
-      type: Number,
-      default: undefined
-    },
     isChangeRecord: {
       type: Boolean,
       required: false
-    },
-    handleSizeChange: {
-      type: Function,
-      default: (pageSizeNumber) => {
-        console.info('implement change size page number method', pageSizeNumber)
-      }
-    },
-    handleChangePage: {
-      type: Function,
-      default: (pageNumber) => {
-        console.info('implement change page number method', pageNumber)
-      }
-    },
-    changeNextRecord: {
-      type: Function,
-      default: (recordNext) => {
-        console.info('implement method Change to Next Record', recordNext)
-      }
-    },
-    changePreviousRecord: {
-      type: Function,
-      default: (recordPrevious) => {
-        console.info('implement method Change to Previous Record ', recordPrevious)
-      }
     }
   },
 
-  setup(props) {
-    const isSelection = computed(() => {
-      if (isEmptyValue(props.selection)) {
+  setup(props, { root }) {
+    const recordUuid = computed(() => {
+      return store.getters.getUuidOfContainer(props.containerUuid)
+    })
+
+    const tableName = computed(() => {
+      return store.getters.getStoredTableNameByTab(props.containerUuid)
+    })
+
+    const disableNextRecord = computed(() => {
+      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'new-record') {
+        return true
+      }
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      if (posicionIndex > 0) {
         return false
       }
       return true
     })
 
-    const isMobile = computed(() => {
-      return store.state.app.device === 'mobile'
-    })
-
-    const rowPage = computed(() => {
-      return totalRowByPage({
-        pageSize: props.pageSize,
-        pageNumber: props.currentPage
-      })
-    })
-
-    const currentPageSize = computed(() => {
-      return store.getters.getTabPageSize({ containerUuid: props.containerUuid })
-    })
-
-    const isShowedTableRecords = computed(() => {
-      return store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
-      ).isShowedTableRecords
-    })
-
-    const disableNextRecord = computed(() => {
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
-      if (posicionIndex > 0) return false
-      return true
-    })
-
     const disablePreviousRecord = computed(() => {
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
-      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
+      if (isEmptyValue(recordUuid.value) || recordUuid.value === 'new-record') {
+        return true
+      }
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
       const maxRecord = recordsWithFilter.value.length - 1
-      if (posicionIndex < maxRecord) return false
+      if (posicionIndex < maxRecord) {
+        return false
+      }
       return true
     })
 
@@ -178,18 +114,89 @@ export default defineComponent({
       return []
     })
 
+    function setRecordPath(recordId) {
+      router.push({
+        query: {
+          ...root.$route.query,
+          recordId
+        },
+        params: {
+          ...root.$route.params,
+          recordId
+        }
+      }, () => {})
+    }
+
+    /**
+     * changePreviousRecord
+     */
+     function changePreviousRecord() {
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      const previosRecord = recordsWithFilter.value[posicionIndex - 1]
+      const recordId = previosRecord[tableName.value + '_ID']
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: false,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'currentRowSelect',
+        attributeNameControl: undefined,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        row: previosRecord
+      })
+
+      props.containerManager.seekRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        row: previosRecord
+      })
+      setRecordPath(recordId)
+    }
+
+    /**
+     * changePreviousRecord
+     */
+    function changeNextRecord() {
+      const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid.value)
+      const nextRecord = recordsWithFilter.value[posicionIndex + 1]
+      const recordId = nextRecord[tableName.value + '_ID']
+
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'isShowedTableRecords',
+        attributeNameControl: undefined,
+        attributeValue: false,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
+      store.dispatch('changeTabAttribute', {
+        attributeName: 'currentRowSelect',
+        attributeNameControl: undefined,
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        row: nextRecord
+      })
+
+      props.containerManager.seekRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        row: nextRecord
+      })
+
+      setRecordPath(recordId)
+    }
+
     return {
       // Computed
-      isSelection,
-      rowPage,
-      currentPageSize,
-      isMobile,
-      isShowedTableRecords,
       disableNextRecord,
       recordsWithFilter,
       disablePreviousRecord,
-      // Import
-      NUMBER_RECORDS_PER_PAGE
+      // Methods
+      changeNextRecord,
+      changePreviousRecord
     }
   }
 
