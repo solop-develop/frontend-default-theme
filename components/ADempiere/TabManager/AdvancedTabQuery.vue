@@ -179,9 +179,9 @@ export default defineComponent({
 
     const styleIconSvg = computed(() => {
       if (isShowedTableRecords.value) {
-        return 'position: absolute;right: 51px;display: inline-block;padding-right: 10px;float: right;width: 300px;'
+        return 'position: absolute;right: 66px;display: inline-block;padding-right: 5px;float: right;width: 293px;'
       }
-      return 'position: absolute;right: 68px;display: inline-block;padding-right: 0px;float: right;margin-top: 2px;width: 290px;'
+      return 'position: absolute;right: 70px;display: inline-block;padding-right: 0px;float: right;width: 289px;margin-top: -1px;'
     })
 
     const containerManagerAdvancedQuery = computed(() => {

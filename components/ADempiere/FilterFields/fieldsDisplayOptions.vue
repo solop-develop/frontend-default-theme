@@ -19,7 +19,7 @@
 <template>
   <span>
     <!-- Show Options -->
-    <el-dropdown trigger="click" class="fields-display-options" size="small" @command="handleCommand">
+    <el-dropdown trigger="click" class="fields-display-options" @command="handleCommand">
       <span class="el-dropdown-link">
         <svg-icon icon-class="list" />
       </span>
@@ -684,5 +684,6 @@ export default defineComponent({
 <style scoped lang="scss">
   .fields-display-options {
     padding-left: 5px;
+    font-size: 16px;
   }
 </style>

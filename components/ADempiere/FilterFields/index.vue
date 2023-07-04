@@ -420,7 +420,8 @@ export default defineComponent({
 }
 .right-panel-field-options-table {
   position: absolute;
-  right: 0%;
+  right: 8px;
+  margin-top: 5px;
   display: block;
 }
 .right-panel-field-options {
