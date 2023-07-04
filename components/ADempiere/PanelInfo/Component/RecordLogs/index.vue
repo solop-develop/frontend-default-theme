@@ -168,6 +168,10 @@ export default defineComponent({
   },
 
   props: {
+    containerUuid: {
+      type: String,
+      required: false
+    },
     tableName: {
       type: String,
       default: ''
@@ -186,7 +190,7 @@ export default defineComponent({
     }
   },
 
-  setup() {
+  setup(props) {
     const currentRecordLogs = ref({ name: '' })
     const currentKey = ref(0)
     const typeAction = ref(0)
@@ -213,9 +217,8 @@ export default defineComponent({
     }
 
     const getTableName = computed(() => {
-      const { currentTab } = store.getters.getContainerInfo
-      const { tableName } = currentTab
-      return tableName
+      // const { currentTab } = store.getters.getContainerInfo
+      return store.getters.getStoredTableNameByTab(props.containerUuid)
     })
 
     return {
