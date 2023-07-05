@@ -65,6 +65,54 @@
       />
     </span>
   </el-row>
+  <el-row
+    v-else-if="!isMobile"
+    id="panelOptionsBar"
+    class="panel-options-bar"
+  >
+
+    <span
+      id="RightPanelFieldOptions"
+      :class="isClassOptions"
+    >
+      <el-select
+        v-model="fieldsListShowed"
+        :filterable="!isMobile"
+        :placeholder="$t('components.filterableItems')"
+        multiple
+        collapse-tags
+        value-key="key"
+        :size="size"
+        :popper-append-to-body="true"
+        style="min-width: 295px;max-width: 300px;"
+      >
+        <el-option
+          v-for="(item, key) in fieldsListAvailable"
+          :key="key"
+          :label="item.name"
+          :value="item.columnName"
+        />
+      </el-select>
+
+      <columns-display-option
+        v-if="inTable"
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+      />
+      <fields-display-option
+        v-else
+        :parent-uuid="parentUuid"
+        :container-uuid="containerUuid"
+        :available-fields="fieldsListAvailable"
+        :available-fields-with-value="fieldsListAvailableWithValue"
+        :showed-fields="fieldsListShowed"
+        :filter-manager="filterManager"
+        :container-manager="containerManager"
+        :new-fields-list-secuence="newFieldsListSecuence"
+        :fields-customization="fieldsCustomization"
+      />
+    </span>
+  </el-row>
 
   <el-row v-else :gutter="20">
     <span
@@ -80,7 +128,7 @@
         value-key="key"
         :size="size"
         :popper-append-to-body="true"
-        style="width: 91%;"
+        :style="panelType ? 'width: 91%;' : 'min-width: 295px;max-width: 300px;'"
       >
         <el-option
           v-for="(item, key) in fieldsListAvailable"
@@ -115,6 +163,7 @@
 import { defineComponent, computed } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 
 // Components and Mixins
 import AdvancedTabQuery from '@theme/components/ADempiere/TabManager/AdvancedTabQuery.vue'
@@ -194,11 +243,17 @@ export default defineComponent({
       return 'form-filter-fields'
     })
 
+    const panelType = computed(() => {
+      const currentRoute = router.app.$route
+      return currentRoute.meta.type === 'window'
+    })
+
     const isClassOptions = computed(() => {
       const { isShowedTableRecords } = store.getters.getStoredTab(
         props.parentUuid,
         props.containerUuid
       )
+      if (!panelType) return 'float: right;'
       if (isShowedTableRecords) {
         if (isDocumentTab.value) {
           return 'right-panel-field-options-table-mobile'
@@ -312,6 +367,7 @@ export default defineComponent({
       showedAttibute,
       isClassOptions,
       isDocumentTab,
+      panelType,
       // methods
       changeShowed
     }
