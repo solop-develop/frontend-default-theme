@@ -21,8 +21,9 @@
     <el-col :span="24" style="float: right;">
       <el-pagination
         small
-        layout="slot, total, sizes, prev, pager, next"
+        layout="slot, sizes, prev, pager, next"
         :current-page="currentPage"
+        :total="total"
         :page-sizes="NUMBER_RECORDS_PER_PAGE"
         :page-size="currentPageSize"
         style="float: right;padding-left: 0px;padding-right: 0px;"
@@ -30,7 +31,7 @@
         @current-change="handleChangePage"
       >
         <span class="selections-number">
-          <span style="padding-top: 5px;">
+          <span style="padding-top: 3px;">
             {{ currentIndex + ' / ' + total }}
           </span>
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
@@ -48,7 +49,7 @@
 import { defineComponent, computed } from '@vue/composition-api'
 import store from '@/store'
 // constants
-import { ROWS_OF_RECORDS_BY_PAGE, NUMBER_RECORDS_PER_PAGE, totalRowByPage } from '@/utils/ADempiere/tableUtils'
+import { ROWS_OF_RECORDS_BY_PAGE, NUMBER_RECORDS_PER_PAGE, totalRowByPage, indexRowByPage } from '@/utils/ADempiere/tableUtils'
 
 // utils and helper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -120,8 +121,12 @@ export default defineComponent({
   },
 
   setup(props) {
+    const containerUuid = props.containerUuid
+    const parentUuid = props.parentUuid
+    const selection = props.selection
+
     const isSelection = computed(() => {
-      if (isEmptyValue(props.selection)) {
+      if (isEmptyValue(selection)) {
         return false
       }
       return true
@@ -139,25 +144,25 @@ export default defineComponent({
     })
 
     const currentPageSize = computed(() => {
-      return store.getters.getTabPageSize({ containerUuid: props.containerUuid })
+      return store.getters.getTabPageSize({ containerUuid })
     })
 
     const isShowedTableRecords = computed(() => {
       return store.getters.getStoredTab(
-        props.parentUuid,
-        props.containerUuid
+        parentUuid,
+        containerUuid
       ).isShowedTableRecords
     })
 
     const disableNextRecord = computed(() => {
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      const recordUuid = store.getters.getUuidOfContainer(containerUuid)
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
       if (posicionIndex > 0) return false
       return true
     })
 
     const disablePreviousRecord = computed(() => {
-      const recordUuid = store.getters.getUuidOfContainer(props.containerUuid)
+      const recordUuid = store.getters.getUuidOfContainer(containerUuid)
       const posicionIndex = recordsWithFilter.value.findIndex(record => record.UUID === recordUuid)
       const maxRecord = recordsWithFilter.value.length - 1
       if (posicionIndex < maxRecord) return false
@@ -166,22 +171,22 @@ export default defineComponent({
 
     const recordsWithFilter = computed(() => {
       if (props.containerManager && props.containerManager.getRecordsList) {
-        return props.containerManager.getRecordsList({
-          containerUuid: props.containerUuid
-        })
+        return props.containerManager.getRecordsList({ containerUuid })
       }
       return []
     })
 
     const currentIndex = computed(() => {
-      if (props.containerManager && props.containerManager.getRecordsList) {
-        const list = props.containerManager.getRecordsList({
-          containerUuid: props.containerUuid
-        })
-        if (isEmptyValue(list)) return 0
-        return list.findIndex(row => row.UUID === store.getters.getUuidOfContainer(props.containerUuid))
+      const records = recordsWithFilter.value
+      if (isEmptyValue(records)) {
+        return selection
       }
-      return props.selection
+      const index = records.findIndex(row => row.UUID === store.getters.getUuidOfContainer(containerUuid))
+      return indexRowByPage({
+        indexRow: index,
+        pageNumber: props.currentPage,
+        pageSize: props.pageSize
+      })
     })
 
     return {
