@@ -31,7 +31,7 @@
       </el-input>
     </div>
 
-    <div class="board">
+    <div :class="classBoard">
       <div
         class="kanban todo"
         header-text="Todo"
@@ -46,7 +46,7 @@
             :group="group"
             v-bind="dragOptions"
             class="board-column-content"
-            style="max-height: 450px; overflow: auto;"
+            :style="draggableStyle"
           >
             <div
               v-for="(element, index) in availableListShowed"
@@ -81,7 +81,7 @@
             :group="group"
             v-bind="dragOptions"
             class="board-column-content"
-            style="max-height: 450px; overflow: auto;"
+            :style="draggableStyle"
             @change="handleChange"
           >
             <div
@@ -169,6 +169,20 @@ export default defineComponent({
 
     const sortColumnName = computed(() => {
       return panelMetadata.value.sortOrderColumnName
+    })
+
+    const isMobile = computed(() => {
+      return store.getters.device === 'mobile'
+    })
+
+    const classBoard = computed(() => {
+      if (isMobile.value) return 'board-mobile'
+      return 'board'
+    })
+
+    const draggableStyle = computed(() => {
+      if (isMobile.value) return 'max-height: 450px; overflow: auto;min-height: 250px;'
+      return 'max-height: 450px; overflow: auto;'
     })
 
     const recordsList = computed({
@@ -509,7 +523,10 @@ export default defineComponent({
       group,
       // computeds
       dragOptions,
+      isMobile,
+      classBoard,
       panelMetadata,
+      draggableStyle,
       includedColumnName,
       isDifferentClientRecord,
       searchValue,
@@ -586,6 +603,7 @@ export default defineComponent({
 .sort-panel-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
   align-items: flex-start;
 
   .sort-panel-header {
@@ -611,6 +629,59 @@ export default defineComponent({
 
     .kanban {
       width: 45%;
+
+      &.todo {
+        .board-column-header {
+          background: #f9944a;
+        }
+
+        .sort-add-item-icon {
+          float: right;
+          font-size: 20px;
+          padding-top: 5px;
+
+          &:hover {
+            color: #67c23a;
+            font-weight: bold;
+          }
+        }
+      }
+
+      &.working {
+        .board-column-header {
+          background: #4A9FF9;
+        }
+
+        .sort-remove-item-icon {
+          float: right;
+          font-size: 20px;
+          padding-top: 5px;
+
+          &:hover {
+            color: red;
+            font-weight: bold;
+          }
+        }
+      }
+
+      .board-item[disabled=disabled],
+      .sort-remove-item-icon[disabled=disabled],
+      .sort-add-item-icon[disabled=disabled] {
+        cursor: not-allowed;
+      }
+    }
+  }
+  .board-mobile {
+    width: 100%;
+    display: block;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: flex-start;
+    height: 100% !important;
+    text-align: -webkit-center;
+
+    .kanban {
+      width: 85%;
 
       &.todo {
         .board-column-header {

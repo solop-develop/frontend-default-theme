@@ -249,7 +249,7 @@ export default defineComponent({
         instanceUuid,
         containerManager: props.containerManager,
         recordUuid: recordUuid.value,
-        uuid: action.uuid,
+        uuid: currentAction.uuid,
         currentTab: currentTab.value
       })
       store.commit('setShowMenuMobile', false)
