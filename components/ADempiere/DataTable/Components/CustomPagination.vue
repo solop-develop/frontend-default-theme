@@ -25,13 +25,13 @@
         :current-page="currentPage"
         :page-sizes="NUMBER_RECORDS_PER_PAGE"
         :page-size="currentPageSize"
-        style="float: right;"
+        style="float: right;padding-left: 0px;padding-right: 0px;"
         @size-change="handleSizeChange"
         @current-change="handleChangePage"
       >
         <span class="selections-number">
           <span style="padding-top: 5px;">
-            {{ currentIndex + '/ ' + total }}
+            {{ currentIndex + ' / ' + total }}
           </span>
           <span :class="isMobile ? 'is-pagination-content-panel-mobile' : 'is-pagination-content-panel'">
             <span v-show="isShowedTableRecords">
@@ -174,11 +174,14 @@ export default defineComponent({
     })
 
     const currentIndex = computed(() => {
-      const list = props.containerManager.getRecordsList({
-        containerUuid: props.containerUuid
-      })
-      if (isEmptyValue(list)) return 0
-      return list.findIndex(row => row.UUID === store.getters.getUuidOfContainer(props.containerUuid))
+      if (props.containerManager && props.containerManager.getRecordsList) {
+        const list = props.containerManager.getRecordsList({
+          containerUuid: props.containerUuid
+        })
+        if (isEmptyValue(list)) return 0
+        return list.findIndex(row => row.UUID === store.getters.getUuidOfContainer(props.containerUuid))
+      }
+      return props.selection
     })
 
     return {

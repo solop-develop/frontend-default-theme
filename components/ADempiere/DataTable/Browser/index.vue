@@ -45,7 +45,6 @@
       ref="multipleTable"
       v-loading="isLoadingDataTable"
       border
-      :height="sizeViewTable"
       :row-key="keyColumn"
       reserve-selection
       highlight-current-row

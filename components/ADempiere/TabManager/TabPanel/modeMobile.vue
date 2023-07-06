@@ -237,6 +237,12 @@ export default defineComponent({
     })
 
     const styleFooterPanel = computed(() => {
+      if (isMobile.value) {
+        if (props.isChildTab) {
+          return 'height: 100px !important; padding: 0px !important;'
+        }
+        return 'height: 36px; padding: 0px !important;'
+      }
       if (props.isChildTab) {
         // if (storedWindow.value.isFullScreenTabsChildren) {
         return 'height: 100px !important'
