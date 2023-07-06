@@ -267,7 +267,7 @@ export default defineComponent({
       //   props.containerUuid
       // )
       // if (isShowedTableRecords) return 'auxiliary-menu auxiliary-menu-mobile-table'
-      return 'auxiliary-menu auxiliary-menu-mobile'
+      return ''
     })
 
     const allList = computed(() => {
