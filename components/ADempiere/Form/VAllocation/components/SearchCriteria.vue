@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
 Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -206,6 +206,7 @@ import store from '@/store'
 // Components and Mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
 import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
+
 // API Request Methods
 import {
   listTransactionTypes,
@@ -253,18 +254,11 @@ export default defineComponent({
     const currentSetp = ref(0)
 
     // Value the Select
-
-    // const currentTypeTransaction = ref('')
-    // const businessPartners = ref('')
     const organizations = ref('')
     const currency = ref('')
 
     // List Option the Select
-
     const optionsBusinessPartners = ref([])
-    // const optionsOrganizations = ref([])
-    // const optionsCurrency = ref([])
-
     const listTypeTransaction = ref([])
 
     const bPartner = ref({})
@@ -272,7 +266,6 @@ export default defineComponent({
     /**
      * Computed
      */
-
     const labelReceivablesOnly = computed(() => {
       if (isEmptyValue(listTypeTransaction.value)) {
         return ''
@@ -430,9 +423,10 @@ export default defineComponent({
     /**
      * Methods
      */
-
     function findBusinessPartners(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listBusinessPartners({
         searchValue
       })
@@ -449,7 +443,9 @@ export default defineComponent({
     }
 
     function findOrganizations(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listOrganizations({
         searchValue
       })
@@ -467,7 +463,9 @@ export default defineComponent({
     }
 
     function findCurrencies(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listCurrencies({
         searchValue
       })
@@ -519,7 +517,9 @@ export default defineComponent({
     }
 
     function setListTransactionTypes() {
-      if (!isEmptyValue(listTypeTransaction.value)) return
+      if (!isEmptyValue(listTypeTransaction.value)) {
+        return
+      }
       listTransactionTypes()
         .then(response => {
           const { records } = response
@@ -624,7 +624,6 @@ export default defineComponent({
     /**
      * Wacht
      */
-
     watch(receivablesPayables, (newValue, oldValue) => {
       currentTypeTransaction.value = newValue
     })
