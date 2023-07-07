@@ -36,14 +36,30 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         v-show="'payments' === stepList[currentSetp].key"
       >
         <template v-slot:footer>
-          <el-button type="danger" icon="el-icon-close" plain @click="currentSetp--" />
-          <el-button type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />
+          <el-button
+            type="danger"
+            class="button-base-icon"
+            icon="el-icon-close"
+            @click="currentSetp--"
+          />
+          <el-button
+            type="primary"
+            class="button-base-icon"
+            icon="el-icon-check"
+            :disabled="isDisabledProcess"
+            @click="nextStep"
+          />
         </template>
       </payments>
     </div>
     <div v-show="currentSetp <= 0" style="height: 10% !important;text-align: end;padding: 0px 15px;">
-      <el-button type="danger" icon="el-icon-close" plain @click="currentSetp--" />
-      <el-button type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />
+      <el-button
+        type="primary"
+        class="button-base-icon"
+        icon="el-icon-check"
+        :disabled="isDisabledProcess"
+        @click="nextStep"
+      />
     </div>
   </div>
 </template>

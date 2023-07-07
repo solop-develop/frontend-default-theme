@@ -262,8 +262,8 @@ export default defineComponent({
     // List Option the Select
 
     const optionsBusinessPartners = ref([])
-    const optionsOrganizations = ref([])
-    const optionsCurrency = ref([])
+    // const optionsOrganizations = ref([])
+    // const optionsCurrency = ref([])
 
     const listTypeTransaction = ref([])
 
@@ -308,7 +308,46 @@ export default defineComponent({
       },
       // setter
       set(id) {
-        store.commit('setBusinessPartner', id)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'businessPartnerId',
+          criteria: 'searchCriteria',
+          value: id
+        })
+        // store.commit('setBusinessPartner', id)
+      }
+    })
+
+    const optionsOrganizations = computed({
+      // getter
+      get() {
+        const { listOrganization } = store.getters.getSearchFilter
+        return listOrganization
+      },
+      // setter
+      set(list) {
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'listOrganization',
+          criteria: 'searchCriteria',
+          value: list
+        })
+        // store.commit('setBusinessPartner', id)
+      }
+    })
+
+    const optionsCurrency = computed({
+      // getter
+      get() {
+        const { listCurrency } = store.getters.getSearchFilter
+        return listCurrency
+      },
+      // setter
+      set(list) {
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'listCurrency',
+          criteria: 'searchCriteria',
+          value: list
+        })
+        // store.commit('setBusinessPartner', id)
       }
     })
 
@@ -328,7 +367,12 @@ export default defineComponent({
       },
       // setter
       set(id) {
-        store.commit('setOrganizations', id)
+        // store.commit('setOrganizations', id)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'organizationId',
+          criteria: 'searchCriteria',
+          value: id
+        })
       }
     })
 
@@ -340,7 +384,12 @@ export default defineComponent({
       },
       // setter
       set(id) {
-        store.commit('setCurrency', id)
+        // store.commit('setCurrency', id)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'currencyId',
+          criteria: 'searchCriteria',
+          value: id
+        })
       }
     })
 
@@ -352,7 +401,12 @@ export default defineComponent({
       },
       // setter
       set(date) {
-        store.commit('setDate', date)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'date',
+          criteria: 'searchCriteria',
+          value: date
+        })
+        // store.commit('setDate', date)
       }
     })
 
@@ -364,7 +418,12 @@ export default defineComponent({
       },
       // setter
       set(type) {
-        return store.commit('setTransactionType', type)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'transactionType',
+          criteria: 'searchCriteria',
+          value: type
+        })
+        // return store.commit('setTransactionType', type)
       }
     })
 
