@@ -19,8 +19,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <template>
   <div style="display: contents;height: 100% !important;">
     <div style="height: 89% !important;">
-      <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;">
-        <div style="width: 50%;t: 100%;">
+      <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;display: block;">
+        <div style="width: 100%;height: 50%;">
           <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
             <div slot="header" class="clearfix" style="text-align: center;">
               <b> {{ $t('form.VAllocation.payment.title') }} </b>
@@ -87,7 +87,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-table>
           </el-card>
         </div>
-        <div style="width: 50%;height: 100%;">
+        <div style="width: 100%;height: 50%;">
           <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
             <div slot="header" class="clearfix" style="text-align: center;">
               <b> {{ $t('form.VAllocation.invoice.title') }} </b>
