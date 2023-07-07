@@ -159,7 +159,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       </el-card>
     </div>
     <div>
-      <el-card class="box-card">
+      <el-card class="box-card" style="margin-bottom: 20px;">
         <div id="description-payment" class="description-payment">
           <el-card
             class="box-card"
@@ -167,84 +167,119 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <div>
               <el-form
                 :inline="true"
-                label-position="left"
+                label-position="top"
                 style="padding: 10px !important;"
               >
-                <el-col :span="4">
-                  <el-form-item
-                    :label="$t('form.VAllocation.description.difference')"
+                <el-row :gutter="20">
+                  <el-col
+                    :span="2"
+                    style="text-align: center;"
                   >
-                    <el-tag>
-                      <b style="text-align: right; font-size: 19px">
-                        {{ listDifference }}
-                      </b>
-                    </el-tag>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="5">
-                  <el-form-item
-                    :label="$t('form.VAllocation.searchCriteria.date')"
-                  >
-                    <el-date-picker
-                      v-model="currentDateProcess"
-                      type="date"
-                      style="width: 100%;"
-                    />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="5">
-                  <el-form-item
-                    :label="$t('form.VAllocation.description.charge')"
-                  >
-                    <el-select
-                      v-model="charges"
-                      style="width: 100%;"
-                      filterable
-                      clearable
-                      :filter-method="remoteSearchCharges"
-                      @visible-change="findCharges"
+                    <el-form-item
+                      :label="$t('form.VAllocation.description.difference')"
+                      label-width="120px"
                     >
-                      <el-option
-                        v-for="item in optionsCharges"
-                        :key="item.id"
-                        :label="item.label"
-                        :value="item.id"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="5">
-                  <el-form-item
-                    :label="$t('form.VAllocation.description.organization')"
+                      <el-tag>
+                        <b style="text-align: right; font-size: 19px">
+                          {{ listDifference }}
+                        </b>
+                      </el-tag>
+                    </el-form-item>
+                  </el-col>
+                  <el-col
+                    :span="4"
+                    style="text-align: center;"
                   >
-                    <el-select
-                      v-model="transactionOrganizationId"
-                      style="width: 100%;"
-                      filterable
-                      clearable
-                      :filter-method="remoteSearchOrganizations"
-                      @visible-change="findOrganizations"
+                    <el-form-item
+                      :label="$t('form.VAllocation.searchCriteria.date')"
+                      label-width="120px"
                     >
-                      <el-option
-                        v-for="item in optionsOrganizations"
-                        :key="item.id"
-                        :label="item.label"
-                        :value="item.id"
+                      <el-date-picker
+                        v-model="currentDateProcess"
+                        type="date"
+                        style="width: 100%;"
                       />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="5">
-                  <el-form-item
-                    :label="$t('form.VAllocation.description.description')"
+                    </el-form-item>
+                  </el-col>
+                  <el-col
+                    :span="5"
+                    style="text-align: center;"
                   >
-                    <el-input
-                      v-model="description"
-                      type="textarea"
-                      :autosize="{ minRows: 2, maxRows: 4}"
-                    />
-                  </el-form-item>
-                </el-col>
+                    <el-form-item
+                      :label="$t('form.VAllocation.description.charge')"
+                      label-width="120px"
+                    >
+                      <el-select
+                        v-model="charges"
+                        style="width: 100%;"
+                        filterable
+                        clearable
+                        :filter-method="remoteSearchCharges"
+                        @visible-change="findCharges"
+                      >
+                        <el-option
+                          v-for="item in optionsCharges"
+                          :key="item.id"
+                          :label="item.label"
+                          :value="item.id"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col
+                    :span="5"
+                    style="text-align: center;"
+                  >
+                    <el-form-item
+                      :label="$t('form.VAllocation.description.organization')"
+                      label-width="120px"
+                    >
+                      <el-select
+                        v-model="transactionOrganizationId"
+                        style="width: 100%;"
+                        filterable
+                        clearable
+                        :filter-method="remoteSearchOrganizations"
+                        @visible-change="findOrganizations"
+                      >
+                        <el-option
+                          v-for="item in optionsOrganizations"
+                          :key="item.id"
+                          :label="item.label"
+                          :value="item.id"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col
+                    :span="5"
+                    style="text-align: center;"
+                  >
+                    <el-form-item
+                      :label="$t('form.VAllocation.description.description')"
+                      label-width="120px"
+                    >
+                      <el-input
+                        v-model="description"
+                        type="textarea"
+                        :autosize="{ minRows: 1, maxRows: 2}"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col
+                    :span="3"
+                    style="text-align: center;"
+                  >
+                    <el-form-item
+                      label-width="120px"   
+                    >
+                      <template slot="label">
+                        <i style="color: transparent !important;"> {{ 'Buttons Actions' }}</i>
+                      </template>
+                      <slot name="footer" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
               </el-form>
             </div>
           </el-card>
@@ -402,7 +437,8 @@ export default defineComponent({
     const currentDateProcess = computed({
       // getter
       get() {
-        const { date } = store.getters.getProcess
+        let date = store.getters.getProcess.date
+        if (isEmptyValue(date)) date = store.getters.getSearchFilter.date
         // return date
         return date
       },

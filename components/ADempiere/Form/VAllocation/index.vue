@@ -18,7 +18,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;">
-    <div style="height: 7% !important;padding: 0px 15px;">
+    <div style="height: 10% !important;padding: 0px 15px;">
       <el-steps :active="currentSetp" finish-status="success">
         <el-step
           v-for="(list, key) in stepList"
@@ -27,17 +27,23 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         />
       </el-steps>
     </div>
-    <div style="height: 85% !important;padding: 0px 15px;">
+    <div style="height: 80% !important;padding: 0px 15px;">
       <search-criteria
         v-show="'searchCriteria' === stepList[currentSetp].key"
+        :metadata="metadata"
       />
       <payments
         v-show="'payments' === stepList[currentSetp].key"
-      />
+      >
+        <template v-slot:footer>
+          <el-button type="danger" icon="el-icon-close" plain @click="currentSetp--" />
+          <el-button type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />    
+        </template>
+      </payments>
     </div>
-    <div style="height: 5% !important;text-align: end;padding: 0px 15px;">
-      <el-button v-show="currentSetp > 0" type="danger" icon="el-icon-close" plain @click="currentSetp--" />
-      <el-button v-show="currentSetp < 2" type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />
+    <div v-show="currentSetp <= 0" style="height: 10% !important;text-align: end;padding: 0px 15px;">
+      <el-button type="danger" icon="el-icon-close" plain @click="currentSetp--" />
+      <el-button type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />
     </div>
   </div>
 </template>
@@ -94,9 +100,10 @@ export default defineComponent({
 
     const isDisabledProcess = computed(() => {
       const {
-        businessPartnerId
+        businessPartnerId,
+        currencyId
       } = store.getters.getSearchFilter
-      return (currentSetp.value > 0) && isEmptyValue(businessPartnerId)
+      return isEmptyValue(businessPartnerId) || isEmptyValue(currencyId)
     })
 
     function nextStep(step) {
