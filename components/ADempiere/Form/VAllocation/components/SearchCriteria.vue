@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
 Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,10 +29,27 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-row :gutter="20">
                 <el-col :span="12">
                   <el-form-item
-                    :label="$t('form.VAllocation.searchCriteria.businessPartner')"
+                    v-if="!isEmptyValue(bPartner)"
                     style="width: 100%;"
                   >
-                    <el-select
+                    <template slot="label">
+                      {{ bPartner.name }}
+                      <span style="color: #f34b4b"> * </span>
+                    </template>
+                    <field-definition
+                      :metadata-field="bPartner"
+                      :container-uuid="metadata.containerUuid"
+                      :container-manager="{
+                        generalInfoSearch,
+                        searchTableHeader,
+                        isMandatoryField,
+                        isReadOnlyField,
+                        isDisplayedDefault,
+                        getSearchInfoList
+                      }"
+                      :in-table="true"
+                    />
+                    <!-- <el-select
                       v-model="businessPartnerId"
                       style="width: 100%;"
                       filterable
@@ -46,7 +63,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         :label="item.label"
                         :value="item.id"
                       />
-                    </el-select>
+                    </el-select> -->
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -59,7 +76,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       style="width: 100%;"
                       filterable
                       clearable
-                      :filter-method="remoteSearchOrganizations"
+                      :remote-method="remoteSearchOrganizations"
                       @visible-change="findOrganizations"
                     >
                       <el-option
@@ -75,15 +92,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-row :gutter="20">
                 <el-col :span="12">
                   <el-form-item
-                    :label="$t('form.VAllocation.searchCriteria.currency')"
                     style="width: 100%;"
                   >
+                    <template slot="label">
+                      {{ $t('form.VAllocation.searchCriteria.currency') }}
+                      <span style="color: #f34b4b"> * </span>
+                    </template>
                     <el-select
                       v-model="currencyId"
                       style="width: 100%;"
                       filterable
                       clearable
-                      :filter-method="remoteSearchCurrencies"
+                      :remote-method="remoteSearchCurrencies"
                       @visible-change="findCurrencies"
                     >
                       <el-option
@@ -185,6 +205,7 @@ import store from '@/store'
 
 // Components and Mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
+import FieldDefinition from '@/themes/default/components/ADempiere/FieldDefinition/index.vue'
 
 // API Request Methods
 import {
@@ -195,13 +216,15 @@ import {
 } from '@/api/ADempiere/form/VAllocation.js'
 
 // Utils and Helper Methods
+import { createFieldFromDictionary } from '@/utils/ADempiere/lookupFactory'
 import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'SearchCriteria',
 
   components: {
-    Carousel
+    Carousel,
+    FieldDefinition
   },
 
   props: {
@@ -231,24 +254,18 @@ export default defineComponent({
     const currentSetp = ref(0)
 
     // Value the Select
-
-    // const currentTypeTransaction = ref('')
-    // const businessPartners = ref('')
     const organizations = ref('')
     const currency = ref('')
 
     // List Option the Select
-
     const optionsBusinessPartners = ref([])
-    const optionsOrganizations = ref([])
-    const optionsCurrency = ref([])
-
     const listTypeTransaction = ref([])
+
+    const bPartner = ref({})
 
     /**
      * Computed
      */
-
     const labelReceivablesOnly = computed(() => {
       if (isEmptyValue(listTypeTransaction.value)) {
         return ''
@@ -284,8 +301,55 @@ export default defineComponent({
       },
       // setter
       set(id) {
-        store.commit('setBusinessPartner', id)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'businessPartnerId',
+          criteria: 'searchCriteria',
+          value: id
+        })
+        // store.commit('setBusinessPartner', id)
       }
+    })
+
+    const optionsOrganizations = computed({
+      // getter
+      get() {
+        const { listOrganization } = store.getters.getSearchFilter
+        return listOrganization
+      },
+      // setter
+      set(list) {
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'listOrganization',
+          criteria: 'searchCriteria',
+          value: list
+        })
+        // store.commit('setBusinessPartner', id)
+      }
+    })
+
+    const optionsCurrency = computed({
+      // getter
+      get() {
+        const { listCurrency } = store.getters.getSearchFilter
+        return listCurrency
+      },
+      // setter
+      set(list) {
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'listCurrency',
+          criteria: 'searchCriteria',
+          value: list
+        })
+        // store.commit('setBusinessPartner', id)
+      }
+    })
+
+    const businessPartner = computed(() => {
+      return store.getters.getValueOfFieldOnContainer({
+        parentUuid: '',
+        containerUuid: '8e4268c8-fb40-11e8-a479-7a0060f0aa01',
+        columnName: 'C_BPartner_ID'
+      })
     })
 
     const organizationsId = computed({
@@ -296,7 +360,12 @@ export default defineComponent({
       },
       // setter
       set(id) {
-        store.commit('setOrganizations', id)
+        // store.commit('setOrganizations', id)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'organizationId',
+          criteria: 'searchCriteria',
+          value: id
+        })
       }
     })
 
@@ -308,7 +377,12 @@ export default defineComponent({
       },
       // setter
       set(id) {
-        store.commit('setCurrency', id)
+        // store.commit('setCurrency', id)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'currencyId',
+          criteria: 'searchCriteria',
+          value: id
+        })
       }
     })
 
@@ -320,7 +394,12 @@ export default defineComponent({
       },
       // setter
       set(date) {
-        store.commit('setDate', date)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'date',
+          criteria: 'searchCriteria',
+          value: date
+        })
+        // store.commit('setDate', date)
       }
     })
 
@@ -332,16 +411,22 @@ export default defineComponent({
       },
       // setter
       set(type) {
-        return store.commit('setTransactionType', type)
+        store.commit('updateAttributeCriteriaVallocation', {
+          attribute: 'transactionType',
+          criteria: 'searchCriteria',
+          value: type
+        })
+        // return store.commit('setTransactionType', type)
       }
     })
 
     /**
      * Methods
      */
-
     function findBusinessPartners(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listBusinessPartners({
         searchValue
       })
@@ -358,7 +443,9 @@ export default defineComponent({
     }
 
     function findOrganizations(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listOrganizations({
         searchValue
       })
@@ -376,7 +463,9 @@ export default defineComponent({
     }
 
     function findCurrencies(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listCurrencies({
         searchValue
       })
@@ -428,7 +517,9 @@ export default defineComponent({
     }
 
     function setListTransactionTypes() {
-      if (!isEmptyValue(listTypeTransaction.value)) return
+      if (!isEmptyValue(listTypeTransaction.value)) {
+        return
+      }
       listTransactionTypes()
         .then(response => {
           const { records } = response
@@ -452,12 +543,93 @@ export default defineComponent({
       })
     }
 
+    function createField() {
+      createFieldFromDictionary({
+        containerUuid: props.metadata.containerUuid,
+        uuid: '',
+        elementUuid: '',
+        elementColumnName: 'C_BPartner_ID',
+        tableName: '',
+        columnName: '',
+        overwriteDefinition: {
+          containerUuid: props.metadata.containerUuid
+        },
+        columnUuid: props.columnUuid
+      })
+        .then(response => {
+          bPartner.value = response
+        }).catch(error => {
+          console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
+        })
+    }
+
+    function isMandatoryField({ isMandatory, isMandatoryFromLogic }) {
+      return isMandatory || isMandatoryFromLogic
+    }
+    function isDisplayedDefault() {
+      return true
+    }
+    function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
+      return isQueryCriteria && isReadOnlyFromLogic
+    }
+    function generalInfoSearch({
+      containerUuid,
+      contextColumnNames,
+      filters,
+      uuid,
+      searchValue,
+      tableName,
+      columnName,
+      pageNumber
+    }) {
+      return store.dispatch('findGeneralInfo', {
+        containerUuid,
+        contextColumnNames,
+        filters,
+        // fieldUuid: uuid,
+        searchValue,
+        tableName,
+        columnName,
+        pageNumber
+      })
+    }
+    function searchTableHeader({
+      containerUuid,
+      tableName
+    }) {
+      return store.dispatch('searchTableHeader', {
+        containerUuid,
+        tableName
+      })
+    }
+    function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
+      return store.dispatch('searchInfoList', {
+        parentUuid,
+        containerUuid,
+        contextColumnNames,
+        fieldUuid: uuid,
+        tableName,
+        columnName,
+        filters,
+        searchValue,
+        pageNumber,
+        pageSize
+      })
+    }
+
+    createField()
+
+    currentDate.value = new Date()
+
     /**
      * Wacht
      */
-
     watch(receivablesPayables, (newValue, oldValue) => {
       currentTypeTransaction.value = newValue
+    })
+
+    watch(businessPartner, (newValue, oldValue) => {
+      businessPartnerId.value = newValue
     })
 
     setListTransactionTypes()
@@ -471,6 +643,7 @@ export default defineComponent({
       radioPanel2,
       radioPanel3,
       radioPanel4,
+      bPartner,
       value1,
       options,
       receivablesPayables,
@@ -498,8 +671,16 @@ export default defineComponent({
       findBusinessPartners,
       findOrganizations,
       findCurrencies,
+      createField,
       changeType,
-      findFilter
+      findFilter,
+      //
+      isMandatoryField,
+      isDisplayedDefault,
+      isReadOnlyField,
+      generalInfoSearch,
+      searchTableHeader,
+      getSearchInfoList
     }
   }
 })
