@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
 Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
@@ -291,15 +291,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, ref, computed } from '@vue/composition-api'
-// import lang from '@/lang'
+
 import store from '@/store'
 
-// components and mixins
+// Components and Mixins
 import headersInvoice from './headersInvoice.js'
 import headersPayments from './headersPayments.js'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+
 // API Request Methods
 import {
   listCharges,
@@ -322,20 +323,15 @@ export default defineComponent({
     /**
      * Refs
      */
-
     const optionsOrganizations = ref([])
     const listPaymentsTable = ref(null)
     const listInvocesTable = ref(null)
     const optionsCharges = ref([])
-    // const transactionOrganizationId = ref('')
-    // const description = ref('')
     const tableData = ref([])
-    // const charges = ref('')
 
     /**
      * computed
      */
-
     const selectListPayments = computed(() => {
       return store.getters.getSelectListPayments
     })
@@ -395,7 +391,9 @@ export default defineComponent({
 
     const listDifference = computed(() => {
       const list = store.getters.getListDifference
-      if (isEmptyValue(list)) return 0
+      if (isEmptyValue(list)) {
+        return 0
+      }
       const result = list.reduce((valorAnterior, valorActual, indice, vector) => {
         if (valorAnterior.transactionType === 'P' && valorActual.transactionType === 'P') {
           const amount = valorAnterior.amount - valorActual.amount
@@ -438,7 +436,9 @@ export default defineComponent({
       // getter
       get() {
         let date = store.getters.getProcess.date
-        if (isEmptyValue(date)) date = store.getters.getSearchFilter.date
+        if (isEmptyValue(date)) {
+          date = store.getters.getSearchFilter.date
+        }
         // return date
         return date
       },
@@ -502,9 +502,10 @@ export default defineComponent({
     /**
      * Methods
      */
-
     function findCharges(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listCharges({
         searchValue
       })
@@ -547,7 +548,9 @@ export default defineComponent({
     }
 
     function findOrganizations(isFind, searchValue) {
-      if (!isFind) return
+      if (!isFind) {
+        return
+      }
       listTransactionOrganizations({
         searchValue
       })
@@ -643,7 +646,6 @@ export default defineComponent({
     }
 
     return {
-      // Const
       // Refs
       tableData,
       headersPayments,
