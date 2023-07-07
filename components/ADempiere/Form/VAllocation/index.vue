@@ -37,7 +37,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       >
         <template v-slot:footer>
           <el-button type="danger" icon="el-icon-close" plain @click="currentSetp--" />
-          <el-button type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />    
+          <el-button type="primary" icon="el-icon-check" :disabled="isDisabledProcess" plain @click="nextStep" />
         </template>
       </payments>
     </div>

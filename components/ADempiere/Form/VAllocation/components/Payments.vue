@@ -271,7 +271,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     style="text-align: center;"
                   >
                     <el-form-item
-                      label-width="120px"   
+                      label-width="120px"
                     >
                       <template slot="label">
                         <i style="color: transparent !important;"> {{ 'Buttons Actions' }}</i>

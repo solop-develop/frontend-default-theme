@@ -307,7 +307,7 @@ export default defineComponent({
         return businessPartnerId
       },
       // setter
-      set(id) { 
+      set(id) {
         store.commit('setBusinessPartner', id)
       }
     })
@@ -503,8 +503,6 @@ export default defineComponent({
           console.warn(`LookupFactory: Get Field From Server (State) - Error ${error.code}: ${error.message}.`)
         })
     }
-
-    // 
 
     function isMandatoryField({ isMandatory, isMandatoryFromLogic }) {
       return isMandatory || isMandatoryFromLogic
