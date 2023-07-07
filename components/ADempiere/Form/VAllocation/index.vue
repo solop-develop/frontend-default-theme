@@ -1,6 +1,6 @@
 <!--
 ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
 Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
@@ -66,12 +66,15 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
+
 import lang from '@/lang'
-// components and mixins
+import store from '@/store'
+
+// Components and Mixins
 import SearchCriteria from './components/SearchCriteria'
 import Payments from './components/Payments'
 import Summary from './components/Summary'
-import store from '@/store'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 
@@ -98,7 +101,6 @@ export default defineComponent({
     /**
      * Refs
      */
-
     const stepList = ref([
       {
         name: lang.t('form.VAllocation.step.searchCriteria'),
@@ -123,7 +125,9 @@ export default defineComponent({
     })
 
     function nextStep(step) {
-      if (currentSetp > 2) return
+      if (currentSetp > 2) {
+        return
+      }
       currentSetp.value++
       if (currentSetp.value > 1) {
         store.dispatch('processSend')
@@ -137,9 +141,7 @@ export default defineComponent({
     /**
      * Methods
      */
-
     return {
-      // Const
       // Refs
       stepList,
       currentSetp,
