@@ -76,7 +76,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       style="width: 100%;"
                       filterable
                       clearable
-                      :filter-method="remoteSearchOrganizations"
+                      :remote-method="remoteSearchOrganizations"
                       @visible-change="findOrganizations"
                     >
                       <el-option
@@ -103,7 +103,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       style="width: 100%;"
                       filterable
                       clearable
-                      :filter-method="remoteSearchCurrencies"
+                      :remote-method="remoteSearchCurrencies"
                       @visible-change="findCurrencies"
                     >
                       <el-option
