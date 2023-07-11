@@ -95,7 +95,7 @@ import ComparisonOperator from '@theme/components/ADempiere/FieldDefinition/Fiel
 
 // Constants
 import { UUID } from '@/utils/ADempiere/constants/systemColumns'
-import { TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
+import { BUTTON, TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { MULTIPLE_VALUES_OPERATORS_LIST } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
 
@@ -308,7 +308,7 @@ export default {
     },
 
     isOnlyField() {
-      return this.field.isFieldOnly
+      return this.field.isFieldOnly || [BUTTON.id].includes(this.field.displayType)
     },
     currentTab() {
       if (this.isEmptyValue(this.parentUuid) || !this.containerManager.getPanel) {
