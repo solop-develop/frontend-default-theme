@@ -37,7 +37,6 @@ export default {
     // load the component that is indicated in the attributes of received property
     componentRender() {
       let form
-      console.log(this.metadata.fileName)
       switch (this.metadata.fileName) {
         case 'PriceChecking':
           form = import('@theme/components/ADempiere/Form/PriceChecking')
