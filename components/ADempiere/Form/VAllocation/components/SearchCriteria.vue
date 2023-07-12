@@ -187,7 +187,6 @@ import {
   ref
 } from '@vue/composition-api'
 import store from '@/store'
-import router from '@/router'
 
 // Components and Mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
@@ -589,7 +588,6 @@ export default defineComponent({
       })
     }
     function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
-      router.app.$route.meta.isSalesTransaction = false
       if ((receivablesOnly.value && payablesOnly.value) || (!receivablesOnly.value && !payablesOnly.value)) {
         filters = [{
           columnName: 'IsActive',
