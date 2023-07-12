@@ -49,21 +49,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       }"
                       :in-table="true"
                     />
-                    <!-- <el-select
-                      v-model="businessPartnerId"
-                      style="width: 100%;"
-                      filterable
-                      clearable
-                      :filter-method="remoteSearchBusinessPartners"
-                      @visible-change="findBusinessPartners"
-                    >
-                      <el-option
-                        v-for="item in optionsBusinessPartners"
-                        :key="item.id"
-                        :label="item.label"
-                        :value="item.id"
-                      />
-                    </el-select> -->
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -202,6 +187,7 @@ import {
   ref
 } from '@vue/composition-api'
 import store from '@/store'
+import router from '@/router'
 
 // Components and Mixins
 import Carousel from '@theme/components/ADempiere/Carousel'
@@ -244,8 +230,8 @@ export default defineComponent({
     const radioPanel3 = ref('')
     const radioPanel4 = ref('')
 
-    const receivablesOnly = ref('')
-    const payablesOnly = ref('')
+    const receivablesOnly = ref(false)
+    const payablesOnly = ref(false)
 
     const value1 = ref('')
 
@@ -603,6 +589,24 @@ export default defineComponent({
       })
     }
     function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
+      router.app.$route.meta.isSalesTransaction = false
+      if ((receivablesOnly.value && payablesOnly.value) || (!receivablesOnly.value && !payablesOnly.value)) {
+        filters = [{
+          columnName: 'IsActive',
+          value: true
+        }]
+      } else if (receivablesOnly.value && !payablesOnly.value) {
+        filters = [{
+          columnName: 'IsCustomer',
+          value: receivablesOnly.value
+        }]
+      } else if (payablesOnly.value && !receivablesOnly.value) {
+        filters = [{
+          columnName: 'IsVendor',
+          value: payablesOnly.value
+        }]
+      }
+
       return store.dispatch('searchInfoList', {
         parentUuid,
         containerUuid,
@@ -613,7 +617,8 @@ export default defineComponent({
         filters,
         searchValue,
         pageNumber,
-        pageSize
+        pageSize,
+        isFrom: true
       })
     }
 
