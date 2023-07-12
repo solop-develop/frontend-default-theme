@@ -95,6 +95,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           :width="(item.length >= 5) ? '350' : 'auto'"
         >
           <template slot="header" slot-scope="scope">
+            {{ scope.row }}
             <span v-if="isEmptyValue(formatFields)">
               {{ item.label }}
             </span>
@@ -313,7 +314,6 @@ export default defineComponent({
         id
       })
         .then(response => {
-          // console.log({ qlq: response })
           formatFields.value = response.formatFields
         })
     }
@@ -329,7 +329,6 @@ export default defineComponent({
         return header
       })
       headerTable.value = alo
-      console.log({ field, alo })
     }
 
     // Optener Excel
