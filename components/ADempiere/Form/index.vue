@@ -112,6 +112,9 @@ export default {
         case 'org.spin.eca46.form.TaskManager':
           form = import('@theme/components/ADempiere/Form/TaskManager')
           break
+        case 'VFileImport':
+          form = import('@theme/components/ADempiere/Form/VFileImport')
+          break
         default:
           form = import('@/views/ADempiere/Unsupported')
           break
