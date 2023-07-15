@@ -18,6 +18,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;height: 100% !important;">
+    <!-- {{ currentSetp }} | {{ typeof currentSetp }} -->
     <div style="height: 89% !important;">
       <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;display: block;">
         <div style="width: 100%;height: 50%;">
@@ -290,10 +291,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
-
+import router from '@/router'
 // Components and Mixins
 import headersInvoice from './headersInvoice.js'
 import headersPayments from './headersPayments.js'
@@ -476,10 +477,7 @@ export default defineComponent({
       },
       // setter
       set(value) {
-        store.commit('setProcess', {
-          attribute: 'description',
-          value
-        })
+        store.commit('setProcess', value)
       }
     })
 
@@ -497,6 +495,22 @@ export default defineComponent({
           value
         })
       }
+    })
+
+    const paymentAssignment = computed(() => {
+      return store.getters.getPaymentAssignment
+    })
+
+    const currentSetp = computed(() => {
+      return store.getters.getSteps
+    })
+
+    const isActiveTag = computed(() => {
+      const listViews = store.getters.visitedViews
+      const currentRoute = router.app.$route
+      const currentViews = listViews.find(list => list.name === currentRoute.name)
+      setToggleSelection()
+      return currentViews
     })
 
     /**
@@ -574,6 +588,7 @@ export default defineComponent({
       row.applied = totalApplied
       store.commit('setListPayments', listPayments.value)
       store.commit('setSelectListPayments', selection)
+      store.commit('setAddListPayments', selection)
       store.commit('setListSelectPayments', selection)
       toggleSelectionPayments(row)
     }
@@ -587,6 +602,7 @@ export default defineComponent({
       row.applied = all
       store.commit('setDiference', { row })
       store.commit('setListSelectInvoices', selection)
+      store.commit('setAddListInvoces', selection)
       store.commit('setListInvoces', listInvoces.value)
     }
 
@@ -645,6 +661,61 @@ export default defineComponent({
       return isInput
     }
 
+    function toggleSelectionInvoces(rows) {
+      if (isEmptyValue(listInvocesTable.value)) return
+      if (rows) {
+        rows.forEach(row => {
+          listInvocesTable.value.toggleRowSelection(row)
+        })
+      } else {
+        listInvocesTable.value.clearSelection()
+      }
+    }
+
+    function toggleSelectionPayment(rows) {
+      if (isEmptyValue(listInvocesTable.value)) return
+      if (rows) {
+        rows.forEach(row => {
+          listPaymentsTable.value.toggleRowSelection(row)
+        })
+      } else {
+        listPaymentsTable.value.clearSelection()
+      }
+    }
+
+    function setToggleSelection() {
+      const {
+        invoces,
+        payments
+      } = paymentAssignment.value
+      const indexPayments = payments.map(list => listPayments.value.findIndex(listIndex => listIndex.id === list.id))
+      const indexInvoces = invoces.map(list => listInvoces.value.findIndex(listIndex => listIndex.id === list.id))
+      setTimeout(() => {
+        if (!isEmptyValue(listInvoces.value) && !isEmptyValue(indexInvoces)) {
+          indexInvoces.forEach(index => {
+            toggleSelectionInvoces([listInvoces.value[index]])
+          })
+        }
+        if (!isEmptyValue(listPayments.value) && !isEmptyValue(indexPayments)) {
+          indexInvoces.forEach(index => {
+            toggleSelectionPayment([listPayments.value[index]])
+          })
+        }
+      }, 500)
+    }
+
+    watch(currentSetp, (newValue) => {
+      if (newValue && !isEmptyValue(listInvoces.value)) {
+        setToggleSelection()
+      }
+    })
+
+    watch(isActiveTag, (newValue) => {
+      if (newValue && !isEmptyValue(listInvoces.value)) {
+        setToggleSelection()
+      }
+    })
+
     return {
       // Refs
       tableData,
@@ -678,7 +749,14 @@ export default defineComponent({
       // toggleSelection,
       isCellInput,
       findCharges,
-      findFilter
+      findFilter,
+      //
+      paymentAssignment,
+      currentSetp,
+      isActiveTag,
+      toggleSelectionInvoces,
+      toggleSelectionPayment,
+      setToggleSelection
     }
   }
 })
