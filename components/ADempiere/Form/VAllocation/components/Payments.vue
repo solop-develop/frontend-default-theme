@@ -18,7 +18,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;height: 100% !important;">
-    <!-- {{ currentSetp }} | {{ typeof currentSetp }} -->
     <div style="height: 89% !important;">
       <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;display: block;">
         <div style="width: 100%;height: 50%;">
@@ -93,7 +92,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <div slot="header" class="clearfix" style="text-align: center;">
               <b> {{ $t('form.VAllocation.invoice.title') }} </b>
             </div>
-            <!-- {{ listInvoces }} -->
             <el-table
               id="listInvocesTable"
               ref="listInvocesTable"
@@ -295,6 +293,7 @@ import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
 import router from '@/router'
+
 // Components and Mixins
 import headersInvoice from './headersInvoice.js'
 import headersPayments from './headersPayments.js'
