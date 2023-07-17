@@ -30,6 +30,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               ref="listPaymentsTable"
               :data="listPayments"
               border
+              :max-height="panelInvoce"
               style="width: 100%;height: 90%;"
               @select="handleSelectionPayments"
               @select-all="handleSelectionPaymentsAll"
@@ -87,9 +88,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-table>
           </el-card>
         </div>
-        <div style="width: 100%;height: 50%;">
-          <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
-            <div slot="header" class="clearfix" style="text-align: center;">
+        <div id="panelInvoce" style="width: 100%;height: 50%;">
+          <el-card class="panel-invoce" style="padding: 5px 10px 5px 10px;height: 100%;display: grid;">
+            <div slot="header" class="clearfix-panel-invoce" style="text-align: center;">
               <b> {{ $t('form.VAllocation.invoice.title') }} </b>
             </div>
             <el-table
@@ -97,6 +98,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               ref="listInvocesTable"
               :data="listInvoces"
               border
+              :max-height="panelInvoce"
               @select="handleSelectionInvoces"
               @select-all="handleSelectionInvocesAll"
             >
@@ -328,6 +330,7 @@ export default defineComponent({
     const listInvocesTable = ref(null)
     const optionsCharges = ref([])
     const tableData = ref([])
+    const panelInvoce = ref(250)
 
     /**
      * computed
@@ -800,15 +803,34 @@ export default defineComponent({
       return (open_amount - discount_amount)
     }
 
+    function loadHeight(height) {
+      setTimeout(() => {
+        panelInvoce.value = height.clientHeight - 100
+      }, 1000)
+    }
+
+    setTimeout(() => {
+      const height = document.getElementById('panelInvoce')
+      loadHeight(height)
+    }, 1000)
+
     watch(currentSetp, (newValue) => {
       if (newValue && !isEmptyValue(listInvoces.value)) {
         setToggleSelection()
+        setTimeout(() => {
+          const height = document.getElementById('panelInvoce')
+          loadHeight(height)
+        }, 1000)
       }
     })
 
     watch(isActiveTag, (newValue) => {
       if (newValue && !isEmptyValue(listInvoces.value)) {
         setToggleSelection()
+        setTimeout(() => {
+          const height = document.getElementById('panelInvoce')
+          loadHeight(height)
+        }, 1000)
       }
     })
 
@@ -852,6 +874,7 @@ export default defineComponent({
       resultDiference,
       currentSetp,
       isActiveTag,
+      panelInvoce,
       toggleSelectionInvoces,
       toggleSelectionPayment,
       setToggleSelection
@@ -897,4 +920,8 @@ export default defineComponent({
   height: 90%;
   overflow-x: auto;
 }
+/* .el-card__header {
+  padding-top: 5px;
+  padding-bottom: 0px;
+} */
 </style>
