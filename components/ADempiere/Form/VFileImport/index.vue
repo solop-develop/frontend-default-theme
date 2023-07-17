@@ -1,39 +1,39 @@
 <!--
-ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https:www.gnu.org/licenses/>.
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
+ Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
   <div class="main-express-receipt">
     <el-card class="box-card">
       <div slot="header" class="clearfix-express-receipt">
-        <el-form
-          ref="form-express-receipt"
-          label-position="top"
-          class="field-from"
-          inline
-        >
-          <el-row :gutter="24">
-            <el-col :span="10">
-              <el-form-item
-                label="Subir Archivo"
-                style="width: 100%;"
-              >
-                <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
+        <el-row :gutter="24">
+
+          <el-col :span="8">
+            <upload-resource
+              table-name="AD_ImpFormat"
+              :record-id="100000"
+            />
+          </el-col>
+
+          <el-form
+            ref="form-express-receipt"
+            label-position="top"
+            class="field-from"
+            inline
+          >
+            <el-col :span="8">
               <el-form-item
                 label="lista de conjuntos de caracteres"
                 style="width: 100%;"
@@ -55,7 +55,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="8">
               <el-form-item
                 label="Formato de Importación"
                 style="width: 100%;"
@@ -77,8 +77,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 </el-select>
               </el-form-item>
             </el-col>
-          </el-row>
-        </el-form>
+          </el-form>
+        </el-row>
       </div>
       <br>
 
@@ -138,13 +138,12 @@ import {
   computed
 } from '@vue/composition-api'
 
-// import lang from '@/lang'
 import store from '@/store'
-// import router from '@/router'
 
 // Components and Mixins
-// import UploadFile from './UploadFile.vue'
 import UploadExcelComponent from '@/themes/default/components/UploadExcel/index.vue'
+import UploadResource from '@/themes/default/components/ADempiere/PanelInfo/Component/AttachmentManager/uploadResource.vue'
+
 // Api Request Methods
 import {
   listCharsets,
@@ -153,17 +152,16 @@ import {
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
-// import { showMessage } from '@/utils/ADempiere/notification'
-// import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'VFileImport',
 
   components: {
-    UploadExcelComponent
+    UploadExcelComponent,
+    UploadResource
   },
 
-  setup(props, { root, refs }) {
+  setup() {
     /**
      * Ref
      */
@@ -174,7 +172,6 @@ export default defineComponent({
     /**
      * Computed
      */
-
     const currrentCharsets = computed({
       // getter
       get() {
@@ -242,6 +239,7 @@ export default defineComponent({
         })
       }
     })
+
     /**
      * Methods
      */
