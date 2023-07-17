@@ -18,6 +18,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <div style="display: contents;height: 100% !important;">
+    <!-- {{ resultDiference.length }} | {{ isEmptyValue(resultDiference) }} | {{ resultDiference }}
+    <hr> -->
+    <!-- {{ summaryDiference }} -->
     <div style="height: 89% !important;">
       <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;display: block;">
         <div style="width: 100%;height: 50%;">
@@ -97,7 +100,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               ref="listInvocesTable"
               :data="listInvoces"
               border
-              style="width: 100%;height: 90%;"
               @select="handleSelectionInvoces"
               @select-all="handleSelectionInvocesAll"
             >
@@ -110,7 +112,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 :key="key"
                 prop="id"
                 :align="header.align"
-                :min-width="isCellInput(header) ? '225' : '125'"
+                min-width="210"
                 :label="header.label"
               >
                 <template slot-scope="scope">
@@ -180,7 +182,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     >
                       <el-tag>
                         <b style="text-align: right; font-size: 19px">
-                          {{ listDifference }}
+                          {{ summaryDiference }}
                         </b>
                       </el-tag>
                     </el-form-item>
@@ -500,6 +502,50 @@ export default defineComponent({
       return store.getters.getPaymentAssignment
     })
 
+    const resultDiference = computed(() => {
+      return store.getters.getAllDiference.map(list => list.document_no)
+    })
+
+    const summaryDiference = computed(() => {
+      const { difference } = paymentAssignment.value
+      const listDifference = difference.map(list => {
+        const { applied, transaction_type, document_no } = list
+        return {
+          applied,
+          transactionType: transaction_type.name,
+          transactionTypeValue: transaction_type.value,
+          documentNo: document_no
+        }
+      })
+      let summar
+      listDifference.forEach((currentValue, index, array) => {
+        if (index <= 0) {
+          summar = currentValue
+        } else {
+          summar = {
+            ...currentValue,
+            applied: (summar.applied) + (currentValue.applied)
+          }
+        }
+        // console.log({ summar, listDifference })
+      })
+      if (!isEmptyValue(summar)) {
+        return summar.applied 
+        // let difference = summar.applied
+        // console.log({ ...summar })
+        // switch (summar.transactionTypeValue) {
+        //   case 'R':
+        //     difference = difference * -1
+        //     break
+        //   case 'P':
+        //     difference = -(difference)
+        //     break
+        // }
+        // return difference
+      }
+      return 0
+    })
+
     const currentSetp = computed(() => {
       return store.getters.getSteps
     })
@@ -585,6 +631,12 @@ export default defineComponent({
       const totalApplied = (applied === 0) ? open_amount : applied
       row.isSelect = !isSelect
       row.applied = totalApplied
+      // const listSelectionDiference = selection.map(payemnt => payment.isSelect)
+      if (row.isSelect) {
+        store.commit('setAddDiference', row)
+      } else {
+        store.dispatch('changeDiference', { row })
+      }
       store.commit('setListPayments', listPayments.value)
       store.commit('setSelectListPayments', selection)
       store.commit('setAddListPayments', selection)
@@ -599,6 +651,11 @@ export default defineComponent({
       const all = (totalApplied < 0) ? -(totalApplied) : -(totalApplied)
       row.isSelect = !isSelect
       row.applied = all
+      if (row.isSelect) {
+        store.commit('setAddDiference', row)
+      } else {
+        store.dispatch('changeDiference', { row })
+      }
       store.commit('setDiference', { row })
       store.commit('setListSelectInvoices', selection)
       store.commit('setAddListInvoces', selection)
@@ -613,10 +670,54 @@ export default defineComponent({
           applied: result
         }
       })
+      if (!isEmptyValue(selection)) {
+        selection.forEach(element => {
+          // const row = {
+          //   ...element,
+          //   isSelect: true
+          // }
+          // // store.commit('setAddListInvoces', row)
+          // store.commit('setAddDiference', row)
+        })
+        listInvoces.value.forEach(row => {
+          const { applied, open_amount, discount_amount } = row
+          row.isSelect = true
+          row.applied = (applied === 0) ? open_amount - discount_amount : applied
+          store.commit('setAddDiference', row)
+        })
+      } else {
+        listInvoces.value.forEach(element => {
+          element.applied = 0
+          store.dispatch('changeDiference', { row: element })
+        })
+      }
       store.commit('setListSelectInvoices', data)
     }
 
-    function handleSelectionPaymentsAll(selection, row) {
+    function handleSelectionPaymentsAll(selection) {
+      if (!isEmptyValue(selection)) {
+        selection.forEach(element => {
+          // const row = {
+          //   ...element,
+          //   isSelect: true
+          // }
+          listPayments.value.forEach(row => {
+            const { applied, open_amount } = row
+            // console.log({ applied, open_amount, document_no })
+            row.isSelect = true
+            row.applied = (applied === 0) ? open_amount : applied
+            // console.log({ ...row }, 'Payment  ==> ', document_no, ' ==> ', applied)
+            store.commit('setAddDiference', row)
+          })
+          // store.commit('setAddListPayments', row)
+          // store.commit('setAddDiference', row)
+        })
+      } else {
+        listPayments.value.forEach(element => {
+          element.applied = 0
+          store.dispatch('changeDiference', { row: element })
+        })
+      }
       store.commit('setListSelectPayments', selection)
     }
 
@@ -687,8 +788,8 @@ export default defineComponent({
         invoces,
         payments
       } = paymentAssignment.value
-      const indexPayments = payments.map(list => listPayments.value.findIndex(listIndex => listIndex.id === list.id))
-      const indexInvoces = invoces.map(list => listInvoces.value.findIndex(listIndex => listIndex.id === list.id))
+      const indexPayments = isEmptyValue(payments) ? [] : payments.map(list => listPayments.value.findIndex(listIndex => listIndex.id === list.id))
+      const indexInvoces = isEmptyValue(invoces) ? [] : invoces.map(list => listInvoces.value.findIndex(listIndex => listIndex.id === list.id))
       setTimeout(() => {
         if (!isEmptyValue(listInvoces.value) && !isEmptyValue(indexInvoces)) {
           indexInvoces.forEach(index => {
@@ -750,7 +851,9 @@ export default defineComponent({
       findCharges,
       findFilter,
       //
+      summaryDiference,
       paymentAssignment,
+      resultDiference,
       currentSetp,
       isActiveTag,
       toggleSelectionInvoces,
