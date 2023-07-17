@@ -114,7 +114,17 @@ export default defineComponent({
       }
     ])
 
-    const currentSetp = ref(0)
+    const currentSetp = computed({
+      // getter
+      get() {
+        const step = store.getters.getSteps
+        return step
+      },
+      // setter
+      set(value) {
+        store.commit('setChangeSteps', value)
+      }
+    })
 
     const isDisabledProcess = computed(() => {
       const {

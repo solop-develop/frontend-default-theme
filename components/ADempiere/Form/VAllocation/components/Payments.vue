@@ -30,6 +30,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               ref="listPaymentsTable"
               :data="listPayments"
               border
+              :max-height="panelInvoce"
               style="width: 100%;height: 90%;"
               @select="handleSelectionPayments"
               @select-all="handleSelectionPaymentsAll"
@@ -87,23 +88,23 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-table>
           </el-card>
         </div>
-        <div style="width: 100%;height: 50%;">
-          <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
-            <div slot="header" class="clearfix" style="text-align: center;">
+        <div id="panelInvoce" style="width: 100%;height: 50%;">
+          <el-card class="panel-invoce" style="padding: 5px 10px 5px 10px;height: 100%;display: grid;">
+            <div slot="header" class="clearfix-panel-invoce" style="text-align: center;">
               <b> {{ $t('form.VAllocation.invoice.title') }} </b>
             </div>
-            <!-- {{ listInvoces }} -->
             <el-table
               id="listInvocesTable"
               ref="listInvocesTable"
               :data="listInvoces"
               border
-              style="width: 100%;height: 90%;"
+              :max-height="panelInvoce"
               @select="handleSelectionInvoces"
               @select-all="handleSelectionInvocesAll"
             >
               <el-table-column
                 type="selection"
+                fixed
                 width="40"
               />
               <el-table-column
@@ -111,7 +112,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 :key="key"
                 prop="id"
                 :align="header.align"
-                :min-width="isCellInput(header) ? '225' : '125'"
+                min-width="210"
                 :label="header.label"
               >
                 <template slot-scope="scope">
@@ -181,7 +182,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     >
                       <el-tag>
                         <b style="text-align: right; font-size: 19px">
-                          {{ listDifference }}
+                          {{ summaryDiference }}
                         </b>
                       </el-tag>
                     </el-form-item>
@@ -290,9 +291,10 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 
 // Components and Mixins
 import headersInvoice from './headersInvoice.js'
@@ -328,6 +330,7 @@ export default defineComponent({
     const listInvocesTable = ref(null)
     const optionsCharges = ref([])
     const tableData = ref([])
+    const panelInvoce = ref(250)
 
     /**
      * computed
@@ -476,10 +479,7 @@ export default defineComponent({
       },
       // setter
       set(value) {
-        store.commit('setProcess', {
-          attribute: 'description',
-          value
-        })
+        store.commit('setProcess', value)
       }
     })
 
@@ -497,6 +497,54 @@ export default defineComponent({
           value
         })
       }
+    })
+
+    const paymentAssignment = computed(() => {
+      return store.getters.getPaymentAssignment
+    })
+
+    const resultDiference = computed(() => {
+      return store.getters.getAllDiference.map(list => list.document_no)
+    })
+
+    const summaryDiference = computed(() => {
+      const { difference } = paymentAssignment.value
+      const listDifference = difference.map(list => {
+        const { applied, transaction_type, document_no } = list
+        return {
+          applied,
+          transactionType: transaction_type.name,
+          transactionTypeValue: transaction_type.value,
+          documentNo: document_no
+        }
+      })
+      let summary
+      listDifference.forEach((currentValue, index, array) => {
+        if (index <= 0) {
+          summary = currentValue
+        } else {
+          summary = {
+            ...currentValue,
+            applied: (summary.applied) + (currentValue.applied)
+          }
+        }
+      })
+      if (!isEmptyValue(summary)) {
+        return summary.applied
+      }
+      return 0
+    })
+
+    const currentSetp = computed(() => {
+      return store.getters.getSteps
+    })
+
+    const isActiveTag = computed(() => {
+      const listViews = store.getters.visitedViews
+      const currentRoute = router.app.$route
+      const currentViews = listViews.find(list => list.name === currentRoute.name)
+      setToggleSelection()
+      return currentViews
     })
 
     /**
@@ -572,21 +620,32 @@ export default defineComponent({
       const totalApplied = (applied === 0) ? open_amount : applied
       row.isSelect = !isSelect
       row.applied = totalApplied
+      if (row.isSelect) {
+        store.commit('setAddDiference', row)
+      } else {
+        store.dispatch('changeDiference', { row })
+      }
       store.commit('setListPayments', listPayments.value)
       store.commit('setSelectListPayments', selection)
+      store.commit('setAddListPayments', selection)
       store.commit('setListSelectPayments', selection)
       toggleSelectionPayments(row)
     }
 
     function handleSelectionInvoces(selection, row) {
-      const { isSelect, applied, open_amount } = row
+      const { isSelect } = row
       toggleSelectionInvoce(row)
-      const totalApplied = (applied === 0) ? open_amount : applied
-      const all = (totalApplied < 0) ? -(totalApplied) : -(totalApplied)
+      const all = appliedAmount(row)
       row.isSelect = !isSelect
       row.applied = all
+      if (row.isSelect) {
+        store.commit('setAddDiference', row)
+      } else {
+        store.dispatch('changeDiference', { row })
+      }
       store.commit('setDiference', { row })
       store.commit('setListSelectInvoices', selection)
+      store.commit('setAddListInvoces', selection)
       store.commit('setListInvoces', listInvoces.value)
     }
 
@@ -598,10 +657,47 @@ export default defineComponent({
           applied: result
         }
       })
+      if (!isEmptyValue(selection)) {
+        selection.forEach(element => {
+          const row = {
+            ...element,
+            applied: (element.applied === 0) ? element.open_amount - element.discount_amount : element.applied,
+            isSelect: true
+          }
+          store.commit('setAddDiference', row)
+        })
+        listInvoces.value.forEach(row => {
+          const { applied, open_amount, discount_amount } = row
+          row.isSelect = true
+          row.applied = (applied === 0) ? open_amount - discount_amount : applied
+        })
+      } else {
+        listInvoces.value.forEach(element => {
+          element.applied = 0
+          element.isSelect = false
+          store.dispatch('changeDiference', { row: element })
+        })
+      }
       store.commit('setListSelectInvoices', data)
     }
 
-    function handleSelectionPaymentsAll(selection, row) {
+    function handleSelectionPaymentsAll(selection) {
+      if (!isEmptyValue(selection)) {
+        selection.forEach(element => {
+          listPayments.value.forEach(row => {
+            const { applied, open_amount } = row
+            row.isSelect = true
+            row.applied = (applied === 0) ? open_amount : applied
+            store.commit('setAddDiference', row)
+          })
+        })
+      } else {
+        listPayments.value.forEach(element => {
+          element.applied = 0
+          element.isSelect = false
+          store.dispatch('changeDiference', { row: element })
+        })
+      }
       store.commit('setListSelectPayments', selection)
     }
 
@@ -645,6 +741,99 @@ export default defineComponent({
       return isInput
     }
 
+    function toggleSelectionInvoces(rows) {
+      if (isEmptyValue(listInvocesTable.value)) return
+      if (rows) {
+        rows.forEach(row => {
+          listInvocesTable.value.toggleRowSelection(row)
+        })
+      } else {
+        listInvocesTable.value.clearSelection()
+      }
+    }
+
+    function toggleSelectionPayment(rows) {
+      if (isEmptyValue(listInvocesTable.value)) return
+      if (rows) {
+        rows.forEach(row => {
+          listPaymentsTable.value.toggleRowSelection(row)
+        })
+      } else {
+        listPaymentsTable.value.clearSelection()
+      }
+    }
+
+    function setToggleSelection() {
+      const {
+        invoces,
+        payments
+      } = paymentAssignment.value
+      const indexPayments = isEmptyValue(payments) ? [] : payments.map(list => listPayments.value.findIndex(listIndex => listIndex.id === list.id))
+      const indexInvoces = isEmptyValue(invoces) ? [] : invoces.map(list => listInvoces.value.findIndex(listIndex => listIndex.id === list.id))
+      setTimeout(() => {
+        if (!isEmptyValue(listInvoces.value) && !isEmptyValue(indexInvoces)) {
+          indexInvoces.forEach(index => {
+            toggleSelectionInvoces([listInvoces.value[index]])
+          })
+        }
+        if (!isEmptyValue(listPayments.value) && !isEmptyValue(indexPayments)) {
+          indexInvoces.forEach(index => {
+            toggleSelectionPayment([listPayments.value[index]])
+          })
+        }
+      }, 500)
+    }
+
+    function appliedAmount(row) {
+      const { transaction_type, open_amount, discount_amount } = row
+      const { difference } = paymentAssignment.value
+      const listAmount = difference.filter(list => list.transaction_type.value !== transaction_type.value).map(list => list.applied)
+      const differenceAmount = 0
+      const sumWithInitial = listAmount.reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+        differenceAmount
+      )
+      const total = Math.abs(open_amount - discount_amount)
+      if (
+        (total) > (Math.abs(sumWithInitial)) &&
+        (Math.abs(sumWithInitial) !== 0)
+      ) {
+        return -(sumWithInitial)
+      }
+      return (open_amount - discount_amount)
+    }
+
+    function loadHeight(height) {
+      setTimeout(() => {
+        panelInvoce.value = height.clientHeight - 100
+      }, 1000)
+    }
+
+    setTimeout(() => {
+      const height = document.getElementById('panelInvoce')
+      loadHeight(height)
+    }, 1000)
+
+    watch(currentSetp, (newValue) => {
+      if (newValue && !isEmptyValue(listInvoces.value)) {
+        setToggleSelection()
+        setTimeout(() => {
+          const height = document.getElementById('panelInvoce')
+          loadHeight(height)
+        }, 1000)
+      }
+    })
+
+    watch(isActiveTag, (newValue) => {
+      if (newValue && !isEmptyValue(listInvoces.value)) {
+        setToggleSelection()
+        setTimeout(() => {
+          const height = document.getElementById('panelInvoce')
+          loadHeight(height)
+        }, 1000)
+      }
+    })
+
     return {
       // Refs
       tableData,
@@ -678,7 +867,17 @@ export default defineComponent({
       // toggleSelection,
       isCellInput,
       findCharges,
-      findFilter
+      findFilter,
+      //
+      summaryDiference,
+      paymentAssignment,
+      resultDiference,
+      currentSetp,
+      isActiveTag,
+      panelInvoce,
+      toggleSelectionInvoces,
+      toggleSelectionPayment,
+      setToggleSelection
     }
   }
 })
@@ -721,4 +920,8 @@ export default defineComponent({
   height: 90%;
   overflow-x: auto;
 }
+/* .el-card__header {
+  padding-top: 5px;
+  padding-bottom: 0px;
+} */
 </style>
