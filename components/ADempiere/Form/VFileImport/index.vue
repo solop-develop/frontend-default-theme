@@ -1,154 +1,97 @@
 <!--
- ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
- Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <https:www.gnu.org/licenses/>.
+ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
+Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <div class="main-express-receipt">
-    <el-card class="box-card">
-      <div slot="header" class="clearfix-express-receipt">
-        <el-row :gutter="24">
-
-          <el-col :span="8">
-            <upload-resource
-              table-name="AD_ImpFormat"
-              :record-id="100000"
-            />
-          </el-col>
-
-          <el-form
-            ref="form-express-receipt"
-            label-position="top"
-            class="field-from"
-            inline
-          >
-            <el-col :span="8">
-              <el-form-item
-                label="lista de conjuntos de caracteres"
-                style="width: 100%;"
-              >
-                <el-select
-                  v-model="currrentCharsets"
-                  style="width: 100%;"
-                  filterable
-                  clearable
-                  :remote-method="remoteSearchCharsets"
-                  @visible-change="findCharsets"
-                >
-                  <el-option
-                    v-for="item in optionsCharsets"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item
-                label="Formato de Importación"
-                style="width: 100%;"
-              >
-                <el-select
-                  v-model="currrentImportFormats"
-                  style="width: 100%;"
-                  filterable
-                  clearable
-                  :remote-method="remoteSearchImportFormats"
-                  @visible-change="findImportFormats"
-                >
-                  <el-option
-                    v-for="item in optionsImportFormats"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-form>
-        </el-row>
-      </div>
-      <br>
-
-      <el-table
-        :data="dataTable"
-        border
-        highlight-current-row
-        style="width: 100%"
-        height="450"
-      >
-        <el-table-column
-          v-for="item of headerTable"
-          :key="item.label"
-          :width="(item.length >= 5) ? '350' : 'auto'"
+  <div style="padding: 10px;">
+    <div style="height: 8% !important;">
+      <el-steps :active="currentSetp" finish-status="success">
+        <el-step
+          v-for="(list, key) in stepList"
+          :key="key"
+          :title="list.name"
+        />
+      </el-steps>
+    </div>
+    <div style="height: 92% !important;">
+      <transition name="el-fade-in-linear">
+        <selectTable
+          v-if="currentSetp === 1"
         >
-          <template slot="header" slot-scope="scope">
-            {{ scope.row }}
-            <span v-if="isEmptyValue(formatFields)">
-              {{ item.label }}
-            </span>
-            <span v-else>
-              <el-dropdown trigger="click" @command="handleFormat">
-                <span class="el-dropdown-link">
-                  {{ item.label }} <svg-icon icon-class="more-vertical" />
-                </span>
-                <el-dropdown-menu slot="dropdown">
-                  <template
-                    v-for="field in formatFields"
-                  >
-                    <el-dropdown-item
-                      :key="field.id"
-                      :command="{
-                        header: item,
-                        field: field.name
-                      }"
-                    >
-                      {{ field.name }}
-                    </el-dropdown-item>
-                  </template>
-                </el-dropdown-menu>
-              </el-dropdown>
-            </span>
+          <template v-slot:footer>
+            <el-button
+              type="primary"
+              class="button-base-icon"
+              icon="el-icon-check"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+              :disabled="!isDisableNextTable"
+              @click="nextStep"
+            />
+            <el-button
+              type="danger"
+              class="button-base-icon"
+              icon="el-icon-close"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+            />
+            <el-button
+              plain
+              type="info"
+              class="button-base-icon"
+              style="float: right;margin-right: 0px;margin-top: 10px;"
+              @click="actionClear"
+            >
+              <svg-icon icon-class="layers-clear" />
+            </el-button>
           </template>
-          <template slot-scope="scope">
-            {{ scope.row[item.key] }}
+        </selectTable>
+        <uploadFile
+          v-if="currentSetp === 2"
+        >
+          <template v-slot:footer>
+            <el-button
+              type="primary"
+              class="button-base-icon"
+              icon="el-icon-check"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+              @click="nextStep"
+            />
+            <el-button
+              type="danger"
+              class="button-base-icon"
+              icon="el-icon-close"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+              @click="prevStep"
+            />
           </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+        </uploadFile>
+      </transition>
+    </div>
   </div>
 </template>
 
 <script>
-import {
-  defineComponent,
-  ref,
-  computed
-} from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 
+import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
-import UploadExcelComponent from '@/themes/default/components/UploadExcel/index.vue'
-import UploadResource from '@/themes/default/components/ADempiere/PanelInfo/Component/AttachmentManager/uploadResource.vue'
-
-// Api Request Methods
-import {
-  listCharsets,
-  listImportFormats
-} from '@/api/ADempiere/form/VFileImport.js'
+import selectTable from './selectTable.vue'
+import uploadFile from './uploadFile.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
@@ -157,228 +100,146 @@ export default defineComponent({
   name: 'VFileImport',
 
   components: {
-    UploadExcelComponent,
-    UploadResource
+    selectTable,
+    uploadFile
   },
 
-  setup() {
+  props: {
+    metadata: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
+
+  setup(props, { root }) {
     /**
-     * Ref
-     */
-    const headerTable = ref([])
-    const dataTable = ref([])
-    const formatFields = ref([])
+    * Refs
+    */
 
-    /**
-     * Computed
-     */
-    const currrentCharsets = computed({
-      // getter
-      get() {
-        const { charsets } = store.getters.getAttribute
-        return charsets
+    const stepList = ref([
+      {
+        name: 'Seleccione Tabla'
       },
-      // setter
-      set(value) {
-        store.commit('updateAttributeVFileImport', {
-          attribute: 'attribute',
-          criteria: 'charsets',
-          value
-        })
+      // {
+      //   name: lang.t('VBankStatementMatch.steps.automaticMatch')
+      // },
+      {
+        name: 'Configure Archivo a Importar'
+      },
+      {
+        name: lang.t('VBankStatementMatch.steps.summaryAdjustment')
       }
-    })
+    ])
 
-    const currrentImportFormats = computed({
-      // getter
-      get() {
-        const { importFormats } = store.getters.getAttribute
-        return importFormats
-      },
-      // setter
-      set(value) {
-        store.commit('updateAttributeVFileImport', {
-          attribute: 'attribute',
-          criteria: 'importFormats',
-          value
-        })
-        infoImportFormats(value)
-      }
-    })
-
-    // List Options
-    const optionsCharsets = computed({
-      // getter
-      get() {
-        const { listCharsets } = store.getters.getOptions
-        return listCharsets
-        // return []
-      },
-      // setter
-      set(list) {
-        store.commit('updateAttributeVFileImport', {
-          attribute: 'options',
-          criteria: 'listCharsets',
-          value: list
-        })
-      }
-    })
-
-    const optionsImportFormats = computed({
-      // getter
-      get() {
-        const { listImportFormats } = store.getters.getOptions
-        return listImportFormats
-        // return []
-      },
-      // setter
-      set(list) {
-        store.commit('updateAttributeVFileImport', {
-          attribute: 'options',
-          criteria: 'listImportFormats',
-          value: list
-        })
-      }
-    })
+    const currentSetp = ref(1)
 
     /**
-     * Methods
-     */
-    function remoteSearchCharsets(query) {
-      if (!isEmptyValue(query) && query.length > 2) {
-        const result = optionsCharsets.value.filter(findFilter(query))
-        if (isEmptyValue(result)) {
-          findCharsets(true, query)
-        }
-      }
+    * Computed
+    */
+    const isBack = computed(() => {
+      return currentSetp.value === 1
+    })
+
+    const isNext = computed(() => {
+      return currentSetp.value === 3
+    })
+
+    const initialSept = computed(() => {
+      return currentSetp.value - 1
+    })
+
+    const label = computed(() => {
+      if (currentSetp.value === 3) return lang.t('VBankStatementMatch.steps.summaryAdjustment')
+      return ''
+    })
+
+    const validate = computed(() => {
+      const { matchMode, bankAccounts } = store.getters.getCriteriaVBankStatement
+      return isEmptyValue(bankAccounts.id) || isEmptyValue(matchMode.value)
+    })
+
+    const isDisableNextTable = computed(() => {
+      const {
+        tablaId,
+        charsets,
+        importFormats,
+      } = store.getters.getAttribute
+      return !isEmptyValue(tablaId) && !isEmptyValue(charsets) && !isEmptyValue(importFormats)
+    })
+
+    // Computed
+
+    function nextStep(steps) {
+      currentSetp.value++
     }
 
-    function findCharsets(isFind, searchValue) {
-      if (!isFind) {
-        return
-      }
-      listCharsets({
-        searchValue
+    function prevStep(steps) {
+      currentSetp.value--
+    }
+
+    function actionClear() {
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'attribute',
+        criteria: 'tablaId',
+        value: undefined
       })
-        .then(response => {
-          const { records } = response
-          optionsCharsets.value = records.map(list => {
-            const { DisplayColumn, ValueColumn } = list.values
-            return {
-              value: ValueColumn,
-              label: DisplayColumn
-            }
-          })
-        })
-    }
-
-    function remoteSearchImportFormats(query) {
-      if (!isEmptyValue(query) && query.length > 2) {
-        const result = optionsImportFormats.value.filter(findFilter(query))
-        if (isEmptyValue(result)) {
-          findCharsets(true, query)
-        }
-      }
-    }
-
-    function findImportFormats(isFind, searchValue) {
-      if (!isFind) {
-        return
-      }
-      listImportFormats({
-        searchValue
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'attribute',
+        criteria: 'charsets',
+        value: ''
       })
-        .then(response => {
-          const { records } = response
-          optionsImportFormats.value = records.map(list => {
-            const { DisplayColumn } = list.values
-            return {
-              value: list.id,
-              label: DisplayColumn
-            }
-          })
-        })
-    }
-
-    function findFilter(queryString) {
-      return (query) => {
-        const search = queryString.toLowerCase()
-        return query.label.toLowerCase().includes(search)
-      }
-    }
-
-    function infoImportFormats(id) {
-      if (isEmptyValue(id)) return
-      store.dispatch('importFormats', {
-        id
-      })
-        .then(response => {
-          formatFields.value = response.formatFields
-        })
-    }
-
-    function handleFormat(field) {
-      const alo = headerTable.value.map(header => {
-        if (field.header === header) {
-          return {
-            ...header,
-            label: field.field
-          }
-        }
-        return header
-      })
-      headerTable.value = alo
-    }
-
-    // Optener Excel
-
-    function beforeUpload(file) {
-      const isLt1M = file.size / 1024 / 1024 < 1
-      if (isLt1M) {
-        return true
-      }
-      console.log('error')
-      return false
-    }
-
-    function handleSuccess({ data, workbook, firstSheetName, worksheet, results, header }) {
-      const epale = results.filter((data, index) => {
-        if (index <= 50) {
-          return data
-        }
-      })
-      dataTable.value = epale
-      headerTable.value = header.map(list => {
-        return {
-          key: list,
-          label: list
-        }
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'attribute',
+        criteria: 'importFormats',
+        value: ''
       })
     }
-    /**
-     * Watch
-     */
+
     return {
-      // Ref
-      headerTable,
-      dataTable,
-      formatFields,
-      // Computed
-      optionsCharsets,
-      currrentCharsets,
-      optionsImportFormats,
-      currrentImportFormats,
-      // Methods
-      findCharsets,
-      infoImportFormats,
-      findImportFormats,
-      remoteSearchCharsets,
-      remoteSearchImportFormats,
-      // Optener CSV
-      beforeUpload,
-      handleSuccess,
-      handleFormat
-      // Action Panel Footer
+      stepList,
+      currentSetp,
+      isBack,
+      isNext,
+      label,
+      initialSept,
+      isDisableNextTable,
+      validate,
+      prevStep,
+      nextStep,
+      actionClear
     }
   }
 })
 </script>
+
+<style scoped>
+.carousel-panel {
+  height: 100% !important;
+  padding: 10px 0px;
+}
+.el-carousel__item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  overflow: hidden;
+  z-index: 0;
+  height: auto;
+}
+.transition-box {
+  margin-bottom: 10px;
+  width: 200px;
+  height: 100px;
+  border-radius: 4px;
+  background-color: #409EFF;
+  text-align: center;
+  color: #fff;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  margin-right: 20px;
+}
+</style>
