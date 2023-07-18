@@ -64,6 +64,7 @@
       <br>
 
       <el-table
+        ref="singleTable"
         :data="dataTable"
         border
         highlight-current-row
@@ -81,28 +82,6 @@
             <span>
               {{ item.label }}
             </span>
-            <!-- <span v-else>
-              <el-dropdown trigger="click" @command="handleFormat">
-                <span class="el-dropdown-link">
-                  {{ item.label }} <svg-icon icon-class="more-vertical" />
-                </span>
-                <el-dropdown-menu slot="dropdown">
-                  <template
-                    v-for="field in formatFields"
-                  >
-                    <el-dropdown-item
-                      :key="field.id"
-                      :command="{
-                        header: item,
-                        field: field.name
-                      }"
-                    >
-                      {{ field.name }}
-                    </el-dropdown-item>
-                  </template>
-                </el-dropdown-menu>
-              </el-dropdown>
-            </span> -->
           </template>
           <template slot-scope="scope">
             {{ scope.row[item.key] }}
@@ -110,7 +89,25 @@
         </el-table-column>
       </el-table>
     </el-card>
-    <el-card style="padding: 0px 10px !important;">
+    <el-card
+      v-if="!isEmptyValue(getInfoImportFormats)"
+      shadow="never"
+      style="padding: 0px 10px !important;"
+    >
+      <el-card
+        shadow="never"
+      >
+        <p
+          style="font-size: 18px;text-align: center;margin: 5px;"
+        >
+          {{ getInfoImportFormats.name }}
+        </p>
+        <p
+          style="font-size: 14px;text-align: center;margin: 5px;"
+        >
+          {{ getInfoImportFormats.description }}
+        </p>
+      </el-card>
       <el-row :gutter="10">
         <el-form
           ref="form-express-receipt"
@@ -129,24 +126,28 @@
             >
               <el-input
                 v-if="field.dataType === 'S'"
-                v-model="field.defaultValue"
+                :value="displayValue(field, field.startNo)"
+                disabled
                 style="width: 100%;"
               />
               <el-input-number
                 v-else-if="field.dataType === 'N'"
-                v-model="num"
+                v-model="field.defaultValue"
                 controls-position="right"
+                disabled
                 style="width: 100%;"
               />
               <el-date-picker
                 v-else-if="field.dataType === 'D'"
                 v-model="field.defaultValue"
                 type="date"
+                disabled
                 style="width: 100%;"
               />
               <el-input
                 v-else-if="field.dataType === 'C'"
                 v-model="field.defaultValue"
+                disabled
                 style="width: 100%;"
               />
             </el-form-item>
@@ -165,7 +166,9 @@
 <script>
 import {
   defineComponent,
-  computed
+  computed,
+  watch,
+  ref
 } from '@vue/composition-api'
 
 import store from '@/store'
@@ -192,10 +195,11 @@ export default defineComponent({
   },
 
   setup() {
-
     /**
      * Computed
      */
+
+    const listField = ref([])
 
     const dataTable = computed(() => {
       const { data } = store.getters.getFile
@@ -207,9 +211,24 @@ export default defineComponent({
       return header
     })
 
-    const formatFields = computed(() => {
-      const { formatFields } = store.getters.getAttribute
-      return formatFields
+    const getInfoImportFormats = computed(() => {
+      return store.getters.getInfoFormat
+    })
+
+    const currentLine = computed(() => {
+      return store.getters.getNavigationLine
+    })
+
+    const formatFields = computed({
+      // getter
+      get() {
+        const { formatFields } = store.getters.getAttribute
+        return formatFields
+      },
+      // setter
+      set(value) {
+        store.commit('setInfoFormat', value)
+      }
     })
 
     const currrentCharsets = computed({
@@ -407,14 +426,39 @@ export default defineComponent({
         })
       })
     }
+    const { header } = store.getters.getFile
+
+    function displayValue(field, index) {
+      if (isEmptyValue(header)) return
+      const line = formatFields.value.map(list => {
+        return {
+          ...list,
+          defaultValue: currentLine.value[header[index - 1].key]
+        }
+      })
+      listField.value = line
+      return line[index - 1].defaultValue
+    }
+    const singleTable = ref(null)
+
+    watch(currentLine, (newValue, oldValue) => {
+      if (newValue) {
+        singleTable.value.setCurrentRow(newValue)
+      }
+    })
+
     return {
       // Ref
       headerTable,
       dataTable,
       formatFields,
+      listField,
+      singleTable,
       // Computed
+      currentLine,
       optionsCharsets,
       currrentCharsets,
+      getInfoImportFormats,
       optionsImportFormats,
       currrentImportFormats,
       // Methods
@@ -424,7 +468,8 @@ export default defineComponent({
       remoteSearchCharsets,
       remoteSearchImportFormats,
       handleSuccess,
-      handleFormat
+      handleFormat,
+      displayValue
     }
   }
 })
@@ -434,5 +479,11 @@ export default defineComponent({
 .el-table--border th.el-table__cell {
   border-bottom: 1px solid #dfe6ec;
   background: #E8F4FF;
+}
+.el-input.is-disabled .el-input__inner {
+    background-color: #F5F7FA;
+    border-color: #dfe4ed;
+    color: rgb(27, 26, 26);
+    cursor: not-allowed;
 }
 </style>

@@ -82,6 +82,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 plain
                 size="small"
                 style="float: right;margin-right: 0px;margin-top: 10px;"
+                @click="changePrevLine"
               >
                 <i class="el-icon-arrow-up" style="font-size: 16px;" />
               </el-button>
@@ -90,6 +91,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 plain
                 size="small"
                 style="float: right;margin-right: 10px;margin-top: 10px;"
+                @click="changeNextLine"
               >
                 <i class="el-icon-arrow-down" style="font-size: 16px;" />
               </el-button>
@@ -135,6 +137,8 @@ export default defineComponent({
     /**
     * Refs
     */
+
+    let index = 0
 
     const stepList = ref([
       {
@@ -192,10 +196,6 @@ export default defineComponent({
         data,
         header
       } = store.getters.getFile
-      console.log({
-        data,
-        header
-      })
       return isEmptyValue(data) && isEmptyValue(header)
     })
 
@@ -203,10 +203,30 @@ export default defineComponent({
 
     function nextStep(steps) {
       currentSetp.value++
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'file',
+        criteria: 'header',
+        value: []
+      })
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'file',
+        criteria: 'data',
+        value: []
+      })
     }
 
     function prevStep(steps) {
       currentSetp.value--
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'file',
+        criteria: 'header',
+        value: []
+      })
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'file',
+        criteria: 'data',
+        value: []
+      })
     }
 
     function actionClear() {
@@ -227,7 +247,21 @@ export default defineComponent({
       })
     }
 
+    function changeNextLine() {
+      const { data } = store.getters.getFile
+      store.commit('setNavigationLine', data[index])
+      index++
+    }
+
+    function changePrevLine() {
+      const { data } = store.getters.getFile
+      store.commit('setNavigationLine', data[index])
+      if (index === 0) return
+      index--
+    }
+
     return {
+      index,
       stepList,
       currentSetp,
       isBack,
@@ -239,7 +273,9 @@ export default defineComponent({
       showNavegationTable,
       prevStep,
       nextStep,
-      actionClear
+      actionClear,
+      changePrevLine,
+      changeNextLine
     }
   }
 })
