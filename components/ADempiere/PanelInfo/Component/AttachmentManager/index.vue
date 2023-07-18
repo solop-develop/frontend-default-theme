@@ -41,7 +41,7 @@
           <p style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"> {{ file.title }} </p>
           <el-image
             class="image-card-attachment"
-            :src="file.imageDate.uri"
+            :src="file.content_type.includes('image') ? getImageFromSource(file).uri : converFile(file).uri"
             fit="contain"
             :preview-src-list="previewList"
             style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;"
@@ -101,11 +101,15 @@ import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import UploadResource from './uploadResource.vue'
 
 // Utils and Helper Methods
-import { requestResource } from '@/api/ADempiere/user-interface/component/resource.js'
+import {
+  requestResource
+} from '@/api/ADempiere/user-interface/component/resource.js'
 import { getImagePath } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
-import { showMessage } from '@/utils/ADempiere/notification'
+import {
+  downloadResource
+} from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
   name: 'AttachmentManager',
@@ -223,8 +227,6 @@ export default defineComponent({
      */
 
     const handleDownload = async(file, isDownload = true) => {
-      // if (isEmptyValue(file.url)) return
-      // file.url = URL.createObjectURL(file)
       let link
       if (file.content_type.includes('image')) {
         const imagen = await fetch(file.imageDate.uri)
@@ -236,40 +238,22 @@ export default defineComponent({
         link.click()
         return
       }
-      requestResource({
-        resourceUuid: file.resource_uuid
-      })
-        .then(response => {
-          console.log({ response })
+
+      fetch(
+        requestResource({
+          resourceUuid: file.resource_uuid,
+          resourceName: file.title
         })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'error'
+      )
+        .then((response) => response.body)
+        .then((resource) => {
+          const reader = resource.getReader()
+          downloadResource({
+            mimeType: file.content_type,
+            name: file.title,
+            reader
           })
         })
-      // const urlImage = await axios.get(file.imageDate. )
-      //   .then(response => {
-      //     const { data } = response
-        //     const blob = new Blob([Uint8Array.from(data)], {
-        //       type: file.content_type
-        //     })
-      //     link = document.createElement('a')
-      //     link.href = window.URL.createObjectURL(blob)
-      //     link.download = file.file_name
-      //     if (isDownload) {
-      //       link.click()
-      //     }
-      //     dialogImageUrl.value = {
-      //       ...file,
-      //       src: link.href
-      //     }
-      //     isLoadeDialogFileUrl.value = false
-      //   })
-      // return {
-      //   urlImage,
-      //   link
-      // }
     }
 
     /**
@@ -288,6 +272,15 @@ export default defineComponent({
           break
         case 'application/octet-stream':
           urlImage = octetStream(image)
+          break
+        case 'text/csv':
+          urlImage = require('@/image/ADempiere/attachment/csv.png')
+          break
+        case 'text/plain':
+          urlImage = require('@/image/ADempiere/attachment/txt.png')
+          break
+        case 'application/vnd.ms-excel':
+          urlImage = require('@/image/ADempiere/attachment/xlsx.png')
           break
         default:
           urlImage
