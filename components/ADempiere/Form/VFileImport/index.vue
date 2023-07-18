@@ -76,6 +76,24 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               style="float: right;margin-right: 10px;margin-top: 10px;"
               @click="prevStep"
             />
+            <span v-if="!showNavegationTable">
+              <el-button
+                type="info"
+                plain
+                size="small"
+                style="float: right;margin-right: 0px;margin-top: 10px;"
+              >
+                <i class="el-icon-arrow-up" style="font-size: 16px;" />
+              </el-button>
+              <el-button
+                type="info"
+                plain
+                size="small"
+                style="float: right;margin-right: 10px;margin-top: 10px;"
+              >
+                <i class="el-icon-arrow-down" style="font-size: 16px;" />
+              </el-button>
+            </span>
           </template>
         </uploadFile>
       </transition>
@@ -164,9 +182,21 @@ export default defineComponent({
       const {
         tablaId,
         charsets,
-        importFormats,
+        importFormats
       } = store.getters.getAttribute
       return !isEmptyValue(tablaId) && !isEmptyValue(charsets) && !isEmptyValue(importFormats)
+    })
+
+    const showNavegationTable = computed(() => {
+      const {
+        data,
+        header
+      } = store.getters.getFile
+      console.log({
+        data,
+        header
+      })
+      return isEmptyValue(data) && isEmptyValue(header)
     })
 
     // Computed
@@ -206,6 +236,7 @@ export default defineComponent({
       initialSept,
       isDisableNextTable,
       validate,
+      showNavegationTable,
       prevStep,
       nextStep,
       actionClear

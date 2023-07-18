@@ -155,7 +155,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 <script>
 import {
   defineComponent,
-  computed
+  computed,
+  watch
   // ref
 } from '@vue/composition-api'
 import store from '@/store'
@@ -575,6 +576,21 @@ export default defineComponent({
     }
 
     store.dispatch('findListTable')
+
+    watch(tableId, (newValue, oldValue) => {
+      if (newValue) {
+        store.commit('updateAttributeVFileImport', {
+          attribute: 'attribute',
+          criteria: 'importFormats',
+          value: ''
+        })
+        if (isEmptyValue(optionsCharsets.value)) findCharsets(true)
+        const defaultCharset = optionsCharsets.value.find(list => list.label === 'UTF-8')
+        if (isEmptyValue(currrentCharsets.value) && !isEmptyValue(defaultCharset)) {
+          currrentCharsets.value = defaultCharset.value
+        }
+      }
+    })
 
     return {
       listTables,

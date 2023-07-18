@@ -18,11 +18,6 @@
   <div class="main-express-receipt">
     <el-card class="box-card">
       <el-card>
-        <!-- <div slot="header">
-          <h3 style="text-align: center;margin: 0px;">
-            {{ 'Configure Archivo a Importar' }}
-          </h3>
-        </div> -->
         <el-row :gutter="24">
           <el-form
             ref="form-express-receipt"
@@ -38,6 +33,7 @@
                 <upload-resource
                   table-name="AD_ImpFormat"
                   :record-id="currrentImportFormats.value"
+                  :load-data="handleSuccess"
                   style="text-align: center;"
                 />
               </el-form-item>
@@ -78,14 +74,14 @@
         <el-table-column
           v-for="item of headerTable"
           :key="item.label"
-          :width="(item.length >= 5) ? '350' : 'auto'"
+          width="150"
         >
           <template slot="header" slot-scope="scope">
             {{ scope.row }}
-            <span v-if="isEmptyValue(formatFields)">
+            <span>
               {{ item.label }}
             </span>
-            <span v-else>
+            <!-- <span v-else>
               <el-dropdown trigger="click" @command="handleFormat">
                 <span class="el-dropdown-link">
                   {{ item.label }} <svg-icon icon-class="more-vertical" />
@@ -106,7 +102,7 @@
                   </template>
                 </el-dropdown-menu>
               </el-dropdown>
-            </span>
+            </span> -->
           </template>
           <template slot-scope="scope">
             {{ scope.row[item.key] }}
@@ -169,7 +165,6 @@
 <script>
 import {
   defineComponent,
-  ref,
   computed
 } from '@vue/composition-api'
 
@@ -197,16 +192,20 @@ export default defineComponent({
   },
 
   setup() {
-    /**
-     * Ref
-     */
-    const headerTable = ref([])
-    const dataTable = ref([])
-    // const formatFields = ref([])
 
     /**
      * Computed
      */
+
+    const dataTable = computed(() => {
+      const { data } = store.getters.getFile
+      return data
+    })
+
+    const headerTable = computed(() => {
+      const { header } = store.getters.getFile
+      return header
+    })
 
     const formatFields = computed(() => {
       const { formatFields } = store.getters.getAttribute
@@ -218,7 +217,14 @@ export default defineComponent({
       get() {
         const { charsets } = store.getters.getAttribute
         const { listCharsets } = store.getters.getOptions
-        return listCharsets.find(list => list.value === charsets)
+        const defautl = listCharsets.find(list => list.value === charsets)
+        if (!isEmptyValue(defautl)) {
+          return defautl
+        }
+        return {
+          label: '',
+          value: null
+        }
       },
       // setter
       set(value) {
@@ -235,7 +241,14 @@ export default defineComponent({
       get() {
         const { importFormats } = store.getters.getAttribute
         const { listImportFormats } = store.getters.getOptions
-        return listImportFormats.find(list => list.value === importFormats)
+        const defautl = listImportFormats.find(list => list.value === importFormats)
+        if (!isEmptyValue(defautl)) {
+          return defautl
+        }
+        return {
+          label: '',
+          value: null
+        }
       },
       // setter
       set(value) {
@@ -372,34 +385,28 @@ export default defineComponent({
       headerTable.value = alo
     }
 
-    // Optener Excel
-
-    function beforeUpload(file) {
-      const isLt1M = file.size / 1024 / 1024 < 1
-      if (isLt1M) {
-        return true
-      }
-      console.log('error')
-      return false
-    }
-
-    function handleSuccess({ data, workbook, firstSheetName, worksheet, results, header }) {
-      const epale = results.filter((data, index) => {
+    function handleSuccess({ results, header }) {
+      const data = results.filter((data, index) => {
         if (index <= 50) {
           return data
         }
       })
-      dataTable.value = epale
-      headerTable.value = header.map(list => {
-        return {
-          key: list,
-          label: list
-        }
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'file',
+        criteria: 'data',
+        value: data
+      })
+      store.commit('updateAttributeVFileImport', {
+        attribute: 'file',
+        criteria: 'header',
+        value: header.map(list => {
+          return {
+            key: list,
+            label: list
+          }
+        })
       })
     }
-    /**
-     * Watch
-     */
     return {
       // Ref
       headerTable,
@@ -416,12 +423,16 @@ export default defineComponent({
       findImportFormats,
       remoteSearchCharsets,
       remoteSearchImportFormats,
-      // Optener CSV
-      beforeUpload,
       handleSuccess,
       handleFormat
-      // Action Panel Footer
     }
   }
 })
 </script>
+
+<style lang="scss">
+.el-table--border th.el-table__cell {
+  border-bottom: 1px solid #dfe6ec;
+  background: #E8F4FF;
+}
+</style>
