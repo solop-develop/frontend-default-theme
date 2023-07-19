@@ -27,7 +27,7 @@
           >
             <el-col :span="8" style="border: 1px solid rgb(230, 235, 245);padding: 0px 10px;">
               <el-form-item
-                label="Seleccione Archivo a Importar"
+                :label="$t('form.VFileImport.configureToImport.selectFileToImport')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;color: transparent !important;"
               >
                 <upload-resource
@@ -40,21 +40,25 @@
             </el-col>
             <el-col :span="8" style="border: 1px solid #e6ebf5;">
               <el-form-item
-                label="lista de conjuntos de caracteres"
+                :label="$t('form.VFileImport.selectTable.listOfCharacterSets')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
               >
                 <el-tag>
-                  {{ currrentCharsets.label }}
+                  <b style="font-size: 16px;">
+                    {{ currrentCharsets.label }}
+                  </b>
                 </el-tag>
               </el-form-item>
             </el-col>
             <el-col :span="8" style="border: 1px solid #e6ebf5;">
               <el-form-item
-                label="Formato de Importación"
+                :label="$t('form.VFileImport.selectTable.importFormat')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
               >
                 <el-tag>
-                  {{ currrentImportFormats.label }}
+                  <b style="font-size: 16px;">
+                    {{ currrentImportFormats.label }}
+                  </b>
                 </el-tag>
               </el-form-item>
             </el-col>
@@ -69,8 +73,8 @@
         border
         highlight-current-row
         style="width: 100%"
-        empty-text="Sin Datos a Importar"
-        height="450"
+        :empty-text="$t('form.VFileImport.configureToImport.emptyDataTable')"
+        height="35vh"
       >
         <el-table-column
           v-for="item of headerTable"
@@ -100,7 +104,9 @@
         <p
           style="font-size: 18px;text-align: center;margin: 5px;"
         >
-          {{ getInfoImportFormats.name }}
+          <b>
+            {{ getInfoImportFormats.name }}
+          </b>
         </p>
         <p
           style="font-size: 14px;text-align: center;margin: 5px;"
@@ -116,7 +122,7 @@
           inline
         >
           <el-col
-            v-for="field in formatFields"
+            v-for="(field, key) in formatFields"
             :key="field.sequence"
             :span="6"
           >
@@ -126,13 +132,13 @@
             >
               <el-input
                 v-if="field.dataType === 'S'"
-                :value="displayValue(field, field.startNo)"
+                :value="displayValue(field, key)"
                 disabled
                 style="width: 100%;"
               />
               <el-input-number
                 v-else-if="field.dataType === 'N'"
-                v-model="field.defaultValue"
+                :value="displayValue(field, key)"
                 controls-position="right"
                 disabled
                 style="width: 100%;"
@@ -146,7 +152,7 @@
               />
               <el-input
                 v-else-if="field.dataType === 'C'"
-                v-model="field.defaultValue"
+                :value="displayValue(field, key)"
                 disabled
                 style="width: 100%;"
               />
@@ -426,18 +432,18 @@ export default defineComponent({
         })
       })
     }
-    const { header } = store.getters.getFile
 
     function displayValue(field, index) {
+      const { header } = store.getters.getFile
       if (isEmptyValue(header)) return
       const line = formatFields.value.map(list => {
         return {
           ...list,
-          defaultValue: currentLine.value[header[index - 1].key]
+          defaultValue: currentLine.value[header[field.startNo - 1].key]
         }
       })
       listField.value = line
-      return line[index - 1].defaultValue
+      return line[field.startNo - 1].defaultValue
     }
     const singleTable = ref(null)
 

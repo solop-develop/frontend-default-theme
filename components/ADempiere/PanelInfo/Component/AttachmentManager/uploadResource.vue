@@ -110,6 +110,11 @@ export default defineComponent({
           fileName: file.name,
           fileSize: file.size
         }).then(response => {
+          store.commit('updateAttributeVFileImport', {
+            attribute: 'file',
+            criteria: 'id',
+            value: response.id
+          })
           additionalData.value = {
             resource_uuid: response.uuid,
             file_name: response.file_name
@@ -120,7 +125,7 @@ export default defineComponent({
             message: error.message || lang.t('window.containerInfo.attachment.error'),
             type: 'error'
           })
-          reject(false)
+          resolve(true)
         }).finally(() => {
           // store.dispatch('findAttachment', {
           //   tableName: props.tableName,

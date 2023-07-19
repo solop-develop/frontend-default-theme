@@ -67,7 +67,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               class="button-base-icon"
               icon="el-icon-check"
               style="float: right;margin-right: 10px;margin-top: 10px;"
-              @click="nextStep"
+              @click="saveImport"
             />
             <el-button
               type="danger"
@@ -116,6 +116,9 @@ import uploadFile from './uploadFile.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 
+// Api
+import { saveRecordImport } from '@/api/ADempiere/form/VFileImport.js'
+
 export default defineComponent({
   name: 'VFileImport',
 
@@ -142,16 +145,10 @@ export default defineComponent({
 
     const stepList = ref([
       {
-        name: 'Seleccione Tabla'
-      },
-      // {
-      //   name: lang.t('VBankStatementMatch.steps.automaticMatch')
-      // },
-      {
-        name: 'Configure Archivo a Importar'
+        name: lang.t('form.VFileImport.step.selectTable')
       },
       {
-        name: lang.t('VBankStatementMatch.steps.summaryAdjustment')
+        name: lang.t('form.VFileImport.step.configureToImport')
       }
     ])
 
@@ -260,6 +257,22 @@ export default defineComponent({
       index--
     }
 
+    function saveImport() {
+      const {
+        charsets,
+        importFormats
+      } = store.getters.getAttribute
+      const { id } = store.getters.getFile
+      saveRecordImport({
+        id,
+        charset: charsets,
+        importFormatId: importFormats
+      })
+        .then(response => {
+          console.log({ response })
+        })
+    }
+
     return {
       index,
       stepList,
@@ -273,6 +286,7 @@ export default defineComponent({
       showNavegationTable,
       prevStep,
       nextStep,
+      saveImport,
       actionClear,
       changePrevLine,
       changeNextLine
