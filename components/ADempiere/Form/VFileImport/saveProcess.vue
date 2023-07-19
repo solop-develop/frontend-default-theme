@@ -25,20 +25,15 @@
             class="form-min-label"
             inline
           >
-            <el-col :span="8" style="border: 1px solid rgb(230, 235, 245);padding: 0px 10px;">
+            <!-- <el-col :span="spanSize" style="border: 1px solid rgb(230, 235, 245);padding: 0px 10px;">
               <el-form-item
-                :label="$t('form.VFileImport.configureToImport.selectFileToImport')"
+                :label="$t('form.VFileImport.saveAndProcess.fileName')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;color: transparent !important;"
               >
-                <upload-resource
-                  table-name="AD_ImpFormat"
-                  :record-id="currrentImportFormats.value"
-                  :load-data="handleSuccess"
-                  style="text-align: center;"
-                />
+                {{ 'alo' }}
               </el-form-item>
-            </el-col>
-            <el-col :span="8" style="border: 1px solid #e6ebf5;">
+            </el-col> -->
+            <el-col :span="spanSize" style="border: 1px solid #e6ebf5;">
               <el-form-item
                 :label="$t('form.VFileImport.selectTable.listOfCharacterSets')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
@@ -50,7 +45,7 @@
                 </el-tag>
               </el-form-item>
             </el-col>
-            <el-col :span="8" style="border: 1px solid #e6ebf5;">
+            <el-col :span="spanSize" style="border: 1px solid #e6ebf5;">
               <el-form-item
                 :label="$t('form.VFileImport.selectTable.importFormat')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
@@ -62,36 +57,20 @@
                 </el-tag>
               </el-form-item>
             </el-col>
+            <el-col :span="spanSize" style="border: 1px solid #e6ebf5;">
+              <el-form-item
+                :label="$t('form.VFileImport.saveAndProcess.processes')"
+                style="width: 100%;text-align: center;margin-bottom: 0px !important;"
+              >
+                <el-switch
+                  v-model="isProcess"
+                />
+              </el-form-item>
+            </el-col>
           </el-form>
         </el-row>
       </el-card>
       <br>
-
-      <el-table
-        ref="singleTable"
-        :data="dataTable"
-        border
-        highlight-current-row
-        style="width: 100%"
-        :empty-text="$t('form.VFileImport.configureToImport.emptyDataTable')"
-        height="35vh"
-      >
-        <el-table-column
-          v-for="item of headerTable"
-          :key="item.label"
-          width="150"
-        >
-          <template slot="header" slot-scope="scope">
-            {{ scope.row }}
-            <span>
-              {{ item.label }}
-            </span>
-          </template>
-          <template slot-scope="scope">
-            {{ scope.row[item.key] }}
-          </template>
-        </el-table-column>
-      </el-table>
     </el-card>
     <el-card
       v-if="!isEmptyValue(getInfoImportFormats)"
@@ -124,7 +103,7 @@
           <el-col
             v-for="(field, key) in formatFields"
             :key="field.sequence"
-            :span="6"
+            :span="spanSize"
           >
             <el-form-item
               :label="field.name"
@@ -180,8 +159,6 @@ import {
 import store from '@/store'
 
 // Components and Mixins
-import UploadExcelComponent from '@/themes/default/components/UploadExcel/index.vue'
-import UploadResource from '@/themes/default/components/ADempiere/PanelInfo/Component/AttachmentManager/uploadResource.vue'
 
 // Api Request Methods
 import {
@@ -193,12 +170,7 @@ import {
 import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
-  name: 'VFileImport',
-
-  components: {
-    UploadExcelComponent,
-    UploadResource
-  },
+  name: 'saveProcess',
 
   setup() {
     /**
@@ -223,6 +195,27 @@ export default defineComponent({
 
     const currentLine = computed(() => {
       return store.getters.getNavigationLine
+    })
+
+    const spanSize = computed(() => {
+      if (isProcess.value) return 6
+      return 8
+    })
+
+    const isProcess = computed({
+      // getter
+      get() {
+        const { isProcess } = store.getters.getAttribute
+        return isProcess
+      },
+      // setter
+      set(value) {
+        store.commit('updateAttributeVFileImport', {
+          attribute: 'attribute',
+          criteria: 'isProcess',
+          value: value
+        })
+      }
     })
 
     const formatFields = computed({
@@ -410,7 +403,7 @@ export default defineComponent({
       headerTable.value = alo
     }
 
-    function handleSuccess({ results, header, resource, file }) {
+    function handleSuccess({ results, header }) {
       const data = results.filter((data, index) => {
         if (index <= 50) {
           return data
@@ -420,14 +413,6 @@ export default defineComponent({
         attribute: 'file',
         criteria: 'data',
         value: data
-      })
-      store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'resource',
-        value: {
-          ...resource,
-          fileLabel: file.name
-        }
       })
       store.commit('updateAttributeVFileImport', {
         attribute: 'file',
@@ -463,6 +448,8 @@ export default defineComponent({
 
     return {
       // Ref
+      isProcess,
+      spanSize,
       headerTable,
       dataTable,
       formatFields,

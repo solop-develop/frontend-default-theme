@@ -88,6 +88,7 @@ export default defineComponent({
     const upload = ref(null)
     const filesList = ref([])
     const additionalData = ref({})
+    const fileResource = ref(({}))
 
     const additionalHeaders = computed(() => {
       const token = getToken()
@@ -110,11 +111,7 @@ export default defineComponent({
           fileName: file.name,
           fileSize: file.size
         }).then(response => {
-          store.commit('updateAttributeVFileImport', {
-            attribute: 'file',
-            criteria: 'id',
-            value: response.id
-          })
+          fileResource.value = response
           additionalData.value = {
             resource_uuid: response.uuid,
             file_name: response.file_name
@@ -142,7 +139,11 @@ export default defineComponent({
       const rawFile = file.raw
       readerData(rawFile)
         .then(response => {
-          props.loadData(response)
+          props.loadData({
+            ...response,
+            resource: fileResource.value,
+            file
+          })
         })
       additionalData.value = {}
 
@@ -189,9 +190,10 @@ export default defineComponent({
     }
 
     return {
-      additionalData,
-      additionalHeaders,
       endPointUploadResource,
+      additionalHeaders,
+      additionalData,
+      fileResource,
       filesList,
       upload,
       isValidUploadHandler,

@@ -62,13 +62,20 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           v-if="currentSetp === 2"
         >
           <template v-slot:footer>
-            <el-button
+            <!-- <el-button
               type="primary"
               class="button-base-icon"
               icon="el-icon-check"
               style="float: right;margin-right: 10px;margin-top: 10px;"
               :loading="isLoadSave"
               @click="saveImport"
+            /> -->
+            <el-button
+              type="primary"
+              class="button-base-icon"
+              icon="el-icon-check"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+              @click="nextStep"
             />
             <el-button
               type="danger"
@@ -99,6 +106,27 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </span>
           </template>
         </uploadFile>
+        <saveProcess
+          v-if="currentSetp === 3"
+        >
+          <template v-slot:footer>
+            <el-button
+              type="primary"
+              class="button-base-icon"
+              icon="el-icon-check"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+              :loading="isLoadSave"
+              @click="saveImport"
+            />
+            <el-button
+              type="danger"
+              class="button-base-icon"
+              icon="el-icon-close"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
+              @click="prevStep"
+            />
+          </template>
+        </saveProcess>
       </transition>
     </div>
   </div>
@@ -113,7 +141,7 @@ import store from '@/store'
 // Components and Mixins
 import selectTable from './selectTable.vue'
 import uploadFile from './uploadFile.vue'
-
+import saveProcess from './saveProcess.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
@@ -125,7 +153,8 @@ export default defineComponent({
 
   components: {
     selectTable,
-    uploadFile
+    uploadFile,
+    saveProcess
   },
 
   props: {
@@ -150,6 +179,9 @@ export default defineComponent({
       },
       {
         name: lang.t('form.VFileImport.step.configureToImport')
+      },
+      {
+        name: lang.t('form.VFileImport.step.saveAndProcess')
       }
     ])
 
