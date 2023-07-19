@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -111,7 +111,7 @@ export default defineComponent({
           fileSize: file.size
         }).then(response => {
           additionalData.value = {
-            resource_uuid: response.resource_uuid,
+            resource_uuid: response.uuid,
             file_name: response.file_name
           }
           resolve(true)
@@ -122,11 +122,12 @@ export default defineComponent({
           })
           reject(false)
         }).finally(() => {
-          store.dispatch('findAttachment', {
-            tableName: props.tableName,
-            recordId: props.recordId,
-            recordUuid: props.recordUuid
-          })
+          // store.dispatch('findAttachment', {
+          //   tableName: props.tableName,
+          //   recordId: props.recordId,
+          //   recordUuid: props.recordUuid
+          // })
+          // upload.value.uploadFiles = filesList.value
           resolve(true)
         })
       })
@@ -139,6 +140,12 @@ export default defineComponent({
           props.loadData(response)
         })
       additionalData.value = {}
+
+      store.dispatch('findAttachment', {
+        tableName: props.tableName,
+        recordId: props.recordId,
+        recordUuid: props.recordUuid
+      })
     }
 
     function readerData(rawFile) {
