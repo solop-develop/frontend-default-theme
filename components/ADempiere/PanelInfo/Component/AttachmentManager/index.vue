@@ -1,7 +1,8 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -9,7 +10,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -35,6 +36,8 @@
         </b>
       </el-button>
     </el-row>
+
+    <!-- Mosaic View -->
     <el-row v-if="!isList" :gutter="20">
       <el-col v-for="(file, key) in attachmentList" :key="key" :span="8">
         <el-card shadow="hover" class="image-attachment">
@@ -46,11 +49,22 @@
             :preview-src-list="previewList"
             style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;"
           />
-          <el-button icon="el-icon-download" plain style="margin-bottom: 10px;" @click="handleDownload(file)" />
-          <el-button icon="el-icon-delete" plain style="margin-bottom: 10px;" @click="handleRemove(file)" />
+          <el-button
+            icon="el-icon-download"
+            plain
+            style="margin-bottom: 10px;"
+            @click="handleDownload(file)"
+          />
+          <el-button
+            icon="el-icon-delete"
+            plain style="margin-bottom: 10px;"
+            @click="handleRemove(file)"
+          />
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- List View -->
     <el-row v-else :gutter="20">
       <el-col v-for="(file, key) in attachmentList" :key="key" :span="24">
         <el-card shadow="hover" class="image-attachment">
@@ -69,7 +83,6 @@
         </el-card>
       </el-col>
     </el-row>
-
     <br>
 
     <span>
@@ -93,7 +106,10 @@ import { defineComponent, computed, ref } from '@vue/composition-api'
 import store from '@/store'
 
 // API Request Methods
-import { deleteResourceReference } from '@/api/ADempiere/user-interface/component/resource'
+import {
+  requestResource,
+  deleteResourceReference
+} from '@/api/ADempiere/user-interface/component/resource'
 
 // Components and Mixins
 import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
@@ -101,14 +117,11 @@ import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import UploadResource from './uploadResource.vue'
 
 // Utils and Helper Methods
-import {
-  requestResource
-} from '@/api/ADempiere/user-interface/component/resource.js'
-import { getImagePath } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { getExtensionFromFile } from '@/utils/ADempiere/resource.js'
 import {
-  downloadResource
+  buildLinkHref,
+  getExtensionFromFile,
+  getImagePath,
 } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
@@ -167,16 +180,17 @@ export default defineComponent({
           return []
         }
         return storedResourcesList.map(element => {
+          const valueToReplace = element.uuid + '-'
           if (element.content_type.includes('image')) {
             return {
               ...element,
-              title: element.file_name.replace(element.resource_uuid, ''),
+              title: element.file_name.replace(valueToReplace, ''),
               imageDate: getImageFromSource(element)
             }
           }
           return {
             ...element,
-            title: element.file_name.replace(element.resource_uuid, ''),
+            title: element.file_name.replace(valueToReplace, ''),
             imageDate: converFile(element)
           }
         })
@@ -193,14 +207,13 @@ export default defineComponent({
      * Handle Remove
      * @param {Object} file
      */
-
     const handleRemove = (file) => {
       deleteResourceReference({
-        resourceUuid: file.resource_uuid,
+        resourceUuid: file.uuid,
         resourceName: file.file_name
       }).then(() => {
         const resourceReferencesList = attachmentList.value.filter(resourceReference => {
-          return resourceReference.resource_uuid !== file.resource_uuid ||
+          return resourceReference.uuid !== file.uuid ||
             resourceReference.file_name !== file.file_name
         })
         attachmentList.value = resourceReferencesList
@@ -211,7 +224,6 @@ export default defineComponent({
      * Handle Picture Card Preview
      * @param {Object} file
      */
-
     const handlePictureCardPreview = (file) => {
       imageKey.value = attachmentList.value.findIndex(list => list.imageDate.uri === file.imageDate.uri)
       // if (file.content_type.includes('application/pdf')) {
@@ -225,7 +237,6 @@ export default defineComponent({
      * @param {Object} file
      * @param {Boolean} isDownload
      */
-
     const handleDownload = async(file, isDownload = true) => {
       let link
       if (file.content_type.includes('image')) {
@@ -239,28 +250,23 @@ export default defineComponent({
         return
       }
 
-      fetch(
-        requestResource({
-          resourceUuid: file.resource_uuid,
-          resourceName: file.title
+      requestResource({
+        resourceUuid: file.uuid,
+        resourceName: file.title
+      }).then(response => {
+        buildLinkHref({
+          fileName: file.title,
+          mimeType: file.content_type,
+          outputStream: response, // response.data
+          isDownload: true
         })
-      )
-        .then((response) => response.body)
-        .then((resource) => {
-          const reader = resource.getReader()
-          downloadResource({
-            mimeType: file.content_type,
-            name: file.title,
-            reader
-          })
-        })
+      })
     }
 
     /**
      * Conver File
      * @param {Object} image
      */
-
     const converFile = (image) => {
       let urlImage
       switch (image.content_type) {
@@ -292,32 +298,15 @@ export default defineComponent({
     }
 
     /**
-     * Before Avatar Upload
-     * @param {Object} file
-     */
-
-    const beforeAvatarUpload = (file) => {
-      listImageAll.value.push({
-        name: file.name,
-        type: file.type,
-        status: 'newImage',
-        uuid: file.uid,
-        url: URL.createObjectURL(file)
-      })
-    }
-
-    /**
      * Image From Source
      * @param {Object} file
      */
-
     const getImageFromSource = (file) => {
       const image = getImagePath({
         file: file.file_name,
         width: 900,
         height: 500
       })
-      // beforeAvatarUpload(file)
       return image
     }
 
@@ -325,10 +314,9 @@ export default defineComponent({
      * Octet Stream
      * @param {Object} file
      */
-
     const octetStream = (file) => {
       let urlImage
-      if (file.file_name.includes('.xlsx')) {
+      if (['.xlsx', '.xls'].includes(file.file_name)) {
         urlImage = require('@/image/ADempiere/attachment/xlsx.png')
       } else if (file.file_name.includes('.rar')) {
         urlImage = require('@/image/ADempiere/attachment/rar.png')
@@ -353,7 +341,6 @@ export default defineComponent({
       imageKey,
       previewList,
       // Methods
-      beforeAvatarUpload,
       converFile,
       handleRemove,
       handlePictureCardPreview,
