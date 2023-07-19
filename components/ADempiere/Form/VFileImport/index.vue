@@ -67,6 +67,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               class="button-base-icon"
               icon="el-icon-check"
               style="float: right;margin-right: 10px;margin-top: 10px;"
+              :loading="isLoadSave"
               @click="saveImport"
             />
             <el-button
@@ -115,7 +116,7 @@ import uploadFile from './uploadFile.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
-
+import { showMessage } from '@/utils/ADempiere/notification'
 // Api
 import { saveRecordImport } from '@/api/ADempiere/form/VFileImport.js'
 
@@ -151,6 +152,8 @@ export default defineComponent({
         name: lang.t('form.VFileImport.step.configureToImport')
       }
     ])
+
+    const isLoadSave = ref(false)
 
     const currentSetp = ref(1)
 
@@ -263,18 +266,33 @@ export default defineComponent({
         importFormats
       } = store.getters.getAttribute
       const { id } = store.getters.getFile
+      isLoadSave.value = true
       saveRecordImport({
         id,
         charset: charsets,
         importFormatId: importFormats
       })
         .then(response => {
-          console.log({ response })
+          const { message } = response
+          showMessage({
+            message: message,
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          showMessage({
+            message: error.message,
+            type: 'error'
+          })
+        })
+        .finally(() => {
+          isLoadSave.value = false
         })
     }
 
     return {
       index,
+      isLoadSave,
       stepList,
       currentSetp,
       isBack,
