@@ -23,7 +23,7 @@
   >
     <el-upload
       ref="upload"
-      action="https://jsonplaceholder.typicode.com/posts/"
+      :action="endPointUploadResource"
       class="upload-demo"
       name="file"
       :file-list="filesList"
@@ -102,10 +102,6 @@ export default defineComponent({
     })
 
     function isValidUploadHandler(file) {
-      if (!isEmptyValue(file)) {
-        console.log({ file })
-        return
-      }
       return new Promise((resolve, reject) => {
         setResourceReference({
           tableName: props.tableName,

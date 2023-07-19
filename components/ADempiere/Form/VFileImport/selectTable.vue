@@ -27,7 +27,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             v-if="isEmptyValue(currentTable)"
             style="text-align: center;margin: 0px;"
           >
-            {{ $t('VFileImport.selectTable.title') }}
+            {{ $t('form.VFileImport.selectTable.title') }}
           </h3>
           <span
             v-else
@@ -65,7 +65,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               >
                 <template slot="label">
                   <span style="color: #f34b4b"> * </span>
-                  {{ $t('VFileImport.selectTable.importFormat') }}
+                  {{ $t('form.VFileImport.selectTable.importFormat') }}
                 </template>
                 <el-select
                   v-model="currrentImportFormats"
@@ -88,7 +88,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               >
                 <template slot="label">
                   <span style="color: #f34b4b"> * </span>
-                  {{ $t('VFileImport.selectTable.listOfCharacterSets') }}
+                  {{ $t('form.VFileImport.selectTable.listOfCharacterSets') }}
                 </template>
                 <el-select
                   v-model="currrentCharsets"

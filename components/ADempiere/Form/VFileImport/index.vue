@@ -145,10 +145,10 @@ export default defineComponent({
 
     const stepList = ref([
       {
-        name: lang.t('VFileImport.steps.selectTable')
+        name: lang.t('form.VFileImport.step.selectTable')
       },
       {
-        name: lang.t('VFileImport.steps.configureToImport')
+        name: lang.t('form.VFileImport.step.configureToImport')
       }
     ])
 

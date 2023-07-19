@@ -27,7 +27,7 @@
           >
             <el-col :span="8" style="border: 1px solid rgb(230, 235, 245);padding: 0px 10px;">
               <el-form-item
-                :label="$t('VFileImport.configureToImport.selectFileToImport')"
+                :label="$t('form.VFileImport.configureToImport.selectFileToImport')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;color: transparent !important;"
               >
                 <upload-resource
@@ -40,7 +40,7 @@
             </el-col>
             <el-col :span="8" style="border: 1px solid #e6ebf5;">
               <el-form-item
-                label="Lista de conjuntos de caracteres"
+                :label="$t('form.VFileImport.selectTable.listOfCharacterSets')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
               >
                 <el-tag>
@@ -52,7 +52,7 @@
             </el-col>
             <el-col :span="8" style="border: 1px solid #e6ebf5;">
               <el-form-item
-                label="Formato de Importación"
+                :label="$t('form.VFileImport.selectTable.importFormat')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
               >
                 <el-tag>
@@ -73,7 +73,7 @@
         border
         highlight-current-row
         style="width: 100%"
-        :empty-text="$t('VFileImport.configureToImport.emptyDataTable')"
+        :empty-text="$t('form.VFileImport.configureToImport.emptyDataTable')"
         height="35vh"
       >
         <el-table-column
