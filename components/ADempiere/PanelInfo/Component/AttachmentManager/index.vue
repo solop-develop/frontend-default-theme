@@ -57,7 +57,8 @@
           />
           <el-button
             icon="el-icon-delete"
-            plain style="margin-bottom: 10px;"
+            plain
+            style="margin-bottom: 10px;"
             @click="handleRemove(file)"
           />
         </el-card>
@@ -121,7 +122,7 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
   buildLinkHref,
   getExtensionFromFile,
-  getImagePath,
+  getImagePath
 } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
