@@ -61,6 +61,7 @@ import {
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { getToken } from '@/utils/auth'
+import { read, utils } from 'xlsx'
 
 export default defineComponent({
   name: 'UploadResource',
@@ -77,7 +78,8 @@ export default defineComponent({
     recordUuid: {
       type: String,
       default: ''
-    }
+    },
+    loadData: Function
   },
 
   setup(props) {
@@ -112,7 +114,6 @@ export default defineComponent({
             resource_uuid: response.uuid,
             file_name: response.file_name
           }
-          // filesList.value.push(file)
           resolve(true)
         }).catch(error => {
           showMessage({
@@ -127,11 +128,17 @@ export default defineComponent({
           //   recordUuid: props.recordUuid
           // })
           // upload.value.uploadFiles = filesList.value
+          resolve(true)
         })
       })
     }
 
     function loadedSucess(response, file, fileList) {
+      const rawFile = file.raw
+      readerData(rawFile)
+        .then(response => {
+          props.loadData(response)
+        })
       additionalData.value = {}
 
       store.dispatch('findAttachment', {
@@ -141,6 +148,41 @@ export default defineComponent({
       })
     }
 
+    function readerData(rawFile) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = e => {
+          const data = e.target.result
+          const workbook = read(data, { type: 'array' })
+          const firstSheetName = workbook.SheetNames[0]
+          const worksheet = workbook.Sheets[firstSheetName]
+          const header = getHeaderRow(worksheet)
+          const results = utils.sheet_to_json(worksheet)
+          resolve({
+            header,
+            results
+          })
+        }
+        reader.readAsArrayBuffer(rawFile)
+      })
+    }
+
+    function getHeaderRow(sheet) {
+      const headers = []
+      const range = utils.decode_range(sheet['!ref'])
+      let C
+      const R = range.s.r
+      /* start in the first row */
+      for (C = range.s.c; C <= range.e.c; ++C) { /* walk every column in the range */
+        const cell = sheet[utils.encode_cell({ c: C, r: R })]
+        /* find the cell in the first row */
+        let hdr = 'UNKNOWN ' + C // <-- replace with your desired default
+        if (cell && cell.t) hdr = utils.format_cell(cell)
+        headers.push(hdr)
+      }
+      return headers
+    }
+
     return {
       additionalData,
       additionalHeaders,
@@ -148,7 +190,8 @@ export default defineComponent({
       filesList,
       upload,
       isValidUploadHandler,
-      loadedSucess
+      loadedSucess,
+      readerData
     }
   }
 })
