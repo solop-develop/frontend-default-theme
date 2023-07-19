@@ -27,7 +27,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             v-if="isEmptyValue(currentTable)"
             style="text-align: center;margin: 0px;"
           >
-            {{ 'Por Favor Seleccione una Tabla' }}
+            {{ $t('VFileImport.selectTable.title') }}
           </h3>
           <span
             v-else
@@ -43,7 +43,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
                   <i v-if="currentTable.icon.type === 'i'" :class="currentTable.icon.class" />
                   <svg-icon v-else :icon-class="currentTable.icon.class" />
                 </span>
-                <!-- <el-divider direction="vertical" /> -->
                 <p
                   style="text-align: center;margin: 0px;font-size: 12px;"
                 >
@@ -66,7 +65,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               >
                 <template slot="label">
                   <span style="color: #f34b4b"> * </span>
-                  {{ 'Formato de Importación' }}
+                  {{ $t('VFileImport.selectTable.importFormat') }}
                 </template>
                 <el-select
                   v-model="currrentImportFormats"
@@ -89,7 +88,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               >
                 <template slot="label">
                   <span style="color: #f34b4b"> * </span>
-                  {{ 'Lista de conjuntos de caracteres' }}
+                  {{ $t('VFileImport.selectTable.listOfCharacterSets') }}
                 </template>
                 <el-select
                   v-model="currrentCharsets"

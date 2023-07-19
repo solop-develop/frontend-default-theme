@@ -23,7 +23,7 @@
   >
     <el-upload
       ref="upload"
-      :action="endPointUploadResource"
+      action="https://jsonplaceholder.typicode.com/posts/"
       class="upload-demo"
       name="file"
       :file-list="filesList"
@@ -102,6 +102,10 @@ export default defineComponent({
     })
 
     function isValidUploadHandler(file) {
+      if (!isEmptyValue(file)) {
+        console.log({ file })
+        return
+      }
       return new Promise((resolve, reject) => {
         setResourceReference({
           tableName: props.tableName,
@@ -110,6 +114,11 @@ export default defineComponent({
           fileName: file.name,
           fileSize: file.size
         }).then(response => {
+          store.commit('updateAttributeVFileImport', {
+            attribute: 'file',
+            criteria: 'id',
+            value: response.id
+          })
           additionalData.value = {
             resource_uuid: response.resource_uuid,
             file_name: response.file_name
@@ -120,7 +129,7 @@ export default defineComponent({
             message: error.message || lang.t('window.containerInfo.attachment.error'),
             type: 'error'
           })
-          reject(false)
+          resolve(true)
         }).finally(() => {
           store.dispatch('findAttachment', {
             tableName: props.tableName,
