@@ -24,7 +24,6 @@
         id="panel-select-table"
         class="panel-select-table"
       >
-        {{ currrentCharsets }}
         <div slot="header" class="clearfix" :style="isEmptyValue(currentTable) ? 'padding: 10px;' : 'padding-right: 10px; padding-left: 10px; padding-top: 10px;'">
           <h3
             v-if="isEmptyValue(currentTable)"
