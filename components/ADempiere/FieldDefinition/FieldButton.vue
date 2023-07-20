@@ -137,7 +137,7 @@ export default {
         return {
           is: 'i',
           class: 'el-icon-data-analysis',
-          start: generateReportOfWindow.generateReportOfWindow({
+          start: () => generateReportOfWindow.generateReportOfWindow({
             parentUuid: this.parentUuid,
             containerUuid: this.containerUuid,
             uuid: this.metadata.process.uuid
