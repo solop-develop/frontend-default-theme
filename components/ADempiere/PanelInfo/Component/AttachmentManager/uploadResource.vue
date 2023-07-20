@@ -137,14 +137,16 @@ export default defineComponent({
 
     function loadedSucess(response, file, fileList) {
       const rawFile = file.raw
-      readerData(rawFile)
-        .then(response => {
-          props.loadData({
-            ...response,
-            resource: fileResource.value,
-            file
+      if (props.loadData) {
+        readerData(rawFile)
+          .then(response => {
+            props.loadData({
+              ...response,
+              resource: fileResource.value,
+              file
+            })
           })
-        })
+      }
       additionalData.value = {}
 
       store.dispatch('findAttachment', {
@@ -154,6 +156,9 @@ export default defineComponent({
       })
     }
 
+    /**
+     * TODO: Remove this, handle with callback
+     */
     function readerData(rawFile) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -173,6 +178,9 @@ export default defineComponent({
       })
     }
 
+    /**
+     * TODO: Remove this, handle with callback
+     */
     function getHeaderRow(sheet) {
       const headers = []
       const range = utils.decode_range(sheet['!ref'])
@@ -197,8 +205,7 @@ export default defineComponent({
       filesList,
       upload,
       isValidUploadHandler,
-      loadedSucess,
-      readerData
+      loadedSucess
     }
   }
 })
