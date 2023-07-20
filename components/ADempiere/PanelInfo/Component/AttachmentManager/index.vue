@@ -68,14 +68,14 @@
               :label="file.id"
               @click="resourceReference = file"
             >
-              {{ file.title }}
+              {{ file.name }}
             </el-radio>
           </div>
           <p
             v-else
             style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
           >
-            {{ file.title }}
+            {{ file.name }}
           </p>
 
           <el-image
@@ -124,15 +124,15 @@
               :label="file.id"
               @click="resourceReference = file"
             >
-              {{ file.title }}
+              {{ file.name }}
             </el-radio>
             <p
               v-else
               style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
             >
-              {{ file.title }}
+              {{ file.name }}
             </p>
-            <!-- <b>{{ file.title }}</b> -->
+            <!-- <b>{{ file.name }}</b> -->
             <br>
             <span>{{ formatFileSize(file.file_size) }}</span>
           </div>
@@ -247,10 +247,8 @@ export default defineComponent({
           return []
         }
         return storedResourcesList.map(element => {
-          const valueToReplace = element.uuid + '-'
           return {
             ...element,
-            title: element.file_name.replace(valueToReplace, ''),
             src: getSurceFile(element)
           }
         })
@@ -315,17 +313,17 @@ export default defineComponent({
         const imageURL = URL.createObjectURL(imagenblob)
         link = document.createElement('a')
         link.href = imageURL
-        link.download = file.title
+        link.download = file.name
         link.click()
         return
       }
 
       requestResource({
         resourceUuid: file.uuid,
-        resourceName: file.title
+        resourceName: file.file_name
       }).then(response => {
         buildLinkHref({
-          fileName: file.title,
+          fileName: file.name,
           mimeType: file.content_type,
           outputStream: response, // response.data
           isDownload: true
