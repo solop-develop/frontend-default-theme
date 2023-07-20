@@ -15,7 +15,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <div style="height: 85vh">
+  <div style="height: 85vh;overflow: auto;">
     <el-card class="box-card" style="margin: 0px 5px;padding: 10px 15px;">
       <div slot="header" class="clearfix">
         <h1 style="width: 200px;padding: 0px;margin: 0px 10px;display: contents;">
@@ -60,22 +60,22 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-button
                 type="success"
                 class="button-base-icon"
-                :loading="isRun"
+                :loading="scope.row.isLoading"
                 plain
-                :disabled="isRun"
+                :disabled="scope.row.isLoading"
                 @click="runJob(scope.row)"
               >
-                <svg-icon v-if="!isRun" icon-class="run" />
+                <svg-icon v-if="!scope.row.isLoading" icon-class="run" />
               </el-button>
               <el-button
                 type="info"
                 class="button-base-icon"
-                :loading="isRun"
+                :loading="scope.row.isLoading"
                 plain
-                :disabled="isRun"
+                :disabled="scope.row.isLoading"
                 @click="selectJobs(scope.row)"
               >
-                <svg-icon v-if="!isRun" icon-class="details" />
+                <svg-icon v-if="!scope.row.isLoading" icon-class="details" />
               </el-button>
             </template>
           </el-table-column>
@@ -103,7 +103,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               plain
               style="float: right;"
               :disabled="isRun"
-              @click="getListJobs"
+              @click="executionsJobs(currentJob.id)"
             />
             <el-button
               class="button-base-icon"
@@ -140,7 +140,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     {{ currentJob[summary.key] }}
                   </el-form-item>
                   <el-form-item style="margin-bottom: 0px">
-                    <div id="code" style="background: #282c34;color: #fff;padding: 15px">
+                    <div id="code" style="background: #282c34;color: #fff;padding: 15px;overflow: auto;">
                       {{ currentJob.executor_config }}
                     </div>
                   </el-form-item>
@@ -202,8 +202,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   :label="header.label"
                 >
                   <template slot-scope="scope">
-                    <el-button v-if="'success' === header.key" :type="scope.row[header.key] ? 'primary' : 'danger'" round>
-                      {{ scope.row[header.key] }}
+                    <el-button v-if="'success' === header.key" :type="scope.row[header.key] ? 'success' : 'danger'" round>
+                      <span v-if="scope.row[header.key]">
+                        {{ $t('form.tasks.table.success') }}
+                      </span>
+                      <span v-else>
+                        {{ $t('form.tasks.table.error') }}
+                      </span>
                     </el-button>
                     <span v-else>
                       {{ scope.row[header.key] }}
@@ -239,9 +244,9 @@ import {
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
-import { dateTimeFormats } from '@/utils/ADempiere/formatValue/dateFormat'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
+import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'TaskManager',
@@ -277,7 +282,14 @@ export default defineComponent({
               type: 'error'
             })
           }
-          if (!isEmptyValue(response)) list.value = response
+          if (!isEmptyValue(response)) {
+            list.value = response.map(listJob => {
+              return {
+                ...listJob,
+                isLoading: false
+              }
+            })
+          }
         })
         .catch(error => {
           showMessage({
@@ -308,8 +320,8 @@ export default defineComponent({
             const logs = (result.length > 5) ? JSON.parse(result) : {}
             return {
               ...list,
-              startDate: dateTimeFormats(started_at, 'YYYY-MM-DD \ HH:MM:SS'),
-              finishedDate: dateTimeFormats(finished_at, 'YYYY-MM-DD \ HH:MM:SS'),
+              startDate: formatDate({ value: started_at, isTime: true, isDate: true }),
+              finishedDate: formatDate({ value: finished_at, isTime: true, isDate: true }),
               logs
             }
           })
@@ -326,6 +338,7 @@ export default defineComponent({
     function runJob(job) {
       const { id } = job
       isRun.value = true
+      job.isLoading = true
       run({
         id
       })
@@ -339,6 +352,8 @@ export default defineComponent({
           }
           getListJobs()
           isRun.value = false
+          job.isLoading = false
+          executionsJobs(id)
         })
         .catch(error => {
           console.warn({ error })
@@ -346,6 +361,7 @@ export default defineComponent({
             message: error.message,
             type: 'error'
           })
+          job.isLoading = false
           isRun.value = false
         })
     }
@@ -390,6 +406,7 @@ export default defineComponent({
       restoreJob,
       selectJobs,
       selectTabs,
+      executionsJobs,
       runJob,
       copyOutput,
       getListJobs
