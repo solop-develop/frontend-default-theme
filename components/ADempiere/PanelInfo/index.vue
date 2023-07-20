@@ -169,7 +169,7 @@ export default defineComponent({
         },
         {
           name: 'recordAttachmentTab',
-          title: language.t('window.containerInfo.attachment.label'),
+          title: language.t('component.attachment.label'),
           show: true,
           svg: false,
           isLoading: isLoadingListAttachment.value,
@@ -398,7 +398,7 @@ export default defineComponent({
         findListStoreProduct()
         return
       }
-      if (tab.name === 'recordAttachmentTab' || tab.name === language.t('window.containerInfo.attachment.label')) {
+      if (tab.name === 'recordAttachmentTab' || tab.name === language.t('component.attachment.label')) {
         tabOptions = 'getAttachment'
       }
       if (tab.name === language.t('window.containerInfo.notes')) {
