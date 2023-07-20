@@ -35,7 +35,7 @@
     >
       <el-button slot="trigger" size="small" type="primary">
         <i class="el-icon-upload" />
-        {{ $t('window.containerInfo.attachment.selectFile') }}
+        {{ $t('component.attachment.uploadFile') }}
       </el-button>
     </el-upload>
   </form>
@@ -119,7 +119,7 @@ export default defineComponent({
           resolve(true)
         }).catch(error => {
           showMessage({
-            message: error.message || lang.t('window.containerInfo.attachment.error'),
+            message: error.message || lang.t('component.attachment.error'),
             type: 'error'
           })
           resolve(true)

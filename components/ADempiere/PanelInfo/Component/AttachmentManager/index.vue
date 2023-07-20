@@ -18,37 +18,76 @@
 -->
 
 <template>
-  <span
+  <div
     v-if="!isLoading"
+    style="margin-left: 15px; margin-right: 20px;"
   >
     <div v-if="isEmptyValue(attachmentList)">
       <el-empty />
     </div>
-    <el-row :gutter="20" style="margin-left: 0px; margin-right: 5px; text-align: end;">
-      <el-button v-if="isList" plain type="text" style="color: black;" @click="isList = !isList">
-        <b style="font-size: 28px;">
-          <svg-icon icon-class="grid-gallery" />
-        </b>
-      </el-button>
-      <el-button v-else plain type="text" style="color: black;" @click="isList = !isList">
-        <b style="font-size: 28px;">
-          <svg-icon icon-class="list-gallery" />
-        </b>
-      </el-button>
+
+    <el-row :gutter="20" style="margin-left: 0px; margin-right: 10px; margin-bottom: 10px;">
+      <el-col :span="12">
+        <upload-resource
+          style="float: left;"
+          :table-name="tableName"
+          :record-id="recordId"
+          :record-uuid="recordUuid"
+        />
+      </el-col>
+
+      <el-col :span="8" style="float: right; text-align: end;">
+        <el-button
+          v-if="isList"
+          plain
+          style="color: black;"
+          @click="isList = !isList"
+        >
+          <i class="el-icon-menu" />
+          {{ $t('component.attachment.toggleView') }}
+        </el-button>
+        <el-button
+          v-else
+          plain
+          style="color: black;"
+          @click="isList = !isList"
+        >
+          <svg-icon icon-class="list" />
+          {{ $t('component.attachment.toggleView') }}
+        </el-button>
+      </el-col>
     </el-row>
 
     <!-- Mosaic View -->
     <el-row v-if="!isList" :gutter="20">
-      <el-col v-for="(file, key) in attachmentList" :key="key" :span="8">
-        <el-card shadow="hover" class="image-attachment">
-          <p style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"> {{ file.title }} </p>
+      <el-col v-for="(file, key) in attachmentList" :key="key" :span="8" style="line-height: 20px; margin-bottom: 20px;">
+        <el-card shadow="hover" :class="{ 'image-attachment': true, 'is-current': isCurrent(file) }">
+          <div v-if="isSelectable" slot="header" class="clearfix" style="margin-top: 16px; margin-bottom: 16px;">
+            <el-radio
+              v-model="resourceReference.id"
+              :label="file.id"
+              @click="resourceReference = file"
+            >
+              {{ file.title }}
+            </el-radio>
+          </div>
+          <p
+            v-else
+            style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
+          >
+            {{ file.title }}
+          </p>
+
           <el-image
             class="image-card-attachment"
-            :src="file.content_type.includes('image') ? getImageFromSource(file).uri : converFile(file).uri"
+            :src="file.src"
             fit="contain"
             :preview-src-list="previewList"
             style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;"
           />
+          <span>{{ formatFileSize(file.file_size) }}</span>
+          <br>
+
           <el-button
             icon="el-icon-download"
             plain
@@ -68,32 +107,40 @@
     <!-- List View -->
     <el-row v-else :gutter="20">
       <el-col v-for="(file, key) in attachmentList" :key="key" :span="24">
-        <el-card shadow="hover" class="image-attachment">
+        <el-card shadow="hover" :class="{ 'image-attachment': true, 'is-current': isCurrent(file) }">
           <div style="float: left;width: 20%; height: 100px;">
             <el-image
               class="image-card-attachment"
-              :src="file.imageDate.uri"
+              :src="file.src"
               fit="contain"
               :preview-src-list="previewList"
               style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;width: 150px;height: 100px;float: left;"
             />
           </div>
-          <div style="float: left;padding-top: 5%;">
-            <span> {{ file.title }} </span>
+          <div style="float: left;padding-top: 2%;">
+            <el-radio
+              v-if="isSelectable"
+              v-model="resourceReference.id"
+              :label="file.id"
+              @click="resourceReference = file"
+            >
+              {{ file.title }}
+            </el-radio>
+            <p
+              v-else
+              style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
+            >
+              {{ file.title }}
+            </p>
+            <!-- <b>{{ file.title }}</b> -->
+            <br>
+            <span>{{ formatFileSize(file.file_size) }}</span>
           </div>
         </el-card>
       </el-col>
     </el-row>
-    <br>
+  </div>
 
-    <span>
-      <upload-resource
-        :table-name="tableName"
-        :record-id="recordId"
-        :record-uuid="recordUuid"
-      />
-    </span>
-  </span>
   <loading-view
     v-else
     key="Attachment-Manager-Loading"
@@ -121,8 +168,9 @@ import UploadResource from './uploadResource.vue'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import {
   buildLinkHref,
-  getExtensionFromFile,
-  getImagePath
+  formatFileSize,
+  getImagePath,
+  getImageFromContentType
 } from '@/utils/ADempiere/resource.js'
 
 export default defineComponent({
@@ -147,13 +195,17 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    isSelectable: {
+      type: Boolean,
+      default: false
+    },
     isLoading: {
       type: Boolean,
       default: false
     }
   },
 
-  setup() {
+  setup(props) {
     // Ref
     const dialogImageUrl = ref('')
     const isLoadeDialogFileUrl = ref(false)
@@ -164,12 +216,26 @@ export default defineComponent({
     const isList = ref(false)
 
     // Computed
-    const listImageAll = computed(() => {
-      if (imageAttachment.value) {
-        return imageAttachment.value.concat(pdfAttachment.value)
-      }
-      return []
-    })
+    // const listImageAll = computed(() => {
+    //   if (imageAttachment.value) {
+    //     return imageAttachment.value.concat(pdfAttachment.value)
+    //   }
+    //   return []
+    // })
+
+    // const attachmentStored = computed(() => {
+    //   const storedAttachment = store.getters.getAttachment
+    //   if (isEmptyValue(storedAttachment)) {
+    //     return undefined
+    //   }
+    //   if (storedAttachment.tableName !== props.tableName) {
+    //     return undefined
+    //   }
+    //   if (!isSameValues(storedAttachment.recordId, props.recordId) && !isSameValues(storedAttachment.recordUuid, props.recordUuid)) {
+    //     return undefined
+    //   }
+    //   return store.getters.getAttachment
+    // })
 
     const attachmentList = computed({
       set(value) {
@@ -182,26 +248,29 @@ export default defineComponent({
         }
         return storedResourcesList.map(element => {
           const valueToReplace = element.uuid + '-'
-          if (element.content_type.includes('image')) {
-            return {
-              ...element,
-              title: element.file_name.replace(valueToReplace, ''),
-              imageDate: getImageFromSource(element)
-            }
-          }
           return {
             ...element,
             title: element.file_name.replace(valueToReplace, ''),
-            imageDate: converFile(element)
+            src: getSurceFile(element)
           }
         })
       }
     })
 
     const previewList = computed(() => {
-      return attachmentList.value.map(file => file.imageDate.uri)
+      return attachmentList.value.map(file => file.src)
     })
     const imageKey = ref(0)
+
+    const resourceReference = computed({
+      set(value) {
+        store.commit('setResourceReference', value)
+      },
+      get() {
+        return store.getters.getResourceReference
+      }
+    })
+
     // Methods
 
     /**
@@ -226,7 +295,7 @@ export default defineComponent({
      * @param {Object} file
      */
     const handlePictureCardPreview = (file) => {
-      imageKey.value = attachmentList.value.findIndex(list => list.imageDate.uri === file.imageDate.uri)
+      imageKey.value = attachmentList.value.findIndex(list => list.src === file.src)
       // if (file.content_type.includes('application/pdf')) {
       isLoadeDialogFileUrl.value = true
       dialogImageUrl.value = handleDownload(file, false)
@@ -241,7 +310,7 @@ export default defineComponent({
     const handleDownload = async(file, isDownload = true) => {
       let link
       if (file.content_type.includes('image')) {
-        const imagen = await fetch(file.imageDate.uri)
+        const imagen = await fetch(file.src)
         const imagenblob = await imagen.blob()
         const imageURL = URL.createObjectURL(imagenblob)
         link = document.createElement('a')
@@ -264,38 +333,14 @@ export default defineComponent({
       })
     }
 
-    /**
-     * Conver File
-     * @param {Object} image
-     */
-    const converFile = (image) => {
-      let urlImage
-      switch (image.content_type) {
-        case 'application/pdf':
-          urlImage = require('@/image/ADempiere/attachment/pdf.png')
-          break
-        case 'application/x-javascript':
-          urlImage = require('@/image/ADempiere/attachment/javascript.png')
-          break
-        case 'application/octet-stream':
-          urlImage = octetStream(image)
-          break
-        case 'text/csv':
-          urlImage = require('@/image/ADempiere/attachment/csv.png')
-          break
-        case 'text/plain':
-          urlImage = require('@/image/ADempiere/attachment/txt.png')
-          break
-        case 'application/vnd.ms-excel':
-          urlImage = require('@/image/ADempiere/attachment/xlsx.png')
-          break
-        default:
-          urlImage
-          break
+    function getSurceFile(file) {
+      if (file.content_type.includes('image')) {
+        return getImageFromSource(file).uri
       }
-      return {
-        uri: urlImage
-      }
+      return getImageFromContentType({
+        contentType: file.content_type,
+        fileName: file.file_name
+      })
     }
 
     /**
@@ -311,20 +356,14 @@ export default defineComponent({
       return image
     }
 
-    /**
-     * Octet Stream
-     * @param {Object} file
-     */
-    const octetStream = (file) => {
-      let urlImage
-      if (['.xlsx', '.xls'].includes(file.file_name)) {
-        urlImage = require('@/image/ADempiere/attachment/xlsx.png')
-      } else if (file.file_name.includes('.rar')) {
-        urlImage = require('@/image/ADempiere/attachment/rar.png')
-      } else if (file.file_name.includes('.sql')) {
-        urlImage = require('@/image/ADempiere/attachment/sql.png')
+    function isCurrent(file) {
+      if (!props.isSelectable) {
+        return false
       }
-      return urlImage
+      if (isEmptyValue(resourceReference.value)) {
+        return false
+      }
+      return resourceReference.value.id === file.id
     }
 
     return {
@@ -337,19 +376,18 @@ export default defineComponent({
       pdfAttachment,
       isList,
       // Computed
-      listImageAll,
+      // listImageAll,
       attachmentList,
+      // attachmentStored,
+      resourceReference,
       imageKey,
       previewList,
       // Methods
-      converFile,
+      isCurrent,
       handleRemove,
       handlePictureCardPreview,
       handleDownload,
-      // Image
-      getImageFromSource,
-      octetStream,
-      getExtensionFromFile
+      formatFileSize
     }
   }
 })
@@ -369,6 +407,12 @@ export default defineComponent({
 .scroll-attachment {
   max-height: 80vh;
 }
+.el-card.is-current {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background-color: #eaf5fe;
+  border: 1px solid #36a3f7;
+}
+
 .el-upload--picture-card {
   background-color: #fbfdff;
   border: 1px dashed #c0ccda;
