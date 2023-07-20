@@ -10,7 +10,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -34,10 +34,14 @@
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;color: transparent !important;"
               >
                 <upload-resource
+                  style="display: inline-block; text-align: center;"
                   table-name="AD_ImpFormat"
                   :record-id="currrentImportFormats.value"
                   :load-data="handleSuccess"
-                  style="text-align: center;"
+                />
+
+                <select-resource
+                  :print-format-id="currrentImportFormats.value"
                 />
               </el-form-item>
             </el-col>
@@ -63,12 +67,6 @@
                     {{ currrentImportFormats.label }}
                   </b>
                 </el-tag>
-
-                <el-button
-                  icon="el-icon-paperclip"
-                  size="mini"
-                  style="font-size: 18px; padding: 3px 5px; margin-left: 10px;"
-                />
               </el-form-item>
             </el-col>
           </el-form>
@@ -122,6 +120,7 @@ import UploadExcelComponent from '@/themes/default/components/UploadExcel/index.
 import UploadResource from '@/themes/default/components/ADempiere/PanelInfo/Component/AttachmentManager/uploadResource.vue'
 import TableRecords from './tableRecords.vue'
 import ImportFormatFields from './importFormatFields.vue'
+import SelectResource from './selectResource.vue'
 
 // Api Request Methods
 import {
@@ -138,6 +137,7 @@ export default defineComponent({
   components: {
     TableRecords,
     ImportFormatFields,
+    SelectResource,
     UploadExcelComponent,
     UploadResource
   },
@@ -323,6 +323,7 @@ export default defineComponent({
     }
 
     function handleSuccess({ results, header, resource, file }) {
+      console.log(results, header, resource, file)
       const data = results.filter((data, index) => {
         if (index <= 50) {
           return data
