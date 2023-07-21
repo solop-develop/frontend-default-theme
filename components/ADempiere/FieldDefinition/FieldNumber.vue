@@ -178,10 +178,10 @@ export default {
       if (!isEmptyValue(documentCurrency)) {
         return documentCurrency
       }
-      const currencyIsoCode = store.getters.getCurrencyCode
-      if (!isEmptyValue(currencyIsoCode)) {
-        return currencyIsoCode
-      }
+      // const currencyIsoCode = store.getters.getCurrencyCode
+      // if (!isEmptyValue(currencyIsoCode)) {
+      //   return currencyIsoCode
+      // }
       return undefined
     },
     shortcutKeys() {
