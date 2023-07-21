@@ -205,7 +205,7 @@ export default {
     },
     'metadata.displayed': {
       handler(value) {
-        if (value) {
+        if (value || this.isAlwaysDisplayColumn) {
           this.setDisplayedValue()
         }
       },
@@ -224,7 +224,7 @@ export default {
   },
 
   beforeMount() {
-    if (this.metadata.displayed) {
+    if (this.metadata.displayed || this.isAlwaysDisplayColumn) {
       this.setDisplayedValue()
     }
   },

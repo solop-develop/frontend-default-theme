@@ -33,7 +33,8 @@
   </div>
 
   <el-col
-    v-else-if="!inTable && isDisplayedField"
+    v-else-if="!inTable && (isDisplayedField || isAlwaysDisplayColumn)"
+    v-show="isDisplayedField"
     key="is-panel-template"
     :xs="sizeField.xs"
     :sm="sizeField.sm"
@@ -98,6 +99,7 @@ import { UUID } from '@/utils/ADempiere/constants/systemColumns'
 import { BUTTON, TEXT, DEFAULT_SIZE } from '@/utils/ADempiere/references'
 import { MULTIPLE_VALUES_OPERATORS_LIST } from '@/utils/ADempiere/dataUtils'
 import { LAYOUT_MAX_COLUMNS_PER_ROW, DEFAULT_COLUMNS_PER_ROW } from '@/utils/ADempiere/componentUtils'
+import { ALWAYS_DISPLAY_COLUMN } from '@/utils/ADempiere/dictionaryUtils'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -182,6 +184,9 @@ export default {
       return store.getters.getSizeColumn({
         containerUuid: this.containerUuid
       })
+    },
+    isAlwaysDisplayColumn() {
+      return ALWAYS_DISPLAY_COLUMN.includes(this.field.columnName)
     },
     sizeField() {
       if (!this.isEmptyValue(this.sizeCol)) {

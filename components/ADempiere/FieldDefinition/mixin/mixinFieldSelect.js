@@ -19,6 +19,7 @@
 import store from '@/store'
 
 // Constants
+import { ALWAYS_DISPLAY_COLUMN } from '@/utils/ADempiere/dictionaryUtils'
 import { MULTIPLE_VALUES_OPERATORS_LIST } from '@/utils/ADempiere/dataUtils'
 
 // Utils and Helper Methods
@@ -57,7 +58,7 @@ export default {
       }
     },
     getStoredLookupList() {
-      if (!this.metadata.displayed) {
+      if (!this.metadata.displayed && !this.isAlwaysDisplayColumn) {
         return [this.blankOption]
       }
 
@@ -95,6 +96,10 @@ export default {
       }
 
       return allOptions
+    },
+
+    isAlwaysDisplayColumn() {
+      return ALWAYS_DISPLAY_COLUMN.includes(this.metadata.columnName)
     }
   },
 
