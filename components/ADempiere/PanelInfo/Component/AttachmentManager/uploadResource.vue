@@ -141,10 +141,10 @@ export default defineComponent({
     }
 
     function handleError(error, file, fileList) {
-        return showMessage({
-          type: 'error',
-          message: error.message || lang.t('component.attachment.error')
-        })
+      return showMessage({
+        type: 'error',
+        message: error.message || lang.t('component.attachment.error')
+      })
     }
 
     function loadedSucess(response, file, fileList) {
