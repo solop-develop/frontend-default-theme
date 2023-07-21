@@ -314,7 +314,7 @@ export default defineComponent({
         optionsList.push(logsOptionItem)
       }
 
-      return optionsList.concat(menuOptions)
+      return sortOptions(optionsList.concat(menuOptions))
     })
 
     const openOptionField = computed({
@@ -429,6 +429,18 @@ export default defineComponent({
         showPopoverPath.value = false
       }
     })
+
+    function sortOptions(listOptions) {
+      return listOptions.sort((a, b) => {
+        if (a.index > b.index) {
+          return 1
+        }
+        if (a.index < b.index) {
+          return -1
+        }
+        return 0
+      })
+    }
 
     onMounted(() => {
       // disable focus with tab key on label

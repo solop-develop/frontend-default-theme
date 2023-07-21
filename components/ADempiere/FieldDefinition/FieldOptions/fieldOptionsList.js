@@ -35,6 +35,7 @@ export const infoOptionItem = {
   enabled: true,
   svg: false,
   icon: 'el-icon-info',
+  index: 5,
   isRender: true,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/ContextInfo'),
   executeMethod: ({ containerManager, fieldAttributes }) => {}
@@ -48,6 +49,7 @@ export const zoomInOptionItem = {
   enabled: true,
   svg: false,
   icon: 'el-icon-files',
+  index: 0,
   isRender: false,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/EmptyOption'),
   executeMethod: ({ containerManager, fieldAttributes, value }) => {
@@ -130,6 +132,7 @@ export const translateOptionItem = {
   enabled: true,
   svg: true,
   icon: 'language',
+  index: 4,
   isRender: true,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/TranslatedField'),
   executeMethod: ({ containerManager, fieldAttributes }) => {}
@@ -163,6 +166,7 @@ export const logsOptionItem = {
   enabled: true,
   svg: true,
   icon: 'tree-table',
+  index: 2,
   isRender: true,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/ChangeLogs'),
   executeMethod: ({ containerManager, fieldAttributes }) => {
@@ -201,6 +205,7 @@ export const hideThisField = {
   enabled: true,
   svg: true,
   icon: 'eye',
+  index: 3,
   isRender: false,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/EmptyOption'),
   executeMethod: ({ containerManager, fieldAttributes }) => {
@@ -241,6 +246,7 @@ export const refreshLookup = {
   svg: false,
   icon: 'el-icon-refresh',
   isRender: false,
+  index: 1,
   componentRender: () => import('@theme/components/ADempiere/FieldDefinition/FieldOptions/EmptyOption'),
   executeMethod: ({ containerManager, fieldAttributes, value }) => {
     store.dispatch('deleteLookup', {
