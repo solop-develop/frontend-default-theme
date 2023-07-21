@@ -207,14 +207,14 @@ export default defineComponent({
     const headerList = computed(() => {
       return props.header.filter(fieldItem => {
         if (props.containerManager.isDisplayedColumn(fieldItem)) {
-          const isMandatoryGenerated = props.containerManager.isMandatoryColumn(fieldItem)
-          const isDisplayedDefault = props.containerManager.isDisplayedDefaultTable({
-            ...fieldItem,
-            isMandatory: isMandatoryGenerated
-          })
-          if (isDisplayedDefault) {
-            return true
-          }
+          // const isMandatoryGenerated = props.containerManager.isMandatoryColumn(fieldItem)
+          // const isDisplayedDefault = props.containerManager.isDisplayedDefaultTable({
+          //   ...fieldItem,
+          //   isMandatory: isMandatoryGenerated
+          // })
+          // if (isDisplayedDefault) {
+          //   return true
+          // }
           return fieldItem.isShowedTableFromUser
         }
         return false
