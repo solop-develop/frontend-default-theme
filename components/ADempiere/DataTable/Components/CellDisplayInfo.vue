@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -86,17 +86,19 @@
 <script>
 import { defineComponent, computed } from '@vue/composition-api'
 
-// components and mixins
+// Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 import ProgressPercentage from '@theme/components/ADempiere/ContainerOptions/ProgressPercentage.vue'
 
-// utils and helpers methods
+// Utils and helpers Methods
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 import { formatField } from '@/utils/ADempiere/valueFormat.js'
 
-// constants
+// Constants
 import { TEXT_LONG } from '@/utils/ADempiere/references'
+import { CURRENCY } from '@/utils/ADempiere/constants/systemColumns'
+import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 export default defineComponent({
   name: 'CellDisplayInfo',
@@ -136,6 +138,7 @@ export default defineComponent({
     const displayedValue = computed(() => {
       return formatField({
         value: props.dataRow[columnName.value],
+        currency: props.dataRow[DISPLAY_COLUMN_PREFIX + CURRENCY],
         displayedValue: props.dataRow[displayColumnName.value],
         displayType: props.fieldAttributes.displayType
       })
