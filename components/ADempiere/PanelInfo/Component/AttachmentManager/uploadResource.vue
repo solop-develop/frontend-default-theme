@@ -22,7 +22,7 @@
     @submit.prevent="notSubmitForm"
   >
     <el-upload
-      ref="upload"
+      ref="uploadComponent"
       :action="endPointUploadResource"
       class="upload-demo"
       name="file"
@@ -32,6 +32,7 @@
       :multiple="false"
       :before-upload="isValidUploadHandler"
       :on-success="loadedSucess"
+      :on-error="handleError"
     >
       <el-button slot="trigger" size="small" type="primary">
         <i class="el-icon-upload" />
@@ -85,7 +86,7 @@ export default defineComponent({
   setup(props) {
     const endPointUploadResource = config.adempiere.api.url + 'user-interface/component/resource/save-attachment'
 
-    const upload = ref(null)
+    const uploadComponent = ref(null)
     const filesList = ref([])
     const additionalData = ref({})
     const fileResource = ref(({}))
@@ -111,6 +112,10 @@ export default defineComponent({
           fileName: file.name,
           fileSize: file.size
         }).then(response => {
+          if (response.code >= 400) {
+            reject(response)
+          }
+
           fileResource.value = response
           additionalData.value = {
             resource_uuid: response.uuid,
@@ -122,20 +127,38 @@ export default defineComponent({
             message: error.message || lang.t('component.attachment.error'),
             type: 'error'
           })
-          resolve(true)
+          reject(error)
         }).finally(() => {
           // store.dispatch('findAttachment', {
           //   tableName: props.tableName,
           //   recordId: props.recordId,
           //   recordUuid: props.recordUuid
           // })
-          // upload.value.uploadFiles = filesList.value
-          resolve(true)
+          // uploadComponent.value.uploadFiles = filesList.value
+          // resolve(true)
         })
       })
     }
 
+    function handleError(error, file, fileList) {
+        return showMessage({
+          type: 'error',
+          message: error.message || lang.t('component.attachment.error')
+        })
+    }
+
     function loadedSucess(response, file, fileList) {
+      if (response.code >= 400) {
+        setTimeout(() => {
+          fileList.pop()
+        }, 500)
+        return handleError(
+          new Error(response.result),
+          file,
+          fileList
+        )
+      }
+
       const rawFile = file.raw
       if (props.loadData) {
         readerData(rawFile)
@@ -199,13 +222,17 @@ export default defineComponent({
 
     return {
       endPointUploadResource,
-      additionalHeaders,
+      // Refs
+      uploadComponent,
       additionalData,
       fileResource,
       filesList,
-      upload,
+      // Computeds
+      additionalHeaders,
+      // Methods
       isValidUploadHandler,
-      loadedSucess
+      loadedSucess,
+      handleError
     }
   }
 })
