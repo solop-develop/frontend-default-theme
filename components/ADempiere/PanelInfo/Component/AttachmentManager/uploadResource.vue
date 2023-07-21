@@ -124,16 +124,11 @@ export default defineComponent({
           resolve(true)
         }).catch(error => {
           showMessage({
-            message: error.message || lang.t('component.attachment.error'),
+            message: error.message || error.result || lang.t('component.attachment.error'),
             type: 'error'
           })
           reject(error)
         }).finally(() => {
-          // store.dispatch('findAttachment', {
-          //   tableName: props.tableName,
-          //   recordId: props.recordId,
-          //   recordUuid: props.recordUuid
-          // })
           // uploadComponent.value.uploadFiles = filesList.value
           // resolve(true)
         })
@@ -143,7 +138,7 @@ export default defineComponent({
     function handleError(error, file, fileList) {
       return showMessage({
         type: 'error',
-        message: error.message || lang.t('component.attachment.error')
+        message: error.message || error.result || lang.t('component.attachment.error')
       })
     }
 
