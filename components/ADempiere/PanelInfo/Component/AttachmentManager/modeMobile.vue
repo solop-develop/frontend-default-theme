@@ -108,8 +108,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     :label="$t('component.attachment.addMessage')"
                   >
                     <el-input
-                      type="textarea"
                       v-model="addMessage"
+                      type="textarea"
                       maxlength="2000"
                       show-word-limit
                     />
