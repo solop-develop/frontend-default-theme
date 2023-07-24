@@ -91,9 +91,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 placement="bottom"
                 trigger="click"
               >
-                <!-- <el-input
-                  v-model="file.text_message"
-                /> -->
                 <el-form
                   label-position="top"
                   class="form-min-label"
@@ -153,40 +150,21 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 placement="bottom"
                 trigger="click"
               >
-                <el-descriptions
-                  direction="vertical"
-                  :column="2"
-                  border
-                >
-                  <el-descriptions-item >
-                    {{ $t('component.attachment.fileName') }}
-                  </el-descriptions-item>
-                  <el-descriptions-item>
+                <el-descriptions class="margin-top" :column="1" border>
+                  <el-descriptions-item :label="$t('component.attachment.fileName')">
                     {{ file.name }}
                   </el-descriptions-item>
-                  <el-descriptions-item>
-                    {{ $t('component.attachment.fileSize') }}
-                  </el-descriptions-item>
-                  <el-descriptions-item>
+                  <el-descriptions-item :label="$t('component.attachment.fileSize')">
                     {{ formatFileSize(file.file_size) }}
                   </el-descriptions-item>
-                  <el-descriptions-item>
-                    {{ $t('component.attachment.fileFormat') }}
-                  </el-descriptions-item>
-                  <el-descriptions-item>
+                  <el-descriptions-item :label="$t('component.attachment.fileFormat')">
                     {{ file.content_type }}
                   </el-descriptions-item>
-                  <el-descriptions-item>
-                    {{ $t('component.attachment.message') }}
-                  </el-descriptions-item>
-                  <el-descriptions-item>
-                    {{ file.text_message }}
-                  </el-descriptions-item>
-                  <el-descriptions-item>
-                    {{ $t('component.attachment.description') }}
-                  </el-descriptions-item>
-                  <el-descriptions-item>
+                  <el-descriptions-item :label="$t('component.attachment.description')">
                     {{ file.description }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="$t('component.attachment.message')">
+                    {{ file.text_message }}
                   </el-descriptions-item>
                 </el-descriptions>
                 <el-button

@@ -88,14 +88,34 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           <p style="text-align: center;">
             <el-button-group>
               <el-popover
-                v-model="file.isShowMessage"
+                :value="isShowMessage"
                 placement="bottom"
-                title="Agregar Mensaje"
                 trigger="click"
               >
-                <el-input
-                  v-model="addMessage"
-                />
+                <el-form
+                  label-position="top"
+                  class="form-min-label"
+                >
+                  <el-form-item
+                    :label="$t('component.attachment.addDescription')"
+                  >
+                    <el-input
+                      v-model="addDescription"
+                      maxlength="255"
+                      show-word-limit
+                    />
+                  </el-form-item>
+                  <el-form-item
+                    :label="$t('component.attachment.addMessage')"
+                  >
+                    <el-input
+                      type="textarea"
+                      v-model="addMessage"
+                      maxlength="2000"
+                      show-word-limit
+                    />
+                  </el-form-item>
+                </el-form>
 
                 <p style="text-align: end;">
                   <el-button
@@ -124,27 +144,27 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                   slot="reference"
                   icon="el-icon-chat-line-square"
                   plain
+                  @click="openMessage(file)"
                 />
               </el-popover>
               <el-popover
                 placement="bottom"
                 trigger="click"
               >
-                <el-descriptions
-                  direction="vertical"
-                  :column="2"
-                  border
-                >
-                  <el-descriptions-item label="Nombre de Archivo">
+                <el-descriptions class="margin-top" :column="1" border>
+                  <el-descriptions-item :label="$t('component.attachment.fileName')">
                     {{ file.name }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="Tamaño del Archivo">
+                  <el-descriptions-item :label="$t('component.attachment.fileSize')">
                     {{ formatFileSize(file.file_size) }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="Formato del Archivo">
+                  <el-descriptions-item :label="$t('component.attachment.fileFormat')">
                     {{ file.content_type }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="Mesage">
+                  <el-descriptions-item :label="$t('component.attachment.description')">
+                    {{ file.description }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="$t('component.attachment.message')">
                     {{ file.text_message }}
                   </el-descriptions-item>
                 </el-descriptions>

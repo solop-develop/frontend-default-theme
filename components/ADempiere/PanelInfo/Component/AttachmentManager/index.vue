@@ -25,6 +25,7 @@
     :record-uuid="recordUuid"
     :is-selectable="isSelectable"
     :is-loading="isLoading"
+    :container-manager="containerManager"
   />
 </template>
 
@@ -44,6 +45,10 @@ export default defineComponent({
     recordId: {
       type: Number,
       default: 0
+    },
+    containerManager: {
+      type: Object,
+      required: true
     },
     recordUuid: {
       type: String,

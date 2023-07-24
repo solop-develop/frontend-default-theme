@@ -58,6 +58,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    containerManager: {
+      type: Object,
+      required: true
+    },
     recordId: {
       type: Number,
       default: 0
@@ -248,6 +252,7 @@ export default defineComponent({
             message: 'OK',
             showClose: true
           })
+          loadAttachment()
         })
         .catch(error => {
           showMessage({
@@ -288,6 +293,14 @@ export default defineComponent({
       isShowMessage.value = file.isShowMessage
       addMessage.value = file.text_message
       addDescription.value = file.description
+    }
+
+    function loadAttachment() {
+      props.containerManager['getAttachment']({
+        tableName: props.tableName,
+        recordId: props.recordId,
+        recordUuid: props.recordUuid
+      })
     }
 
     return {
