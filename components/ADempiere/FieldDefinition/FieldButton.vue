@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
+
 <template>
   <el-button-group>
     <el-button
@@ -63,9 +64,8 @@ import {
   openDocumentAction
 } from '@/utils/ADempiere/dictionary/window.js'
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
-import { getContextAttributes, generateContextKey } from '@/utils/ADempiere/contextUtils'
+import { getContextAttributes, generateContextKey } from '@/utils/ADempiere/contextUtils/contextAttributes'
 
-// TODO: Add displayed value
 export default {
   name: 'FieldButton',
 
