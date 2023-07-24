@@ -19,13 +19,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <template>
   <div
     v-if="!isLoading"
-    style="margin-left: 15px;margin-right: 20px;margin-bottom: 10%;height: -webkit-fill-available;overflow: auto;"
+    style="margin-left: 15px;margin-right: 15px;margin-bottom: 10%;height: -webkit-fill-available;overflow-x: hidden;overflow-y: auto;"
   >
     <div v-if="isEmptyValue(attachmentList)">
       <el-empty />
     </div>
 
-    <el-row :gutter="20" style="margin-left: 0px; margin-right: 0px; margin-bottom: 10px;">
+    <el-row style="margin-left: 0px; margin-right: 0px; margin-bottom: 10px;">
       <el-col :span="12">
         <upload-resource
           style="float: left;"
@@ -71,7 +71,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </div>
           <p
             v-else
-            style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
+            style="font-size: 14px;box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
           >
             {{ file.name }}
           </p>
@@ -193,16 +193,16 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     <el-row v-else :gutter="20">
       <el-col v-for="(file, key) in attachmentList" :key="key" :span="24">
         <el-card shadow="hover" :class="{ 'image-attachment': true, 'is-current': isCurrent(file) }">
-          <div style="float: left;width: 20%; height: 100px;">
+          <div style="float: left;width: 40%; height: 100px;">
             <el-image
               class="image-card-attachment"
               :src="file.src"
               fit="contain"
               :preview-src-list="previewList"
-              style="padding-left: 0px; padding-right: 0px;border: 1px solid #b8babca3;width: 150px;height: 100px;float: left;"
+              style="padding-left: 0px;padding-right: 0px;border: 1px solid rgba(184, 186, 188, 0.64);width: 150px;height: 100px;float: left;margin-top: 5%;"
             />
           </div>
-          <div style="float: left;padding-top: 2%;">
+          <div style="float: left;padding-top: 2%;width: 60%;">
             <el-radio
               v-if="isSelectable"
               v-model="resourceReference.id"
@@ -213,16 +213,68 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-radio>
             <p
               v-else
-              style="box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;"
+              style="font-size: 14px;box-sizing: border-box;overflow: hidden;text-overflow: ellipsis;white-space: normal;word-break: break-all;text-align: end;padding-right: 10px;"
             >
               {{ file.name }}
+              <br>
+              {{ formatFileSize(file.file_size) }}
             </p>
             <br>
-            <span>{{ formatFileSize(file.file_size) }}</span>
           </div>
         </el-card>
       </el-col>
     </el-row>
+    <!-- Add Description -->
+    <el-card v-if="!isEmptyValue(currentAttachment.textMessage) && !isEditHeard" class="box-card">
+      <div slot="header" class="clearfix">
+        <b style="font-size: 20px;">
+          {{ currentAttachment.textMessage }}
+        </b>
+        <el-button
+          plain
+          style="color: black;float: right;"
+          @click="updateDescriptionHeader(currentAttachment.textMessage)"
+        >
+          <svg-icon icon-class="edit" />
+        </el-button>
+      </div>
+    </el-card>
+    <el-card v-else class="box-card">
+      {{ currentAttachment.textMessage }}
+      <b slot="header" style="font-size: 20px;">
+        {{ $t('component.attachment.addDescription') }}
+      </b>
+      <el-row :gutter="24">
+        <el-col :span="24">
+          <el-input
+            v-model="resourceDescription"
+            type="textarea"
+            :placeholder="$t('component.attachment.addDescription')"
+            maxlength="2000"
+            show-word-limit
+          />
+        </el-col>
+      </el-row>
+      <p style="text-align: end;">
+        <el-button
+          plain
+          type="info"
+          class="button-base-icon"
+          style="font-size: 25px;"
+          :disabled="isEmptyValue(resourceDescription)"
+          @click="clearDescriptionHeader"
+        >
+          <svg-icon icon-class="layers-clear" />
+        </el-button>
+        <el-button
+          type="primary"
+          class="button-base-icon"
+          icon="el-icon-check"
+          :disabled="isEmptyValue(resourceDescription)"
+          @click="addAttachmentDescriptionHeader"
+        />
+      </p>
+    </el-card>
   </div>
 
   <loading-view
