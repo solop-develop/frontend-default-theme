@@ -34,7 +34,7 @@
       :on-success="loadedSucess"
       :on-error="handleError"
     >
-      <el-button slot="trigger" size="small" type="primary">
+      <el-button slot="trigger" size="small" type="primary" style="font-size: 13px;">
         <i class="el-icon-upload" />
         {{ $t('component.attachment.uploadFile') }}
       </el-button>

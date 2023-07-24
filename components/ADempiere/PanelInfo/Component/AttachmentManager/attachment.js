@@ -24,7 +24,8 @@ import store from '@/store'
 import {
   requestResource,
   deleteResourceReference,
-  sendAttachmentDescription
+  sendAttachmentDescription,
+  sendAttachmentDescriptionHeader
 } from '@/api/ADempiere/user-interface/component/resource'
 
 // Components and Mixins
@@ -93,6 +94,8 @@ export default defineComponent({
     const addMessage = ref('')
     const addDescription = ref('')
     const isShowMessage = ref(false)
+    const isEditHeard = ref(false)
+    const resourceDescription = ref('')
 
     // Computed
 
@@ -130,6 +133,10 @@ export default defineComponent({
       get() {
         return store.getters.getResourceReference
       }
+    })
+
+    const currentAttachment = computed(() => {
+      return store.getters.getAttachment
     })
 
     // Methods
@@ -295,6 +302,10 @@ export default defineComponent({
       addDescription.value = file.description
     }
 
+    /**
+     * Refrest Attachment
+     */
+
     function loadAttachment() {
       props.containerManager['getAttachment']({
         tableName: props.tableName,
@@ -303,17 +314,64 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Add Description in Header
+     */
+
+    function addAttachmentDescriptionHeader() {
+      const { id, attachment_uuid } = currentAttachment.value
+      sendAttachmentDescriptionHeader({
+        id,
+        uuid: attachment_uuid,
+        textMessage: resourceDescription.value
+      })
+        .then(response => {
+          console.log({ response })
+        })
+        .catch(error => {
+          showMessage({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
+        .finally(() => {
+          isEditHeard.value = false
+          loadAttachment()
+        })
+    }
+
+    /**
+     * Update Description Header
+     */
+
+    function updateDescriptionHeader(description) {
+      isEditHeard.value = true
+      resourceDescription.value = description
+    }
+
+    /**
+     * Clean Description Header
+     */
+
+    function clearDescriptionHeader() {
+      resourceDescription.value = ''
+    }
+
     return {
       // Ref
       isList,
       disabled,
       addMessage,
+      isEditHeard,
       addDescription,
       isShowMessage,
       dialogVisible,
       pdfAttachment,
       dialogImageUrl,
       imageAttachment,
+      currentAttachment,
+      resourceDescription,
       isLoadeDialogFileUrl,
       // Computed
       isMobile,
@@ -330,7 +388,10 @@ export default defineComponent({
       handleRemove,
       handleDownload,
       formatFileSize,
-      handlePictureCardPreview
+      clearDescriptionHeader,
+      updateDescriptionHeader,
+      handlePictureCardPreview,
+      addAttachmentDescriptionHeader
     }
   }
 })
