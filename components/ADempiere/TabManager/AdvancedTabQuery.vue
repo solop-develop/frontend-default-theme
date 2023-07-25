@@ -28,7 +28,16 @@
       style="padding-right: 6px;"
       @input="handleChangeSearch"
     >
+      <el-button
+        v-if="isMobile"
+        slot="append"
+        class="button-search-record"
+        @click="openDrawer"
+      >
+        <svg-icon icon-class="manageSearch" />
+      </el-button>
       <el-popover
+        v-else
         slot="append"
         v-model="isShowedAdvancedQuery"
         placement="bottom"
@@ -94,6 +103,64 @@
         </el-button>
       </el-popover>
     </el-input>
+    <el-drawer
+      :visible.sync="isShowedAdvancedQuery"
+      :with-header="true"
+      :before-close="handleCloseDrawer"
+      size="100%"
+    >
+      <span slot="title">
+        <title-and-help
+          class="advanced-query-title"
+          style="margin: 0 !important;"
+          :name="$t('window.advancedQuery.title')"
+          :help="$t('window.advancedQuery.help')"
+        />
+      </span>
+      <el-row :gutter="0">
+        <el-col :span="24">
+          <el-row style="padding-bottom: 0px; padding-top: 0px;">
+            <panel-definition
+              class="advanced-query-panel-definition"
+              :parent-uuid="parentUuid + IS_ADVANCED_QUERY"
+              :container-uuid="containerUuid + IS_ADVANCED_QUERY"
+              :container-manager="containerManagerAdvancedQuery"
+              :is-filter-records="false"
+              :is-advanced-query="true"
+              :is-tab-panel="true"
+            />
+          </el-row>
+        </el-col>
+
+        <el-col :span="24" class="advanced-query-footer">
+          <samp style="float: right; padding-top: 4px;">
+            <el-button
+              type="info"
+              class="button-base-icon"
+              plain
+              @click="clearValues();"
+            >
+              <svg-icon icon-class="layers-clear" />
+            </el-button>
+
+            <el-button
+              type="danger"
+              class="button-base-icon"
+              icon="el-icon-close"
+              @click="isShowedAdvancedQuery = false"
+            />
+
+            <el-button
+              type="primary"
+              class="button-base-icon"
+              icon="el-icon-check"
+              :loading="isLoadingSearch"
+              @click="searchRecords"
+            />
+          </samp>
+        </el-col>
+      </el-row>
+    </el-drawer>
   </span>
 </template>
 
@@ -276,6 +343,14 @@ export default defineComponent({
       })
     }
 
+    function handleCloseDrawer() {
+      isShowedAdvancedQuery.value = false
+    }
+
+    function openDrawer() {
+      isShowedAdvancedQuery.value = true
+    }
+
     watch(isShowedAdvancedQuery, (newValue, oldValue) => {
       if (newValue && newValue !== oldValue) {
         if (isEmptyValue(panelAdvancedQuery.value)) {
@@ -301,8 +376,10 @@ export default defineComponent({
       panelAdvancedQuery,
       styleIconSvg,
       // Methods
+      openDrawer,
       clearValues,
       searchRecords,
+      handleCloseDrawer,
       handleChangeSearch
     }
   }
