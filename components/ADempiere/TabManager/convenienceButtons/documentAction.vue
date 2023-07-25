@@ -28,10 +28,14 @@
       size="small"
       trigger="click"
       class="document-action"
+      :disabled="isLoadingActions"
       @click="handleCommandActions(defaultValue);"
       @command="handleCommandActions"
     >
-      {{ defaultName }}
+      <i v-if="isLoadingActions" class="el-icon-loading" />
+      <span v-else>
+        {{ defaultName }}
+      </span>
 
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item
@@ -172,6 +176,7 @@ export default defineComponent({
       value: '',
       description: ''
     }
+    const isLoadingActions = ref(false)
 
     /**
      * Computed
@@ -348,6 +353,7 @@ export default defineComponent({
 
     function sendAction() {
       isVisibleDocAction.value = false
+      isLoadingActions.value = true
       store.dispatch('runDocumentAction', {
         tableName: props.tabAttributes.tableName,
         recordUuid: recordUuid.value,
@@ -360,6 +366,7 @@ export default defineComponent({
         })
         .finally(() => {
           refreshCurrentRecord()
+          isLoadingActions.value = false
         })
     }
 
@@ -413,6 +420,7 @@ export default defineComponent({
       emptyDocAction,
       popoverDocAction,
       selectDocActions,
+      isLoadingActions,
       isVisibleDocAction,
       // Computed
       isMobile,
