@@ -51,7 +51,7 @@
               :record-id="currentRecordId"
               :tab-uuid="currentTab.uuid"
               :is-loading="tab.isLoading"
-              style="height: -webkit-fill-available;"
+              style="height: 95%;"
             />
           </el-tab-pane>
         </template>

@@ -358,6 +358,16 @@ export default defineComponent({
       resourceDescription.value = ''
     }
 
+    /**
+     * Close Note
+     */
+
+    function closeNote() {
+      store.dispatch('showLogs', {
+        show: false
+      })
+    }
+
     return {
       // Ref
       isList,
@@ -381,6 +391,7 @@ export default defineComponent({
       resourceReference,
       // Methods
       isCurrent,
+      closeNote,
       openMessage,
       sendMessage,
       cleanMessage,
