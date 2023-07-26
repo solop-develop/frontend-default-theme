@@ -34,6 +34,7 @@
           :container-uuid="containerUuid"
           :container-manager="containerManagerModalDialog"
           :is-filter-records="false"
+          :is-tab-panel="true"
         />
       </span>
       <loading-view
@@ -79,6 +80,7 @@
           :container-uuid="containerUuid"
           :container-manager="containerManagerModalDialog"
           :is-filter-records="false"
+          :is-tab-panel="true"
         />
       </span>
       <loading-view
