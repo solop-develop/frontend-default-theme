@@ -6,7 +6,7 @@
       </div>
     </div>
     <!-- eslint-disable-next-line -->
-    <div :style="{backgroundImage: `url(${image})`}" class="pan-thumb"></div>
+    <img :src="image" width="600" height="400" class="pan-thumb" >
   </div>
 </template>
 
