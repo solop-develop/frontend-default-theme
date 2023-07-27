@@ -51,6 +51,7 @@ import store from '@/store'
 // Constants
 import { config } from '@/utils/ADempiere/config'
 import { BEARER_TYPE } from '@/utils/auth'
+import { RESOURCE_TYPE_ATTACHMENT } from '@/utils/ADempiere/resource'
 
 // API Request Methods
 import {
@@ -106,6 +107,7 @@ export default defineComponent({
     function isValidUploadHandler(file) {
       return new Promise((resolve, reject) => {
         setResourceReference({
+          resourceType: RESOURCE_TYPE_ATTACHMENT,
           tableName: props.tableName,
           recordId: props.recordId,
           recordUuid: props.recordUuid,

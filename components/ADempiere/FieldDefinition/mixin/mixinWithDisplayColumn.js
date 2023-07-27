@@ -100,6 +100,10 @@ export default {
           }
         }
 
+        if (isEmptyValue(this.value)) {
+          return undefined
+        }
+
         // DisplayColumn_'ColumnName'
         const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
         // table records values

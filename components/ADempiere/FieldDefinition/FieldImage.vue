@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -9,7 +9,7 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
@@ -17,31 +17,70 @@
 -->
 
 <template>
-  <el-upload
-    v-bind="commonsProperties"
-    action="https://jsonplaceholder.typicode.com/posts/"
-    :show-file-list="false"
-    :on-success="handleAvatarSuccess"
-    :on-change="handleChange"
-    :before-upload="beforeAvatarUpload"
+  <form
+    enctype="multipart/form-data"
+    @submit.prevent="notSubmitForm"
   >
-    <img v-if="value" :src="value" class="avatar">
-    <i v-else class="el-icon-plus avatar-uploader-icon" />
-  </el-upload>
+    <el-upload
+      ref="uploadComponent"
+      v-bind="commonsProperties"
+      :action="endPointUploadResource"
+      :data="additionalData"
+      :headers="additionalHeaders"
+      drag
+      name="file"
+      :show-file-list="false"
+      :multiple="false"
+      :before-upload="isValidUploadHandler"
+      :on-success="loadedSucess"
+      :on-change="handleChange"
+    >
+      <img
+        v-if="value"
+        :alt="altImage"
+        :src="imageSource"
+        class="image-file"
+      >
+      <!-- <i v-else class="el-icon-plus icon-image-upload" /> -->
+      <svg-icon v-else icon-class="cloud_upload" class="icon-image-upload" style="font-size: 45px;" />
+    </el-upload>
+  </form>
 </template>
 
 <script>
+import lang from '@/lang'
+
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
+import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixinWithDisplayColumn.js'
+
+// Constants
+import { config } from '@/utils/ADempiere/config'
+import { BEARER_TYPE } from '@/utils/auth'
+import { UUID_PATTERN } from '@/utils/ADempiere/recordUtil'
+import { RESOURCE_TYPE_IMAGE } from '@/utils/ADempiere/resource'
 
 // API Request Methods
-import { getResource, updateResource } from '@/api/ADempiere/field/binary.js'
+// import { getResource } from '@/api/ADempiere/field/binary.js'
+import {
+  // requestUploadAttachment,
+  setResourceReference
+} from '@/api/ADempiere/user-interface/component/resource'
+
+// Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { getToken } from '@/utils/auth'
+import {
+  getImagePath
+} from '@/utils/ADempiere/resource.js'
+import { showMessage } from '@/utils/ADempiere/notification'
 
 export default {
   name: 'FieldImage',
 
   mixins: [
-    fieldMixin
+    fieldMixin,
+    fieldWithDisplayColumn
   ],
 
   props: {
@@ -54,6 +93,9 @@ export default {
 
   data() {
     return {
+      endPointUploadResource: config.adempiere.api.url + 'user-interface/component/resource/save-attachment',
+      additionalData: {},
+      fileResource: {},
       valuesImage: [{
         identifier: 'undefined',
         value: '',
@@ -65,92 +107,134 @@ export default {
   computed: {
     cssClassCustomField() {
       return ' custom-field-image '
+    },
+    altImage() {
+      const displayedAlt = this.displayedValue
+      if (isEmptyValue(displayedAlt)) {
+        return this.value
+      }
+      return displayedAlt.replace(UUID_PATTERN, '')
+        .replace(/^-{0,1}/, '')
+    },
+    imageSource() {
+      const displayedAlt = this.displayedValue
+      if (isEmptyValue(displayedAlt)) {
+        return undefined
+      }
+      const { uri } = getImagePath({
+        file: displayedAlt,
+        width: 900,
+        height: 500
+      })
+      return uri
+    },
+    additionalHeaders() {
+      const token = getToken()
+      let bearerToken = token
+      // Json Web Token
+      if (!isEmptyValue(bearerToken) && !bearerToken.startsWith(BEARER_TYPE)) {
+        bearerToken = `${BEARER_TYPE} ${token}`
+      }
+      return {
+        Authorization: bearerToken
+      }
     }
   },
 
   methods: {
-    updateResource,
-    getResource,
-    handleChange(file, fileList) {
-      let message, type
-      this.binary.push({
-        columnName: this.metadata.columnName,
-        value: file
-      })
-      switch (file.status) {
-        case 'success':
-          message = 'succesful'
-          type = file.status
-          break
-        case 'ready':
-          message = 'loading'
-          type = 'loading'
-          break
-        case 'error':
-          message = file.status
-          type = file.status
-          break
-      }
-      this.$message({
-        type: type,
-        showClose: true,
-        message: this.$t('notifications.' + message)
-      })
-      updateResource({
-        uuid: this.metadata.recordUuid,
-        tableName: this.$route.params.tableName,
-        binaryFile: this.binary
-      })
-    },
-    handleAvatarSuccess(res, file) {
-      this.value = URL.createObjectURL(file.raw)
-      this.handleFieldChange({ value: this.value })
-      getResource({
-        uuid: this.metadata.recordUuid,
-        tableName: this.$route.params.tableName
-      })
-    },
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === 'image/jpeg'
-      const isPNG = file.type === 'image/png'
-      // const isGIF = file.type === 'image/gif'
-      // const isBMP = file.type === 'image/bmp'
-      const isLt2M = file.size / 1024 / 1024 < 2
+    isValidUploadHandler(file) {
+      return new Promise((resolve, reject) => {
+        setResourceReference({
+          resourceType: RESOURCE_TYPE_IMAGE,
+          resourceId: this.value,
+          fileName: file.name,
+          fileSize: file.size
+        }).then(response => {
+          if (response.code >= 400) {
+            reject(response)
+          }
 
-      if (!isLt2M) {
-        this.$message.error(this.$t('components.imageError'))
+          this.fileResource = response
+          this.additionalData = {
+            resource_uuid: response.uuid,
+            file_name: response.file_name
+          }
+          resolve(true)
+        }).catch(error => {
+          showMessage({
+            message: error.message || error.result || lang.t('component.attachment.error'),
+            type: 'error'
+          })
+          reject(error)
+        })
+      })
+    },
+    handleChange(file, fileList) {
+    },
+    handleError(error, file, fileList) {
+      return showMessage({
+        type: 'error',
+        message: error.message || error.result || lang.t('component.attachment.error')
+      })
+    },
+    loadedSucess(response, file, fileList) {
+      if (response.code >= 400) {
+        setTimeout(() => {
+          fileList.pop()
+        }, 500)
+        return this.handleError(
+          new Error(response.result),
+          file,
+          fileList
+        )
       }
-      return isJPG + isPNG + isLt2M
+      const { result } = response
+
+      this.value = result.resource_id
+      this.displayedValue = result.file_name
+      this.preHandleChange(this.value)
     }
   }
 }
 </script>
 
-<style scoped>
-  .custom-field-image .el-upload {
-    border: 1px dashed #d9d9d9;
+<style lang="scss">
+.custom-field-image {
+  .el-upload {
+    border: 1px dashed #818181;
     border-radius: 6px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
+
+    &:hover {
+      border-color: #3095fb;
+      box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.2);
+    }
   }
 
-  .custom-field-image .el-upload:hover {
-    border-color: #409EFF;
-  }
-
-  .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
+  .icon-image-upload {
     height: 178px;
-    line-height: 178px;
     text-align: center;
+    color: #8c939d;
+  }
+  svg.icon-image-upload {
+    font-size: 45px;
+  }
+  i.icon-image-upload {
+    font-size: 28px;
+    width: 178px;
   }
 
-  .avatar {
+  .image-file {
+    // align center alt text
+    display: flex;
+    // display: block;
+    align-items: center;
+    justify-content: center;
+
     width: 178px;
     height: 178px;
-    display: block;
   }
+}
 </style>
