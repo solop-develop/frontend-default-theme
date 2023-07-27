@@ -229,7 +229,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     <el-footer
       height="auto"
     >
-    <!-- Add Description -->
+      <!-- Add Description -->
       <el-card v-if="!isEmptyValue(currentAttachment.textMessage) && !isEditHeard" class="box-card">
         <div slot="header" class="clearfix">
           <b style="font-size: 20px;">
