@@ -24,7 +24,7 @@
       size="small"
       :disabled="disableNextRecord"
       style="margin-right: 3px;"
-      @click="changePreviousRecord()"
+      @click="hangleChangeRecord('changePreviousRecord')"
     >
       <i class="el-icon-arrow-up" />
     </el-button>
@@ -35,7 +35,7 @@
       size="small"
       :disabled="disablePreviousRecord"
       style="margin-right: 3px;margin-left: 0px"
-      @click="changeNextRecord()"
+      @click="hangleChangeRecord('changeNextRecord')"
     >
       <i class="el-icon-arrow-down" />
     </el-button>
@@ -91,6 +91,19 @@ export default defineComponent({
         return false
       }
       return true
+    })
+
+    const isExistsChanges = computed(() => {
+      const persistenceValues = store.getters.getPersistenceAttributesChanges({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid,
+        recordUuid: recordUuid.value
+      })
+      return !isEmptyValue(persistenceValues)
+    })
+
+    const tabAttributes = computed(() => {
+      return store.getters.getStoredTab(props.parentUuid, props.containerUuid)
     })
 
     const disablePreviousRecord = computed(() => {
@@ -189,13 +202,34 @@ export default defineComponent({
       setRecordPath(recordId)
     }
 
+    function hangleChangeRecord(action) {
+      if (isExistsChanges.value) {
+        store.dispatch('flushPersistenceQueue', {
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid,
+          tableName: tabAttributes.value.tableName,
+          recordUuid: recordUuid.value
+        })
+          .then(() => {
+            if (action === 'changeNextRecord') return changeNextRecord()
+            return changePreviousRecord()
+          })
+        return
+      }
+      if (action === 'changeNextRecord') return changeNextRecord()
+      return changePreviousRecord()
+    }
+
     return {
       // Computed
+      tabAttributes,
+      isExistsChanges,
       disableNextRecord,
       recordsWithFilter,
       disablePreviousRecord,
       // Methods
       changeNextRecord,
+      hangleChangeRecord,
       changePreviousRecord
     }
   }
