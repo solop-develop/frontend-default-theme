@@ -33,10 +33,10 @@ import FileRender from '@theme/components/ADempiere/FileRender/index.vue'
 import LoadingView from '@theme/components/ADempiere/LoadingView/index.vue'
 import UploadResource from './uploadResource.vue'
 import PanelFooter from '@theme/components/ADempiere/PanelFooter/index.vue'
+
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification.js'
-// API Request Methods
 import {
   buildLinkHref,
   formatFileSize,

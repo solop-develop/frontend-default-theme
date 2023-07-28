@@ -19,10 +19,103 @@
 <template>
   <form
     enctype="multipart/form-data"
+    class="custom-field-image"
     @submit.prevent="notSubmitForm"
   >
+    <el-col v-if="value" :span="24" :offset="0">
+      <el-card :body-style="{ padding: '0px' }">
+        <el-image
+          class="image-file"
+          :alt="altImage"
+          :src="imageSourceSmall"
+          fit="contain"
+          :preview-src-list="[imageSourceLarge]"
+          style="display: block; padding-left: 5px;padding-right: 5px; padding-top: 5px; border: 1px solid rgba(184, 186, 188, 0.64);width: 100%;height: 100%;"
+        />
+
+        <div class="image-footer">
+          <!-- <el-button
+            slot="reference"
+            class="button-manage-file"
+            icon="el-icon-chat-line-square"
+            plain
+            :disabled="isEmptyValue(value) && isEmptyValue(displayedValue)"
+          /> -->
+          <!-- <file-info
+            :image-id="value"
+            :resource-name="displayedValue"
+            icon="el-icon-chat-line-square"
+          >
+            <el-button
+              slot="reference"
+              class="button-manage-file"
+              icon="el-icon-chat-line-square"
+              plain
+              :disabled="isEmptyValue(value) && isEmptyValue(displayedValue)"
+            />
+          </file-info> -->
+
+          <el-button
+            class="button-manage-file-svg"
+            plain
+            :disabled="isDisabled"
+            @click="clearValues()"
+          >
+            <svg-icon
+              icon-class="layers-clear"
+            />
+          </el-button>
+
+          <el-button
+            icon="el-icon-delete"
+            class="button-manage-file"
+            plain
+            :disabled="isDisabled || isEmptyValue(value)"
+            @click="handleRemove()"
+          />
+
+          <el-upload
+            ref="replaceFileComponent"
+            :action="endPointUploadResource"
+            :data="additionalData"
+            :headers="additionalHeaders"
+            class="upload-button"
+            name="file"
+            :show-file-list="false"
+            :multiple="false"
+            :before-upload="isValidUploadHandler"
+            :on-success="loadedSucess"
+            :on-change="handleChange"
+          >
+            <el-button
+              class="button-manage-file-svg"
+              plain
+              :disabled="isDisabled"
+            >
+              <svg-icon
+                icon-class="cloud_upload"
+              />
+            </el-button>
+          </el-upload>
+
+          <el-button
+            class="button-manage-file-svg"
+            plain
+            :disabled="!isDownload"
+            @click="handleDownload()"
+          >
+            <svg-icon
+              icon-class="cloud_download"
+            />
+          </el-button>
+        </div>
+      </el-card>
+    </el-col>
+
     <el-upload
+      v-else
       ref="uploadComponent"
+      class="image-without-file"
       v-bind="commonsProperties"
       :action="endPointUploadResource"
       :data="additionalData"
@@ -35,14 +128,8 @@
       :on-success="loadedSucess"
       :on-change="handleChange"
     >
-      <img
-        v-if="value"
-        :alt="altImage"
-        :src="imageSource"
-        class="image-file"
-      >
       <!-- <i v-else class="el-icon-plus icon-image-upload" /> -->
-      <svg-icon v-else icon-class="cloud_upload" class="icon-image-upload" style="font-size: 45px;" />
+      <svg-icon icon-class="cloud_upload" class="icon-image-upload" style="font-size: 45px;" />
     </el-upload>
   </form>
 </template>
@@ -53,6 +140,7 @@ import lang from '@/lang'
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixinWithDisplayColumn.js'
+// import FileInfo from '@theme/components/ADempiere/PanelInfo/Component/AttachmentManager/fileInfo'
 
 // Constants
 import { config } from '@/utils/ADempiere/config'
@@ -64,6 +152,7 @@ import { RESOURCE_TYPE_IMAGE } from '@/utils/ADempiere/resource'
 // import { getResource } from '@/api/ADempiere/field/binary.js'
 import {
   // requestUploadAttachment,
+  deleteResourceReference,
   setResourceReference
 } from '@/api/ADempiere/user-interface/component/resource'
 
@@ -77,6 +166,10 @@ import { showMessage } from '@/utils/ADempiere/notification'
 
 export default {
   name: 'FieldImage',
+
+  // components: {
+  //   FileInfo
+  // },
 
   mixins: [
     fieldMixin,
@@ -116,15 +209,30 @@ export default {
       return displayedAlt.replace(UUID_PATTERN, '')
         .replace(/^-{0,1}/, '')
     },
-    imageSource() {
+    isDownload() {
+      return !isEmptyValue(this.displayedValue)
+    },
+    imageSourceSmall() {
       const displayedAlt = this.displayedValue
       if (isEmptyValue(displayedAlt)) {
         return undefined
       }
       const { uri } = getImagePath({
         file: displayedAlt,
-        width: 900,
-        height: 500
+        width: 200,
+        height: 200
+      })
+      return uri
+    },
+    imageSourceLarge() {
+      const displayedAlt = this.displayedValue
+      if (isEmptyValue(displayedAlt)) {
+        return undefined
+      }
+      const { uri } = getImagePath({
+        file: displayedAlt,
+        width: 1024,
+        height: 1024
       })
       return uri
     },
@@ -152,6 +260,7 @@ export default {
         }).then(response => {
           if (response.code >= 400) {
             reject(response)
+            return
           }
 
           this.fileResource = response
@@ -159,6 +268,10 @@ export default {
             resource_uuid: response.uuid,
             file_name: response.file_name
           }
+
+          this.value = response.resource_id
+          this.displayedValue = response.file_name
+          this.preHandleChange(this.value)
           resolve(true)
         }).catch(error => {
           showMessage({
@@ -188,11 +301,47 @@ export default {
           fileList
         )
       }
-      const { result } = response
+      // const { result } = response
+      // this.value = result.resource_id
+      // this.displayedValue = result.file_name
+      // this.preHandleChange(this.value)
+    },
 
-      this.value = result.resource_id
-      this.displayedValue = result.file_name
+    clearValues() {
+      this.value = undefined
       this.preHandleChange(this.value)
+      // this.displayedValue = undefined
+    },
+
+    /**
+     * Handle Download image
+     */
+    async handleDownload() {
+      if (!this.isDownload) {
+        return
+      }
+      const imagen = await fetch(this.imageSourceLarge)
+      const imagenblob = await imagen.blob()
+      const imageURL = URL.createObjectURL(imagenblob)
+      const link = document.createElement('a')
+      link.href = imageURL
+      link.download = this.altImage
+      link.click()
+    },
+
+    /**
+     * Handle Removeya esta actualizado solop
+     */
+    handleRemove() {
+      const resourceName = this.displayedValue
+      if (isEmptyValue(resourceName)) {
+        return
+      }
+      deleteResourceReference({
+        resourceName
+      }).then(() => {
+        this.clearValues()
+      })
     }
   }
 }
@@ -200,41 +349,78 @@ export default {
 
 <style lang="scss">
 .custom-field-image {
-  .el-upload {
-    border: 1px dashed #818181;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+  .image-with-file {
+    // .el-upload {
+    //   border: 1px dashed #818181;
+    //   border-radius: 6px;
+    //   cursor: pointer;
+    //   position: relative;
+    //   overflow: hidden;
 
-    &:hover {
-      border-color: #3095fb;
-      box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.2);
+    //   &:hover {
+    //     border-color: #3095fb;
+    //     box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.2);
+    //   }
+    // }
+
+    .image-file {
+      // align center alt text
+      display: flex;
+      // display: block;
+      align-items: center;
+      justify-content: center;
+
+      width: 178px;
+      height: 178px;
     }
   }
 
-  .icon-image-upload {
-    height: 178px;
+  .image-without-file {
+    .icon-image-upload {
+        height: 178px;
+        text-align: center;
+        color: #8c939d;
+      }
+      svg.icon-image-upload {
+        font-size: 45px;
+      }
+      i.icon-image-upload {
+        font-size: 28px;
+        width: 178px;
+      }
+  }
+
+  .image-footer {
     text-align: center;
-    color: #8c939d;
-  }
-  svg.icon-image-upload {
-    font-size: 45px;
-  }
-  i.icon-image-upload {
-    font-size: 28px;
-    width: 178px;
+    // margin-top: 0px;
+    // margin-bottom: 0px;
+    padding-top: 7px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    .button-manage-file {
+      font-size: 20px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .button-manage-file-svg {
+      font-size: 24px;
+      padding-top: 3px;
+      padding-bottom: 3px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .upload-button {
+      display: initial;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
   }
 
-  .image-file {
-    // align center alt text
-    display: flex;
-    // display: block;
-    align-items: center;
-    justify-content: center;
-
-    width: 178px;
-    height: 178px;
-  }
 }
 </style>
