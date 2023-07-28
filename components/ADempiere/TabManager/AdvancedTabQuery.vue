@@ -104,6 +104,7 @@
       </el-popover>
     </el-input>
     <el-drawer
+      v-if="isMobile"
       :visible.sync="isShowedAdvancedQuery"
       :with-header="true"
       :before-close="handleCloseDrawer"
