@@ -48,7 +48,7 @@ export default defineComponent({
     },
     containerManager: {
       type: Object,
-      required: true
+      default: () => {}
     },
     recordUuid: {
       type: String,

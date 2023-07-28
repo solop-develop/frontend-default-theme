@@ -99,7 +99,9 @@
         </p>
       </el-card>
 
-      <import-format-fields />
+      <el-scrollbar wrap-class="scroll-list-field">
+        <import-format-fields />
+      </el-scrollbar>
 
       <el-row>
         <slot
@@ -323,7 +325,6 @@ export default defineComponent({
     }
 
     function handleSuccess({ results, header, resource, file }) {
-      console.log(results, header, resource, file)
       const data = results.filter((data, index) => {
         if (index <= 50) {
           return data
@@ -385,5 +386,8 @@ export default defineComponent({
     border-color: #dfe4ed;
     color: rgb(27, 26, 26);
     cursor: not-allowed;
+}
+.scroll-list-field {
+  max-height: 25vh;
 }
 </style>

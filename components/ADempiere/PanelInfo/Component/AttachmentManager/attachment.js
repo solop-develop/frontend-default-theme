@@ -61,7 +61,7 @@ export default defineComponent({
     },
     containerManager: {
       type: Object,
-      required: true
+      default: () => {}
     },
     recordId: {
       type: Number,

@@ -18,8 +18,8 @@
 -->
 
 <template>
-  <div style="padding: 10px;">
-    <div style="height: 8% !important;">
+  <div style="padding: 5px;">
+    <div style="height: 5% !important;">
       <el-steps :active="currentSetp" finish-status="success">
         <el-step
           v-for="(list, key) in stepList"
@@ -28,31 +28,25 @@
         />
       </el-steps>
     </div>
-    <div style="height: 92% !important;">
+    <div style="height: 90% !important;">
       <transition name="el-fade-in-linear">
         <selectTable
           v-if="currentSetp === 1"
         >
           <template v-slot:footer>
             <el-button
-              type="primary"
+              type="info"
               class="button-base-icon"
-              icon="el-icon-check"
+              icon="el-icon-arrow-right"
               style="float: right;margin-right: 10px;margin-top: 10px;"
               :disabled="!isDisableNextTable"
               @click="nextStep"
             />
             <el-button
-              type="danger"
-              class="button-base-icon"
-              icon="el-icon-close"
-              style="float: right;margin-right: 10px;margin-top: 10px;"
-            />
-            <el-button
               plain
               type="info"
               class="button-base-icon"
-              style="float: right;margin-right: 0px;margin-top: 10px;"
+              style="float: right;margin-right: 10px;margin-top: 10px;"
               @click="actionClear"
             >
               <svg-icon icon-class="layers-clear" />
@@ -64,31 +58,24 @@
           v-if="currentSetp === 2"
         >
           <template v-slot:footer>
-            <!-- <el-button
-              type="primary"
-              class="button-base-icon"
-              icon="el-icon-check"
-              style="float: right;margin-right: 10px;margin-top: 10px;"
-              :loading="isLoadSave"
-              @click="saveImport"
-            /> -->
             <el-button
-              type="primary"
+              type="info"
               class="button-base-icon"
-              icon="el-icon-check"
+              icon="el-icon-arrow-right"
               style="float: right;margin-right: 10px;margin-top: 10px;"
+              :disabled="disabledNextStepSave"
               @click="nextStep"
             />
             <el-button
-              type="danger"
+              type="info"
               class="button-base-icon"
-              icon="el-icon-close"
+              icon="el-icon-arrow-left"
               style="float: right;margin-right: 10px;margin-top: 10px;"
               @click="prevStep"
             />
             <span v-if="!showNavegationTable">
               <el-button
-                type="info"
+                type="success"
                 plain
                 size="small"
                 style="float: right;margin-right: 0px;margin-top: 10px;"
@@ -97,7 +84,7 @@
                 <i class="el-icon-arrow-up" style="font-size: 16px;" />
               </el-button>
               <el-button
-                type="info"
+                type="success"
                 plain
                 size="small"
                 style="float: right;margin-right: 10px;margin-top: 10px;"
@@ -122,9 +109,9 @@
               @click="saveImport"
             />
             <el-button
-              type="danger"
+              type="info"
               class="button-base-icon"
-              icon="el-icon-close"
+              icon="el-icon-arrow-left"
               style="float: right;margin-right: 10px;margin-top: 10px;"
               @click="prevStep"
             />
@@ -234,6 +221,11 @@ export default defineComponent({
       return isEmptyValue(data) && isEmptyValue(header)
     })
 
+    const disabledNextStepSave = computed(() => {
+      const { resource } = store.getters.getFile
+      return isEmptyValue(resource.id)
+    })
+
     // Computed
 
     function nextStep(steps) {
@@ -300,10 +292,10 @@ export default defineComponent({
         charsets,
         importFormats
       } = store.getters.getAttribute
-      const { id } = store.getters.getFile
+      const { resource } = store.getters.getFile
       isLoadSave.value = true
       saveRecordImport({
-        id,
+        id: resource.id,
         charset: charsets,
         importFormatId: importFormats
       })
@@ -336,6 +328,7 @@ export default defineComponent({
       initialSept,
       isDisableNextTable,
       validate,
+      disabledNextStepSave,
       showNavegationTable,
       prevStep,
       nextStep,

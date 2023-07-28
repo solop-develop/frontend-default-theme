@@ -24,7 +24,7 @@
         id="panel-select-table"
         class="panel-select-table"
       >
-        <div slot="header" class="clearfix" :style="isEmptyValue(currentTable) ? 'padding: 10px;' : 'padding-right: 10px; padding-left: 10px; padding-top: 10px;'">
+        <div slot="header" class="clearfix" style="padding: 0px; !important">
           <h3
             v-if="isEmptyValue(currentTable)"
             style="text-align: center;margin: 0px;"
@@ -36,7 +36,7 @@
           >
             <el-card
               shadow="never"
-              style="width: 25%;display: inline-block;background-color: #eaf5fe;border: 1px solid #36a3f7;margin-top: 5px;"
+              style="width: 30%;display: inline-block;background-color: #eaf5fe;border: 1px solid #36a3f7;margin-top: 5px;"
             >
               <span>
                 <span
@@ -574,6 +574,7 @@ export default defineComponent({
 
     function selectTabla(table) {
       store.dispatch('changeTable', table)
+      store.dispatch('listProcess', table)
     }
 
     store.dispatch('findListTable')

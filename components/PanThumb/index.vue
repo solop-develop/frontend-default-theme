@@ -6,7 +6,13 @@
       </div>
     </div>
     <!-- eslint-disable-next-line -->
-    <img :src="image" width="600" height="400" class="pan-thumb" >
+    <el-image
+      :src="image"
+      fit="contain"
+      :width="width"
+      :height="height"
+      class="pan-thumb"
+    />
   </div>
 </template>
 

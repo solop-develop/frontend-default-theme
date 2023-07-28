@@ -22,9 +22,6 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     style="margin-left: 15px; margin-right: 20px;height: 89vh;"
   >
     <el-main>
-      <div v-if="isEmptyValue(attachmentList)">
-        <el-empty />
-      </div>
       <el-card class="box-card">
         <el-row
           slot="header"
@@ -233,6 +230,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           </el-col>
         </el-row>
       </el-card>
+      <div v-if="isEmptyValue(attachmentList)">
+        <el-empty />
+      </div>
     </el-main>
     <!-- Add Description -->
     <el-footer
