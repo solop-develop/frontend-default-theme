@@ -159,7 +159,7 @@ export default defineComponent({
 
     watch(() => props.resourceName, (newValue, oldValue) => {
       if (!isSameValues(newValue, oldValue)) {
-        resourceReference.value = emptyRespourceRefence 
+        resourceReference.value = emptyRespourceRefence
       }
     })
 
