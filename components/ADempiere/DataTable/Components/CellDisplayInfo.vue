@@ -34,7 +34,7 @@
     /> -->
 
     <p
-      v-else-if="!isEmptyValue(displayedValue) && displayedValue.length >= 23"
+      v-else-if="!isEmptyValue(displayedValue) && displayedValue.length >= 23 && fieldAttributes.displayType != IMAGE.id"
       key="display-column"
       style="max-height: 40px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap; margin: 5px;"
     >
@@ -76,6 +76,48 @@
         v-markdown="displayedValue"
       />
 
+      <el-popover
+        v-else-if="(!isEmptyValue(displayedValue) && fieldAttributes.componentPath === IMAGE.componentPath)"
+        v-model="isPreviewImage"
+        placement="left"
+        width="300"
+        trigger="hover"
+        :open-delay="400"
+      >
+        <el-image
+          v-if="isPreviewImage"
+          class="image-file"
+          :src="imageSourceMedium"
+          lazy
+          fit="contain"
+        >
+          <!-- <div slot="placeholder" class="image-loading">
+            {{ $t('notifications.loading') }}<span class="dot">...</span>
+          </div> -->
+          <el-skeleton
+            slot="placeholder"
+            :loading="true"
+            animated
+            :throttle="500"
+            class="image-loading"
+          >
+            <template slot="template">
+              <el-skeleton-item
+                variant="image"
+                style="width: 100%; height: 140px;"
+              />
+            </template>
+          </el-skeleton>
+        </el-image>
+
+        <img
+          slot="reference"
+          :src="imageSourceSmall"
+          width="25px"
+          height="25px"
+        >
+      </el-popover>
+
       <p v-else key="only-value" style="margin: 5px;">
         {{ displayedValue }}
       </p>
@@ -84,7 +126,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed } from '@vue/composition-api'
 
 // Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
@@ -92,11 +134,13 @@ import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.v
 import ProgressPercentage from '@theme/components/ADempiere/ContainerOptions/ProgressPercentage.vue'
 
 // Utils and helpers Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 import { copyToClipboard } from '@/utils/ADempiere/coreUtils.js'
 import { formatField } from '@/utils/ADempiere/valueFormat.js'
+import { getImagePath } from '@/utils/ADempiere/resource'
 
 // Constants
-import { TEXT_LONG } from '@/utils/ADempiere/references'
+import { IMAGE, TEXT_LONG } from '@/utils/ADempiere/references'
 import { CURRENCY } from '@/utils/ADempiere/constants/systemColumns'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
@@ -121,6 +165,8 @@ export default defineComponent({
   },
 
   setup(props) {
+    const isPreviewImage = ref(false)
+
     const columnName = computed(() => {
       return props.fieldAttributes.columnName
     })
@@ -155,6 +201,32 @@ export default defineComponent({
       return classCss
     })
 
+    const imageSourceSmall = computed(() => {
+      const displayedAlt = displayedValue.value
+      if (isEmptyValue(displayedAlt)) {
+        return undefined
+      }
+      const { uri } = getImagePath({
+        file: displayedAlt,
+        width: 20,
+        height: 20
+      })
+      return uri
+    })
+
+    const imageSourceMedium = computed(() => {
+      const displayedAlt = displayedValue.value
+      if (isEmptyValue(displayedAlt)) {
+        return undefined
+      }
+      const { uri } = getImagePath({
+        file: displayedAlt,
+        width: 400,
+        height: 400
+      })
+      return uri
+    })
+
     // const isPercentageColumn = computed(() => {
     //   return [columnName.value, elementName.value].includes('TaskStatus')
     // })
@@ -171,12 +243,16 @@ export default defineComponent({
       displayColumnName,
       // data
       // isPercentageColumn,
+      IMAGE,
       TEXT_LONG,
-      // computeds
+      // Computeds
       cellValue,
       cellCssClass,
       displayedValue,
-      // methods
+      isPreviewImage,
+      imageSourceSmall,
+      imageSourceMedium,
+      // Methods
       copyContent
     }
   }

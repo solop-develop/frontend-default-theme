@@ -55,6 +55,9 @@ import { defineComponent, computed } from '@vue/composition-api'
 import CellDisplayInfo from '@theme/components/ADempiere/DataTable/Components/CellDisplayInfo.vue'
 import FieldDefinition from '@theme/components/ADempiere/FieldDefinition/index.vue'
 
+// Constants
+import { BINARY_DATA, IMAGE } from '@/utils/ADempiere/references'
+
 // Utils and Helpers Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
@@ -113,6 +116,9 @@ export default defineComponent({
     })
 
     const isRowChangeEdited = computed(() => {
+      if ([BINARY_DATA.id, IMAGE.id].includes(props.fieldAttributes.displayType)) {
+        return false
+      }
       if (props.dataRow.isEditRow && !isReadOnly.value) {
         return props.dataRow.isEditRow
       }
