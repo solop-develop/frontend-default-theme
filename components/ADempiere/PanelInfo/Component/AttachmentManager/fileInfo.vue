@@ -58,7 +58,7 @@ import { defineComponent, ref, watch } from '@vue/composition-api'
 import { requestGetResourceReference } from '@/api/ADempiere/user-interface/component/resource'
 
 // Utils and Helper Methods
-import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
 import { formatFileSize } from '@/utils/ADempiere/resource.js'
 import { camelizeObjectKeys } from '@/utils/ADempiere/transformObject.js'
 
@@ -107,8 +107,7 @@ export default defineComponent({
   setup(props) {
     const isLoading = ref(false)
     const isShowed = ref(false)
-
-    const resourceReference = ref({
+    const emptyRespourceRefence = {
       name: 'unknown',
       fileSize: 0,
       contextType: 'application/unknown',
@@ -116,7 +115,9 @@ export default defineComponent({
       textMessage: '',
       update: -1,
       created: -1
-    })
+    }
+
+    const resourceReference = ref(emptyRespourceRefence)
 
     function getResourceReference() {
       isLoading.value = true
@@ -153,6 +154,12 @@ export default defineComponent({
     watch(isShowed, (newValue) => {
       if (newValue && resourceReference.value.fileSize === 0) {
         getResourceReference()
+      }
+    })
+
+    watch(() => props.resourceName, (newValue, oldValue) => {
+      if (!isSameValues(newValue, oldValue)) {
+        resourceReference.value = emptyRespourceRefence 
       }
     })
 
