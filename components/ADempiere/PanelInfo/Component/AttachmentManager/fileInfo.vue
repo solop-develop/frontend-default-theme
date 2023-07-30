@@ -18,25 +18,28 @@
 
 <template>
   <el-popover
+    v-model="isShowed"
     placement="bottom"
     trigger="click"
   >
-    <el-descriptions class="margin-top" :column="1" border>
+    <el-skeleton v-if="isLoading" :rows="5" animated />
+
+    <el-descriptions v-else class="margin-top" :column="1" border>
       <el-descriptions-item :label="$t('component.attachment.fileName')">
         {{ resourceReference.name }}
       </el-descriptions-item>
       <el-descriptions-item :label="$t('component.attachment.fileSize')">
-        {{ formatFileSize(resourceReference.file_size) }}
+        {{ formatFileSize(resourceReference.fileSize) }}
       </el-descriptions-item>
       <el-descriptions-item :label="$t('component.attachment.fileFormat')">
-        {{ resourceReference.content_type }}
+        {{ resourceReference.contentType }}
       </el-descriptions-item>
 
       <el-descriptions-item :label="$t('component.attachment.description')">
         {{ resourceReference.description }}
       </el-descriptions-item>
       <el-descriptions-item :label="$t('component.attachment.message')">
-        {{ resourceReference.text_message }}
+        {{ resourceReference.textMessage }}
       </el-descriptions-item>
     </el-descriptions>
 
@@ -44,20 +47,20 @@
       slot="reference"
       icon="el-icon-info"
       plain
-      v-bind="props"
     />
   </el-popover>
 </template>
 
 <script>
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, ref, watch } from '@vue/composition-api'
 
 // API Request Methods
-// import { requestGetResourceReference } from '@/api/ADempiere/user-interface/component/resource'
+import { requestGetResourceReference } from '@/api/ADempiere/user-interface/component/resource'
 
 // Utils and Helper Methods
-// import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatFileSize } from '@/utils/ADempiere/resource.js'
+import { camelizeObjectKeys } from '@/utils/ADempiere/transformObject.js'
 
 export default defineComponent({
   name: 'FileInfo',
@@ -103,43 +106,59 @@ export default defineComponent({
 
   setup(props) {
     const isLoading = ref(false)
+    const isShowed = ref(false)
 
     const resourceReference = ref({
       name: 'unknown',
-      file_size: 0,
-      context_type: 'application/unknown',
+      fileSize: 0,
+      contextType: 'application/unknown',
       description: '',
-      text_message: ''
+      textMessage: '',
+      update: -1,
+      created: -1
     })
 
-    // function getResourceReference() {
-    //   isLoading.value = false
-    //   requestGetResourceReference({
-    //     resourceId: props.id,
-    //     resourceUuid: props.uuid,
-    //     imageId: props.imageId,
-    //     imageUuid: props.imageUuid,
-    //     resourceName: props.resourceName
-    //   })
-    //     .then(response => {
-    //       resourceReference.value = response
-    //     })
-    //     .catch(error => {
-    //       console.warn(error)
-    //     })
-    //     .finally(() => {
-    //       isLoading.value = false
-    //     })
-    // }
+    function getResourceReference() {
+      isLoading.value = true
+      requestGetResourceReference({
+        id: props.id,
+        uuid: props.uuid,
+        resourceName: props.resourceName,
+        //
+        imageId: props.imageId,
+        imageUuid: props.imageUuid,
+        //
+        archiveId: props.archiveId,
+        archiveUuid: props.archiveUuid
+      })
+        .then(response => {
+          resourceReference.value = response
+        })
+        .catch(error => {
+          console.warn(error)
+        })
+        .finally(() => {
+          isLoading.value = false
+        })
+    }
 
-    // if (isEmptyValue(props.file)) {
-    //   getResourceReference()
-    // } else {
-    //   resourceReference.value = props.file
-    // }
+    if (isEmptyValue(props.file)) {
+      if (isShowed.value) {
+        getResourceReference()
+      }
+    } else {
+      resourceReference.value = camelizeObjectKeys(props.file)
+    }
+
+    watch(isShowed, (newValue) => {
+      if (newValue && resourceReference.value.fileSize === 0) {
+        getResourceReference()
+      }
+    })
 
     return {
       isLoading,
+      isShowed,
       resourceReference,
       // Methods
       formatFileSize
