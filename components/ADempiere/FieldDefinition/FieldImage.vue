@@ -22,16 +22,34 @@
     class="custom-field-image"
     @submit.prevent="notSubmitForm"
   >
-    <el-col v-if="value" :span="24" :offset="0">
+    <el-col v-if="value" :span="24" :offset="0" class="image-with-file">
       <el-card :body-style="{ padding: '0px' }">
         <el-image
           class="image-file"
           :alt="altImage"
           :src="imageSourceSmall"
+          lazy
           fit="contain"
           :preview-src-list="[imageSourceLarge]"
-          style="display: block; padding-left: 5px;padding-right: 5px; padding-top: 5px; border: 1px solid rgba(184, 186, 188, 0.64);width: 100%;height: 100%;"
-        />
+        >
+          <!-- <div slot="placeholder" class="image-loading">
+            {{ $t('notifications.loading') }}<span class="dot">...</span>
+          </div> -->
+          <el-skeleton
+            slot="placeholder"
+            :loading="true"
+            animated
+            :throttle="500"
+            class="image-loading"
+          >
+            <template slot="template">
+              <el-skeleton-item
+                variant="image"
+                style="width: 100%; height: 140px;"
+              />
+            </template>
+          </el-skeleton>
+        </el-image>
 
         <div class="image-footer">
           <!-- <el-button
@@ -149,7 +167,6 @@ import { UUID_PATTERN } from '@/utils/ADempiere/recordUtil'
 import { RESOURCE_TYPE_IMAGE } from '@/utils/ADempiere/resource'
 
 // API Request Methods
-// import { getResource } from '@/api/ADempiere/field/binary.js'
 import {
   // requestUploadAttachment,
   deleteResourceReference,
@@ -159,9 +176,7 @@ import {
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { getToken } from '@/utils/auth'
-import {
-  getImagePath
-} from '@/utils/ADempiere/resource.js'
+import { getImagePath } from '@/utils/ADempiere/resource'
 import { showMessage } from '@/utils/ADempiere/notification'
 
 export default {
@@ -350,28 +365,63 @@ export default {
 <style lang="scss">
 .custom-field-image {
   .image-with-file {
-    // .el-upload {
-    //   border: 1px dashed #818181;
-    //   border-radius: 6px;
-    //   cursor: pointer;
-    //   position: relative;
-    //   overflow: hidden;
-
-    //   &:hover {
-    //     border-color: #3095fb;
-    //     box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.2);
-    //   }
-    // }
-
     .image-file {
       // align center alt text
-      display: flex;
+      // display: flex;
       // display: block;
       align-items: center;
       justify-content: center;
 
-      width: 178px;
-      height: 178px;
+      // width: 178px;
+      // height: 178px;
+
+      display: block;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 5px;
+      border: 1px solid rgba(184, 186, 188, 0.64);
+      width: 100%;
+      height: 100%;
+
+      .image-loading {
+        width: 100%;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .image-footer {
+      text-align: center;
+      // margin-top: 0px;
+      // margin-bottom: 0px;
+      padding-top: 7px;
+      padding-bottom: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+
+      .button-manage-file {
+        font-size: 20px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .button-manage-file-svg {
+        font-size: 24px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .upload-button {
+        display: initial;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
     }
   }
 
@@ -389,38 +439,5 @@ export default {
         width: 178px;
       }
   }
-
-  .image-footer {
-    text-align: center;
-    // margin-top: 0px;
-    // margin-bottom: 0px;
-    padding-top: 7px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-
-    .button-manage-file {
-      font-size: 20px;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      padding-left: 10px;
-      padding-right: 10px;
-    }
-
-    .button-manage-file-svg {
-      font-size: 24px;
-      padding-top: 3px;
-      padding-bottom: 3px;
-      padding-left: 8px;
-      padding-right: 8px;
-    }
-
-    .upload-button {
-      display: initial;
-      margin-left: 10px;
-      margin-right: 10px;
-    }
-  }
-
 }
 </style>
