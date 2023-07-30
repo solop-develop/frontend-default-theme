@@ -59,11 +59,12 @@
             plain
             :disabled="isEmptyValue(value) && isEmptyValue(displayedValue)"
           /> -->
-          <!-- <file-info
+          <file-info
             :image-id="value"
             :resource-name="displayedValue"
-            icon="el-icon-chat-line-square"
-          >
+            class="popover-info"
+          />
+          <!--
             <el-button
               slot="reference"
               class="button-manage-file"
@@ -158,7 +159,7 @@ import lang from '@/lang'
 // Components and Mixins
 import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinField.js'
 import fieldWithDisplayColumn from '@theme/components/ADempiere/FieldDefinition/mixin/mixinWithDisplayColumn.js'
-// import FileInfo from '@theme/components/ADempiere/PanelInfo/Component/AttachmentManager/fileInfo'
+import FileInfo from '@theme/components/ADempiere/PanelInfo/Component/AttachmentManager/fileInfo'
 
 // Constants
 import { config } from '@/utils/ADempiere/config'
@@ -182,9 +183,9 @@ import { showMessage } from '@/utils/ADempiere/notification'
 export default {
   name: 'FieldImage',
 
-  // components: {
-  //   FileInfo
-  // },
+  components: {
+    FileInfo
+  },
 
   mixins: [
     fieldMixin,
@@ -267,6 +268,10 @@ export default {
   methods: {
     isValidUploadHandler(file) {
       return new Promise((resolve, reject) => {
+        if (this.isDisabled) {
+          reject(false)
+          return
+        }
         setResourceReference({
           resourceType: RESOURCE_TYPE_IMAGE,
           resourceId: this.value,
@@ -323,6 +328,9 @@ export default {
     },
 
     clearValues() {
+      if (this.isDisabled) {
+        return
+      }
       this.value = undefined
       this.preHandleChange(this.value)
       // this.displayedValue = undefined
@@ -348,6 +356,9 @@ export default {
      * Handle Removeya esta actualizado solop
      */
     handleRemove() {
+      if (this.isDisabled) {
+        return
+      }
       const resourceName = this.displayedValue
       if (isEmptyValue(resourceName)) {
         return
@@ -400,6 +411,17 @@ export default {
       padding-bottom: 5px;
       padding-left: 10px;
       padding-right: 10px;
+
+      .popover-info {
+        margin-right: 10px;
+        .el-button {
+          font-size: 20px;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+      }
 
       .button-manage-file {
         font-size: 20px;
