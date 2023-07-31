@@ -22,6 +22,8 @@
     v-bind="commonsProperties"
     :active-text="$t('components.switchActiveText')"
     :inactive-text="$t('components.switchInactiveText')"
+    :active-color="activeColor"
+    :inactive-color="inactiveColor"
     @change="preHandleChange"
     @blur="focusLost"
     @focus="focusGained"
@@ -34,6 +36,7 @@ import fieldMixin from '@theme/components/ADempiere/FieldDefinition/mixin/mixinF
 
 // Utils and Helper Methods
 import { convertStringToBoolean } from '@/utils/ADempiere/formatValue/booleanFormat.js'
+import { ACTIVE } from '@/utils/ADempiere/constants/systemColumns'
 
 export default {
   name: 'FieldYesNoSwitch',
@@ -45,6 +48,18 @@ export default {
   computed: {
     cssClassCustomField() {
       return ' custom-field-yes-no-switch '
+    },
+    activeColor() {
+      if (ACTIVE === this.metadata.columnName) {
+        return '#13ce66'
+      }
+      return undefined
+    },
+    inactiveColor() {
+      if (ACTIVE === this.metadata.columnName) {
+        return '#ff4949'
+      }
+      return undefined
     }
   },
 
