@@ -193,9 +193,9 @@ export default defineComponent({
     const cellCssClass = computed(() => {
       let classCss = ''
       if (props.fieldAttributes.componentPath === 'FieldNumber') {
-        classCss += ' cell-align-right '
+        classCss = ' cell-align-right '
       }
-      if (props.fieldAttributes.isColumnDocumentStatus) {
+      if (props.fieldAttributes.isColumnDocumentStatus || props.fieldAttributes.displayType === IMAGE.id) {
         classCss = ' cell-align-center '
       }
       return classCss
