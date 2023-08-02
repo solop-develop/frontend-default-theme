@@ -62,11 +62,37 @@
                 :label="$t('form.VFileImport.selectTable.importFormat')"
                 style="width: 100%;text-align: center;margin-bottom: 0px !important;"
               >
-                <el-tag>
+                <el-tag v-if="optionsImportFormats.length <= 1">
                   <b style="font-size: 16px;">
                     {{ currrentImportFormats.label }}
                   </b>
                 </el-tag>
+                <el-dropdown
+                  v-else
+                  plain
+                  split-button
+                  :hide-on-click="true"
+                  :class="{ 'action-container': true, 'without-defualt-action': false }"
+                  @command="handleCommand"
+                >
+                  <span>
+                    {{ currrentImportFormats.label }}
+                  </span>
+                  <el-dropdown-menu
+                    slot="dropdown"
+                  >
+                    <template
+                      v-for="(list, index) in optionsImportFormats"
+                    >
+                      <el-dropdown-item
+                        :key="index"
+                        :command="list.value"
+                      >
+                        {{ list.label }}
+                      </el-dropdown-item>
+                    </template>
+                  </el-dropdown-menu>
+                </el-dropdown>
               </el-form-item>
             </el-col>
           </el-form>
@@ -324,17 +350,7 @@ export default defineComponent({
         })
     }
 
-    function handleSuccess({ results, header, resource, file }) {
-      const data = results.filter((data, index) => {
-        if (index <= 50) {
-          return data
-        }
-      })
-      store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'data',
-        value: data
-      })
+    function handleSuccess({ resource, file }) {
       store.commit('updateAttributeVFileImport', {
         attribute: 'file',
         criteria: 'resource',
@@ -343,16 +359,16 @@ export default defineComponent({
           fileLabel: file.name
         }
       })
+      store.dispatch('listFilePreview', resource)
+    }
+
+    function handleCommand(command) {
       store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'header',
-        value: header.map(list => {
-          return {
-            key: list,
-            label: list
-          }
-        })
+        attribute: 'attribute',
+        criteria: 'importFormats',
+        value: command
       })
+      store.dispatch('listFilePreview')
     }
 
     return {
@@ -370,7 +386,8 @@ export default defineComponent({
       findImportFormats,
       remoteSearchCharsets,
       remoteSearchImportFormats,
-      handleSuccess
+      handleSuccess,
+      handleCommand
     }
   }
 })

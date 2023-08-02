@@ -99,21 +99,15 @@ export default defineComponent({
     function displayValue(field, index) {
       const { header } = store.getters.getFile
       if (isEmptyValue(header)) return
-      const line = formatFields.value.map(list => {
-        return {
-          ...list,
-          defaultValue: currentLine.value[header[field.startNo - 1].key]
-        }
-      })
-      listField.value = line
-      return line[field.startNo - 1].defaultValue
+      return currentLine.value[field.columnName]
     }
 
     return {
+      // Ref
       listField,
-      //
+      // Computed
       formatFields,
-      //
+      // Methos
       displayValue
     }
   }
