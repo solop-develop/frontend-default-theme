@@ -586,6 +586,21 @@ export default defineComponent({
           criteria: 'importFormats',
           value: ''
         })
+        store.commit('updateAttributeVFileImport', {
+          attribute: 'file',
+          criteria: 'data',
+          value: []
+        })
+        store.commit('updateAttributeVFileImport', {
+          attribute: 'file',
+          criteria: 'header',
+          value: []
+        })
+        store.commit('updateAttributeVFileImport', {
+          attribute: 'file',
+          criteria: 'resource',
+          value: {}
+        })
         if (isEmptyValue(optionsCharsets.value)) findCharsets(true)
         const defaultCharset = optionsCharsets.value.find(list => list.label === 'UTF-8')
         if (isEmptyValue(currrentCharsets.value) && !isEmptyValue(defaultCharset)) {
