@@ -230,30 +230,10 @@ export default defineComponent({
 
     function nextStep(steps) {
       currentSetp.value++
-      store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'header',
-        value: []
-      })
-      store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'data',
-        value: []
-      })
     }
 
     function prevStep(steps) {
       currentSetp.value--
-      store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'header',
-        value: []
-      })
-      store.commit('updateAttributeVFileImport', {
-        attribute: 'file',
-        criteria: 'data',
-        value: []
-      })
     }
 
     function actionClear() {

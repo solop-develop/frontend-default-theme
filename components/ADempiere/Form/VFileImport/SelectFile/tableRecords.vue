@@ -20,24 +20,22 @@
 <template>
   <el-table
     ref="singleTable"
+    v-loading="isLoadingTable"
     :data="dataTable"
     border
     highlight-current-row
     style="width: 100%"
+    :element-loading-text="$t('notifications.loading')"
+    element-loading-background="rgba(255, 255, 255, 0.8)"
     :empty-text="$t('form.VFileImport.configureToImport.emptyDataTable')"
     height="35vh"
   >
     <el-table-column
-      v-for="item of headerTable"
-      :key="item.label"
-      width="150"
+      v-for="(item, key) in headerTable"
+      :key="key"
+      :label="item.key"
+      width="180"
     >
-      <template slot="header" slot-scope="scope">
-        {{ scope.row }}
-        <span>
-          {{ item.label }}
-        </span>
-      </template>
       <template slot-scope="scope">
         {{ scope.row[item.key] }}
       </template>
@@ -66,6 +64,11 @@ export default defineComponent({
       return header
     })
 
+    const isLoadingTable = computed(() => {
+      const { isLoading } = store.getters.getFile
+      return isLoading
+    })
+
     const currentLine = computed(() => {
       return store.getters.getNavigationLine
     })
@@ -80,6 +83,7 @@ export default defineComponent({
       singleTable,
       //
       currentLine,
+      isLoadingTable,
       dataTable,
       headerTable
     }

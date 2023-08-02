@@ -63,7 +63,6 @@ import {
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { getToken } from '@/utils/auth'
-import { read, utils } from 'xlsx'
 
 export default defineComponent({
   name: 'UploadResource',
@@ -156,16 +155,11 @@ export default defineComponent({
         )
       }
 
-      const rawFile = file.raw
       if (props.loadData) {
-        readerData(rawFile)
-          .then(response => {
-            props.loadData({
-              ...response,
-              resource: fileResource.value,
-              file
-            })
-          })
+        props.loadData({
+          resource: fileResource.value,
+          file
+        })
       }
       additionalData.value = {}
 
@@ -174,47 +168,6 @@ export default defineComponent({
         recordId: props.recordId,
         recordUuid: props.recordUuid
       })
-    }
-
-    /**
-     * TODO: Remove this, handle with callback
-     */
-    function readerData(rawFile) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = e => {
-          const data = e.target.result
-          const workbook = read(data, { type: 'array' })
-          const firstSheetName = workbook.SheetNames[0]
-          const worksheet = workbook.Sheets[firstSheetName]
-          const header = getHeaderRow(worksheet)
-          const results = utils.sheet_to_json(worksheet)
-          resolve({
-            header,
-            results
-          })
-        }
-        reader.readAsArrayBuffer(rawFile)
-      })
-    }
-
-    /**
-     * TODO: Remove this, handle with callback
-     */
-    function getHeaderRow(sheet) {
-      const headers = []
-      const range = utils.decode_range(sheet['!ref'])
-      let C
-      const R = range.s.r
-      /* start in the first row */
-      for (C = range.s.c; C <= range.e.c; ++C) { /* walk every column in the range */
-        const cell = sheet[utils.encode_cell({ c: C, r: R })]
-        /* find the cell in the first row */
-        let hdr = 'UNKNOWN ' + C // <-- replace with your desired default
-        if (cell && cell.t) hdr = utils.format_cell(cell)
-        headers.push(hdr)
-      }
-      return headers
     }
 
     return {
