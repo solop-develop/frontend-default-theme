@@ -139,7 +139,11 @@
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import {
+  defineComponent,
+  computed,
+  watch
+} from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -274,6 +278,11 @@ export default defineComponent({
       }
     })
 
+    const resourceId = computed(() => {
+      const { id } = store.getters.getResourceReference
+      return id
+    })
+
     /**
      * Methods
      */
@@ -371,10 +380,23 @@ export default defineComponent({
       store.dispatch('listFilePreview')
     }
 
+    watch(resourceId, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue) && newValue !== oldValue) {
+        console.log({ newValue })
+        store.commit('updateAttributeVFileImport', {
+          attribute: 'file',
+          criteria: 'resource',
+          value: { id: newValue }
+        })
+        store.dispatch('listFilePreview', newValue)
+      }
+    })
+
     return {
       // Ref
       formatFields,
       // Computed
+      resourceId,
       optionsCharsets,
       currrentCharsets,
       getInfoImportFormats,
