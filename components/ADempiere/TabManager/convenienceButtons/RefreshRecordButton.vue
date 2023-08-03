@@ -40,7 +40,7 @@ import language from '@/lang'
 
 // Utils and Melper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-import { refreshRecord } from '@/utils/ADempiere/dictionary/window'
+import { refreshRecord, refreshRecords } from '@/utils/ADempiere/dictionary/window'
 
 export default defineComponent({
   name: 'RefreshRecordButton',
@@ -86,16 +86,23 @@ export default defineComponent({
     })
 
     function refreshCurrentRecord() {
-      refreshRecord.refreshRecord({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      })
-
       const info = {
         fieldsList: tabAttributes.value.fieldsList,
         option: language.t('actionMenu.refresh')
       }
       store.dispatch('fieldListInfo', { info })
+
+      if (tabAttributes.value.isShowedTableRecords) {
+        refreshRecords.refreshRecords({
+          parentUuid: props.parentUuid,
+          containerUuid: props.containerUuid
+        })
+        return
+      }
+      refreshRecord.refreshRecord({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      })
     }
 
     return {
