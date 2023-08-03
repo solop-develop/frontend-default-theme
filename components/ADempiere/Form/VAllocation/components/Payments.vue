@@ -25,67 +25,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <div slot="header" class="clearfix" style="text-align: center;">
               <b> {{ $t('form.VAllocation.payment.title') }} </b>
             </div>
-            <el-table
-              id="listPaymentsTable"
-              ref="listPaymentsTable"
-              :data="listPayments"
-              border
-              :max-height="panelInvoce"
-              style="width: 100%;height: 90%;"
-              @select="handleSelectionPayments"
-              @select-all="handleSelectionPaymentsAll"
-            >
-              <el-table-column
-                type="selection"
-                width="40"
-              />
-              <el-table-column
-                v-for="(header, key) in headersPayments"
-                :key="key"
-                :align="header.align"
-                :min-width="isCellInput(header) ? '225' : '125'"
-                :label="header.label"
-              >
-                <template slot-scope="scope">
-                  <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
-                    {{ scope.row[header.columnName].name }}
-                  </span>
-                  <span v-else-if="isCellInput(header)">
-                    <el-input-number
-                      v-model="scope.row[header.columnName]"
-                      controls-position="right"
-                    />
-                  </span>
-                  <span v-else>
-                    <p
-                      v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      {{ scope.row[header.columnName] }}
-                    </p>
-                    <p
-                      v-else
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      <el-popover
-                        placement="top-start"
-                        trigger="hover"
-                        width="300"
-                      >
-                        {{ scope.row[header.columnName] }}
-                        <p
-                          slot="reference"
-                          type="text"
-                          style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                        >
-                          {{ scope.row[header.columnName] }}
-                        </p>
-                      </el-popover>
-                    </p>
-                  </span>
-                </template>
-              </el-table-column>
-            </el-table>
+            <payments-table />
           </el-card>
         </div>
         <div id="panelInvoce" style="width: 100%;height: 50%;">
@@ -93,68 +33,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             <div slot="header" class="clearfix-panel-invoce" style="text-align: center;">
               <b> {{ $t('form.VAllocation.invoice.title') }} </b>
             </div>
-            <el-table
-              id="listInvocesTable"
-              ref="listInvocesTable"
-              :data="listInvoces"
-              border
-              :max-height="panelInvoce"
-              @select="handleSelectionInvoces"
-              @select-all="handleSelectionInvocesAll"
-            >
-              <el-table-column
-                type="selection"
-                fixed
-                width="40"
-              />
-              <el-table-column
-                v-for="(header, key) in headersInvoice"
-                :key="key"
-                prop="id"
-                :align="header.align"
-                min-width="210"
-                :label="header.label"
-              >
-                <template slot-scope="scope">
-                  <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
-                    {{ scope.row[header.columnName].name }}
-                  </span>
-                  <span v-else-if="isCellInput(header)">
-                    <el-input-number
-                      v-model="scope.row[header.columnName]"
-                      controls-position="right"
-                    />
-                  </span>
-                  <span v-else>
-                    <p
-                      v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      {{ scope.row[header.columnName] }}
-                    </p>
-                    <p
-                      v-else
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      <el-popover
-                        placement="top-start"
-                        trigger="hover"
-                        width="300"
-                      >
-                        {{ scope.row[header.columnName] }}
-                        <p
-                          slot="reference"
-                          type="text"
-                          style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                        >
-                          {{ scope.row[header.columnName] }}
-                        </p>
-                      </el-popover>
-                    </p>
-                  </span>
-                </template>
-              </el-table-column>
-            </el-table>
+            <invoce-table />
           </el-card>
         </div>
       </el-card>
@@ -299,7 +178,8 @@ import router from '@/router'
 // Components and Mixins
 import headersInvoice from './headersInvoice.js'
 import headersPayments from './headersPayments.js'
-
+import InvoceTable from './InvoceTable.vue'
+import PaymentsTable from './PaymentsTable.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
@@ -311,6 +191,11 @@ import {
 
 export default defineComponent({
   name: 'Payments',
+
+  components: {
+    InvoceTable,
+    PaymentsTable
+  },
 
   props: {
     metadata: {
