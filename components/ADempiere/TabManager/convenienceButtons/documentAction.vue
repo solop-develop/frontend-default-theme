@@ -338,7 +338,8 @@ export default defineComponent({
     function refreshCurrentRecord() {
       refreshRecord.refreshRecord({
         parentUuid: props.parentUuid,
-        containerUuid
+        containerUuid,
+        isRefreshChilds: true
       })
 
       const info = {
