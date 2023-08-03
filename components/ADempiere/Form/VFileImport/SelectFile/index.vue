@@ -382,7 +382,6 @@ export default defineComponent({
 
     watch(resourceId, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
-        console.log({ newValue })
         store.commit('updateAttributeVFileImport', {
           attribute: 'file',
           criteria: 'resource',
