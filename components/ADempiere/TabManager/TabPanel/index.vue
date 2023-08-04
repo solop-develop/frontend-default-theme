@@ -31,7 +31,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, onMounted } from '@vue/composition-api'
 
 import store from '@/store'
 
@@ -78,7 +78,7 @@ export default defineComponent({
     }
   },
 
-  setup() {
+  setup(props) {
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })
@@ -88,6 +88,15 @@ export default defineComponent({
         return () => import('./modeMobile.vue')
       }
       return () => import('./modeDesktop.vue')
+    })
+
+    onMounted(() => {
+      store.dispatch('changeTabAttribute', {
+        parentUuid: props.parentUuid,
+        containerUuid: props.tabAttributes.uuid,
+        attributeName: 'hasBeenRendered',
+        attributeValue: true
+      })
     })
 
     return {
