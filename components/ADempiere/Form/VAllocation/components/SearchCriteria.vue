@@ -76,6 +76,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       style="width: 100%;"
                       filterable
                       clearable
+                      :default-first-option="true"
                       :remote-method="remoteSearchOrganizations"
                       @visible-change="findOrganizations"
                     >
@@ -103,6 +104,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       style="width: 100%;"
                       filterable
                       clearable
+                      :default-first-option="true"
                       :remote-method="remoteSearchCurrencies"
                       @visible-change="findCurrencies"
                     >

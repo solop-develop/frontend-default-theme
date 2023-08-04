@@ -17,72 +17,77 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <el-table
-    id="listPaymentsTable"
-    ref="listPaymentsTable"
-    :data="listPayments"
-    border
-    :max-height="panelInvoce"
-    @select="selectionsPayments"
-    @select-all="selectionsPaymentsAll"
-  >
-    <el-table-column
-      type="selection"
-      fixed
-      width="40"
-    />
-    <el-table-column
-      v-for="(header, key) in headersPayments"
-      :key="key"
-      prop="id"
-      :align="header.align"
-      min-width="210"
-      :label="header.label"
+  <span>
+    <!-- <h2>
+      {{ diference }} | {{ sumApplied }}
+    </h2> -->
+    <el-table
+      id="listPaymentsTable"
+      ref="listPaymentsTable"
+      :data="listPayments"
+      border
+      :max-height="panelInvoce"
+      @select="selectionsPayments"
+      @select-all="selectionsPaymentsAll"
     >
-      <template slot-scope="scope">
-        <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
-          {{ scope.row[header.columnName].name }}
-        </span>
-        <span v-else-if="isCellInput(header)">
-          <el-input-number
-            v-model="scope.row[header.columnName]"
-            controls-position="right"
-          />
-        </span>
-        <span v-else>
-          <p
-            v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
-            style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-          >
-            {{ scope.row[header.columnName] }}
-          </p>
-          <p
-            v-else
-            style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-          >
-            <el-popover
-              placement="top-start"
-              trigger="hover"
-              width="300"
+      <el-table-column
+        type="selection"
+        fixed
+        width="40"
+      />
+      <el-table-column
+        v-for="(header, key) in headersPayments"
+        :key="key"
+        prop="id"
+        :align="header.align"
+        min-width="210"
+        :label="header.label"
+      >
+        <template slot-scope="scope">
+          <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
+            {{ scope.row[header.columnName].name }}
+          </span>
+          <span v-else-if="isCellInput(header)">
+            <el-input-number
+              v-model="scope.row[header.columnName]"
+              controls-position="right"
+            />
+          </span>
+          <span v-else>
+            <p
+              v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
+              style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
             >
               {{ scope.row[header.columnName] }}
-              <p
-                slot="reference"
-                type="text"
-                style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+            </p>
+            <p
+              v-else
+              style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+            >
+              <el-popover
+                placement="top-start"
+                trigger="hover"
+                width="300"
               >
                 {{ scope.row[header.columnName] }}
-              </p>
-            </el-popover>
-          </p>
-        </span>
-      </template>
-    </el-table-column>
-  </el-table>
+                <p
+                  slot="reference"
+                  type="text"
+                  style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+                >
+                  {{ scope.row[header.columnName] }}
+                </p>
+              </el-popover>
+            </p>
+          </span>
+        </template>
+      </el-table-column>
+    </el-table>
+  </span>
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed, watch } from '@vue/composition-api'
 
 import store from '@/store'
 // import router from '@/router'
@@ -105,6 +110,14 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const diference = ref(0)
+    const sumApplied = computed(() => {
+      const sum = selectListAll.value.map(list => list.applied)
+      // console.log({ sum })
+      const initialValue = 0
+      // const sumWithInitial = sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+      return sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+    })
     /**
      * Refs
      */
@@ -178,9 +191,9 @@ export default defineComponent({
 
     function addRowSelect(row) {
       const list = isEmptyValue(selectListAll.value) ? [] : selectListAll.value
-      console.log({ list, row })
-      const listAll = list.push(row)
-      console.log({ list, listAll, row })
+      // console.log({ list, row })
+      list.push(row)
+      // console.log({ list, listAll, row })
       store.commit('setListSelectInvoceandPayment', list)
     }
 
@@ -194,32 +207,85 @@ export default defineComponent({
 
     function applied(row) {
       if (isEmptyValue(selectListAll.value)) return row.open_amount
-      let applied
-      // let amount = 0, applied = 0
-      selectListAll.value.forEach(element => {
-        console.log({ element })
-        if (element.type === row.type) {
-          if (element.transaction_type.value !== row.transaction_type.value) {
-            if (element.applied <= row.open_amount) {
-              applied = row.open_amount
-            } else {
-              applied = element.applied
-            }
-          }
+      const index = selectListAll.value.length
+      const undoSelection = selectListAll.value[index - 1].applied
+      console.log(12)
+      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => list.amountApplied)
+      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce')
+      if (sumInvoce.length >= 1 && sumPayment.length <= 0) {
+        const initialValue = 0
+        const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+        if (sumAllInvoce <= num(row.open_amount)) {
+          if (Math.sign(row.open_amount) < 0) return -(sumAllInvoce)
+          return sumAllInvoce
         }
-      })
-      return applied
+      }
+      if (num(undoSelection) <= num(row.open_amount)) {
+        if (Math.sign(row.open_amount) > 0) {
+          console.log({ ...row })
+          return num(undoSelection)
+        }
+        return -(undoSelection)
+      } else {
+        if (Math.sign(row.open_amount) > 0) {
+          console.log({ ...row }, 2)
+          return num(row.open_amount)
+        }
+        return row.open_amount
+      }
+      // let applied
+      // let amount = 0, applied = 0
+      // selectListAll.value.forEach(element => {
+      //   console.log({ element })
+      //   if (element.type === row.type) {
+      //     if (element.transaction_type.value !== row.transaction_type.value) {
+      //       if (element.applied <= row.open_amount) {
+      //         applied = row.open_amount
+      //       } else {
+      //         applied = element.applied
+      //       }
+      //     }
+      //   }
+      // })
+      // return applied
     }
+
+    function num(amount) {
+      const math = Math.sign(amount)
+      if (math > 0) return amount
+      return -(amount)
+    }
+
+    /**
+     * Watch
+     */
+
+    watch(selectListAll, (newValue) => {
+      if (newValue) {
+        const index = newValue.length
+        // console.log({ index })
+        if (index > 0) {
+          diference.value = newValue[index - 1].applied
+          // console.log({ diference: diference.value }, newValue[index -1].applied)
+        } else {
+          diference.value = 0
+        }
+        // console.log({ newValue })
+      }
+    })
 
     setToggleSelection()
 
     return {
+      // Let
+      diference,
       // Import
       headersPayments,
       // Refs
       panelInvoce,
       listPaymentsTable,
       // Computed
+      sumApplied,
       listPayments,
       selectListAll,
       // Methods
