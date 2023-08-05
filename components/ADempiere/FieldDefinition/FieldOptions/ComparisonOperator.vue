@@ -22,8 +22,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     plain
     :split-button="true"
     type="primary"
-    :class="{ 'action-container': true, 'without-defualt-action': true }"
+    :class="{ 'comparison-operator-container': true, 'without-defualt-action': true, 'disabled-operators': metadataField.readonly }"
     trigger="click"
+    :disabled="metadataField.readonly"
     @command="handleOperator"
   >
     {{ $t('operators.' + currentOperatorValue) }}
@@ -35,7 +36,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         :class="{ 'is-current': operator === currentOperatorValue}"
         :disabled="isDisableOperator(operator)"
       >
-        {{ $t('operators.' + operator) }}
+        {{ $t('operators.' + operator) }} a
       </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
@@ -141,10 +142,77 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.el-dropdown-menu__item {
-  &.is-current {
-    font-weight: bold;
-    color: #1890ff;
+.comparison-operator-container {
+  &.without-defualt-action {
+    .el-button {
+      padding-left: 5px;
+      padding-right: 8px;
+    }
+  }
+
+  .el-dropdown-menu__item {
+    &.is-current {
+      font-weight: bold;
+      color: #1890ff;
+    }
+  }
+
+  .el-button-group {
+    // light blue style of the first section of the menu button
+    // >.el-button::first-child {
+    >.el-button:not(:last-child) {
+      :not(.without-defualt-action) {
+        min-width: 105px;
+      }
+      font-weight: bold;
+      // margin-right: -1px;
+      color: #0080ff;
+      border-color: #0080ff;
+      background: #F5F7FA;
+
+      &.is-disabled {
+        font-weight: bold;
+        color: #868889;
+        border-color: #929699;
+        &:hover {
+          font-weight: bold;
+          color: #868889;
+          border-color: #929699;
+          background: #F5F7FA;
+        }
+      }
+    }
+
+    // light blue style of the drop down menu section
+    .el-button--primary:last-child {
+      // margin-right: 2px;
+      color: #0080ff;
+      border-color: #0080ff;
+      background: #e6f1fd;
+      border-left-color: #000000 !important;
+
+      &.is-disabled {
+        font-weight: bold;
+        color: #868889;
+        border-color: #929699;
+        background: #F5F7FA;
+      }
+    }
+
+    // dark blue style when pointing to the menu
+    .el-button--primary:hover {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #FFFFFF;
+      background: #F5F7FA;
+
+      &.is-disabled {
+        font-weight: bold;
+        color: #868889;
+        border-color: #929699;
+        background: #F5F7FA;
+      }
+    }
   }
 }
 </style>
