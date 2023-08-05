@@ -1323,6 +1323,7 @@ export default {
         containerUuid: 'OverdrawnInvoice',
         format: 'object'
       })
+      let refundCurrencyUuid
       const refund = this.convertValuesToSend(values)
       if (this.isEmptyValue(this.currentBankAccount)) {
         const nameAccount = this.$store.getters.getValueOfField({
@@ -1334,6 +1335,12 @@ export default {
           columnName: 'Value'
         })
         const payment = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+        const paymentCurrency = this.paymentTypeList.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+        if (this.isEmptyValue(paymentCurrency.refund_reference_currency)) {
+          refundCurrencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
+        } else {
+          refundCurrencyUuid = paymentCurrency.refund_reference_currency
+        }
 
         this.$store.dispatch('customerBankAccount', {
           ...refund,
