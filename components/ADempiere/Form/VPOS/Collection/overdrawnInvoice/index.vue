@@ -114,6 +114,23 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
+                <el-col :span="8">
+                  <el-form-item label="Cuenta Bancaria" class="from-field">
+                    <el-select
+                      v-model="currentBankAccount"
+                      style="display: block;"
+                      clearable
+                      @change="selectedBanckAccount"
+                    >
+                      <el-option
+                        v-for="item in bankAccountList"
+                        :key="item.customer_bank_account_uuid"
+                        :label="item.name"
+                        :value="item.customer_bank_account_uuid"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
                 <el-col
                   v-for="field in hiddenFieldsList"
                   :key="field.sequence"
@@ -302,6 +319,7 @@
                   :key="key"
                   :span="8"
                 >
+                  <b> {{ 22 }} </b>
                   <field-definition
                     :metadata-field="field"
                     :container-uuid="'OverdrawnInvoice'"
@@ -944,6 +962,7 @@ export default {
       }
     },
     addPostPayment(customerBankAccountUuid) {
+      // addPostPayment
       const values = this.$store.getters.getValuesView({
         containerUuid: 'OverdrawnInvoice',
         format: 'object'
@@ -1299,6 +1318,60 @@ export default {
       return value
     },
     addPayRefund() {
+      let newCustomerBankAccountUuid
+      const values = this.$store.getters.getValuesView({
+        containerUuid: 'OverdrawnInvoice',
+        format: 'object'
+      })
+      const refund = this.convertValuesToSend(values)
+      if (this.isEmptyValue(this.currentBankAccount)) {
+        const nameAccount = this.$store.getters.getValueOfField({
+          containerUuid: 'OverdrawnInvoice',
+          columnName: 'Name'
+        })
+        const value = this.$store.getters.getValueOfField({
+          containerUuid: 'OverdrawnInvoice',
+          columnName: 'Value'
+        })
+        const payment = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+
+        this.$store.dispatch('customerBankAccount', {
+          ...refund,
+          customerUuid: refund.customerUuid,
+          posUuid: refund.posUuid,
+          email: refund.email,
+          driverLicense: value,
+          socialSecurityNumber: value,
+          name: this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name + '-' + this.currentPaymentMethods : nameAccount + '-' + this.currentPaymentMethods,
+          bankAccountType: refund.bankAccountType,
+          bankUuid: refund.bankUuid,
+          paymentMethodUuid: payment.uuid,
+          isAch: true,
+          AccountNo: refund.phone
+        })
+          .then(response => {
+            newCustomerBankAccountUuid = response.customerBankAccountUuid
+            this.$store.dispatch('refundReference', {
+              ...refund,
+              sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
+              isReceipt: false,
+              customerBankAccountUuid: response.customerBankAccountUuid,
+              currencyUuid: refundCurrencyUuid.uuid,
+              tenderTypeCode: payment.payment_method.tender_type,
+              customerUuid: refund.customerUuid,
+              posUuid: refund.posUuid,
+              email: refund.email,
+              driverLicense: value,
+              socialSecurityNumber: value,
+              name: nameAccount,
+              bankAccountType: refund.bankAccountType,
+              bankUuid: refund.bankID,
+              paymentMethodUuid: payment.payment_method.uuid,
+              isAch: true,
+              AccountNo: refund.phone
+            })
+          })
+      }
       const containerUuid = 'OverdrawnInvoice'
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
@@ -1350,6 +1423,7 @@ export default {
         amount: amount,
         convertedAmount: amount * this.dayRate.divideRate,
         paymentDate,
+        customerBankAccountUuid: this.isEmptyValue(newCustomerBankAccountUuid) ? this.currentBankAccount : newCustomerBankAccountUuid,
         tenderTypeCode: paymentCurrency.payment_method.tender_type,
         paymentMethodUuid: paymentCurrency.payment_method.uuid,
         currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
