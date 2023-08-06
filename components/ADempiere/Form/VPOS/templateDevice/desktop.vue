@@ -58,7 +58,7 @@
               :visible.sync="showCollection"
               :with-header="false"
               :before-close="handleClose"
-              size="40%"
+              size="50%"
             >
               <collection
                 key="collection-component"

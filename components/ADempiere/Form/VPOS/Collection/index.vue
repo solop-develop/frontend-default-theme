@@ -121,6 +121,23 @@
                       }"
                     />
                   </el-col>
+                  <el-col v-if="isShowBankAccount" :span="size">
+                    <el-form-item label="Cuenta Bancaria" class="from-field">
+                      <el-select
+                        v-model="currentBankAccount"
+                        style="display: block;"
+                        clearable
+                        @change="changeBankAccount"
+                      >
+                        <el-option
+                          v-for="item in bankAccountList"
+                          :key="item.customer_bank_account_uuid"
+                          :label="item.name"
+                          :value="item.customer_bank_account_uuid"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
                 </el-row>
               </el-form>
             </div>
@@ -322,7 +339,8 @@ export default {
       value: '',
       amontSend: 0,
       currentFieldCurrency: '',
-      currentFieldPaymentMethods: ''
+      currentFieldPaymentMethods: '',
+      currentBankAccount: ''
     }
   },
 
@@ -738,6 +756,14 @@ export default {
     },
     showCollection() {
       return this.$store.getters.getShowCollectionPos
+    },
+    bankAccountList() {
+      return this.$store.getters.getListCustomerBankAccount
+    },
+    isShowBankAccount() {
+      const payment = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
+      if (!this.isEmptyValue(payment) && !this.isEmptyValue(payment.payment_method) && payment.payment_method.tender_type === 'P') return true
+      return false
     }
   },
 
@@ -872,6 +898,7 @@ export default {
     },
     currentFieldPaymentMethods(value) {
       const payment = this.availablePaymentMethods.find(payment => payment.uuid === value)
+      if (!this.isEmptyValue(payment.payment_method) && payment.payment_method.tender_type === 'P') this.loadBankAccount()
       if (!this.isEmptyValue(payment.reference_currency)) {
         this.changeCurrency(payment.reference_currency.iso_code)
       } else {
@@ -1033,14 +1060,56 @@ export default {
         paymentDate: values.DateTrx
       }
 
+      // console.log({ values }, this.currentOrder.customer)
+
+      const customerBankAccountUuid = this.currentBankAccount
       const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
+
+      if (
+        this.isEmptyValue(customerBankAccountUuid) &&
+        paymentCurrency.payment_method.tender_type === 'P'
+      ) {
+        this.$store.dispatch('customerBankAccount', {
+          customerUuid: this.currentOrder.customer.uuid,
+          posUuid,
+          driverLicense: this.currentOrder.businessPartner.value,
+          socialSecurityNumber: this.currentOrder.businessPartner.value,
+          name: this.currentOrder.businessPartner.name,
+          bankUuid: values.C_Bank_ID_UUID,
+          paymentMethodUuid: paymentCurrency.uuid,
+          isAch: true,
+          AccountNo: values.Phone
+        })
+          .then(response => {
+            this.$store.dispatch('createPayments', {
+              ...params,
+              posUuid,
+              orderUuid,
+              bankUuid,
+              customerBankAccountUuid: response.customerBankAccountUuid,
+              amount: this.round(this.amontSend, this.standardPrecision),
+              convertedAmount: this.amontSend * this.dayRate.divideRate,
+              paymentMethodUuid: paymentCurrency.payment_method.uuid,
+              tenderTypeCode: this.currentAvailablePaymentMethods.payment_method.tender_type,
+              currencyUuid: this.isEmptyValue(paymentCurrency.reference_currency) ? currencyUuid.uuid : paymentCurrency.reference_currency.uuid
+            })
+              .then((response) => {
+                if (response.type !== 'error') {
+                  this.addCollect()
+                }
+              })
+          })
+        return
+      }
+
+      // const currentBankAccountUuid = this.currentBankAccount
       if (this.currentAvailablePaymentMethods.is_payment_reference) {
         this.$store.dispatch('refundReference', {
           ...params,
           posUuid,
           orderUuid,
-          customerBankAccountUuid: this.currentOrder.customer.uuid,
+          customerBankAccountUuid: customerBankAccountUuid,
           isReceipt: true,
           bankUuid,
           amount: this.round(this.amontSend, this.standardPrecision),
@@ -1073,6 +1142,7 @@ export default {
           posUuid,
           orderUuid,
           bankUuid,
+          customerBankAccountUuid: customerBankAccountUuid,
           amount: this.round(this.amontSend, this.standardPrecision),
           convertedAmount: this.amontSend * this.dayRate.divideRate,
           paymentMethodUuid: paymentCurrency.payment_method.uuid,
@@ -1518,6 +1588,12 @@ export default {
     },
     loadProcess() {
       if (this.$store.getters.getShowCollectionPos) this.$store.commit('setShowPOSCollection', !this.$store.getters.getShowCollectionPos)
+    },
+    changeBankAccount(value) {
+      console.log({ value })
+    },
+    loadBankAccount() {
+      this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })
     }
   }
 }
