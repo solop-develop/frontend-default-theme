@@ -38,11 +38,11 @@ export default [
   // Currency
   // Bank
   {
-    tableName,
+    tableName: 'C_BP_BankAccount',
     columnName: 'C_Bank_ID',
     isFromDictionary: true,
     overwriteDefinition: {
-      sequence: 2,
+      sequence: 3,
       name: language.t('form.pos.collect.overdrawnInvoice.fieldList.bank'),
       handleActionKeyPerformed: true,
       handleActionPerformed: true,
@@ -50,7 +50,7 @@ export default [
       displayLogicPayment: 'D,K,T,A,P,C',
       size: 24,
       isActiveLogics: true,
-      isMandatory: false
+      isMandatory: true
     }
   },
   // Date
@@ -100,6 +100,19 @@ export default [
       size: 24,
       displayLogicPayment: 'Z',
       isActiveLogics: true,
+      isMandatory: true
+    }
+  },
+  {
+    elementColumnName: 'Phone',
+    columnName: 'Phone',
+    tableName: 'AD_user',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      sequence: 5,
+      isCustomField: true,
+      size: 24,
+      displayLogicPayment: 'K,T,A,P,C',
       isMandatory: true
     }
   },

@@ -132,8 +132,8 @@
                   </el-form-item>
                 </el-col>
                 <el-col
-                  v-for="field in hiddenFieldsList"
-                  :key="field.sequence"
+                  v-for="(field, key) in hiddenFieldsList"
+                  :key="key"
                   :span="8"
                 >
                   <field-definition
@@ -192,8 +192,8 @@
             >
               <el-row>
                 <el-col
-                  v-for="field in primaryFieldsList"
-                  :key="field.sequence"
+                  v-for="(field, key) in primaryFieldsList"
+                  :key="key"
                   :span="8"
                 >
                   <field-definition
@@ -319,7 +319,6 @@
                   :key="key"
                   :span="8"
                 >
-                  <b> {{ 22 }} </b>
                   <field-definition
                     :metadata-field="field"
                     :container-uuid="'OverdrawnInvoice'"
@@ -831,6 +830,12 @@ export default {
     option(value) {
       const clear = false
       this.clearAccountData(clear)
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'OverdrawnInvoice',
+        columnName: 'DateTrx',
+        value: new Date()
+      })
+      this.loadBankAccount()
       this.currentFieldPaymentMethods = this.isEmptyValue(this.searchPaymentMethods) ? '' : this.searchPaymentMethods[0].uuid
       this.selectionTypeRefund = {}
       this.$store.commit('updateValueOfField', {
@@ -924,6 +929,12 @@ export default {
         value: this.currentPointOfSales.currentOrder.businessPartner.value
       })
     }
+    this.$store.commit('updateValueOfField', {
+      containerUuid: 'OverdrawnInvoice',
+      columnName: 'DateTrx',
+      value: new Date()
+    })
+    this.loadBankAccount()
   },
   methods: {
     formatPrice,
@@ -1336,10 +1347,10 @@ export default {
         })
         const payment = this.searchPaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
         const paymentCurrency = this.paymentTypeList.find(payment => payment.uuid === this.currentFieldPaymentMethods)
-        if (this.isEmptyValue(paymentCurrency.refund_reference_currency)) {
-          refundCurrencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
-        } else {
+        if (!this.isEmptyValue(paymentCurrency) && !this.isEmptyValue(paymentCurrency.refund_reference_currency)) {
           refundCurrencyUuid = paymentCurrency.refund_reference_currency
+        } else {
+          refundCurrencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
         }
 
         this.$store.dispatch('customerBankAccount', {
@@ -1740,6 +1751,9 @@ export default {
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
         })
+    },
+    loadBankAccount() {
+      this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })
     },
     printPreview(posUuid, orderUuid) {
       this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
