@@ -22,9 +22,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     plain
     :split-button="true"
     type="primary"
-    :class="{ 'comparison-operator-container': true, 'without-defualt-action': true, 'disabled-operators': metadataField.readonly }"
+    :class="{ 'comparison-operator-container': true, 'without-defualt-action': true, 'disabled-operators': readonly }"
     trigger="click"
-    :disabled="metadataField.readonly"
+    :disabled="readonly"
     @command="handleOperator"
   >
     {{ $t('operators.' + currentOperatorValue) }}
@@ -62,6 +62,10 @@ export default defineComponent({
     metadataField: {
       type: Object,
       default: () => ({})
+    },
+    readonly: {
+      type: Boolean,
+      default: false
     },
     containerManager: {
       type: Object,
@@ -104,6 +108,7 @@ export default defineComponent({
         columnName,
         value: null
       })
+      console.log(operator)
       store.dispatch('changeFieldAttribure', {
         containerUuid,
         columnName,

@@ -67,8 +67,9 @@
             :metadata="fieldAttributes"
           />
           <comparison-operator
-            :metadata-field="fieldAttributes"
+            :metadata-field="field"
             :container-manager="containerManager"
+            :readonly="fieldAttributes.readonly"
             :style="styleOperator"
           />
         </div>
