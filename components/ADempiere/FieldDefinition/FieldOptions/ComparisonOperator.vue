@@ -108,7 +108,6 @@ export default defineComponent({
         columnName,
         value: null
       })
-      console.log(operator)
       store.dispatch('changeFieldAttribure', {
         containerUuid,
         columnName,
