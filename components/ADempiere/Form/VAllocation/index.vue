@@ -54,9 +54,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     </div>
     <div v-show="currentSetp <= 0" style="height: 10% !important;text-align: end;padding: 0px 15px;">
       <el-button
-        type="primary"
+        type="success"
         class="button-base-icon"
-        icon="el-icon-check"
+        icon="el-icon-arrow-right"
         :disabled="isDisabledProcess"
         @click="nextStep"
       />
@@ -136,14 +136,11 @@ export default defineComponent({
 
     function nextStep(step) {
       if (currentSetp.value === 0) store.commit('setListSelectInvoceandPayment', [])
-      if (currentSetp.value > 2) {
-        return
-      }
+      if (currentSetp.value === 1) store.dispatch('processSend')
+      if (currentSetp.value >= 1) return
+
       currentSetp.value++
-      if (currentSetp.value > 1) {
-        store.dispatch('processSend')
-      }
-      if (!isEmptyValue(stepList.value[currentSetp.value]) && stepList.value[currentSetp.value].key === 'payments') {
+      if (currentSetp.value === 1) {
         store.dispatch('findListPayment')
         store.dispatch('findListInvoices')
       }

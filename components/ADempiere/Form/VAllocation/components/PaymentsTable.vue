@@ -24,9 +24,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     <el-table
       id="listPaymentsTable"
       ref="listPaymentsTable"
+      v-loading="isLoadingPayments"
       :data="listPayments"
       border
       :max-height="panelInvoce"
+      element-loading-background="rgba(255, 255, 255, 0.8)"
+      :element-loading-text="$t('notifications.loading')"
       @select="selectionsPayments"
       @select-all="selectionsPaymentsAll"
     >
@@ -116,6 +119,10 @@ export default defineComponent({
       const initialValue = 0
       return sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
     })
+    const isLoadingPayments = computed(() => {
+      const { isLoadingPayments } = store.getters.getisLoadTables
+      return isLoadingPayments
+    })
     /**
      * Refs
      */
@@ -191,7 +198,21 @@ export default defineComponent({
     }
 
     function selectionsPaymentsAll(selection) {
-      console.log({ selection })
+      if (!isEmptyValue(selection)) {
+        selection.forEach(row => {
+          if (selection.length === listPayments.value.length) {
+            row.isSelect = true
+            row.applied = applied(row)
+            addRowSelect(row)
+          }
+        })
+        return
+      }
+      listPayments.value.forEach(row => {
+        row.isSelect = false
+        row.applied = 0
+        removeRowSelect(row)
+      })
     }
 
     function setToggleSelection() {
@@ -278,6 +299,7 @@ export default defineComponent({
       listPayments,
       selectListAll,
       sumAppliedInvoce,
+      isLoadingPayments,
       // Methods
       isCellInput,
       selectionsPayments,

@@ -17,73 +17,71 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <span>
-    <!-- <h2>
-      {{ diference }} | {{ sumApplied }}
-    </h2> -->
-    <el-table
-      id="listInvocesTable"
-      ref="listInvocesTable"
-      :data="listInvoces"
-      border
-      :max-height="panelInvoce"
-      @select="selectionInvoces"
-      @select-all="selectionInvocesAll"
+  <el-table
+    id="listInvocesTable"
+    ref="listInvocesTable"
+    v-loading="isLoadingInvoces"
+    :data="listInvoces"
+    border
+    :max-height="panelInvoce"
+    element-loading-background="rgba(255, 255, 255, 0.8)"
+    :element-loading-text="$t('notifications.loading')"
+    @select="selectionInvoces"
+    @select-all="selectionInvocesAll"
+  >
+    <el-table-column
+      type="selection"
+      fixed
+      width="40"
+    />
+    <el-table-column
+      v-for="(header, key) in headersInvoice"
+      :key="key"
+      prop="id"
+      :align="header.align"
+      width="210"
+      :label="header.label"
     >
-      <el-table-column
-        type="selection"
-        fixed
-        width="40"
-      />
-      <el-table-column
-        v-for="(header, key) in headersInvoice"
-        :key="key"
-        prop="id"
-        :align="header.align"
-        width="210"
-        :label="header.label"
-      >
-        <template slot-scope="scope">
-          <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
-            {{ scope.row[header.columnName].name }}
-          </span>
-          <span v-else-if="isCellInput(header)">
-            <el-input-number
-              v-model="scope.row[header.columnName]"
-              controls-position="right"
-            />
-          </span>
-          <span v-else>
-            <p
-              v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
-              style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+      <template slot-scope="scope">
+        <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
+          {{ scope.row[header.columnName].name }}
+        </span>
+        <span v-else-if="isCellInput(header)">
+          <el-input-number
+            v-model="scope.row[header.columnName]"
+            controls-position="right"
+          />
+        </span>
+        <span v-else>
+          <p
+            v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
+            style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+          >
+            {{ scope.row[header.columnName] }}
+          </p>
+          <p
+            v-else
+            style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
+          >
+            <el-popover
+              placement="top-start"
+              trigger="hover"
+              width="300"
             >
               {{ scope.row[header.columnName] }}
-            </p>
-            <p
-              v-else
-              style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-            >
-              <el-popover
-                placement="top-start"
-                trigger="hover"
-                width="300"
+              <p
+                slot="reference"
+                type="text"
+                style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
               >
                 {{ scope.row[header.columnName] }}
-                <p
-                  slot="reference"
-                  type="text"
-                  style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                >
-                  {{ scope.row[header.columnName] }}
-                </p>
-              </el-popover>
-            </p>
-          </span>
-        </template>
-      </el-table-column>
-    </el-table>
-  </span>
+              </p>
+            </el-popover>
+          </p>
+        </span>
+      </template>
+    </el-table-column>
+  </el-table>
 </template>
 
 <script>
@@ -118,6 +116,10 @@ export default defineComponent({
       })
       const initialValue = 0
       return sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+    })
+    const isLoadingInvoces = computed(() => {
+      const { isLoadingInvoces } = store.getters.getisLoadTables
+      return isLoadingInvoces
     })
     /**
      * Refs
@@ -170,7 +172,23 @@ export default defineComponent({
     }
 
     function selectionInvocesAll(selection) {
-      console.log({ selection })
+      if (!isEmptyValue(selection)) {
+        selection.forEach(row => {
+          if (selection.length === listInvoces.value.length) {
+            row.isSelect = true
+            row.applied = appliedPay(row)
+            row.amountApplied = num(appliedPay(row))
+            addRowSelect(row)
+          }
+        })
+        return
+      }
+      listInvoces.value.forEach(row => {
+        row.isSelect = false
+        row.applied = 0
+        row.amountApplied = 0
+        removeRowSelect(row)
+      })
     }
 
     function appliedPay(currentInvoce) {
@@ -218,7 +236,7 @@ export default defineComponent({
       const index = selectListAll.value.findIndex(list => list.id === row.id)
       const list = selectListAll.value
       const listRemove = list.splice(index, 1)
-      console.log({ listRemove })
+      console.log({ listRemove, list })
     }
 
     function num(amount) {
@@ -250,6 +268,7 @@ export default defineComponent({
       panelInvoce,
       listInvocesTable,
       // Computed
+      isLoadingInvoces,
       selectListAll,
       listInvoces,
       // Methods
