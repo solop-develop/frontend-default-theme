@@ -1391,7 +1391,7 @@ export default {
               AccountNo: refund.phone
             })
           })
-          return
+        return
       }
       const containerUuid = 'OverdrawnInvoice'
       const posUuid = this.currentPointOfSales.uuid
