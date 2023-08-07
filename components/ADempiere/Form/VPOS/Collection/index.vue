@@ -100,6 +100,23 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
+                  <el-col v-if="isShowBankAccount" :span="size">
+                    <el-form-item label="Cuenta Bancaria" class="from-field">
+                      <el-select
+                        v-model="currentBankAccount"
+                        style="display: block;"
+                        clearable
+                        @change="changeBankAccount"
+                      >
+                        <el-option
+                          v-for="item in bankAccountList"
+                          :key="item.customer_bank_account_uuid"
+                          :label="item.name"
+                          :value="item.customer_bank_account_uuid"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
                   <el-col
                     v-for="field in hiddenFieldsList"
                     :key="field.sequence"
@@ -120,23 +137,6 @@
                         changeFieldShowedFromUser
                       }"
                     />
-                  </el-col>
-                  <el-col v-if="isShowBankAccount" :span="size">
-                    <el-form-item label="Cuenta Bancaria" class="from-field">
-                      <el-select
-                        v-model="currentBankAccount"
-                        style="display: block;"
-                        clearable
-                        @change="changeBankAccount"
-                      >
-                        <el-option
-                          v-for="item in bankAccountList"
-                          :key="item.customer_bank_account_uuid"
-                          :label="item.name"
-                          :value="item.customer_bank_account_uuid"
-                        />
-                      </el-select>
-                    </el-form-item>
                   </el-col>
                 </el-row>
               </el-form>
@@ -1590,7 +1590,36 @@ export default {
       if (this.$store.getters.getShowCollectionPos) this.$store.commit('setShowPOSCollection', !this.$store.getters.getShowCollectionPos)
     },
     changeBankAccount(value) {
-      console.log({ value })
+      if (this.isEmptyValue(value)) {
+        this.$store.commit('updateValuesOfContainer', {
+          containerUuid: 'Collection',
+          attributes: [
+            {
+              columnName: 'Phone',
+              value: ''
+            },
+            {
+              columnName: 'C_Bank_ID_UUID',
+              value: undefined
+            }
+          ]
+        })
+        return
+      }
+      const currentBanckAccount = this.bankAccountList.find(banck => banck.customer_bank_account_uuid === value)
+      this.$store.commit('updateValuesOfContainer', {
+        containerUuid: 'Collection',
+        attributes: [
+          {
+            columnName: 'Phone',
+            value: currentBanckAccount.account_no
+          },
+          {
+            columnName: 'C_Bank_ID_UUID',
+            value: currentBanckAccount.bank_uuid
+          }
+        ]
+      })
     },
     loadBankAccount() {
       this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })

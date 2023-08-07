@@ -34,6 +34,7 @@ export default [
     }
   },
   {
+    tableName: 'C_BPartner',
     elementColumnName: 'TaxID',
     columnName: 'TaxID',
     fieldUuid: '8cef473e-fb40-11e8-a479-7a0060f0aa01',
@@ -49,6 +50,7 @@ export default [
   },
 
   {
+    tableName: 'C_BPartner',
     fieldUuid: 'e699d070-8e2e-11e9-a13e-6ba4b8556bd1',
     uuid: 'e699d070-8e2e-11e9-a13e-6ba4b8556bd1',
     isFromDictionary: true,

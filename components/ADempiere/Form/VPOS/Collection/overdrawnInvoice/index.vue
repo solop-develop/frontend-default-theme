@@ -1006,6 +1006,7 @@ export default {
       //     return convert
       //   }
       // })
+      const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrencyRefund)
       if (this.isEmptyValue(this.currentBankAccount)) {
         this.$store.dispatch('customerBankAccount', {
           ...refund,
@@ -1027,7 +1028,7 @@ export default {
               sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
               isReceipt: false,
               customerBankAccountUuid: response.customerBankAccountUuid,
-              currencyUuid: refundCurrencyUuid.uuid,
+              currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid,
               tenderTypeCode: payment.payment_method.tender_type,
               customerUuid: refund.customerUuid,
               posUuid: refund.posUuid,
@@ -1050,7 +1051,7 @@ export default {
         sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
         isReceipt: false,
         customerBankAccountUuid: this.currentBankAccount,
-        currencyUuid: refundCurrencyUuid.uuid,
+        currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid,
         tenderTypeCode: payment.payment_method.tender_type,
         customerUuid: refund.customerUuid,
         posUuid: refund.posUuid,
@@ -1352,6 +1353,7 @@ export default {
         } else {
           refundCurrencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
         }
+        const currencyUuid = this.listCurrency.find(currency => (currency.iso_code === payment.reference_currency.iso_code) || (currency.iso_code === payment.refund_reference_currency.iso_code))
 
         this.$store.dispatch('customerBankAccount', {
           ...refund,
@@ -1374,7 +1376,7 @@ export default {
               sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
               isReceipt: false,
               customerBankAccountUuid: response.customerBankAccountUuid,
-              currencyUuid: refundCurrencyUuid.uuid,
+              currencyUuid: this.isEmptyValue(paymentCurrency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid,
               tenderTypeCode: payment.payment_method.tender_type,
               customerUuid: refund.customerUuid,
               posUuid: refund.posUuid,
@@ -1389,6 +1391,7 @@ export default {
               AccountNo: refund.phone
             })
           })
+        return
       }
       const containerUuid = 'OverdrawnInvoice'
       const posUuid = this.currentPointOfSales.uuid
