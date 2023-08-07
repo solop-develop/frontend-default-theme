@@ -1371,7 +1371,7 @@ export default {
         })
           .then(response => {
             newCustomerBankAccountUuid = response.customerBankAccountUuid
-            this.$store.dispatch('refundReference', {
+            this.$store.dispatch('sendCreateCustomerAccount', {
               ...refund,
               sourceAmount: (this.currentPointOfSales.currentOrder.priceList.currency.uuid !== refundCurrencyUuid) ? (refund.amount) : refund.amount,
               isReceipt: false,
@@ -1384,6 +1384,7 @@ export default {
               driverLicense: value,
               socialSecurityNumber: value,
               name: nameAccount,
+              isRefund: true,
               bankAccountType: refund.bankAccountType,
               bankUuid: refund.bankID,
               paymentMethodUuid: payment.payment_method.uuid,
@@ -1764,14 +1765,14 @@ export default {
           const { processLog } = response
           if (!this.isEmptyValue(processLog)) {
             const link = buildLinkHref({
-              fileName: processLog.output.file_name,
-              outputStream: processLog.output.output_stream,
+              fileName: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
+              outputStream: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
               mimeType: processLog.output.mime_type
             })
             this.$store.commit('setReportOutput', {
               download: link.download,
               format: processLog.output.report_type,
-              fileName: processLog.output.file_name,
+              fileName: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
               link,
               content: processLog.output.output,
               mimeType: processLog.output.mime_type,

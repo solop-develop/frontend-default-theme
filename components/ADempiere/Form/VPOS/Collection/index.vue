@@ -1425,14 +1425,14 @@ export default {
           const { processLog } = response
           if (!this.isEmptyValue(processLog)) {
             const link = buildLinkHref({
-              fileName: processLog.output.file_name,
+              fileName: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
               outputStream: processLog.output.output_stream,
               mimeType: processLog.output.mime_type
             })
             this.$store.commit('setReportOutput', {
               download: link.download,
               format: processLog.output.report_type,
-              fileName: processLog.output.file_name,
+              fileName: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
               link,
               content: processLog.output.output,
               mimeType: processLog.output.mime_type,
