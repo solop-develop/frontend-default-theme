@@ -113,9 +113,7 @@ export default defineComponent({
     const diference = ref(0)
     const sumApplied = computed(() => {
       const sum = selectListAll.value.map(list => list.applied)
-      // console.log({ sum })
       const initialValue = 0
-      // const sumWithInitial = sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
       return sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
     })
     /**
@@ -133,6 +131,32 @@ export default defineComponent({
 
     const selectListAll = computed(() => {
       return store.getters.getListSelectInvoceandPayment
+    })
+
+    const sumAppliedInvoce = computed(() => {
+      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => {
+        const { transaction_type } = list
+        if (list.type === 'isInvoce') {
+          if (transaction_type.value === 'R') {
+            return -(list.amountApplied)
+          }
+          return list.amountApplied
+        }
+        return list.applied
+      })
+      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce').map(list => list.applied)
+      const initialValue = 0
+      const initialValuePayment = 0
+      const initialValueAll = 0
+      const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+      const sumAllPayments = sumPayment.reduce((accumulator, currentValue) => accumulator + currentValue, initialValuePayment)
+      const alo = [sumAllPayments, sumAllInvoce].reduce((accumulator, currentValue) => accumulator + currentValue, initialValueAll)
+      if (isEmptyValue(sumAllPayments) && !isEmptyValue(sumAllInvoce)) {
+        return sumAllInvoce
+      } else if (!isEmptyValue(sumPayment) && isEmptyValue(sumAllInvoce)) {
+        return sumAllPayments
+      }
+      return alo
     })
 
     /**
@@ -191,14 +215,11 @@ export default defineComponent({
 
     function addRowSelect(row) {
       const list = isEmptyValue(selectListAll.value) ? [] : selectListAll.value
-      // console.log({ list, row })
       list.push(row)
-      // console.log({ list, listAll, row })
       store.commit('setListSelectInvoceandPayment', list)
     }
 
     function removeRowSelect(row) {
-      console.log(selectListAll.value)
       const index = selectListAll.value.findIndex(list => list.id === row.id)
       const list = selectListAll.value
       const listRemove = list.splice(index, 1)
@@ -207,47 +228,18 @@ export default defineComponent({
 
     function applied(row) {
       if (isEmptyValue(selectListAll.value)) return row.open_amount
-      const index = selectListAll.value.length
-      const undoSelection = selectListAll.value[index - 1].applied
-      console.log(12)
-      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => list.amountApplied)
-      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce')
-      if (sumInvoce.length >= 1 && sumPayment.length <= 0) {
-        const initialValue = 0
-        const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
-        if (sumAllInvoce <= num(row.open_amount)) {
-          if (Math.sign(row.open_amount) < 0) return -(sumAllInvoce)
-          return sumAllInvoce
+      if (num(sumAppliedInvoce.value) > 0) {
+        if (num(sumAppliedInvoce.value) > num(row.open_amount)) {
+          return row.open_amount
         }
-      }
-      if (num(undoSelection) <= num(row.open_amount)) {
-        if (Math.sign(row.open_amount) > 0) {
-          console.log({ ...row })
-          return num(undoSelection)
+        if (Math.sign(sumAppliedInvoce.value) === Math.sign(row.open_amount)) {
+          return row.open_amount
         }
-        return -(undoSelection)
+        if (row.transaction_type.value === 'P') return -(sumAppliedInvoce.value)
+        return sumAppliedInvoce.value
       } else {
-        if (Math.sign(row.open_amount) > 0) {
-          console.log({ ...row }, 2)
-          return num(row.open_amount)
-        }
         return row.open_amount
       }
-      // let applied
-      // let amount = 0, applied = 0
-      // selectListAll.value.forEach(element => {
-      //   console.log({ element })
-      //   if (element.type === row.type) {
-      //     if (element.transaction_type.value !== row.transaction_type.value) {
-      //       if (element.applied <= row.open_amount) {
-      //         applied = row.open_amount
-      //       } else {
-      //         applied = element.applied
-      //       }
-      //     }
-      //   }
-      // })
-      // return applied
     }
 
     function num(amount) {
@@ -263,14 +255,11 @@ export default defineComponent({
     watch(selectListAll, (newValue) => {
       if (newValue) {
         const index = newValue.length
-        // console.log({ index })
         if (index > 0) {
           diference.value = newValue[index - 1].applied
-          // console.log({ diference: diference.value }, newValue[index -1].applied)
         } else {
           diference.value = 0
         }
-        // console.log({ newValue })
       }
     })
 
@@ -288,6 +277,7 @@ export default defineComponent({
       sumApplied,
       listPayments,
       selectListAll,
+      sumAppliedInvoce,
       // Methods
       isCellInput,
       selectionsPayments,

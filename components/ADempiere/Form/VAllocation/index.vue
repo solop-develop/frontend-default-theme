@@ -135,7 +135,8 @@ export default defineComponent({
     })
 
     function nextStep(step) {
-      if (currentSetp > 2) {
+      if (currentSetp.value === 0) store.commit('setListSelectInvoceandPayment', [])
+      if (currentSetp.value > 2) {
         return
       }
       currentSetp.value++

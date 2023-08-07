@@ -116,16 +116,14 @@ export default defineComponent({
         if (list.type === 'isInvoce') return list.amountApplied
         return list.applied
       })
-      // console.log({ sumInvoce })
       const initialValue = 0
-      // const sumWithInitial = sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
       return sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
     })
     /**
      * Refs
      */
     const listInvocesTable = ref(null)
-    const panelInvoce = ref(250)
+    const panelInvoce = ref(300)
     /**
      * computed
      */
@@ -180,10 +178,7 @@ export default defineComponent({
       if (selectListAll.value.length < 1) {
         return open_amount - discount_amount
       }
-      // let appliedAmount
-      // console.log(num(sumApplied.value), { sumApplied }, '<=', num(open_amount - discount_amount))
       if (num(sumApplied.value) <= num(open_amount - discount_amount) && Math.sign(sumApplied.value) < 0) {
-        // console.log(sumApplied.value, num(sumApplied.value))
         if (num(sumApplied.value) === 0) {
           if (Math.sign(sumApplied.value) < 0) {
             return open_amount - discount_amount
@@ -192,39 +187,6 @@ export default defineComponent({
         return sumApplied.value
       }
       return open_amount - discount_amount
-
-      // const index = selectListAll.value.length
-      // const alo = selectListAll.value[index -1]
-      // // console.log({ alo }, alo.transaction_type.value, currentInvoce.transaction_type.value)
-      // if (!isEmptyValue(alo) && alo.transaction_type.value === currentInvoce.transaction_type.value) {
-      //   console.log(alo.applied, '<=', (open_amount - discount_amount))
-      //   console.log({
-      //     a: num(alo.applied),
-      //     b: num((open_amount - discount_amount))
-      //   })
-      //   if (
-      //     num(alo.applied) <= num((open_amount - discount_amount))
-      //   ) {
-      //     appliedAmount = alo.applied
-      //   } else {
-      //     appliedAmount = open_amount - discount_amount
-      //   }
-      //   // console.log({ appliedAmount })
-      //   return appliedAmount
-      // }
-      // if (applied <= 0) return open_amount - discount_amount
-      // selectListAll.value.forEach(element => {
-      //   console.log({ element })
-      //   if (element.type === row.type) {
-      //     if (element.transaction_type.value !== row.transaction_type.value) {
-      //       if (element.applied <= row.open_amount) {
-      //         applied = row.open_amount
-      //       } else {
-      //         applied = element.applied
-      //       }
-      //     }
-      //   }
-      // })
     }
 
     function setToggleSelection() {
@@ -248,14 +210,11 @@ export default defineComponent({
 
     function addRowSelect(row) {
       const list = isEmptyValue(selectListAll.value) ? [] : selectListAll.value
-      // console.log({ list, row })
       list.push(row)
-      // console.log({ list, listAll, row })
       store.commit('setListSelectInvoceandPayment', list)
     }
 
     function removeRowSelect(row) {
-      // console.log(selectListAll.value)
       const index = selectListAll.value.findIndex(list => list.id === row.id)
       const list = selectListAll.value
       const listRemove = list.splice(index, 1)
@@ -271,14 +230,11 @@ export default defineComponent({
     watch(selectListAll, (newValue) => {
       if (newValue) {
         const index = newValue.length
-        // console.log({ index })
         if (index > 0) {
           diference.value = newValue[index - 1].applied
-          // console.log({ diference: diference.value }, newValue[index - 1].applied)
         } else {
           diference.value = 0
         }
-        // console.log({ newValue })
       }
     })
 

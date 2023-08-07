@@ -725,20 +725,22 @@ export default defineComponent({
 
     const sumApplied = computed(() => {
       const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => {
-        if (list.type === 'isInvoce') return list.amountApplied
+        const { transaction_type } = list
+        if (list.type === 'isInvoce') {
+          if (transaction_type.value === 'R') {
+            return -(list.amountApplied)
+          }
+          return list.amountApplied
+        }
         return list.applied
       })
       const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce').map(list => list.applied)
-      console.log({ sumInvoce, sumPayment })
       const initialValue = 0
       const initialValuePayment = 0
       const initialValueAll = 0
       const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
       const sumAllPayments = sumPayment.reduce((accumulator, currentValue) => accumulator + currentValue, initialValuePayment)
       const alo = [sumAllPayments, sumAllInvoce].reduce((accumulator, currentValue) => accumulator + currentValue, initialValueAll)
-
-      console.log({ sumPayment, sumInvoce }, sumPayment - sumInvoce, (sumAllInvoce - sumAllPayments), { sumAllPayments, sumAllInvoce, alo }, alo)
-      // const sumWithInitial = sum.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
       if (isEmptyValue(sumAllPayments) && !isEmptyValue(sumAllInvoce)) {
         return sumAllInvoce
       } else if (!isEmptyValue(sumPayment) && isEmptyValue(sumAllInvoce)) {
