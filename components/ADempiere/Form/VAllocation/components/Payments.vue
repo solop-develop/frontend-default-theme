@@ -20,141 +20,20 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
   <div style="display: contents;height: 100% !important;">
     <div style="height: 89% !important;">
       <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100%;display: block;">
-        <div style="width: 100%;height: 50%;">
+        <div style="width: 100%;height: 40%;">
           <el-card style="padding: 5px 10px 5px 10px;height: 100%;">
             <div slot="header" class="clearfix" style="text-align: center;">
               <b> {{ $t('form.VAllocation.payment.title') }} </b>
             </div>
-            <el-table
-              id="listPaymentsTable"
-              ref="listPaymentsTable"
-              :data="listPayments"
-              border
-              :max-height="panelInvoce"
-              style="width: 100%;height: 90%;"
-              @select="handleSelectionPayments"
-              @select-all="handleSelectionPaymentsAll"
-            >
-              <el-table-column
-                type="selection"
-                width="40"
-              />
-              <el-table-column
-                v-for="(header, key) in headersPayments"
-                :key="key"
-                :align="header.align"
-                :min-width="isCellInput(header) ? '225' : '125'"
-                :label="header.label"
-              >
-                <template slot-scope="scope">
-                  <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
-                    {{ scope.row[header.columnName].name }}
-                  </span>
-                  <span v-else-if="isCellInput(header)">
-                    <el-input-number
-                      v-model="scope.row[header.columnName]"
-                      controls-position="right"
-                    />
-                  </span>
-                  <span v-else>
-                    <p
-                      v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      {{ scope.row[header.columnName] }}
-                    </p>
-                    <p
-                      v-else
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      <el-popover
-                        placement="top-start"
-                        trigger="hover"
-                        width="300"
-                      >
-                        {{ scope.row[header.columnName] }}
-                        <p
-                          slot="reference"
-                          type="text"
-                          style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                        >
-                          {{ scope.row[header.columnName] }}
-                        </p>
-                      </el-popover>
-                    </p>
-                  </span>
-                </template>
-              </el-table-column>
-            </el-table>
+            <payments-table />
           </el-card>
         </div>
-        <div id="panelInvoce" style="width: 100%;height: 50%;">
-          <el-card class="panel-invoce" style="padding: 5px 10px 5px 10px;height: 100%;display: grid;">
+        <div id="panelInvoce" style="width: 100%;">
+          <el-card class="panel-invoce" style="padding: 5px 10px 5px 10px;height: 100%;">
             <div slot="header" class="clearfix-panel-invoce" style="text-align: center;">
               <b> {{ $t('form.VAllocation.invoice.title') }} </b>
             </div>
-            <el-table
-              id="listInvocesTable"
-              ref="listInvocesTable"
-              :data="listInvoces"
-              border
-              :max-height="panelInvoce"
-              @select="handleSelectionInvoces"
-              @select-all="handleSelectionInvocesAll"
-            >
-              <el-table-column
-                type="selection"
-                fixed
-                width="40"
-              />
-              <el-table-column
-                v-for="(header, key) in headersInvoice"
-                :key="key"
-                prop="id"
-                :align="header.align"
-                min-width="210"
-                :label="header.label"
-              >
-                <template slot-scope="scope">
-                  <span v-if="(header.columnName === 'organization' || header.columnName === 'transaction_type')">
-                    {{ scope.row[header.columnName].name }}
-                  </span>
-                  <span v-else-if="isCellInput(header)">
-                    <el-input-number
-                      v-model="scope.row[header.columnName]"
-                      controls-position="right"
-                    />
-                  </span>
-                  <span v-else>
-                    <p
-                      v-if="scope.row[header.columnName].length < 13 || (typeof scope.row[header.columnName] === 'number')"
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      {{ scope.row[header.columnName] }}
-                    </p>
-                    <p
-                      v-else
-                      style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                    >
-                      <el-popover
-                        placement="top-start"
-                        trigger="hover"
-                        width="300"
-                      >
-                        {{ scope.row[header.columnName] }}
-                        <p
-                          slot="reference"
-                          type="text"
-                          style="color: #606266;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;line-height: 12px;"
-                        >
-                          {{ scope.row[header.columnName] }}
-                        </p>
-                      </el-popover>
-                    </p>
-                  </span>
-                </template>
-              </el-table-column>
-            </el-table>
+            <invoce-table />
           </el-card>
         </div>
       </el-card>
@@ -182,7 +61,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                     >
                       <el-tag>
                         <b style="text-align: right; font-size: 19px">
-                          {{ summaryDiference }}
+                          {{ sumApplied }}
                         </b>
                       </el-tag>
                     </el-form-item>
@@ -299,7 +178,8 @@ import router from '@/router'
 // Components and Mixins
 import headersInvoice from './headersInvoice.js'
 import headersPayments from './headersPayments.js'
-
+import InvoceTable from './InvoceTable.vue'
+import PaymentsTable from './PaymentsTable.vue'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
@@ -311,6 +191,11 @@ import {
 
 export default defineComponent({
   name: 'Payments',
+
+  components: {
+    InvoceTable,
+    PaymentsTable
+  },
 
   props: {
     metadata: {
@@ -793,6 +678,16 @@ export default defineComponent({
         (accumulator, currentValue) => accumulator + currentValue,
         differenceAmount
       )
+      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => list.amountApplied)
+      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce')
+      if (sumPayment.length > 1 && sumInvoce.length <= 0) {
+        const initialValue = 0
+        const sumAllInvoce = sumPayment.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+        if (sumAllInvoce <= row.open_amount) {
+          if (Math.sign(row.open_amount) < 0) return -(sumAllInvoce)
+          return sumAllInvoce
+        }
+      }
       const total = Math.abs(open_amount - discount_amount)
       if (
         (total) > (Math.abs(sumWithInitial)) &&
@@ -824,6 +719,36 @@ export default defineComponent({
       }
     })
 
+    const selectListAll = computed(() => {
+      return store.getters.getListSelectInvoceandPayment
+    })
+
+    const sumApplied = computed(() => {
+      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => {
+        const { transaction_type } = list
+        if (list.type === 'isInvoce') {
+          if (transaction_type.value === 'R') {
+            return -(list.amountApplied)
+          }
+          return list.amountApplied
+        }
+        return list.applied
+      })
+      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce').map(list => list.applied)
+      const initialValue = 0
+      const initialValuePayment = 0
+      const initialValueAll = 0
+      const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+      const sumAllPayments = sumPayment.reduce((accumulator, currentValue) => accumulator + currentValue, initialValuePayment)
+      const alo = [sumAllPayments, sumAllInvoce].reduce((accumulator, currentValue) => accumulator + currentValue, initialValueAll)
+      if (isEmptyValue(sumAllPayments) && !isEmptyValue(sumAllInvoce)) {
+        return sumAllInvoce
+      } else if (!isEmptyValue(sumPayment) && isEmptyValue(sumAllInvoce)) {
+        return sumAllPayments
+      }
+      return alo
+    })
+
     watch(isActiveTag, (newValue) => {
       if (newValue && !isEmptyValue(listInvoces.value)) {
         setToggleSelection()
@@ -836,6 +761,7 @@ export default defineComponent({
 
     return {
       // Refs
+      sumApplied,
       tableData,
       headersPayments,
       headersInvoice,
