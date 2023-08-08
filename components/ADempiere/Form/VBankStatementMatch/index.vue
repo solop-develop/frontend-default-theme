@@ -47,7 +47,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         class="button-base-icon"
         icon="el-icon-arrow-right"
         plain
-        :disabled="isNext || validate"
+        :disabled="isNext || isDisabledNext"
         style="float: right;"
         @click="currentSetp++"
       />
@@ -79,7 +79,7 @@ import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
-import SearchCriteria from './SearchCriteria.vue'
+import SearchCriteria from './SearchCriteria/index.vue'
 import AutomaticMatch from './AutomaticMatch.vue'
 import ManualMatch from './ManualMatch.vue'
 
@@ -104,23 +104,22 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup() {
     /**
     * Refs
     */
-
     const stepList = ref([
       {
-        name: lang.t('VBankStatementMatch.steps.searchCriteria')
+        name: lang.t('form.VBankStatementMatch.steps.searchCriteria')
       },
       // {
-      //   name: lang.t('VBankStatementMatch.steps.automaticMatch')
+      //   name: lang.t('form.VBankStatementMatch.steps.automaticMatch')
       // },
       {
-        name: lang.t('VBankStatementMatch.steps.pendingMatch')
+        name: lang.t('form.VBankStatementMatch.steps.pendingMatch')
       },
       {
-        name: lang.t('VBankStatementMatch.steps.summaryAdjustment')
+        name: lang.t('form.VBankStatementMatch.steps.summaryAdjustment')
       }
     ])
 
@@ -142,13 +141,16 @@ export default defineComponent({
     })
 
     const label = computed(() => {
-      if (currentSetp.value === 3) return lang.t('VBankStatementMatch.steps.summaryAdjustment')
+      if (currentSetp.value === 3) return lang.t('form.VBankStatementMatch.steps.summaryAdjustment')
       return ''
     })
 
-    const validate = computed(() => {
-      const { matchMode, bankAccounts } = store.getters.getCriteriaVBankStatement
-      return isEmptyValue(bankAccounts.id) || isEmptyValue(matchMode.value)
+    const isDisabledNext = computed(() => {
+      const bankAccount = store.getters.getBankAccountValueStatementMatch
+      if (isEmptyValue(bankAccount) || bankAccount <= 0) {
+        return true
+      }
+      return false
     })
 
     return {
@@ -158,7 +160,7 @@ export default defineComponent({
       isNext,
       label,
       initialSept,
-      validate
+      isDisabledNext
     }
   }
 })
