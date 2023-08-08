@@ -1453,6 +1453,7 @@ export default {
         })
     },
     afterProcess() {
+      console.log(656556)
       if (this.summaryProcessOrder.type === 'error') {
         // this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
         this.completePreparedOrder(this.listPayments)
@@ -1463,21 +1464,25 @@ export default {
       const orderUuid = this.currentOrder.uuid
       this.$store.dispatch('printTicket', { posUuid, orderUuid })
         .then((responseCreate) => {
-          this.$store.dispatch('createOrder', {
-            posUuid,
-            customerUuid: this.currentPointOfSales.templateCustomer.uuid,
-            salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
-            priceListUuid: this.currentPointOfSales.priceList.uuid,
-            warehouseUuid: this.currentPointOfSales.warehouse.uuid
-          })
-            .then(response => {
-              this.$store.commit('setOrder', response)
-              this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
-              this.isLoadProcessOrder = false
+          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
+            .then(() => {
+              this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
             })
-          if (this.currentPointOfSales.isAllowsPreviewDocument) {
-            this.printPreview(posUuid, orderUuid)
-          }
+          // this.$store.dispatch('createOrder', {
+          //   posUuid: this.currentPointOfSales.uuid,
+          //   customerUuid: this.currentPointOfSales.templateCustomer.uuid,
+          //   salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
+          //   priceListUuid: this.currentPointOfSales.priceList.uuid,
+          //   warehouseUuid: this.currentPointOfSales.warehouse.uuid
+          // })
+          //   .then(response => {
+          //     this.$store.commit('setOrder', response)
+          //     this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
+          //     this.isLoadProcessOrder = false
+          //   })
+          // if (this.currentPointOfSales.isAllowsPreviewDocument) {
+          //   this.printPreview(posUuid, orderUuid)
+          // }
         })
         .catch((error) => {
           this.$message({
@@ -1489,7 +1494,7 @@ export default {
       this.$store.dispatch('listOrdersFromServer', {
         posUuid: this.currentPointOfSales.uuid
       })
-      this.loadProcess()
+      // this.loadProcess()
       this.$store.dispatch('updateOrderPos', false)
       this.$store.dispatch('updatePaymentPos', false)
     },
