@@ -1,19 +1,19 @@
 <!--
-ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanchez15@outlook.com https://github.com/elsiosanchez
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https:www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -22,17 +22,17 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
       <el-table
         v-loading="matchingMovements.isLoading"
         :data="matchingMovements.list"
-        empty-text="Sin Coincidencia Automática "
+        :empty-text="$t('form.VBankStatementMatch.automaticMatch.withoutAutomaticMatch')"
         :border="true"
         element-loading-text="Loading....."
         element-loading-spinner="el-icon-loading"
         element-loading-background="rgba(0, 0, 0, 0.2)"
       >
         <p slot="empty" style="width: 100%;">
-          <el-empty description="Sin Coincidencia Automática" />
+          <el-empty :description="$t('form.VBankStatementMatch.automaticMatch.withoutAutomaticMatch')" />
         </p>
         <el-table-column
-          label="Coincidencia Automática"
+          :label="$t('form.VBankStatementMatch.automaticMatch.title')"
           :align="'center'"
         >
           <el-table-column
@@ -49,12 +49,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             :align="fieldAttributes.align"
           >
             <template slot-scope="scope">
-              <span v-if="fieldAttributes.columnName === 'is_receipt'">
-                <i v-if="scope.row[fieldAttributes.columnName]" class="el-icon-check" style="font-size: 21px;color: green;font-weight: 600;" />
-              </span>
-              <span v-else>
-                {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
-              </span>
+              {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
             </template>
           </el-table-column>
         </el-table-column>
@@ -66,7 +61,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 <script>
 import { defineComponent, computed, ref } from '@vue/composition-api'
 
+import lang from '@/lang'
 import store from '@/store'
+
+// Utils and Helper Methods
+import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat'
+import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 
 export default defineComponent({
   name: 'AutomaticMatch',
@@ -82,70 +82,71 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup() {
     /**
     * Refs
     */
     const matchingMovements = computed(() => {
       return store.getters.getListMatchingMovements
     })
+
     const headerTable = ref([
       {
-        label: 'Transaction Date',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.transactionDate'),
         columnName: 'transactionDate',
         align: 'left',
         width: '150'
       },
       {
-        label: 'Receipt',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.receipt'),
         columnName: 'receipt',
         align: 'left',
         width: '100'
       },
       {
-        label: 'Document No',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.documentNo'),
         columnName: 'documentNo',
         align: 'left',
         width: '150'
       },
       {
-        label: 'Business Partner',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.businessPartner'),
         columnName: 'businessPartner',
         align: 'left',
         width: '180'
       },
       {
-        label: 'Tender type',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.tenderType'),
         columnName: 'tenderType',
         align: 'left',
         width: '150'
       },
       {
-        label: 'Currency',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.currency'),
         columnName: 'currency',
         align: 'left',
         width: '100'
       },
       {
-        label: 'Amount',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.amount'),
         columnName: 'amount',
         align: 'right',
         width: '120'
       },
       {
-        label: 'Description',
-        columnName: 'TransactionDate',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.description'),
+        columnName: 'description',
         align: 'left',
         width: '120'
       },
       {
-        label: 'Reference No',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.referenceNo'),
         columnName: 'referenceNo',
         align: 'left',
         width: '150'
       },
       {
-        label: 'Memo',
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.memo'),
         columnName: 'memo',
         align: 'left',
         width: '100'
@@ -155,14 +156,29 @@ export default defineComponent({
     function displayDataColumn(data, column) {
       let display
       switch (column) {
-        case 'business_partner':
+        case 'businessPartner':
           display = data.business_partner.name
           break
-        case 'tender_type':
+        case 'tenderType':
           display = data.tender_type.name
           break
         case 'currency':
           display = data.currency.iso_code
+          break
+        case 'receipt':
+          display = convertBooleanToTranslationLang(data.is_receipt)
+          break
+        case 'documentNo':
+          display = data.document_no
+          break
+        case 'referenceNo':
+          display = data.reference_no
+          break
+        case 'amount':
+          display = formatPrice({
+            value: data.amount,
+            currency: data.currency.iso_code
+          })
           break
         default:
           display = data[column]
