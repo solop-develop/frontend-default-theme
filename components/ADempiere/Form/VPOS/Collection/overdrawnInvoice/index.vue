@@ -432,6 +432,56 @@
         />
       </span>
     </el-dialog>
+    <el-dialog
+      :visible.sync="showOpenSummary"
+      :append-to-body="true"
+      :title="summaryProcessOrder.labelModal"
+    >
+      <el-result
+        :icon="summaryProcessOrder.type"
+        :title="summaryProcessOrder.title"
+      />
+      <div style="border: 1px solid rgb(54, 163, 247);padding-left: 10px;padding-right: 10px;">
+        <p class="total">
+          <b>
+            {{ $t('form.pos.collect.orderTotal') }} {{ '(' + currentOrder.documentNo + ')' }}:
+          </b>
+          <b style="float: right;">
+            {{ formatPrice(currentOrder.grandTotal, pointOfSalesCurrency.iSOCode) }}
+          </b>
+        </p>
+
+        <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total">
+          <b>{{ $t('form.pos.collect.convertedAmount') }}: </b>
+          <b v-if="totalAmountConverted !== 1" style="float: right;">
+            {{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}
+          </b>
+          <b v-else style="float: right;">
+            {{ formatPrice(0.00, currentPointOfSales.displayCurrency.iso_code) }}
+          </b>
+        </p>
+      </div>
+      <type-collection
+        :is-add-type-pay="$store.getters.getListRefund.filter(payment => !payment.isRefund)"
+        :currency="pointOfSalesCurrency"
+        :is-read-only-payemnt="true"
+        :size="12"
+      />
+      <span style="float: right;margin-top: 10px;">
+        <el-button
+          type="danger"
+          class="custom-button-create-bp"
+          icon="el-icon-close"
+          @click="showOpenSummary = !showOpenSummary"
+        />
+        <el-button
+          type="primary"
+          class="custom-button-create-bp"
+          icon="el-icon-check"
+          @click="afterProcess()"
+        />
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -521,7 +571,9 @@ export default {
       pinPostPayment: '',
       emptyConversion: [],
       refundOptionVAlidate: {},
-      currentBankAccount: ''
+      currentBankAccount: '',
+      showOpenSummary: false,
+      summaryProcessOrder: {}
     }
   },
   computed: {
@@ -1716,45 +1768,72 @@ export default {
         payments: this.listAllPayments
       })
         .then(response => {
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
-            .then(() => {
-              this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-                .then(() => {
-                  this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-                })
-            })
-            .catch((error) => {
-              this.$message({
-                type: 'info',
-                message: this.$t('pointOfSales.print.cloudNotConnectPirnter') + error.message,
-                showClose: true
-              })
-              this.$store.dispatch('reloadOrder', response.uuid)
-            })
-          if (this.IsAllowsPreviewDocument) {
-            this.printPreview(posUuid, orderUuid)
-          }
           this.$message({
             type: 'success',
             message: this.$t('notifications.completed'),
             showClose: true
           })
+          this.summaryProcessOrder = {
+            labelModal: this.$t('notifications.succesful'),
+            title: this.$t('notifications.completed'),
+            type: 'success'
+          }
+          this.showOpenSummary = true
         })
         .catch(error => {
-          this.$store.commit('dialogoInvoce', { show: true })
           this.$message({
             type: 'error',
             message: error.message,
             showClose: true
           })
+          this.$store.dispatch('listPayments', {
+            posUuid: this.currentPointOfSales.uuid,
+            orderUuid: this.currentOrder.uuid
+          })
+          this.summaryProcessOrder = {
+            labelModal: this.$t('notifications.error'),
+            title: error.message,
+            type: 'error'
+          }
+          this.showOpenSummary = true
         })
-        .finally(() => {
-          // this.$store.dispatch('listOrdersFromServer', {
-          //   posUuid: this.currentPointOfSales.uuid
-          // })
-          this.$store.dispatch('updateOrderPos', false)
-          this.$store.dispatch('updatePaymentPos', false)
+    },
+    afterProcess() {
+      if (this.summaryProcessOrder.type === 'error') {
+        // this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
+        this.completePreparedOrder({
+          posUuid: this.currentPointOfSales.uuid,
+          orderUuid: this.currentOrder.uuid
         })
+        this.showOpenSummary = false
+        return
+      }
+      this.$store.dispatch('printTicket', {
+        posUuid: this.currentPointOfSales.uuid,
+        orderUuid: this.currentOrder.uuid
+      })
+        .then(() => {
+          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
+            .then(() => {
+              this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
+            })
+        })
+        .catch((error) => {
+          this.$message({
+            type: 'info',
+            message: this.$t('pointOfSales.print.cloudNotConnectPirnter') + error.message,
+            showClose: true
+          })
+          this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
+        })
+      if (this.IsAllowsPreviewDocument) {
+        this.printPreview({
+          posUuid: this.currentPointOfSales.uuid,
+          orderUuid: this.currentOrder.uuid
+        })
+      }
+      this.$store.dispatch('updateOrderPos', false)
+      this.$store.dispatch('updatePaymentPos', false)
     },
     loadBankAccount() {
       this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })
@@ -1763,7 +1842,7 @@ export default {
       this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
         .then(response => {
           const { processLog } = response
-          if (!this.isEmptyValue(processLog)) {
+          if (!this.isEmptyValue(processLog) && !this.isEmptyValue(processLog.output)) {
             const link = buildLinkHref({
               fileName: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
               outputStream: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',

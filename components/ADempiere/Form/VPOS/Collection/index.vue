@@ -246,6 +246,56 @@
         </el-footer>
       </el-container>
     </el-main>
+    <el-dialog
+      :visible.sync="showOpenSummary"
+      :append-to-body="true"
+      :title="summaryProcessOrder.labelModal"
+    >
+      <el-result
+        :icon="summaryProcessOrder.type"
+        :title="summaryProcessOrder.title"
+      />
+      <div style="border: 1px solid rgb(54, 163, 247);padding-left: 10px;padding-right: 10px;">
+        <p class="total">
+          <b>
+            {{ $t('form.pos.collect.orderTotal') }} {{ '(' + currentOrder.documentNo + ')' }}:
+          </b>
+          <b style="float: right;">
+            {{ formatPrice(currentOrder.grandTotal, pointOfSalesCurrency.iSOCode) }}
+          </b>
+        </p>
+
+        <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total">
+          <b>{{ $t('form.pos.collect.convertedAmount') }}: </b>
+          <b v-if="totalAmountConverted !== 1" style="float: right;">
+            {{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}
+          </b>
+          <b v-else style="float: right;">
+            {{ formatPrice(0.00, currentPointOfSales.displayCurrency.iso_code) }}
+          </b>
+        </p>
+      </div>
+      <type-collection
+        :is-add-type-pay="$store.getters.getListRefund.filter(payment => !payment.isRefund)"
+        :currency="pointOfSalesCurrency"
+        :is-read-only-payemnt="true"
+        :size="12"
+      />
+      <span style="float: right;margin-top: 10px;">
+        <el-button
+          type="danger"
+          class="custom-button-create-bp"
+          icon="el-icon-close"
+          @click="showOpenSummary = !showOpenSummary"
+        />
+        <el-button
+          type="primary"
+          class="custom-button-create-bp"
+          icon="el-icon-check"
+          @click="afterProcess()"
+        />
+      </span>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -340,7 +390,9 @@ export default {
       amontSend: 0,
       currentFieldCurrency: '',
       currentFieldPaymentMethods: '',
-      currentBankAccount: ''
+      currentBankAccount: '',
+      showOpenSummary: false,
+      summaryProcessOrder: {}
     }
   },
 
@@ -1360,55 +1412,36 @@ export default {
         payments: payment
       })
         .then(response => {
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
-            .then((responseCreate) => {
-              this.loadProcess()
-              this.$store.dispatch('createOrder', {
-                posUuid,
-                customerUuid: this.currentPointOfSales.templateCustomer.uuid,
-                salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
-                priceListUuid: this.currentPointOfSales.priceList.uuid,
-                warehouseUuid: this.currentPointOfSales.warehouse.uuid
-              })
-                .then(response => {
-                  this.$store.commit('setOrder', response)
-                  this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
-                  this.isLoadProcessOrder = false
-                  this.loadProcess()
-                })
-              if (this.currentPointOfSales.isAllowsPreviewDocument) {
-                this.printPreview(posUuid, orderUuid)
-              }
-              // this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-              // this.isLoadProcessOrder = false
-            })
-            // this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
-            // .then(() => {
-            //   this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-            // })
-            .catch((error) => {
-              this.$message({
-                type: 'info',
-                message: 'Error no se a podido conectar con la impresora' + error.message,
-                showClose: true
-              })
-              this.loadProcess()
-              // this.$store.dispatch('reloadOrder', response.uuid)
-            })
-          // this.$store.dispatch('reloadOrder', response.uuid)
           this.$message({
             type: 'success',
             message: this.$t('notifications.completed'),
             showClose: true
           })
+          this.summaryProcessOrder = {
+            labelModal: this.$t('notifications.succesful'),
+            title: this.$t('notifications.completed'),
+            type: 'success'
+          }
+          this.showOpenSummary = true
         })
         .catch(error => {
+          this.loadProcess()
           this.isLoadProcessOrder = false
           this.$message({
             type: 'error',
             message: error.message,
             showClose: true
           })
+          this.$store.dispatch('listPayments', {
+            posUuid: this.currentPointOfSales.uuid,
+            orderUuid: this.currentOrder.uuid
+          })
+          this.summaryProcessOrder = {
+            labelModal: this.$t('notifications.error'),
+            title: error.message,
+            type: 'error'
+          }
+          this.showOpenSummary = true
         })
         .finally(() => {
           this.$store.dispatch('listOrdersFromServer', {
@@ -1419,11 +1452,52 @@ export default {
           this.$store.dispatch('updatePaymentPos', false)
         })
     },
+    afterProcess() {
+      if (this.summaryProcessOrder.type === 'error') {
+        // this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
+        this.completePreparedOrder(this.listPayments)
+        this.showOpenSummary = false
+        return
+      }
+      const posUuid = this.currentPointOfSales.uuid
+      const orderUuid = this.currentOrder.uuid
+      this.$store.dispatch('printTicket', { posUuid, orderUuid })
+        .then((responseCreate) => {
+          this.$store.dispatch('createOrder', {
+            posUuid,
+            customerUuid: this.currentPointOfSales.templateCustomer.uuid,
+            salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
+            priceListUuid: this.currentPointOfSales.priceList.uuid,
+            warehouseUuid: this.currentPointOfSales.warehouse.uuid
+          })
+            .then(response => {
+              this.$store.commit('setOrder', response)
+              this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
+              this.isLoadProcessOrder = false
+            })
+          if (this.currentPointOfSales.isAllowsPreviewDocument) {
+            this.printPreview(posUuid, orderUuid)
+          }
+        })
+        .catch((error) => {
+          this.$message({
+            type: 'info',
+            message: error.message,
+            showClose: true
+          })
+        })
+      this.$store.dispatch('listOrdersFromServer', {
+        posUuid: this.currentPointOfSales.uuid
+      })
+      this.loadProcess()
+      this.$store.dispatch('updateOrderPos', false)
+      this.$store.dispatch('updatePaymentPos', false)
+    },
     printPreview(posUuid, orderUuid) {
       this.$store.dispatch('printTicketPreviwer', { posUuid, orderUuid })
         .then(response => {
           const { processLog } = response
-          if (!this.isEmptyValue(processLog)) {
+          if (!this.isEmptyValue(processLog) && !this.isEmptyValue(processLog.output)) {
             const link = buildLinkHref({
               fileName: !this.isEmptyValue(processLog.output.file_name) ? processLog.output.file_name : '',
               outputStream: processLog.output.output_stream,

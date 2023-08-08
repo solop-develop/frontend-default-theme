@@ -211,6 +211,10 @@ export default {
     isRefundReference: {
       type: Boolean,
       default: false
+    },
+    isReadOnlyPayemnt: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -481,6 +485,7 @@ export default {
       this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
     },
     isValidateDelete(value) {
+      if (this.isReadOnlyPayemnt) return !this.isReadOnlyPayemnt
       if (value.isRefund) {
         return !value.is_automatic || !value.is_processed
       }
