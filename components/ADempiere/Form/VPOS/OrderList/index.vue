@@ -278,9 +278,6 @@
 <script>
 // Constants
 import fieldsListOrders from './fieldsListOrders.js'
-import {
-  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
-} from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
