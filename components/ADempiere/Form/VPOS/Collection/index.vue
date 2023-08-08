@@ -1453,7 +1453,6 @@ export default {
         })
     },
     afterProcess() {
-      console.log(656556)
       if (this.summaryProcessOrder.type === 'error') {
         // this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
         this.completePreparedOrder(this.listPayments)
