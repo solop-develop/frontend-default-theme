@@ -61,11 +61,9 @@
         />
       </el-collapse-item>
     </el-collapse>
-
     <el-table
       ref="orderTable"
       v-shortkey="shortsKey"
-      v-loading="!ordersList.isLoaded || isLoadRecord"
       :data="sortTableOrderList"
       :border="true"
       :empty-text="$t('form.byInvoice.emptyList')"
@@ -280,9 +278,6 @@
 <script>
 // Constants
 import fieldsListOrders from './fieldsListOrders.js'
-import {
-  DISPLAY_COLUMN_PREFIX, UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX
-} from '@/utils/ADempiere/dictionaryUtils'
 
 // Components and Mixins
 import DocumentStatusTag from '@theme/components/ADempiere/ContainerOptions/DocumentStatusTag/index.vue'
@@ -385,6 +380,13 @@ export default {
       }
       return null
     },
+    valuesField() {
+      const values = this.$store.getters.getValuesView({
+        containerUuid: 'Orders-List',
+        format: 'object'
+      })
+      return values
+    },
     isReadyFromGetData() {
       const { isReload } = this.ordersList
       return isReload
@@ -420,6 +422,9 @@ export default {
     },
     sortTableOrderList(value) {
       this.isLoadRecord = false
+    },
+    valuesField(values) {
+      this.loadOrdersList()
     }
   },
 
@@ -492,6 +497,12 @@ export default {
     loadOrdersList(pageNumber = 0) {
       const point = this.$store.getters.posAttributes.currentPointOfSales.uuid
       if (!isEmptyValue(point)) {
+        // this.$store.commit('setListOrder', {
+        //   isLoaded: false,
+        //   ordersList: this.sortTableOrderList,
+        //   isReload: true,
+        //   posUuid: point
+        // })
         this.isLoadRecord = true
         this.$store.dispatch('listOrdersFromServer', {
           posUuid: point,
@@ -550,20 +561,6 @@ export default {
     clear() {
       this.$store.commit('setDialogoComponent', false)
       this.$store.commit('showListOrders', false)
-    },
-    subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'updateValueOfField' &&
-          !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
-          !mutation.payload.columnName.endsWith(UNIVERSALLY_UNIQUE_IDENTIFIER_COLUMN_SUFFIX) &&
-          mutation.payload.containerUuid === this.metadata.containerUuid) {
-          clearTimeout(this.timeOut)
-          this.isLoadRecord = true
-          this.timeOut = setTimeout(() => {
-            this.loadOrdersList()
-          }, 2000)
-        }
-      })
     },
     orderPrpcess(row) {
       const parametersList = [{
