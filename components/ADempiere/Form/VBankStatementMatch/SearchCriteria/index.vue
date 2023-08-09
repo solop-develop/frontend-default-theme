@@ -80,12 +80,18 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 
           <el-col :span="7">
             <el-form-item
-              :label="$t('form.VBankStatementMatch.field.totalPayment')"
+              :label="$t('form.VBankStatementMatch.field.simulateMatch')"
               class="form-item-criteria"
             >
+              {{
+                isMatchModeValue ?
+                  $t('form.VBankStatementMatch.field.assignedMatch') :
+                  $t('form.VBankStatementMatch.field.unassignedMatch')
+              }}
+
               <el-button
                 type="primary"
-                icon="el-icon-refresh-right"
+                icon="el-icon-setting"
                 plain
                 style="float: right; margin-left: 5px;"
                 class="button-base-icon"
@@ -136,6 +142,10 @@ export default defineComponent({
         return false
       }
       return true
+    })
+
+    const isMatchModeValue = computed(() => {
+      return store.getters.getMatchModeBankStatementMatch === 0
     })
 
     const paymentAmountTo = computed({
@@ -208,6 +218,7 @@ export default defineComponent({
 
     return {
       isEnableSearch,
+      isMatchModeValue,
       paymentAmountTo,
       paymentAmountFrom,
       transactionDate,
