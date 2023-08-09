@@ -30,6 +30,7 @@
           :src="imageSourceSmall"
           lazy
           fit="contain"
+          style="text-align: center ; height: 100px"
           :preview-src-list="[imageSourceLarge]"
         >
           <!-- <div slot="placeholder" class="image-loading">
@@ -236,7 +237,8 @@ export default {
       const { uri } = getImagePath({
         file: displayedAlt,
         width: 200,
-        height: 200
+        height: 200,
+        operation: 'resize'
       })
       return uri
     },
@@ -248,7 +250,8 @@ export default {
       const { uri } = getImagePath({
         file: displayedAlt,
         width: 1024,
-        height: 1024
+        height: 1024,
+        operation: 'resize'
       })
       return uri
     },
@@ -376,6 +379,8 @@ export default {
 <style lang="scss">
 .custom-field-image {
   .image-with-file {
+    // width: 178px;
+    // height: 178px;
     .image-file {
       // align center alt text
       // display: flex;
