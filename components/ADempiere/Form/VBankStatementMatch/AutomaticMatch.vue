@@ -24,7 +24,7 @@
         :data="matchingMovements.list"
         :empty-text="$t('form.VBankStatementMatch.automaticMatch.withoutAutomaticMatch')"
         :border="true"
-        element-loading-text="Loading....."
+        :element-loading-text="$t('notifications.loading') + '...'"
         element-loading-spinner="el-icon-loading"
         element-loading-background="rgba(0, 0, 0, 0.2)"
       >

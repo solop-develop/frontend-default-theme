@@ -24,8 +24,8 @@
   >
     <el-switch
       v-model="matchModeValue"
-      active-value="1"
-      inactive-value="0"
+      :active-value="1"
+      :inactive-value="0"
       :active-text="$t('form.VBankStatementMatch.searchMode.matched')"
       :inactive-text="$t('form.VBankStatementMatch.searchMode.notMatched')"
     />
