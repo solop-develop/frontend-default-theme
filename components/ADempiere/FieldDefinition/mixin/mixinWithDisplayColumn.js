@@ -26,6 +26,7 @@ import {
 
 // Utils and Helper Methods
 import { isEmptyValue, isSameValues } from '@/utils/ADempiere/valueUtils'
+import { IMAGE } from '@/utils/ADempiere/references'
 
 export default {
   name: 'MixinWithDisplayColumn',
@@ -100,12 +101,13 @@ export default {
           }
         }
 
-        if (isEmptyValue(this.value)) {
+        const { displayColumnName: columnName, containerUuid, inTable, displayType } = this.metadata
+
+        if (isEmptyValue(this.value) && displayType === IMAGE.id) {
           return undefined
         }
 
         // DisplayColumn_'ColumnName'
-        const { displayColumnName: columnName, containerUuid, inTable } = this.metadata
         // table records values
         if (inTable) {
           // implement container manager row
