@@ -59,7 +59,7 @@ export default defineComponent({
 
     const storedBankStatement = computed({
       set(newValue) {
-        console.log(newValue)
+        store.commit('setCurrentBankStatement', newValue)
       },
       get() {
         const currentValue = store.getters.getCurrentBankStatement
