@@ -211,9 +211,9 @@ export default defineComponent({
     })
 
     function refreshSearch() {
-      // store.dispatch('searchListPayments', {})
+      // store.dispatch('getPaymentsListFromServer', {})
       // store.dispatch('searchListImportedBankMovements', {})
-      store.dispatch('searchListMatchingMovements', {})
+      store.dispatch('getMatchingMovementsListFromServer', {})
     }
 
     return {

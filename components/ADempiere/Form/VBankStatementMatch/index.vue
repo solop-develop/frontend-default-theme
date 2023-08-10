@@ -33,8 +33,10 @@
           v-if="currentSetp === 1"
           :metadata="metadata"
         />
+
         <manual-match v-if="currentSetp === 2" />
-        <automatic-match
+
+        <save-data
           v-else-if="currentSetp === 3"
           :title="label"
         />
@@ -73,25 +75,25 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed, onMounted } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
 
 // Components and Mixins
 import SearchCriteria from './SearchCriteria/index.vue'
-import AutomaticMatch from './AutomaticMatch.vue'
 import ManualMatch from './ManualMatch/index.vue'
+import SaveData from './SaveData/index.vue'
 
 // Utils and Helper Methods
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 
 export default defineComponent({
   name: 'VBankStatementMatch',
 
   components: {
     SearchCriteria,
-    AutomaticMatch,
+    SaveData,
     ManualMatch
   },
 
@@ -104,7 +106,15 @@ export default defineComponent({
     }
   },
 
-  setup() {
+  setup(props, { root }) {
+    const storedBankStatementId = computed(() => {
+      const bankStatement = store.getters.getCurrentBankStatement
+      if (isEmptyValue(bankStatement)) {
+        return -1
+      }
+      return bankStatement.id
+    })
+
     /**
     * Refs
     */
@@ -119,7 +129,7 @@ export default defineComponent({
         name: lang.t('form.VBankStatementMatch.steps.pendingMatch')
       },
       {
-        name: lang.t('form.VBankStatementMatch.steps.summaryAdjustment')
+        name: lang.t('form.VBankStatementMatch.steps.confirmImport')
       }
     ])
 
@@ -149,7 +159,7 @@ export default defineComponent({
 
     const label = computed(() => {
       if (currentSetp.value === 3) {
-        return lang.t('form.VBankStatementMatch.steps.summaryAdjustment')
+        return lang.t('form.VBankStatementMatch.steps.confirmImport')
       }
       return ''
     })
@@ -160,6 +170,15 @@ export default defineComponent({
         return true
       }
       return false
+    })
+
+    onMounted(() => {
+      const { Record_ID } = root.$route.query
+      if (!isEmptyValue(Record_ID) && storedBankStatementId.value !== Number(Record_ID)) {
+        store.dispatch('getBankStatementFromServer', {
+          id: Record_ID
+        })
+      }
     })
 
     return {

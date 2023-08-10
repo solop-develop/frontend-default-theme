@@ -139,7 +139,7 @@ export default defineComponent({
 
     function refreshSearch() {
       isLoading.value = true
-      store.dispatch('searchListPayments', {})
+      store.dispatch('getPaymentsListFromServer', {})
         .finally(() => {
           isLoading.value = false
         })

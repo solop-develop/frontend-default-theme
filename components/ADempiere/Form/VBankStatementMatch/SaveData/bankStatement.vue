@@ -18,25 +18,25 @@
 
 <template>
   <el-form-item
-    :label="$t('form.VBankStatementMatch.field.bankAccount')"
+    :label="$t('form.VBankStatementMatch.field.bankStatement')"
     class="form-item-criteria"
     style="width: 100%;"
-    required
   >
     <el-select
-      v-model="bankAccountValue"
+      v-model="storedBankStatement"
+      value-key="id"
       filterable
       clearable
       style="width: 100%;"
       :remote-method="remoteSearch"
-      @visible-change="getBanksAccountsList"
+      @visible-change="getBankStatementsList"
       @clear="clearValues"
     >
       <el-option
-        v-for="item in bankAccountsList"
+        v-for="item in storedBankStatementsList"
         :key="item.id"
-        :label="item.displayedValue"
-        :value="item.id"
+        :label="'#' + item.documentNo + ' - ' + formatDate({ value: item.statementDate})"
+        :value="item"
       />
     </el-select>
   </el-form-item>
@@ -48,7 +48,8 @@ import { defineComponent, computed, ref, onMounted } from '@vue/composition-api'
 import store from '@/store'
 
 // Utils and Helper Methods
-import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
+import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'BankAccount',
@@ -56,39 +57,41 @@ export default defineComponent({
   setup() {
     const timeOut = ref(null)
 
-    const bankAccountFromBankStatement = computed(() => {
-      const bankStatement = store.getters.getCurrentBankStatement
-      if (isEmptyValue(bankStatement)) {
-        return undefined
-      }
-      return bankStatement.bankAccountId
-    })
-
-    const bankAccountValue = computed({
+    const storedBankStatement = computed({
       set(newValue) {
-        store.commit('setBankAccountId', newValue)
+        store.commit('setCurrentBankStatement', newValue)
       },
       get() {
-        return store.getters.getBankAccountValueStatementMatch
+        const currentValue = store.getters.getCurrentBankStatement
+        // if (isEmptyValue(currentValue)) {
+        //   return undefined
+        // }
+        return currentValue
       }
     })
 
-    const bankAccountsList = computed(() => {
-      return store.getters.getBanksAccountsListStatementMatch
+    const bankAccountId = computed(() => {
+      return store.getters.getBankAccountValueStatementMatch
     })
 
-    function getBanksAccountsList(isExpand) {
-      if (!isExpand || !isEmptyValue(bankAccountsList.value)) {
+    const storedBankStatementsList = computed(() => {
+      return store.getters.getBankStatementsList
+    })
+
+    function getBankStatementsList(isExpand) {
+      if (!isExpand || !isEmptyValue(storedBankStatementsList.value)) {
         return
       }
-      store.dispatch('listBankAccount', {})
+      store.dispatch('getBankStatementsListFromServer', {
+        bankAccountId: bankAccountId.value
+      })
     }
 
     function localSearch(searchQuery = '') {
       if (isEmptyValue(searchQuery)) {
-        return bankAccountsList.value
+        return storedBankStatementsList.value
       }
-      return bankAccountsList.value.filter(option => {
+      return storedBankStatementsList.value.filter(option => {
         return option.displayedValue.toLowerCase().includes(searchQuery.toLowerCase())
       })
     }
@@ -99,7 +102,8 @@ export default defineComponent({
         (!isEmptyValue(searchQuery) && (isEmptyValue(results) || results.length < 3))) {
         clearTimeout(timeOut.value)
         timeOut.value = setTimeout(() => {
-          store.dispatch('listBankAccount', {
+          store.dispatch('getBankStatementsListFromServer', {
+            bankAccountId: bankAccountId.value,
             searchValue: searchQuery
           })
         }, 500)
@@ -108,22 +112,21 @@ export default defineComponent({
     }
 
     function clearValues() {
-      bankAccountValue.value = undefined
-      store.commit('setBankAccountsList', [])
+      storedBankStatement.value = undefined
+      store.commit('setBankStatementsList', [])
     }
 
     onMounted(() => {
-      getBanksAccountsList(true)
-      if (!isEmptyValue(bankAccountFromBankStatement)) {
-        bankAccountValue.value = bankAccountFromBankStatement.value
-      }
+      // to displayed value if is record id on query
+      getBankStatementsList(true)
     })
 
     return {
-      bankAccountValue,
-      bankAccountsList,
+      storedBankStatement,
+      storedBankStatementsList,
       //
-      getBanksAccountsList,
+      formatDate,
+      getBankStatementsList,
       remoteSearch,
       clearValues
     }
