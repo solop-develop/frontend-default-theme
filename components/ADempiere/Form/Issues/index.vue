@@ -125,7 +125,8 @@
                             </template>
                             <el-avatar
                               v-if="isEmptyValue(scope.row.sales_representative.avatar)"
-                              icon="el-icon-user-solid" size="small"
+                              icon="el-icon-user-solid"
+                              size="small"
                               style="margin-left: 10px;"
                             />
                             <el-image
