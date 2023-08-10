@@ -875,7 +875,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
                           <b>
                             <svg-icon icon-class="user" style="font-size: 13px !important;" />
-                            {{ $t('issues.assigned') + ': ' }} {{ 15 }}
+                            {{ $t('issues.assigned') + ': ' }}
                           </b>
                           {{ currentSalesRepsLabel.name }}
                         </el-button>
