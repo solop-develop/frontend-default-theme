@@ -480,9 +480,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <b>
                               <svg-icon icon-class="calendar" style="font-size: 16px;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
-                              <i v-if="currentIssues.date_next_action > 0">
+                              <i v-if="currentIssues.dateNextAction > 0">
                                 {{ formatDate({
-                                  value: currentIssues.date_next_action
+                                  value: currentIssues.dateNextAction
                                 }) }}
                               </i>
                             </b>
@@ -573,9 +573,22 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             style="margin-left: 10px;"
           >
             <span v-if="comment.issue_comment_type === 1">
-              <svg-icon icon-class="user" />
+              <svg-icon v-if="isEmptyValue(comment.user.avatar)" icon-class="user" />
+              <el-image
+                :src="avatarResize(comment.user)"
+                fit="contain"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 50%;
+                  display: inline-block;
+                  position: relative;
+                  cursor: default;
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                "
+              />
               <b>
-                {{ comment.user_name }}
+                {{ comment.user.name }}
               </b>
               {{ logDisplayLanguaje(true, false) }}
               <b>
@@ -861,7 +874,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                         <el-button slot="reference" plain style="margin: 10px;font-size: 15px;color: black;">
                           <b>
                             <svg-icon icon-class="user" style="font-size: 13px !important;" />
-                            {{ $t('issues.assigned') + ': ' }}
+                            {{ $t('issues.assigned') + ': ' }} {{ 15 }}
                           </b>
                           {{ currentSalesRepsLabel.name }}
                         </el-button>
@@ -1168,7 +1181,25 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           </el-form>
                           <el-button slot="reference" plain size="mini" style="margin: 10px;font-size: 15px;color: black;">
                             <b>
-                              <svg-icon icon-class="user" style="font-size: 13px !important;" />
+                              <el-image
+                                v-if="!isEmptyValue(currentIssues.sales_representative) && !isEmptyValue(currentIssues.sales_representative.avatar)"
+                                :src="avatarResize(currentIssues.sales_representative)"
+                                fit="contain"
+                                style="
+                                  width: 20px;
+                                  height: 20px;
+                                  border-radius: 50%;
+                                  display: inline-block;
+                                  position: relative;
+                                  cursor: default;
+                                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                                "
+                              />
+                              <svg-icon
+                                v-else
+                                icon-class="user"
+                                style="font-size: 13px !important;"
+                              />
                               {{ $t('issues.assigned') + ': ' }}
                             </b>
                             {{ currentIssues.sales_representative.name }}
@@ -1194,9 +1225,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <b>
                               <svg-icon icon-class="calendar" style="font-size: 16px;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
-                              <i v-if="currentIssues.date_next_action > 0">
+                              <i v-if="currentIssues.dateNextAction > 0">
                                 {{ formatDate({
-                                  value: currentIssues.date_next_action
+                                  value: currentIssues.dateNextAction
                                 }) }}
                               </i>
                             </b>
@@ -1210,7 +1241,25 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </div>
           </div>
           <i style="font-size: 12px;color: #82848a;">
-            {{ $t('issues.isCreated') }} {{ translateDateByLong(currentIssues.created) }} {{ $t('issues.by') }}  {{ currentIssues.user_name }} <svg-icon icon-class="user" />
+            {{ $t('issues.isCreated') }} {{ translateDateByLong(currentIssues.created) }} {{ $t('issues.by') }}
+            <svg-icon
+              v-if="isEmptyValue(currentIssues.user.avatar)"
+              icon-class="user"
+            />
+            <el-image
+              :src="avatarResize(currentIssues.user)"
+              fit="contain"
+              style="
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: inline-block;
+                position: relative;
+                cursor: default;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+              "
+            />
+            <b> {{ currentIssues.user.name }} </b>
           </i>
         </el-card>
         <br>
@@ -1224,9 +1273,22 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               style="margin-left: 10px;"
             >
               <span v-if="comment.issue_comment_type === 1">
-                <svg-icon icon-class="user" />
+                <svg-icon v-if="isEmptyValue(comment.user.avatar)" icon-class="user" />
+                <el-image
+                  :src="avatarResize(comment.user)"
+                  fit="contain"
+                  style="
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: inline-block;
+                    position: relative;
+                    cursor: default;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                  "
+                />
                 <b>
-                  {{ comment.user_name }}
+                  {{ comment.user.name }}
                 </b>
                 {{ logDisplayLanguaje(true, false) }}
                 <b>
@@ -1242,7 +1304,23 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               <el-card v-else class="list-comments">
                 <div slot="header" class="list-comments-clearfix">
                   <span>
-                    <svg-icon icon-class="user" /> {{ comment.user_name }}
+                    <svg-icon v-if="isEmptyValue(comment.user.avatar)" icon-class="user" />
+                    <el-image
+                      :src="avatarResize(comment.user)"
+                      fit="contain"
+                      style="
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        display: inline-block;
+                        position: relative;
+                        cursor: default;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                      "
+                    />
+                    <b>
+                      {{ comment.user.name }}
+                    </b>
                   </span>
                   <el-dropdown trigger="click" style="float: right" @command="handleCommand">
                     <span class="el-dropdown-link">
@@ -1266,10 +1344,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       <el-scrollbar wrap-class="scroll-previwer-disable">
                         <v-md-preview :text="commentUpdate" class="previwer-disable" style="padding: 0px" height="150px" />
                       </el-scrollbar>
-                      <!-- <v-md-preview v-if="commentUpdate" :text="comment.result" class="previwer-disable" style="padding: 0px" /> -->
-                      <!-- <div v-markdown="commentUpdate" class="output" /> -->
                     </el-card>
-                    <!-- <div v-if="commentUpdatePreview" v-markdown="comment.result" class="output" /> -->
                     <v-md-editor
                       v-else
                       v-model="commentUpdate"
@@ -1324,9 +1399,22 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               style="margin-left: 10px;"
             >
               <span v-if="comment.issue_comment_type === 1">
-                <svg-icon icon-class="user" />
+                <svg-icon v-if="isEmptyValue(comment.user.avatar)" icon-class="user" />
+                <el-image
+                  :src="avatarResize(comment.user)"
+                  fit="contain"
+                  style="
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: inline-block;
+                    position: relative;
+                    cursor: default;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                  "
+                />
                 <b>
-                  {{ comment.user_name }}
+                  {{ comment.user.name }}
                 </b>
                 {{ logDisplayLanguaje(true, false) }}
                 <b>
@@ -1504,6 +1592,7 @@ import { isEmptyValue } from '@/utils/ADempiere'
 import { showMessage } from '@/utils/ADempiere/notification'
 import { translateDateByLong, formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 import { zoomIn } from '@/utils/ADempiere/coreUtils.js'
+import { getImagePath } from '@/utils/ADempiere/resource.js'
 
 // Api Request Methods
 import {
@@ -2088,6 +2177,17 @@ export default defineComponent({
 
     loadListMail()
 
+    function avatarResize(user) {
+      const { avatar } = user
+      const { uri } = getImagePath({
+        file: avatar,
+        width: 20,
+        height: 20,
+        operation: 'resize'
+      })
+      return uri
+    }
+
     watch(isPanelEditIssues, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         findRequestTypes(true)
@@ -2173,6 +2273,7 @@ export default defineComponent({
       logDisplayLanguaje,
       loadListMail,
       zoomIssues,
+      avatarResize,
       markdownContent
     }
   }
