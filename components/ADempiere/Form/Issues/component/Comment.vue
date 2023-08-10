@@ -247,6 +247,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                           <b>
                             <svg-icon icon-class="calendar" style="font-size: 16px;" />
                             {{ $t('issues.nextActionDate') + ': ' }}
+                            {{ newDateNextAction }}
                             <i v-if="!isEmptyValue(newDateNextAction)">
                               {{ formatDate({
                                 value: newDateNextAction
@@ -480,7 +481,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <b>
                               <svg-icon icon-class="calendar" style="font-size: 16px;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
-                              <i v-if="currentIssues.dateNextAction > 0">
+                              <i v-if="!isEmptyValue(currentIssues.dateNextAction)">
                                 {{ formatDate({
                                   value: currentIssues.dateNextAction
                                 }) }}
@@ -900,9 +901,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <svg-icon icon-class="calendar" style="font-size: 16px;" />
                             {{ $t('issues.nextActionDate') + ': ' }}
                             <i v-if="!isEmptyValue(newDateNextAction)">
-                              {{ formatDate({
-                                value: newDateNextAction
-                              }) }}
+                              {{
+                                formatDate({
+                                  value: newDateNextAction
+                                })
+                              }}
                             </i>
                           </b>
                         </el-button>
@@ -1225,9 +1228,9 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                             <b>
                               <svg-icon icon-class="calendar" style="font-size: 16px;" />
                               {{ $t('issues.nextActionDate') + ': ' }}
-                              <i v-if="currentIssues.dateNextAction > 0">
+                              <i v-if="!isEmptyValue(currentIssues.date_next_action)">
                                 {{ formatDate({
-                                  value: currentIssues.dateNextAction
+                                  value: currentIssues.date_next_action
                                 }) }}
                               </i>
                             </b>
