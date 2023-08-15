@@ -24,25 +24,31 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         label-position="top"
         style="padding: 10px !important;"
       >
-        <el-row :gutter="24">
-          <el-col :span="7">
+        <el-row :gutter="4">
+          <el-col :span="8">
+            <bank-statement />
+          </el-col>
+          <el-col :span="8">
             <bank-account />
           </el-col>
 
-          <el-col :span="7">
+          <el-col :span="8">
             <business-partner />
           </el-col>
 
-          <el-col :span="10">
+          <el-col :span="8">
             <el-form-item
               :label="$t('form.VBankStatementMatch.field.totalPayment')"
               class="form-item-criteria"
-              style="width: 100%;"
+              style="margin: 0px;"
             >
-              <el-card shadow="never">
+              <span
+                style="display: flex !important;border-radius: 4px;border: 1px solid rgb(235, 238, 245);padding: 2px 4px;"
+              >
                 <el-input-number
                   v-model="paymentAmountTo"
                   controls-position="right"
+                  style="width: 50% !important;"
                 />
                 <b style="color: #80808078;margin-left: 5px;margin-right: 5px;font-weight: 999;">
                   {{ '─' }}
@@ -50,12 +56,13 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                 <el-input-number
                   v-model="paymentAmountFrom"
                   controls-position="right"
+                  style="width: 50% !important;"
                 />
-              </el-card>
+              </span>
             </el-form-item>
           </el-col>
 
-          <el-col :span="7">
+          <el-col :span="8">
             <el-form-item
               :label="$t('form.VBankStatementMatch.field.transactionDate')"
               class="form-item-criteria"
@@ -74,11 +81,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-form-item>
           </el-col>
 
-          <el-col :span="7">
+          <el-col :span="4" style="padding: 0px;">
             <search-mode />
           </el-col>
 
-          <el-col :span="7">
+          <el-col :span="4" style="padding: 0px;">
             <el-form-item
               :label="$t('form.VBankStatementMatch.field.simulateMatch')"
               class="form-item-criteria"
@@ -121,6 +128,7 @@ import AutomaticMatch from '../AutomaticMatch.vue'
 import BankAccount from '../SearchCriteria/bankAccount.vue'
 import BusinessPartner from '../SearchCriteria/businessPartner.vue'
 import SearchMode from '../SearchCriteria/searchMode.vue'
+import BankStatement from '../SaveData/bankStatement.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'
@@ -129,9 +137,10 @@ export default defineComponent({
   name: 'SearchCriteria',
 
   components: {
-    AutomaticMatch,
-    BankAccount,
     BusinessPartner,
+    AutomaticMatch,
+    BankStatement,
+    BankAccount,
     SearchMode
   },
 

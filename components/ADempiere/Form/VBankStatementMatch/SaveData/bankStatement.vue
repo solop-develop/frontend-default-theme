@@ -20,6 +20,7 @@
   <el-form-item
     :label="$t('form.VBankStatementMatch.field.bankStatement')"
     class="form-item-criteria"
+    required
     style="width: 100%;"
   >
     <el-select
@@ -59,13 +60,12 @@ export default defineComponent({
 
     const storedBankStatement = computed({
       set(newValue) {
+        const { bankAccountId } = newValue
+        if (!isEmptyValue(bankAccountId)) store.commit('setBankAccountId', bankAccountId)
         store.commit('setCurrentBankStatement', newValue)
       },
       get() {
         const currentValue = store.getters.getCurrentBankStatement
-        // if (isEmptyValue(currentValue)) {
-        //   return undefined
-        // }
         return currentValue
       }
     })

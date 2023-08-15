@@ -18,7 +18,23 @@
 
 <template>
   <div style="height: 100% !important;">
-    <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100% !important;">
+    <el-card id="panel-top-search-criteria" class="panel-top-search-criteria" style="height: 100% !important;padding: 10px;">
+      <div slot="header" class="clearfix" style="text-align: center;">
+        <b>
+          {{ $t('form.VBankStatementMatch.automaticMatch.title') }}
+        </b>
+
+        <el-button
+          v-if="!isUnMatch"
+          plain
+          type="primary"
+          class="button-base-icon"
+          icon="el-icon-document-delete"
+          :disabled="isUnMatch"
+          style="float: right;"
+          @click="unMatch"
+        />
+      </div>
       <el-table
         v-loading="matchingMovements.isLoading"
         :data="matchingMovements.list"
@@ -27,31 +43,30 @@
         :element-loading-text="$t('notifications.loading') + '...'"
         element-loading-spinner="el-icon-loading"
         element-loading-background="rgba(0, 0, 0, 0.2)"
+        highlight-current-row
+        :cell-class-name="cellRow"
+        @row-click="selectMatchingMovements"
+        @selection-change="selectMatch"
       >
         <p slot="empty" style="width: 100%;">
           <el-empty :description="$t('form.VBankStatementMatch.automaticMatch.withoutAutomaticMatch')" />
         </p>
         <el-table-column
-          :label="$t('form.VBankStatementMatch.automaticMatch.title')"
-          :align="'center'"
+          type="selection"
+          width="40"
+        />
+        <el-table-column
+          v-for="(fieldAttributes, key) in headerTable"
+          :key="key"
+          :column-key="fieldAttributes.columnName"
+          :prop="fieldAttributes.columnName"
+          :label="fieldAttributes.label"
+          :min-width="fieldAttributes.width"
+          :align="fieldAttributes.align"
         >
-          <el-table-column
-            type="selection"
-            width="55"
-          />
-          <el-table-column
-            v-for="(fieldAttributes, key) in headerTable"
-            :key="key"
-            :column-key="fieldAttributes.columnName"
-            :prop="fieldAttributes.columnName"
-            :label="fieldAttributes.label"
-            :min-width="fieldAttributes.width"
-            :align="fieldAttributes.align"
-          >
-            <template slot-scope="scope">
-              {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
-            </template>
-          </el-table-column>
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -65,6 +80,7 @@ import lang from '@/lang'
 import store from '@/store'
 
 // Utils and Helper Methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { convertBooleanToTranslationLang } from '@/utils/ADempiere/formatValue/booleanFormat'
 import { formatPrice } from '@/utils/ADempiere/formatValue/numberFormat'
 
@@ -160,10 +176,10 @@ export default defineComponent({
           display = data.business_partner.name
           break
         case 'tenderType':
-          display = data.tender_type.name
+          display = isEmptyValue(data.tender_type) ? '' : data.tender_type.name
           break
         case 'currency':
-          display = data.currency.iso_code
+          display = isEmptyValue(data.currency) ? '' : data.currency.iso_code
           break
         case 'receipt':
           display = convertBooleanToTranslationLang(data.is_receipt)
@@ -177,7 +193,7 @@ export default defineComponent({
         case 'amount':
           display = formatPrice({
             value: data.amount,
-            currency: data.currency.iso_code
+            currency: isEmptyValue(data.currency) ? '' : data.currency.iso_code
           })
           break
         default:
@@ -187,10 +203,50 @@ export default defineComponent({
       return display
     }
 
+    const isUnMatch = computed(() => {
+      const { listUnMatch } = store.getters.getListMatchingMovements
+      return isEmptyValue(listUnMatch)
+    })
+
+    function unMatch() {
+      store.dispatch('listUnMatch')
+    }
+
+    function selectMatchingMovements(row, column, event) {
+      store.commit('updateAttributeCriteria', {
+        criteria: 'matchingMovements',
+        attribute: 'select',
+        value: row
+      })
+    }
+
+    function selectMatch(selection) {
+      store.commit('updateAttributeCriteria', {
+        criteria: 'matchingMovements',
+        attribute: 'listUnMatch',
+        value: selection
+      })
+    }
+
+    function cellRow({
+      row,
+      column,
+      rowIndex,
+      columnIndex
+    }) {
+      return 'cell-column-invoce'
+    }
+
     return {
-      matchingMovements,
       headerTable,
-      displayDataColumn
+      matchingMovements,
+      isUnMatch,
+      // Methods
+      unMatch,
+      cellRow,
+      selectMatch,
+      displayDataColumn,
+      selectMatchingMovements
     }
   }
 })
@@ -226,5 +282,9 @@ export default defineComponent({
   .el-table__body-wrapper {
     height: 85% !important;
   }
+}
+.el-table .cell-column-invoce {
+  padding: 15px !important;
+  margin: 5px !important;
 }
 </style>
