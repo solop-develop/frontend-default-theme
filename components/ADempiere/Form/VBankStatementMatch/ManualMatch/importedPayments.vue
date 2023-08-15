@@ -17,7 +17,7 @@
 -->
 
 <template>
-  <el-card style="height: 100% !important;">
+  <el-card style="height: 100% !important;padding: 0px 10px;">
     <div slot="header" class="clearfix" style="text-align: center;">
       <b>
         {{ $t('form.VBankStatementMatch.importedMovements.title') }}
@@ -36,19 +36,43 @@
     <el-table
       v-loading="isLoading"
       :data="recorsList"
-      :border="true"
       class="table-import"
-      max-height="300"
+      max-height="313"
+      :border="true"
+      :row-class-name="tableRowClassName"
+      :cell-class-name="cellRow"
+      style="width: 100%;"
     >
-      <!-- <el-table-column
-        type="selection"
-        :align="'center'"
-        width="35"
-      /> -->
+      <el-table-column
+        :label="$t('form.VBankStatementMatch.importedMovements.table.match')"
+        min-width="109"
+      >
+        <p slot-scope="scope" style="text-align: center;margin: 0px;">
+          <i
+            v-if="displayMatch(scope.row)"
+            class="el-icon-check"
+            style="
+              font-size: 22px;
+              font-weight: 900;
+              color: green;
+            "
+          />
+          <i
+            v-else
+            class="el-icon-close"
+            style="
+              font-size: 22px;
+              font-weight: 900;
+              color: red;
+            "
+          />
+          <!-- {{ displayMatch(scope.row) }} -->
+        </p>
+      </el-table-column>
 
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.date')"
-        width="95"
+        min-width="120"
       >
         <template slot-scope="scope">
           {{ formatDate({ value: scope.row.transaction_date, isDate: true }) }}
@@ -57,7 +81,7 @@
 
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.receipt')"
-        width="75"
+        min-width="110"
       >
         <template slot-scope="scope">
           {{ convertBooleanToTranslationLang(scope.row.is_receipt) }}
@@ -67,12 +91,12 @@
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.referenceNo')"
         prop="reference_no"
-        width="100"
+        min-width="140"
       />
 
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.businessPartner')"
-        width="180"
+        min-width="145"
       >
         <template slot-scope="scope">
           {{ scope.row.business_partner.value }}
@@ -84,12 +108,13 @@
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.currency')"
         prop="currency.iso_code"
-        width="75"
+        min-width="80"
       />
 
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.amount')"
-        width="150"
+        min-width="110"
+        align="right"
       >
         <template slot-scope="scope">
           {{ formatPrice({ value: scope.row.amount, currency: scope.row.currency.iso_code }) }}
@@ -99,7 +124,7 @@
       <el-table-column
         :label="$t('form.VBankStatementMatch.importedMovements.table.memo')"
         prop="memo"
-        width="180"
+        width="100"
       />
     </el-table>
   </el-card>
@@ -134,6 +159,37 @@ export default defineComponent({
         })
     }
 
+    function tableRowClassName({
+      row,
+      rowIndex
+    }) {
+      const { select } = store.getters.getListMatchingMovements
+      if (
+        !isEmptyValue(select) &&
+        !isEmptyValue(row) &&
+        row.id === select.id
+      ) {
+        return 'success-row'
+      }
+      return ''
+    }
+
+    function displayMatch(row) {
+      const { list } = store.getters.getListMatchingMovements
+      if (isEmptyValue(list)) return false
+      const isMatch = list.find(list => list.id === row.id)
+      return !isEmptyValue(isMatch)
+    }
+
+    function cellRow({
+      row,
+      column,
+      rowIndex,
+      columnIndex
+    }) {
+      return 'cell-column-invoce'
+    }
+
     onMounted(() => {
       if (isEmptyValue(recorsList.value)) {
         refreshSearch()
@@ -145,11 +201,26 @@ export default defineComponent({
       //
       recorsList,
       //
+      cellRow,
       formatDate,
       formatPrice,
-      convertBooleanToTranslationLang,
-      refreshSearch
+      displayMatch,
+      refreshSearch,
+      tableRowClassName,
+      convertBooleanToTranslationLang
     }
   }
 })
 </script>
+
+<style lang="scss">
+.el-table .success-row {
+  background: #d9ecff;
+}
+.el-table .not-match {
+  background: #f8cee1;
+}
+.el-table .cell-column-invoce {
+  padding: 0px !important;
+}
+</style>

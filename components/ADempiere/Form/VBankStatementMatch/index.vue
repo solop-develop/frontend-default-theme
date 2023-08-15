@@ -18,7 +18,7 @@
 
 <template>
   <div style="height: -webkit-fill-available;">
-    <div style="height: 10% !important;">
+    <div style="height: 6% !important;">
       <el-steps :active="currentSetp" finish-status="success">
         <el-step
           v-for="(list, key) in stepList"
@@ -27,7 +27,7 @@
         />
       </el-steps>
     </div>
-    <div style="height: 80% !important;">
+    <div style="height: 88% !important;">
       <transition name="el-fade-in-linear">
         <search-criteria
           v-if="currentSetp === 1"
@@ -42,7 +42,7 @@
         />
       </transition>
     </div>
-    <div style="height: 5% !important;text-align: end;">
+    <div style="height: 6% !important;text-align: end;">
       <el-button
         v-if="!isNext"
         type="info"
@@ -59,7 +59,8 @@
         icon="el-icon-check"
         class="button-base-icon"
         style="float: right;"
-        disabled
+        :disabled="isProcess"
+        @click="process"
       />
       <el-button
         type="info"
@@ -75,7 +76,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, onMounted } from '@vue/composition-api'
+import { defineComponent, ref, computed, onMounted, watch } from '@vue/composition-api'
 
 import lang from '@/lang'
 import store from '@/store'
@@ -122,9 +123,6 @@ export default defineComponent({
       {
         name: lang.t('form.VBankStatementMatch.steps.searchCriteria')
       },
-      // {
-      //   name: lang.t('form.VBankStatementMatch.steps.automaticMatch')
-      // },
       {
         name: lang.t('form.VBankStatementMatch.steps.pendingMatch')
       },
@@ -133,6 +131,9 @@ export default defineComponent({
       }
     ])
 
+    /**
+    * Computed
+    */
     const currentSetp = computed({
       set(newValue) {
         store.commit('bankStatementMatchStep', newValue)
@@ -142,9 +143,6 @@ export default defineComponent({
       }
     })
 
-    /**
-    * Computed
-    */
     const isBack = computed(() => {
       return currentSetp.value === 1
     })
@@ -172,6 +170,21 @@ export default defineComponent({
       return false
     })
 
+    const isProcess = computed(() => {
+      const { list } = store.getters.getResult
+      return isEmptyValue(list)
+    })
+
+    function process() {
+      store.dispatch('process')
+    }
+
+    watch(currentSetp, (newValue, oldValue) => {
+      if (newValue === 3) {
+        store.dispatch('resultMovements')
+      }
+    })
+
     onMounted(() => {
       const { Record_ID } = root.$route.query
       if (!isEmptyValue(Record_ID) && storedBankStatementId.value !== Number(Record_ID)) {
@@ -188,7 +201,9 @@ export default defineComponent({
       isNext,
       label,
       initialSept,
-      isDisabledNext
+      isProcess,
+      isDisabledNext,
+      process
     }
   }
 })
