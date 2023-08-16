@@ -81,11 +81,11 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
             </el-form-item>
           </el-col>
 
-          <el-col :span="4" style="padding: 0px;">
+          <!-- <el-col :span="4" style="padding: 0px;">
             <search-mode />
-          </el-col>
+          </el-col> -->
 
-          <el-col :span="4" style="padding: 0px;">
+          <el-col :span="8" style="padding: 0px;">
             <el-form-item
               :label="$t('form.VBankStatementMatch.field.simulateMatch')"
               class="form-item-criteria"
