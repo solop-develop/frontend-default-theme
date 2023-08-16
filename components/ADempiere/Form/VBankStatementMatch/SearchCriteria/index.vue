@@ -80,41 +80,12 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
               />
             </el-form-item>
           </el-col>
-
-          <!-- <el-col :span="4" style="padding: 0px;">
-            <search-mode />
-          </el-col> -->
-
-          <el-col :span="8" style="padding: 0px;">
-            <el-form-item
-              :label="$t('form.VBankStatementMatch.field.simulateMatch')"
-              class="form-item-criteria"
-            >
-              {{
-                isMatchModeValue ?
-                  $t('form.VBankStatementMatch.field.assignedMatch') :
-                  $t('form.VBankStatementMatch.field.unassignedMatch')
-              }}
-
-              <el-button
-                type="primary"
-                icon="el-icon-setting"
-                plain
-                style="float: right; margin-left: 5px;"
-                class="button-base-icon"
-                :disabled="!isEnableSearch"
-                @click="refreshSearch"
-              />
-            </el-form-item>
-          </el-col>
         </el-row>
       </el-form>
     </el-card>
-    <br>
-
-    <el-card>
+    <!-- <el-card>
       <automatic-match />
-    </el-card>
+    </el-card> -->
   </div>
 </template>
 
@@ -124,7 +95,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 import store from '@/store'
 
 // Components and Mixins
-import AutomaticMatch from '../AutomaticMatch.vue'
+// import AutomaticMatch from '../AutomaticMatch.vue'
 import BankAccount from '../SearchCriteria/bankAccount.vue'
 import BusinessPartner from '../SearchCriteria/businessPartner.vue'
 import SearchMode from '../SearchCriteria/searchMode.vue'
@@ -138,7 +109,7 @@ export default defineComponent({
 
   components: {
     BusinessPartner,
-    AutomaticMatch,
+    // AutomaticMatch,
     BankStatement,
     BankAccount,
     SearchMode

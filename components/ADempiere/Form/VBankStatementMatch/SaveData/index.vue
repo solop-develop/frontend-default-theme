@@ -20,7 +20,9 @@
   <el-card shadow="never" style="padding: 20px;">
     <el-row :gutter="20">
       <el-form @submit="notSubmitForm">
-        <bank-statement />
+        <bank-statement
+          :is-disabled="true"
+        />
       </el-form>
     </el-row>
     <br>

@@ -28,7 +28,7 @@
       value-key="id"
       filterable
       clearable
-      :disabled="isDisabled"
+      :disabled="isDisabledBankStatement"
       style="width: 100%;"
       :remote-method="remoteSearch"
       @visible-change="getBankStatementsList"
@@ -56,8 +56,14 @@ import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
   name: 'BankAccount',
+  props: {
+    isDisabled: {
+      type: Boolean,
+      default: false
+    }
+  },
 
-  setup() {
+  setup(props) {
     const timeOut = ref(null)
 
     const storedBankStatement = computed({
@@ -72,10 +78,10 @@ export default defineComponent({
       }
     })
 
-    const isDisabled = computed(() => {
+    const isDisabledBankStatement = computed(() => {
       const currentRoute = router.app.$route
       const { query } = currentRoute
-      return !isEmptyValue(query.Record_ID)
+      return !isEmptyValue(query.Record_ID) || props.isDisabled
     })
 
     const bankAccountId = computed(() => {
@@ -130,9 +136,9 @@ export default defineComponent({
     })
 
     return {
-      isDisabled,
       storedBankStatement,
       storedBankStatementsList,
+      isDisabledBankStatement,
       //
       formatDate,
       getBankStatementsList,
