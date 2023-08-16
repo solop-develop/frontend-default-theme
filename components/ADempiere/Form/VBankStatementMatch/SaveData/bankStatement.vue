@@ -28,6 +28,7 @@
       value-key="id"
       filterable
       clearable
+      :disabled="isDisabled"
       style="width: 100%;"
       :remote-method="remoteSearch"
       @visible-change="getBankStatementsList"
@@ -36,7 +37,7 @@
       <el-option
         v-for="item in storedBankStatementsList"
         :key="item.id"
-        :label="'#' + item.documentNo + ' - ' + formatDate({ value: item.statementDate})"
+        :label="'#' + item.documentNo + ' - ' + formatDate({ value: item.statementDate}) + ' - ' + item.name"
         :value="item"
       />
     </el-select>
@@ -47,6 +48,7 @@
 import { defineComponent, computed, ref, onMounted } from '@vue/composition-api'
 
 import store from '@/store'
+import router from '@/router'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -68,6 +70,12 @@ export default defineComponent({
         const currentValue = store.getters.getCurrentBankStatement
         return currentValue
       }
+    })
+
+    const isDisabled = computed(() => {
+      const currentRoute = router.app.$route
+      const { query } = currentRoute
+      return !isEmptyValue(query.Record_ID)
     })
 
     const bankAccountId = computed(() => {
@@ -122,6 +130,7 @@ export default defineComponent({
     })
 
     return {
+      isDisabled,
       storedBankStatement,
       storedBankStatementsList,
       //
