@@ -17,26 +17,123 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <el-table
-    :data="recordResult"
-    :border="true"
-    highlight-current-row
-    :cell-class-name="cellRow"
-  >
-    <el-table-column
-      v-for="(fieldAttributes, key) in headerTable"
-      :key="key"
-      :column-key="fieldAttributes.columnName"
-      :prop="fieldAttributes.columnName"
-      :label="fieldAttributes.label"
-      :min-width="fieldAttributes.width"
-      :align="fieldAttributes.align"
+  <el-card style="height: 100% !important;padding: 0px 10px;">
+    <div slot="header" class="clearfix" style="text-align: center;">
+      <b>
+        {{ $t('form.VBankStatementMatch.result') }}
+        {{ '(' + $t('form.VBankStatementMatch.importedMovements.table.total') + ': ' + recordResult.length + ')' }}
+      </b>
+    </div>
+    <el-table
+      :data="recordResult"
+      :border="true"
+      highlight-current-row
+      :cell-class-name="cellRow"
     >
-      <template slot-scope="scope">
-        {{ displayDataColumn(scope.row, fieldAttributes.columnName) }}
-      </template>
-    </el-table-column>
-  </el-table>
+      <el-table-column
+        :label="$t('form.VBankStatementMatch.systemPayments.table.match')"
+        min-width="109"
+      >
+        <p slot-scope="scope" style="text-align: center;margin: 0px;">
+          <i
+            v-if="!isEmptyValue(scope.row.payment_id) && scope.row.payment_id !== 0"
+            class="el-icon-check"
+            style="
+              font-size: 22px;
+              font-weight: 900;
+              color: green;
+            "
+          />
+          <i
+            v-else
+            class="el-icon-close"
+            style="
+              font-size: 22px;
+              font-weight: 900;
+              color: red;
+            "
+          />
+        </p>
+      </el-table-column>
+      <el-table-column
+        :label="$t('form.VBankStatementMatch.automaticMatch.table.currency')"
+        :align="'left'"
+        min-width="100"
+      >
+        <template slot-scope="scope">
+          {{ displayDataColumn(scope.row, 'currency') }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        :label="$t('form.VBankStatementMatch.automaticMatch.table.transactionDate')"
+        :align="'left'"
+        prop="transactionDate"
+        min-width="190"
+      />
+      <el-table-column
+        :label="$t('form.VBankStatementMatch.importedMovements.title')"
+        :align="'center'"
+      >
+        <el-table-column
+          :label="$t('form.VBankStatementMatch.automaticMatch.table.referenceNo')"
+          min-width="140"
+        >
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, 'referenceNo') }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('form.VBankStatementMatch.automaticMatch.table.amount')"
+          prop="amount"
+          :align="'right'"
+          min-width="120"
+        >
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, 'amount') }}
+          </template>
+        </el-table-column>
+      </el-table-column>
+      <el-table-column
+        :label="$t('form.VBankStatementMatch.systemPayments.title')"
+        :align="'center'"
+      >
+        <el-table-column
+          :label="$t('form.VBankStatementMatch.automaticMatch.table.documentNo')"
+          min-width="140"
+        >
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, 'documentNo') }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="Monto del Pago"
+          :align="'right'"
+          min-width="150"
+        >
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, 'payment_amount') }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('form.VBankStatementMatch.automaticMatch.table.businessPartner')"
+          min-width="180"
+        >
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, 'businessPartner') }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('form.VBankStatementMatch.automaticMatch.table.tenderType')"
+          min-width="150"
+        >
+          <template slot-scope="scope">
+            {{ displayDataColumn(scope.row, 'tenderType') }}
+          </template>
+        </el-table-column>
+      </el-table-column>
+      <!-- </el-table-column> -->
+    </el-table>
+  </el-card>
 </template>
 
 <script>
@@ -56,10 +153,16 @@ export default defineComponent({
   setup() {
     const headerTable = ref([
       {
+        label: lang.t('form.VBankStatementMatch.automaticMatch.table.currency'),
+        columnName: 'currency',
+        align: 'left',
+        width: '100'
+      },
+      {
         label: lang.t('form.VBankStatementMatch.automaticMatch.table.transactionDate'),
         columnName: 'transactionDate',
         align: 'left',
-        width: '170'
+        width: '180'
       },
       {
         label: lang.t('form.VBankStatementMatch.automaticMatch.table.receipt'),
@@ -84,12 +187,6 @@ export default defineComponent({
         columnName: 'tenderType',
         align: 'left',
         width: '150'
-      },
-      {
-        label: lang.t('form.VBankStatementMatch.automaticMatch.table.currency'),
-        columnName: 'currency',
-        align: 'left',
-        width: '100'
       },
       {
         label: lang.t('form.VBankStatementMatch.automaticMatch.table.amount'),
@@ -158,6 +255,12 @@ export default defineComponent({
             currency: data.currency.iso_code
           })
           break
+        case 'payment_amount':
+          display = formatPrice({
+            value: data.payment_amount,
+            currency: data.currency.iso_code
+          })
+          break
         default:
           display = data[column]
           break
@@ -181,5 +284,8 @@ export default defineComponent({
 <style lang="scss">
 .el-table .cell-column-invoce {
   padding: 0px !important;
+}
+.el-table thead.is-group th.el-table__cell {
+  padding: 3px 0px;
 }
 </style>

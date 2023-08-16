@@ -21,16 +21,8 @@
     <div slot="header" class="clearfix" style="text-align: center;">
       <b>
         {{ $t('form.VBankStatementMatch.systemPayments.title') }}
+        {{ '(' + $t('form.VBankStatementMatch.systemPayments.table.total') + ': ' + recorsList.length + ')' }}
       </b>
-
-      <el-button
-        style="margin-left: 10px;"
-        type="success"
-        class="button-base-icon"
-        icon="el-icon-refresh-right"
-        :loading="isLoading"
-        @click="refreshSearch"
-      />
     </div>
 
     <el-table

@@ -60,7 +60,26 @@
         class="button-base-icon"
         style="float: right;"
         :disabled="isProcess"
+        :loading="isLoadingProcess"
         @click="process"
+      />
+      <el-button
+        v-if="!isUnMatch"
+        plain
+        type="primary"
+        class="button-base-icon"
+        icon="el-icon-document-delete"
+        :disabled="isUnMatch"
+        style="margin-left: 10px;"
+        @click="unMatch"
+      />
+      <el-button
+        v-if="currentSetp === 2"
+        type="success"
+        class="button-base-icon"
+        icon="el-icon-refresh-right"
+        :loading="isLoading"
+        @click="refreshSearch"
       />
       <el-button
         type="info"
@@ -131,6 +150,9 @@ export default defineComponent({
       }
     ])
 
+    const isLoading = ref(false)
+    const isLoadingProcess = ref(false)
+
     /**
     * Computed
     */
@@ -175,11 +197,36 @@ export default defineComponent({
       return isEmptyValue(list)
     })
 
+    const isUnMatch = computed(() => {
+      const { listUnMatch } = store.getters.getListMatchingMovements
+      return isEmptyValue(listUnMatch)
+    })
+
+    function unMatch() {
+      store.dispatch('listUnMatch')
+    }
+
     function process() {
+      isLoadingProcess.value = true
       store.dispatch('process')
+        .finally(() => {
+          isLoadingProcess.value = false
+        })
+    }
+
+    function refreshSearch() {
+      isLoading.value = true
+      store.dispatch('searchListImportedBankMovements', {})
+      store.dispatch('getPaymentsListFromServer', {})
+        .finally(() => {
+          isLoading.value = false
+        })
     }
 
     watch(currentSetp, (newValue, oldValue) => {
+      if (newValue === 2) {
+        store.dispatch('getMatchingMovementsListFromServer', {})
+      }
       if (newValue === 3) {
         store.dispatch('resultMovements')
       }
@@ -195,6 +242,7 @@ export default defineComponent({
     })
 
     return {
+      isLoading,
       stepList,
       currentSetp,
       isBack,
@@ -203,7 +251,12 @@ export default defineComponent({
       initialSept,
       isProcess,
       isDisabledNext,
-      process
+      isLoadingProcess,
+      isUnMatch,
+      // Methods
+      unMatch,
+      process,
+      refreshSearch
     }
   }
 })
