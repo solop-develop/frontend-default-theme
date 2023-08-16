@@ -136,6 +136,7 @@ export default defineComponent({
     })
 
     return {
+      isDisabled,
       storedBankStatement,
       storedBankStatementsList,
       isDisabledBankStatement,
