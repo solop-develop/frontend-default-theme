@@ -19,14 +19,10 @@
 <template>
   <el-card shadow="never" style="padding: 20px;">
     <el-row :gutter="20">
-      <el-form @submit="notSubmitForm">
-        <bank-statement
-          :is-disabled="true"
-        />
-      </el-form>
+      <bank-statement-info />
     </el-row>
     <br>
-    <br>
+
     <el-row :gutter="20">
       <el-card shadow="never">
         <result-table />
@@ -38,14 +34,14 @@
 <script>
 import { defineComponent } from '@vue/composition-api'
 
-import BankStatement from './bankStatement.vue'
+import BankStatementInfo from './bankStatementInfo.vue'
 import ResultTable from './ResultTable.vue'
 
 export default defineComponent({
   name: 'SaveData',
 
   components: {
-    BankStatement,
+    BankStatementInfo,
     ResultTable
   },
 
