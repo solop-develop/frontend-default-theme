@@ -68,8 +68,10 @@ export default defineComponent({
 
     const storedBankStatement = computed({
       set(newValue) {
-        const { bankAccountId } = newValue
-        if (!isEmptyValue(bankAccountId)) store.commit('setBankAccountId', bankAccountId)
+        const { bankAccount } = newValue
+        if (!isEmptyValue(bankAccount) && bankAccount.id > 0) {
+          store.commit('setBankAccountId', bankAccount.id)
+        }
         store.commit('setCurrentBankStatement', newValue)
       },
       get() {

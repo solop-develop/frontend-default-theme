@@ -21,7 +21,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
     <div slot="header" class="clearfix" style="text-align: center;">
       <b>
         {{ $t('form.VBankStatementMatch.result') }}
-        {{ '(' + $t('form.VBankStatementMatch.importedMovements.table.total') + ': ' + recordResult.length + ')' }}
+        {{ '(' + $t('form.VBankStatementMatch.bankMovements.table.total') + ': ' + recordResult.length + ')' }}
       </b>
     </div>
     <el-table
@@ -71,7 +71,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
         min-width="190"
       />
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.title')"
+        :label="$t('form.VBankStatementMatch.bankMovements.title')"
         :align="'center'"
       >
         <el-table-column

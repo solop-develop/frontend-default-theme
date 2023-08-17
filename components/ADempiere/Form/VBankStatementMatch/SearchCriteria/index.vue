@@ -99,7 +99,7 @@ import store from '@/store'
 import BankAccount from '../SearchCriteria/bankAccount.vue'
 import BusinessPartner from '../SearchCriteria/businessPartner.vue'
 import SearchMode from '../SearchCriteria/searchMode.vue'
-import BankStatement from '../SaveData/bankStatement.vue'
+import BankStatement from '../SearchCriteria/bankStatement.vue'
 
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere'

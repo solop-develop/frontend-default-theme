@@ -20,8 +20,8 @@
   <el-card style="height: 100% !important;padding: 0px 10px;">
     <div slot="header" class="clearfix" style="text-align: center;">
       <b>
-        {{ $t('form.VBankStatementMatch.importedMovements.title') }}
-        {{ '(' + $t('form.VBankStatementMatch.importedMovements.table.total') + ': ' + recorsList.length + ')' }}
+        {{ $t('form.VBankStatementMatch.bankMovements.title') }}
+        {{ '(' + $t('form.VBankStatementMatch.bankMovements.table.total') + ': ' + recorsList.length + ')' }}
       </b>
     </div>
 
@@ -36,7 +36,7 @@
       style="width: 100%;"
     >
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.match')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.match')"
         min-width="109"
       >
         <p slot-scope="scope" style="text-align: center;margin: 0px;">
@@ -63,16 +63,16 @@
       </el-table-column>
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.date')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.date')"
         min-width="120"
       >
         <template slot-scope="scope">
-          {{ formatDate({ value: scope.row.transaction_date, isDate: true }) }}
+          {{ scope.row.transactionDate }}
         </template>
       </el-table-column>
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.receipt')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.receipt')"
         min-width="110"
       >
         <template slot-scope="scope">
@@ -81,13 +81,13 @@
       </el-table-column>
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.referenceNo')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.referenceNo')"
         prop="reference_no"
         min-width="140"
       />
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.businessPartner')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.businessPartner')"
         min-width="145"
       >
         <template slot-scope="scope">
@@ -98,13 +98,13 @@
       </el-table-column>
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.currency')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.currency')"
         prop="currency.iso_code"
         min-width="80"
       />
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.amount')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.amount')"
         min-width="110"
         align="right"
       >
@@ -114,7 +114,7 @@
       </el-table-column>
 
       <el-table-column
-        :label="$t('form.VBankStatementMatch.importedMovements.table.memo')"
+        :label="$t('form.VBankStatementMatch.bankMovements.table.memo')"
         prop="memo"
         width="100"
       />
