@@ -208,7 +208,7 @@ export default defineComponent({
 
     function process() {
       isLoadingProcess.value = true
-      store.dispatch('process')
+      store.dispatch('processBankStatementMatch')
         .finally(() => {
           isLoadingProcess.value = false
         })
