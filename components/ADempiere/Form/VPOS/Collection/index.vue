@@ -72,6 +72,7 @@
                       <el-select
                         v-model="currentFieldPaymentMethods"
                         style="display: block;"
+                        :filterable="!isMobile"
                         @change="changePaymentMethods"
                       >
                         <el-option
@@ -399,6 +400,9 @@ export default {
   computed: {
     listCurrency() {
       return this.$store.getters.getCurrenciesList
+    },
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     },
     convertionList() {
       return this.$store.state['pointOfSales/point/index'].conversionsList
