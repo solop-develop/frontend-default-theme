@@ -875,7 +875,13 @@ export default {
       return ''
     },
     allowsReturnOrder() {
-      return this.$store.getters.posAttributes.currentPointOfSales.isAllowsReturnOrder
+      const { isAllowsReturnOrder } = this.$store.getters.posAttributes.currentPointOfSales
+      if (isAllowsReturnOrder) {
+        if (this.currentOrder.documentStatus.value === 'CO') return true
+        return false
+      }
+      return isAllowsReturnOrder
+      // return this.$store.getters.posAttributes.currentPointOfSales.isAllowsReturnOrder
     },
     allowsCreateOrder() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsCreateOrder
