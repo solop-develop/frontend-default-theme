@@ -1398,7 +1398,7 @@ export default {
       })
         .then(response => {
           const { processLog } = response
-          if (!isEmptyValue(processLog)) {
+          if (!isEmptyValue(processLog.output)) {
             const link = buildLinkHref({
               fileName: processLog.output.file_name,
               outputStream: processLog.output.output_stream,
