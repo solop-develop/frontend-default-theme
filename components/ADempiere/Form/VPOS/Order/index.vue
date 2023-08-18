@@ -1282,30 +1282,30 @@ export default {
       }
     },
     changePriceList(priceList) {
-      if (priceList.id !== this.currentPriceList.id) {
-        if (priceList.is_pos_required_pin) {
-          const attributePin = {
-            ...priceList,
-            action: 'changePriceList',
-            type: 'actionPos',
-            requestedAccess: 'IsAllowsChangeListPrice',
-            label: this.$t('form.pos.pinMessage.priceList')
-          }
-          this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-          this.visible = true
-        } else {
-          if (!this.isEmptyValue(this.currentOrder.uuid)) {
-            this.$store.dispatch('updateOrder', {
-              orderUuid: this.currentOrder.uuid,
-              posUuid: this.currentPointOfSales.uuid,
-              documentTypeUuid: this.currentOrder.documentStatus.uuid,
-              priceListUuid: priceList.uuid,
-              warehouseUuid: this.currentPointOfSales.warehouse.uuid
-            })
-          }
-          this.$store.commit('setCurrentPriceList', priceList)
+      // if (priceList.id !== this.currentPriceList.id) {
+      if (priceList.is_pos_required_pin) {
+        const attributePin = {
+          ...priceList,
+          action: 'changePriceList',
+          type: 'actionPos',
+          requestedAccess: 'IsAllowsChangeListPrice',
+          label: this.$t('form.pos.pinMessage.priceList')
         }
+        this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+        this.visible = true
+      } else {
+        if (!this.isEmptyValue(this.currentOrder.uuid)) {
+          this.$store.dispatch('updateOrder', {
+            orderUuid: this.currentOrder.uuid,
+            posUuid: this.currentPointOfSales.uuid,
+            documentTypeUuid: this.currentOrder.documentStatus.uuid,
+            priceListUuid: priceList.uuid,
+            warehouseUuid: this.currentPointOfSales.warehouse.uuid
+          })
+        }
+        this.$store.commit('setCurrentPriceList', priceList)
       }
+      // }
     },
     changeDiscountList(discountList) {
       console.log(discountList)

@@ -396,7 +396,14 @@ export default {
             this.$store.dispatch('sendCreateCustomerAccount', action.payments)
             break
           case 'changePriceList':
-            this.$store.commit('setCurrentPriceList', action)
+            // this.$store.commit('setCurrentPriceList', action)
+            this.$store.dispatch('updateOrder', {
+              orderUuid: this.currentOrder.uuid,
+              posUuid: this.currentPointOfSales.uuid,
+              documentTypeUuid: this.currentOrder.documentStatus.uuid,
+              priceListUuid: action.uuid,
+              warehouseUuid: this.currentPointOfSales.warehouse.uuid
+            })
             break
           case 'openBalanceInvoice':
             switch (action.typeRefund) {
