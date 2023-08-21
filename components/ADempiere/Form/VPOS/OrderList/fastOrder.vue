@@ -378,6 +378,30 @@ export default {
           },
           isVisible: false,
           isShow: true
+        },
+        {
+          title: this.$t('form.byInvoice.cancelled'),
+          params: {
+            isNullified: true
+          },
+          isVisible: false,
+          isShow: true
+        },
+        {
+          title: this.$t('form.byInvoice.closed'),
+          params: {
+            isClosed: true
+          },
+          isVisible: false,
+          isShow: true
+        },
+        {
+          title: this.$t('form.byInvoice.proposals'),
+          params: {
+            isBindingOffer: true
+          },
+          isVisible: false,
+          isShow: true
         }
       ]
     },
