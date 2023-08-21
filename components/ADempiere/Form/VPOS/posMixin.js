@@ -384,9 +384,22 @@ export default {
       } else if (action.type === 'actionPos') {
         switch (action.action) {
           case 'changeWarehouse':
-            this.$store.commit('setCurrentWarehousePos', action)
+            this.$store.dispatch('updateOrder', {
+              orderUuid: this.currentOrder.uuid,
+              posUuid: this.currentPointOfSales.uuid,
+              documentTypeUuid: this.currentOrder.documentStatus.uuid,
+              priceListUuid: this.currentPointOfSales.priceList.uuid,
+              warehouseUuid: action.uuid
+            })
             break
           case 'changeDocumentType':
+            this.$store.dispatch('updateOrder', {
+              orderUuid: this.currentOrder.uuid,
+              posUuid: this.currentPointOfSales.uuid,
+              documentTypeUuid: action.uuid,
+              priceListUuid: this.currentPointOfSales.priceList.uuid,
+              warehouseUuid: this.currentPointOfSales.warehouse.uuid
+            })
             this.$store.commit('setCurrentDocumentTypePos', action)
             break
           case 'newOrder':
