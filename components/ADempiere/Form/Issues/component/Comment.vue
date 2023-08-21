@@ -1,19 +1,19 @@
 <!--
-ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
-Contributor(s): Elsio Sanchez Elsiosanches@gmail.com https://github.com/Elsiosanchez
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https:www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -1214,14 +1214,14 @@ import { getImagePath } from '@/utils/ADempiere/resource.js'
 
 // Api Request Methods
 import {
-  listSalesRepresentatives,
-  listRequestTypes,
-  listStatus,
-  listPriorities
+  requestListSalesRepresentatives,
+  requestListRequestTypes,
+  requestListStatuses,
+  requestListPriorities
 } from '@/api/ADempiere/user-interface/component/issue'
 
 export default defineComponent({
-  name: 'Comment',
+  name: 'IssueComment',
 
   components: {
     RecordTime
@@ -1368,7 +1368,7 @@ export default defineComponent({
       if (!isVisible) {
         return
       }
-      listSalesRepresentatives()
+      requestListSalesRepresentatives({})
         .then(response => {
           const { records } = response
           listSalesReps.value = records
@@ -1385,7 +1385,7 @@ export default defineComponent({
       if (!isVisible) {
         return
       }
-      listRequestTypes()
+      requestListRequestTypes({})
         .then(response => {
           const { records } = response
           listIssuesTypes.value = records
@@ -1406,7 +1406,7 @@ export default defineComponent({
       if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
         requestTypeId = currentIssues.value.request_type.id
       }
-      listStatus({
+      requestListStatuses({
         requestTypeId
       })
         .then(response => {
@@ -1425,7 +1425,7 @@ export default defineComponent({
       if (!isVisible) {
         return
       }
-      listPriorities()
+      requestListPriorities({})
         .then(response => {
           const { records } = response
           listPriority.value = records
@@ -1631,7 +1631,7 @@ export default defineComponent({
     }
 
     function removeIssues(issues) {
-      store.dispatch('deleteIssues', {
+      store.dispatch('deleteIssue', {
         ...issues,
         tableName,
         recordId
@@ -1650,7 +1650,7 @@ export default defineComponent({
 
     function addNewComments(params) {
       const { id, uuid } = currentIssues.value
-      store.dispatch('newComments', {
+      store.dispatch('newIssueComment', {
         id,
         uuid,
         result: comments.value
@@ -1701,7 +1701,7 @@ export default defineComponent({
 
     function deleteComment(comment) {
       const { id, uuid } = comment
-      store.dispatch('deleteComments', {
+      store.dispatch('deleteIssueComment', {
         id,
         uuid,
         issuesId: currentIssues.value.id,
@@ -1712,7 +1712,7 @@ export default defineComponent({
     function updateComment(comment) {
       const { id, uuid } = comment
       comment.isEdit = false
-      store.dispatch('updateComments', {
+      store.dispatch('updateIssueComment', {
         id,
         uuid,
         issuesId: currentIssues.value.id,
