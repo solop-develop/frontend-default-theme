@@ -165,8 +165,7 @@ export default [
   },
   // type credit card
   {
-    tableName,
-    elementColumnName: 'CreditCardType',
+    tableName: 'C_Payment',
     columnName: 'CreditCardType',
     isFromDictionary: true,
     overwriteDefinition: {
@@ -176,6 +175,9 @@ export default [
       handleContentSelection: true,
       handleActionPerformed: true,
       size: 24,
+      reference: {
+        tableName: 'C_Payment'
+      },
       displayLogicPayment: 'C',
       isActiveLogics: true,
       isMandatory: true
