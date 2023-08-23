@@ -77,6 +77,7 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
                       <el-date-picker
                         v-model="currentDateProcess"
                         type="date"
+                        format="yyyy-MM-dd"
                         style="width: 100%;"
                       />
                     </el-form-item>
@@ -448,6 +449,47 @@ export default defineComponent({
       }
     })
 
+    const maximumDefiniteDate = computed(() => {
+      if (isEmptyValue(selectListAll.value)) return new Date()
+      const date = selectListAll.value.map(date => {
+        if (date.type === 'isPayment') return date.transaction_date
+        return date.date_invoiced
+      })
+      return date.sort((a, b) => {
+        return new Date(b) - new Date(a)
+      })
+    })
+
+    const selectListAll = computed(() => {
+      return store.getters.getListSelectInvoceandPayment
+    })
+
+    const sumApplied = computed(() => {
+      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => {
+        const { transaction_type } = list
+        if (list.type === 'isInvoce') {
+          if (transaction_type.value === 'R') {
+            return -(list.amountApplied)
+          }
+          return list.amountApplied
+        }
+        return list.applied
+      })
+      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce').map(list => list.applied)
+      const initialValue = 0
+      const initialValuePayment = 0
+      const initialValueAll = 0
+      const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
+      const sumAllPayments = sumPayment.reduce((accumulator, currentValue) => accumulator + currentValue, initialValuePayment)
+      const alo = [sumAllPayments, sumAllInvoce].reduce((accumulator, currentValue) => accumulator + currentValue, initialValueAll)
+      if (isEmptyValue(sumAllPayments) && !isEmptyValue(sumAllInvoce)) {
+        return sumAllInvoce
+      } else if (!isEmptyValue(sumPayment) && isEmptyValue(sumAllInvoce)) {
+        return sumAllPayments
+      }
+      return alo
+    })
+
     /**
      * Methods
      */
@@ -725,6 +767,12 @@ export default defineComponent({
       loadHeight(height)
     }, 1000)
 
+    /**
+     * Watch
+     * Declare watch callbacks to be invoked on data change
+     * (NewValue - OldValue)
+     */
+
     watch(currentSetp, (newValue) => {
       if (newValue && !isEmptyValue(listInvoces.value)) {
         setToggleSelection()
@@ -735,36 +783,6 @@ export default defineComponent({
       }
     })
 
-    const selectListAll = computed(() => {
-      return store.getters.getListSelectInvoceandPayment
-    })
-
-    const sumApplied = computed(() => {
-      const sumInvoce = selectListAll.value.filter(list => list.type === 'isInvoce').map(list => {
-        const { transaction_type } = list
-        if (list.type === 'isInvoce') {
-          if (transaction_type.value === 'R') {
-            return -(list.amountApplied)
-          }
-          return list.amountApplied
-        }
-        return list.applied
-      })
-      const sumPayment = selectListAll.value.filter(list => list.type !== 'isInvoce').map(list => list.applied)
-      const initialValue = 0
-      const initialValuePayment = 0
-      const initialValueAll = 0
-      const sumAllInvoce = sumInvoce.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue)
-      const sumAllPayments = sumPayment.reduce((accumulator, currentValue) => accumulator + currentValue, initialValuePayment)
-      const alo = [sumAllPayments, sumAllInvoce].reduce((accumulator, currentValue) => accumulator + currentValue, initialValueAll)
-      if (isEmptyValue(sumAllPayments) && !isEmptyValue(sumAllInvoce)) {
-        return sumAllInvoce
-      } else if (!isEmptyValue(sumPayment) && isEmptyValue(sumAllInvoce)) {
-        return sumAllPayments
-      }
-      return alo
-    })
-
     watch(isActiveTag, (newValue) => {
       if (newValue && !isEmptyValue(listInvoces.value)) {
         setToggleSelection()
@@ -773,6 +791,10 @@ export default defineComponent({
           loadHeight(height)
         }, 1000)
       }
+    })
+
+    watch(maximumDefiniteDate, (newValue, oldValue) => {
+      if (!isEmptyValue(newValue)) currentDateProcess.value = newValue[0]
     })
 
     return {
@@ -789,13 +811,14 @@ export default defineComponent({
       listPaymentsTable,
       description,
       // Computed
-      listPayments,
-      listInvoces,
       difference,
-      selectListPayments,
-      selectListInvoces,
+      listInvoces,
+      listPayments,
       listDifference,
+      selectListInvoces,
+      selectListPayments,
       currentDateProcess,
+      maximumDefiniteDate,
       // Methods
       handleSelectionPaymentsAll,
       handleSelectionInvocesAll,
