@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -149,6 +149,7 @@ import store from '@/store'
 import { BUSINESS_PARTNERS_LIST_FORM } from '@/utils/ADempiere/dictionary/field/businessPartner.js'
 import FIELDS_LIST from './fieldsListSearch'
 import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
+import { IS_SO_TRX } from '@/utils/ADempiere/constants/systemColumns'
 
 // Components and Mixins
 import businessPartnerMixin from './mixinBusinessPartner'
@@ -291,7 +292,7 @@ export default {
       return this.$store.getters.getValueOfFieldOnContainer({
         parentUuid: this.metadata.parentUuid,
         containerUuid: this.metadata.containerUuid,
-        columnName: 'IsSOTrx'
+        columnName: IS_SO_TRX
       })
     },
     oldFilter() {
