@@ -375,7 +375,7 @@ export default {
 
   computed: {
     isLoadingCash() {
-      return this.$store.getters.getLoadingCash
+      return this.$store.getters.getLoadingCashOpen
     },
     isShowFieldBankAccount() {
       const base = 'form.pos.optionsPoinSales.cashManagement.'
@@ -1085,7 +1085,7 @@ export default {
         format: 'object'
       })
       this.$store.commit(this.currentPanel.commit, false)
-      this.$store.commit('setLoadingCash', true)
+      this.$store.commit('setLoadingCashOpen', true)
 
       cashOpening({
         posUuid: this.currentPointOfSales.uuid,
@@ -1112,7 +1112,7 @@ export default {
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
         })
         .finally(() => {
-          this.$store.commit('setLoadingCash', false)
+          this.$store.commit('setLoadingCashOpen', false)
         })
     },
     currencyPayment(payment) {

@@ -109,6 +109,7 @@
             style="float: right;margin-left: 10px;"
             type="success"
             icon="el-icon-plus"
+            :loading="isLoadingPayment"
             @click="addPayment()"
           />
           <el-button
@@ -249,6 +250,8 @@
         style="float: right;margin-left: 10px;"
         type="primary"
         icon="el-icon-check"
+        :loading="isLoadingCashWithdrawal"
+        :disabled="isLoadingCashWithdrawal"
         @click="cashWithdrawal()"
       />
       <el-button
@@ -361,11 +364,15 @@ export default {
       listBankAcount: [],
       currentFieldCurrency: '',
       currentMethodsCurrency: '',
-      currentFieldPaymentMethods: ''
+      currentFieldPaymentMethods: '',
+      isLoadingPayment: false
     }
   },
 
   computed: {
+    isLoadingCashWithdrawal() {
+      return this.$store.getters.getLoadingCashWithdrawal
+    },
     isShowFieldBankAccount() {
       const base = 'form.pos.optionsPoinSales.cashManagement.'
       return this.$t(base + 'transfer') === this.$t(this.labelPanel) || this.$t(base + 'moneyIncome') === this.$t(this.labelPanel)
@@ -976,6 +983,7 @@ export default {
       payment.chargeUuid = this.currentPointOfSales.defaultWithdrawalChargeUuid
       payment.posUuid = this.currentPointOfSales.uuid
       payment.currencyUuid = !this.isEmptyValue(paymentMethodsPos.reference_currency) ? paymentMethodsPos.reference_currency.uuid : selectCurrency.uuid
+      if (this.isLoadingPayment) return
       this.sendPayment(payment)
     },
     sendPayment(payment) {
@@ -985,6 +993,7 @@ export default {
         }
         return undefined
       })
+      this.isLoadingPayment = true
       if (this.isEmptyValue(listPayments)) {
         createPayment(payment)
           .then(response => {
@@ -1002,6 +1011,9 @@ export default {
               ...error,
               type: 'error'
             }
+          })
+          .finally(() => {
+            this.isLoadingPayment = false
           })
       } else {
         updatePayment({
@@ -1023,6 +1035,9 @@ export default {
               ...error,
               type: 'error'
             }
+          })
+          .finally(() => {
+            this.isLoadingPayment = false
           })
       }
     },
@@ -1063,7 +1078,8 @@ export default {
         containerUuid: 'Cash-Withdrawal',
         format: 'object'
       })
-      this.$store.commit(this.currentPanel.commit, false)
+      // this.$store.commit(this.currentPanel.commit, false)
+      this.$store.commit('setLoadingCashWithdrawal', true)
 
       cashWithdrawal({
         posUuid: this.currentPointOfSales.uuid,
@@ -1087,6 +1103,9 @@ export default {
             type: 'error'
           })
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
+        })
+        .finally(() => {
+          this.$store.commit('setLoadingCashWithdrawal', false)
         })
     },
     currencyPayment(payment) {
