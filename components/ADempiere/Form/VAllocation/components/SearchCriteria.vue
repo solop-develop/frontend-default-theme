@@ -1,19 +1,19 @@
 <!--
-ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
-Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
-Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Contributor(s): Elsio Sanchez elsiosanches@gmail.com https://github.com/elsiosanchez
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https:www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -188,6 +188,7 @@ import {
   watch,
   ref
 } from '@vue/composition-api'
+
 import store from '@/store'
 
 // Components and Mixins
@@ -223,22 +224,15 @@ export default defineComponent({
     }
   },
 
-  setup(props, { root }) {
+  setup(props) {
     /**
      * Refs
      */
     const radioPanel2 = ref('')
     const radioPanel3 = ref('')
-    const radioPanel4 = ref('')
 
-    const receivablesOnly = ref('')
-    const payablesOnly = ref('')
-
-    const value1 = ref('')
-
-    const options = ref([])
-
-    const currentSetp = ref(0)
+    const receivablesOnly = ref(false)
+    const payablesOnly = ref(false)
 
     // Value the Select
     const organizations = ref('')
@@ -592,8 +586,31 @@ export default defineComponent({
         tableName
       })
     }
-    function getSearchInfoList({ parentUuid, containerUuid, contextColumnNames, tableName, columnName, pageNumber, uuid, filters, searchValue, pageSize }) {
+
+    function getSearchInfoList({
+      parentUuid, containerUuid,
+      contextColumnNames, filters, searchValue,
+      uuid, tableName, columnName,
+      pageNumber, pageSize
+    }) {
+      filters = [{
+        columnName: 'IsActive',
+        value: true
+      }]
+      if (receivablesOnly.value && !payablesOnly.value) {
+        filters.push({
+          columnName: 'IsCustomer',
+          value: receivablesOnly.value
+        })
+      } else if (payablesOnly.value && !receivablesOnly.value) {
+        filters.push({
+          columnName: 'IsVendor',
+          value: payablesOnly.value
+        })
+      }
+
       return store.dispatch('searchInfoList', {
+        isForm: true,
         parentUuid,
         containerUuid,
         contextColumnNames,
@@ -625,17 +642,12 @@ export default defineComponent({
     setListTransactionTypes()
 
     return {
-      // Const
       // Refs
       receivablesOnly,
       payablesOnly,
-      currentSetp,
       radioPanel2,
       radioPanel3,
-      radioPanel4,
       bPartner,
-      value1,
-      options,
       receivablesPayables,
       // List Option
       optionsBusinessPartners,
