@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,8 @@ import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatDate } from '@/utils/ADempiere/formatValue/dateFormat'
 
 export default defineComponent({
-  name: 'BankAccount',
+  name: 'BankStatement',
+
   props: {
     isDisabled: {
       type: Boolean,
@@ -68,6 +69,12 @@ export default defineComponent({
 
     const storedBankStatement = computed({
       set(newValue) {
+        if (isEmptyValue(newValue)) {
+          // clear values
+          store.commit('setBankAccountId', -1)
+          store.commit('setCurrentBankStatement', {})
+          return
+        }
         const { bankAccount } = newValue
         if (!isEmptyValue(bankAccount) && bankAccount.id > 0) {
           store.commit('setBankAccountId', bankAccount.id)
