@@ -161,12 +161,14 @@ function immediateInvoice() {
 }
 
 function completeOrder() {
+  if (this.$store.getters.getProcessLoading) return
   const {
     currentOrder,
     uuid
   } = store.getters.posAttributes.currentPointOfSales
   if (isEmptyValue(currentOrder) || currentOrder.documentStatus.value) return true
   const isOpenRefund = !isEmptyValue(store.getters.getListRefundReference)
+  this.$store.commit('setProcessLoading', true)
   processOrder({
     posUuid: uuid,
     orderUuid: currentOrder.uuid,
@@ -205,6 +207,7 @@ function completeOrder() {
       store.dispatch('listOrdersFromServer', {
         posUuid: uuid
       })
+      this.$store.commit('setProcessLoading', false)
       store.dispatch('updateOrderPos', false)
       store.dispatch('updatePaymentPos', false)
       store.commit('setShowPOSOptions', false)

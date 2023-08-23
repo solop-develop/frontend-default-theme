@@ -481,6 +481,7 @@
           type="primary"
           class="custom-button-create-bp"
           icon="el-icon-check"
+          :loading="isProcessLoading"
           @click="afterProcess()"
         />
       </span>
@@ -1764,6 +1765,7 @@ export default {
       this.selectionTypeRefund = {}
     },
     completePreparedOrder(posUuid, orderUuid, payments) {
+      if (this.isProcessLoading) return
       this.$store.dispatch('updateOrderPos', true)
       this.$store.dispatch('updatePaymentPos', true)
       this.$message({
@@ -1771,6 +1773,7 @@ export default {
         message: this.$t('notifications.processing'),
         showClose: true
       })
+      this.$store.commit('setProcessLoading', true)
       processOrder({
         posUuid,
         orderUuid,
@@ -1807,6 +1810,9 @@ export default {
             type: 'error'
           }
           this.showOpenSummary = true
+        })
+        .finally(() => {
+          this.$store.commit('setProcessLoading', false)
         })
     },
     afterProcess() {
