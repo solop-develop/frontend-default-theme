@@ -1480,6 +1480,7 @@ export default {
       this.$store.commit('setShowPOSOptions', false)
     },
     completePreparedOrder() {
+      if (this.$store.getters.getProcessLoading) return
       if (isEmptyValue(this.currentOrder.uuid) || this.currentOrder.documentStatus.value !== 'DR') {
         return ''
       }
@@ -1492,6 +1493,7 @@ export default {
         message: this.$t('notifications.processing'),
         showClose: true
       })
+      this.$store.commit('setProcessLoading', true)
       processOrder({
         posUuid,
         orderUuid,
@@ -1525,6 +1527,7 @@ export default {
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
           // close panel lef
+          this.$store.commit('setProcessLoading', false)
           this.$store.commit('setShowPOSOptions', false)
         })
     },

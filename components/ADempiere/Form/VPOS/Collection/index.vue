@@ -147,7 +147,7 @@
             <el-button type="danger" icon="el-icon-close" @click="exit" />
             <el-button type="info" icon="el-icon-minus" :disabled="isDisabled" @click="undoPatment" />
             <el-button type="success" icon="el-icon-plus" :disabled="fieldAmount <= 0" @click="addCollectToList(paymentBox)" />
-            <el-button type="primary" icon="el-icon-shopping-cart-full" :disabled="isLoadProcessOrder" :loading="isLoadProcessOrder" @click="validateOrder(listPayments)" />
+            <el-button type="primary" icon="el-icon-shopping-cart-full" :disabled="isProcessLoading" :loading="isProcessLoading" @click="validateOrder(listPayments)" />
           </samp>
         </el-header>
 
@@ -289,10 +289,12 @@
           icon="el-icon-close"
           @click="showOpenSummary = !showOpenSummary"
         />
+        <!-- {{ isProcessLoading }} -->
         <el-button
           type="primary"
           class="custom-button-create-bp"
           icon="el-icon-check"
+          :loading="isProcessLoading"
           @click="afterProcess()"
         />
       </span>
@@ -1407,7 +1409,8 @@ export default {
         message: this.$t('notifications.processing'),
         showClose: true
       })
-      this.$store.commit('setShowPOSCollection', false)
+      // this.$store.commit('setShowPOSCollection', false)
+      this.$store.commit('setProcessLoading', true)
       processOrder({
         posUuid,
         orderUuid,
@@ -1454,9 +1457,11 @@ export default {
           this.loadProcess()
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
+          this.$store.commit('setProcessLoading', false)
         })
     },
     afterProcess() {
+      if (this.isProcessLoading) return
       if (this.summaryProcessOrder.type === 'error') {
         // this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
         this.completePreparedOrder(this.listPayments)

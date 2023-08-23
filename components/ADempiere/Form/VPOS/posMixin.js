@@ -215,6 +215,9 @@ export default {
     },
     isNewOrder() {
       return this.$store.getters.getFocusNewOrder
+    },
+    isProcessLoading() {
+      return this.$store.getters.getProcessLoading
     }
   },
   watch: {
@@ -456,6 +459,7 @@ export default {
         message: this.$t('notifications.processing'),
         showClose: true
       })
+      this.$store.commit('setProcessLoading', true)
       processOrder({
         posUuid,
         orderUuid,
@@ -484,6 +488,7 @@ export default {
           this.$store.dispatch('updateOrderPos', false)
           this.$store.dispatch('updatePaymentPos', false)
           this.$store.commit('dialogoInvoce', { show: false })
+          this.$store.commit('setProcessLoading', false)
         })
     },
     printPreview(posUuid, orderUuid) {
