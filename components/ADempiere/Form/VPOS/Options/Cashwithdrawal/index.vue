@@ -1078,7 +1078,7 @@ export default {
         containerUuid: 'Cash-Withdrawal',
         format: 'object'
       })
-      // this.$store.commit(this.currentPanel.commit, false)
+      this.$store.commit(this.currentPanel.commit, false)
       this.$store.commit('setLoadingCashWithdrawal', true)
 
       cashWithdrawal({

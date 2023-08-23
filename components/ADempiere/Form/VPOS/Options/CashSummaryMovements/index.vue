@@ -50,6 +50,8 @@
         style="float: right;margin-left: 10px;"
         type="primary"
         icon="el-icon-check"
+        :loading="isLoadingCashClosing"
+        :disabled="isLoadingCashClosing"
         @click="cashClose()"
       />
       <el-button
@@ -122,6 +124,9 @@ export default {
     },
     listCashSummary() {
       return this.$store.getters.getListCashSummary
+    },
+    isLoadingCashClosing() {
+      return this.$store.getters.getLoadingCashClosing
     }
   },
   methods: {
@@ -131,7 +136,7 @@ export default {
     },
     cashClose() {
       this.$store.commit('setShowCashSummaryMovements', false)
-
+      this.$store.commit('setLoadingCashClosing', true)
       cashClosing({
         posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
         id: this.listCashSummary.id,
@@ -152,6 +157,9 @@ export default {
             type: 'error'
           })
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
+        })
+        .finally(() => {
+          this.$store.commit('setLoadingCashClosing', false)
         })
     }
   }
