@@ -38,6 +38,7 @@
               <el-form
                 label-position="top"
                 label-width="10px"
+                class="form-min-label"
                 style="float: right; display: contents; line-height: 10px;"
                 :disabled="validateOpenAmount"
                 @submit.native.prevent="notSubmitForm"
@@ -68,55 +69,85 @@
                     />
                   </el-col>
                   <el-col :span="size">
-                    <el-form-item :label="$t('form.pos.collect.paymentMethods')" class="from-field">
-                      <el-select
-                        v-model="currentFieldPaymentMethods"
-                        style="display: block;"
-                        :filterable="!isMobile"
-                        @change="changePaymentMethods"
-                      >
-                        <el-option
-                          v-for="item in availablePaymentMethods"
-                          :key="item.id"
-                          :label="item.name"
-                          :value="item.uuid"
-                        />
-                      </el-select>
-                    </el-form-item>
+                    <div class="field-definition">
+                      <el-form-item :label="$t('form.pos.collect.paymentMethods')" class="field-standard">
+                        <el-select
+                          v-model="currentFieldPaymentMethods"
+                          :filterable="!isMobile"
+                          style="width: 100%;"
+                          @change="changePaymentMethods"
+                        >
+                          <el-option
+                            v-for="item in availablePaymentMethods"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.uuid"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
                   </el-col>
                   <el-col :span="size">
-                    <el-form-item :label="$t('form.pos.collect.Currency')" class="from-field" style="margin-left: 10px;margin-right: 10px;">
-                      <el-select
-                        v-model="currentFieldCurrency"
-                        :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
-                        style="display: block;"
-                        @change="changeCurrency"
-                      >
-                        <el-option
-                          v-for="item in listCurrency"
-                          :key="item.id"
-                          :label="item.iso_code + '(' + item.currency_symbol + ')'"
-                          :value="item.iso_code"
-                        />
-                      </el-select>
-                    </el-form-item>
+                    <div class="field-definition">
+                      <el-form-item :label="$t('form.pos.collect.Currency')" class="field-standard" style="margin-left: 10px;margin-right: 10px;">
+                        <el-select
+                          v-model="currentFieldCurrency"
+                          :disabled="!isEmptyValue(currentAvailablePaymentMethods.reference_currency)"
+                          style="width: 100%;"
+                          @change="changeCurrency"
+                        >
+                          <el-option
+                            v-for="item in listCurrency"
+                            :key="item.id"
+                            :label="item.iso_code + '(' + item.currency_symbol + ')'"
+                            :value="item.iso_code"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
                   </el-col>
                   <el-col v-if="isShowBankAccount" :span="size">
-                    <el-form-item label="Cuenta Bancaria" class="from-field">
-                      <el-select
-                        v-model="currentBankAccount"
-                        style="display: block;"
-                        clearable
-                        @change="changeBankAccount"
-                      >
-                        <el-option
-                          v-for="item in bankAccountList"
-                          :key="item.customer_bank_account_uuid"
-                          :label="item.name"
-                          :value="item.customer_bank_account_uuid"
-                        />
-                      </el-select>
-                    </el-form-item>
+                    <div class="field-definition">
+                      <el-form-item label="Cuenta Bancaria" class="field-standard">
+                        <el-select
+                          v-model="currentBankAccount"
+                          clearable
+                          remote
+                          style="width: 100%;"
+                          @change="changeBankAccount"
+                        >
+                          <el-option
+                            v-for="item in bankAccountList"
+                            :key="item.customer_bank_account_uuid"
+                            :label="item.name"
+                            :value="item.customer_bank_account_uuid"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-col>
+                  <el-col v-if="isdisplayLogicBank" :span="size">
+                    <div class="field-definition">
+                      <el-form-item label="Banco" class="field-standard">
+                        <el-select
+                          v-model="currentBank"
+                          style="display: block;"
+                          :loading="loadingBank"
+                          filterable
+                          clearable
+                          remote
+                          :remote-method="remoteMethodBank"
+                          @visible-change="showListBank"
+                        >
+                          <el-option
+                            v-for="item in listBanks"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.uuid"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
                   </el-col>
                   <el-col
                     v-for="field in hiddenFieldsList"
@@ -395,11 +426,19 @@ export default {
       currentFieldPaymentMethods: '',
       currentBankAccount: '',
       showOpenSummary: false,
+      currentBank: '',
+      listBanks: [],
+      loadingBank: false,
       summaryProcessOrder: {}
     }
   },
 
   computed: {
+    isdisplayLogicBank() {
+      if (this.isEmptyValue(this.currentAvailablePaymentMethods)) return false
+      if (this.isEmptyValue(this.currentAvailablePaymentMethods.payment_method)) return false
+      return ['D', 'K', 'T', 'A', 'P', 'C'].includes(this.currentAvailablePaymentMethods.payment_method.tender_type)
+    },
     listCurrency() {
       return this.$store.getters.getCurrenciesList
     },
@@ -1094,10 +1133,7 @@ export default {
       const containerUuid = this.containerUuid
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
-      const bankUuid = this.$store.getters.getValueOfField({
-        containerUuid,
-        columnName: 'C_Bank_ID_UUID'
-      })
+      const bankUuid = this.currentBank
       this.amontSend = this.$store.getters.getValueOfField({
         containerUuid,
         columnName: 'PayAmt'
@@ -1134,7 +1170,7 @@ export default {
           driverLicense: this.currentOrder.businessPartner.value,
           socialSecurityNumber: this.currentOrder.businessPartner.value,
           name: this.currentOrder.businessPartner.name,
-          bankUuid: values.C_Bank_ID_UUID,
+          bankUuid: this.currentBank,
           paymentMethodUuid: paymentCurrency.uuid,
           isAch: true,
           AccountNo: values.Phone
@@ -1373,6 +1409,24 @@ export default {
         orderUuid,
         paymentUuid
       })
+    },
+    showListBank(isShow, searchValue) {
+      if (!isShow) return
+      this.$store.dispatch('listBanks', {
+        searchValue
+      })
+        .then(responseListBanks => {
+          this.listBanks = responseListBanks
+          this.loadingBank = false
+        })
+    },
+    remoteMethodBank(query) {
+      if (query !== '') {
+        this.loadingBank = true
+        this.showListBank(true, query)
+      } else {
+        this.listBanks = []
+      }
     },
     validateOrder(payment) {
       // this.porcessInvoce = true

@@ -85,22 +85,6 @@ export default [
     }
   },
   // Bank
-  {
-    tableName: 'C_BP_BankAccount',
-    columnName: 'C_Bank_ID',
-    isFromDictionary: true,
-    overwriteDefinition: {
-      sequence: 3,
-      name: language.t('form.pos.collect.overdrawnInvoice.fieldList.bank'),
-      handleActionKeyPerformed: true,
-      handleActionPerformed: true,
-      handleContentSelection: true,
-      displayLogicPayment: 'D,K,T,A,P,C',
-      size: 24,
-      isActiveLogics: true,
-      isMandatory: true
-    }
-  },
   // Date
   {
     tableName,
