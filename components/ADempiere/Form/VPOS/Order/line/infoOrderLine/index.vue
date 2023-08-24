@@ -46,7 +46,7 @@
           <span v-if="!isEmptyValue(recordRow.product.value)">{{ $t('form.productInfo.code') }}: <b>{{ recordRow.product.value }}</b><br> </span>
           {{ $t('form.productInfo.name') }}: <b>{{ (isEmptyValue(recordRow.product.name) ? recordRow.charge.name : recordRow.product.name) }}</b><br>
           {{ $t('form.productInfo.description') }}: <b>{{ (isEmptyValue(recordRow.product.description) ? recordRow.charge.description : recordRow.product.description) }}</b><br>
-          {{ $t('form.productInfo.UM') }}: <b>{{ recordRow.uom.product_uom.name }}</b><br>
+          {{ $t('form.productInfo.UM') }}: <b>{{ recordRow.uom.uom.name }}</b><br>
         </el-col>
 
         <el-col :span="8">
@@ -61,13 +61,21 @@
             <br>
             {{ $t('form.productInfo.grandTotal') }}:
             <b>{{ formatPrice({ value: recordRow.totalAmountWithTax, currency: pointOfSalesCurrency.iSOCode }) }}</b>
-            <br>
-            {{ $t('form.pos.tableProduct.quantity') }}:
-            <b>{{ formatQuantity({ value: recordRow.quantityOrdered }) }}</b>
-            <br>
-            {{ $t('form.pos.tableProduct.baseQuantity') }}:
-            <b>{{ formatQuantity({ value: recordRow.quantityOrderedLine }) }}</b>
           </div>
+        </el-col>
+        <el-col :span="24">
+          <el-divider>
+            {{ '1 ' + recordRow.uom.uom.name + ' (' + recordRow.uom.uom.symbol + ') ' + ' ~ ' + formatQuantity({ value: (recordRow.uom.divide_rate >= recordRow.uom.multiply_rate) ? recordRow.uom.divide_rate : recordRow.uom.multiply_rate }) + ' ' + recordRow.uom.product_uom.name + ' (' + recordRow.uom.product_uom.symbol + ') ' }}
+          </el-divider>
+        </el-col>
+        <el-col :span="8">
+          {{ $t('form.pos.tableProduct.quantity') }}: <b>{{ formatQuantity({ value: recordRow.quantity }) }}</b>
+        </el-col>
+        <el-col :span="8">
+          {{ $t('form.productInfo.UM') }}: <b>{{ recordRow.uom.uom.name }}</b>
+        </el-col>
+        <el-col :span="8">
+          {{ $t('form.pos.tableProduct.baseQuantity') }}: <b>{{ formatQuantity({ value: recordRow.quantityOrderedLine }) }}</b>
         </el-col>
       </el-row>
     </el-form>
