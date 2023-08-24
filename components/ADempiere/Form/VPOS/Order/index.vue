@@ -632,9 +632,6 @@ export default {
     isValidateDocumentType() {
       return this.currentOrder.documentStatus.value !== 'CO'
     },
-    fieldCampaign() {
-      return this.fieldsList.find(field => field.columnName === 'C_Campaign_ID')
-    },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
@@ -945,8 +942,8 @@ export default {
 
   mounted() {
     setTimeout(() => {
-      if ((this.fieldCampaign && !this.isEmptyValue(this.fieldCampaign.reference)) && this.isEmptyValue(this.listCampaign)) {
-        this.getListCampaign(this.fieldCampaign.reference)
+      if (this.isEmptyValue(this.listCampaign)) {
+        this.getListCampaign()
       }
     }, 500)
     if (!this.isEmptyValue(this.$route.query.action) && this.isEmptyValue(this.currentOrder.uuid)) {
