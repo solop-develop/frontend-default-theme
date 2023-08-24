@@ -172,9 +172,8 @@
                 </el-col>
               </el-row>
             </el-form>
-            <el-button slot="reference"  type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
-          </el-popover>
-         
+            <el-button slot="reference" type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
+          </el-popover>         
           <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteLine(scope.row)" />
         </template>
       </el-table-column>
@@ -279,9 +278,6 @@ import {
 
 export default {
   name: 'ConfirmDelivery',
-  components: {
-    ImageProduct
-  },
   mixins: [
     formMixin
   ],
