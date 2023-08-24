@@ -172,8 +172,15 @@
                 </el-col>
               </el-row>
             </el-form>
-            <el-button slot="reference" type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
-          </el-popover>         
+            <el-button
+              slot="reference"
+              type="primary"
+              icon="el-icon-info"
+              size="mini"
+              style="margin-right: 3%;"
+              @click="showInfoLine(scope.row)"
+            />
+          </el-popover>
           <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteLine(scope.row)" />
         </template>
       </el-table-column>
@@ -255,7 +262,6 @@
 
 <script>
 // components and mixins
-import ImageProduct from '@theme/components/ADempiere/Form/VPOS/Order/line/infoOrderLine/imageProduct.vue'
 import formMixin from '@theme/components/ADempiere/Form/formMixin.js'
 
 // api request methods
