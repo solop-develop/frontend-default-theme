@@ -581,7 +581,6 @@ import { formatQuantity as formatQuantityPanel } from '@/utils/ADempiere/formatV
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 
 // API Request Methods
-import { requestLookupList } from '@/api/ADempiere/window.js'
 import { releaseOrder } from '@/api/ADempiere/form/point-of-sales.js'
 
 export default {
