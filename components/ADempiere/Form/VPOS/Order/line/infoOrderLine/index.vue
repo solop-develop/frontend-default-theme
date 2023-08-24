@@ -69,6 +69,11 @@
             <b>{{ formatQuantity({ value: recordRow.quantityOrderedLine }) }}</b>
           </div>
         </el-col>
+        <el-col :span="24">
+          <el-divider>
+            {{ '1 ' + recordRow.uom.uom.name + ' (' + recordRow.uom.uom.symbol + ') ' + ' ~ ' + formatQuantity({ value: (recordRow.uom.divide_rate >= recordRow.uom.multiply_rate) ? recordRow.uom.divide_rate : recordRow.uom.multiply_rate }) + ' ' + recordRow.uom.product_uom.name + ' (' + recordRow.uom.product_uom.symbol + ') ' }}
+          </el-divider>
+        </el-col>
       </el-row>
     </el-form>
 
