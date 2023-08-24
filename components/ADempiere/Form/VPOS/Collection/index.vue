@@ -176,8 +176,8 @@
           </el-card>
           <samp id="buttonCollection" style="float: right;padding-right: 10px;">
             <el-button type="danger" icon="el-icon-close" @click="exit" />
-            <el-button type="info" icon="el-icon-minus" :disabled="isDisabled" @click="undoPatment" />
-            <el-button type="success" icon="el-icon-plus" :disabled="fieldAmount <= 0" @click="addCollectToList(paymentBox)" />
+            <el-button type="info" icon="el-icon-minus" :disabled="isDisabled || isUndoPayLoading" :loading="isUndoPayLoading" @click="undoPatment" />
+            <el-button type="success" icon="el-icon-plus" :disabled="fieldAmount <= 0" :loading="isPayemntLoading" @click="addCollectToList(paymentBox)" />
             <el-button type="primary" icon="el-icon-shopping-cart-full" :disabled="isProcessLoading" :loading="isProcessLoading" @click="validateOrder(listPayments)" />
           </samp>
         </el-header>
@@ -320,12 +320,12 @@
           icon="el-icon-close"
           @click="showOpenSummary = !showOpenSummary"
         />
-        <!-- {{ isProcessLoading }} -->
         <el-button
           type="primary"
           class="custom-button-create-bp"
           icon="el-icon-check"
           :loading="isProcessLoading"
+          :disabled="isProcessLoading"
           @click="afterProcess()"
         />
       </span>
@@ -429,7 +429,9 @@ export default {
       currentBank: '',
       listBanks: [],
       loadingBank: false,
-      summaryProcessOrder: {}
+      summaryProcessOrder: {},
+      isPayemntLoading: false,
+      isUndoPayLoading: false
     }
   },
 
@@ -1130,6 +1132,7 @@ export default {
       return rate
     },
     addCollectToList() {
+      this.isPayemntLoading = true
       const containerUuid = this.containerUuid
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
@@ -1153,9 +1156,6 @@ export default {
         description: values.Description,
         paymentDate: values.DateTrx
       }
-
-      // console.log({ values }, this.currentOrder.customer)
-
       const customerBankAccountUuid = this.currentBankAccount
       const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
@@ -1194,6 +1194,7 @@ export default {
                 }
               })
           })
+        this.isPayemntLoading = false
         return
       }
 
@@ -1215,6 +1216,7 @@ export default {
           currencyUuid: this.isEmptyValue(paymentCurrency.refund_reference_currency) ? currencyUuid.uuid : paymentCurrency.refund_reference_currency.uuid
         })
         this.addCollect()
+        this.isPayemntLoading = false
         return
       }
       if (this.sendToServer) {
@@ -1245,6 +1247,7 @@ export default {
         })
           .then((response) => {
             if (response.type !== 'error') {
+              this.isPayemntLoading = false
               this.addCollect()
             }
           })
@@ -1404,11 +1407,15 @@ export default {
       const list = this.listPayments[this.listPayments.length - 1]
       const orderUuid = list.orderUuid
       const paymentUuid = list.uuid
+      this.isUndoPayLoading = true
       this.$store.dispatch('deletetPayments', {
         posUuid: this.currentPointOfSales.uuid,
         orderUuid,
         paymentUuid
       })
+        .then(() => {
+          this.isUndoPayLoading = false
+        })
     },
     showListBank(isShow, searchValue) {
       if (!isShow) return
@@ -1522,6 +1529,7 @@ export default {
         this.showOpenSummary = false
         return
       }
+      this.showOpenSummary = false
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.currentOrder.uuid
       this.$store.dispatch('printTicket', { posUuid, orderUuid })
@@ -1530,21 +1538,6 @@ export default {
             .then(() => {
               this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
             })
-          // this.$store.dispatch('createOrder', {
-          //   posUuid: this.currentPointOfSales.uuid,
-          //   customerUuid: this.currentPointOfSales.templateCustomer.uuid,
-          //   salesRepresentativeUuid: this.currentPointOfSales.salesRepresentative.uuid,
-          //   priceListUuid: this.currentPointOfSales.priceList.uuid,
-          //   warehouseUuid: this.currentPointOfSales.warehouse.uuid
-          // })
-          //   .then(response => {
-          //     this.$store.commit('setOrder', response)
-          //     this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
-          //     this.isLoadProcessOrder = false
-          //   })
-          // if (this.currentPointOfSales.isAllowsPreviewDocument) {
-          //   this.printPreview(posUuid, orderUuid)
-          // }
         })
         .catch((error) => {
           this.$message({

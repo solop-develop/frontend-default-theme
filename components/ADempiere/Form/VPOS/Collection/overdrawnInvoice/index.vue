@@ -528,6 +528,7 @@
           class="custom-button-create-bp"
           icon="el-icon-check"
           :loading="isProcessLoading"
+          :disabled="isProcessLoading"
           @click="afterProcess()"
         />
       </span>
@@ -1893,6 +1894,7 @@ export default {
         })
     },
     afterProcess() {
+      if (this.isProcessLoading) return
       if (this.summaryProcessOrder.type === 'error') {
         // this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
         this.completePreparedOrder({
@@ -1902,6 +1904,7 @@ export default {
         this.showOpenSummary = false
         return
       }
+      this.showOpenSummary = false
       this.$store.dispatch('printTicket', {
         posUuid: this.currentPointOfSales.uuid,
         orderUuid: this.currentOrder.uuid
