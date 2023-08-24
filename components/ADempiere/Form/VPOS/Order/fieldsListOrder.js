@@ -27,18 +27,5 @@ export default [
       handleActionPerformed: true,
       handleActionKeyPerformed: true
     }
-  },
-  {
-    elementColumnName: 'C_Campaign_ID',
-    isFromDictionary: true,
-    overwriteDefinition: {
-      size: 24,
-      handleFocusGained: true,
-      handleActionPerformed: true,
-      reference: {
-        tableName: 'C_Campaign'
-      },
-      handleActionKeyPerformed: true
-    }
   }
 ]
