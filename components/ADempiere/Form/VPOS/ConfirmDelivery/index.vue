@@ -93,7 +93,7 @@
         prop="quantity"
         :label="$t('form.pos.tableProduct.quantity')"
         align="right"
-        :width="isEditQuantity ? '200px' : '90px'"
+        :width="isEditQuantity ? '210px' : '110px'"
       >
         <template slot-scope="scope">
           <el-input-number
@@ -104,8 +104,22 @@
             @change="handleChange(scope.row)"
           />
           <span v-else>
-            {{ scope.row.quantity }}
+            {{ formatQuantity({ value: scope.row.quantity }) }}
           </span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="uom.uom.name"
+        :label="$t('form.pos.tableProduct.uom')"
+      />
+      <el-table-column
+        prop="quantity"
+        :label="$t('form.pos.tableProduct.movementQuantity')"
+        align="right"
+        width="200px"
+      >
+        <template slot-scope="scope">
+          {{ formatQuantity({ value: scope.row.movement_quantity }) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -115,41 +129,52 @@
       >
         <template slot-scope="scope">
           <el-popover
-            ref="open"
-            v-model="value"
-            placement="right-start"
-            width="600"
+            :value="scope.row.isInfo"
+            placement="bottom"
             trigger="click"
-            :visible-arrow="currentLineInfo === scope.row.uuid"
+            width="750"
           >
             <el-form
               label-position="top"
               :style="currentLineInfo === scope.row.uuid ? 'float: right;display: contents;line-height: 30px;' : 'float: right;display: none;line-height: 30px;'"
               @submit.native.prevent="notSubmitForm"
             >
-              <el-row style="margin: 10px!important;">
-                <el-col :span="6">
-                  <div>
-                    <image-product
-                      :show="showInfo"
-                      :metadata-line="{
-                        product: scope.row,
-                        uuid: scope.row.uuid
-                      }"
-                    />
-                  </div>
+              <el-row :gutter="10">
+                <el-col :span="4">
+                  <el-skeleton-item
+                    variant="image"
+                    style="width: 110px; height: 150px;"
+                  />
                 </el-col>
-                <el-col :span="18">
-                  {{ $t('form.productInfo.code') }}: <b>{{ scope.row.product.value }}</b><br>
-                  {{ $t('form.productInfo.name') }}: <b>{{ scope.row.product.name }}</b><br>
-                  {{ $t('form.productInfo.description') }}: <b>{{ scope.row.description }}</b><br>
-                  {{ $t('form.productInfo.UM') }}: <b>{{ scope.row.uomName }}</b><br>
-                  {{ $t('form.pos.tableProduct.quantity') }}: <b>{{ scope.row.quantity }}</b><br>
+                <el-col :span="20">
+                  <el-row>
+                    <el-col :span="24">
+                      {{ $t('form.productInfo.code') }}: <b>{{ scope.row.product.value }}</b><br>
+                      {{ $t('form.productInfo.name') }}: <b>{{ scope.row.product.name }}</b><br>
+                      {{ $t('form.productInfo.description') }}: <b>{{ scope.row.product.description }}</b><br>
+                      {{ $t('form.productInfo.UM') }}: <b>{{ scope.row.uom.product_uom.name }}</b>
+                    </el-col>
+                    <el-col :span="24">
+                      <el-divider>
+                        {{ '1 ' + scope.row.uom.uom.name + ' (' + scope.row.uom.uom.symbol + ') ' + ' ~ ' + formatQuantity({ value: (scope.row.uom.divide_rate >= scope.row.uom.multiply_rate) ? scope.row.uom.divide_rate : scope.row.uom.multiply_rate }) + ' ' + scope.row.uom.product_uom.name + ' (' + scope.row.uom.product_uom.symbol + ') ' }}
+                      </el-divider>
+                    </el-col>
+                    <el-col :span="8">
+                      {{ $t('form.pos.tableProduct.quantity') }}: <b>{{ formatQuantity({ value: scope.row.quantity }) }}</b>
+                    </el-col>
+                    <el-col :span="8">
+                      {{ $t('form.productInfo.UM') }}: <b>{{ scope.row.uom.uom.name }}</b>
+                    </el-col>
+                    <el-col :span="8">
+                      {{ $t('form.pos.tableProduct.movementQuantity') }}: <b>{{ formatQuantity({ value: scope.row.movement_quantity }) }}</b>
+                    </el-col>
+                  </el-row>
                 </el-col>
               </el-row>
             </el-form>
-            <el-button slot="reference" type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
+            <el-button slot="reference"  type="primary" icon="el-icon-info" size="mini" style="margin-right: 3%;" @click="showInfoLine(scope.row)" />
           </el-popover>
+         
           <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteLine(scope.row)" />
         </template>
       </el-table-column>
@@ -245,7 +270,8 @@ import {
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
-import { formatPrice, formatQuantity } from '@/utils/ADempiere/valueFormat.js'
+import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
 import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 import {
   buildLinkHref
@@ -331,7 +357,12 @@ export default {
       return this.$store.getters.posAttributes.currentPointOfSales.currentOrder.lineOrder
     },
     productdeliveryList() {
-      return this.$store.getters.getDeliveryList
+      return this.$store.getters.getDeliveryList.map(a => {
+        return {
+          ...a,
+          isInfo: false
+        }
+      })
     },
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
@@ -655,7 +686,11 @@ export default {
     },
     showInfoLine(line) {
       this.$store.commit('setLine', line)
-      this.showInfo = true
+      line.isInfo = true
+      const list = this.productdeliveryList.filter(lines => lines.id !== line.id)
+      list.forEach(element => {
+        element.isInfo = false
+      })
     },
     closeDialog() {
       this.dialogVisible = false
