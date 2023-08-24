@@ -315,7 +315,7 @@
                       :key="item.uuid"
                       :command="item"
                     >
-                      {{ item.values.DisplayColumn }}
+                      {{ item.name }}
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
@@ -619,7 +619,7 @@ export default {
       isEditLine: {},
       fileColumnNameEdit: '',
       editPrice: 0,
-      listCampaign: []
+      listCampaign: this.$store.getters.getListCampaigns
     }
   },
 
@@ -886,18 +886,18 @@ export default {
       return ''
     },
     currentCampaign() {
-      if (!this.isEmptyValue(this.currentOrder.campaignUuid)) {
-        const campaig = this.listCampaign.find(campaign => campaign.uuid === this.currentOrder.campaignUuid)
-        if (this.isEmptyValue(campaig)) {
+      if (!this.isEmptyValue(this.currentOrder.campaign)) {
+        const { campaign } = this.currentOrder
+        if (this.isEmptyValue(campaign)) {
           return this.$t('form.pos.order.noCampaignSelected')
         }
-        return campaig.values.DisplayColumn
-      } else if (!this.isEmptyValue(this.currentPointOfSales.defaultCampaignUuid)) {
-        const campaig = this.listCampaign.find(campaign => campaign.uuid === this.currentPointOfSales.defaultCampaignUuid)
-        if (this.isEmptyValue(campaig)) {
+        return campaign.name
+      } else if (!this.isEmptyValue(this.currentPointOfSales.defaultCampaign)) {
+        const { defaultCampaign } = this.currentPointOfSales
+        if (this.isEmptyValue(defaultCampaign)) {
           return this.$t('form.pos.order.noCampaignSelected')
         }
-        return campaig.values.DisplayColumn
+        return defaultCampaign.name
       }
       return this.$t('form.pos.order.noCampaignSelected')
     }
@@ -1062,14 +1062,10 @@ export default {
         isShowMessage: true
       })
     },
-    getListCampaign(campaing) {
-      requestLookupList({
-        tableName: campaing.tableName,
-        query: campaing.query,
-        pageSize: 50
-      })
-        .then(responseLookupItem => {
-          this.listCampaign = responseLookupItem.recordsList
+    getListCampaign() {
+      this.$store.dispatch('searchListCampaigns')
+        .then(response => {
+          this.listCampaign = response
         })
     },
     productFocus(value) {
