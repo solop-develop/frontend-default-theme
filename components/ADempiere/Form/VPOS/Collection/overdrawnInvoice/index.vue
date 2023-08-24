@@ -134,6 +134,29 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
+                <el-col v-if="isdisplayLogicBank" :span="8">
+                  <div class="field-definition">
+                    <el-form-item label="Banco" class="field-standard">
+                      <el-select
+                        v-model="currentBank"
+                        style="display: block;"
+                        :loading="loadingBank"
+                        filterable
+                        clearable
+                        remote
+                        :remote-method="remoteMethodBank"
+                        @visible-change="showListBank"
+                      >
+                        <el-option
+                          v-for="item in listBanks"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.uuid"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </el-col>
                 <el-col
                   v-for="(field, key) in hiddenFieldsList"
                   :key="key"
@@ -316,6 +339,29 @@
                       />
                     </el-select>
                   </el-form-item>
+                </el-col>
+                <el-col v-if="isdisplayLogicBank" :span="8">
+                  <div class="field-definition">
+                    <el-form-item label="Banco" class="field-standard">
+                      <el-select
+                        v-model="currentBank"
+                        style="display: block;"
+                        :loading="loadingBank"
+                        filterable
+                        clearable
+                        remote
+                        :remote-method="remoteMethodBank"
+                        @visible-change="showListBank"
+                      >
+                        <el-option
+                          v-for="item in listBanks"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.uuid"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </div>
                 </el-col>
                 <el-col
                   v-for="(field, key) in hiddenFieldsList"
@@ -577,10 +623,26 @@ export default {
       refundOptionVAlidate: {},
       currentBankAccount: '',
       showOpenSummary: false,
-      summaryProcessOrder: {}
+      summaryProcessOrder: {},
+      currentBank: '',
+      listBanks: this.$store.getters.getListBanks,
+      loadingBank: false
     }
   },
   computed: {
+    isdisplayLogicBank() {
+      let listPaymentMethods
+      if (this.option === 1) {
+        listPaymentMethods = this.paymentTypeListRefund
+      } else if (this.option === 3) {
+        listPaymentMethods = this.paymentTypeList
+      }
+
+      const isPayment = listPaymentMethods.find(list => list.uuid === this.currentFieldPaymentMethods)
+      if (this.isEmptyValue(isPayment)) return false
+      return ['D', 'K', 'T', 'A', 'P', 'C'].includes(isPayment.payment_method.tender_type)
+      // return false
+    },
     validateCurrentPayment() {
       const isPayment = this.paymentTypeListRefund.find(list => list.uuid === this.currentFieldPaymentMethods)
       if (this.isEmptyValue(isPayment)) return false
@@ -1078,7 +1140,7 @@ export default {
           socialSecurityNumber: value,
           name: this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name + '-' + this.currentPaymentMethods : nameAccount + '-' + this.currentPaymentMethods,
           bankAccountType: refund.bankAccountType,
-          bankUuid: refund.bankUuid,
+          bankUuid: this.currentBank,
           paymentMethodUuid: payment.uuid,
           isAch: true,
           AccountNo: account
@@ -1098,7 +1160,7 @@ export default {
               socialSecurityNumber: value,
               name: nameAccount,
               bankAccountType: refund.bankAccountType,
-              bankUuid: refund.bankID,
+              bankUuid: this.currentBank,
               paymentMethodUuid: payment.payment_method.uuid,
               isAch: true,
               AccountNo: account
@@ -1121,13 +1183,31 @@ export default {
         socialSecurityNumber: value,
         name: nameAccount,
         bankAccountType: refund.bankAccountType,
-        bankUuid: refund.bankAccountType,
+        bankUuid: this.currentBank,
         paymentMethodUuid: payment.payment_method.uuid,
         isAch: true,
         AccountNo: account
       })
       this.clearAccountData()
       return
+    },
+    showListBank(isShow, searchValue) {
+      if (!isShow) return
+      this.$store.dispatch('listBanks', {
+        searchValue
+      })
+        .then(responseListBanks => {
+          this.listBanks = responseListBanks
+          this.loadingBank = false
+        })
+    },
+    remoteMethodBank(query) {
+      if (query !== '') {
+        this.loadingBank = true
+        this.showListBank(true, query)
+      } else {
+        this.listBanks = []
+      }
     },
     validateSubsequentPayment() {
       const values = this.$store.getters.getValuesView({
@@ -1215,21 +1295,21 @@ export default {
       this.pinPostPayment = ''
     },
     selectedBanckAccount(value) {
-      const fieldBank = this.fieldsList.find(fields => fields.columnName === 'C_Bank_ID')
-      let listBank
-      if (!this.isEmptyValue(fieldBank) && fieldBank.reference) {
-        listBank = this.$store.getters.getStoredLookupList({
-          containerUuid: this.metadata.containerUuid,
-          query: fieldBank.reference.query,
-          tableName: fieldBank.reference.tableName
-        })
-      }
       const account = this.bankAccountList.find(banck => banck.customer_bank_account_uuid === value)
+      let select = {
+        uuid: ''
+      }
+      if (!this.isEmptyValue(this.$store.getters.getListBanks)) {
+        select = this.$store.getters.getListBanks.find(list => list.uuid === account.bank_uuid)
+      } else {
+        this.showListBank(true)
+      }
+      this.currentBank = select.uuid
       this.$store.dispatch('listRefunds', {
         posUuid: this.currentPointOfSales.uuid,
         orderUuid: this.currentOrder.uuid
       })
-      account.bank = this.isEmptyValue(listBank) || this.isEmptyValue(account.bank_uuid) ? { uuid: '', id: 0, labe: '' } : listBank.find(bank => bank.uuid === account.bank_uuid)
+      account.bank = this.isEmptyValue(this.$store.getters.getListBanks) || this.isEmptyValue(account.bank_uuid) ? { uuid: '', id: 0, labe: '' } : this.$store.getters.getListBanks.find(bank => bank.uuid === account.bank_uuid)
       this.uploadAccountData(account)
     },
     convertValuesToSend(values) {
@@ -1265,7 +1345,7 @@ export default {
             valuesToSend['bankID'] = value
             break
           case 'C_Bank_ID_UUID':
-            valuesToSend['bankUuid'] = value
+            valuesToSend['bankUuid'] = this.currentBank
             break
           case 'DisplayColumn_C_Bank_ID':
             valuesToSend['bank'] = value
@@ -1461,10 +1541,7 @@ export default {
       const containerUuid = 'OverdrawnInvoice'
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
-      const bankUuid = this.$store.getters.getValueOfField({
-        containerUuid,
-        columnName: 'C_Bank_ID_UUID'
-      })
+      const bankUuid = this.currentBank
       const amount = this.$store.getters.getValueOfField({
         containerUuid,
         columnName: 'PayAmt'
