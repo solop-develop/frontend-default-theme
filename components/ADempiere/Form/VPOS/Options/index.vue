@@ -1782,7 +1782,6 @@ export default {
         description: this.messageReverseSales
       })
         .then(response => {
-          console.log({ response })
           this.showReverseOrder = true
           this.summaryReverseOrder = {
             type: 'success',
