@@ -374,6 +374,22 @@ export default {
   },
 
   computed: {
+    showCashOpeningSummary: {
+      get() {
+        return this.$store.getters.getShowSummaryCashOpen
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryCashOpen', value)
+      }
+    },
+    summaryCashOpen: {
+      get() {
+        return this.$store.getters.getSummaryCashOpen
+      },
+      set(value) {
+        this.$store.commit('setSummaryCashOpen', value)
+      }
+    },
     isLoadingCash() {
       return this.$store.getters.getLoadingCashOpen
     },
@@ -1086,6 +1102,7 @@ export default {
       })
       this.$store.commit(this.currentPanel.commit, false)
       this.$store.commit('setLoadingCashOpen', true)
+      const labelCollectingAgent = this.listCollectAgent.find(agent => agent.uuid === this.collectAgentUuid)
 
       cashOpening({
         posUuid: this.currentPointOfSales.uuid,
@@ -1100,10 +1117,24 @@ export default {
             showClose: true,
             message
           })
+          this.summaryCashOpen = {
+            type: 'success',
+            description: attribute.Description,
+            collectingAgentUuid: labelCollectingAgent,
+            payments: this.listCastOpen,
+            title: this.$t(this.labelPanel)
+          }
           this.close()
         })
         .catch(error => {
           this.$store.commit(this.currentPanel.commit, true)
+          this.summaryCashOpen = {
+            type: 'error',
+            description: attribute.Description,
+            collectingAgentUuid: labelCollectingAgent,
+            payments: this.listCastOpen,
+            title: this.$t(this.labelPanel)
+          }
           this.$message({
             message: error.message,
             isShowClose: true,
@@ -1112,6 +1143,7 @@ export default {
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
         })
         .finally(() => {
+          this.showCashOpeningSummary = true
           this.$store.commit('setLoadingCashOpen', false)
         })
     },

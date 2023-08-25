@@ -1490,6 +1490,15 @@ export default {
             title: this.$t('notifications.completed'),
             type: 'success'
           }
+          this.$store.dispatch('printTicket', { posUuid, orderUuid })
+            .then(() => {})
+            .catch((error) => {
+              this.$message({
+                type: 'info',
+                message: error.message,
+                showClose: true
+              })
+            })
           this.showOpenSummary = true
         })
         .catch(error => {
@@ -1530,22 +1539,7 @@ export default {
         return
       }
       this.showOpenSummary = false
-      const posUuid = this.currentPointOfSales.uuid
-      const orderUuid = this.currentOrder.uuid
-      this.$store.dispatch('printTicket', { posUuid, orderUuid })
-        .then((responseCreate) => {
-          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-            .then(() => {
-              this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-            })
-        })
-        .catch((error) => {
-          this.$message({
-            type: 'info',
-            message: error.message,
-            showClose: true
-          })
-        })
+      this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
       this.$store.dispatch('listOrdersFromServer', {
         posUuid: this.currentPointOfSales.uuid
       })

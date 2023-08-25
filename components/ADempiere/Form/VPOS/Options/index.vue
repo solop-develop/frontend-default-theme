@@ -630,6 +630,186 @@
     >
       <table-time-control />
     </el-drawer>
+    <el-dialog
+      :visible.sync="showCashOpeningSummary"
+      :append-to-body="true"
+      :title="summaryCashOpen.title"
+    >
+      <el-result
+        v-if="!isEmptyValue(summaryCashOpen)"
+        :icon="summaryCashOpen.type"
+        :title="summaryCashOpen.title"
+      />
+      <div v-if="!isEmptyValue(summaryCashOpen)" style="border: 1px solid rgb(54, 163, 247);padding-left: 10px;padding-right: 10px;">
+        <p class="total">
+          <b>
+            {{ $t('form.pos.collect.collectionAgent') }}:
+          </b>
+          <!-- {{ summaryCashOpen }} -->
+          {{ summaryCashOpen.collectingAgentUuid.name }}
+        </p>
+        <p class="total">
+          <b>
+            {{ $t('field.container.description') }}:
+          </b>
+          {{ summaryCashOpen.description }}
+        </p>
+      </div>
+      <el-container style="border: 1px solid rgb(211, 232, 248);padding-left: 10px;padding-right: 10px;">
+        <el-main style="min-height: 150px;">
+          <el-row :gutter="24">
+            <template v-for="(payment) in summaryCashOpen.payments">
+              <el-col :key="payment.uuid" :span="12" style="padding-left: 5px; padding-right: 5px;">
+                <el-card :body-style="{ padding: '0px' }" style="max-height: 120px;">
+                  <el-row>
+                    <el-col :span="6" style="padding: 10px">
+                      <el-image style="width: 100px; height: 100px" :src="imageCard(payment)" fit="contain" />
+                    </el-col>
+                    <el-col :span="18" style="padding-right: 0px;padding-left: 40px;">
+                      <div style="padding-right: 10px; padding-top: 5%;">
+                        <div class="top clearfix">
+                          <span>
+                            {{
+                              payment.paymentMethod.name
+                            }}
+                          </span>
+                        </div>
+                        <div class="bottom clearfix" style="margin-top: 0px !important!">
+                          <el-button
+                            type="text"
+                            class="button"
+                            style="color: rgb(50, 54, 58); font-size: 13px; text-align: left; float: unset; padding-top: 5px;"
+                          >
+                            {{ payment.documentNo }}
+                          </el-button>
+                          <el-button
+                            v-if="!isEmptyValue(payment.paymentDate)"
+                            type="text"
+                            class="button"
+                            style="color: rgb(50, 54, 58); font-size: 13px; text-align: left; float: unset; padding-top: 5px;"
+                          >
+                            {{ formatDate(payment.paymentDate) }}
+                          </el-button>
+                          <div
+                            slot="header"
+                            class="clearfix"
+                            style="padding-bottom: 20px;"
+                          >
+                            <p class="total">
+                              <b style="float: right;">
+                                {{ formatPrice(payment.amount, payment.currency.iso_code) }}
+                              </b>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-card>
+              </el-col>
+            </template>
+          </el-row>
+        </el-main>
+      </el-container>
+      <span style="float: right;margin-top: 10px;">
+        <el-button
+          type="danger"
+          class="custom-button-create-bp"
+          icon="el-icon-close"
+          @click="showCashOpeningSummary = !showCashOpeningSummary"
+        />
+        <el-button
+          type="primary"
+          class="custom-button-create-bp"
+          icon="el-icon-check"
+          @click="showCashOpeningSummary = !showCashOpeningSummary"
+        />
+      </span>
+    </el-dialog>
+    <el-dialog
+      :visible.sync="showCashClose"
+      :append-to-body="true"
+      :title="summaryCashClose.title"
+    >
+      <el-result
+        v-if="!isEmptyValue(summaryCashClose)"
+        :icon="summaryCashClose.type"
+        :title="summaryCashClose.title"
+      />
+      <el-card class="box-card" style="padding-left: 0px; padding-right: 0px">
+        <el-table
+          :data="summaryCashClose.listCashSummary"
+          border
+          height="250"
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="payment_method_name"
+            :label="$t('form.pos.collect.paymentMethods')"
+          />
+          <el-table-column
+            prop="currency.iso_code"
+            :label="$t('form.pos.collect.Currency')"
+          />
+          <el-table-column
+            label="Monto"
+            align="right"
+          >
+            <template slot-scope="scope">
+              {{ formatPrice(scope.row.amount, scope.row.currency.iso_code) }}
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+      <span style="float: right;margin-top: 10px;">
+        <el-button
+          type="danger"
+          class="custom-button-create-bp"
+          icon="el-icon-close"
+          @click="showCashClose = !showCashClose"
+        />
+        <el-button
+          type="primary"
+          class="custom-button-create-bp"
+          icon="el-icon-check"
+          @click="showCashClose = !showCashClose"
+        />
+      </span>
+    </el-dialog>
+    <!-- showReverseOrder -->
+    <el-dialog
+      :visible.sync="showReverseOrder"
+      :append-to-body="true"
+      :title="summaryReverseOrder.title"
+    >
+      <el-result
+        v-if="!isEmptyValue(summaryReverseOrder)"
+        :icon="summaryReverseOrder.type"
+        :title="summaryReverseOrder.title"
+      />
+      <el-card class="box-card" style="padding-left: 0px; padding-right: 0px">
+        <p class="total">
+          <b>
+            {{ $t('form.pos.collect.orderTotal') }}:
+            {{ summaryReverseOrder.documentNo }}
+          </b>
+        </p>
+      </el-card>
+      <span style="float: right;margin-top: 10px;">
+        <el-button
+          type="danger"
+          class="custom-button-create-bp"
+          icon="el-icon-close"
+          @click="showReverseOrder = !showReverseOrder"
+        />
+        <el-button
+          type="primary"
+          class="custom-button-create-bp"
+          icon="el-icon-check"
+          @click="showReverseOrder = !showReverseOrder"
+        />
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -670,7 +850,7 @@ import {
   buildLinkHref
 } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
-
+import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
 export default {
   name: 'PointOfSalesOptions',
 
@@ -720,12 +900,46 @@ export default {
       messageReverseSales: '',
       showConfirmDelivery: false,
       isShowResource: false,
-      isLoadingPin: false
+      isLoadingPin: false,
+      showReverseOrder: false,
+      summaryReverseOrder: {}
       // isMnemonicCommand: false
     }
   },
 
   computed: {
+    showCashClose: {
+      get() {
+        return this.$store.getters.getShowSummaryCashClose
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryCashClose', value)
+      }
+    },
+    summaryCashClose: {
+      get() {
+        return this.$store.getters.getSummaryCashClose
+      },
+      set(value) {
+        this.$store.commit('setSummaryCashClose', value)
+      }
+    },
+    showCashOpeningSummary: {
+      get() {
+        return this.$store.getters.getShowSummaryCashOpen
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryCashOpen', value)
+      }
+    },
+    summaryCashOpen: {
+      get() {
+        return this.$store.getters.getSummaryCashOpen
+      },
+      set(value) {
+        this.$store.commit('setSummaryCashOpen', value)
+      }
+    },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
@@ -1076,6 +1290,35 @@ export default {
   },
 
   methods: {
+    formatDate,
+    formatPrice,
+    imageCard(typePayment) {
+      let image
+      switch (typePayment.tenderTypeCode) {
+        case 'D':
+          image = 'MobilePayment.jpg'
+          break
+        case 'P':
+          image = 'Mobile.jpg'
+          break
+        case 'X':
+          image = 'Cash.jpg'
+          break
+        case 'A':
+          image = 'ACH.jpg'
+          break
+        case 'M':
+          image = 'GiftCard.jpg'
+          break
+        case 'Z':
+          image = 'Zelle.jpg'
+          break
+        default:
+          image = 'Default.jpg'
+          break
+      }
+      return require('@/image/ADempiere/pos/typePayment/' + image)
+    },
     closeResource() {
       this.$store.commit('showListResources', false)
       if (this.isShowResource && this.isMobile) {
@@ -1539,6 +1782,13 @@ export default {
         description: this.messageReverseSales
       })
         .then(response => {
+          console.log({ response })
+          this.showReverseOrder = true
+          this.summaryReverseOrder = {
+            type: 'success',
+            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+            documentNo: response.documentNo
+          }
           const posUuid = this.currentPointOfSales.uuid
           const orderUuid = response.uuid
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
@@ -1551,6 +1801,12 @@ export default {
         })
         .catch(error => {
           console.error(error.message)
+          this.showReverseOrder = true
+          this.summaryReverseOrder = {
+            type: 'error',
+            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+            documentNo: this.currentOrder.documentNo
+          }
           this.$message({
             type: 'error',
             message: error.message,
