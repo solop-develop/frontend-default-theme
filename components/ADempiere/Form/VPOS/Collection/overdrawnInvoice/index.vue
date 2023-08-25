@@ -937,6 +937,11 @@ export default {
     }
   },
   watch: {
+    caseOrder(value) {
+      if (value === 2) {
+        this.option = 4
+      }
+    },
     searchRefundCurrency(value) {
       const clear = false
       this.clearAccountData(clear)
@@ -1635,13 +1640,44 @@ export default {
       })
     },
     addRefund() {
+      const grandTotal = this.currentOrder.grandTotal
+      const paymentAmount = this.currentOrder.paymentAmount
+      const chargeAmount = this.currentOrder.chargeAmount
+      const abono = this.currentOrder.creditAmount
+      const AmountTolerance = this.currentPointOfSales.writeOffAmountTolerance
+      const posUuid = this.currentPointOfSales.uuid
+      const orderUuid = this.currentOrder.uuid
+      const payments = this.currentOrder.listPayments.payments
+      let total = grandTotal + chargeAmount - abono - paymentAmount
+      if (total < 0) {
+        total = Math.abs(total)
+      }
+      if (
+        this.option === 4 &&
+        (this.caseOrder === 1 || this.caseOrder === 2) &&
+        total <= AmountTolerance
+      ) {
+        this.completePreparedOrder(posUuid, orderUuid, payments)
+      } else {
+        const attributePin = {
+          posUuid,
+          payments,
+          orderUuid,
+          type: 'actionPos',
+          typeRefund: this.option,
+          action: 'openBalanceInvoice',
+          value: this.currentOrder.openAmount,
+          requestedAccess: 'IsAllowsInvoiceOpen',
+          label: this.$t('form.pos.pinMessage.invoiceOpen')
+        }
+        this.visible = true
+        this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+        return
+      }
       const values = this.$store.getters.getValuesView({
         containerUuid: this.renderComponentContainer,
         format: 'object'
       })
-      const posUuid = this.currentPointOfSales.uuid
-      const orderUuid = this.currentOrder.uuid
-      const payments = this.currentOrder.listPayments.payments
       Object.keys(values).forEach(element => {
         this.$store.commit('updateValueOfField', {
           containerUuid: this.renderComponentContainer,
@@ -1649,26 +1685,26 @@ export default {
           value: undefined
         })
       })
-      if (this.option === 4) {
-        if (this.currentPointOfSales.currentOrder.openAmount > this.currentPointOfSales.writeOffAmountTolerance) {
-          const attributePin = {
-            posUuid,
-            orderUuid,
-            payments,
-            typeRefund: this.option,
-            action: 'openBalanceInvoice',
-            type: 'actionPos',
-            label: this.$t('form.pos.pinMessage.invoiceOpen'),
-            requestedAccess: 'IsAllowsInvoiceOpen'
-          }
-          this.visible = true
-          this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
-          return
-        }
-        this.completePreparedOrder(posUuid, orderUuid, payments)
-        // this.$store.commit('dialogoInvoce', { show: false, success: true })
-        return
-      }
+      // if (this.option === 4) {
+      //   if (this.currentPointOfSales.currentOrder.openAmount > this.currentPointOfSales.writeOffAmountTolerance) {
+      //     const attributePin = {
+      //       posUuid,
+      //       orderUuid,
+      //       payments,
+      //       typeRefund: this.option,
+      //       action: 'openBalanceInvoice',
+      //       type: 'actionPos',
+      //       label: this.$t('form.pos.pinMessage.invoiceOpen'),
+      //       requestedAccess: 'IsAllowsInvoiceOpen'
+      //     }
+      //     this.visible = true
+      //     this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
+      //     return
+      //   }
+      //   this.completePreparedOrder(posUuid, orderUuid, payments)
+      //   // this.$store.commit('dialogoInvoce', { show: false, success: true })
+      //   return
+      // }
       this.$store.dispatch('addRefundLoaded', values)
       if (this.caseOrder === 2) {
         this.success()
@@ -1865,6 +1901,10 @@ export default {
             message: this.$t('notifications.completed'),
             showClose: true
           })
+          this.$store.dispatch('printTicket', {
+            posUuid: this.currentPointOfSales.uuid,
+            orderUuid: this.currentOrder.uuid
+          })
           this.summaryProcessOrder = {
             labelModal: this.$t('notifications.succesful'),
             title: this.$t('notifications.completed'),
@@ -1905,24 +1945,8 @@ export default {
         return
       }
       this.showOpenSummary = false
-      this.$store.dispatch('printTicket', {
-        posUuid: this.currentPointOfSales.uuid,
-        orderUuid: this.currentOrder.uuid
-      })
-        .then(() => {
-          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-            .then(() => {
-              this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-            })
-        })
-        .catch((error) => {
-          this.$message({
-            type: 'info',
-            message: this.$t('pointOfSales.print.cloudNotConnectPirnter') + error.message,
-            showClose: true
-          })
-          this.$store.dispatch('reloadOrder', this.currentOrder.uuid)
-        })
+
+      this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
       if (this.IsAllowsPreviewDocument) {
         this.printPreview({
           posUuid: this.currentPointOfSales.uuid,
