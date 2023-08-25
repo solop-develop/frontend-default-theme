@@ -370,6 +370,22 @@ export default {
   },
 
   computed: {
+    showCashOpeningSummary: {
+      get() {
+        return this.$store.getters.getShowSummaryCashOpen
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryCashOpen', value)
+      }
+    },
+    summaryCashOpen: {
+      get() {
+        return this.$store.getters.getSummaryCashOpen
+      },
+      set(value) {
+        this.$store.commit('setSummaryCashOpen', value)
+      }
+    },
     isLoadingCashWithdrawal() {
       return this.$store.getters.getLoadingCashWithdrawal
     },
@@ -1080,7 +1096,7 @@ export default {
       })
       this.$store.commit(this.currentPanel.commit, false)
       this.$store.commit('setLoadingCashWithdrawal', true)
-
+      const labelCollectingAgent = this.listCollectAgent.find(agent => agent.uuid === this.collectAgentUuid)
       cashWithdrawal({
         posUuid: this.currentPointOfSales.uuid,
         collectingAgentUuid: this.collectAgentUuid,
@@ -1093,6 +1109,13 @@ export default {
             showClose: true,
             message: this.$t('form.pos.optionsPoinSales.cashManagement.cashwithdrawal')
           })
+          this.summaryCashOpen = {
+            type: 'success',
+            description: attribute.Description,
+            collectingAgentUuid: labelCollectingAgent,
+            payments: this.listCashWithdrawaln,
+            title: this.$t(this.labelPanel)
+          }
           this.close()
         })
         .catch(error => {
@@ -1102,9 +1125,17 @@ export default {
             isShowClose: true,
             type: 'error'
           })
+          this.summaryCashOpen = {
+            type: 'error',
+            description: attribute.Description,
+            collectingAgentUuid: labelCollectingAgent,
+            payments: this.listCashWithdrawaln,
+            title: this.$t(this.labelPanel)
+          }
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
         })
         .finally(() => {
+          this.showCashOpeningSummary = true
           this.$store.commit('setLoadingCashWithdrawal', false)
         })
     },

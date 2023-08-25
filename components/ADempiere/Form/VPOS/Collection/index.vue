@@ -1502,6 +1502,15 @@ export default {
             title: this.$t('notifications.completed'),
             type: 'success'
           }
+          this.$store.dispatch('printTicket', { posUuid, orderUuid })
+            .then(() => {})
+            .catch((error) => {
+              this.$message({
+                type: 'info',
+                message: error.message,
+                showClose: true
+              })
+            })
           this.showOpenSummary = true
         })
         .catch(error => {

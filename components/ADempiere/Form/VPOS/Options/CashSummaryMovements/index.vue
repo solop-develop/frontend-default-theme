@@ -119,6 +119,22 @@ export default {
     }
   },
   computed: {
+    showCashClose: {
+      get() {
+        return this.$store.getters.getShowSummaryCashClose
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryCashClose', value)
+      }
+    },
+    summaryCashClose: {
+      get() {
+        return this.$store.getters.getSummaryCashClose
+      },
+      set(value) {
+        this.$store.commit('setSummaryCashClose', value)
+      }
+    },
     showCashSummaryMovements() {
       return this.$store.getters.getShowCashSummaryMovements
     },
@@ -143,19 +159,31 @@ export default {
         uuid: this.listCashSummary.uuid
       })
         .then(response => {
+          this.showCashClose = true
           this.$message({
             message: response.document_type.name + ' Realizado ' + response.document_no,
             isShowClose: true,
             type: 'success'
           })
+          this.summaryCashClose = {
+            type: 'success',
+            listCashSummary: this.listCashSummary.records,
+            title: this.$t('form.pos.optionsPoinSales.cashManagement.closeBox')
+          }
         })
         .catch(error => {
+          this.showCashClose = true
           this.$store.commit('setShowCashSummaryMovements', true)
           this.$message({
             message: error.message,
             isShowClose: true,
             type: 'error'
           })
+          this.summaryCashClose = {
+            type: 'error',
+            listCashSummary: this.listCashSummary.records,
+            title: this.$t('form.pos.optionsPoinSales.cashManagement.closeBox')
+          }
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
         })
         .finally(() => {
