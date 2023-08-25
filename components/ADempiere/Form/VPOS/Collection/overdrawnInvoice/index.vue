@@ -1644,7 +1644,7 @@ export default {
       const paymentAmount = this.currentOrder.paymentAmount
       const chargeAmount = this.currentOrder.chargeAmount
       const abono = this.currentOrder.creditAmount
-      const MontoTolerancia = this.currentPointOfSales.writeOffAmountTolerance
+      const AmountTolerance = this.currentPointOfSales.writeOffAmountTolerance
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.currentOrder.uuid
       const payments = this.currentOrder.listPayments.payments
@@ -1652,37 +1652,10 @@ export default {
       if (total < 0) {
         total = Math.abs(total)
       }
-      // const rangoMin = total - MontoTolerancia
-      // const rangoMax = total + MontoTolerancia
-      // console.log({
-      //   grandTotal,
-      //   chargeAmount,
-      //   paymentAmount,
-      //   abono,
-      //   MontoTolerancia,
-      //   totalDeLaOrden,
-      //   rangoMin,
-      //   rangoMax,
-      //   option: this.option,
-      //   caseOrder: this.caseOrder
-      // })
-      // console.log('MontoTolerancia: ', MontoTolerancia, ' => ',  'rangoMin: ', rangoMin)
-      // console.log('MontoTolerancia: ', MontoTolerancia, ' <= ',  'rangoMax: ', rangoMax)
-      // console.log('MontoTolerancia: ', MontoTolerancia, ' => ',  'rangoMin: ', rangoMin)
-      // console.log('total: ', total, ' <= ',  'MontoTolerancia: ', MontoTolerancia)
-      // if (
-      //   this.option === 4 &&
-      //   (this.caseOrder === 1 || this.caseOrder === 2) &&
-      //   total <= MontoTolerancia
-      // ) {
-      //   console.log('pasa colado')
-      // } else {
-      //   console.log('pedir pin')
-      // }
       if (
         this.option === 4 &&
         (this.caseOrder === 1 || this.caseOrder === 2) &&
-        total <= MontoTolerancia
+        total <= AmountTolerance
       ) {
         this.completePreparedOrder(posUuid, orderUuid, payments)
       } else {

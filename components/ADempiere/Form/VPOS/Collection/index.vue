@@ -1542,22 +1542,7 @@ export default {
         return
       }
       this.showOpenSummary = false
-      const posUuid = this.currentPointOfSales.uuid
-      const orderUuid = this.currentOrder.uuid
       this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-        // .then((responseCreate) => {
-        //   this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-        //     .then(() => {
-        //       this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-        //     })
-        // })
-        // .catch((error) => {
-        //   this.$message({
-        //     type: 'info',
-        //     message: error.message,
-        //     showClose: true
-        //   })
-        // })
       this.$store.dispatch('listOrdersFromServer', {
         posUuid: this.currentPointOfSales.uuid
       })
