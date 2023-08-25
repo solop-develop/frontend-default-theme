@@ -366,7 +366,7 @@ import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 import {
   buildLinkHref
 } from '@/utils/ADempiere/resource.js'
-
+import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
 export default {
   name: 'Collection',
 
@@ -1064,6 +1064,7 @@ export default {
     changeFieldShowedFromUser,
     formatDateToSend,
     formatPrice2,
+    formatQuantity,
     showDayRate(rate) {
       const amount = rate.divideRate > rate.multiplyRate ? rate.divideRate : rate.multiplyRate
       const currency = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
@@ -1436,11 +1437,21 @@ export default {
       }
     },
     validateOrder(payment) {
-      // this.porcessInvoce = true
-      const allTotal = (this.currentOrder.chargeAmount + this.currentOrder.grandTotal) - this.currentOrder.creditAmount
-      if (this.currentOrder.paymentAmount > allTotal) {
+      const grandTotal = this.currentOrder.grandTotal
+      const paymentAmount = this.currentOrder.paymentAmount
+      const chargeAmount = this.currentOrder.chargeAmount
+      const abono = this.currentOrder.creditAmount
+      let total = grandTotal + chargeAmount - abono - paymentAmount
+      if (total < 0) {
+        total = Math.abs(total)
+      }
+      if (Number.parseFloat(total) <= 1) {
+        this.completePreparedOrder(payment)
+        return
+      }
+      if (this.currentOrder.refundAmount > 0) {
         this.$store.commit('dialogoInvoce', { show: true, type: 1 })
-      } else if (this.currentOrder.paymentAmount < this.currentOrder.grandTotal && Math.abs(this.currentOrder.openAmount) > this.currentPointOfSales.writeOffAmountTolerance) {
+      } else if (this.currentOrder.openAmount > 0 || this.currentOrder.refundAmount > 0) {
         if (this.isPosRequiredPin) {
           const attributePin = {
             payment: payment,
@@ -1485,6 +1496,7 @@ export default {
             message: this.$t('notifications.completed'),
             showClose: true
           })
+          this.$store.dispatch('printTicket', { posUuid, orderUuid })
           this.summaryProcessOrder = {
             labelModal: this.$t('notifications.succesful'),
             title: this.$t('notifications.completed'),
@@ -1532,20 +1544,20 @@ export default {
       this.showOpenSummary = false
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.currentOrder.uuid
-      this.$store.dispatch('printTicket', { posUuid, orderUuid })
-        .then((responseCreate) => {
-          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-            .then(() => {
-              this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
-            })
-        })
-        .catch((error) => {
-          this.$message({
-            type: 'info',
-            message: error.message,
-            showClose: true
-          })
-        })
+      this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
+        // .then((responseCreate) => {
+        //   this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
+        //     .then(() => {
+        //       this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })
+        //     })
+        // })
+        // .catch((error) => {
+        //   this.$message({
+        //     type: 'info',
+        //     message: error.message,
+        //     showClose: true
+        //   })
+        // })
       this.$store.dispatch('listOrdersFromServer', {
         posUuid: this.currentPointOfSales.uuid
       })
