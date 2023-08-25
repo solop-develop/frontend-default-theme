@@ -111,27 +111,27 @@ export default [
       handleActionKeyPerformed: true,
       handleContentSelection: true,
       handleActionPerformed: true,
-      displayLogicPayment: 'K,Z,P,D,K,T,A',
+      displayLogicPayment: 'K,Z,P,D,K,T,M,A',
       size: 24,
       isActiveLogics: true,
       isMandatory: true
     }
   },
   // DocumentNo
-  {
-    elementColumnName: 'DocumentNo',
-    isFromDictionary: true,
-    overwriteDefinition: {
-      sequence: 10,
-      handleActionKeyPerformed: true,
-      handleContentSelection: true,
-      handleActionPerformed: true,
-      displayLogicPayment: 'M',
-      size: 24,
-      isActiveLogics: true,
-      isMandatory: true
-    }
-  },
+  // {
+  //   elementColumnName: 'DocumentNo',
+  //   isFromDictionary: true,
+  //   overwriteDefinition: {
+  //     sequence: 10,
+  //     handleActionKeyPerformed: true,
+  //     handleContentSelection: true,
+  //     handleActionPerformed: true,
+  //     displayLogicPayment: 'M',
+  //     size: 24,
+  //     isActiveLogics: true,
+  //     isMandatory: true
+  //   }
+  // },
   // WH_Type_ID
   {
     elementColumnName: 'WH_Type_ID',
