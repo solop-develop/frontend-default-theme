@@ -1496,7 +1496,6 @@ export default {
             message: this.$t('notifications.completed'),
             showClose: true
           })
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
           this.summaryProcessOrder = {
             labelModal: this.$t('notifications.succesful'),
             title: this.$t('notifications.completed'),
