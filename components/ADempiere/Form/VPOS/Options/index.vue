@@ -434,6 +434,49 @@
               </el-popover>
             </el-card>
           </el-col>
+          <!-- applyDiscountToAllLines -->
+          <el-col v-if="isAllowsApplyDiscount" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover">
+              <el-popover
+                v-model="showDiscountAllLines"
+                width="350"
+                :title="$t('form.pos.applyDiscountToAllLines')"
+                placement="top"
+              >
+                <div style="padding: 20px;">
+                  <apply-discount-to-all-lines
+                    ref="applyDiscountToAllLines"
+                    v-shortkey="showDiscountAllLines ? {close: ['esc'], enter: ['enter']} : {}"
+                    @shortkey.native="theActionDiscountAllLines"
+                  />
+                </div>
+                <div style="text-align: right; margin: 0">
+                  <el-button
+                    type="danger"
+                    class="custom-button-create-bp"
+                    icon="el-icon-close"
+                    @click="showDiscountAllLines = false"
+                  />
+                  <el-button
+                    type="primary"
+                    class="custom-button-create-bp"
+                    icon="el-icon-check"
+                    @click="applyDiscountToAllLines(discountRateAllLines)"
+                  />
+                </div>
+                <el-button
+                  slot="reference"
+                  type="text"
+                  :disabled="isOptionPopoverDiscuent"
+                  :class="classOptionPopoverDiscuent"
+                >
+                  <i class="el-icon-document-remove" />
+                  <br>
+                  {{ $t('form.pos.applyDiscountToAllLines') }}
+                </el-button>
+              </el-popover>
+            </el-card>
+          </el-col>
         </el-row>
       </el-collapse-item>
 
@@ -644,6 +687,7 @@ import CashWithdrawal from './Cashwithdrawal'
 import DiscountOrder from './DiscountOrder'
 import AssignSeller from './AssignSeller'
 import SalesDiscountOff from './SalesDiscountOff'
+import applyDiscountToAllLines from './applyDiscountToAllLines'
 import MnemonicCommand from './MnemonicCommand'
 import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
@@ -683,6 +727,7 @@ export default {
     GeneralOptions,
     ModalDialog,
     SalesDiscountOff,
+    applyDiscountToAllLines,
     DiscountOrder,
     OrdersList,
     TableTimeControl,
@@ -711,6 +756,7 @@ export default {
       validatePin: true,
       visible: false,
       showCount: false,
+      showDiscountAllLines: false,
       showSalesDiscount: false,
       visibleReverse: false,
       isLoadingReverse: false,
@@ -968,6 +1014,12 @@ export default {
         columnName: 'Discount'
       })
     },
+    discountRateAllLines() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: 'Sales-Discount-All-Lines',
+        columnName: 'Discount'
+      })
+    },
     currentPointOfSales() {
       return this.$store.getters.posAttributes.currentPointOfSales
     },
@@ -1063,6 +1115,13 @@ export default {
       if (value && !isEmptyValue(this.$refs)) {
         setTimeout(() => {
           this.focusDiscount(value, 'applyDiscountOnOrder')
+        }, 300)
+      }
+    },
+    showDiscountAllLines(value) {
+      if (value && !isEmptyValue(this.$refs)) {
+        setTimeout(() => {
+          this.focusDiscount(value, 'applyDiscountToAllLines')
         }, 300)
       }
     },
@@ -1175,6 +1234,23 @@ export default {
             this.showCount = false
             this.$store.commit('updateValueOfField', {
               containerUuid: 'Discount-Order',
+              columnName: 'Discount',
+              value: ''
+            })
+            break
+        }
+      }
+    },
+    theActionDiscountAllLines(event) {
+      if (this.showDiscountAllLines) {
+        switch (event.srcKey) {
+          case 'enter':
+            if (this.discountRateAllLines > 1) this.applyDiscountToAllLines(this.discountRateAllLines)
+            break
+          case 'close':
+            this.showDiscountAllLines = false
+            this.$store.commit('updateValueOfField', {
+              containerUuid: 'Sales-Discount-All-Lines',
               columnName: 'Discount',
               value: ''
             })
@@ -1704,6 +1780,40 @@ export default {
         value: ''
       })
       this.showSalesDiscount = false
+    },
+    applyDiscountToAllLines(discountRateAllLines, isValidatePin = false) {
+      if (discountRateAllLines > this.currentPointOfSales.maximumDiscountAllowed && !isValidatePin || !this.isAllowsApplyDiscount) {
+        this.validateOption(this.$t('form.pos.applyDiscountOnOrder'), 'applyDiscount', discountRateAllLines)
+        return
+      }
+      this.$store.dispatch('updateOrder', {
+        orderUuid: this.currentOrder.uuid,
+        posUuid: this.currentPointOfSales.uuid,
+        discountAllLine: discountRateAllLines
+      })
+        .then(response => {
+          setTimeout(() => {
+            this.$message({
+              type: 'success',
+              showClose: true,
+              message: 'ok'
+            })
+          }, 2000)
+        })
+        .catch(error => {
+          console.warn(error)
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
+      this.$store.commit('updateValueOfField', {
+        containerUuid: 'Sales-Discount-All-Lines',
+        columnName: 'Discount',
+        value: ''
+      })
+      this.showDiscountAllLines = false
     },
     seeOrderList() {
       if (this.ordersList.recordCount <= 0) {
