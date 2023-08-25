@@ -1645,7 +1645,6 @@ export default {
       const chargeAmount = this.currentOrder.chargeAmount
       const abono = this.currentOrder.creditAmount
       const MontoTolerancia = this.currentPointOfSales.writeOffAmountTolerance
-      const totalDeLaOrden = grandTotal + chargeAmount - abono
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.currentOrder.uuid
       const payments = this.currentOrder.listPayments.payments
