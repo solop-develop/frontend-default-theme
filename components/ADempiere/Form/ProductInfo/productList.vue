@@ -131,7 +131,6 @@
             v-for="stock in listStockProduct"
             :key="stock.id"
           >
-          
             <p>
               <b style="float: left">{{ stock.label }}</b>
               <span style="float: right">
@@ -363,7 +362,7 @@ export default {
     show(row) {
       this.isDetail = true
       this.currentLine = row
-      const alo = this.setStocks(row)
+      this.setStocks(row)
     },
     displayValue(row, column) {
       let value
@@ -390,13 +389,12 @@ export default {
       return value
     },
     setStocks(row) {
-      let listStock = []
+      const listStock = []
       const {
         value,
         sku
       } = row.product
       listStocks({
-        posUuid,
         value,
         sku
       })
