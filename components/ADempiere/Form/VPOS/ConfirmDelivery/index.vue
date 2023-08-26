@@ -607,6 +607,13 @@ export default {
             showClose: true
           })
           this.previwerShipment(response)
+          this.$store.commit('setSummaryConfirmDelivery', {
+            type: 'success',
+            businessPartner: this.currentOrder.businessPartner.name,
+            documentNo: this.currentOrder.documentNo,
+            getItemQuantity: this.getItemQuantity,
+            numberOfLines: this.numberOfLines
+          })
           return response
         })
         .catch(error => {
@@ -616,11 +623,19 @@ export default {
             duration: 1500,
             showClose: true
           })
+          this.$store.commit('setSummaryConfirmDelivery', {
+            type: 'error',
+            businessPartner: this.currentOrder.businessPartner.name,
+            documentNo: this.currentOrder.documentNo,
+            getItemQuantity: this.getItemQuantity,
+            numberOfLines: this.numberOfLines
+          })
         })
         .finally(() => {
           this.dialogVisible = false
           this.isLoadedProcessShipment = true
           this.isLoadedConfirm = false
+          this.$store.commit('setShowConfirmDelivery', true)
           this.$store.commit('setShowPOSOptions', false)
           this.$store.commit('setConfirmDelivery', false)
         })

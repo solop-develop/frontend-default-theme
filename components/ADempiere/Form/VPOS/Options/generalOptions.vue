@@ -134,13 +134,13 @@
           <p style="text-align: center;font-size: 14px;color: black;">
             <svg-icon icon-class="product-search" style="font-size: 17px;" />
             <br>
-            {{ $t('form.pos.optionsPoinSales.generalOptions.productSearch') }}
+            {{ $t('form.pos.optionsPoinSales.generalOptions.productQuery') }}
           </p>
         </div>
       </el-card>
     </el-col>
     <el-dialog
-      :title="$t('form.pos.optionsPoinSales.generalOptions.productSearch')"
+      :title="$t('form.pos.optionsPoinSales.generalOptions.productQuery')"
       :visible.sync="showProductSearch"
       :center="true"
       :modal="false"

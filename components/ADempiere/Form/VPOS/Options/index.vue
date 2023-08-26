@@ -853,6 +853,65 @@
         />
       </span>
     </el-dialog>
+    <el-dialog
+      :title="$t('form.pos.optionsPoinSales.salesOrder.confirmDelivery')"
+      :visible.sync="showDialogoDelivery"
+      :center="true"
+      :modal="false"
+      :append-to-body="true"
+    >
+      <span v-if="!isEmptyValue(summaryConfirmDelivery)">
+        <el-result
+          v-if="!isEmptyValue(summaryConfirmDelivery)"
+          :icon="summaryConfirmDelivery.type"
+          :title="$t('form.pos.optionsPoinSales.salesOrder.confirmDelivery')"
+        />
+        <p class="total">
+          {{ $t('form.pos.order.BusinessPartnerCreate.businessPartner') }}:
+          <b class="order-info">
+            {{ summaryConfirmDelivery.businessPartner }}
+          </b>
+        </p>
+        <p class="total">
+          {{ $t('form.pos.order.order') }}:
+          <b class="order-info">
+            {{ summaryConfirmDelivery.documentNo }}
+          </b>
+        </p>
+        <p class="total">
+          {{ $t('form.pos.order.itemQuantity') }}:
+          <b v-if="!isEmptyValue(summaryConfirmDelivery)" class="order-info">
+            {{ summaryConfirmDelivery.getItemQuantity }}
+          </b>
+        </p>
+        <p class="total">
+          {{ $t('form.pos.order.numberLines') }}:
+          <b v-if="!isEmptyValue(summaryConfirmDelivery)" class="order-info">
+            {{ summaryConfirmDelivery.numberOfLines }}
+          </b>
+        </p>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-row :gutter="24">
+          <el-col :span="24">
+            <samp style="float: right; padding-right: 10px;">
+              <el-button
+                type="danger"
+                class="custom-button-create-bp"
+                icon="el-icon-close"
+                @click="showDialogoDelivery = !showDialogoDelivery"
+              />
+              <el-button
+                type="primary"
+                class="custom-button-create-bp"
+                icon="el-icon-check"
+                @click="showDialogoDelivery = !showDialogoDelivery"
+              />
+            </samp>
+          </el-col>
+        </el-row>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -952,6 +1011,22 @@ export default {
   },
 
   computed: {
+    showDialogoDelivery: {
+      get() {
+        return this.$store.getters.getShowConfirmDelivery
+      },
+      set(value) {
+        this.$store.commit('setShowConfirmDelivery', value)
+      }
+    },
+    summaryConfirmDelivery: {
+      get() {
+        return this.$store.getters.getSummaryConfirmDelivery
+      },
+      set(value) {
+        this.$store.commit('setSummaryConfirmDelivery', value)
+      }
+    },
     showReverseOrder: {
       get() {
         return this.$store.getters.getShowSummaryReverseOrder
