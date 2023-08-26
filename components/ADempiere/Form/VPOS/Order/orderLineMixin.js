@@ -398,7 +398,7 @@ export default {
         }
         return row.product.value + ' - ' + row.product.name
       }
-      const currency = this.$store.getters.posAttributes.currentPointOfSales.priceList.currency.iSOCode
+      const currency = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.priceList.currency.iso_code
       if (columnName === 'CurrentPrice') {
         let price = row.price
         if (!this.currentPointOfSales.isDisplayTaxAmount && !this.currentPointOfSales.isDisplayDiscount) {
@@ -444,7 +444,7 @@ export default {
         if (this.currentPointOfSales.currentPriceList.isTaxIncluded) {
           return this.formatPrice(row.price / this.totalAmountConverted, this.currentPointOfSales.displayCurrency.iso_code)
         }
-        return this.formatPrice(row.totalAmountWithTax / this.totalAmountConverted, this.currentPointOfSales.displayCurrency.iso_code)
+        return this.formatPrice(row.totalAmountWithTax / this.totalAmountConverted, this.currentPointOfSales.displayCurrency.iso_code) + 'alo'
       } else if (columnName === 'DiscountTotal') {
         return this.formatPrice(row.totalDiscountAmount, currency)
       } else if (columnName === 'DisplayTaxAmount') {

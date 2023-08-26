@@ -57,120 +57,16 @@
       @current-change="handleCurrentChange"
     >
       <el-table-column
-        prop="product.value"
-        :label="$t('form.productInfo.code')"
-      />
-      <el-table-column
-        :label="$t('form.productInfo.product')"
+        v-for="(header, key) in listHeader"
+        :key="key"
+        :label="header.label"
       >
         <template slot-scope="scope">
-          <el-popover trigger="click" placement="right" width="450">
-            <b><i> {{ scope.row.product.name }} </i> </b>
-            <el-divider />
-            <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ scope.row.product.value }}</span></p><br>
-            <p><b style="float: left">{{ $t('form.productInfo.upc') }}</b><span style="float: right"> {{ scope.row.product.upc }} </span></p><br>
-            <p>
-              <b style="float: left">{{ $t('form.productInfo.quantityOnHand') }}</b>
-              <span style="float: right">
-                {{ formatQuantity({ value: scope.row.quantityOnHand }) }}
-              </span>
-            </p><br>
-            <p>
-              <b style="float: left">{{ $t('form.productInfo.price') }}</b>
-              <span style="float: right">
-                {{ formatPrice({ value: scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
-              </span>
-            </p><br>
-            <p>
-              <b style="float: left">{{ $t('form.productInfo.taxAmount') }}</b>
-              <span style="float: right">
-                {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), currency: scope.row.currency.iSOCode }) }}
-              </span>
-            </p><br>
-            <p>
-              <b style="float: left">{{ $t('form.productInfo.grandTotal') }}</b>
-              <span style="float: right"><b>
-                {{ formatPrice(getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate) + scope.row.priceStandard, scope.row.currency.iSOCode) }}
-              </b></span>
-            </p><br>
-            <p>
-              <b style="float: left">
-                {{ $t('form.productInfo.grandTotalConverted') }} ({{ scope.row.schemaCurrency.iSOCode }})
-              </b>
-              <span style="float: right"><b>
-                {{ formatPrice({ value: getTaxAmount(scope.row.schemaPriceStandard, scope.row.taxRate.rate) + scope.row.schemaPriceStandard, currency: scope.row.schemaCurrency.iSOCode }) }}
-              </b></span>
-            </p>
-            <div slot="reference" class="name-wrapper">
-              {{ scope.row.product.name }}
-            </div>
-          </el-popover>
+          <div slot="reference" class="name-wrapper" @click="show(scope.row)">
+            {{ displayValue(scope.row, header.column) }}
+          </div>
         </template>
       </el-table-column>
-      <el-table-column
-        :label="$t('form.productInfo.quantityOnHand')"
-        align="right"
-        width="100"
-      >
-        <template slot-scope="scope">
-          {{ formatQuantity({ value: scope.row.quantityOnHand }) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('form.productInfo.quantityAvailable')"
-        align="right"
-      >
-        <template slot-scope="scope">
-          {{ formatQuantity({ value: scope.row.quantityAvailable }) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('form.productInfo.price')"
-        align="right"
-      >
-        <template slot-scope="scope">
-          {{ formatPrice({ value: scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('form.productInfo.taxAmount')"
-        align="right"
-      >
-        <template slot-scope="scope">
-          {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), currency: scope.row.currency.iSOCode }) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('form.productInfo.grandTotal')"
-        align="right"
-      >
-        <template slot-scope="scope">
-          {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate) + scope.row.priceStandard, currency: scope.row.currency.iSOCode }) }}
-        </template>
-      </el-table-column>
-      <!-- <el-table-column
-        label=""
-        width="100"
-      >
-        <template slot-scope="scope">
-          <el-dropdown trigger="click">
-            <span class="el-dropdown-link">
-              {{ $t('form.pos.tableProduct.options') }}
-              <i class="el-icon-arrow-down el-icon--right" />
-            </span>
-            {{ scope.row.product.name }}
-            <el-dropdown-menu slot="dropdown" style="padding-bottom: 0px;">
-              <span v-show="!isEmptyValue(process)">
-                <el-dropdown-item v-for="(report, key) in process" :key="key" icon="el-icon-document">
-                  <span @click="associatedprocesses(scope.row.product.id, report)">
-                    {{ report.name }}
-                  </span>
-                </el-dropdown-item>
-              </span>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </template>
-      </el-table-column> -->
     </el-table>
     <custom-pagination
       :total="productPrice.recordCount"
@@ -178,6 +74,75 @@
       :handle-change-page="handleChangePage"
       :records-page="listWithPrice.length"
     />
+    <el-dialog
+      :visible.sync="isDetail"
+    >
+      <span v-if="!isEmptyValue(currentLine)">
+        <b>
+          <i> {{ currentLine.product.name }} </i>
+        </b>
+        <el-divider />
+        <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ currentLine.product.value }}</span></p><br>
+        <p><b style="float: left">{{ $t('form.productInfo.upc') }}</b><span style="float: right"> {{ currentLine.product.upc }} </span></p><br>
+        <p>
+          <b style="float: left">{{ $t('form.productInfo.quantityOnHand') }}</b>
+          <span style="float: right">
+            {{ formatQuantity({ value: currentLine.quantityOnHand }) }}
+          </span>
+        </p><br>
+        <p>
+          <b style="float: left">{{ $t('form.productInfo.price') }}</b>
+          <span style="float: right">
+            {{ formatPrice({ value: currentLine.priceStandard, currency: currentLine.currency.iSOCode }) }}
+          </span>
+        </p><br>
+        <p>
+          <b style="float: left">{{ $t('form.productInfo.taxAmount') }}</b>
+          <span style="float: right">
+            {{ formatPrice({ value: getTaxAmount(currentLine.priceStandard, currentLine.taxRate.rate), currency: currentLine.currency.iSOCode }) }}
+          </span>
+        </p><br>
+        <p>
+          <b style="float: left">{{ $t('form.productInfo.grandTotal') }}</b>
+          <span style="float: right">
+            {{ formatPrice(getTaxAmount(currentLine.priceStandard, currentLine.taxRate.rate) + currentLine.priceStandard, currentLine.currency.iSOCode) }}
+          </span>
+        </p><br>
+        <p>
+          <b style="float: left">
+            {{ $t('form.productInfo.grandTotalConverted') }} ({{ currentLine.schemaCurrency.iSOCode }})
+          </b>
+          <span style="float: right">
+            {{ formatPrice({ value: getTaxAmount(currentLine.schemaPriceStandard, currentLine.taxRate.rate) + currentLine.schemaPriceStandard, currency: currentLine.schemaCurrency.iSOCode }) }}
+          </span>
+        </p>
+        <br>
+        <br>
+        <br>
+        <el-divider>
+          <b>
+            <i>
+              {{ $t('form.productInfo.warehouseAvailability') }}
+            </i>
+          </b>
+        </el-divider>
+        <el-scrollbar wrap-class="scroll-warehouses">
+          <span
+            v-for="stock in listStockProduct"
+            :key="stock.id"
+          >
+          
+            <p>
+              <b style="float: left">{{ stock.label }}</b>
+              <span style="float: right">
+                {{ formatQuantity({ value: stock.sumaryQty }) }}
+              </span>
+            </p>
+            <br>
+          </span>
+        </el-scrollbar>
+      </span>
+    </el-dialog>
   </el-main>
 </template>
 
@@ -203,6 +168,10 @@ import {
   isReadOnlyField,
   changeFieldShowedFromUser
 } from '@theme/components/ADempiere/Form/VPOS/containerManagerPos.js'
+
+import {
+  listStocks
+} from '@/api/ADempiere/form/point-of-sales.js'
 
 export default {
   name: 'ProductList',
@@ -256,10 +225,45 @@ export default {
       fieldsList: fieldsListProductPrice,
       isCustomForm: true,
       timeOut: null,
-      indexTable: 0
+      indexTable: 0,
+      currentLine: {},
+      listStockProduct: [],
+      isDetail: false
     }
   },
   computed: {
+    listHeader() {
+      return [
+        {
+          label: this.$t('form.productInfo.code'),
+          column: 'value'
+        },
+        {
+          label: this.$t('form.productInfo.product'),
+          column: 'name'
+        },
+        {
+          label: this.$t('form.productInfo.quantityOnHand'),
+          column: 'quantityOnHand'
+        },
+        {
+          label: this.$t('form.productInfo.quantityAvailable'),
+          column: 'quantityAvailable'
+        },
+        {
+          label: this.$t('form.productInfo.price'),
+          column: 'priceStandard'
+        },
+        {
+          label: this.$t('form.productInfo.taxAmount'),
+          column: 'taxAmount'
+        },
+        {
+          label: this.$t('form.productInfo.grandTotal'),
+          column: 'grandTotal'
+        }
+      ]
+    },
     defaultImage() {
       return require('@/image/ADempiere/pos/no-image.jpg')
     },
@@ -356,6 +360,98 @@ export default {
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
+    show(row) {
+      this.isDetail = true
+      this.currentLine = row
+      const alo = this.setStocks(row)
+    },
+    displayValue(row, column) {
+      let value
+      switch (column) {
+        case 'quantityOnHand':
+          value = formatQuantity({ value: row.quantityOnHand })
+          break
+        case 'quantityAvailable':
+          value = formatQuantity({ value: row.quantityAvailable })
+          break
+        case 'priceStandard':
+          value = formatPrice({ value: row.priceStandard, currency: row.currency.iSOCode })
+          break
+        case 'taxAmount':
+          value = formatPrice({ value: this.getTaxAmount(row.priceStandard, row.taxRate.rate), currency: row.currency.iSOCode })
+          break
+        case 'grandTotal':
+          value = formatPrice({ value: ((row.priceStandard * row.taxRate.rate / 100) + row.priceStandard), currency: row.currency.iSOCode })
+          break
+        default:
+          value = row.product[column]
+          break
+      }
+      return value
+    },
+    setStocks(row) {
+      let listStock = []
+      const {
+        value,
+        sku
+      } = row.product
+      listStocks({
+        posUuid,
+        value,
+        sku
+      })
+        .then(response => {
+          // this.listStockProduct = response.stocks.map(stock => {
+          //   return {
+          //     label: stock.warehouse_name,
+          //     id: stock.warehouse_id,
+          //     uuid: stock.warehouse_uuid,
+          //     attributeName: stock.attribute_name,
+          //     qty: stock.qty,
+          //     sumaryQty: []
+          //   }
+          // })
+          const list = response.stocks.map(stock => {
+            return {
+              label: stock.warehouse_name,
+              id: stock.warehouse_id,
+              uuid: stock.warehouse_uuid,
+              attributeName: stock.attribute_name,
+              qty: stock.qty,
+              sumaryQty: []
+            }
+          })
+          const options = []
+
+          list.forEach(element => {
+            if (this.isEmptyValue(options)) {
+              options.push({
+                ...element
+              })
+            }
+            const currentStock = options.find(stock => stock.id === element.id)
+            const index = options.findIndex(stock => stock.id === element.id)
+            if (!this.isEmptyValue(currentStock) && !this.isEmptyValue(options)) {
+              options[index].qty = currentStock.qty + element.qty
+              options[index].sumaryQty.push(element.qty)
+            }
+            if (this.isEmptyValue(currentStock)) {
+              options.push({
+                ...element,
+                sumaryQty: [element.qty]
+              })
+            }
+          })
+          this.listStockProduct = options.map(list => {
+            const sumaryQty = list.sumaryQty.reduce((a, b) => a + b, 0)
+            return {
+              ...list,
+              sumaryQty: sumaryQty
+            }
+          })
+        })
+      return listStock
+    },
     getImageFromSource(keyValue) {
       if (isEmptyValue(keyValue)) {
         return this.defaultImage
@@ -408,14 +504,22 @@ export default {
       }
     },
     loadProductsPricesList() {
-      this.$store.dispatch('listProductPriceFromServerProductInfo', {})
+      this.$store.dispatch('listProductPriceFromServer', {
+        currentPOS: {
+          uuid: '792a2889-cb3d-4ac1-aa89-fb67abd61bad'
+        }
+      })
     },
     /**
      * @param {number} newPage
      */
     handleChangePage(newPage) {
       this.$store.dispatch('setProductPicePageNumber', newPage)
-      this.$store.dispatch('listProductPriceFromServerProductInfo', {})
+      this.$store.dispatch('listProductPriceFromServer', {
+        currentPOS: {
+          uuid: '792a2889-cb3d-4ac1-aa89-fb67abd61bad'
+        }
+      })
     },
     findlistProductWithRow(row) {
       if (!this.isSelectable) {
@@ -502,5 +606,8 @@ export default {
   max-height: 80%;
   min-height: 80%;
   overflow: auto
+}
+.scroll-warehouses {
+  max-height: 25vh;
 }
 </style>
