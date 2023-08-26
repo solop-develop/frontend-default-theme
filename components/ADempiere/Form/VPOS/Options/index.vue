@@ -1327,11 +1327,6 @@ export default {
   },
 
   watch: {
-    // whatShowResource(value) {
-    //   if (!value) {
-    //     this.isShowResource = value
-    //   }
-    // },
     visible(value) {
       if (value && !isEmptyValue(this.$refs)) {
         setTimeout(() => {

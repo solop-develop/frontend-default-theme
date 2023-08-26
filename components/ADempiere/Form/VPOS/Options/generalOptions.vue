@@ -122,20 +122,51 @@
         </el-dropdown>
       </el-card>
     </el-col>
+
+    <!-- Generate Invoice from Shipment -->
+    <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+      <el-card shadow="hover" style="height: 100px">
+        <div
+          plain
+          type="text"
+          @click="show"
+        >
+          <p style="text-align: center;font-size: 14px;color: black;">
+            <svg-icon icon-class="product-search" style="font-size: 17px;" />
+            <br>
+            {{ $t('form.pos.optionsPoinSales.generalOptions.productSearch') }}
+          </p>
+        </div>
+      </el-card>
+    </el-col>
+    <el-dialog
+      :title="$t('form.pos.optionsPoinSales.generalOptions.productSearch')"
+      :visible.sync="showProductSearch"
+      :center="true"
+      :modal="false"
+      width="85%"
+    >
+      <list-product-search
+        :height="'55vh'"
+      />
+    </el-dialog>
   </el-row>
 </template>
 
 <script>
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ref } from '@vue/composition-api'
 
 // components and mixins
 import ListProductPrice from '@theme/components/ADempiere/Form/VPOS/ProductInfo/productList'
+import ListProductSearch from '@theme/components/ADempiere/Form/ProductInfo/productList'
+// /opt/Deveploment/frontend-core/src/themes/default/components/ADempiere/Form/ProductInfo/productList.vue
 
 export default defineComponent({
   name: 'GeneralOptions',
 
   components: {
-    ListProductPrice
+    ListProductPrice,
+    ListProductSearch
   },
 
   props: {
@@ -146,6 +177,8 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
+    const showProductSearch = ref(false)
+
     const currentPointOfSales = computed(() => {
       return root.$store.getters.posAttributes.currentPointOfSales
     })
@@ -293,7 +326,13 @@ export default defineComponent({
       })
     }
 
+    function show() {
+      showProductSearch.value = !showProductSearch.value
+    }
+
     return {
+      // Ref
+      showProductSearch,
       // computeds
       adviserPin,
       blockOption,
@@ -303,6 +342,7 @@ export default defineComponent({
       size,
       warehousesListPointOfSales,
       // methods
+      show,
       changePos,
       changePriceList,
       changeWarehouse

@@ -18,12 +18,13 @@
 <template>
   <el-main
     v-shortkey="shortsKey"
-    style="height: 90vh;"
+    :style="{height: height}"
   >
     <el-form
       v-shortkey="shortsKey"
       label-position="top"
       label-width="10px"
+      style="margin-bottom: 0px;margin-left: 0px;"
       @shortkey.native="keyAction"
       @submit.native.prevent="notSubmitForm"
     >
@@ -43,6 +44,7 @@
           isReadOnlyField,
           changeFieldShowedFromUser
         }"
+        style="margin-bottom: 0px;margin-left: 0px;"
       />
     </el-form>
     <el-table
@@ -51,6 +53,7 @@
       :data="listWithPrice"
       border
       fit
+      height="50"
       class="table-product-info"
       highlight-current-row
       @row-click="findlistProductWithRow"
@@ -76,12 +79,15 @@
     />
     <el-dialog
       :visible.sync="isDetail"
+      :center="true"
+      :modal="false"
+      :title="isEmptyValue(currentLine) ? '' : currentLine.product.name"
     >
       <span v-if="!isEmptyValue(currentLine)">
-        <b>
+        <!-- <b style="text-align: center;">
           <i> {{ currentLine.product.name }} </i>
-        </b>
-        <el-divider />
+        </b> -->
+        <!-- <el-divider /> -->
         <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ currentLine.product.value }}</span></p><br>
         <p><b style="float: left">{{ $t('form.productInfo.upc') }}</b><span style="float: right"> {{ currentLine.product.upc }} </span></p><br>
         <p>
@@ -107,7 +113,7 @@
           <span style="float: right">
             {{ formatPrice(getTaxAmount(currentLine.priceStandard, currentLine.taxRate.rate) + currentLine.priceStandard, currentLine.currency.iSOCode) }}
           </span>
-        </p><br>
+        </p>
         <p>
           <b style="float: left">
             {{ $t('form.productInfo.grandTotalConverted') }} ({{ currentLine.schemaCurrency.iSOCode }})
@@ -116,8 +122,6 @@
             {{ formatPrice({ value: getTaxAmount(currentLine.schemaPriceStandard, currentLine.taxRate.rate) + currentLine.schemaPriceStandard, currency: currentLine.schemaCurrency.iSOCode }) }}
           </span>
         </p>
-        <br>
-        <br>
         <br>
         <el-divider>
           <b>
@@ -192,6 +196,10 @@ export default {
           containerUuid: 'Products-Price-List-ProductInfo'
         }
       }
+    },
+    height: {
+      type: String,
+      default: '90vh'
     },
     isSelectable: {
       type: Boolean,
@@ -300,25 +308,17 @@ export default {
       }
       return 0
     },
-    // process() {
-    //   if (!isEmptyValue(this.reportAsociated)) {
-    //     const process = this.reportAsociated.map(element => {
-    //       const findProcess = this.$store.getters.getProcess(element.uuid)
-    //       if (!isEmptyValue(findProcess)) {
-    //         return {
-    //           ...element,
-    //           name: findProcess.name,
-    //           id: findProcess.id
-    //         }
-    //       }
-    //       return []
-    //     })
-    //     return process
-    //   }
-    //   return []
-    // },
+    currentPointOfSales() {
+      return this.$store.getters.posAttributes.currentPointOfSales
+    },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
+    },
+    searchProduct() {
+      return this.$store.getters.getValueOfField({
+        containerUuid: 'Products-Price-List-ProductInfo',
+        columnName: 'ProductValue'
+      })
     }
   },
   watch: {
@@ -335,6 +335,10 @@ export default {
         this.loadProductsPricesList()
       }
     }
+    // const amount = this.$store.getters.getValueOfField({
+    //   containerUuid,
+    //   columnName: 'PayAmt'
+    // })
   },
   created() {
     this.unsubscribe = this.subscribeChanges()
@@ -395,20 +399,11 @@ export default {
         sku
       } = row.product
       listStocks({
+        posUuid: this.currentPointOfSales.uuid,
         value,
         sku
       })
         .then(response => {
-          // this.listStockProduct = response.stocks.map(stock => {
-          //   return {
-          //     label: stock.warehouse_name,
-          //     id: stock.warehouse_id,
-          //     uuid: stock.warehouse_uuid,
-          //     attributeName: stock.attribute_name,
-          //     qty: stock.qty,
-          //     sumaryQty: []
-          //   }
-          // })
           const list = response.stocks.map(stock => {
             return {
               label: stock.warehouse_name,
@@ -503,9 +498,7 @@ export default {
     },
     loadProductsPricesList() {
       this.$store.dispatch('listProductPriceFromServer', {
-        currentPOS: {
-          uuid: '792a2889-cb3d-4ac1-aa89-fb67abd61bad'
-        }
+        searchValue: this.searchProduct
       })
     },
     /**
@@ -514,9 +507,7 @@ export default {
     handleChangePage(newPage) {
       this.$store.dispatch('setProductPicePageNumber', newPage)
       this.$store.dispatch('listProductPriceFromServer', {
-        currentPOS: {
-          uuid: '792a2889-cb3d-4ac1-aa89-fb67abd61bad'
-        }
+        searchValue: this.searchProduct
       })
     },
     findlistProductWithRow(row) {
@@ -554,7 +545,7 @@ export default {
     },
     findPosition(current) {
       const arrow = this.listWithPrice.findIndex(element => {
-        if (element.product.id === current.product.id) {
+        if (!this.isEmptyValue(current) && element.product.id === current.product.id) {
           return element
         }
       })
@@ -562,9 +553,6 @@ export default {
     },
     subscribeChanges() {
       return this.$store.subscribe((mutation, state) => {
-        // if (!isEmptyValue(this.listWithPrice)) {
-        //   this.setCurrent(this.listWithPrice[0])
-        // }
         if (mutation.type === 'updateValueOfField' &&
           !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
           mutation.payload.containerUuid === this.metadata.containerUuid) {
@@ -599,7 +587,7 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="scss">
 .table-product-info {
   max-height: 80%;
   min-height: 80%;
@@ -607,5 +595,16 @@ export default {
 }
 .scroll-warehouses {
   max-height: 25vh;
+}
+.el-dialog {
+  .el-dialog__header {
+    border: 1px solid #d3d4d6;
+    background: #FFFFFF;
+    padding: 0px;
+    font-weight: bold;
+    padding-top: 25px;
+    border-bottom: 0px;
+    padding-bottom: 5px;
+  }
 }
 </style>
