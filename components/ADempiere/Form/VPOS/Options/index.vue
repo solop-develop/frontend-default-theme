@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -929,7 +929,7 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import OrdersList from '@theme/components/ADempiere/Form/VPOS/OrderList/index'
 import ConfirmDelivery from '@theme/components/ADempiere/Form/VPOS/ConfirmDelivery'
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
@@ -945,6 +945,7 @@ import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
 import TableTimeControl from '@theme/components/ADempiere/Form/TimeControl/table.vue'
 import ComponentDialgo from '@theme/components/ADempiere/Form/VPOS/Options/MnemonicCommand/component.vue'
+
 // API Request Methods
 import {
   generateImmediateInvoice,
@@ -967,6 +968,7 @@ import {
 } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
+
 export default {
   name: 'PointOfSalesOptions',
 
@@ -1675,7 +1677,7 @@ export default {
       this.$store.dispatch('listCashMovementsSummary', posUuid)
       this.$store.commit('setIsShowCashSummaryMovements', true)
     },
-    assignSeller( ) {
+    assignSeller() {
       this.$store.commit('setShowAssignSeller', true)
     },
     unassignSeller() {
