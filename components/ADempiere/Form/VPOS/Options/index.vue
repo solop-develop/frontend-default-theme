@@ -856,7 +856,6 @@
     <el-dialog
       :title="$t('form.pos.optionsPoinSales.salesOrder.confirmDelivery')"
       :visible.sync="showDialogoDelivery"
-      width="50%"
       :center="true"
       :modal="false"
       :append-to-body="true"
