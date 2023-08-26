@@ -134,7 +134,7 @@ export default {
       switch (event.srcKey) {
         case 'refreshList':
         case 'refreshList2':
-          this.$store.dispatch('listProductPriceFromServerProductInfo', {})
+          this.$store.dispatch('listProductPriceFromServer', {})
           break
       }
     },
@@ -166,7 +166,7 @@ export default {
         if (this.isEmptyValue(results) && String(stringToMatch.length > 3)) {
           clearTimeout(this.timeOut)
           this.timeOut = setTimeout(() => {
-            this.$store.dispatch('listProductPriceFromServerProductInfo', {
+            this.$store.dispatch('listProductPriceFromServer', {
               containerUuid: 'Products-Price-List-ProductInfo',
               pageNumber: 1,
               searchValue: stringToMatch

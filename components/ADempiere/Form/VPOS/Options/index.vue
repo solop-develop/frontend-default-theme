@@ -1858,12 +1858,6 @@ export default {
         description: this.messageReverseSales
       })
         .then(response => {
-          this.showReverseOrder = true
-          this.summaryReverseOrder = {
-            type: 'success',
-            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
-            documentNo: response.documentNo
-          }
           const posUuid = this.currentPointOfSales.uuid
           const orderUuid = response.uuid
           this.$store.dispatch('printTicket', { posUuid, orderUuid })
@@ -1872,7 +1866,12 @@ export default {
               if (this.IsAllowsPreviewDocument) this.printPreview()
             })
           this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-          this.clearOrder()
+          // this.clearOrder()
+          this.summaryReverseOrder = {
+            type: 'success',
+            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+            documentNo: response.document_no
+          }
         })
         .catch(error => {
           console.error(error.message)
@@ -1889,6 +1888,7 @@ export default {
           })
         })
         .finally(() => {
+          this.showReverseOrder = true
           this.isLoadingReverse = false
           this.visibleReverse = false
           this.messageReverseSales = ''
