@@ -946,14 +946,28 @@ export default {
       messageReverseSales: '',
       showConfirmDelivery: false,
       isShowResource: false,
-      isLoadingPin: false,
-      showReverseOrder: false,
-      summaryReverseOrder: {}
+      isLoadingPin: false
       // isMnemonicCommand: false
     }
   },
 
   computed: {
+    showReverseOrder: {
+      get() {
+        return this.$store.getters.getShowSummaryReverseOrder
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryReverseOrder', value)
+      }
+    },
+    summaryReverseOrder: {
+      get() {
+        return this.$store.getters.getSummaryReverseOrder
+      },
+      set(value) {
+        this.$store.commit('setSummaryReverseOrder', value)
+      }
+    },
     showCashClose: {
       get() {
         return this.$store.getters.getShowSummaryCashClose
