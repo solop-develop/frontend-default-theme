@@ -113,18 +113,19 @@
                           :loading="isLoading"
                           type="success"
                           icon="el-icon-refresh-right"
+                          class="button-base-icon"
                           size="small"
                           @click="listOrdersInvoiced();"
                         />
                         <el-button
                           type="danger"
-                          class="custom-button-create-bp"
+                          class="button-base-icon"
                           icon="el-icon-close"
                           @click="closeSearch(option)"
                         />
                         <el-button
                           type="primary"
-                          class="custom-button-create-bp"
+                          class="button-base-icon"
                           icon="el-icon-check"
                           @click="openOrder(option)"
                         />
@@ -220,19 +221,20 @@
                 <el-button
                   :loading="isLoading"
                   type="success"
+                  class="button-base-icon"
                   icon="el-icon-refresh-right"
                   size="small"
                   @click="listOrdersInvoiced();"
                 />
                 <el-button
                   type="danger"
-                  class="custom-button-create-bp"
+                  class="button-base-icon"
                   icon="el-icon-close"
                   @click="closeSearch(currentOptions)"
                 />
                 <el-button
                   type="primary"
-                  class="custom-button-create-bp"
+                  class="button-base-icon"
                   icon="el-icon-check"
                   @click="openOrder(currentOptions)"
                 />
