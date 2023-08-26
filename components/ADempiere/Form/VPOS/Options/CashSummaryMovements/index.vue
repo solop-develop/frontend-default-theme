@@ -27,8 +27,23 @@
           style="width: 100%"
         >
           <el-table-column
+            v-if="isShowCashSummaryMovements"
+            prop="document_no"
+            :label="$t('form.expressMovement.field.documentNo')"
+          />
+          <el-table-column
+            v-if="isShowCashSummaryMovements"
+            prop="customer.name"
+            :label="$t('form.pos.collect.customer')"
+          />
+          <el-table-column
+            v-if="isShowCashSummaryMovements"
+            prop="collecting_agent.name"
+            :label="$t('form.pos.collect.seller')"
+          />
+          <el-table-column
             prop="payment_method_name"
-            :label="$t('form.pos.collect.paymentMethods')"
+            :label="$t('form.pos.collect.paymentMethod')"
           />
           <el-table-column
             prop="currency.iso_code"
@@ -100,6 +115,10 @@ export default {
           containerUuid: 'Cash-Withdrawal'
         }
       }
+    },
+    labelPanel: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -139,15 +158,23 @@ export default {
       return this.$store.getters.getShowCashSummaryMovements
     },
     listCashSummary() {
+      if (this.isShowCashSummaryMovements) return this.$store.getters.getListCashSummaryMovements
       return this.$store.getters.getListCashSummary
     },
     isLoadingCashClosing() {
       return this.$store.getters.getLoadingCashClosing
+    },
+    isShowCashSummaryMovements() {
+      return this.$store.getters.getIsShowCashSummaryMovements
     }
   },
   methods: {
     formatPrice,
     close() {
+      if (this.isShowCashSummaryMovements) {
+        this.$store.commit('setIsShowCashSummaryMovements', false)
+        return
+      }
       this.$store.commit('setShowCashSummaryMovements', false)
     },
     cashClose() {
@@ -168,7 +195,8 @@ export default {
           this.summaryCashClose = {
             type: 'success',
             listCashSummary: this.listCashSummary.records,
-            title: this.$t('form.pos.optionsPoinSales.cashManagement.closeBox')
+            label: this.labelPanel,
+            title: this.labelPanel
           }
         })
         .catch(error => {
@@ -182,7 +210,8 @@ export default {
           this.summaryCashClose = {
             type: 'error',
             listCashSummary: this.listCashSummary.records,
-            title: this.$t('form.pos.optionsPoinSales.cashManagement.closeBox')
+            title: this.labelPanel,
+            label: error.message
           }
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
         })

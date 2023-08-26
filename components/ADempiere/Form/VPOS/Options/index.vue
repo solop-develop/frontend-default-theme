@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Edwin Betancourt EdwinBetanc0urt@outlook.com https://github.com/EdwinBetanc0urt
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -526,6 +526,18 @@
               </p>
             </el-card>
           </el-col>
+          <el-col v-if="isAllowsCashClosing" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <p
+                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
+                @click="openCashDetailsClosing()"
+              >
+                <i class="el-icon-sold-out" />
+                <br>
+                {{ $t('form.pos.optionsPoinSales.cashManagement.detailedCloseBox') }}
+              </p>
+            </el-card>
+          </el-col>
           <el-col v-if="isAllowsAllocateSeller" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -772,12 +784,13 @@
     <el-dialog
       :visible.sync="showCashClose"
       :append-to-body="true"
-      :title="summaryCashClose.title"
+      :center="true"
+      :title="$t(summaryCashClose.title)"
     >
       <el-result
         v-if="!isEmptyValue(summaryCashClose)"
         :icon="summaryCashClose.type"
-        :title="summaryCashClose.title"
+        :title="$t(summaryCashClose.label)"
       />
       <el-card class="box-card" style="padding-left: 0px; padding-right: 0px">
         <el-table
@@ -916,7 +929,7 @@
 </template>
 
 <script>
-// components and mixins
+// Components and Mixins
 import OrdersList from '@theme/components/ADempiere/Form/VPOS/OrderList/index'
 import ConfirmDelivery from '@theme/components/ADempiere/Form/VPOS/ConfirmDelivery'
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
@@ -932,6 +945,7 @@ import ModalDialog from '@theme/components/ADempiere/Dialog'
 import GeneralOptions from '@theme/components/ADempiere/Form/VPOS/Options/generalOptions.vue'
 import TableTimeControl from '@theme/components/ADempiere/Form/TimeControl/table.vue'
 import ComponentDialgo from '@theme/components/ADempiere/Form/VPOS/Options/MnemonicCommand/component.vue'
+
 // API Request Methods
 import {
   generateImmediateInvoice,
@@ -954,6 +968,7 @@ import {
 } from '@/utils/ADempiere/resource.js'
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
+
 export default {
   name: 'PointOfSalesOptions',
 
@@ -1105,6 +1120,10 @@ export default {
     isOpenPanel() {
       const isOpen = {}
       switch (true) {
+        case this.isShowCashSummaryMovements:
+          isOpen.getters = 'getIsShowCashSummaryMovements'
+          isOpen.commit = 'setIsShowCashSummaryMovements'
+          break
         case this.showCashOpen:
           isOpen.getters = 'getShowCashOpen'
           isOpen.commit = 'setshowCashOpen'
@@ -1140,6 +1159,9 @@ export default {
       let isLabel
       const baseTag = 'form.pos.optionsPoinSales.cashManagement.'
       switch (true) {
+        case this.isShowCashSummaryMovements:
+          isLabel = baseTag + 'detailedCloseBox'
+          break
         case this.showCashOpen:
           isLabel = baseTag + 'cashOpening'
           break
@@ -1180,6 +1202,7 @@ export default {
           component = () => import('@theme/components/ADempiere/Form/VPOS/Options/Cashwithdrawal')
           this.clearField('Cash-Withdrawal')
           break
+        case this.isShowCashSummaryMovements:
         case this.showCashSummaryMovements:
           component = () => import('@theme/components/ADempiere/Form/VPOS/Options/CashSummaryMovements')
           break
@@ -1250,6 +1273,9 @@ export default {
     },
     showCashOpen() {
       return this.$store.getters.getShowCashOpen
+    },
+    isShowCashSummaryMovements() {
+      return this.$store.getters.getIsShowCashSummaryMovements
     },
     showCashSummaryMovements() {
       return this.$store.getters.getShowCashSummaryMovements
@@ -1646,6 +1672,11 @@ export default {
       this.$store.dispatch('listCashSummary', posUuid)
       this.$store.commit('setShowCashSummaryMovements', true)
     },
+    openCashDetailsClosing() {
+      const posUuid = this.currentPointOfSales.uuid
+      this.$store.dispatch('listCashMovementsSummary', posUuid)
+      this.$store.commit('setIsShowCashSummaryMovements', true)
+    },
     assignSeller() {
       this.$store.commit('setShowAssignSeller', true)
     },
@@ -1775,6 +1806,9 @@ export default {
           break
         case this.$t('form.pos.optionsPoinSales.cashManagement.closeBox'):
           this.openCashClosing()
+          break
+        case this.$t('form.pos.optionsPoinSales.cashManagement.detailedCloseBox'):
+          this.openCashDetailsClosing()
           break
         case this.$t('form.pos.optionsPoinSales.cashManagement.assignSeller'):
           this.assignSeller()
