@@ -322,11 +322,6 @@ export default {
     }
   },
   watch: {
-    isReadyFromGetData(isToLoad) {
-      if (isToLoad) {
-        this.loadProductsPricesList()
-      }
-    },
     indexTable(value) {
       this.setCurrent(this.listWithPrice[value])
     },
@@ -335,10 +330,6 @@ export default {
         this.loadProductsPricesList()
       }
     }
-    // const amount = this.$store.getters.getValueOfField({
-    //   containerUuid,
-    //   columnName: 'PayAmt'
-    // })
   },
   created() {
     this.unsubscribe = this.subscribeChanges()
