@@ -1122,6 +1122,7 @@ export default {
             description: attribute.Description,
             collectingAgentUuid: labelCollectingAgent,
             payments: this.listCastOpen,
+            label: message,
             title: this.$t(this.labelPanel)
           }
           this.close()
@@ -1133,6 +1134,7 @@ export default {
             description: attribute.Description,
             collectingAgentUuid: labelCollectingAgent,
             payments: this.listCastOpen,
+            label: error.message,
             title: this.$t(this.labelPanel)
           }
           this.$message({
