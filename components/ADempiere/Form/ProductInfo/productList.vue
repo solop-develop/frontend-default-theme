@@ -144,7 +144,6 @@ import CustomPagination from '@theme/components/ADempiere/DataTable/Components/C
 
 // constants
 import fieldsListProductPrice from './fieldsList.js'
-import { DISPLAY_COLUMN_PREFIX } from '@/utils/ADempiere/dictionaryUtils'
 
 // utils and herlper methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
@@ -302,7 +301,7 @@ export default {
     },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
-    },
+    }
     // searchProduct() {
     //   return this.$store.getters.getValueOfField({
     //     containerUuid: 'Products-Price-List-ProductInfo',
@@ -313,7 +312,7 @@ export default {
   watch: {
     indexTable(value) {
       this.setCurrent(this.listWithPrice[value])
-    },
+    }
     // currentPoint(value) {
     //   if (!isEmptyValue(value)) {
     //     this.loadProductsPricesList()
