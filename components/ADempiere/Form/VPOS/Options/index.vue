@@ -688,12 +688,13 @@
     <el-dialog
       :visible.sync="showCashOpeningSummary"
       :append-to-body="true"
+      :center="true"
       :title="summaryCashOpen.title"
     >
       <el-result
         v-if="!isEmptyValue(summaryCashOpen)"
         :icon="summaryCashOpen.type"
-        :title="summaryCashOpen.title"
+        :title="summaryCashOpen.label"
       />
       <div v-if="!isEmptyValue(summaryCashOpen)" style="border: 1px solid rgb(54, 163, 247);padding-left: 10px;padding-right: 10px;">
         <p class="total">
