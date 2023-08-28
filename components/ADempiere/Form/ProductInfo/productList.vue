@@ -24,28 +24,16 @@
       v-shortkey="shortsKey"
       label-position="top"
       label-width="10px"
-      style="margin-bottom: 0px;margin-left: 0px;"
-      @shortkey.native="keyAction"
       @submit.native.prevent="notSubmitForm"
     >
-      <field-definition
-        v-for="(field) in fieldsList"
-        :key="field.columnName"
-        :metadata-field="field"
-        :container-uuid="'Products-Price-List-ProductInfo'"
-        :container-manager="{
-          ...containerManager,
-          getLookupList,
-          isDisplayedField,
-          isDisplayedDefault,
-          generalInfoSearch,
-          searchTableHeader,
-          isMandatoryField,
-          isReadOnlyField,
-          changeFieldShowedFromUser
-        }"
-        style="margin-bottom: 0px;margin-left: 0px;"
-      />
+      <el-form-item :label="$t('form.productInfo.codeProduct')">
+        <el-input
+          v-model="searchValue"
+          :placeholder="$t('quickAccess.searchWithEnter')"
+          clearable
+          @input="searchProduct"
+        />
+      </el-form-item>
     </el-form>
     <el-table
       ref="singleTable"
@@ -235,6 +223,7 @@ export default {
       indexTable: 0,
       currentLine: {},
       listStockProduct: [],
+      searchValue: '',
       isDetail: false
     }
   },
@@ -314,25 +303,24 @@ export default {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     },
-    searchProduct() {
-      return this.$store.getters.getValueOfField({
-        containerUuid: 'Products-Price-List-ProductInfo',
-        columnName: 'ProductValue'
-      })
-    }
+    // searchProduct() {
+    //   return this.$store.getters.getValueOfField({
+    //     containerUuid: 'Products-Price-List-ProductInfo',
+    //     columnName: 'ProductValue'
+    //   })
+    // }
   },
   watch: {
     indexTable(value) {
       this.setCurrent(this.listWithPrice[value])
     },
-    currentPoint(value) {
-      if (!isEmptyValue(value)) {
-        this.loadProductsPricesList()
-      }
-    }
+    // currentPoint(value) {
+    //   if (!isEmptyValue(value)) {
+    //     this.loadProductsPricesList()
+    //   }
+    // }
   },
   created() {
-    this.unsubscribe = this.subscribeChanges()
     this.$store.commit('setListProductPrice', {
       isLoaded: false
     })
@@ -487,9 +475,9 @@ export default {
           break
       }
     },
-    loadProductsPricesList() {
+    loadProductsPricesList(searchValue) {
       this.$store.dispatch('listProductPriceFromServer', {
-        searchValue: this.searchProduct
+        searchValue
       })
     },
     /**
@@ -498,7 +486,7 @@ export default {
     handleChangePage(newPage) {
       this.$store.dispatch('setProductPicePageNumber', newPage)
       this.$store.dispatch('listProductPriceFromServer', {
-        searchValue: this.searchProduct
+        searchValue: this.searchValue
       })
     },
     findlistProductWithRow(row) {
@@ -542,21 +530,27 @@ export default {
       })
       this.indexTable = arrow
     },
-    subscribeChanges() {
-      return this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'updateValueOfField' &&
-          !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
-          mutation.payload.containerUuid === this.metadata.containerUuid) {
-          clearTimeout(this.timeOut)
-          this.timeOut = setTimeout(() => {
-            this.$store.dispatch('updateSearch', mutation.payload.value)
-            if (this.productPrice.isLoaded) {
-              this.$store.commit('setIsReloadProductPrice')
-            }
-          }, 1000)
-        }
-      })
+    searchProduct(search) {
+      clearTimeout(this.timeOut)
+      this.timeOut = setTimeout(() => {
+        this.loadProductsPricesList(search)
+      }, 500)
     },
+    // subscribeChanges() {
+    //   return this.$store.subscribe((mutation, state) => {
+    //     if (mutation.type === 'updateValueOfField' &&
+    //       !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
+    //       mutation.payload.containerUuid === this.metadata.containerUuid) {
+    //       clearTimeout(this.timeOut)
+    //       this.timeOut = setTimeout(() => {
+    //         this.$store.dispatch('updateSearch', mutation.payload.value)
+    //         if (this.productPrice.isLoaded) {
+    //           this.$store.commit('setIsReloadProductPrice')
+    //         }
+    //       }, 1000)
+    //     }
+    //   })
+    // },
     /**
      * @param {object} PointOfSales
      */
