@@ -215,7 +215,7 @@
                       {{ $t('form.pos.collect.orderTotal') }} {{ '(' + currentOrder.documentNo + ')' }}:
                     </b>
                     <b style="float: right;">
-                      {{ formatPrice(currentOrder.grandTotal, pointOfSalesCurrency.iSOCode) }}
+                      {{ formatPrice(currentOrder.grandTotal, currentOrder.priceList.currency.iso_code) }}
                     </b>
                   </p>
 
@@ -233,34 +233,34 @@
                   <p class="total">
                     {{ $t('pointOfSales.collection.creditAmount') }}:
                     <b style="float: right;">
-                      {{ formatPrice2({ value: currentOrder.creditAmount, currency: pointOfSalesCurrency.iSOCode }) }}
+                      {{ formatPrice2({ value: currentOrder.creditAmount, currency: currentOrder.priceList.currency.iso_code }) }}
                     </b>
                   </p>
                   <p class="total">
                     {{ $t('pointOfSales.collection.chargeAmount') }}:
                     <b style="float: right;">
-                      {{ formatPrice2({ value: currentOrder.chargeAmount, currency: pointOfSalesCurrency.iSOCode }) }}
+                      {{ formatPrice2({ value: currentOrder.chargeAmount, currency: currentOrder.priceList.currency.iso_code }) }}
                     </b>
                   </p>
 
                   <p class="total">
                     {{ $t('form.pos.collect.payment') }}:
                     <b style="float: right;">
-                      {{ formatPrice(currentOrder.paymentAmount, pointOfSalesCurrency.iSOCode) }}
+                      {{ formatPrice(currentOrder.paymentAmount, currentOrder.priceList.currency.iso_code) }}
                     </b>
                   </p>
 
                   <p class="total">
                     {{ $t('form.pos.collect.pending') }}:
                     <b style="float: right;">
-                      {{ formatPrice(currentOrder.openAmount, pointOfSalesCurrency.iSOCode) }}
+                      {{ formatPrice(currentOrder.openAmount, currentOrder.priceList.currency.iso_code) }}
                     </b>
                   </p>
 
                   <p class="total">
                     {{ $t('form.pos.collect.change') }}:
                     <b style="float: right;">
-                      {{ formatPrice(currentOrder.refundAmount, pointOfSalesCurrency.iSOCode) }}
+                      {{ formatPrice(currentOrder.refundAmount, currentOrder.priceList.currency.iso_code) }}
                     </b>
                   </p>
 
@@ -293,7 +293,7 @@
             {{ $t('form.pos.collect.orderTotal') }} {{ '(' + currentOrder.documentNo + ')' }}:
           </b>
           <b style="float: right;">
-            {{ formatPrice(currentOrder.grandTotal, pointOfSalesCurrency.iSOCode) }}
+            {{ formatPrice(currentOrder.grandTotal, currentOrder.priceList.currency.iso_code) }}
           </b>
         </p>
 

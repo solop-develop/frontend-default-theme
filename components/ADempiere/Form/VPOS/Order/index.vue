@@ -350,9 +350,9 @@
                   :point-of-sales="currentPointOfSales"
                 />
 
-                <p class="total"> {{ $t('form.pos.order.subTotal') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">{{ formatPrice(currentOrder.totalLines, pointOfSalesCurrency.iSOCode) }}</b></p>
-                <p class="total"> {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.discountAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
-                <p class="total"> {{ $t('form.pos.order.tax') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.taxAmount, pointOfSalesCurrency.iSOCode) }}</b> </p>
+                <p class="total"> {{ $t('form.pos.order.subTotal') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" class="order-info">{{ formatPrice(currentOrder.totalLines, currentOrder.priceList.currency.iso_code) }}</b></p>
+                <p class="total"> {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.discountAmount, currentOrder.priceList.currency.iso_code) }}</b> </p>
+                <p class="total"> {{ $t('form.pos.order.tax') }}:<b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.taxAmount, currentOrder.priceList.currency.iso_code) }}</b> </p>
               </div>
               <div style="border: 1px solid rgb(54, 163, 247);padding-left: 10px;padding-right: 10px;">
                 <p class="total">
@@ -360,7 +360,7 @@
                     {{ $t('form.pos.order.total') }}:
                   </b>
                   <b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">
-                    {{ formatPrice(currentOrder.grandTotal, pointOfSalesCurrency.iSOCode) }}
+                    {{ formatPrice(currentOrder.grandTotal, currentOrder.priceList.currency.iso_code) }}
                   </b>
                 </p>
                 <p v-if="!isEmptyValue(currentPointOfSales.displayCurrency)" class="total"> <b> {{ $t('form.pos.collect.convertedAmount') }}: </b> <b v-if="!isEmptyValue(currentOrder.uuid)" style="float: right;">{{ formatPrice(currentOrder.grandTotal / totalAmountConverted, currentPointOfSales.displayCurrency.iso_code) }}</b> </p>
@@ -746,9 +746,9 @@ export default {
     // Currency Point Of Sales
     pointOfSalesCurrency() {
       // const currency = this.currentPointOfSales
-      if (!this.isEmptyValue(this.currentPointOfSales.priceList)) {
+      if (!this.isEmptyValue(this.currentPointOfSales.currentOrder.priceList.currency.iso_code)) {
         return {
-          ...this.currentPointOfSales.priceList.currency,
+          ...this.currentOrder.priceList.currency,
           amountConvertion: 1
         }
       }
