@@ -1212,10 +1212,18 @@ export default {
       if (!this.isEmptyValue(this.currentPointOfSales.id) && this.currentPointOfSales.id !== pointOfSales.id) {
         this.$store.dispatch('setCurrentPOS', pointOfSales)
         this.$store.commit('customer', pointOfSales.templateCustomer)
+        this.$store.commit('setListProductPrice', {
+          productPricesList: []
+        })
         this.clearOrder()
       }
     },
     changeCampaign(item) {
+      const point = {
+        ...this.currentPointOfSales,
+        defaultCampaign: item
+      }
+      this.$store.dispatch('setCurrentPOS', point)
       this.$store.dispatch('updateOrder', {
         orderUuid: this.currentOrder.uuid,
         posUuid: this.currentPointOfSales.uuid,

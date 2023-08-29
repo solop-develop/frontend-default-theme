@@ -75,6 +75,11 @@
         align="right"
       />
       <el-table-column
+        prop="quantityAvailable"
+        :label="$t('form.productInfo.quantityAvailable')"
+        align="right"
+      />
+      <el-table-column
         :label="$t('form.productInfo.price')"
         align="right"
       >
@@ -353,7 +358,7 @@ export default {
           columnName: 'ProductValue',
           value: value
         })
-      }, 500)
+      }, 1500)
     },
     /**
      * @param {object} PointOfSales
