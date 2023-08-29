@@ -2,7 +2,7 @@
   <el-card
     style="height: auto;"
   >
-    <div class=""clearfix>
+    <div class="clearfix">
       <el-row :gutter="2">
         <el-col :span="22">
           <el-button
