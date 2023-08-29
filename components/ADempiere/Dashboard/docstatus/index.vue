@@ -117,7 +117,6 @@ export default {
           action: 'criteria'
         }
       })
-      // conditions for the registration amount (operador: row.criteria.whereClause)
     }
   }
 }
