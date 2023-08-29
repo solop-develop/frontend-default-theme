@@ -51,6 +51,7 @@
         v-for="(header, key) in listHeader"
         :key="key"
         :label="header.label"
+        :align="header.align"
       >
         <template slot-scope="scope">
           <div slot="reference" class="name-wrapper" @click="show(scope.row)">
@@ -72,10 +73,6 @@
       :title="isEmptyValue(currentLine) ? '' : currentLine.product.name"
     >
       <span v-if="!isEmptyValue(currentLine)">
-        <!-- <b style="text-align: center;">
-          <i> {{ currentLine.product.name }} </i>
-        </b> -->
-        <!-- <el-divider /> -->
         <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ currentLine.product.value }}</span></p><br>
         <p><b style="float: left">{{ $t('form.productInfo.upc') }}</b><span style="float: right"> {{ currentLine.product.upc }} </span></p><br>
         <p>
@@ -99,15 +96,16 @@
         <p>
           <b style="float: left">{{ $t('form.productInfo.grandTotal') }}</b>
           <span style="float: right">
-            {{ formatPrice(getTaxAmount(currentLine.priceStandard, currentLine.taxRate.rate) + currentLine.priceStandard, currentLine.currency.iSOCode) }}
+            {{ displayValue(currentLine, 'grandTotal') }}
           </span>
         </p>
+        <br>
         <p>
           <b style="float: left">
             {{ $t('form.productInfo.grandTotalConverted') }} ({{ currentLine.schemaCurrency.iSOCode }})
           </b>
           <span style="float: right">
-            {{ formatPrice({ value: getTaxAmount(currentLine.schemaPriceStandard, currentLine.taxRate.rate) + currentLine.schemaPriceStandard, currency: currentLine.schemaCurrency.iSOCode }) }}
+            {{ displayValue(currentLine, 'convertedAmount') }}
           </span>
         </p>
         <br>
@@ -231,31 +229,43 @@ export default {
       return [
         {
           label: this.$t('form.productInfo.code'),
-          column: 'value'
+          column: 'value',
+          align: 'center'
         },
         {
           label: this.$t('form.productInfo.product'),
-          column: 'name'
+          column: 'name',
+          align: 'center'
         },
         {
           label: this.$t('form.productInfo.quantityOnHand'),
-          column: 'quantityOnHand'
+          column: 'quantityOnHand',
+          align: 'right'
         },
         {
           label: this.$t('form.productInfo.quantityAvailable'),
-          column: 'quantityAvailable'
+          column: 'quantityAvailable',
+          align: 'right'
         },
         {
           label: this.$t('form.productInfo.price'),
-          column: 'priceStandard'
+          column: 'priceStandard',
+          align: 'right'
         },
         {
           label: this.$t('form.productInfo.taxAmount'),
-          column: 'taxAmount'
+          column: 'taxAmount',
+          align: 'right'
         },
         {
           label: this.$t('form.productInfo.grandTotal'),
-          column: 'grandTotal'
+          column: 'grandTotal',
+          align: 'right'
+        },
+        {
+          label: this.$t('form.pos.collect.convertedAmount'),
+          column: 'convertedAmount',
+          align: 'right'
         }
       ]
     },
@@ -302,30 +312,17 @@ export default {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
     }
-    // searchProduct() {
-    //   return this.$store.getters.getValueOfField({
-    //     containerUuid: 'Products-Price-List-ProductInfo',
-    //     columnName: 'ProductValue'
-    //   })
-    // }
   },
   watch: {
     indexTable(value) {
       this.setCurrent(this.listWithPrice[value])
     }
-    // currentPoint(value) {
-    //   if (!isEmptyValue(value)) {
-    //     this.loadProductsPricesList()
-    //   }
-    // }
   },
   created() {
-    this.$store.commit('setListProductPrice', {
-      isLoaded: false
-    })
+    this.loadProductsPricesList()
     this.timeOut = setTimeout(() => {
       this.validatePos(this.currentPoint)
-    }, 3000)
+    }, 1000)
   },
   beforeDestroy() {
     this.unsubscribe()
@@ -362,7 +359,10 @@ export default {
           value = formatPrice({ value: this.getTaxAmount(row.priceStandard, row.taxRate.rate), currency: row.currency.iSOCode })
           break
         case 'grandTotal':
-          value = formatPrice({ value: ((row.priceStandard * row.taxRate.rate / 100) + row.priceStandard), currency: row.currency.iSOCode })
+          value = formatPrice({ value: ((this.getTaxAmount(row.priceStandard, row.taxRate.rate)) + row.priceStandard), currency: row.currency.iSOCode })
+          break
+        case 'convertedAmount':
+          value = formatPrice({ value: row.schemaPriceStandard, currency: row.schemaCurrency.iSOCode })
           break
         default:
           value = row.product[column]
@@ -535,21 +535,6 @@ export default {
         this.loadProductsPricesList(search)
       }, 500)
     },
-    // subscribeChanges() {
-    //   return this.$store.subscribe((mutation, state) => {
-    //     if (mutation.type === 'updateValueOfField' &&
-    //       !mutation.payload.columnName.startsWith(DISPLAY_COLUMN_PREFIX) &&
-    //       mutation.payload.containerUuid === this.metadata.containerUuid) {
-    //       clearTimeout(this.timeOut)
-    //       this.timeOut = setTimeout(() => {
-    //         this.$store.dispatch('updateSearch', mutation.payload.value)
-    //         if (this.productPrice.isLoaded) {
-    //           this.$store.commit('setIsReloadProductPrice')
-    //         }
-    //       }, 1000)
-    //     }
-    //   })
-    // },
     /**
      * @param {object} PointOfSales
      */

@@ -147,7 +147,7 @@
       width="85%"
     >
       <list-product-search
-        :height="'55vh'"
+        :height="'60vh'"
       />
     </el-dialog>
   </el-row>
