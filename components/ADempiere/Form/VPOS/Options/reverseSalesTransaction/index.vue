@@ -88,7 +88,8 @@ export default defineComponent({
     function cancelSaleTransaction() {
       const {
         currentOrder,
-        uuid
+        uuid,
+        id
       } = store.getters.posAttributes.currentPointOfSales
       reverseSales({
         posUuid: uuid,
@@ -97,8 +98,8 @@ export default defineComponent({
       })
         .then(response => {
           store.dispatch('printTicket', {
-            posUuid: uuid,
-            orderUuid: currentOrder.uuid
+            posId: id,
+            orderId: currentOrder.id
           })
           store.dispatch('reloadOrder', response.uuid)
             .then(() => {

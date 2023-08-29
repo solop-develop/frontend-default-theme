@@ -164,7 +164,8 @@ function completeOrder() {
   if (this.$store.getters.getProcessLoading) return
   const {
     currentOrder,
-    uuid
+    uuid,
+    id
   } = store.getters.posAttributes.currentPointOfSales
   if (isEmptyValue(currentOrder) || currentOrder.documentStatus.value) return true
   const isOpenRefund = !isEmptyValue(store.getters.getListRefundReference)
@@ -178,8 +179,8 @@ function completeOrder() {
   })
     .then(response => {
       store.dispatch('printTicket', {
-        posUuid: uuid,
-        orderUuid: currentOrder.uuid
+        posId: id,
+        orderId: currentOrder.id
       })
       store.dispatch('reloadOrder', response.uuid)
         .then(() => {
@@ -280,13 +281,13 @@ function printOrder() {
   const {
     isAllowsPrintDocument,
     currentOrder,
-    uuid
+    id
   } = store.getters.posAttributes.currentPointOfSales
   if (isEmptyValue(currentOrder.uuid)) return false
   if (isAllowsPrintDocument) return true
   store.dispatch('printTicket', {
-    posUuid: uuid,
-    orderUuid: currentOrder.uuid
+    posId: id,
+    orderId: currentOrder.id
   })
 }
 

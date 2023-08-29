@@ -1902,8 +1902,8 @@ export default {
             showClose: true
           })
           this.$store.dispatch('printTicket', {
-            posUuid: this.currentPointOfSales.uuid,
-            orderUuid: this.currentOrder.uuid
+            posId: this.currentPointOfSales.id,
+            orderId: this.currentOrder.id
           })
           this.summaryProcessOrder = {
             labelModal: this.$t('notifications.succesful'),

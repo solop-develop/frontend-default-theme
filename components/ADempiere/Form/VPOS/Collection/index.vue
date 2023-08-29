@@ -1500,7 +1500,7 @@ export default {
             title: this.$t('notifications.completed'),
             type: 'success'
           }
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
+          this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: this.currentOrder.id })
             .then(() => {})
             .catch((error) => {
               this.$message({

@@ -468,7 +468,10 @@ export default {
         payments: payments
       })
         .then(response => {
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
+          this.$store.dispatch('printTicket', {
+            posId: this.currentPointOfSales.id,
+            orderId: this.currentOrder.id
+          })
           if (this.IsAllowsPreviewDocument) this.printPreview(posUuid, orderUuid)
           this.clearOrder()
           this.createOrder({ withLine: false, newOrder: true, customer: this.currentPointOfSales.templateCustomer.uuid })

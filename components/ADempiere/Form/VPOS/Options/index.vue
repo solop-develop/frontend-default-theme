@@ -1895,13 +1895,13 @@ export default {
         })
     },
     printTicket() {
-      const orderUuid = this.currentOrder.uuid
-      const posUuid = this.currentPointOfSales.uuid
+      const posId = this.currentOrder.id
+      const orderId = this.currentPointOfSales.id
 
       this.isLoadingPrintTicket = true
       this.$store.dispatch('printTicket', {
-        posUuid,
-        orderUuid
+        posId,
+        orderId
       })
         .finally(() => {
           this.isLoadingPrintTicket = false
@@ -1940,7 +1940,7 @@ export default {
         payments: []
       })
         .then(response => {
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
+          this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: this.currentOrder.id })
           this.$store.dispatch('reloadOrder', response.uuid)
             .then(() => {
               if (this.IsAllowsPreviewDocument) this.printPreview()
@@ -1977,9 +1977,7 @@ export default {
         description: this.messageReverseSales
       })
         .then(response => {
-          const posUuid = this.currentPointOfSales.uuid
-          const orderUuid = response.uuid
-          this.$store.dispatch('printTicket', { posUuid, orderUuid })
+          this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: response.id })
           this.$store.dispatch('reloadOrder', response.uuid)
             .then(() => {
               if (this.IsAllowsPreviewDocument) this.printPreview()
