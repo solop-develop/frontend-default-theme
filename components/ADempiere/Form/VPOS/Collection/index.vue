@@ -115,6 +115,7 @@
                           remote
                           style="width: 100%;"
                           @change="changeBankAccount"
+                          @visible-change="showBankAccount"
                         >
                           <el-option
                             v-for="item in bankAccountList"
@@ -1170,7 +1171,7 @@ export default {
           posUuid,
           driverLicense: this.currentOrder.businessPartner.value,
           socialSecurityNumber: this.currentOrder.businessPartner.value,
-          name: this.currentOrder.businessPartner.name,
+          // name: this.currentOrder.businessPartner.name,
           bankUuid: this.currentBank,
           paymentMethodUuid: paymentCurrency.uuid,
           isAch: true,
@@ -1727,6 +1728,11 @@ export default {
     loadProcess() {
       if (this.$store.getters.getShowCollectionPos) this.$store.commit('setShowPOSCollection', !this.$store.getters.getShowCollectionPos)
     },
+    showBankAccount(value) {
+      if (this.isEmptyValue(this.listBanks)) {
+        this.showListBank(true)
+      }
+    },
     changeBankAccount(value) {
       if (this.isEmptyValue(value)) {
         this.$store.commit('updateValuesOfContainer', {
@@ -1742,9 +1748,11 @@ export default {
             }
           ]
         })
+        this.currentBank = ''
         return
       }
       const currentBanckAccount = this.bankAccountList.find(banck => banck.customer_bank_account_uuid === value)
+      this.currentBank = currentBanckAccount.bank_uuid
       this.$store.commit('updateValuesOfContainer', {
         containerUuid: 'Collection',
         attributes: [
