@@ -1441,11 +1441,10 @@ export default {
       const paymentAmount = this.currentOrder.paymentAmount
       const chargeAmount = this.currentOrder.chargeAmount
       const abono = this.currentOrder.creditAmount
-      let total = grandTotal + chargeAmount - abono - paymentAmount
-      if (total < 0) {
-        total = Math.abs(total)
-      }
-      if (Number.parseFloat(total) <= 1) {
+      const total = grandTotal + chargeAmount - abono - paymentAmount
+      const precision = this.currentOrder.priceList.currency.standard_precision
+
+      if (this.numberPrecision(total, precision) === 0) {
         this.completePreparedOrder(payment)
         return
       }
@@ -1762,6 +1761,9 @@ export default {
     },
     loadBankAccount() {
       this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })
+    },
+    numberPrecision(amount, precision) {
+      return Number((Math.round(amount * 100) / 100).toFixed(precision))
     }
   }
 }
