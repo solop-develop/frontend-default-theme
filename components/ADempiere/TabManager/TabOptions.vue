@@ -18,27 +18,29 @@
 
 <template>
   <div>
-    <el-button
-      plain
-      size="small"
-      type="primary"
-      style="margin-right: 2px;"
-      @click="changeShowedRecords"
-    >
-      <span style="padding: 0px;">
-        <svg-icon icon-class="table" />
-        <b v-show="!isMobile">
-          {{ label }}
-        </b>
-      </span>
-    </el-button>
+    <span v-show="!isEditSecuence">
+      <el-button
+        plain
+        size="small"
+        type="primary"
+        style="margin-right: 2px;"
+        @click="changeShowedRecords"
+      >
+        <span style="padding: 0px;">
+          <svg-icon icon-class="table" />
+          <b v-show="!isMobile">
+            {{ label }}
+          </b>
+        </span>
+      </el-button>
 
-    <change-record
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-      :container-manager="containerManager"
-      :is-change-record="isChangeRecord"
-    />
+      <change-record
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :container-manager="containerManager"
+        :is-change-record="isChangeRecord"
+      />
+    </span>
 
     <convenience-buttons
       :parent-uuid="parentUuid"
@@ -162,6 +164,10 @@ export default defineComponent({
       return tabData.value.isShowedTableRecords
     })
 
+    const isEditSecuence = computed(() => {
+      return tabData.value.isEditSecuence
+    })
+
     const tabData = computed(() => {
       return store.getters.getStoredTab(
         props.parentUuid,
@@ -222,8 +228,9 @@ export default defineComponent({
       label,
       isMobile,
       listAction,
-      isShowedTableRecords,
+      isEditSecuence,
       showMenuMobile,
+      isShowedTableRecords,
       // methods
       changeShowedRecords
     }

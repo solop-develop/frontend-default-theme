@@ -17,51 +17,56 @@
 -->
 
 <template>
-  <div v-show="isDisableOptionsTabChild" class="convenience-buttons-main">
-    <new-record-button
+  <span v-if="!isEditSecuence">
+    <div v-if="isDisableOptionsTabChild" class="convenience-buttons-main">
+      <new-record-button
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
+      <undo-change-button
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
+      <refresh-record-button
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
+      <delete-record-button
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
+      <save-record-button
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+      />
+
+      <document-action
+        v-if="tabAttributes.isDocument"
+        :parent-uuid="parentUuid"
+        :container-manager="containerManager"
+        :tab-attributes="tabAttributes"
+      />
+      <advanced-tab-query
+        v-if="!isMobile"
+        :parent-uuid="parentUuid"
+        :container-uuid="tabAttributes.uuid"
+        :container-manager="containerManager"
+        style="float: right;"
+      />
+
+    </div>
+  </span>
+  <div v-else>
+    <options-secuence
       :parent-uuid="parentUuid"
       :container-uuid="tabAttributes.uuid"
-    />
-
-    <undo-change-button
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-    />
-
-    <refresh-record-button
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-    />
-
-    <delete-record-button
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-    />
-
-    <save-record-button
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
-    />
-
-    <document-action
-      v-if="tabAttributes.isDocument"
-      :parent-uuid="parentUuid"
-      :container-manager="containerManager"
       :tab-attributes="tabAttributes"
-    />
-    <!-- <span v-if="isMobile">
-      <div>
-        {{ 46546456 }}
-      </div>
-    </span> -->
-    <advanced-tab-query
-      v-if="!isMobile"
-      :parent-uuid="parentUuid"
-      :container-uuid="tabAttributes.uuid"
       :container-manager="containerManager"
-      style="float: right;"
     />
-
   </div>
 </template>
 
@@ -78,7 +83,7 @@ import SaveRecordButton from '@theme/components/ADempiere/TabManager/convenience
 import UndoChangeButton from '@theme/components/ADempiere/TabManager/convenienceButtons/UndoChangeButton.vue'
 import RefreshRecordButton from '@theme/components/ADempiere/TabManager/convenienceButtons/RefreshRecordButton.vue'
 import DeleteRecordButton from '@theme/components/ADempiere/TabManager/convenienceButtons/DeleteRecordButton.vue'
-
+import OptionsSecuence from '@theme/components/ADempiere/TabManager/convenienceButtons/OptionsSecuence.vue'
 export default defineComponent({
   name: 'ConvenienceButtons',
 
@@ -89,7 +94,8 @@ export default defineComponent({
     SaveRecordButton,
     UndoChangeButton,
     RefreshRecordButton,
-    DeleteRecordButton
+    DeleteRecordButton,
+    OptionsSecuence
   },
 
   props: {
@@ -139,6 +145,17 @@ export default defineComponent({
       return props.tabAttributes
     })
 
+    const isEditSecuence = computed(() => {
+      const tab = store.getters.getStoredTab(
+        props.parentUuid,
+        containerUuid
+      )
+      if (tab) {
+        return tab.isEditSecuence
+      }
+      return props.tabAttributes.isEditSecuence
+    })
+
     const isMobile = computed(() => {
       return store.state.app.device === 'mobile'
     })
@@ -179,6 +196,7 @@ export default defineComponent({
       isMobile,
       recordUuid,
       getCurrentTab,
+      isEditSecuence,
       isDisableOptionsTabChild,
       // methods
       openLog
