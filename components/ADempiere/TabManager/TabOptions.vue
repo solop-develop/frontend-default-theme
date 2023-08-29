@@ -41,7 +41,6 @@
         :is-change-record="isChangeRecord"
       />
     </span>
-    
 
     <convenience-buttons
       :parent-uuid="parentUuid"

@@ -113,7 +113,7 @@ export default defineComponent({
     /**
      * Close Modal Dialog
      */
-     function close() {
+    function close() {
       store.commit('setShowNewSequence', false)
       props.containerManager.changePanelAttribute({
         parentUuid: props.parentUuid,
