@@ -88,86 +88,92 @@
       :visible.sync="isSaveNewSequence"
     >
       <el-form :inline="true" label-position="top">
-        <el-form-item>
-          <template slot="label">
-            <el-radio v-model="levelType" :label="0" :border="true" @change="getAvailableUsersList(true)">
-              {{ $t('form.workflowActivity.filtersSearch.user') }}
-            </el-radio>
-          </template>
-          <el-select
-            v-model="currentUser"
-            :placeholder="$t('form.workflowActivity.filtersSearch.user')"
-            :disabled="levelType !== 0"
-            filterable
-            @visible-change="getAvailableUsersList"
-          >
-            <el-option
-              v-for="item in availableUsersList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-              <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">
-                {{ isEmptyValue(item.value) ? item.description : item.value }}
-              </span>
-            </el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <template slot="label">
-            <el-radio v-model="levelType" :label="1" :border="true" @change="getAvailableRolesList(true)">
-              {{ $t('profile.role') }}
-            </el-radio>
-          </template>
-          <el-select
-            v-model="currentRole"
-            :placeholder="$t('profile.role')"
-            :disabled="levelType !== 1"
-            filterable
-            @visible-change="getAvailableRolesList"
-          >
-            <el-option
-              v-for="item in availableRolesList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-              <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">
-                {{ isEmptyValue(item.value) ? item.description : item.value }}
-              </span>
-            </el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <template slot="label">
-            <el-radio v-model="levelType" :label="2" :border="true" @change="getAvailableCustomizationsList(true)">
-              {{ $t('component.sequenceSort.customizationlevel') }}
-            </el-radio>
-          </template>
-          <el-select
-            v-model="customizationLevel"
-            :placeholder="$t('component.sequenceSort.customizationlevel')"
-            :disabled="levelType !== 2 "
-            filterable
-            @visible-change="getAvailableCustomizationsList"
-          >
-            <el-option
-              v-for="item in availableCustomizationsLeveList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-              <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">
-                {{ isEmptyValue(item.value) ? item.description : item.value }}
-              </span>
-            </el-option>
-          </el-select>
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item>
+              <template slot="label">
+                <el-radio v-model="levelType" :label="0" :border="true" @change="getAvailableUsersList(true)">
+                  {{ $t('form.workflowActivity.filtersSearch.user') }}
+                </el-radio>
+              </template>
+              <el-select
+                v-model="currentUser"
+                :placeholder="$t('form.workflowActivity.filtersSearch.user')"
+                :disabled="levelType !== 0"
+                filterable
+                @visible-change="getAvailableUsersList"
+              >
+                <el-option
+                  v-for="item in availableUsersList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                  <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
+                  <span style="float: right; color: #8492a6; font-size: 13px">
+                    {{ isEmptyValue(item.value) ? item.description : item.value }}
+                  </span>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item>
+              <template slot="label">
+                <el-radio v-model="levelType" :label="1" :border="true" @change="getAvailableRolesList(true)">
+                  {{ $t('profile.role') }}
+                </el-radio>
+              </template>
+              <el-select
+                v-model="currentRole"
+                :placeholder="$t('profile.role')"
+                :disabled="levelType !== 1"
+                filterable
+                @visible-change="getAvailableRolesList"
+              >
+                <el-option
+                  v-for="item in availableRolesList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                  <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
+                  <span style="float: right; color: #8492a6; font-size: 13px">
+                    {{ isEmptyValue(item.value) ? item.description : item.value }}
+                  </span>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item>
+              <template slot="label">
+                <el-radio v-model="levelType" :label="2" :border="true" @change="getAvailableCustomizationsList(true)">
+                  {{ $t('component.sequenceSort.customizationlevel') }}
+                </el-radio>
+              </template>
+              <el-select
+                v-model="customizationLevel"
+                :placeholder="$t('component.sequenceSort.customizationlevel')"
+                :disabled="levelType !== 2 "
+                filterable
+                @visible-change="getAvailableCustomizationsList"
+              >
+                <el-option
+                  v-for="item in availableCustomizationsLeveList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                  <span style="float: left; margin-right: 15px;">{{ item.name }}</span>
+                  <span style="float: right; color: #8492a6; font-size: 13px">
+                    {{ isEmptyValue(item.value) ? item.description : item.value }}
+                  </span>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
 
       <span slot="footer" class="dialog-footer">
@@ -289,6 +295,15 @@ export default defineComponent({
       }
     })
 
+    const isSaveNewSequence = computed({
+      set(newValue) {
+        store.commit('setShowNewSequence', newValue)
+      },
+      get() {
+        return store.getters.getShowNewSequence
+      }
+    })
+
     const currentSessionRoleId = computed(() => {
       return store.getters['user/getRole'].id
     })
@@ -391,7 +406,7 @@ export default defineComponent({
     const currentRole = ref(currentSessionRoleId.value)
     const availableUsersList = ref([])
     const availableRolesList = ref([])
-    const isSaveNewSequence = ref(false)
+    // const isSaveNewSequence = ref(false)
     const customizationLevel = ref('')
     const availableCustomizationsLeveList = ref([])
 
