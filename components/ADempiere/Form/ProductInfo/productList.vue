@@ -533,7 +533,7 @@ export default {
       clearTimeout(this.timeOut)
       this.timeOut = setTimeout(() => {
         this.loadProductsPricesList(search)
-      }, 500)
+      }, 1500)
     },
     /**
      * @param {object} PointOfSales
