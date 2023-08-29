@@ -550,7 +550,7 @@ export default defineComponent({
       isLoadingSaveCustomization.value = true
       props.containerManager.applyCustomization({
         containerUuid: props.containerUuid,
-        level: levelType.value,
+        levelType: levelType.value,
         levelId,
         // levelUuid,
         fieldAttributes: props.fieldsCustomization

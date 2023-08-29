@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A. www.erpya.com
  Contributor(s): Elsio Sanchez Elsiosanches@gmail.com https://github.com/elsiosanchez
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -99,6 +99,7 @@ import draggable from 'vuedraggable'
 // Utils and Helper Methods
 import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { sortFields } from '@/utils/ADempiere/dictionary/panel'
+import { convertBooleanToString } from '@/utils/ADempiere/formatValue/booleanFormat'
 
 export default defineComponent({
   name: 'DraggablePanel',
@@ -304,9 +305,11 @@ export default defineComponent({
     const fieldsAttributesCustomization = computed(() => {
       return draggableFieldsList.value.map(fieldItem => {
         return {
+          id: fieldItem.id,
+          uuid: fieldItem.uuid,
           columnName: fieldItem.columnName,
-          sequence: fieldItem[sortColumnName.value],
-          isDisplayedDefault: fieldItem.isShowedFromUser
+          sequencePanel: fieldItem[sortColumnName.value],
+          isDefaultDisplayedAsPanel: convertBooleanToString(fieldItem.isShowedFromUser, true)
         }
       })
     })
