@@ -71,6 +71,7 @@
       :center="true"
       :modal="false"
       :title="isEmptyValue(currentLine) ? '' : currentLine.product.name"
+      @close="clean()"
     >
       <span v-if="!isEmptyValue(currentLine)">
         <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ currentLine.product.value }}</span></p><br>
@@ -220,7 +221,7 @@ export default {
       indexTable: 0,
       currentLine: {},
       listStockProduct: [],
-      searchValue: '',
+      // searchValue: '',
       isDetail: false
     }
   },
@@ -253,6 +254,11 @@ export default {
           align: 'right'
         },
         {
+          label: this.$t('form.pos.collect.convertedAmount'),
+          column: 'convertedAmount',
+          align: 'right'
+        },
+        {
           label: this.$t('form.productInfo.taxAmount'),
           column: 'taxAmount',
           align: 'right'
@@ -260,11 +266,6 @@ export default {
         {
           label: this.$t('form.productInfo.grandTotal'),
           column: 'grandTotal',
-          align: 'right'
-        },
-        {
-          label: this.$t('form.pos.collect.convertedAmount'),
-          column: 'convertedAmount',
           align: 'right'
         }
       ]
@@ -338,6 +339,9 @@ export default {
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
+    clean() {
+      this.searchValue = ''
+    },
     show(row) {
       this.isDetail = true
       this.currentLine = row
@@ -355,14 +359,14 @@ export default {
         case 'priceStandard':
           value = formatPrice({ value: row.priceStandard, currency: row.currency.iSOCode })
           break
+        case 'convertedAmount':
+          value = formatPrice({ value: row.schemaPriceStandard, currency: row.schemaCurrency.iSOCode })
+          break
         case 'taxAmount':
           value = formatPrice({ value: this.getTaxAmount(row.priceStandard, row.taxRate.rate), currency: row.currency.iSOCode })
           break
         case 'grandTotal':
           value = formatPrice({ value: ((this.getTaxAmount(row.priceStandard, row.taxRate.rate)) + row.priceStandard), currency: row.currency.iSOCode })
-          break
-        case 'convertedAmount':
-          value = formatPrice({ value: row.schemaPriceStandard, currency: row.schemaCurrency.iSOCode })
           break
         default:
           value = row.product[column]

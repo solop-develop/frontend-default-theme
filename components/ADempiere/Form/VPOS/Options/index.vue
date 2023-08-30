@@ -477,6 +477,29 @@
               </el-popover>
             </el-card>
           </el-col>
+          <el-col v-show="false" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <p
+                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;max-width: 100px;"
+                @click="openReturnProduct()"
+              >
+                <el-dialog
+                  :title="$t('form.pos.returnProduct')"
+                  :visible.sync="showReturnProduct"
+                  :center="true"
+                  :modal="false"
+                  :append-to-body="true"
+                  width="80%"
+                >
+                  <return-product />
+                </el-dialog>
+                <i class="el-icon-box" />
+                <svg-icon icon-class="undo" />
+                <br>
+                {{ $t('form.pos.returnProduct') }}
+              </p>
+            </el-card>
+          </el-col>
         </el-row>
       </el-collapse-item>
 
@@ -485,16 +508,12 @@
           <el-col v-if="isAllowsCashOpening" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
-                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
+                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;max-width: 100px;"
+                @click="openCashOpening()"
               >
                 <i class="el-icon-sell" />
                 <br>
-                <el-button
-                  type="text"
-                  @click="openCashOpening()"
-                >
-                  {{ $t('form.pos.optionsPoinSales.cashManagement.cashOpening') }}
-                </el-button>
+                {{ $t('form.pos.optionsPoinSales.cashManagement.cashOpening') }}
               </p>
             </el-card>
           </el-col>
@@ -502,15 +521,11 @@
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
+                @click="openCashWithdrawal()"
               >
                 <i class="el-icon-money" />
                 <br>
-                <el-button
-                  type="text"
-                  @click="openCashWithdrawal()"
-                >
-                  {{ $t('form.pos.optionsPoinSales.cashManagement.cashwithdrawal') }}
-                </el-button>
+                {{ $t('form.pos.optionsPoinSales.cashManagement.cashwithdrawal') }}
               </p>
             </el-card>
           </el-col>
@@ -564,18 +579,6 @@
               </p>
             </el-card>
           </el-col>
-          <!-- <el-col v-if="isAllowsAllocateSeller" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
-            <el-card shadow="hover" style="height: 100px">
-              <p
-                style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
-                @click="adviserPin ? validateOption($t('form.pos.optionsPoinSales.cashManagement.transfer')) : transfer()"
-              >
-                <i class="el-icon-sort" />
-                <br>
-                {{ $t('form.pos.optionsPoinSales.cashManagement.transfer') }}
-              </p>
-            </el-card>
-          </el-col> -->
           <el-col v-if="isAllowsAllocateSeller" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
@@ -935,6 +938,7 @@ import OrdersList from '@theme/components/ADempiere/Form/VPOS/OrderList/index'
 import ConfirmDelivery from '@theme/components/ADempiere/Form/VPOS/ConfirmDelivery'
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
 import CashOpening from './CashOpening'
+import ReturnProduct from './ReturnProduct'
 import CashSummaryMovements from './CashSummaryMovements'
 import CashWithdrawal from './Cashwithdrawal'
 import DiscountOrder from './DiscountOrder'
@@ -987,7 +991,8 @@ export default {
     OrdersList,
     TableTimeControl,
     MnemonicCommand,
-    ComponentDialgo
+    ComponentDialgo,
+    ReturnProduct
   },
 
   mixins: [
@@ -1274,6 +1279,14 @@ export default {
     },
     showCashOpen() {
       return this.$store.getters.getShowCashOpen
+    },
+    showReturnProduct: {
+      get() {
+        return this.$store.getters.getShowReturnProduct
+      },
+      set(value) {
+        this.$store.commit('setShowReturnProduct', value)
+      }
     },
     isShowCashSummaryMovements() {
       return this.$store.getters.getIsShowCashSummaryMovements
@@ -1642,6 +1655,9 @@ export default {
         }
       }
     },
+    openReturnProduct() {
+      this.$store.commit('setShowReturnProduct', true)
+    },
     openCashOpening() {
       if (!isEmptyValue(this.currentPointOfSales.displayCurrency)) {
         this.$store.dispatch('searchConversion', {
@@ -1799,6 +1815,9 @@ export default {
         case this.$t('form.pos.pinMessage.newOrder'):
           this.newOrder()
           break
+        case this.$t('form.pos.returnProduct'):
+          this.openReturnProduct()
+          break
         case this.$t('form.pos.optionsPoinSales.cashManagement.cashOpening'):
           this.openCashOpening()
           break
@@ -1895,8 +1914,8 @@ export default {
         })
     },
     printTicket() {
-      const posId = this.currentOrder.id
-      const orderId = this.currentPointOfSales.id
+      const posId = this.currentPointOfSales.id
+      const orderId = this.currentOrder.id
 
       this.isLoadingPrintTicket = true
       this.$store.dispatch('printTicket', {

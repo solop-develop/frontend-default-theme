@@ -95,6 +95,22 @@
           {{ formatPrice({ value: scope.row.schemaPriceStandard, currency: scope.row.schemaCurrency.iSOCode }) }}
         </template>
       </el-table-column>
+      <el-table-column
+        :label="$t('form.productInfo.taxAmount')"
+        align="right"
+      >
+        <template slot-scope="scope">
+          {{ formatPrice({ value: getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate), currency: scope.row.currency.iSOCode }) }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        :label="$t('form.productInfo.grandTotal')"
+        align="right"
+      >
+        <template slot-scope="scope">
+          {{ formatPrice({ value: ((getTaxAmount(scope.row.priceStandard, scope.row.taxRate.rate)) + scope.row.priceStandard), currency: scope.row.currency.iSOCode }) }}
+        </template>
+      </el-table-column>
     </el-table>
 
     <el-row :gutter="24" class="products-list-footer">
@@ -383,6 +399,12 @@ export default {
         text: row.product.value,
         isShowMessage: true
       })
+    },
+    getTaxAmount(basePrice, taxRate) {
+      if (this.isEmptyValue(basePrice) || this.isEmptyValue(taxRate)) {
+        return 0
+      }
+      return (basePrice * taxRate) / 100
     }
   }
 }
