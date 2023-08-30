@@ -1444,8 +1444,7 @@ export default {
       const abono = this.currentOrder.creditAmount
       const total = grandTotal + chargeAmount - abono - paymentAmount
       const precision = this.currentOrder.priceList.currency.standard_precision
-
-      if (this.numberPrecision(total, precision) === 0) {
+      if (Number((this.numberPrecision(total, precision))) === Number(0.00)) {
         this.completePreparedOrder(payment)
         return
       }
@@ -1771,7 +1770,13 @@ export default {
       this.$store.dispatch('listCustomerBankAccounts', { customerUuid: this.currentOrder.businessPartner.uuid })
     },
     numberPrecision(amount, precision) {
-      return Number((Math.round(amount * 100) / 100).toFixed(precision))
+      const num = Number((Math.round(amount * 100) / 100).toFixed(precision))
+      // console.log({ num })
+      if (Math.sign(num) === 1) {
+        return num
+      }
+      // console.log(Math.abs(num), this.formatQuantity(Math.abs(num)), { num }, Number(Number.parseFloat(Math.abs(num)).toFixed(2)))
+      return Number(Number.parseFloat(Math.abs(num)).toFixed(2))
     }
   }
 }
