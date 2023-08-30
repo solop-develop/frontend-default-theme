@@ -178,7 +178,8 @@ export default {
       this.$store.commit('setShowCashSummaryMovements', false)
     },
     cashClose() {
-      this.$store.commit('setShowCashSummaryMovements', false)
+      // this.$store.commit('setShowCashSummaryMovements', false)
+      this.close
       this.$store.commit('setLoadingCashClosing', true)
       cashClosing({
         posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
@@ -201,7 +202,6 @@ export default {
         })
         .catch(error => {
           this.showCashClose = true
-          this.$store.commit('setShowCashSummaryMovements', true)
           this.$message({
             message: error.message,
             isShowClose: true,
@@ -214,6 +214,11 @@ export default {
             label: error.message
           }
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
+          if (this.isShowCashSummaryMovements) {
+            this.$store.commit('setIsShowCashSummaryMovements', true)
+            return
+          }
+          this.$store.commit('setShowCashSummaryMovements', true)
         })
         .finally(() => {
           this.$store.commit('setLoadingCashClosing', false)

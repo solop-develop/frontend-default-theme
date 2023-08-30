@@ -1914,8 +1914,8 @@ export default {
         })
     },
     printTicket() {
-      const posId = this.currentOrder.id
-      const orderId = this.currentPointOfSales.id
+      const posId = this.currentPointOfSales.id
+      const orderId = this.currentOrder.id
 
       this.isLoadingPrintTicket = true
       this.$store.dispatch('printTicket', {
