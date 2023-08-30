@@ -200,10 +200,6 @@ export default {
         return []
       }
     },
-    searchValue: {
-      type: String,
-      default: ''
-    },
     containerManager: {
       type: Object,
       default: () => ({
@@ -224,11 +220,14 @@ export default {
       indexTable: 0,
       currentLine: {},
       listStockProduct: [],
-      // searchValue: '',
+      searchValue: '',
       isDetail: false
     }
   },
   computed: {
+    showProductSearch() {
+      return this.$store.getters.getShowProductSearch
+    },
     listHeader() {
       return [
         {
@@ -320,6 +319,9 @@ export default {
   watch: {
     indexTable(value) {
       this.setCurrent(this.listWithPrice[value])
+    },
+    showProductSearch(value) {
+      this.searchValue = ''
     }
   },
   created() {

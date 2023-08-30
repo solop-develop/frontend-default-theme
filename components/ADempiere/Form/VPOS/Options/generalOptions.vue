@@ -148,15 +148,13 @@
     >
       <list-product-search
         :height="'60vh'"
-        :search-value="''"
-        :show="showProductSearch"
       />
     </el-dialog>
   </el-row>
 </template>
 
 <script>
-import { defineComponent, computed, ref } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 
 // components and mixins
 import ListProductPrice from '@theme/components/ADempiere/Form/VPOS/ProductInfo/productList'
@@ -179,7 +177,16 @@ export default defineComponent({
   },
 
   setup(props, { root }) {
-    const showProductSearch = ref(false)
+    const showProductSearch = computed({
+      get() {
+        return root.$store.getters.getShowProductSearch
+      },
+      set(isShowed) {
+        root.$store.commit('setShowProductSearch', isShowed)
+      }
+    })
+
+    // const showProductSearch = ref(false)
 
     const currentPointOfSales = computed(() => {
       return root.$store.getters.posAttributes.currentPointOfSales
