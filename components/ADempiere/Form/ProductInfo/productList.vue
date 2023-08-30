@@ -71,7 +71,6 @@
       :center="true"
       :modal="false"
       :title="isEmptyValue(currentLine) ? '' : currentLine.product.name"
-      @close="clean()"
     >
       <span v-if="!isEmptyValue(currentLine)">
         <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ currentLine.product.value }}</span></p><br>
@@ -200,6 +199,10 @@ export default {
       default() {
         return []
       }
+    },
+    searchValue: {
+      type: String,
+      default: ''
     },
     containerManager: {
       type: Object,
@@ -339,9 +342,6 @@ export default {
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
-    clean() {
-      this.searchValue = ''
-    },
     show(row) {
       this.isDetail = true
       this.currentLine = row

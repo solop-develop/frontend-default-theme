@@ -148,6 +148,8 @@
     >
       <list-product-search
         :height="'60vh'"
+        :search-value="''"
+        :show="showProductSearch"
       />
     </el-dialog>
   </el-row>

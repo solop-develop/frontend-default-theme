@@ -30,6 +30,7 @@
         isReadOnlyField,
         changeFieldShowedFromUser
       }"
+      :search-value="''"
     />
   </div>
 </template>
@@ -62,6 +63,10 @@ export default {
     ProductInfoList
   },
   props: {
+    searchValue: {
+      type: String,
+      default: ''
+    },
     containerManager: {
       type: Object,
       default: () => ({
