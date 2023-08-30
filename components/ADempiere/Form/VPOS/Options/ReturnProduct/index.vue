@@ -203,7 +203,6 @@ export default defineComponent({
     function close() {
       store.commit('setShowReturnProduct', false)
     }
-    console.log('eoale')
     return {
       // Import
       formatPrice,
