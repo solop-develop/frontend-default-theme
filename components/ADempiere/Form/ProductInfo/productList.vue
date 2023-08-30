@@ -71,7 +71,6 @@
       :center="true"
       :modal="false"
       :title="isEmptyValue(currentLine) ? '' : currentLine.product.name"
-      @close="clean()"
     >
       <span v-if="!isEmptyValue(currentLine)">
         <p><b style="float: left">{{ $t('form.productInfo.code') }}</b><span style="float: right">{{ currentLine.product.value }}</span></p><br>
@@ -221,11 +220,14 @@ export default {
       indexTable: 0,
       currentLine: {},
       listStockProduct: [],
-      // searchValue: '',
+      searchValue: '',
       isDetail: false
     }
   },
   computed: {
+    showProductSearch() {
+      return this.$store.getters.getShowProductSearch
+    },
     listHeader() {
       return [
         {
@@ -317,6 +319,9 @@ export default {
   watch: {
     indexTable(value) {
       this.setCurrent(this.listWithPrice[value])
+    },
+    showProductSearch(value) {
+      this.searchValue = ''
     }
   },
   created() {
@@ -339,9 +344,6 @@ export default {
     isMandatoryField,
     isReadOnlyField,
     changeFieldShowedFromUser,
-    clean() {
-      this.searchValue = ''
-    },
     show(row) {
       this.isDetail = true
       this.currentLine = row
