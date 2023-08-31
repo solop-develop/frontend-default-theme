@@ -179,10 +179,11 @@ export default {
     },
     cashClose() {
       // this.$store.commit('setShowCashSummaryMovements', false)
+      const posUuid = this.$store.getters.posAttributes.currentPointOfSales.uuid
       this.close
       this.$store.commit('setLoadingCashClosing', true)
       cashClosing({
-        posUuid: this.$store.getters.posAttributes.currentPointOfSales.uuid,
+        posUuid,
         id: this.listCashSummary.id,
         uuid: this.listCashSummary.uuid
       })
@@ -196,9 +197,10 @@ export default {
           this.summaryCashClose = {
             type: 'success',
             listCashSummary: this.listCashSummary.records,
-            label: this.labelPanel,
+            label: response.document_type.name + ' Realizado ' + response.document_no,
             title: this.labelPanel
           }
+          this.close()
         })
         .catch(error => {
           this.showCashClose = true
@@ -214,13 +216,11 @@ export default {
             label: error.message
           }
           console.warn(`Error: ${error.message}. Code: ${error.code}.`)
-          if (this.isShowCashSummaryMovements) {
-            this.$store.commit('setIsShowCashSummaryMovements', true)
-            return
-          }
-          this.$store.commit('setShowCashSummaryMovements', true)
+          this.close()
         })
         .finally(() => {
+          this.$store.dispatch('listCashMovementsSummary', { posUuid })
+          this.$store.dispatch('listCashSummary', posUuid)
           this.$store.commit('setLoadingCashClosing', false)
         })
     }
