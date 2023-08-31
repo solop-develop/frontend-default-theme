@@ -1230,19 +1230,20 @@ export default {
       const customerBankAccountUuid = this.currentBankAccount
       const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
-      let referencebank = {
-        routingNo: ''
-      }
 
-      if (this.listBanks) {
-        referencebank = this.listBanks.find(a => a.uuid === this.currentBank)
-      }
-      const label = this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name : nameAccount
-      const displayName = label + ' _ ' + values.Phone + ' _ ' + referencebank.routingNo + ' _ ' + value
       if (
         this.isEmptyValue(customerBankAccountUuid) &&
         paymentCurrency.payment_method.tender_type === 'P'
       ) {
+        let referencebank = {
+          routingNo: ''
+        }
+
+        if (this.listBanks) {
+          referencebank = this.listBanks.find(a => a.uuid === this.currentBank)
+        }
+        const label = this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name : nameAccount
+        const displayName = label + ' _ ' + values.Phone + ' _ ' + referencebank.routingNo + ' _ ' + value
         this.$store.dispatch('customerBankAccount', {
           customerUuid: this.currentOrder.customer.uuid,
           posUuid,
