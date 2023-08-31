@@ -18,11 +18,9 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
 <template>
   <el-main
-    v-shortkey="shortsKey"
-    class="product-list-content"
+    class="return-product"
   >
     <el-form
-      v-shortkey="shortsKey"
       label-position="top"
       label-width="10px"
       @submit.native.prevent="notSubmitForm"
@@ -52,16 +50,13 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
     <el-table
       ref="listProducto"
-      v-shortkey="shortsKey"
-      v-loading="isLoadedServer"
-      :data="productdeliveryList"
+      v-loading="false"
+      :data="[]"
       :empty-text="$t('quickAccess.searchWithEnter')"
       border
       fit
       height="350"
       highlight-current-row
-      @cell-dblclick="editDelivery"
-      @shortkey.native="keyAction"
     >
       <el-table-column
         prop="product.value"
@@ -83,7 +78,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             v-model="scope.row.quantity"
             controls-position="right"
             :min="1"
-            @change="handleChange(scope.row)"
           />
           <span v-else>
             {{ formatQuantity({ value: scope.row.quantity }) }}
@@ -120,32 +114,104 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     </el-table>
     <el-row>
       <el-col
-        :offset="18"
-        :span="6"
+        :offset="14"
+        :span="10"
         style="border: 1px solid #d3d4d6;border-radius: 10px;padding-left: 10px;padding-right: 10px;margin-top: 10px;"
       >
-        <p class="total">
-          <b>
-            {{ $t('form.pos.order.order') }}:
-          </b>
-          <b style="float: right;">
-            {{ 'RM-102' }}
-          </b>
-        </p>
-        <p class="total">
-          <b>
-            {{ $t('form.pos.order.total') }}:
-          </b>
-          <b style="float: right;">
-            {{ 0.00 }}
-          </b>
-        </p>
+        <el-row
+          :gutter="20"
+        >
+          <el-col
+            :span="14"
+          >
+            <p
+              class="total-return-info"
+            >
+              <span class="info-label">
+                {{ $t('form.pos.order.order') }}:
+                <b class="order-info">
+                  {{ 'RM-102' }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.date') }}:
+                <b class="order-info">
+                  {{ '30/08/2023' }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.type') }}:
+                <b class="order-info">
+                  {{ 'Orden de Venta Fiscal (POS)' }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.itemQuantity') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.numberLines') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+            </p>
+          </el-col>
+          <el-col
+            :span="10"
+          >
+            <p
+              class="total-return-info"
+            >
+              <span class="info-label">
+                {{ $t('form.pos.order.subTotal') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.tax') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.subTotal') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
+                {{ $t('form.pos.order.total') }}:
+                <b class="order-info">
+                  {{ 0.00 }}
+                </b>
+              </span>
+            </p>
+          </el-col>
+        </el-row>
       </el-col>
     </el-row>
 
     <el-row :gutter="24" class="products-list-footer">
       <el-col :span="24">
-        <samp style="float: right; padding-top: 10px;">
+        <samp style="float: right; padding-top: 5px;">
           <el-button
             type="danger"
             class="button-base-icon"
@@ -167,13 +233,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 <script>
 // constants
 // api request methods
-// import {
-//   createPayment,
-//   cashOpening,
-//   updatePayment,
-//   deletePayment,
-//   availableCash
-// } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   defineComponent,
   computed,
@@ -184,15 +243,20 @@ import store from '@/store'
 // Utils and Helper Methods
 import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
 import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'ReturnProduct',
   setup(props, { root }) {
     // Ref
     const searchProduct = ref('')
+    const isEditQuantity = ref(false)
     // Computed
     const listProduct = computed(() => {
       return store.getters.getListProduct
+    })
+    const currentOrderReturn = computed(() => {
+      return store.getters.getOrderReturn
     })
     // Variable (Let)
     let loading
@@ -203,18 +267,59 @@ export default defineComponent({
     function close() {
       store.commit('setShowReturnProduct', false)
     }
+
+    function loadARM() {
+      const { currentPointOfSales } = store.getters.posAttributes
+      store.dispatch('openRMA', {
+        sourceOrderId: currentPointOfSales.currentOrder.id,
+        posId: currentPointOfSales.id
+      })
+    }
+
+    if (isEmptyValue(currentOrderReturn.value)) loadARM()
+
     return {
       // Import
       formatPrice,
       formatQuantity,
       // Ref
       loading,
+      isEditQuantity,
       searchProduct,
+      // Computed
+      currentOrderReturn,
       listProduct,
       // Methods
       close,
+      loadARM,
       listReturnProduct
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.return-product {
+  padding: 0px;
+  width: 100%;
+  overflow-x: hidden;
+}
+.order-info {
+  float: right;
+}
+.info-label {
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+}
+.total-return-info {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+</style>
+<style lang="scss">
+.el-dialog--center .el-dialog__body {
+  text-align: initial;
+  padding: 15px 16px;
+}
+</style>
