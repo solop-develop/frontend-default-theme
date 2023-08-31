@@ -37,7 +37,23 @@ export default [
   },
   // Currency
   // Bank
-  // Date
+  // Value
+  {
+    elementColumnName: 'Value',
+    columnName: 'Value',
+    uuid: '8d382fa8-fb40-11e8-a479-7a0060f0aa01',
+    isFromDictionary: true,
+    overwriteDefinition: {
+      isCustomField: true,
+      handleFocusGained: true,
+      handleFocusLost: true,
+      sequence: 2,
+      size: 24,
+      displayLogicPayment: 'D,K,T,A,P,C',
+      isActiveLogics: true,
+      isMandatory: true
+    }
+  },
   {
     tableName,
     elementColumnName: 'DateTrx',
