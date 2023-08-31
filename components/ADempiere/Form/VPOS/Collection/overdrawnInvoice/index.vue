@@ -144,7 +144,6 @@
                         filterable
                         clearable
                         remote
-                        :remote-method="remoteMethodBank"
                         @visible-change="showListBank"
                       >
                         <el-option
@@ -350,7 +349,6 @@
                         filterable
                         clearable
                         remote
-                        :remote-method="remoteMethodBank"
                         @visible-change="showListBank"
                       >
                         <el-option
@@ -1130,11 +1128,18 @@ export default {
       } else {
         refundCurrencyUuid = paymentCurrency.refund_reference_currency
       }
-      // const dayRate = this.convertionsList.find(convert => {
-      //   if (!this.isEmptyValue(refundCurrencyUuid) && refundCurrencyUuid.id === convert.currencyTo.id && this.currentPointOfSales.currentPriceList.currency.id !== refundCurrencyUuid.id) {
-      //     return convert
-      //   }
-      // })
+
+      let referencebank = {
+        routingNo: ''
+      }
+
+      if (this.listBanks) {
+        referencebank = this.listBanks.find(a => a.uuid === this.currentBank)
+      }
+
+      const label = this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name : nameAccount
+      const displayName = label + ' _ ' + values.Phone + ' _ ' + value + ' _ ' + referencebank.routingNo
+
       const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrencyRefund)
       if (this.isEmptyValue(this.currentBankAccount)) {
         this.$store.dispatch('customerBankAccount', {
@@ -1144,7 +1149,7 @@ export default {
           email: refund.email,
           driverLicense: value,
           socialSecurityNumber: value,
-          name: this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name + '-' + this.currentPaymentMethods : nameAccount + '-' + this.currentPaymentMethods,
+          name: displayName,
           bankAccountType: refund.bankAccountType,
           bankUuid: this.currentBank,
           paymentMethodUuid: payment.uuid,
@@ -1488,6 +1493,16 @@ export default {
         this.validateCurrentPayment &&
         this.isEmptyValue(this.currentBankAccount)
       ) {
+        let referencebank = {
+          routingNo: ''
+        }
+
+        if (this.listBanks) {
+          referencebank = this.listBanks.find(a => a.uuid === this.currentBank)
+        }
+
+        const label = this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name : nameAccount
+        const displayName = label + ' _ ' + values.Phone + ' _ ' + value + ' _ ' + referencebank.routingNo
         const nameAccount = this.$store.getters.getValueOfField({
           containerUuid: 'OverdrawnInvoice',
           columnName: 'Name'
@@ -1512,7 +1527,7 @@ export default {
           email: refund.email,
           driverLicense: value,
           socialSecurityNumber: value,
-          name: this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name + '-' + this.currentPaymentMethods : nameAccount + '-' + this.currentPaymentMethods,
+          name: displayName,
           bankAccountType: refund.bankAccountType,
           bankUuid: refund.bankUuid,
           paymentMethodUuid: payment.uuid,

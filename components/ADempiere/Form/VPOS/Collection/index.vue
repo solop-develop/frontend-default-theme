@@ -106,9 +106,37 @@
                       </el-form-item>
                     </div>
                   </el-col>
+                  <el-col v-if="isdisplayLogicBank && isShowBankAccount" :span="size">
+                    <div class="field-definition">
+                      <el-form-item
+                        :label="$t('pointOfSales.collection.recipientBank')"
+                        class="field-standard"
+                      >
+                        <el-select
+                          v-model="recipientBank"
+                          style="display: block;"
+                          :loading="loadingBank"
+                          filterable
+                          clearable
+                          remote
+                          @visible-change="showListBank"
+                        >
+                          <el-option
+                            v-for="item in listBanks"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.uuid"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-col>
                   <el-col v-if="isShowBankAccount" :span="size">
                     <div class="field-definition">
-                      <el-form-item label="Cuenta Bancaria" class="field-standard">
+                      <el-form-item
+                        :label="$t('pointOfSales.collection.customerAccount')"
+                        class="field-standard"
+                      >
                         <el-select
                           v-model="currentBankAccount"
                           clearable
@@ -127,9 +155,12 @@
                       </el-form-item>
                     </div>
                   </el-col>
-                  <el-col v-if="isdisplayLogicBank" :span="size">
+                  <el-col v-if="isdisplayLogicBank && isShowBankAccount" :span="size">
                     <div class="field-definition">
-                      <el-form-item label="Banco" class="field-standard">
+                      <el-form-item
+                        :label="$t('pointOfSales.collection.issuingBank')"
+                        class="field-standard"
+                      >
                         <el-select
                           v-model="currentBank"
                           style="display: block;"
@@ -137,7 +168,33 @@
                           filterable
                           clearable
                           remote
-                          :remote-method="remoteMethodBank"
+                          :disabled="!isEmptyValue(currentBankAccount)"
+                          @visible-change="showListBank"
+                        >
+                          <el-option
+                            v-for="item in listBanks"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.uuid"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-col>
+                  <el-col v-if="isdisplayLogicBank && !isShowBankAccount" :span="size">
+                    <div class="field-definition">
+                      <el-form-item
+                        :label="$t('pointOfSales.collection.bank')"
+                        class="field-standard"
+                      >
+                        <el-select
+                          v-model="currentBank"
+                          style="display: block;"
+                          :loading="loadingBank"
+                          filterable
+                          clearable
+                          remote
+                          :disabled="!isEmptyValue(currentBankAccount)"
                           @visible-change="showListBank"
                         >
                           <el-option
@@ -156,7 +213,11 @@
                     :span="size"
                   >
                     <field-definition
-                      :metadata-field="field"
+                      :metadata-field="{
+                        ...field,
+                        isQueryCriteria: (field.columnName === 'ReferenceNo') ? false : !isEmptyValue(currentBankAccount),
+                        isReadOnlyFromLogic: (field.columnName === 'ReferenceNo') ? false : !isEmptyValue(currentBankAccount)
+                      }"
                       :container-uuid="'Collection'"
                       :container-manager="{
                         ...containerManager,
@@ -428,7 +489,8 @@ export default {
       currentBankAccount: '',
       showOpenSummary: false,
       currentBank: '',
-      listBanks: [],
+      recipientBank: '',
+      listBanks: this.$store.getters.getListBanks,
       loadingBank: false,
       summaryProcessOrder: {},
       isPayemntLoading: false,
@@ -1138,7 +1200,7 @@ export default {
       const containerUuid = this.containerUuid
       const posUuid = this.currentPointOfSales.uuid
       const orderUuid = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.uuid
-      const bankUuid = this.currentBank
+      const bankUuid = this.recipientBank
       this.amontSend = this.$store.getters.getValueOfField({
         containerUuid,
         columnName: 'PayAmt'
@@ -1158,10 +1220,25 @@ export default {
         description: values.Description,
         paymentDate: values.DateTrx
       }
+      const nameAccount = this.currentPointOfSales.currentOrder.businessPartner.name
+
+      const value = this.$store.getters.getValueOfField({
+        containerUuid,
+        columnName: 'Value'
+      })
+
       const customerBankAccountUuid = this.currentBankAccount
       const paymentCurrency = this.availablePaymentMethods.find(payment => payment.uuid === this.currentFieldPaymentMethods)
       const currencyUuid = this.listCurrency.find(currency => currency.iso_code === this.currentFieldCurrency)
+      let referencebank = {
+        routingNo: ''
+      }
 
+      if (this.listBanks) {
+        referencebank = this.listBanks.find(a => a.uuid === this.currentBank)
+      }
+      const label = this.isEmptyValue(nameAccount) ? this.currentOrder.businessPartner.name : nameAccount
+      const displayName = label + ' _ ' + values.Phone + ' _ ' + referencebank.routingNo + ' _ ' + value
       if (
         this.isEmptyValue(customerBankAccountUuid) &&
         paymentCurrency.payment_method.tender_type === 'P'
@@ -1169,9 +1246,9 @@ export default {
         this.$store.dispatch('customerBankAccount', {
           customerUuid: this.currentOrder.customer.uuid,
           posUuid,
-          driverLicense: this.currentOrder.businessPartner.value,
-          socialSecurityNumber: this.currentOrder.businessPartner.value,
-          // name: this.currentOrder.businessPartner.name,
+          driverLicense: value,
+          socialSecurityNumber: value,
+          name: displayName,
           bankUuid: this.currentBank,
           paymentMethodUuid: paymentCurrency.uuid,
           isAch: true,
@@ -1690,6 +1767,14 @@ export default {
             value: undefined
           },
           {
+            columnName: 'Phone',
+            value: undefined
+          },
+          {
+            columnName: 'Name',
+            value: undefined
+          },
+          {
             columnName: 'C_Bank_ID_UUID',
             value: undefined
           },
@@ -1758,6 +1843,10 @@ export default {
           {
             columnName: 'Phone',
             value: currentBanckAccount.account_no
+          },
+          {
+            columnName: 'Value',
+            value: currentBanckAccount.driver_license
           },
           {
             columnName: 'C_Bank_ID_UUID',
