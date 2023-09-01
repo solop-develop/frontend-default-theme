@@ -62,11 +62,12 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
       ref="listProducto"
       v-loading="false"
       :data="listProduct"
-      :empty-text="$t('quickAccess.searchWithEnter')"
-      border
       fit
+      :empty-text="$t('quickAccess.searchWithEnter')"
+      :border="true"
       height="350"
       highlight-current-row
+      @cell-dblclick="editLine"
     >
       <template v-for="(valueOrder, item, key) in orderLineDefinition">
         <el-table-column
@@ -78,13 +79,25 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           :align="valueOrder.isNumeric ? 'right' : 'left'"
         >
           <template slot-scope="scope">
-            {{ displayValue(scope.row, valueOrder) }}
+            <el-input-number
+              v-if="(scope.row.isEditLine && valueOrder.columnName === 'QtyEntered')"
+              ref="editField"
+              v-model="scope.row.quantityOrdered"
+              :autofocus="true"
+              controls-position="right"
+              style="width: 100%;"
+              @change="editQuantityLine(scope.row)"
+            />
+            <span v-else>
+              {{ displayValue(scope.row, valueOrder) }}
+            </span>
           </template>
         </el-table-column>
       </template>
       <el-table-column
         :label="$t('form.pos.tableProduct.options')"
         column-key="value"
+        :align="'center'"
         width="160"
       >
         <template slot-scope="scope">
@@ -93,6 +106,11 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             icon="el-icon-delete"
             size="mini"
             @click="deleteLine(scope.row)"
+          />
+          <el-button
+            type="success"
+            icon="el-icon-edit"
+            size="mini"
           />
         </template>
       </el-table-column>
@@ -239,7 +257,12 @@ export default defineComponent({
     const isEditQuantity = ref(false)
     // Computed
     const listProduct = computed(() => {
-      return store.getters.getListProduct
+      return store.getters.getListProduct.map(product => {
+        return {
+          ...product,
+          isEditLine: false
+        }
+      })
     })
 
     const currentPointOfSales = computed(() => {
@@ -252,7 +275,6 @@ export default defineComponent({
 
     const currentOrderReturn = computed({
       get() {
-        // console.log({ qlq: store.getters.getOrderReturn })
         return store.getters.getOrderReturn
       },
       set(value) {
@@ -295,7 +317,7 @@ export default defineComponent({
           columnName: 'QtyEntered',
           label: lang.t('form.pos.tableProduct.quantity'),
           isNumeric: true,
-          size: '125px'
+          size: '200px'
         },
         uom: {
           columnName: 'UOM',
@@ -405,7 +427,7 @@ export default defineComponent({
         } else if (table.columnName === 'CurrentPrice') {
           return '100px'
         } else if (table.columnName === 'QtyEntered') {
-          return '100px'
+          return '250px'
         } else if (table.columnName === 'GrandTotal') {
           return '90px'
         }
@@ -484,15 +506,32 @@ export default defineComponent({
     }
 
     function deleteLine(row) {
-      console.log({ row })
       store.dispatch('deleteLineRMA', {
         id: row.id,
         posId: currentPointOfSales.value.id
       })
     }
 
+    function editQuantityLine(row) {
+      store.dispatch('updateLineRMA', {
+        id: row.id,
+        quantity: row.quantityOrdered,
+        posId: currentPointOfSales.value.id
+      })
+        .finally(() => {
+          row.isEditLine = !row.isEditLine
+        })
+      
+    }
+
     function process() {
       store.dispatch('processRma')
+    }
+
+    function editLine(row, column, cell) {
+      if (column.columnKey === 'QtyEntered') {
+        row.isEditLine = !row.isEditLine
+      }
     }
 
     loadARM()
@@ -519,10 +558,12 @@ export default defineComponent({
       loadARM,
       process,
       addLine,
+      editLine,
       deleteLine,
       displayLabel,
       displayValue,
       sizeTableColumn,
+      editQuantityLine,
       // selectLine,
       listReturnProduct
     }
@@ -547,6 +588,7 @@ export default defineComponent({
   margin-top: 10px;
   margin-bottom: 10px;
   font-size: 16px;
+  color: #303133;
 }
 </style>
 <style lang="scss">
