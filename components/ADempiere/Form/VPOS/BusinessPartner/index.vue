@@ -1,6 +1,6 @@
 <!--
  ADempiere-Vue (Frontend) for ADempiere ERP & CRM Smart Business Solution
- Copyright (C) 2017-Present E.R.P. Consultores y Asociados, C.A.
+ Copyright (C) 2018-Present E.R.P. Consultores y Asociados, C.A.
  Contributor(s): Yamel Senih ysenih@erpya.com www.erpya.com
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -9,11 +9,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https:www.gnu.org/licenses/>.
+ along with this program. If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
@@ -242,11 +242,12 @@ import AddAddress from './addAddress'
 import BusinessPartnersList from './businessPartnersList'
 import BParterMixin from './mixinBusinessPartner.js'
 
-// api request methods
+// API Request Methods
 
-// utils and helper methods
+// Utils and Helper Methods
 const { setBusinessPartner } = BParterMixin.methods
 const { searchBPartnerList } = BusinessPartnersList.methods
+import { isEmptyValue } from '@/utils/ADempiere/valueUtils'
 import { trimPercentage } from '@/utils/ADempiere/valueFormat.js'
 
 /**
@@ -616,6 +617,7 @@ export default {
       createBillingAddress.is_default_billing = true
       createBillingAddress.is_default_shipping = false
       createBillingAddress.phone = values.phone
+
       let createShippingAddress = this.addressForm(this.$store.getters.getValuesView({
         containerUuid: 'Shipping-Address',
         format: 'object'
@@ -626,12 +628,21 @@ export default {
         is_default_billing: true,
         is_default_shipping: false
       }
+
+      const email = values.email
+      if (!isEmptyValue(email)) {
+        createBillingAddress.email = email
+        createShippingAddress.email = email
+        console.log(email, createBillingAddress, createShippingAddress)
+      }
+
       if (this.copyShippingAddress) {
         createShippingAddress = {
           ...createBillingAddress,
           is_default_shipping: true
         }
       }
+
       const emptyMandatoryFields = this.$store.getters.getFieldsListEmptyMandatory({
         containerUuid: 'Business-Partner-Create',
         formatReturn: 'name'
