@@ -1657,6 +1657,10 @@ export default {
     },
     openReturnProduct() {
       this.$store.commit('setShowReturnProduct', true)
+      this.$store.dispatch('openRMA', {
+        sourceOrderId: this.currentPointOfSales.currentOrder.id,
+        posId: this.currentPointOfSales.id
+      })
     },
     openCashOpening() {
       if (!isEmptyValue(this.currentPointOfSales.displayCurrency)) {

@@ -37,13 +37,23 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           style="width: 100%;"
           :visible-change="listReturnProduct"
           :placeholder="$t('quickAccess.searchWithEnter')"
+          @change="addLine"
         >
           <el-option
-            v-for="item in listProduct"
+            v-for="item in currentOrder.lineOrder"
             :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+            :value="item"
+          >
+            <span style="float: left">{{ item.product.name }}</span>
+            <span style="float: right; color: #8492a6; font-size: 13px">
+              {{
+                formatQuantity({
+                  value: item.quantityOrdered,
+                  precision: item.uom.uom.starndard_precision
+                })
+              }}
+            </span>
+          </el-option>
         </el-select>
       </el-form-item>
     </el-form>
@@ -114,15 +124,15 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     </el-table>
     <el-row>
       <el-col
-        :offset="14"
-        :span="10"
+        :offset="12"
+        :span="12"
         style="border: 1px solid #d3d4d6;border-radius: 10px;padding-left: 10px;padding-right: 10px;margin-top: 10px;"
       >
         <el-row
-          :gutter="20"
+          :gutter="10"
         >
           <el-col
-            :span="14"
+            :span="16"
           >
             <p
               class="total-return-info"
@@ -130,21 +140,21 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               <span class="info-label">
                 {{ $t('form.pos.order.order') }}:
                 <b class="order-info">
-                  {{ 'RM-102' }}
+                  {{ currentOrderReturn.documentNo }}
                 </b>
               </span>
               <br>
               <span class="info-label">
                 {{ $t('form.pos.order.date') }}:
                 <b class="order-info">
-                  {{ '30/08/2023' }}
+                  {{ formatDate(currentOrderReturn.dateOrdered) }}
                 </b>
               </span>
               <br>
               <span class="info-label">
                 {{ $t('form.pos.order.type') }}:
-                <b class="order-info">
-                  {{ 'Orden de Venta Fiscal (POS)' }}
+                <b v-if="!isEmptyValue(currentOrderReturn) && !isEmptyValue(currentOrderReturn.documentType)" class="order-info">
+                  {{ currentOrderReturn.documentType.name }}
                 </b>
               </span>
               <br>
@@ -164,7 +174,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             </p>
           </el-col>
           <el-col
-            :span="10"
+            :span="8"
           >
             <p
               class="total-return-info"
@@ -241,9 +251,9 @@ import {
 import store from '@/store'
 
 // Utils and Helper Methods
-import { formatPrice } from '@/utils/ADempiere/valueFormat.js'
+import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
 import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
-import { isEmptyValue } from '@/utils/ADempiere'
+// import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'ReturnProduct',
@@ -255,8 +265,22 @@ export default defineComponent({
     const listProduct = computed(() => {
       return store.getters.getListProduct
     })
-    const currentOrderReturn = computed(() => {
-      return store.getters.getOrderReturn
+
+    const currentPointOfSales = computed(() => {
+      return store.getters.posAttributes.currentPointOfSales
+    })
+
+    const currentOrder = computed(() => {
+      return store.getters.posAttributes.currentPointOfSales.currentOrder
+    })
+
+    const currentOrderReturn = computed({
+      get() {
+        return store.getters.getOrderReturn
+      },
+      set(value) {
+        store.commit('setOrderReturn', value)
+      }
     })
     // Variable (Let)
     let loading
@@ -269,17 +293,37 @@ export default defineComponent({
     }
 
     function loadARM() {
-      const { currentPointOfSales } = store.getters.posAttributes
+      // const { currentPointOfSales } = store.getters.posAttributes
       store.dispatch('openRMA', {
-        sourceOrderId: currentPointOfSales.currentOrder.id,
-        posId: currentPointOfSales.id
+        sourceOrderId: currentOrder.value.id,
+        posId: currentPointOfSales.value.id
+      })
+        .then(response => {
+          currentOrderReturn.value = {
+            ...response,
+            isLoading: false
+          }
+        })
+    }
+
+    function addLine(line) {
+      store.dispatch('createLineRMA', {
+        sourceOrderLineId: 1157746,
+        quantity: line.quantityOrdered,
+        rmaId: currentOrderReturn.value.id,
+        posId: currentPointOfSales.value.id
       })
     }
 
-    if (isEmptyValue(currentOrderReturn.value)) loadARM()
+    // function selectLine(params) {
+    //   console.log(555)
+    // }
+
+    loadARM()
 
     return {
       // Import
+      formatDate,
       formatPrice,
       formatQuantity,
       // Ref
@@ -287,11 +331,15 @@ export default defineComponent({
       isEditQuantity,
       searchProduct,
       // Computed
+      currentPointOfSales,
       currentOrderReturn,
+      currentOrder,
       listProduct,
       // Methods
       close,
       loadARM,
+      addLine,
+      // selectLine,
       listReturnProduct
     }
   }
