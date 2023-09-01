@@ -1273,6 +1273,9 @@ export default {
                   this.addCollect()
                 }
               })
+              .finally(() => {
+                this.isPayemntLoading = false
+              })
           })
         this.isPayemntLoading = false
         return
@@ -1330,6 +1333,9 @@ export default {
               this.isPayemntLoading = false
               this.addCollect()
             }
+          })
+          .finally(() => {
+            this.isPayemntLoading = false
           })
       }
     },
@@ -1493,7 +1499,7 @@ export default {
         orderUuid,
         paymentUuid
       })
-        .then(() => {
+        .finally(() => {
           this.isUndoPayLoading = false
         })
     },

@@ -477,7 +477,7 @@
               </el-popover>
             </el-card>
           </el-col>
-          <el-col v-show="false" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="allowsReturnOrder" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;max-width: 100px;"
@@ -1657,6 +1657,10 @@ export default {
     },
     openReturnProduct() {
       this.$store.commit('setShowReturnProduct', true)
+      this.$store.dispatch('openRMA', {
+        sourceOrderId: this.currentPointOfSales.currentOrder.id,
+        posId: this.currentPointOfSales.id
+      })
     },
     openCashOpening() {
       if (!isEmptyValue(this.currentPointOfSales.displayCurrency)) {
