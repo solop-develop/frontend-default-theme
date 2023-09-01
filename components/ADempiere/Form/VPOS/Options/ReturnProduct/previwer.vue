@@ -20,44 +20,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
   <el-main
     class="return-product"
   >
-    <el-form
-      label-position="top"
-      label-width="10px"
-      @submit.native.prevent="notSubmitForm"
-    >
-      <el-form-item
-        :label="$t('form.productInfo.codeProduct')"
-        style="width: 100%;"
-      >
-        <el-select
-          v-model="searchProduct"
-          remote
-          filterable
-          reserve-keyword
-          style="width: 100%;"
-          :visible-change="listReturnProduct"
-          :placeholder="$t('quickAccess.searchWithEnter')"
-          @change="addLine"
-        >
-          <el-option
-            v-for="item in currentOrder.lineOrder"
-            :key="item.value"
-            :value="item"
-          >
-            <span style="float: left">{{ item.product.name }}</span>
-            <span style="float: right; color: #8492a6; font-size: 13px">
-              {{
-                formatQuantity({
-                  value: item.quantityOrdered,
-                  precision: item.uom.uom.starndard_precision
-                })
-              }}
-            </span>
-          </el-option>
-        </el-select>
-      </el-form-item>
-    </el-form>
-
     <el-table
       ref="listProducto"
       v-loading="false"
@@ -67,7 +29,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
       :border="true"
       height="350"
       highlight-current-row
-      @cell-dblclick="editLine"
     >
       <template v-for="(valueOrder, item, key) in orderLineDefinition">
         <el-table-column
@@ -79,36 +40,10 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
           :align="valueOrder.isNumeric ? 'right' : 'left'"
         >
           <template slot-scope="scope">
-            <el-input-number
-              v-if="(scope.row.isEditLine && valueOrder.columnName === 'QtyEntered')"
-              ref="editField"
-              v-model="scope.row.quantityOrdered"
-              :autofocus="true"
-              controls-position="right"
-              style="width: 100%;"
-              @change="editQuantityLine(scope.row)"
-            />
-            <span v-else>
-              {{ displayValue(scope.row, valueOrder) }}
-            </span>
+            {{ displayValue(scope.row, valueOrder) }}
           </template>
         </el-table-column>
       </template>
-      <el-table-column
-        :label="$t('form.pos.tableProduct.options')"
-        column-key="value"
-        :align="'center'"
-        width="160"
-      >
-        <template slot-scope="scope">
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-            @click="deleteLine(scope.row)"
-          />
-        </template>
-      </el-table-column>
     </el-table>
     <el-row>
       <el-col
@@ -206,25 +141,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         </el-row>
       </el-col>
     </el-row>
-
-    <el-row :gutter="24" class="products-list-footer">
-      <el-col :span="24">
-        <samp style="float: right; padding-top: 5px;">
-          <el-button
-            type="danger"
-            class="button-base-icon"
-            icon="el-icon-close"
-            @click="close"
-          />
-          <el-button
-            type="primary"
-            class="button-base-icon"
-            icon="el-icon-check"
-            @click="process"
-          />
-        </samp>
-      </el-col>
-    </el-row>
   </el-main>
 </template>
 
@@ -252,12 +168,7 @@ export default defineComponent({
     const isEditQuantity = ref(false)
     // Computed
     const listProduct = computed(() => {
-      return store.getters.getListProduct.map(product => {
-        return {
-          ...product,
-          isEditLine: false
-        }
-      })
+      return store.getters.getSummaryRMA.lines
     })
 
     const currentPointOfSales = computed(() => {
@@ -268,13 +179,8 @@ export default defineComponent({
       return store.getters.posAttributes.currentPointOfSales.currentOrder
     })
 
-    const currentOrderReturn = computed({
-      get() {
-        return store.getters.getOrderReturn
-      },
-      set(value) {
-        store.commit('setOrderReturn', value)
-      }
+    const currentOrderReturn = computed(() => {
+      return store.getters.getSummaryRMA.order
     })
 
     const itemQuantity = computed(() => {
@@ -361,19 +267,6 @@ export default defineComponent({
     }
     function close() {
       store.commit('setShowReturnProduct', false)
-    }
-
-    function loadARM() {
-      store.dispatch('openRMA', {
-        sourceOrderId: currentOrder.value.id,
-        posId: currentPointOfSales.value.id
-      })
-        .then(response => {
-          currentOrderReturn.value = {
-            ...response,
-            isLoading: false
-          }
-        })
     }
 
     function addLine(line) {
@@ -528,8 +421,6 @@ export default defineComponent({
       }
     }
 
-    loadARM()
-
     return {
       // Import
       formatDate,
@@ -549,7 +440,6 @@ export default defineComponent({
       isMobile,
       // Methods
       close,
-      loadARM,
       process,
       addLine,
       editLine,

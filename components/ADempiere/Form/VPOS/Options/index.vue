@@ -872,6 +872,42 @@
       </span>
     </el-dialog>
     <el-dialog
+      :visible.sync="showSummaryReturnProduct"
+      :append-to-body="true"
+      :center="true"
+      :title="$t('form.pos.returnProduct')"
+    >
+      <el-result
+        v-if="!isEmptyValue(summaryReturnProduct)"
+        :icon="summaryReturnProduct.type"
+        :title="summaryReturnProduct.label"
+      />
+      <el-card class="box-card" style="padding-left: 0px; padding-right: 0px">
+        <return-product-previwer
+          :is-previwer="true"
+        />
+      </el-card>
+      <el-checkbox
+        v-model="checked1"
+        :label="$t('form.pos.orderRMA.createNewSubstituteOrder')"
+        :border="true"
+      />
+      <span style="float: right;margin-top: 10px;">
+        <el-button
+          type="danger"
+          class="custom-button-create-bp"
+          icon="el-icon-close"
+          @click="showSummaryReturnProduct = !showSummaryReturnProduct"
+        />
+        <el-button
+          type="primary"
+          class="custom-button-create-bp"
+          icon="el-icon-check"
+          @click="showSummaryReturnProduct = !showSummaryReturnProduct"
+        />
+      </span>
+    </el-dialog>
+    <el-dialog
       :title="$t('form.pos.optionsPoinSales.salesOrder.confirmDelivery')"
       :visible.sync="showDialogoDelivery"
       :center="true"
@@ -940,6 +976,7 @@ import ConfirmDelivery from '@theme/components/ADempiere/Form/VPOS/ConfirmDelive
 import orderLineMixin from '@theme/components/ADempiere/Form/VPOS/Order/orderLineMixin.js'
 import CashOpening from './CashOpening'
 import ReturnProduct from './ReturnProduct'
+import ReturnProductPreviwer from './ReturnProduct/previwer'
 import CashSummaryMovements from './CashSummaryMovements'
 import CashWithdrawal from './Cashwithdrawal'
 import DiscountOrder from './DiscountOrder'
@@ -994,7 +1031,8 @@ export default {
     TableTimeControl,
     MnemonicCommand,
     ComponentDialgo,
-    ReturnProduct
+    ReturnProduct,
+    ReturnProductPreviwer
   },
 
   mixins: [
@@ -1013,6 +1051,7 @@ export default {
       activeName: '',
       processPos: '',
       pin: '',
+      checked1: false,
       isAction: false,
       attributePin: {},
       validatePin: true,
@@ -1034,6 +1073,17 @@ export default {
   },
 
   computed: {
+    showSummaryReturnProduct: {
+      get() {
+        return this.$store.getters.getShowSummaryRMA
+      },
+      set(value) {
+        this.$store.commit('setShowSummaryRMA', value)
+      }
+    },
+    summaryReturnProduct() {
+      return this.$store.getters.getSummaryRMA
+    },
     showDialogoDelivery: {
       get() {
         return this.$store.getters.getShowConfirmDelivery
