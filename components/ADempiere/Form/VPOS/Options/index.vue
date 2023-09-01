@@ -489,7 +489,7 @@
                   :center="true"
                   :modal="false"
                   :append-to-body="true"
-                  width="80%"
+                  width="90%"
                 >
                   <return-product />
                 </el-dialog>

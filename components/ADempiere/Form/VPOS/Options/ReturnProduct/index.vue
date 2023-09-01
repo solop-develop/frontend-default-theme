@@ -61,63 +61,38 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     <el-table
       ref="listProducto"
       v-loading="false"
-      :data="[]"
+      :data="listProduct"
       :empty-text="$t('quickAccess.searchWithEnter')"
       border
       fit
       height="350"
       highlight-current-row
     >
-      <el-table-column
-        prop="product.value"
-        :label="$t('form.productInfo.code')"
-      />
-      <el-table-column
-        prop="product.name"
-        :label="$t('form.pos.tableProduct.product')"
-      />
-      <el-table-column
-        prop="quantity"
-        :label="$t('form.pos.tableProduct.quantity')"
-        align="right"
-        :width="isEditQuantity ? '210px' : '110px'"
-      >
-        <template slot-scope="scope">
-          <el-input-number
-            v-if="isEditQuantity"
-            v-model="scope.row.quantity"
-            controls-position="right"
-            :min="1"
-          />
-          <span v-else>
-            {{ formatQuantity({ value: scope.row.quantity }) }}
-          </span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="uom.uom.name"
-        :label="$t('form.pos.tableProduct.uom')"
-      />
-      <el-table-column
-        prop="quantity"
-        :label="$t('form.pos.tableProduct.movementQuantity')"
-        align="right"
-        width="200px"
-      >
-        <template slot-scope="scope">
-          {{ formatQuantity({ value: scope.row.movement_quantity }) }}
-        </template>
-      </el-table-column>
+      <template v-for="(valueOrder, item, key) in orderLineDefinition">
+        <el-table-column
+          v-if="displayLabel(valueOrder)"
+          :key="key"
+          :column-key="valueOrder.columnName"
+          :label="valueOrder.label"
+          :width="sizeTableColumn(valueOrder)"
+          :align="valueOrder.isNumeric ? 'right' : 'left'"
+        >
+          <template slot-scope="scope">
+            {{ displayValue(scope.row, valueOrder) }}
+          </template>
+        </el-table-column>
+      </template>
       <el-table-column
         :label="$t('form.pos.tableProduct.options')"
         column-key="value"
         width="160"
       >
-        <template>
+        <template slot-scope="scope">
           <el-button
             type="danger"
             icon="el-icon-delete"
             size="mini"
+            @click="deleteLine(scope.row)"
           />
         </template>
       </el-table-column>
@@ -161,14 +136,14 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               <span class="info-label">
                 {{ $t('form.pos.order.itemQuantity') }}:
                 <b class="order-info">
-                  {{ 0.00 }}
+                  {{ formatQuantity({ value: itemQuantity }) }}
                 </b>
               </span>
               <br>
               <span class="info-label">
                 {{ $t('form.pos.order.numberLines') }}:
                 <b class="order-info">
-                  {{ 0.00 }}
+                  {{ listProduct.length }}
                 </b>
               </span>
             </p>
@@ -180,37 +155,37 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
               class="total-return-info"
             >
               <span class="info-label">
+                {{ $t('form.pos.order.seller') }}:
+                <b v-if="!isEmptyValue(currentOrderReturn.salesRepresentative)" class="order-info">
+                  {{ currentOrderReturn.salesRepresentative.name }}
+                </b>
+              </span>
+              <br>
+              <span class="info-label">
                 {{ $t('form.pos.order.subTotal') }}:
-                <b class="order-info">
-                  {{ 0.00 }}
+                <b v-if="!isEmptyValue(currentOrderReturn.priceList) && !isEmptyValue(currentOrderReturn.priceList.currency)" class="order-info">
+                  {{ formatPrice(currentOrderReturn.totalLines, currentOrderReturn.priceList.currency.iso_code) }}
                 </b>
               </span>
               <br>
               <span class="info-label">
                 {{ $t('form.pos.tableProduct.displayDiscountAmount') }}:
-                <b class="order-info">
-                  {{ 0.00 }}
+                <b v-if="!isEmptyValue(currentOrderReturn.priceList) && !isEmptyValue(currentOrderReturn.priceList.currency)" class="order-info">
+                  {{ formatPrice(currentOrderReturn.discountAmount, currentOrderReturn.priceList.currency.iso_code) }}
                 </b>
               </span>
               <br>
               <span class="info-label">
                 {{ $t('form.pos.order.tax') }}:
-                <b class="order-info">
-                  {{ 0.00 }}
-                </b>
-              </span>
-              <br>
-              <span class="info-label">
-                {{ $t('form.pos.order.subTotal') }}:
-                <b class="order-info">
-                  {{ 0.00 }}
+                <b v-if="!isEmptyValue(currentOrderReturn.priceList) && !isEmptyValue(currentOrderReturn.priceList.currency)" class="order-info">
+                  {{ formatPrice(currentOrderReturn.taxAmount, currentOrderReturn.priceList.currency.iso_code) }}
                 </b>
               </span>
               <br>
               <span class="info-label">
                 {{ $t('form.pos.order.total') }}:
-                <b class="order-info">
-                  {{ 0.00 }}
+                <b v-if="!isEmptyValue(currentOrderReturn.priceList) && !isEmptyValue(currentOrderReturn.priceList.currency)" class="order-info">
+                  {{ formatPrice(currentOrderReturn.grandTotal, currentOrderReturn.priceList.currency.iso_code) }}
                 </b>
               </span>
             </p>
@@ -232,7 +207,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             type="primary"
             class="button-base-icon"
             icon="el-icon-check"
-            @click="close"
+            @click="process"
           />
         </samp>
       </el-col>
@@ -249,11 +224,12 @@ import {
   ref
 } from '@vue/composition-api'
 import store from '@/store'
+import lang from '@/lang'
 
 // Utils and Helper Methods
 import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
 import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
-// import { isEmptyValue } from '@/utils/ADempiere'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 export default defineComponent({
   name: 'ReturnProduct',
@@ -276,10 +252,88 @@ export default defineComponent({
 
     const currentOrderReturn = computed({
       get() {
+        // console.log({ qlq: store.getters.getOrderReturn })
         return store.getters.getOrderReturn
       },
       set(value) {
         store.commit('setOrderReturn', value)
+      }
+    })
+
+    const itemQuantity = computed(() => {
+      const result = listProduct.value.map(order => {
+        return order.quantity
+      })
+
+      if (!isEmptyValue(result)) {
+        return result.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        })
+      }
+      return 0
+    })
+
+    const isMobile = computed(() => {
+      return store.state.app.device === 'mobile'
+    })
+
+    const orderLineDefinition = computed(() => {
+      return {
+        lineDescription: {
+          columnName: 'LineDescription',
+          label: lang.t('form.pos.tableProduct.product'),
+          isNumeric: false,
+          size: 'auto'
+        },
+        currentPrice: {
+          columnName: 'CurrentPrice',
+          label: lang.t('form.productInfo.price'),
+          isNumeric: true,
+          size: '150px'
+        },
+        quantityOrdered: {
+          columnName: 'QtyEntered',
+          label: lang.t('form.pos.tableProduct.quantity'),
+          isNumeric: true,
+          size: '125px'
+        },
+        uom: {
+          columnName: 'UOM',
+          label: lang.t('form.pos.tableProduct.uom'),
+          isNumeric: false,
+          size: '75px'
+        },
+        discount: {
+          columnName: 'Discount',
+          label: lang.t('form.pos.order.discount'),
+          isNumeric: true,
+          size: '100px'
+        },
+        discountTotal: {
+          columnName: 'DiscountTotal',
+          label: lang.t('form.pos.tableProduct.displayDiscountAmount'),
+          isNumeric: true,
+          size: '125px'
+        },
+        discounDisplayTaxIndicator: {
+          columnName: 'taxIndicator',
+          label: lang.t('form.pos.tableProduct.taxRate'),
+          isNumeric: true,
+          size: '80px'
+        },
+        discounDisplayTaxAmounttTotal: {
+          columnName: 'DisplayTaxAmount',
+          label: lang.t('form.pos.tableProduct.taxAmount'),
+          isNumeric: true,
+          size: '150px'
+        },
+        grandTotal: {
+          columnName: 'GrandTotal',
+          label: 'Total',
+          isNumeric: true,
+          isVisible: true,
+          size: '150px'
+        }
       }
     })
     // Variable (Let)
@@ -293,7 +347,6 @@ export default defineComponent({
     }
 
     function loadARM() {
-      // const { currentPointOfSales } = store.getters.posAttributes
       store.dispatch('openRMA', {
         sourceOrderId: currentOrder.value.id,
         posId: currentPointOfSales.value.id
@@ -308,16 +361,139 @@ export default defineComponent({
 
     function addLine(line) {
       store.dispatch('createLineRMA', {
-        sourceOrderLineId: 1157746,
+        sourceOrderLineId: line.id,
         quantity: line.quantityOrdered,
         rmaId: currentOrderReturn.value.id,
         posId: currentPointOfSales.value.id
       })
+      searchProduct.value = ''
     }
 
-    // function selectLine(params) {
-    //   console.log(555)
-    // }
+    function displayLabel(row) {
+      if (isMobile.value) {
+        if (row.columnName === 'LineDescription') {
+          return true
+        } else if (row.columnName === 'CurrentPrice') {
+          return true
+        } else if (row.columnName === 'QtyEntered') {
+          return true
+        } else if (row.columnName === 'GrandTotal') {
+          return true
+        }
+        return false
+      }
+      if (row.columnName === 'ConvertedAmount') {
+        return !isEmptyValue(currentPointOfSales.value.displayCurrency)
+      } else if (row.columnName === 'Discount') {
+        return currentPointOfSales.value.isDisplayDiscount
+      } else if (row.columnName === 'DiscountTotal') {
+        return currentPointOfSales.value.isDisplayDiscount
+      } else if (row.columnName === 'taxIndicator') {
+        return currentPointOfSales.value.isDisplayTaxAmount
+      } else if (row.columnName === 'DisplayTaxAmount') {
+        return currentPointOfSales.value.isDisplayTaxAmount
+      } else if (row.columnName === 'GrandTotal') {
+        return true
+      }
+      return true
+    }
+
+    function sizeTableColumn(table) {
+      if (isMobile.value) {
+        if (table.columnName === 'LineDescription') {
+          return table.size
+        } else if (table.columnName === 'CurrentPrice') {
+          return '100px'
+        } else if (table.columnName === 'QtyEntered') {
+          return '100px'
+        } else if (table.columnName === 'GrandTotal') {
+          return '90px'
+        }
+        return
+      }
+
+      return table.size
+    }
+
+    /**
+     * Show the correct display format
+     * @param {object} row record
+     * @param {object} orderLine or field definition
+     */
+    function displayValue(row, orderLine) {
+      const { columnName } = orderLine
+      // const iSOCode = this.isEmptyValue(currentPointOfSales.value.displayCurrency) ? '' : currentPointOfSales.value.displayCurrency.iSOCode
+      if (columnName === 'LineDescription') {
+        if (!isEmptyValue(row.resourceAssignment)) return row.product.name + ' - (' + row.resourceAssignment.name + ')'
+        if (isEmptyValue(row.product.name)) return row.description
+        if (isEmptyValue(row.product.value)) return row.charge.columnName
+        if (isMobile.value) {
+          return row.product.name
+        }
+        return row.product.value + ' - ' + row.product.name
+      }
+      const currency = this.$store.getters.posAttributes.currentPointOfSales.currentOrder.priceList.currency.iso_code
+      if (columnName === 'CurrentPrice') {
+        let price = row.price
+        if (!currentPointOfSales.value.isDisplayTaxAmount && !currentPointOfSales.value.isDisplayDiscount) {
+          price = row.priceWithTax
+        }
+        if (isMobile.value) {
+          return this.formatPrice(price)
+        }
+        return this.formatPrice(price, currency)
+      } else if (columnName === 'QtyEntered') {
+        if (isEmptyValue(row.uom.uom)) {
+          return formatQuantity({
+            value: row.quantityOrdered
+          })
+        }
+        let precision = row.uom.uom.starndard_precision
+        if (isEmptyValue(precision)) {
+          precision = 0
+        }
+        return formatQuantity({
+          value: row.quantityOrdered,
+          precision
+        })
+      } else if (columnName === 'UOM') {
+        return row.uom.uom.name
+      } else if (columnName === 'Discount') {
+        return formatQuantity({ value: row.discount }) + ' %'
+      } else if (columnName === 'taxIndicator') {
+        const rate = row.taxRate.rate
+        let taxIndicator = Number.parseFloat(rate).toFixed(2) + ' %'
+        if (rate <= 0) {
+          taxIndicator = row.taxRate.name
+        }
+        return taxIndicator
+      } else if (columnName === 'GrandTotal') {
+        let price = row.totalAmountWithTax
+        if (currentPointOfSales.value.currentPriceList.isTaxIncluded) {
+          price = row.totalAmount
+        }
+        if (isMobile.value) {
+          return this.formatPrice(price)
+        }
+        return this.formatPrice(price, currency)
+      } else if (columnName === 'DiscountTotal') {
+        return this.formatPrice(row.totalDiscountAmount, currency)
+      } else if (columnName === 'DisplayTaxAmount') {
+        return this.formatPrice(row.totalTaxAmount, currency)
+      }
+    }
+
+    function deleteLine(row) {
+      console.log({ row })
+      store.dispatch('deleteLineRMA', {
+        id: row.id,
+        posId: currentPointOfSales.value.id
+      })
+    }
+
+    function process() {
+      store.dispatch('processRma')
+    }
 
     loadARM()
 
@@ -332,13 +508,21 @@ export default defineComponent({
       searchProduct,
       // Computed
       currentPointOfSales,
+      orderLineDefinition,
       currentOrderReturn,
+      itemQuantity,
       currentOrder,
       listProduct,
+      isMobile,
       // Methods
       close,
       loadARM,
+      process,
       addLine,
+      deleteLine,
+      displayLabel,
+      displayValue,
+      sizeTableColumn,
       // selectLine,
       listReturnProduct
     }
