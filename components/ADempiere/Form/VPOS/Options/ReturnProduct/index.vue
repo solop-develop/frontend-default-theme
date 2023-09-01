@@ -521,7 +521,6 @@ export default defineComponent({
         .finally(() => {
           row.isEditLine = !row.isEditLine
         })
-      
     }
 
     function process() {
