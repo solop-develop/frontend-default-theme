@@ -959,6 +959,7 @@ import {
   createNewReturnOrder,
   deleteOrder,
   reverseSales,
+  copyOrder,
   processOrder
 } from '@/api/ADempiere/form/point-of-sales.js'
 import { createShipment, shipments } from '@/api/ADempiere/form/point-of-sales.js'
@@ -2071,6 +2072,14 @@ export default {
       if (isEmptyValue(this.currentOrder.uuid)) {
         return ''
       }
+      copyOrder({
+        posId: this.currentPointOfSales.id,
+        orderId: this.currentOrder.id,
+        salesRepresentativeId: this.currentPointOfSales.salesRepresentative.id
+      })
+        .then(response => {
+          console.log({ response })
+        })
       console.info('Support Copy Order', this.currentOrder.uuid)
     },
     copyLineOrder() {
