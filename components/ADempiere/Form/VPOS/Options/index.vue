@@ -43,7 +43,7 @@
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
-                @click="true ? validateOption($t('form.pos.pinMessage.newOrder'), 'IsAllowsCreateOrder') : newOrder()"
+                @click="!allowsCreateOrder ? validateOption($t('form.pos.pinMessage.newOrder'), 'IsAllowsCreateOrder') : newOrder()"
               >
                 <i class="el-icon-news" />
                 <br>
@@ -665,7 +665,7 @@
       :visible.sync="isComputedRender"
       :is-loaded-panel="isComputedRender"
       close-on-press-escape
-      width="70%"
+      width="80%"
       center
       class="dialogo-seller"
       @shortkey.native="cashManagementModal"
@@ -789,6 +789,7 @@
       :visible.sync="showCashClose"
       :append-to-body="true"
       :center="true"
+      width="80%"
       :title="$t(summaryCashClose.title)"
     >
       <el-result
