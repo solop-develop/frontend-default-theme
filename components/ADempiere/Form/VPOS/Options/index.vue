@@ -1051,7 +1051,7 @@ export default {
       activeName: '',
       processPos: '',
       pin: '',
-      checked1: false,
+      checked1: true,
       isAction: false,
       attributePin: {},
       validatePin: true,
@@ -2128,7 +2128,19 @@ export default {
         salesRepresentativeId: this.currentPointOfSales.salesRepresentative.id
       })
         .then(response => {
-          console.log({ response })
+          this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
+          this.$message({
+            type: 'success',
+            message: 'Ok',
+            showClose: true
+          })
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
         })
       console.info('Support Copy Order', this.currentOrder.uuid)
     },
