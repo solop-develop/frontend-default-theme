@@ -33,8 +33,24 @@
           />
           <el-table-column
             v-if="isShowCashSummaryMovements"
+            prop="invoice_document_no"
+            :label="$t('form.pos.collect.invoceNr')"
+          />
+          <el-table-column
+            v-if="isShowCashSummaryMovements"
+            prop="order_document_no"
+            :label="$t('form.pos.collect.orderNr')"
+          />
+          <el-table-column
+            v-if="isShowCashSummaryMovements"
             prop="customer.name"
             :label="$t('form.pos.collect.customer')"
+          />
+          <el-table-column
+            v-if="isShowCashSummaryMovements"
+            prop="charge.name"
+            width="150"
+            :label="$t('pointOfSales.collection.chargeAmount')"
           />
           <el-table-column
             v-if="isShowCashSummaryMovements"
@@ -43,6 +59,7 @@
           />
           <el-table-column
             prop="payment_method_name"
+            width="150"
             :label="$t('form.pos.collect.paymentMethod')"
           />
           <el-table-column
