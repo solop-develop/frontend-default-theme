@@ -277,7 +277,8 @@ export default {
         posUuid: this.currentPointOfSales.uuid,
         pin,
         requestedAmount: (typeof value === 'number') ? value : '',
-        requestedAccess
+        requestedAccess,
+        orderId: this.currentOrder.id
       })
         .then(response => {
           this.validatePin = true

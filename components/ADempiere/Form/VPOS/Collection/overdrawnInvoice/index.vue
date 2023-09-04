@@ -1269,7 +1269,8 @@ export default {
     openPinPayment(pin) {
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
-        pin: this.pinPostPayment
+        pin: this.pinPostPayment,
+        orderId: this.currentOrder.id
       })
         .then(response => {
           this.pinPostPayment = ''
@@ -1682,7 +1683,7 @@ export default {
           typeRefund: this.option,
           action: 'openBalanceInvoice',
           value: this.currentOrder.openAmount,
-          requestedAccess: 'IsAllowsInvoiceOpen',
+          requestedAccess: this.currentPointOfSales.currentOrder.openAmount > 0 ? 'IsAllowsInvoiceOpen' : 'IsAllowsWriteOffAmount',
           label: this.$t('form.pos.pinMessage.invoiceOpen')
         }
         this.visible = true
@@ -1777,7 +1778,7 @@ export default {
               action: 'openBalanceInvoice',
               type: 'actionPos',
               label: this.$t('form.pos.pinMessage.invoiceOpen'),
-              requestedAccess: 'IsAllowsInvoiceOpen'
+              requestedAccess: this.currentPointOfSales.currentOrder.openAmount > 0 ? 'IsAllowsInvoiceOpen' : 'IsAllowsWriteOffAmount'
             }
             this.visible = true
             this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1826,7 +1827,7 @@ export default {
                 action: 'openBalanceInvoice',
                 type: 'actionPos',
                 label: this.$t('form.pos.pinMessage.invoiceOpen'),
-                requestedAccess: 'IsAllowsInvoiceOpen'
+                requestedAccess: this.currentPointOfSales.currentOrder.openAmount > 0 ? 'IsAllowsInvoiceOpen' : 'IsAllowsWriteOffAmount'
               }
               this.visible = true
               this.$store.dispatch('changePopoverOverdrawnInvoice', { attributePin, visible: true })
@@ -1875,7 +1876,7 @@ export default {
               action: 'openBalanceInvoice',
               type: 'actionPos',
               label: this.$t('form.pos.pinMessage.invoiceOpen'),
-              requestedAccess: 'IsAllowsInvoiceOpen'
+              requestedAccess: this.currentPointOfSales.currentOrder.openAmount > 0 ? 'IsAllowsInvoiceOpen' : 'IsAllowsWriteOffAmount'
             }
             this.visible = true
             this.$store.dispatch('sendCreateCustomerAccount', this.$store.getters.getAddRefund)

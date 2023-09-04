@@ -500,6 +500,19 @@
               </p>
             </el-card>
           </el-col>
+          <!-- Create New Order RMA -->
+          <el-col v-if="allowsReturnOrder" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <p
+                :class="classblockOption"
+                @click="adviserPin ? validateOption($t('form.pos.optionsPoinSales.salesOrder.copyOrder')) : newOrderRMA()"
+              >
+                <i class="el-icon-document-copy" />
+                <br>
+                {{ $t('form.pos.createNewOrderRMA') }}
+              </p>
+            </el-card>
+          </el-col>
         </el-row>
       </el-collapse-item>
 
@@ -541,7 +554,7 @@
               </p>
             </el-card>
           </el-col>
-          <el-col v-if="isAllowsCashClosing" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="isAllowsDetailCashClosing" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
                 style="cursor: pointer; text-align: center !important; color: black;min-height: 50px;"
@@ -1277,6 +1290,9 @@ export default {
     isAllowsCashClosing() {
       return this.currentPointOfSales.isAllowsCashClosing
     },
+    isAllowsDetailCashClosing() {
+      return this.currentPointOfSales.isAllowsDetailCashClosing
+    },
     isAllowsCashWithdrawal() {
       return this.currentPointOfSales.isAllowsCashWithdrawal
     },
@@ -1799,6 +1815,7 @@ export default {
         posUuid: this.currentPointOfSales.uuid,
         pin,
         requestedAccess,
+        orderId: this.currentOrder.id,
         requestedAmount: value
       })
         .then(response => {
@@ -2117,6 +2134,31 @@ export default {
       //   }
       // })
     },
+    newOrderRMA() {
+      if (isEmptyValue(this.currentOrder.uuid)) {
+        return ''
+      }
+      // newOrderFromRMA({
+      //   posId: this.currentPointOfSales.id,
+      //   sourceRmaId: this.currentOrder.id,
+      //   salesRepresentativeId: this.currentPointOfSales.salesRepresentative.id
+      // })
+      //   .then(response => {
+      //     this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
+      //     this.$message({
+      //       type: 'success',
+      //       message: 'Ok',
+      //       showClose: true
+      //     })
+      //   })
+      //   .catch(error => {
+      //     this.$message({
+      //       type: 'error',
+      //       message: error.message,
+      //       showClose: true
+      //     })
+      //   })
+    },
     copyOrder() {
       // TODO: Support Copy Order
       if (isEmptyValue(this.currentOrder.uuid)) {
@@ -2142,7 +2184,6 @@ export default {
             showClose: true
           })
         })
-      console.info('Support Copy Order', this.currentOrder.uuid)
     },
     copyLineOrder() {
       const process = this.$store.getters.getProcess(this.posProcess[1].uuid)

@@ -534,6 +534,7 @@ export default {
       validatePin({
         posUuid: this.currentPointOfSales.uuid,
         pin,
+        orderId: this.currentOrder.id,
         requestedAccess
       })
         .then(response => {
