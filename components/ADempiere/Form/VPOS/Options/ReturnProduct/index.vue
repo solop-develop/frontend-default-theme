@@ -17,7 +17,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 -->
 
 <template>
-  <el-main
+  <div
     class="return-product"
   >
     <el-form
@@ -65,7 +65,6 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
       fit
       :empty-text="$t('quickAccess.searchWithEnter')"
       :border="true"
-      height="350"
       highlight-current-row
       @cell-dblclick="editLine"
     >
@@ -82,7 +81,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
             <el-input-number
               v-if="(scope.row.isEditLine && valueOrder.columnName === 'QtyEntered')"
               ref="editField"
-              v-model="scope.row.quantityOrdered"
+              v-model="scope.row.quantity"
               :autofocus="true"
               controls-position="right"
               style="width: 100%;"
@@ -98,7 +97,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         :label="$t('form.pos.tableProduct.options')"
         column-key="value"
         :align="'center'"
-        width="160"
+        width="100"
       >
         <template slot-scope="scope">
           <el-button
@@ -112,8 +111,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
     </el-table>
     <el-row>
       <el-col
-        :offset="12"
-        :span="12"
+        :offset="10"
+        :span="14"
         style="border: 1px solid #d3d4d6;border-radius: 10px;padding-left: 10px;padding-right: 10px;margin-top: 10px;"
       >
         <el-row
@@ -225,7 +224,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         </samp>
       </el-col>
     </el-row>
-  </el-main>
+  </div>
 </template>
 
 <script>
@@ -300,7 +299,7 @@ export default defineComponent({
           columnName: 'LineDescription',
           label: lang.t('form.pos.tableProduct.product'),
           isNumeric: false,
-          size: 'auto'
+          size: '300px'
         },
         currentPrice: {
           columnName: 'CurrentPrice',
@@ -312,13 +311,13 @@ export default defineComponent({
           columnName: 'QtyEntered',
           label: lang.t('form.pos.tableProduct.quantity'),
           isNumeric: true,
-          size: '200px'
+          size: '150px'
         },
         uom: {
           columnName: 'UOM',
           label: lang.t('form.pos.tableProduct.uom'),
           isNumeric: false,
-          size: '75px'
+          size: 'auto'
         },
         discount: {
           columnName: 'Discount',
@@ -510,7 +509,7 @@ export default defineComponent({
     function editQuantityLine(row) {
       store.dispatch('updateLineRMA', {
         id: row.id,
-        quantity: row.quantityOrdered,
+        quantity: row.quantity,
         posId: currentPointOfSales.value.id
       })
         .finally(() => {
@@ -527,8 +526,6 @@ export default defineComponent({
         row.isEditLine = !row.isEditLine
       }
     }
-
-    loadARM()
 
     return {
       // Import
