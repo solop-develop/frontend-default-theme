@@ -52,6 +52,7 @@
                     <field-definition
                       :metadata-field="field.columnName === 'PayAmt' ? {
                         ...field,
+                        isDisabledFieldPos: isDisabledLogiPos(field),
                         labelCurrency: currentFieldCurrency
                       } : field"
                       :container-uuid="'Collection'"
@@ -207,6 +208,31 @@
                       </el-form-item>
                     </div>
                   </el-col>
+                  <!-- isdisplayLogicCreditMemo -->
+                  <el-col v-if="isdisplayLogicCreditMemo" :span="size">
+                    <div class="field-definition">
+                      <el-form-item
+                        :label="$t('pointOfSales.collection.creditMemo')"
+                        class="field-standard"
+                      >
+                        <el-select
+                          v-model="currentCreditMemo"
+                          style="display: block;"
+                          filterable
+                          clearable
+                          @visible-change="showListCreditMemo"
+                          @change="selectCreditMemo"
+                        >
+                          <el-option
+                            v-for="item in listCreditMemo"
+                            :key="item.id"
+                            :label="item.display"
+                            :value="item.id"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-col>
                   <el-col
                     v-for="field in hiddenFieldsList"
                     :key="field.sequence"
@@ -215,8 +241,7 @@
                     <field-definition
                       :metadata-field="{
                         ...field,
-                        isQueryCriteria: (field.columnName === 'ReferenceNo') ? false : !isEmptyValue(currentBankAccount),
-                        isReadOnlyFromLogic: (field.columnName === 'ReferenceNo') ? false : !isEmptyValue(currentBankAccount)
+                        isDisabledFieldPos: isDisabledLogiPos(field)
                       }"
                       :container-uuid="'Collection'"
                       :container-manager="{
@@ -490,6 +515,8 @@ export default {
       showOpenSummary: false,
       currentBank: '',
       recipientBank: '',
+      listCreditMemo: [],
+      currentCreditMemo: '',
       listBanks: this.$store.getters.getListBanks,
       loadingBank: false,
       summaryProcessOrder: {},
@@ -499,10 +526,23 @@ export default {
   },
 
   computed: {
+    isDisabledFieldPos() {
+      if (this.isdisplayLogicBank) {
+        return !this.isEmptyValue(this.currentBankAccount)
+      } else if (this.isdisplayLogicCreditMemo) {
+        return !this.isEmptyValue(this.currentCreditMemo)
+      }
+      return false
+    },
     isdisplayLogicBank() {
       if (this.isEmptyValue(this.currentAvailablePaymentMethods)) return false
       if (this.isEmptyValue(this.currentAvailablePaymentMethods.payment_method)) return false
       return ['D', 'K', 'T', 'A', 'P', 'C'].includes(this.currentAvailablePaymentMethods.payment_method.tender_type)
+    },
+    isdisplayLogicCreditMemo() {
+      if (this.isEmptyValue(this.currentAvailablePaymentMethods)) return false
+      if (this.isEmptyValue(this.currentAvailablePaymentMethods.payment_method)) return false
+      return ['M'].includes(this.currentAvailablePaymentMethods.payment_method.tender_type)
     },
     listCurrency() {
       return this.$store.getters.getCurrenciesList
@@ -1261,6 +1301,7 @@ export default {
               posUuid,
               orderUuid,
               bankUuid,
+              invoiceReferenceId: this.currentCreditMemo,
               customerBankAccountUuid: response.customerBankAccountUuid,
               amount: this.round(this.amontSend, this.standardPrecision),
               convertedAmount: this.amontSend * this.dayRate.divideRate,
@@ -1321,6 +1362,7 @@ export default {
           posUuid,
           orderUuid,
           bankUuid,
+          invoiceReferenceId: this.currentCreditMemo,
           customerBankAccountUuid: customerBankAccountUuid,
           amount: this.round(this.amontSend, this.standardPrecision),
           convertedAmount: this.amontSend * this.dayRate.divideRate,
@@ -1512,6 +1554,63 @@ export default {
           this.listBanks = responseListBanks
           this.loadingBank = false
         })
+    },
+    showListCreditMemo(isShow) {
+      if (!isShow) return
+      this.$store.dispatch('searchListCreditMemo')
+        .then(response => {
+          this.listCreditMemo = response.map(list => {
+            return {
+              ...list,
+              display: list.documentNo + ' - ' + formatPrice(list.openAmount, list.currency.iso_code)
+            }
+          })
+        })
+    },
+    selectCreditMemo(id) {
+      const current = this.listCreditMemo.find(list => id === list.id)
+      // this.$store.commit('setCurrenciesList', addListCurrency)
+      // const addListCurrency = this.listCurrency.push(current.currency)
+      if (this.isEmptyValue(current)) {
+        this.clearCollection()
+        return
+      }
+      this.currentFieldCurrency = current.currency.iso_code
+      this.$store.commit('updateValuesOfContainer', {
+        containerUuid: 'Collection',
+        attributes: [
+          {
+            columnName: 'PayAmt',
+            value: current.openAmount
+          },
+          {
+            columnName: 'Description',
+            value: current.description
+          },
+          {
+            columnName: 'ReferenceNo',
+            value: current.documentNo
+          },
+          {
+            columnName: 'DateTrx',
+            value: current.documentDate
+          }
+        ]
+      })
+    },
+    /**
+     * Disable Field According to the type of payment
+     * @param {Object} field
+     */
+    isDisabledLogiPos(field) {
+      if (this.isdisplayLogicBank) {
+        const { columnName } = field
+        if (columnName === 'ReferenceNo' || columnName === 'DateTrx' || columnName === 'PayAmt') return false
+        return !this.isEmptyValue(this.currentBankAccount)
+      } else if (this.isdisplayLogicCreditMemo) {
+        return !this.isEmptyValue(this.currentCreditMemo)
+      }
+      return false
     },
     remoteMethodBank(query) {
       if (query !== '') {
@@ -1815,6 +1914,8 @@ export default {
           }
         ]
       })
+      this.currentCreditMemo = ''
+      this.currentBank = ''
     },
     loadProcess() {
       if (this.$store.getters.getShowCollectionPos) this.$store.commit('setShowPOSCollection', !this.$store.getters.getShowCollectionPos)
@@ -1867,11 +1968,9 @@ export default {
     },
     numberPrecision(amount, precision) {
       const num = Number((Math.round(amount * 100) / 100).toFixed(precision))
-      // console.log({ num })
       if (Math.sign(num) === 1) {
         return num
       }
-      // console.log(Math.abs(num), this.formatQuantity(Math.abs(num)), { num }, Number(Number.parseFloat(Math.abs(num)).toFixed(2)))
       return Number(Number.parseFloat(Math.abs(num)).toFixed(2))
     }
   }

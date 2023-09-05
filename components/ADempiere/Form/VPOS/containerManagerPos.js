@@ -69,8 +69,8 @@ export function isDisplayedDefault({ isMandatory }) {
   return true
 }
 
-export function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic }) {
-  return isQueryCriteria && isReadOnlyFromLogic
+export function isReadOnlyField({ isQueryCriteria, isReadOnlyFromLogic, isDisabledFieldPos = false }) {
+  return isQueryCriteria && isReadOnlyFromLogic || isDisabledFieldPos
 }
 
 export function generalInfoSearch({
