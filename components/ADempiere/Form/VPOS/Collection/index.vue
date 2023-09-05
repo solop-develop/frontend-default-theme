@@ -1600,7 +1600,7 @@ export default {
     },
     /**
      * Disable Field According to the type of payment
-     * @param {Object} field 
+     * @param {Object} field
      */
     isDisabledLogiPos(field) {
       if (this.isdisplayLogicBank) {
@@ -1667,7 +1667,7 @@ export default {
       this.$store.commit('setProcessLoading', true)
       processOrder({
         posUuid,
-        orderUuid,  
+        orderUuid,
         isOpenRefund: !this.isEmptyValue(this.$store.getters.getListRefundReference),
         createPayments: !this.isEmptyValue(payment),
         payments: payment
