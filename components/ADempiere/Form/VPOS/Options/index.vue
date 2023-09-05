@@ -501,15 +501,15 @@
             </el-card>
           </el-col>
           <!-- Create New Order RMA -->
-          <el-col v-if="allowsReturnOrder" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="isOnlyRMA" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <p
                 :class="classblockOption"
-                @click="adviserPin ? validateOption($t('form.pos.optionsPoinSales.salesOrder.copyOrder')) : newOrderRMA()"
+                @click="adviserPin ? validateOption($t('form.pos.optionsPoinSales.salesOrder.newOrderFromRMA')) : newOrderRMA()"
               >
                 <i class="el-icon-document-copy" />
                 <br>
-                {{ $t('form.pos.createNewOrderRMA') }}
+                {{ $t('form.pos.optionsPoinSales.salesOrder.newOrderFromRMA') }}
               </p>
             </el-card>
           </el-col>
@@ -1012,6 +1012,9 @@ import {
   copyOrder,
   processOrder
 } from '@/api/ADempiere/form/point-of-sales.js'
+import {
+  newOrderFromRMA
+} from '@/api/ADempiere/form/ReturnRMA.js'
 import { createShipment, shipments } from '@/api/ADempiere/form/point-of-sales.js'
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
 
@@ -1298,6 +1301,9 @@ export default {
     },
     isAllowsAllocateSeller() {
       return this.currentPointOfSales.isAllowsAllocateSeller
+    },
+    isOnlyRMA() {
+      return this.currentOrder.isRma
     },
     allowsConfirmShipment() {
       return this.currentPointOfSales.isAllowsConfirmShipment
@@ -2135,29 +2141,29 @@ export default {
       // })
     },
     newOrderRMA() {
-      if (isEmptyValue(this.currentOrder.uuid)) {
+      if (isEmptyValue(this.currentOrder.id)) {
         return ''
       }
-      // newOrderFromRMA({
-      //   posId: this.currentPointOfSales.id,
-      //   sourceRmaId: this.currentOrder.id,
-      //   salesRepresentativeId: this.currentPointOfSales.salesRepresentative.id
-      // })
-      //   .then(response => {
-      //     this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
-      //     this.$message({
-      //       type: 'success',
-      //       message: 'Ok',
-      //       showClose: true
-      //     })
-      //   })
-      //   .catch(error => {
-      //     this.$message({
-      //       type: 'error',
-      //       message: error.message,
-      //       showClose: true
-      //     })
-      //   })
+      newOrderFromRMA({
+        posId: this.currentPointOfSales.id,
+        sourceRmaId: this.currentOrder.id,
+        salesRepresentativeId: this.currentPointOfSales.salesRepresentative.id
+      })
+        .then(response => {
+          this.$store.dispatch('reloadOrder', { orderUuid: response.uuid })
+          this.$message({
+            type: 'success',
+            message: 'Ok',
+            showClose: true
+          })
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
     },
     copyOrder() {
       // TODO: Support Copy Order
