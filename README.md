@@ -10,41 +10,31 @@ New adv-default-theme template theme for [ADempiere Vue](https://github.com/adem
 ## 🔌  Installation
 In order to use the new ADVue Theme Pos theme in your [ADempiere Vue](https://github.com/adempiere/adempiere-vue) installation, you need:
 
-1. Install `lerna` globally:
-
-   ```
-   yarn global add lerna
-   ```
-
-   or
-
-   ```
-   npm install -g lerna
-   ```
-
 1. Configure `adv-default-theme` repository as a git submodule in theme path of your [ADempiere Vue](https://github.com/adempiere/adempiere-vue) workspace, and then track `develop` branch:
 
-   ```
+   ```bash
    git submodule add -b experimental https://github.com/solop-develop/frontend-default-theme.git src/themes/frontend-default-theme
    ```
 
-1. Fetch all the data:
+2. Fetch all the data:
 
-   ```
+   ```bash
    git submodule update --init --remote
    ```
-1. Generate `local.json` file from script `generate-local-config.js`. Update [ADempiere Vue](https://github.com/adempiere/adempiere-vue) configuration by copying `local.json` file from `src/themes/advDefaultTheme` to root `config` directory:
 
-   ```
+3. Generate `local.json` file from script `generate-local-config.js`. Update [ADempiere Vue](https://github.com/adempiere/adempiere-vue) configuration by copying `local.json` file from `src/themes/advDefaultTheme` to root `config` directory:
+
+   ```bash
    node src/themes/advDefaultTheme/scripts/generate-local-config.js
    ```
-1. Download all dependencies and start development server:
 
-   ```
+4. Download all dependencies and start development server:
+
+   ```bash
    yarn && yarn dev
    ```
 
-1. That's it! Now, after opening your development server (http://localhost:9527 by adv-default-theme), you should see [ADempiere Vue](https://github.com/adempiere/adempiere-vue) with the adv-default-theme. 🎉
+5. That's it! Now, after opening your development server (http://localhost:9527 by adv-default-theme), you should see [ADempiere Vue](https://github.com/adempiere/adempiere-vue) with the adv-default-theme. 🎉
 
 ## Design customization
 
