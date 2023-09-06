@@ -794,7 +794,10 @@ export default defineComponent({
     })
 
     watch(maximumDefiniteDate, (newValue, oldValue) => {
-      if (!isEmptyValue(newValue)) currentDateProcess.value = newValue[0]
+      if (!isEmptyValue(newValue) && !isEmptyValue(newValue[0])) {
+        const dateParse = newValue[0] + 'T00:00:00'
+        currentDateProcess.value = dateParse
+      }
     })
 
     return {
