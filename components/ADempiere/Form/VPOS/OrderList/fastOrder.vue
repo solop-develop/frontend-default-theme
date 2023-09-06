@@ -402,6 +402,14 @@ export default {
           },
           isVisible: false,
           isShow: true
+        },
+        {
+          title: this.$t('form.byInvoice.return'),
+          params: {
+            isOnlyRMA: true
+          },
+          isVisible: false,
+          isShow: true
         }
       ]
     },
