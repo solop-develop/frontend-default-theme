@@ -23,8 +23,6 @@ RUN apk update && \
 RUN
 	# Enable https to install packages
 	git config --global url."https://".insteadOf git:// && \
-    # Install lerna package
-	yarn global add lerna &&
 	# Create theme work dir
 	mkdir -p /var/www/adv-default-theme/
 
