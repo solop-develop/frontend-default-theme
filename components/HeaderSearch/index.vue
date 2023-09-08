@@ -156,22 +156,36 @@ export default {
       })
     },
     initFuse(list) {
+      // this.fuse = new Fuse(list, {
+      //   shouldSort: true,
+      //   threshold: 0.4,
+      //   location: 0,
+      //   distance: 100,
+      //   maxPatternLength: 32,
+      //   minMatchCharLength: 1,
+      //   keys: [{
+      //     name: 'title',
+      //     weight: 0.9
+      //   }, {
+      //     name: 'pinyinTitle',
+      //     weight: 0.1
+      //   }, {
+      //     name: 'path',
+      //     weight: 0.1
+      //   }]
+      // })
       this.fuse = new Fuse(list, {
+        // isCaseSensitive: true,
+        includeScore: true,
         shouldSort: true,
         threshold: 0.4,
-        location: 0,
+        location: 5,
         distance: 100,
         maxPatternLength: 32,
         minMatchCharLength: 1,
         keys: [{
           name: 'title',
           weight: 0.7
-        }, {
-          name: 'pinyinTitle',
-          weight: 0.3
-        }, {
-          name: 'path',
-          weight: 0.3
         }]
       })
     },
