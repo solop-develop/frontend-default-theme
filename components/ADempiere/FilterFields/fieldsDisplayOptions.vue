@@ -290,6 +290,9 @@ export default defineComponent({
         })
       },
       get() {
+        if (isEmptyValue(panel.value)) {
+          return false
+        }
         const { isLoadedFieldsList } = panel.value
         return !isLoadedFieldsList
       }
@@ -364,6 +367,9 @@ export default defineComponent({
     })
 
     const sequenceOptionLabel = computed(() => {
+      if (isEmptyValue(panel.value)) {
+        return false
+      }
       const { isEditSecuence } = panel.value
       if (!isEmptyValue(isEditSecuence) && isEditSecuence) {
         return language.t('component.sequenceSort.saveNewSequence')
@@ -590,7 +596,10 @@ export default defineComponent({
       if (command === 'secuence') {
         if (sequenceOptionLabel.value === language.t('component.sequenceSort.modifyFieldSequence')) {
           fieldsShowed = fieldsListAvailable.value
-          const { isEditSecuence } = panel.value
+          let isEditSecuence = false
+          if (isEmptyValue(panel.value)) {
+            isEditSecuence = panel.value.isEditSecuence
+          }
           toggleDraggablePanel(!isEditSecuence)
           return
         }
