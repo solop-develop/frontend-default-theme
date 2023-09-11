@@ -178,7 +178,7 @@ export default defineComponent({
      * Get the panel object with all its attributes as well as
      * the fields it contains
      */
-     const panelMetadata = computed(() => {
+    const panelMetadata = computed(() => {
       return props.containerManager.getPanel({
         parentUuid: props.parentUuid,
         containerUuid: props.containerUuid
