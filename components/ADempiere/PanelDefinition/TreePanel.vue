@@ -18,7 +18,7 @@
 
 <template>
   <el-row class="tree-panel-definition" :gutter="10">
-    <el-col :span="6" class="tree-col" style="height: 100%;">
+    <el-col :span="isMobile ? 24 : 6" class="tree-col" style="height: 100%;">
       <div class="tree-panel-container">
         <el-input
           v-model="filterValue"
@@ -45,7 +45,7 @@
       </div>
     </el-col>
 
-    <el-col class="tree-col-standard-panel" :span="18">
+    <el-col class="tree-col-standard-panel" :span="isMobile ? 24 : 18">
       <draggable-panel
         v-if="panelMetadata.isEditSecuence"
         :parent-uuid="parentUuid"
@@ -119,9 +119,27 @@ export default defineComponent({
   },
 
   setup(props) {
+    /**
+     * Ref
+     */
     const treePanel = ref(null)
     const filterValue = ref('')
+
+    /**
+     * Const
+     */
     const nodeName = 'name'
+    const defaultProps = {
+      children: 'childs',
+      label: nodeName
+    }
+
+    /**
+     * Computed Properties
+     */
+    const isMobile = computed(() => {
+      return store.getters.device === 'mobile'
+    })
 
     const storedTreeNodes = computed({
       set(newNodes) {
@@ -133,11 +151,6 @@ export default defineComponent({
         }).recordsList
       }
     })
-
-    const defaultProps = {
-      children: 'childs',
-      label: nodeName
-    }
 
     const recordUuid = computed(() => {
       return store.getters.getValueOfFieldOnContainer({
@@ -162,6 +175,20 @@ export default defineComponent({
       })
     })
 
+    /**
+     * Get the panel object with all its attributes as well as
+     * the fields it contains
+     */
+    const panelMetadata = computed(() => {
+      return props.containerManager.getPanel({
+        parentUuid: props.parentUuid,
+        containerUuid: props.containerUuid
+      }) || {}
+    })
+
+    /**
+     * Watch works directly on a ref
+     */
     watch(filterValue, (newValue, oldValue) => {
       treePanel.value.filter(newValue)
     })
@@ -183,16 +210,8 @@ export default defineComponent({
     })
 
     /**
-     * Get the panel object with all its attributes as well as
-     * the fields it contains
+     * Methods
      */
-    const panelMetadata = computed(() => {
-      return props.containerManager.getPanel({
-        parentUuid: props.parentUuid,
-        containerUuid: props.containerUuid
-      }) || {}
-    })
-
     function handleNodeClick(nodeData) {
       setRecord(nodeData.record_uuid)
     }
@@ -320,7 +339,6 @@ export default defineComponent({
       return data[nodeName].toLowerCase().indexOf(value.toLowerCase()) !== -1
     }
 
-    // loadData()
     setTimeout(() => {
       treePanel.value.setCurrentKey(recordUuid.value)
     }, 500)
@@ -331,10 +349,11 @@ export default defineComponent({
       defaultProps,
       storedTreeNodes,
       // computeds
+      isMobile,
       elementId,
+      recordUuid,
       expandedTree,
       panelMetadata,
-      recordUuid,
       // methods
       handleNodeClick,
       handleDragEnd,
