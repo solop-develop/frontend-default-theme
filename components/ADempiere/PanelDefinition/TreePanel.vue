@@ -124,6 +124,7 @@ export default defineComponent({
      */
     const treePanel = ref(null)
     const filterValue = ref('')
+
     /**
      * Const
      */
@@ -132,10 +133,10 @@ export default defineComponent({
       children: 'childs',
       label: nodeName
     }
+
     /**
      * Computed Properties
      */
-
     const isMobile = computed(() => {
       return store.getters.device === 'mobile'
     })
@@ -188,7 +189,6 @@ export default defineComponent({
     /**
      * Watch works directly on a ref
      */
-
     watch(filterValue, (newValue, oldValue) => {
       treePanel.value.filter(newValue)
     })
@@ -212,7 +212,6 @@ export default defineComponent({
     /**
      * Methods
      */
-
     function handleNodeClick(nodeData) {
       setRecord(nodeData.record_uuid)
     }
