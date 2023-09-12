@@ -20,6 +20,7 @@
   <el-card
     v-if="!UNSUPPORTED_DASHBOARDS.includes(metadata.fileName)"
     style="height: auto;"
+    :body-style="{ padding: '5px;'}"
   >
     <div class="clearfix">
       <el-row :gutter="2">
@@ -206,8 +207,8 @@ export default defineComponent({
     padding-left: 1%;
   }
 </style>
-<style>
+<!-- <style>
   .el-card__body {
     padding: 5px;
   }
-</style>
+</style> -->
