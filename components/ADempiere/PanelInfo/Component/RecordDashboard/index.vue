@@ -31,8 +31,8 @@ along with this program. If not, see <https:www.gnu.org/licenses/>.
           :xl="{ span: 24 }"
           style="padding-right:8px;margin-bottom:2px;"
         >
-          <el-collapse accordion>
-            <el-collapse-item name="1">
+          <el-collapse v-model="activeNames" accordion>
+            <el-collapse-item :name="index">
               <template slot="title">
                 <span style="font-size: 18px">
                   <svg-icon icon-class="chart" />
@@ -111,6 +111,7 @@ export default defineComponent({
     * Ref
     */
     const data = ref('Data')
+    const activeNames = ref(0)
 
     /**
     * Computed
@@ -142,6 +143,7 @@ export default defineComponent({
     return {
       // Refs
       data,
+      activeNames,
       // Computed
       dashboardsList,
       parameters
