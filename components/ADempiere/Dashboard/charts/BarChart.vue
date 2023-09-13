@@ -27,7 +27,7 @@ import resize from './mixins/resize'
 
 // API Request Methods
 import { getMetrics } from '@/api/ADempiere/dashboard/chart'
- 
+
 // Utils and Helper Methods
 import { getContextAttributes } from '@/utils/ADempiere/contextUtils/contextAttributes'
 
