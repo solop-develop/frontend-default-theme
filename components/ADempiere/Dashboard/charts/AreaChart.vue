@@ -24,9 +24,9 @@ import * as echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
 
- // API Request Methods
+// API Request Methods
 import { getMetrics } from '@/api/ADempiere/dashboard/chart'
- 
+
 // Utils and Helper Methods
 import { getContextAttributes } from '@/utils/ADempiere/contextUtils/contextAttributes'
 
