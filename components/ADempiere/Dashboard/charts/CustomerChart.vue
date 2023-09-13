@@ -104,12 +104,13 @@ export default {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.showLoading()
-      if (!isEmptyValue(this.metadata.actions)) {
+      if (!this.isEmptyValue(this.metadata.actions)) {
         const contextAttributesList = getContextAttributes({
-          parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
           containerUuid: this.$store.getters.getContainerInfo.currentTab.containerUuid,
+          parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
           contextColumnNames: this.metadata.context_column_names,
-          isBooleanToString: true
+          isBooleanToString: true,
+          keyName: 'key'
         })
         this.$store.dispatch('metrics', {
           id: this.metadata.id,

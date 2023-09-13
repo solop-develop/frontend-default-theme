@@ -24,6 +24,7 @@ import * as echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
 import { getMetrics } from '@/api/ADempiere/dashboard/chart'
+import { getContextAttributes } from '@/utils/ADempiere/contextUtils/contextAttributes'
 
 export default {
   mixins: [resize],
@@ -76,11 +77,20 @@ export default {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.showLoading()
       if (!this.isEmptyValue(this.metadata.actions)) {
+        const contextAttributesList = getContextAttributes({
+          containerUuid: this.$store.getters.getContainerInfo.currentTab.containerUuid,
+          parentUuid: this.$store.getters.getContainerInfo.currentTab.parentUuid,
+          contextColumnNames: this.metadata.context_column_names,
+          isBooleanToString: true,
+          keyName: 'key'
+        })
         this.$store.dispatch('metrics', {
           id: this.metadata.id,
           tableName: this.metadata.tableName,
           recordId: this.metadata.recordId,
-          recordUuid: this.metadata.recordUuid
+          recordUuid: this.metadata.recordUuid,
+          contextAttributes: contextAttributesList,
+          filters: this.metadata.filter
         })
           .then(response => {
             this.loadChartMetrics(response)
