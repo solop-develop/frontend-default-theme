@@ -778,6 +778,8 @@ export default defineComponent({
     const isLoadingNewIssues = ref(false)
     const centerDialogVisible = ref(false)
 
+    currentSalesReps.value = store.getters['user/userInfo'].id
+
     const listOption = computed(() => {
       const listMailTemplates = store.getters.getListMailTemplates
       listMailTemplates.isCollapseDown = {
@@ -867,20 +869,24 @@ export default defineComponent({
     })
 
     function findSalesReps(isVisible) {
-      if (!isVisible) {
-        return
-      }
-      requestListSalesRepresentatives({})
-        .then(response => {
-          const { records } = response
-          listSalesReps.value = records
-        })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'warning'
+      return new Promise((resolve, reject) => {
+        if (!isVisible) {
+          resolve([])
+        }
+        requestListSalesRepresentatives({})
+          .then(response => {
+            const { records } = response
+            listSalesReps.value = records
+            resolve(records)
           })
-        })
+          .catch(error => {
+            showMessage({
+              message: error.message,
+              type: 'warning'
+            })
+            reject([])
+          })
+      })
     }
 
     function findRequestTypes(isVisible) {
@@ -909,6 +915,9 @@ export default defineComponent({
       if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
         requestTypeId = currentIssues.value.request_type.id
       }
+
+      if (isEmptyValue(requestTypeId)) return
+
       requestListStatuses({
         requestTypeId
       })
@@ -1278,10 +1287,18 @@ export default defineComponent({
     }
 
     function newIssues(issues) {
-      // isNewIssues.value = !isNewIssues.value
-      // store.dispatch('changeCurrentIssues', {})
+      defaultValueNewIssues()
       isPanelNewRequest.value = !isPanelNewRequest.value
     }
+
+    function defaultValueNewIssues() {
+      findSalesReps(true)
+        .then(() => {
+          currentSalesReps.value = userId.value
+        })
+      newDateNextAction.value = new Date()
+    }
+
     function loadListMail() {
       store.dispatch('findListMailTemplates')
     }
@@ -1402,6 +1419,7 @@ export default defineComponent({
       logDisplayLanguaje,
       zoomIssues,
       avatarResize,
+      defaultValueNewIssues,
       markdownContent
     }
   }
