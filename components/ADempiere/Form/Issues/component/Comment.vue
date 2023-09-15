@@ -579,7 +579,7 @@
                     v-model="currentRequestTypes"
                     filterable
                     @visible-change="findRequestTypes"
-                    @change="exitPopover('')"
+                    @change="exitPopover('newtypeOfRequest')"
                   >
                     <el-option
                       v-for="item in listIssuesTypes"
@@ -1603,8 +1603,14 @@ export default defineComponent({
     }
 
     function exitPopover(popoverOption) {
+      if (popoverOption === 'newtypeOfRequest') {
+        findStatus(true)
+        const requestType = this.listIssuesTypes.find(list => list.id === this.currentRequestTypes)
+        const { default_status } = requestType
+        // if (isEmptyValue(default_status.name)) return this.currentStatus = ''
+        this.currentStatus = default_status.id
+      }
       if (isEmptyValue(popoverOption)) return
-      // refs[popoverOption].showPopper = false
     }
 
     function SelectionIssue(issues) {

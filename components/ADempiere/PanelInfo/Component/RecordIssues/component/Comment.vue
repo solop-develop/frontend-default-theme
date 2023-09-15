@@ -905,6 +905,7 @@ export default defineComponent({
       if (!isVisible) {
         return
       }
+
       if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
         requestTypeId = currentIssues.value.request_type.id
       }
@@ -997,6 +998,7 @@ export default defineComponent({
     }
 
     function updateIssuesTypeRequest(newValue) {
+      findStatus(true)
       const {
         id,
         uuid,
@@ -1014,8 +1016,16 @@ export default defineComponent({
         priorityValue: currentIssues.value.priority.value,
         statusId: currentIssues.value.status.id
       })
-      // refs.typeOfRequest.showPopper = false
-      // refs.typeOfRequest.activated = false
+        .then(() => {
+          findStatus(true)
+          const requestType = this.listIssuesTypes.find(list => list.id === newValue)
+          const { default_status } = requestType
+          if (default_status.id === 0) {
+            this.currentStatus = ''
+            return
+          }
+          this.currentStatus = default_status.id
+        })
     }
     function updateIssuesSummary(issues) {
       const {
@@ -1102,12 +1112,16 @@ export default defineComponent({
         statusId: currentIssues.value.status.id,
         dateNextAction: newValue
       })
-      // refs.updateDate.showPopper = false
     }
 
     function exitPopover(popoverOption) {
+      if (popoverOption === 'newtypeOfRequest') {
+        const requestType = this.listIssuesTypes.find(list => list.id === this.currentIssues.value.request_type.id)
+        const { default_status } = requestType
+        currentStatus.value = default_status.id
+      }
+      findStatus(true)
       if (isEmptyValue(popoverOption)) return
-      // refs[popoverOption].showPopper = false
     }
 
     function SelectionIssue(issues) {
@@ -1120,7 +1134,6 @@ export default defineComponent({
         tableName,
         recordId
       })
-      // store.dispatch('changeCurrentIssues', issues)
     }
 
     function editIssues(issues) {
