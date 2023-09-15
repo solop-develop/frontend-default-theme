@@ -579,7 +579,7 @@
                     v-model="currentRequestTypes"
                     filterable
                     @visible-change="findRequestTypes"
-                    @change="exitPopover('')"
+                    @change="exitPopover('newtypeOfRequest')"
                   >
                     <el-option
                       v-for="item in listIssuesTypes"
@@ -1272,6 +1272,8 @@ export default defineComponent({
     const isLoadingNewIssues = ref(false)
     const centerDialogVisible = ref(false)
 
+    currentSalesReps.value = store.getters['user/userInfo'].id
+
     const listOption = computed(() => {
       const listMailTemplates = store.getters.getListMailTemplates
       listMailTemplates.isCollapseDown = {
@@ -1365,20 +1367,24 @@ export default defineComponent({
     })
 
     function findSalesReps(isVisible) {
-      if (!isVisible) {
-        return
-      }
-      requestListSalesRepresentatives({})
-        .then(response => {
-          const { records } = response
-          listSalesReps.value = records
-        })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'warning'
+      return new Promise((resolve, reject) => {
+        if (!isVisible) {
+          resolve([])
+        }
+        requestListSalesRepresentatives({})
+          .then(response => {
+            const { records } = response
+            listSalesReps.value = records
+            resolve(records)
           })
-        })
+          .catch(error => {
+            showMessage({
+              message: error.message,
+              type: 'warning'
+            })
+            resolve([])
+          })
+      })
     }
 
     function findRequestTypes(isVisible) {
@@ -1603,8 +1609,14 @@ export default defineComponent({
     }
 
     function exitPopover(popoverOption) {
+      if (popoverOption === 'newtypeOfRequest') {
+        findStatus(true)
+        const requestType = this.listIssuesTypes.find(list => list.id === this.currentRequestTypes)
+        const { default_status } = requestType
+        // if (isEmptyValue(default_status.name)) return this.currentStatus = ''
+        this.currentStatus = default_status.id
+      }
       if (isEmptyValue(popoverOption)) return
-      // refs[popoverOption].showPopper = false
     }
 
     function SelectionIssue(issues) {
@@ -1806,6 +1818,14 @@ export default defineComponent({
       return uri
     }
 
+    function defaultValueNewIssues() {
+      findSalesReps(true)
+        .then(() => {
+          currentSalesReps.value = userId.value
+        })
+      newDateNextAction.value = new Date()
+    }
+
     watch(isPanelEditIssues, (newValue, oldValue) => {
       if (!isEmptyValue(newValue) && newValue !== oldValue) {
         findRequestTypes(true)
@@ -1813,6 +1833,7 @@ export default defineComponent({
         findPriority(true)
       }
     })
+    findSalesReps(true)
 
     return {
       // Ref
@@ -1874,6 +1895,7 @@ export default defineComponent({
       updateIssuesPriority,
       updateIssuesStatus,
       updateIssuesDateNextAction,
+      defaultValueNewIssues,
       addNewComments,
       clearComments,
       translateDateByLong,

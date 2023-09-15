@@ -778,6 +778,8 @@ export default defineComponent({
     const isLoadingNewIssues = ref(false)
     const centerDialogVisible = ref(false)
 
+    currentSalesReps.value = store.getters['user/userInfo'].id
+
     const listOption = computed(() => {
       const listMailTemplates = store.getters.getListMailTemplates
       listMailTemplates.isCollapseDown = {
@@ -867,20 +869,24 @@ export default defineComponent({
     })
 
     function findSalesReps(isVisible) {
-      if (!isVisible) {
-        return
-      }
-      requestListSalesRepresentatives({})
-        .then(response => {
-          const { records } = response
-          listSalesReps.value = records
-        })
-        .catch(error => {
-          showMessage({
-            message: error.message,
-            type: 'warning'
+      return new Promise((resolve, reject) => {
+        if (!isVisible) {
+          resolve([])
+        }
+        requestListSalesRepresentatives({})
+          .then(response => {
+            const { records } = response
+            listSalesReps.value = records
+            resolve(records)
           })
-        })
+          .catch(error => {
+            showMessage({
+              message: error.message,
+              type: 'warning'
+            })
+            reject([])
+          })
+      })
     }
 
     function findRequestTypes(isVisible) {
@@ -905,9 +911,13 @@ export default defineComponent({
       if (!isVisible) {
         return
       }
+
       if (!isEmptyValue(currentIssues.value) && !isPanelNewRequest.value) {
         requestTypeId = currentIssues.value.request_type.id
       }
+
+      if (isEmptyValue(requestTypeId)) return
+
       requestListStatuses({
         requestTypeId
       })
@@ -997,6 +1007,7 @@ export default defineComponent({
     }
 
     function updateIssuesTypeRequest(newValue) {
+      findStatus(true)
       const {
         id,
         uuid,
@@ -1014,8 +1025,16 @@ export default defineComponent({
         priorityValue: currentIssues.value.priority.value,
         statusId: currentIssues.value.status.id
       })
-      // refs.typeOfRequest.showPopper = false
-      // refs.typeOfRequest.activated = false
+        .then(() => {
+          findStatus(true)
+          const requestType = this.listIssuesTypes.find(list => list.id === newValue)
+          const { default_status } = requestType
+          if (default_status.id === 0) {
+            this.currentStatus = ''
+            return
+          }
+          this.currentStatus = default_status.id
+        })
     }
     function updateIssuesSummary(issues) {
       const {
@@ -1102,12 +1121,16 @@ export default defineComponent({
         statusId: currentIssues.value.status.id,
         dateNextAction: newValue
       })
-      // refs.updateDate.showPopper = false
     }
 
     function exitPopover(popoverOption) {
+      if (popoverOption === 'newtypeOfRequest') {
+        const requestType = this.listIssuesTypes.find(list => list.id === this.currentIssues.value.request_type.id)
+        const { default_status } = requestType
+        currentStatus.value = default_status.id
+      }
+      findStatus(true)
       if (isEmptyValue(popoverOption)) return
-      // refs[popoverOption].showPopper = false
     }
 
     function SelectionIssue(issues) {
@@ -1120,7 +1143,6 @@ export default defineComponent({
         tableName,
         recordId
       })
-      // store.dispatch('changeCurrentIssues', issues)
     }
 
     function editIssues(issues) {
@@ -1265,10 +1287,18 @@ export default defineComponent({
     }
 
     function newIssues(issues) {
-      // isNewIssues.value = !isNewIssues.value
-      // store.dispatch('changeCurrentIssues', {})
+      defaultValueNewIssues()
       isPanelNewRequest.value = !isPanelNewRequest.value
     }
+
+    function defaultValueNewIssues() {
+      findSalesReps(true)
+        .then(() => {
+          currentSalesReps.value = userId.value
+        })
+      newDateNextAction.value = new Date()
+    }
+
     function loadListMail() {
       store.dispatch('findListMailTemplates')
     }
@@ -1389,6 +1419,7 @@ export default defineComponent({
       logDisplayLanguaje,
       zoomIssues,
       avatarResize,
+      defaultValueNewIssues,
       markdownContent
     }
   }
