@@ -67,6 +67,7 @@ export default defineComponent({
           viewer = () => import('@theme/components/ADempiere/FileRender/HtmlFile')
           break
         case 'pdf':
+        case 'application/pdf':
           viewer = () => import('@theme/components/ADempiere/FileRender/PdfFile')
           break
         case 'csv':
